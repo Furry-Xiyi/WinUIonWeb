@@ -198,7 +198,7 @@ const calcIndicator = () => {
       indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
       track.style.clipPath = makeClipX(targetRect, sourceRect);
       const movingRight = newX > oldX;
-      const dur = 300;
+      const dur = 600;
       const easeOut = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
       let keyframes;
       if (movingRight) {

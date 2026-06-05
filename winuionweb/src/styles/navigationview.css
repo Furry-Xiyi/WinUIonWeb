@@ -89,7 +89,6 @@
   transition: width var(--normal-duration) var(--fast-out-slow-in), background var(--normal-duration) var(--fast-out-slow-in);
   display: flex;
   align-items: center;
-  padding: 0 16px;
 }
 
   .win-nav-top-bar .win-nav-menu {
