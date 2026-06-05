@@ -1,0 +1,83 @@
+.win-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 40px;
+  height: 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+  .win-switch .track {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    border: 1px solid var(--toggle-border);
+    background-color: transparent;
+    transition: all var(--fast-duration) var(--fast-out-slow-in);
+  }
+
+  .win-switch:hover .track {
+    border-color: var(--text-primary);
+  }
+
+  .win-switch.is-on .track {
+    background-color: var(--accent-base);
+    border-color: transparent;
+  }
+
+  .win-switch.is-on:hover .track {
+    background-color: var(--accent-hover);
+  }
+
+  .win-switch .thumb {
+    position: absolute;
+    top: 50%;
+    left: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    background-color: var(--toggle-thumb);
+    transform: translateY(-50%) translateX(var(--tx, 0px)) scale(var(--scale, 1));
+    transition: background-color var(--fast-duration), transform 0.2s var(--fast-out-slow-in);
+  }
+
+  .win-switch.is-on .thumb {
+    --tx: 20px;
+    background-color: var(--toggle-on-thumb);
+  }
+
+  .win-switch:hover .thumb {
+    --scale: 1.167;
+    background-color: var(--toggle-thumb-hover);
+  }
+
+  .win-switch:hover.is-on .thumb {
+    --tx: 20px;
+    --scale: 1.167;
+    background-color: var(--toggle-on-thumb);
+  }
+
+  .win-switch.is-pressed:not(.is-on) .thumb,
+  .win-switch.dragging:not(.is-on) .thumb {
+    --tx: 0px;
+    --scale: 1;
+    width: 17px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: var(--toggle-thumb-hover);
+    transition: none;
+  }
+
+  .win-switch.is-pressed.is-on .thumb,
+  .win-switch.dragging.is-on .thumb {
+    --tx: 16px;
+    --scale: 1;
+    width: 17px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: var(--toggle-on-thumb);
+    transition: none;
+  }

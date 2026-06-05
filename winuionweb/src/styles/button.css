@@ -1,0 +1,123 @@
+.win-btn {
+  position: relative;
+  border: none;
+  border-radius: 4px;
+  padding: 0 11px;
+  font-size: 14px;
+  height: 32px;
+  background: var(--ctrl-fill-default);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background var(--fast-duration) var(--fast-out-slow-in), color var(--fast-duration);
+  user-select: none;
+}
+
+  .win-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    border: 1px solid var(--ctrl-border);
+    border-bottom: 1px solid var(--ctrl-border-accent);
+    pointer-events: none;
+  }
+
+  .win-btn:hover {
+    background: var(--ctrl-fill-secondary);
+  }
+
+  .win-btn:active {
+    background: var(--ctrl-fill-tertiary);
+    color: var(--text-secondary);
+  }
+
+    .win-btn:active::after {
+      border-bottom-color: var(--ctrl-border);
+    }
+
+  .win-btn.primary {
+    background: var(--accent-base);
+    color: var(--accent-text);
+  }
+
+    .win-btn.primary::after {
+      border-color: var(--accent-border);
+      border-bottom-color: var(--accent-border-accent);
+    }
+
+    .win-btn.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .win-btn.primary:active {
+      background: var(--accent-pressed);
+      color: var(--accent-text-secondary);
+    }
+
+      .win-btn.primary:active::after {
+        border-color: transparent;
+      }
+
+.win-btn-hyperlink {
+  background: transparent;
+  border: none;
+  color: var(--accent-base);
+  height: auto;
+  padding: 4px 8px;
+}
+
+  .win-btn-hyperlink::after {
+    display: none;
+  }
+
+  .win-btn-hyperlink:hover {
+    background: var(--subtle-secondary);
+    color: var(--accent-hover);
+  }
+
+  .win-btn-hyperlink:active {
+    background: var(--subtle-tertiary);
+    color: var(--accent-pressed);
+  }
+
+html.theme-dark .win-btn::after {
+  border-bottom-color: var(--ctrl-border);
+  border-top-color: var(--ctrl-border-accent);
+}
+
+html.theme-dark .win-btn:active::after {
+  border-top-color: var(--ctrl-border);
+}
+
+html.theme-dark .win-btn.primary::after {
+  border-color: var(--accent-border);
+  border-top-color: var(--accent-border-accent);
+}
+
+html.theme-dark .win-btn.primary:active::after {
+  border-color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.theme-light) .win-btn::after {
+    border-bottom-color: var(--ctrl-border);
+    border-top-color: var(--ctrl-border-accent);
+  }
+
+  html:not(.theme-light) .win-btn:active::after {
+    border-top-color: var(--ctrl-border);
+  }
+
+  html:not(.theme-light) .win-btn.primary::after {
+    border-color: var(--accent-border);
+    border-top-color: var(--accent-border-accent);
+  }
+
+  html:not(.theme-light) .win-btn.primary:active::after {
+    border-color: transparent;
+  }
+}

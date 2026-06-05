@@ -1,0 +1,185 @@
+:root {
+  color-scheme: light dark;
+  --faster-duration: 0.083s;
+  --fast-duration: 0.167s;
+  --normal-duration: 0.250s;
+  --fast-out-slow-in: cubic-bezier(0, 0, 0, 1);
+  --app-bg: #F3F3F3;
+  --layer-default: rgba(255, 255, 255, 0.70);
+  --flyout-bg: rgba(252, 252, 252, 0.85);
+  --flyout-backdrop: blur(20px) saturate(150%);
+  --card-bg: rgba(0, 0, 0, 0.02);
+  --card-stroke: rgba(0, 0, 0, 0.06);
+  --card-bg-secondary: rgba(0, 0, 0, 0.02);
+  --stroke-surface-flyout: rgba(0, 0, 0, 0.06);
+  --stroke-divider: rgba(0, 0, 0, 0.06);
+  --ctrl-border-rest: rgba(0, 0, 0, 0.06);
+  --ctrl-border: rgba(0, 0, 0, 0.06);
+  --ctrl-border-accent: rgba(0, 0, 0, 0.16);
+  --accent-border: rgba(255, 255, 255, 0.08);
+  --accent-border-accent: rgba(0, 0, 0, 0.40);
+  --text-primary: rgba(0, 0, 0, 0.89);
+  --text-secondary: rgba(0, 0, 0, 0.62);
+  --text-tertiary: rgba(0, 0, 0, 0.45);
+  --subtle-transparent: transparent;
+  --subtle-secondary: rgba(0, 0, 0, 0.04);
+  --subtle-tertiary: rgba(0, 0, 0, 0.02);
+  --subtle-pressed: rgba(0, 0, 0, 0.06);
+  --ctrl-fill-default: rgba(255, 255, 255, 0.7);
+  --ctrl-fill-secondary: rgba(249, 249, 249, 0.5);
+  --ctrl-fill-tertiary: rgba(249, 249, 249, 0.3);
+  --ctrl-strong-fill: rgba(0, 0, 0, 0.45);
+  --ctrl-strong-stroke: rgba(0, 0, 0, 0.45);
+  --ctrl-solid-fill: #FFFFFF;
+  --accent-base: #005FB8;
+  --accent-hover: color-mix(in srgb, var(--accent-base) 90%, black);
+  --accent-pressed: color-mix(in srgb, var(--accent-base) 80%, black);
+  --accent-text: #FFFFFF;
+  --accent-text-secondary: rgba(255, 255, 255, 0.7);
+  --toggle-border: rgba(0, 0, 0, 0.45);
+  --toggle-thumb: rgba(0, 0, 0, 0.61);
+  --toggle-thumb-hover: rgba(0, 0, 0, 0.89);
+  --toggle-on-thumb: #FFFFFF;
+  --radio-border: rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --app-bg: #202020;
+    --layer-default: rgba(58, 58, 58, 0.45);
+    --flyout-bg: rgba(44, 44, 44, 0.85);
+    --flyout-backdrop: blur(20px) saturate(150%);
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-stroke: rgba(0, 0, 0, 0.10);
+    --card-bg-secondary: rgba(0, 0, 0, 0.04);
+    --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
+    --stroke-divider: rgba(255, 255, 255, 0.08);
+    --ctrl-border: rgba(255, 255, 255, 0);
+    --ctrl-border-accent: rgba(255, 255, 255, 0.094);
+    --accent-border: rgba(0, 0, 0, 0.14);
+    --accent-border-accent: rgba(255, 255, 255, 0.08);
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(255, 255, 255, 0.77);
+    --text-tertiary: rgba(255, 255, 255, 0.53);
+    --subtle-transparent: transparent;
+    --subtle-secondary: rgba(255, 255, 255, 0.06);
+    --subtle-tertiary: rgba(255, 255, 255, 0.04);
+    --subtle-pressed: rgba(255, 255, 255, 0.06);
+    --ctrl-fill-default: rgba(255, 255, 255, 0.06);
+    --ctrl-fill-secondary: rgba(255, 255, 255, 0.08);
+    --ctrl-fill-tertiary: rgba(255, 255, 255, 0.03);
+    --ctrl-strong-fill: rgba(255, 255, 255, 0.54);
+    --ctrl-strong-stroke: rgba(255, 255, 255, 0.54);
+    --ctrl-solid-fill: #454545;
+    --accent-base: #60CDFF;
+    --accent-hover: color-mix(in srgb, var(--accent-base) 90%, white);
+    --accent-pressed: color-mix(in srgb, var(--accent-base) 80%, white);
+    --accent-text: #000000;
+    --accent-text-secondary: rgba(0, 0, 0, 0.50);
+    --toggle-border: rgba(255, 255, 255, 0.54);
+    --toggle-thumb: rgba(255, 255, 255, 0.79);
+    --toggle-thumb-hover: #FFFFFF;
+    --toggle-on-thumb: #000000;
+    --radio-border: rgba(255, 255, 255, 0.54);
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+html, body, #app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--app-bg);
+  transition: background-color var(--normal-duration) var(--fast-out-slow-in), color var(--normal-duration) var(--fast-out-slow-in);
+}
+
+.icon {
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  font-weight: normal;
+}
+
+html.theme-light {
+  color-scheme: light;
+  --app-bg: #F3F3F3;
+  --layer-default: rgba(255, 255, 255, 0.70);
+  --flyout-bg: rgba(252, 252, 252, 0.85);
+  --card-bg: rgba(0, 0, 0, 0.02);
+  --card-stroke: rgba(0, 0, 0, 0.06);
+  --card-bg-secondary: rgba(0, 0, 0, 0.02);
+  --stroke-surface-flyout: rgba(0, 0, 0, 0.06);
+  --stroke-divider: rgba(0, 0, 0, 0.06);
+  --ctrl-border-rest: rgba(255, 255, 255, 0.06);
+  --ctrl-border: rgba(0, 0, 0, 0.06);
+  --ctrl-border-accent: rgba(0, 0, 0, 0.16);
+  --accent-border: rgba(255, 255, 255, 0.08);
+  --accent-border-accent: rgba(0, 0, 0, 0.40);
+  --text-primary: rgba(0, 0, 0, 0.89);
+  --text-secondary: rgba(0, 0, 0, 0.62);
+  --text-tertiary: rgba(0, 0, 0, 0.45);
+  --subtle-secondary: rgba(0, 0, 0, 0.04);
+  --subtle-tertiary: rgba(0, 0, 0, 0.02);
+  --subtle-pressed: rgba(0, 0, 0, 0.06);
+  --ctrl-fill-default: rgba(255, 255, 255, 0.7);
+  --ctrl-fill-secondary: rgba(249, 249, 249, 0.5);
+  --ctrl-fill-tertiary: rgba(249, 249, 249, 0.3);
+  --ctrl-strong-fill: rgba(0, 0, 0, 0.45);
+  --ctrl-strong-stroke: rgba(0, 0, 0, 0.45);
+  --ctrl-solid-fill: #FFFFFF;
+  --accent-base: #005FB8;
+  --accent-hover: color-mix(in srgb, var(--accent-base) 90%, black);
+  --accent-pressed: color-mix(in srgb, var(--accent-base) 80%, black);
+  --accent-text: #FFFFFF;
+  --accent-text-secondary: rgba(255, 255, 255, 0.7);
+  --toggle-border: rgba(0, 0, 0, 0.45);
+  --toggle-thumb: rgba(0, 0, 0, 0.61);
+  --toggle-thumb-hover: rgba(0, 0, 0, 0.89);
+  --toggle-on-thumb: #FFFFFF;
+  --radio-border: rgba(0, 0, 0, 0.45);
+}
+
+html.theme-dark {
+  color-scheme: dark;
+  --app-bg: #202020;
+  --layer-default: rgba(58, 58, 58, 0.45);
+  --flyout-bg: rgba(44, 44, 44, 0.85);
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-stroke: rgba(0, 0, 0, 0.10);
+  --card-bg-secondary: rgba(0, 0, 0, 0.04);
+  --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
+  --stroke-divider: rgba(255, 255, 255, 0.08);
+  --ctrl-border: rgba(255, 255, 255, 0);
+  --ctrl-border-accent: rgba(255, 255, 255, 0.094);
+  --accent-border: rgba(0, 0, 0, 0.14);
+  --accent-border-accent: rgba(255, 255, 255, 0.08);
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.77);
+  --text-tertiary: rgba(255, 255, 255, 0.53);
+  --subtle-secondary: rgba(255, 255, 255, 0.06);
+  --subtle-tertiary: rgba(255, 255, 255, 0.04);
+  --subtle-pressed: rgba(255, 255, 255, 0.06);
+  --ctrl-fill-default: rgba(255, 255, 255, 0.06);
+  --ctrl-fill-secondary: rgba(255, 255, 255, 0.08);
+  --ctrl-fill-tertiary: rgba(255, 255, 255, 0.03);
+  --ctrl-strong-fill: rgba(255, 255, 255, 0.54);
+  --ctrl-strong-stroke: rgba(255, 255, 255, 0.54);
+  --ctrl-solid-fill: #454545;
+  --accent-base: #60CDFF;
+  --accent-hover: color-mix(in srgb, var(--accent-base) 90%, white);
+  --accent-pressed: color-mix(in srgb, var(--accent-base) 80%, white);
+  --accent-text: #000000;
+  --accent-text-secondary: rgba(0, 0, 0, 0.50);
+  --toggle-border: rgba(255, 255, 255, 0.54);
+  --toggle-thumb: rgba(255, 255, 255, 0.79);
+  --toggle-thumb-hover: #FFFFFF;
+  --toggle-on-thumb: #000000;
+  --radio-border: rgba(255, 255, 255, 0.54);
+}

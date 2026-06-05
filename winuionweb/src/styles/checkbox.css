@@ -1,0 +1,44 @@
+.win-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+  color: var(--text-primary);
+}
+
+.checkbox-box {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--ctrl-strong-stroke);
+  border-radius: 4px;
+  background: var(--ctrl-fill-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--fast-duration) var(--fast-out-slow-in);
+}
+
+.win-checkbox:hover .checkbox-box {
+  background: var(--ctrl-fill-secondary);
+}
+
+.win-checkbox:active .checkbox-box {
+  background: var(--ctrl-fill-tertiary);
+  border-color: var(--ctrl-elevation-rest);
+}
+
+.win-checkbox input:checked + .checkbox-box {
+  background: var(--accent-base);
+  border-color: transparent;
+}
+
+  .win-checkbox input:checked + .checkbox-box:after {
+    content: "";
+    width: 9px;
+    height: 4px;
+    border-left: 1.5px solid var(--accent-text);
+    border-bottom: 1.5px solid var(--accent-text);
+    transform: translateY(-1px) rotate(-45deg);
+  }

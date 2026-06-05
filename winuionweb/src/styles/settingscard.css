@@ -1,0 +1,42 @@
+.win-settings-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-stroke);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.win-settings-card-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.win-settings-card-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.win-settings-card-title {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.win-settings-card-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.win-settings-card-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
