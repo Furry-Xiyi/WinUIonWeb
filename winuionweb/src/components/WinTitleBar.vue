@@ -24,7 +24,7 @@ import { ref, watch, inject, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
   title: { type: String, default: '' },
-  icon: { type: String, default: import.meta.env.BASE_URL + 'AppIcon.ico' },
+  icon: { type: String, default: '/AppIcon.ico' },
   theme: { type: String, default: 'system' }
 });
 
