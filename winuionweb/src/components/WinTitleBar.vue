@@ -15,12 +15,23 @@
   -->
   <div class="win-titlebar" v-if="visible">
     <img :src="finalIcon" class="win-titlebar-icon" />
-    <span class="win-titlebar-title">{{ title }}</span>
+    <span class="win-titlebar-title" :class="{ 'is-inactive': !windowFocused }">{{ title }}</span>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, inject, onMounted, onUnmounted, computed } from 'vue';
+
+const windowFocused = ref(document.hasFocus());
+
+let onFocus = null;
+let onBlur = null;
+
+// 在 onMounted 里追加：
+onFocus = () => { windowFocused.value = true; };
+onBlur = () => { windowFocused.value = false; };
+window.addEventListener('focus', onFocus);
+window.addEventListener('blur', onBlur);
 
 const props = defineProps({
   title: { type: String, default: '' },
@@ -79,6 +90,8 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  if (onFocus) window.removeEventListener('focus', onFocus);
+  if (onBlur) window.removeEventListener('blur', onBlur);
   if (onGeometryChange && 'windowControlsOverlay' in navigator) {
     navigator.windowControlsOverlay.removeEventListener('geometrychange', onGeometryChange);
   }

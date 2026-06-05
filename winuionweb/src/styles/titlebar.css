@@ -26,3 +26,7 @@
   font-size: 12px;
   color: var(--text-primary);
 }
+
+  .win-titlebar-title.is-inactive {
+    color: var(--text-disabled);
+  }
