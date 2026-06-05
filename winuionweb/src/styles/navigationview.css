@@ -155,7 +155,6 @@
   border-radius: 3px;
   pointer-events: none;
   z-index: 10;
-  transition: transform var(--normal-duration) var(--fast-out-slow-in), width var(--normal-duration) var(--fast-out-slow-in), opacity var(--fast-duration);
 }
 
 .win-nav-left-panel .win-nav-indicator {
@@ -193,7 +192,6 @@
 
   .win-nav-top-bar .win-nav-item.is-selected {
     background: transparent;
-    font-weight: 600;
   }
 
     .win-nav-top-bar .win-nav-item.is-selected:hover {
@@ -223,4 +221,11 @@
 
 .win-nav-shell.has-titlebar.is-top {
   padding-top: env(titlebar-area-height, 32px);
+}
+
+.win-nav-indicator-track {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
 }
