@@ -1,5 +1,5 @@
 <template>
-  <WinTitleBar title="WinUI on Web Gallery" icon="/AppIcon.ico" :theme="themeSetting" />
+  <WinTitleBar title="WinUI on Web Gallery" :theme="themeSetting" />
   <WinNavigationView :position="navPosition" v-model:selectedValue="currentPage">
     <template #menuItems>
       <WinNavItem value="home" icon="&#xE80F;">Home</WinNavItem>

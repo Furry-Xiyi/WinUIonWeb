@@ -14,18 +14,23 @@
       theme  - 'system' | 'light' | 'dark'，同步系统按钮区域背景色
   -->
   <div class="win-titlebar" v-if="visible">
-    <img :src="icon" class="win-titlebar-icon" />
+    <img :src="finalIcon" class="win-titlebar-icon" />
     <span class="win-titlebar-title">{{ title }}</span>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, inject, onMounted, onUnmounted } from 'vue';
+import { ref, watch, inject, onMounted, onUnmounted, computed } from 'vue';
 
 const props = defineProps({
   title: { type: String, default: '' },
-  icon: { type: String, default: '/AppIcon.ico' },
+  icon: { type: String, default: '' },
   theme: { type: String, default: 'system' }
+});
+
+const finalIcon = computed(() => {
+  if (props.icon) return props.icon;
+  return import.meta.env.BASE_URL + 'AppIcon.ico';
 });
 
 const parentVisible = inject('winTitleBarVisible', null);
