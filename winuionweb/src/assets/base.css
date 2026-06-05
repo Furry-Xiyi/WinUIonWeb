@@ -1,7 +1,3 @@
-body {
-  background: transparent;
-}
-
-.win-nav-shell {
+html, body, #app {
   background: transparent;
 }

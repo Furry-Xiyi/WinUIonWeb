@@ -121,7 +121,7 @@
       <WinExpander>
         <template #header>
           <div style="display: flex; align-items: center; gap: 12px;">
-            <span class="icon" style="font-size: 20px; width: 25px; text-align: center;">&#xE2B1;</span>
+            <span class="icon" style="font-size: 20px; width: 25px; text-align: center;">&#xE8AB;</span>
             <div style="display: flex; flex-direction: column;">
               <span style="font-size: 14px;">Page Transition</span>
               <span style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Animation style when switching pages</span>
@@ -169,7 +169,7 @@ import WinSettingsCard from './components/WinSettingsCard.vue';
 import WinDropDownButton from './components/WinDropDownButton.vue';
 const titleBarActive = ref(false);
 provide('winTitleBarVisible', titleBarActive);
-const currentPage = ref('controls');
+const currentPage = ref('home');
 const navPosition = ref('Left');
 const toggleBtnVal = ref(false);
 const checkVal = ref(true);
