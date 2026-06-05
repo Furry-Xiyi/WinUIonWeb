@@ -8,29 +8,39 @@
   border: 1px solid var(--stroke-surface-flyout);
   border-radius: 4px;
   padding: 4px;
-  background: var(--flyout-bg);
   backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
   min-width: 120px;
   display: flex;
   flex-direction: column;
   will-change: backdrop-filter;
+  isolation: isolate;
 }
 
-  .win-menu-flyout::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 4px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.14);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--fast-duration) ease;
-  }
+.win-menu-flyout::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: var(--flyout-bg);
+  z-index: -1;
+  pointer-events: none;
+}
 
-  .win-menu-flyout.shadow-visible::before {
-    opacity: 1;
-  }
+.win-menu-flyout::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--fast-duration) ease;
+}
+
+.win-menu-flyout.shadow-visible::after {
+  opacity: 1;
+}
 
 .win-menu-flyout-item {
   padding: 6px 12px;
@@ -44,14 +54,14 @@
   font-size: 14px;
 }
 
-  .win-menu-flyout-item:hover {
-    background: var(--subtle-secondary);
-  }
+.win-menu-flyout-item:hover {
+  background: var(--subtle-secondary);
+}
 
-  .win-menu-flyout-item:active {
-    background: var(--subtle-tertiary);
-    color: var(--text-secondary);
-  }
+.win-menu-flyout-item:active {
+  background: var(--subtle-tertiary);
+  color: var(--text-secondary);
+}
 
 .win-menu-flyout-separator {
   height: 1px;
