@@ -1,9 +1,9 @@
 # WinUI on Web 
 是一个把 **WinUI** 带到网页的项目，你可以使用我写的控件直接在网页上使用 **WinUI 控件**。
 控件具有完整的动画与材质，还原度达到 **90%**
->以下是示例页面的截图
-<img width="1181" height="840" alt="image" src="https://github.com/user-attachments/assets/0eb0cd7a-905d-4cf2-b39d-d00bc2ec8b05" />
-<img width="1181" height="839" alt="image" src="https://github.com/user-attachments/assets/004d6d86-5962-4dfb-af0a-3b499e79630f" />
+>以下是示例页面的展示
+
+https://github.com/user-attachments/assets/55c94b52-5e76-4ddd-a217-339fe7f568ef
 
 >以下是带有 MenuFlyOut 的控件演示
 
