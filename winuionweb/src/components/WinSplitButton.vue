@@ -11,15 +11,12 @@
             :class="chevronClass"
             @animationend="onChevronAnimEnd">&#xE70D;</span>
     </button>
-    <WinMenuFlyout :open="isOpen" :anchorRect="anchorRect" @close="isOpen = false">
-      <WinMenuFlyoutItem v-for="(item, i) in options" :key="i" @click="onSelect(item)">{{ item }}</WinMenuFlyoutItem>
-    </WinMenuFlyout>
+    <WinMenuFlyout :open="isOpen" :anchorRect="anchorRect" :items="flyoutItems" @close="isOpen = false" @select="onSelect" />
   </div>
 </template>
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
-import WinMenuFlyoutItem from './WinMenuFlyoutItem.vue';
 const props = defineProps({ options: { type: Array, default: () => [] } });
 const emit = defineEmits(['click', 'select']);
 const wrap = ref(null);
@@ -28,6 +25,8 @@ const anchorRect = ref(null);
 const chevronClass = ref('');
 let chevronPressed = false;
 let chevronPressDone = false;
+
+const flyoutItems = computed(() => props.options.map(item => ({ label: item, value: item })));
 
 const onChevronDown = () => {
   chevronPressed = true;
@@ -56,6 +55,6 @@ const toggleFlyout = () => {
   anchorRect.value = { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
   isOpen.value = true;
 };
-const onSelect = (item) => { emit('select', item); isOpen.value = false; };
+const onSelect = (item) => { emit('select', item.value); isOpen.value = false; };
 </script>
 <style src="../styles/splitbutton.css"></style>

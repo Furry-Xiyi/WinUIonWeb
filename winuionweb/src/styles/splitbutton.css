@@ -41,7 +41,7 @@
   .win-split-button .win-btn-separator {
     width: 1px;
     background: var(--ctrl-border);
-    margin: 6px 0;
+    margin: 0;
   }
 
   .win-split-button .win-btn-chevron {
@@ -58,13 +58,13 @@
     }
 
 html.theme-dark .win-split-button::after {
-  border-bottom-color: var(--ctrl-border);
-  border-top-color: var(--ctrl-border-accent);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
 }
 
 @media (prefers-color-scheme: dark) {
   html:not(.theme-light) .win-split-button::after {
-    border-bottom-color: var(--ctrl-border);
-    border-top-color: var(--ctrl-border-accent);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
   }
 }

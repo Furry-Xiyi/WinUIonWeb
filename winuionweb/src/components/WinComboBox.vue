@@ -53,10 +53,11 @@ const onChevronAnimEnd = () => {
 };
 const toggle = async () => {
   isOpen.value = !isOpen.value;
-  if(isOpen.value) {
+  if (isOpen.value) {
     await nextTick();
     const rect = comboRef.value.getBoundingClientRect();
-    const topOffset = rect.top - (selectedIndex.value * 32);
+    const itemH = 34;
+    const topOffset = rect.top - (selectedIndex.value * itemH) - 4;
     let origin = 'center center';
     if (selectedIndex.value === 0) {
       origin = 'top center';

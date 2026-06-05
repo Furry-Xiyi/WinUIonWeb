@@ -12,9 +12,7 @@
   height: 20px;
   border: 1px solid var(--radio-border);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
   background: transparent;
   transition: all var(--fast-duration) var(--fast-out-slow-in);
   flex-shrink: 0;
@@ -42,6 +40,9 @@
 }
 
 .win-radio-dot {
+  position: absolute;
+  inset: 0;
+  margin: auto;
   width: 10px;
   height: 10px;
   border-radius: 50%;

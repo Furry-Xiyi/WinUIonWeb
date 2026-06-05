@@ -1,5 +1,4 @@
 .win-expander {
-  background: var(--card-bg);
   border: 1px solid var(--card-stroke);
   border-radius: 4px;
   margin-bottom: 4px;
@@ -11,24 +10,45 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  transition: background var(--fast-duration) var(--fast-out-slow-in);
+  background: var(--card-bg);
   border-radius: 4px;
+  transition: background var(--fast-duration) var(--fast-out-slow-in);
 }
 
-  .win-expander-header:hover {
-    background: var(--subtle-secondary);
-  }
-
-  .win-expander-header:active {
-    background: var(--subtle-tertiary);
-  }
+.win-expander.is-open .win-expander-header {
+  border-radius: 4px 4px 0 0;
+}
 
 .win-expander-chevron {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
   font-size: 12px;
-  transition: transform var(--fast-duration) var(--fast-out-slow-in);
+  transition: background var(--fast-duration) var(--fast-out-slow-in);
+}
+
+.win-expander-header:hover .win-expander-chevron {
+  background: var(--subtle-secondary);
+}
+
+.win-expander-header:active .win-expander-chevron {
+  background: var(--subtle-tertiary);
 }
 
 .win-expander.is-open .win-expander-chevron {
+  transform: none;
+}
+
+.win-expander-arrow {
+  font-size: 12px;
+  display: block;
+  transition: transform var(--fast-duration) var(--fast-out-slow-in);
+}
+
+.win-expander.is-open .win-expander-arrow {
   transform: rotate(180deg);
 }
 
@@ -57,4 +77,5 @@
   flex-direction: column;
   gap: 24px;
   background: var(--card-bg-secondary);
+  border-radius: 0 0 3px 3px;
 }

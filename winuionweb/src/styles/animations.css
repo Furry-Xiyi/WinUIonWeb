@@ -9,7 +9,7 @@
   }
 
   .chevron-animate.releasing {
-    animation: chevron-release 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: chevron-release 0.5s cubic-bezier(0, 0, 0, 1) forwards;
   }
 
 @keyframes chevron-press {
@@ -98,19 +98,19 @@
 }
 
 .page-transition-up {
-  animation: page-enter-up 0.3s cubic-bezier(0.15, 0.8, 0.25, 1) both;
+  animation: page-enter-up 0.250s cubic-bezier(0, 0, 0, 1) both;
 }
 
 .page-transition-left {
-  animation: page-enter-left 0.3s cubic-bezier(0.15, 0.8, 0.2, 1) both;
+  animation: page-enter-left 0.250s cubic-bezier(0, 0, 0, 1) both;
 }
 
 .page-transition-right {
-  animation: page-enter-right 0.3s cubic-bezier(0.15, 0.8, 0.2, 1) both;
+  animation: page-enter-right 0.250s cubic-bezier(0, 0, 0, 1) both;
 }
 
 .page-transition-fade {
-  animation: page-enter-fade 0.3s cubic-bezier(0.15, 0.7, 0.5, 1) both;
+  animation: page-enter-fade 0.250s cubic-bezier(0, 0, 0, 1) both;
 }
 
 /* AnimatedIcon */
@@ -124,11 +124,11 @@
 }
 
   .animated-icon-hamburger.pressing {
-    animation: hamburger-press 0.1s ease-out forwards;
+    animation: hamburger-press 0.083s ease-out forwards;
   }
 
   .animated-icon-hamburger.releasing {
-    animation: hamburger-release 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: hamburger-release 0.5s cubic-bezier(0, 0, 0, 1) forwards;
   }
 
 @keyframes hamburger-press {
@@ -156,11 +156,11 @@
 }
 
   .animated-icon-gear.gear-rewind {
-    animation: animated-icon-gear-rewind 0.25s ease-out forwards;
+    animation: animated-icon-gear-rewind 0.167s ease-out forwards;
   }
 
   .animated-icon-gear.gear-spin {
-    animation: animated-icon-gear-spin 0.5s cubic-bezier(0.12, 0.8, 0.2, 1.0) forwards;
+    animation: animated-icon-gear-spin 0.5s cubic-bezier(0, 0, 0, 1) forwards;
   }
 
 @keyframes animated-icon-gear-rewind {

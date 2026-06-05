@@ -26,13 +26,14 @@
 .win-flyout {
   position: absolute;
   border: 1px solid var(--stroke-surface-flyout);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 4px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.14);
   backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
   display: flex;
   flex-direction: column;
+  gap: 2px;
   animation: combo-flyout-enter var(--fast-duration) var(--fast-out-slow-in);
 }
 

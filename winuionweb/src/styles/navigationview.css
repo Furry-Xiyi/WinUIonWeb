@@ -22,6 +22,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   transition: background var(--normal-duration) var(--fast-out-slow-in);
+  scrollbar-width: thin;
 }
 
 .win-nav-shell.is-left .win-nav-content {
@@ -44,7 +45,7 @@
   width: 320px;
   display: flex;
   flex-direction: column;
-  padding: 8px 4px;
+  padding: 4px 4px;
   transition: width var(--normal-duration) var(--fast-out-slow-in), background var(--normal-duration) var(--fast-out-slow-in);
   flex-shrink: 0;
   overflow: hidden;
@@ -53,6 +54,58 @@
   .win-nav-left-panel.is-compact {
     width: 48px;
   }
+
+  .win-nav-left-panel .win-nav-indicator-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 3;
+  }
+
+.win-nav-left-scrollable {
+  flex: 1;
+  min-height: 0;
+  overflow-y: overlay;
+  overflow-x: hidden;
+  position: relative;
+  scrollbar-width: thin;
+}
+
+  .win-nav-left-scrollable:hover {
+    scrollbar-color: var(--ctrl-strong-fill);
+  }
+
+  .win-nav-left-scrollable::-webkit-scrollbar {
+    width: 2px;
+  }
+
+  .win-nav-left-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .win-nav-left-scrollable::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 1px;
+  }
+
+  .win-nav-left-scrollable:hover::-webkit-scrollbar-thumb {
+    background: var(--ctrl-strong-fill);
+  }
+
+.win-nav-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-top: 4px;
+  position: relative;
+  z-index: 2;
+  background: var(--app-bg);
+}
 
 .win-nav-hamburger {
   width: 40px;
@@ -91,6 +144,13 @@
   align-items: center;
 }
 
+  .win-nav-top-bar .win-nav-indicator-track {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: visible;
+  }
+
   .win-nav-top-bar .win-nav-menu {
     flex-direction: row;
     align-items: center;
@@ -124,26 +184,34 @@
   color: var(--text-secondary);
 }
 
-  .win-nav-item.is-selected {
-    background: var(--subtle-secondary);
+.win-nav-item.is-selected {
+  background: var(--subtle-secondary);
+}
+
+  .win-nav-item.is-selected:hover {
+    background: var(--subtle-tertiary);
   }
 
-    .win-nav-item.is-selected:hover {
-      background: var(--subtle-tertiary);
-    }
-
-    .win-nav-item.is-selected:active {
-      background: var(--subtle-pressed);
-    }
-
-  .win-nav-item .icon {
-    margin-right: 16px;
-    min-width: 16px;
-    text-align: center;
-    font-size: 16px;
+  .win-nav-item.is-selected:active {
+    background: var(--subtle-pressed);
   }
+
+.win-nav-item .icon {
+  margin-right: 16px;
+  min-width: 16px;
+  width: 16px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1;
+  position: relative;
+}
 
 .win-nav-left-panel.is-compact .win-nav-item .label {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.win-nav-left-panel.is-compact .win-nav-group-chevron {
   opacity: 0;
   pointer-events: none;
 }
@@ -161,7 +229,12 @@
   top: 0;
   width: 3px;
   height: 16px;
+  transition: left 200ms var(--fast-out-slow-in);
 }
+
+  .win-nav-left-panel .win-nav-indicator.is-child {
+    left: 36px;
+  }
 
 .win-nav-top-bar .win-nav-indicator {
   top: auto;
@@ -199,6 +272,7 @@
 
   .win-nav-top-bar .win-nav-item .icon {
     margin-right: 8px;
+    top: 0.5px;
   }
 
 .win-nav-top-bar .win-nav-settings-item .label {
@@ -222,9 +296,84 @@
   padding-top: env(titlebar-area-height, 32px);
 }
 
-.win-nav-indicator-track {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: visible;
+.win-nav-group-header {
+  position: relative;
+}
+
+  .win-nav-group-header .win-nav-group-chevron {
+    margin-left: auto;
+    margin-right: 0;
+    font-size: 12px;
+    transition: transform 200ms var(--fast-out-slow-in), opacity var(--fast-duration) var(--fast-out-slow-in);
+    transform: rotate(0deg);
+  }
+
+    .win-nav-group-header .win-nav-group-chevron.chevron-open {
+      transform: rotate(180deg);
+    }
+
+    .win-nav-group-header .win-nav-group-chevron.chevron-close {
+      transform: rotate(0deg);
+    }
+
+.win-nav-group.is-expanded > .win-nav-group-header .win-nav-group-chevron {
+  transform: rotate(180deg);
+}
+
+.win-nav-group-children {
+  overflow: hidden;
+  transition: height var(--normal-duration) var(--fast-out-slow-in);
+}
+
+.win-nav-group-children-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.win-nav-group-child {
+  padding-left: 44px;
+}
+
+  .win-nav-group-child .icon {
+    margin-right: 16px;
+  }
+
+.win-nav-left-panel .win-nav-group.is-child-selected > .win-nav-group-header {
+  background: transparent;
+}
+
+  .win-nav-left-panel .win-nav-group.is-child-selected > .win-nav-group-header:hover {
+    background: var(--subtle-secondary);
+  }
+
+.win-nav-left-panel.is-compact .win-nav-group.is-child-selected > .win-nav-group-header {
+  background: transparent;
+}
+
+.win-nav-top-bar .win-nav-group-header .win-nav-group-chevron {
+  margin-left: 8px;
+  margin-right: 0;
+  font-size: 10px;
+  transform: rotate(0deg);
+  transition: transform 200ms var(--fast-out-slow-in);
+}
+
+  .win-nav-top-bar .win-nav-group-header .win-nav-group-chevron.chevron-open {
+    transform: rotate(180deg);
+  }
+
+  .win-nav-top-bar .win-nav-group-header .win-nav-group-chevron.chevron-close {
+    transform: rotate(0deg);
+  }
+
+.win-nav-top-bar .win-nav-group.is-child-selected > .win-nav-group-header {
+  background: transparent;
+}
+
+.win-nav-top-bar .win-nav-group {
+  display: flex;
+  align-items: center;
+  height: 100%;
 }

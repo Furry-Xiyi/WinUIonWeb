@@ -2,7 +2,9 @@
   <div class="win-expander" :class="{ 'is-open': isOpen }">
     <div class="win-expander-header" @click="isOpen = !isOpen">
       <slot name="header"></slot>
-      <span class="icon win-expander-chevron">&#xE70D;</span>
+      <span class="win-expander-chevron">
+        <span class="icon win-expander-arrow">&#xE70D;</span>
+      </span>
     </div>
     <div class="win-expander-grid">
       <div class="win-expander-inner">
