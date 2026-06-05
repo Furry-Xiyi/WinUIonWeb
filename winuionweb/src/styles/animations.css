@@ -1,0 +1,184 @@
+.chevron-animate {
+  display: inline-block;
+  font-size: 12px;
+  animation: none;
+}
+
+  .chevron-animate.pressing {
+    animation: chevron-press 0.083s ease-out forwards;
+  }
+
+  .chevron-animate.releasing {
+    animation: chevron-release 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+@keyframes chevron-press {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(2px);
+  }
+}
+
+@keyframes chevron-release {
+  from {
+    transform: translateY(2px);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes flyout-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-32px) scaleY(-1);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+.flyout-animate {
+  animation: flyout-enter var(--fast-duration) var(--fast-out-slow-in) both;
+  transform-origin: top center;
+}
+
+@keyframes page-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(256px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(256px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes page-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(-256px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes page-enter-fade {
+  from {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.page-transition-up {
+  animation: page-enter-up 0.3s cubic-bezier(0.15, 0.8, 0.25, 1) both;
+}
+
+.page-transition-left {
+  animation: page-enter-left 0.3s cubic-bezier(0.15, 0.8, 0.2, 1) both;
+}
+
+.page-transition-right {
+  animation: page-enter-right 0.3s cubic-bezier(0.15, 0.8, 0.2, 1) both;
+}
+
+.page-transition-fade {
+  animation: page-enter-fade 0.3s cubic-bezier(0.15, 0.7, 0.5, 1) both;
+}
+
+/* AnimatedIcon */
+
+.animated-icon {
+  display: inline-block;
+}
+
+.animated-icon-hamburger {
+  animation: none;
+}
+
+  .animated-icon-hamburger.pressing {
+    animation: hamburger-press 0.1s ease-out forwards;
+  }
+
+  .animated-icon-hamburger.releasing {
+    animation: hamburger-release 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+@keyframes hamburger-press {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0.5);
+  }
+}
+
+@keyframes hamburger-release {
+  from {
+    transform: scaleX(0.5);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animated-icon-gear {
+  transition: transform 0.1s ease;
+}
+
+  .animated-icon-gear.gear-rewind {
+    animation: animated-icon-gear-rewind 0.25s ease-out forwards;
+  }
+
+  .animated-icon-gear.gear-spin {
+    animation: animated-icon-gear-spin 0.5s cubic-bezier(0.12, 0.8, 0.2, 1.0) forwards;
+  }
+
+@keyframes animated-icon-gear-rewind {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-15deg);
+  }
+}
+
+@keyframes animated-icon-gear-spin {
+  from {
+    transform: rotate(-15deg);
+  }
+
+  to {
+    transform: rotate(720deg);
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "WinUI on Web Gallery",
+  "short_name": "WinUI Gallery",
+  "display": "standalone",
+  "display_override": [ "window-controls-overlay" ],
+  "start_url": "/",
+  "theme_color": "transparent",
+  "background_color": "transparent"
+}

@@ -1,0 +1,88 @@
+<template>
+  <!--
+    WinTitleBar - PWA 扩展标题栏组件
+
+    启用方法：
+    1. manifest.json 中添加 "display_override": ["window-controls-overlay"]
+    2. index.html 中添加 <meta name="theme-color" content="#f3f3f3">
+    3. 以 PWA 形式安装后，浏览器将把标题栏让出给网页
+    4. 将此组件放在 App.vue 的 WinNavigationView 之前即可
+
+    Props:
+      title  - 标题栏文字
+      icon   - 图标路径
+      theme  - 'system' | 'light' | 'dark'，同步系统按钮区域背景色
+  -->
+  <div class="win-titlebar" v-if="visible">
+    <img :src="icon" class="win-titlebar-icon" />
+    <span class="win-titlebar-title">{{ title }}</span>
+  </div>
+</template>
+
+<script setup>
+import { ref, watch, inject, onMounted, onUnmounted } from 'vue';
+
+const props = defineProps({
+  title: { type: String, default: '' },
+  icon: { type: String, default: '/AppIcon.ico' },
+  theme: { type: String, default: 'system' }
+});
+
+const parentVisible = inject('winTitleBarVisible', null);
+const visible = ref(false);
+
+let onGeometryChange = null;
+let mediaQuery = null;
+let mediaHandler = null;
+
+function syncVisible(val) {
+  visible.value = val;
+  if (parentVisible) parentVisible.value = val;
+}
+
+function updateThemeColor(mode) {
+  let isDark;
+  if (mode === 'dark') isDark = true;
+  else if (mode === 'light') isDark = false;
+  else isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  const color = isDark ? '#202020' : '#f3f3f3';
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute('content', color);
+}
+
+onMounted(() => {
+  if ('windowControlsOverlay' in navigator) {
+    syncVisible(navigator.windowControlsOverlay.visible);
+    onGeometryChange = () => {
+      syncVisible(navigator.windowControlsOverlay.visible);
+    };
+    navigator.windowControlsOverlay.addEventListener('geometrychange', onGeometryChange);
+  }
+
+  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  mediaHandler = () => {
+    if (props.theme === 'system') updateThemeColor('system');
+  };
+  mediaQuery.addEventListener('change', mediaHandler);
+  updateThemeColor(props.theme);
+});
+
+onUnmounted(() => {
+  if (onGeometryChange && 'windowControlsOverlay' in navigator) {
+    navigator.windowControlsOverlay.removeEventListener('geometrychange', onGeometryChange);
+  }
+  if (mediaQuery && mediaHandler) {
+    mediaQuery.removeEventListener('change', mediaHandler);
+  }
+});
+
+watch(() => props.theme, (val) => updateThemeColor(val));
+</script>
+
+<style src="../styles/titlebar.css"></style>
