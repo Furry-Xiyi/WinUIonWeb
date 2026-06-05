@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import plugin from '@vitejs/plugin-vue';
 import fs from 'fs';
 import path from 'path';
+import postcss from 'postcss';
+import autoprefixer from 'autoprefixer';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -24,6 +26,16 @@ export default defineConfig({
             }
         }
     ],
+    css: {
+        postcss: {
+            plugins: [
+                autoprefixer({
+                    overrideBrowserslist: ['> 1%', 'last 2 versions', 'not dead'],
+                    add: true
+                })
+            ]
+        }
+    },
     server: {
         port: 63179,
     }
