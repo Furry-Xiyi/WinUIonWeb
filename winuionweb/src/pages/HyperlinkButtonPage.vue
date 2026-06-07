@@ -1,6 +1,6 @@
 <template>
   <h1 class="page-header">HyperlinkButton</h1>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       HyperlinkButton
     </template>

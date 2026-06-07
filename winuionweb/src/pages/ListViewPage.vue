@@ -1,6 +1,6 @@
 <template>
   <h1 class="page-header">ListView</h1>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Single Selection
     </template>
@@ -13,7 +13,7 @@
       </template>
     </WinListView>
   </WinSettingsCard>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Grouped Data
     </template>
@@ -32,7 +32,7 @@
       </template>
     </WinListView>
   </WinSettingsCard>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Drag to Reorder
     </template>

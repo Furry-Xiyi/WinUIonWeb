@@ -6,6 +6,7 @@
   display: flex;
   width: 100%;
   height: 100%;
+  touch-action: none;
 }
 
 .flip-view-track {
@@ -44,19 +45,37 @@
   transition: background var(--fast-duration);
 }
 
-  .flip-btn:hover {
-    background: var(--subtle-secondary);
+  .flip-btn .flip-arrow {
+    font-size: 8px;
+    transition: transform 0.1s ease, color var(--fast-duration);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .flip-btn:active {
-    background: var(--subtle-tertiary);
-    color: var(--text-secondary);
+  .flip-btn:hover {
+    background: var(--flyout-bg);
+    backdrop-filter: var(--flyout-backdrop);
   }
+
+    .flip-btn:hover .flip-arrow {
+      color: var(--text-primary);
+    }
+
+  .flip-btn:active {
+    background: var(--flyout-bg);
+    backdrop-filter: var(--flyout-backdrop);
+  }
+
+    .flip-btn:active .flip-arrow {
+      color: var(--text-secondary);
+      transform: scale(0.85);
+    }
 
 .win-flip-view.horizontal .flip-btn {
   top: 50%;
   transform: translateY(-50%);
-  width: 15px;
+  width: 16px;
   height: 40px;
 }
 
@@ -72,7 +91,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 40px;
-  height: 15px;
+  height: 16px;
 }
 
   .win-flip-view.vertical .flip-btn.prev {

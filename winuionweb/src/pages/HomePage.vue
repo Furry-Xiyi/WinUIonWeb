@@ -1,6 +1,6 @@
 <template>
   <h1 class="page-header">WinUI 3 Web Gallery</h1>
-  <WinSettingsCard>
+  <WinSettingsCard >
     <template #header>
       Welcome
     </template>

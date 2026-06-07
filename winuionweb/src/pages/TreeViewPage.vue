@@ -1,6 +1,6 @@
 <template>
   <h1 class="page-header">TreeView</h1>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Basic TreeView
     </template>
@@ -16,7 +16,7 @@
       </template>
     </WinTreeView>
   </WinSettingsCard>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Multi-select with Checkboxes
     </template>
@@ -32,7 +32,7 @@
       </template>
     </WinTreeView>
   </WinSettingsCard>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Drag & Drop Grouping
     </template>

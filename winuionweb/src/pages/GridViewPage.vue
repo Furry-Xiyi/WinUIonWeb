@@ -1,6 +1,6 @@
 <template>
   <h1 class="page-header">GridView</h1>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Single Selection
     </template>
@@ -16,7 +16,7 @@
       </template>
     </WinGridView>
   </WinSettingsCard>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Multiple Selection
     </template>
@@ -32,7 +32,7 @@
       </template>
     </WinGridView>
   </WinSettingsCard>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Drag & Reorder
     </template>

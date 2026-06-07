@@ -10,11 +10,28 @@
   gap: 16px;
 }
 
+  .win-settings-card.content-bottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+    .win-settings-card.content-bottom .win-settings-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .win-settings-card.content-bottom .win-settings-card-right {
+      width: 100%;
+    }
+
 .win-settings-card-left {
   display: flex;
   align-items: center;
   gap: 16px;
   min-width: 0;
+  flex: 1;
 }
 
 .win-settings-card-text {

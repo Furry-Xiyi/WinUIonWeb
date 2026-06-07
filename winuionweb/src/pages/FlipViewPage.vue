@@ -1,13 +1,13 @@
 <template>
   <h1 class="page-header">FlipView</h1>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Horizontal FlipView
     </template>
     <template #description>
       Navigate items left and right.
     </template>
-    <div style="max-width: 400px; height: 270px; border: 1px solid var(--card-stroke);">
+    <div style="width: 100%; max-width: 400px; height: 270px; border: 1px solid var(--card-stroke);">
       <WinFlipView :items="items" orientation="horizontal">
         <template #item="{ item }">
           <div :style="{ background: item.color, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '24px' }">
@@ -17,14 +17,14 @@
       </WinFlipView>
     </div>
   </WinSettingsCard>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Vertical FlipView
     </template>
     <template #description>
       Navigate items up and down.
     </template>
-    <div style="max-width: 400px; height: 270px; border: 1px solid var(--card-stroke);">
+    <div style="width: 100%; max-width: 400px; height: 270px; border: 1px solid var(--card-stroke);">
       <WinFlipView :items="items" orientation="vertical">
         <template #item="{ item }">
           <div :style="{ background: item.color, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '24px' }">

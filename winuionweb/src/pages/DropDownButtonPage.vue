@@ -1,6 +1,6 @@
 <template>
   <h1 class="page-header">DropDownButton</h1>
-  <WinSettingsCard>
+  <WinSettingsCard contentPlacement="bottom">
     <template #header>
       DropDownButton
     </template>
