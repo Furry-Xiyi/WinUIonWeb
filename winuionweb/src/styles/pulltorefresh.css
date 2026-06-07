@@ -1,0 +1,27 @@
+/* styles/pulltorefresh.css */
+.win-pull-to-refresh {
+  position: relative;
+  overflow: hidden;
+}
+
+.ptr-indicator {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -16px;
+  width: 32px;
+  height: 32px;
+  background: var(--flyout-bg);
+  border: 1px solid var(--card-stroke);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: transform 0.2s, opacity 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.ptr-content {
+  transition: transform 0.2s;
+}

@@ -4,262 +4,76 @@
                      :position="navPosition"
                      :menuItems="navMenuItems"
                      :footerItems="[]">
-
-    <div v-if="currentPage === 'home'" :key="'home'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">WinUI 3 Web Gallery</h1>
-      <WinSettingsCard>
-        <template #header>
-          Welcome
-        </template>
-        <template #description>
-          A pure Vue 3 / CSS implementation of Fluent Design.
-        </template>
-        <WinButton primary @click="currentPage = 'button'">Get Started</WinButton>
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'button'" :key="'button'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">Button</h1>
-      <WinSettingsCard>
-        <template #header>
-          Standard Buttons
-        </template>
-        <template #description>
-          A basic button control.
-        </template>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <WinButton>Standard</WinButton>
-          <WinButton primary>Primary</WinButton>
-        </div>
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'dropdownbutton'" :key="'dropdownbutton'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">DropDownButton</h1>
-      <WinSettingsCard>
-        <template #header>
-          DropDownButton
-        </template>
-        <template #description>
-          A button with a flyout of actions.
-        </template>
-        <WinDropDownButton :items="['Action 1', 'Action 2', 'Action 3']">DropDown</WinDropDownButton>
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'hyperlinkbutton'" :key="'hyperlinkbutton'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">HyperlinkButton</h1>
-      <WinSettingsCard>
-        <template #header>
-          HyperlinkButton
-        </template>
-        <template #description>
-          A button that appears as a hyperlink.
-        </template>
-        <WinHyperlinkButton>Click me</WinHyperlinkButton>
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'togglebutton'" :key="'togglebutton'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">ToggleButton</h1>
-      <WinSettingsCard>
-        <template #header>
-          ToggleButton
-        </template>
-        <template #description>
-          A button that can be toggled on or off.
-        </template>
-        <WinToggleButton v-model="toggleBtnVal">Toggle Me</WinToggleButton>
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'splitbutton'" :key="'splitbutton'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">SplitButton</h1>
-      <WinSettingsCard>
-        <template #header>
-          SplitButton
-        </template>
-        <template #description>
-          A two-part button with primary action and flyout.
-        </template>
-        <WinSplitButton :options="['Action 1', 'Action 2']" @click="() => {}">Split</WinSplitButton>
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'checkbox'" :key="'checkbox'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">CheckBox</h1>
-      <WinSettingsCard>
-        <template #header>
-          CheckBox
-        </template>
-        <template #description>
-          A control for boolean input.
-        </template>
-        <WinCheckBox v-model="checkVal">I agree</WinCheckBox>
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'combobox'" :key="'combobox'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">ComboBox</h1>
-      <WinSettingsCard>
-        <template #header>
-          ComboBox
-        </template>
-        <template #description>
-          A drop-down list of items.
-        </template>
-        <WinComboBox :options="[{label:'Arial'}, {label:'Comic Sans MS'}, {label:'Segoe UI'}]" v-model="comboVal" />
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'radiobuttons'" :key="'radiobuttons'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">RadioButtons</h1>
-      <WinSettingsCard>
-        <template #header>
-          RadioButtons
-        </template>
-        <template #description>
-          A group of mutually exclusive options.
-        </template>
-        <div style="display: flex; gap: 24px;">
-          <WinRadioButton value="A" v-model="radioVal">Option A</WinRadioButton>
-          <WinRadioButton value="B" v-model="radioVal">Option B</WinRadioButton>
-          <WinRadioButton value="C" v-model="radioVal">Option C</WinRadioButton>
-        </div>
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'rating'" :key="'rating'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">RatingControl</h1>
-      <WinSettingsCard>
-        <template #header>
-          RatingControl
-        </template>
-        <template #description>
-          A star-based rating input.
-        </template>
-        <WinRating v-model="ratingVal" />
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'slider'" :key="'slider'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">Slider</h1>
-      <WinSettingsCard>
-        <template #header>
-          Slider
-        </template>
-        <template #description>
-          A control for selecting a value from a range.
-        </template>
-        <WinSlider v-model="sliderVal" />
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'toggleswitch'" :key="'toggleswitch'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">ToggleSwitch</h1>
-      <WinSettingsCard>
-        <template #header>
-          ToggleSwitch
-        </template>
-        <template #description>
-          A switch for toggling between two states.
-        </template>
-        <WinToggleSwitch v-model="toggleVal" />
-      </WinSettingsCard>
-    </div>
-
-    <div v-if="currentPage === 'expander'" :key="'expander'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">Expander</h1>
-      <WinExpander>
-        <template #header>
-          <div style="display: flex; flex-direction: column;">
-            <span style="font-size: 14px;">Expander Control</span>
-            <span style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Smooth Grid expansion.</span>
-          </div>
-        </template>
-        <div>Here is the inner content of the expander.</div>
-      </WinExpander>
-    </div>
-
-    <div v-if="currentPage === 'settings'" :key="'settings'" :class="['page-view active', pageTransition]">
-      <h1 class="page-header">Settings</h1>
-      <span style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">Appearance</span>
-      <WinExpander>
-        <template #header>
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span class="icon" style="font-size: 20px; width: 25px; text-align: center;">&#xE706;</span>
-            <div style="display: flex; flex-direction: column;">
-              <span style="font-size: 14px;">Theme</span>
-              <span style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Choose your app color mode</span>
-            </div>
-          </div>
-        </template>
-        <WinRadioButton value="system" v-model="themeSetting">Use system setting</WinRadioButton>
-        <WinRadioButton value="light" v-model="themeSetting">Light</WinRadioButton>
-        <WinRadioButton value="dark" v-model="themeSetting">Dark</WinRadioButton>
-      </WinExpander>
-      <WinExpander>
-        <template #header>
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span class="icon" style="font-size: 20px; width: 25px; text-align: center;">&#xE8AB;</span>
-            <div style="display: flex; flex-direction: column;">
-              <span style="font-size: 14px;">Page Transition</span>
-              <span style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Animation style when switching pages</span>
-            </div>
-          </div>
-        </template>
-        <WinRadioButton value="entrance" v-model="animSetting">Entrance (slide up)</WinRadioButton>
-        <WinRadioButton value="drill" v-model="animSetting">Drill (left / right)</WinRadioButton>
-        <WinRadioButton value="fade" v-model="animSetting">Fade</WinRadioButton>
-      </WinExpander>
-      <WinSettingsCard>
-        <template #header>
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span class="icon" style="font-size: 20px; width: 25px; text-align: center;">&#xF594;</span>
-            <div style="display: flex; flex-direction: column;">
-              <span style="font-size: 14px;">Navigation pane position</span>
-              <span style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Select the navigation bar position</span>
-            </div>
-          </div>
-        </template>
-        <WinComboBox :options="[{label:'Left'}, {label:'Top'}]" :modelValue="navPosition === 'Left' ? 0 : 1" @update:modelValue="v => navPosition = v === 0 ? 'Left' : 'Top'" />
-      </WinSettingsCard>
+    <div v-if="pageComponent" :key="currentPage" :class="['page-view active', pageTransition]">
+      <component :is="pageComponent" />
     </div>
   </WinNavigationView>
 </template>
 
 <script setup>
+import { ref, watch, provide, computed } from 'vue';
 import WinTitleBar from './components/WinTitleBar.vue';
-import { ref, watch, provide } from 'vue';
 import WinNavigationView from './components/WinNavigationView.vue';
-import WinButton from './components/WinButton.vue';
-import WinToggleButton from './components/WinToggleButton.vue';
-import WinHyperlinkButton from './components/WinHyperlinkButton.vue';
-import WinSplitButton from './components/WinSplitButton.vue';
-import WinCheckBox from './components/WinCheckBox.vue';
-import WinRating from './components/WinRating.vue';
-import WinComboBox from './components/WinComboBox.vue';
-import WinToggleSwitch from './components/WinToggleSwitch.vue';
-import WinRadioButton from './components/WinRadioButton.vue';
-import WinSlider from './components/WinSlider.vue';
-import WinExpander from './components/WinExpander.vue';
-import WinSettingsCard from './components/WinSettingsCard.vue';
-import WinDropDownButton from './components/WinDropDownButton.vue';
+
+import HomePage from './pages/HomePage.vue';
+import ButtonPage from './pages/ButtonPage.vue';
+import DropDownButtonPage from './pages/DropDownButtonPage.vue';
+import HyperlinkButtonPage from './pages/HyperlinkButtonPage.vue';
+import ToggleButtonPage from './pages/ToggleButtonPage.vue';
+import SplitButtonPage from './pages/SplitButtonPage.vue';
+import CheckBoxPage from './pages/CheckBoxPage.vue';
+import ComboBoxPage from './pages/ComboBoxPage.vue';
+import RadioButtonsPage from './pages/RadioButtonsPage.vue';
+import RatingPage from './pages/RatingPage.vue';
+import SliderPage from './pages/SliderPage.vue';
+import ToggleSwitchPage from './pages/ToggleSwitchPage.vue';
+import ExpanderPage from './pages/ExpanderPage.vue';
+import FlipViewPage from './pages/FlipViewPage.vue';
+import GridViewPage from './pages/GridViewPage.vue';
+import ListBoxPage from './pages/ListBoxPage.vue';
+import ListViewPage from './pages/ListViewPage.vue';
+import PullToRefreshPage from './pages/PullToRefreshPage.vue';
+import TreeViewPage from './pages/TreeViewPage.vue';
+import SettingsPage from './pages/SettingsPage.vue';
+
+const pageMap = {
+  home: HomePage,
+  button: ButtonPage,
+  dropdownbutton: DropDownButtonPage,
+  hyperlinkbutton: HyperlinkButtonPage,
+  togglebutton: ToggleButtonPage,
+  splitbutton: SplitButtonPage,
+  checkbox: CheckBoxPage,
+  combobox: ComboBoxPage,
+  radiobuttons: RadioButtonsPage,
+  rating: RatingPage,
+  slider: SliderPage,
+  toggleswitch: ToggleSwitchPage,
+  expander: ExpanderPage,
+  flipview: FlipViewPage,
+  gridview: GridViewPage,
+  listbox: ListBoxPage,
+  listview: ListViewPage,
+  pulltorefresh: PullToRefreshPage,
+  treeview: TreeViewPage,
+  settings: SettingsPage
+};
 
 const titleBarActive = ref(false);
 provide('winTitleBarVisible', titleBarActive);
+
 const currentPage = ref('home');
 const navPosition = ref('Left');
-const toggleBtnVal = ref(false);
-const checkVal = ref(true);
-const ratingVal = ref(3);
-const comboVal = ref(0);
-const toggleVal = ref(false);
-const radioVal = ref('A');
-const sliderVal = ref(50);
 const themeSetting = ref('system');
 const animSetting = ref('entrance');
 const pageTransition = ref('page-transition-up');
+
+provide('themeSetting', themeSetting);
+provide('animSetting', animSetting);
+provide('navPosition', navPosition);
+provide('currentPage', currentPage);
+
+const pageComponent = computed(() => pageMap[currentPage.value] || HomePage);
 
 const navMenuItems = [
   { value: 'home', icon: '\uE80F', label: 'Home' },
@@ -276,12 +90,20 @@ const navMenuItems = [
     { value: 'slider', icon: '\uE9E9', label: 'Slider' },
     { value: 'toggleswitch', icon: '\uF19F', label: 'ToggleSwitch' }
   ]},
+  { value: 'collections', icon: '\uE80A', label: 'Collections', selectsOnInvoked: false, children: [
+    { value: 'flipview', icon: '\uF1CB', label: 'FlipView' },
+    { value: 'gridview', icon: '\uF0E2', label: 'GridView' },
+    { value: 'listbox', icon: '\uEA37', label: 'ListBox' },
+    { value: 'listview', icon: '\uE8FD', label: 'ListView' },
+    { value: 'pulltorefresh', icon: '\uE72C', label: 'PullToRefresh' },
+    { value: 'treeview', icon: '\uED41', label: 'TreeView' }
+  ]},
   { value: 'layout', icon: '\uEB3B', label: 'Layout', selectsOnInvoked: false, children: [
     { value: 'expander', icon: '\uE8C4', label: 'Expander' }
   ]}
 ];
 
-const allPages = ['home', 'button', 'dropdownbutton', 'hyperlinkbutton', 'togglebutton', 'splitbutton', 'checkbox', 'combobox', 'radiobuttons', 'rating', 'slider', 'toggleswitch', 'expander', 'settings'];
+const allPages = Object.keys(pageMap);
 
 function applyTheme(mode) {
   const html = document.documentElement;
@@ -315,6 +137,19 @@ watch(currentPage, (newVal, oldVal) => {
     margin-top: 0;
     margin-bottom: 24px;
     color: var(--text-primary);
+  }
+
+  .grid-sample-item {
+    width: 190px;
+    height: 160px;
+    background: var(--card-bg-secondary);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .grid-img {
+    width: 100%;
+    height: 130px;
   }
 
   .page-view {

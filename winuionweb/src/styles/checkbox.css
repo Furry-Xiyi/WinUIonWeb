@@ -1,3 +1,4 @@
+/* styles/checkbox.css (更新部分内容) */
 .win-checkbox {
   display: inline-flex;
   align-items: center;
@@ -7,6 +8,10 @@
   user-select: none;
   color: var(--text-primary);
 }
+
+  .win-checkbox.is-child {
+    margin-left: 32px;
+  }
 
 .checkbox-box {
   width: 20px;
@@ -29,7 +34,8 @@
   border-color: var(--ctrl-elevation-rest);
 }
 
-.win-checkbox input:checked + .checkbox-box {
+.win-checkbox input:checked + .checkbox-box,
+.checkbox-box.is-indeterminate {
   background: var(--accent-base);
   border-color: transparent;
 }
@@ -41,4 +47,12 @@
     border-left: 1.5px solid var(--accent-text);
     border-bottom: 1.5px solid var(--accent-text);
     transform: translateY(-1px) rotate(-45deg);
+  }
+
+  .checkbox-box.is-indeterminate:after {
+    content: "";
+    width: 10px;
+    height: 2px;
+    background: var(--accent-text);
+    border-radius: 1px;
   }

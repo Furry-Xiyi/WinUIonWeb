@@ -1,0 +1,33 @@
+/* styles/gridview.css */
+.win-grid-view {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.win-grid-item {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: transform var(--fast-duration), border var(--fast-duration);
+}
+
+  .win-grid-item.clickEnabled {
+    cursor: pointer;
+  }
+
+    .win-grid-item.clickEnabled:hover {
+      transform: scale(0.98);
+    }
+
+  .win-grid-item.selected {
+    border: 2px solid var(--accent-base);
+  }
+
+.grid-checkbox {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}

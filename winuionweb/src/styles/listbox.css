@@ -1,0 +1,25 @@
+/* styles/listbox.css */
+.win-list-box {
+  background: var(--card-bg);
+  border: 1px solid var(--card-stroke);
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.win-list-box-item {
+  padding: 8px 12px;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background var(--fast-duration);
+}
+
+  .win-list-box-item:hover {
+    background: var(--subtle-secondary);
+  }
+
+  .win-list-box-item.selected {
+    background: var(--accent-base);
+    color: var(--accent-text);
+  }

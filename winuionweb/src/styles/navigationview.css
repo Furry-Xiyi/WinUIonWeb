@@ -75,27 +75,6 @@
   scrollbar-width: thin;
 }
 
-  .win-nav-left-scrollable:hover {
-    scrollbar-color: var(--ctrl-strong-fill);
-  }
-
-  .win-nav-left-scrollable::-webkit-scrollbar {
-    width: 2px;
-  }
-
-  .win-nav-left-scrollable::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .win-nav-left-scrollable::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 1px;
-  }
-
-  .win-nav-left-scrollable:hover::-webkit-scrollbar-thumb {
-    background: var(--ctrl-strong-fill);
-  }
-
 .win-nav-footer {
   display: flex;
   flex-direction: column;

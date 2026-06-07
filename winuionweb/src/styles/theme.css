@@ -75,6 +75,7 @@
     --ctrl-fill-default: rgba(255, 255, 255, 0.02);
     --ctrl-fill-secondary: rgba(255,255,255,0.03);
     --ctrl-fill-tertiary: rgba(255, 255, 255, 0.03);
+    --ctrl-strong-fill: rgba(255, 255, 255, 0.54);
     --ctrl-solid-fill: #454545;
     --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
     --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
@@ -179,9 +180,10 @@ html.theme-dark {
   --subtle-secondary: rgba(255, 255, 255, 0.06);
   --subtle-tertiary: rgba(255, 255, 255, 0.04);
   --subtle-pressed: rgba(255, 255, 255, 0.03);
-  --ctrl-fill-default: rgba(255, 255, 255, 0.06);
+  --ctrl-fill-default: rgba(255, 255, 255, 0.02);
   --ctrl-fill-secondary: rgba(255, 255, 255, 0.08);
   --ctrl-fill-tertiary: rgba(255, 255, 255, 0.03);
+  --ctrl-strong-fill: rgba(255, 255, 255, 0.54);
   --ctrl-solid-fill: #454545;
   --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
   --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);

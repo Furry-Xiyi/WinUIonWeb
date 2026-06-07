@@ -1,0 +1,84 @@
+/* styles/flipview.css */
+.win-flip-view {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.flip-view-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform var(--normal-duration) var(--fast-out-slow-in);
+}
+
+.win-flip-view.vertical .flip-view-track {
+  flex-direction: column;
+}
+
+.flip-view-item {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flip-btn {
+  position: absolute;
+  background: var(--flyout-bg);
+  backdrop-filter: var(--flyout-backdrop);
+  -webkit-backdrop-filter: var(--flyout-backdrop);
+  border: 1px solid var(--card-stroke);
+  border-radius: 4px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background var(--fast-duration);
+}
+
+  .flip-btn:hover {
+    background: var(--subtle-secondary);
+  }
+
+  .flip-btn:active {
+    background: var(--subtle-tertiary);
+    color: var(--text-secondary);
+  }
+
+.win-flip-view.horizontal .flip-btn {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 40px;
+}
+
+  .win-flip-view.horizontal .flip-btn.prev {
+    left: 4px;
+  }
+
+  .win-flip-view.horizontal .flip-btn.next {
+    right: 4px;
+  }
+
+.win-flip-view.vertical .flip-btn {
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 15px;
+}
+
+  .win-flip-view.vertical .flip-btn.prev {
+    top: 4px;
+  }
+
+  .win-flip-view.vertical .flip-btn.next {
+    bottom: 4px;
+  }

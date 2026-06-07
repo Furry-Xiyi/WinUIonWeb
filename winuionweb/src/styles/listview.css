@@ -1,0 +1,62 @@
+/* styles/listview.css */
+.win-list-view {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.win-list-header {
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 16px;
+  background: var(--app-bg);
+  z-index: 5;
+}
+
+  .win-list-header.sticky {
+    position: sticky;
+    top: 0;
+  }
+
+.win-list-item {
+  position: relative;
+  padding: 8px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  transition: background var(--fast-duration);
+}
+
+  .win-list-item.clickEnabled {
+    cursor: pointer;
+  }
+
+    .win-list-item.clickEnabled:hover {
+      background: var(--subtle-secondary);
+    }
+
+  .win-list-item.selected {
+    background: var(--subtle-secondary);
+  }
+
+    .win-list-item.selected:hover {
+      background: var(--subtle-tertiary);
+    }
+
+.list-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
+  background: var(--accent-base);
+  border-radius: 3px;
+  transition: height var(--fast-duration);
+}
+
+.win-list-item.selected:active .list-indicator {
+  height: 10px;
+}

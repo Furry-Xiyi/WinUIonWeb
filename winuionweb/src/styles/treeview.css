@@ -1,0 +1,38 @@
+/* styles/treeview.css */
+.win-tree-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.win-tree-node {
+  display: flex;
+  flex-direction: column;
+}
+
+.tree-item {
+  padding-left: 0;
+}
+
+.tree-children {
+  margin-left: 24px;
+  border-left: 1px solid var(--stroke-divider);
+}
+
+.tree-chevron {
+  font-size: 12px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--fast-duration);
+}
+
+  .tree-chevron.hidden {
+    visibility: hidden;
+  }
+
+  .tree-chevron.expanded {
+    transform: rotate(90deg);
+  }

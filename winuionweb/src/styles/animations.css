@@ -98,19 +98,19 @@
 }
 
 .page-transition-up {
-  animation: page-enter-up 0.250s cubic-bezier(0, 0, 0, 1) both;
+  animation: page-enter-up 0.250s cubic-bezier(0, 0, 0.1, 1) both;
 }
 
 .page-transition-left {
-  animation: page-enter-left 0.250s cubic-bezier(0, 0, 0, 1) both;
+  animation: page-enter-left 0.250s cubic-bezier(0, 0, 0.1, 1) both;
 }
 
 .page-transition-right {
-  animation: page-enter-right 0.250s cubic-bezier(0, 0, 0, 1) both;
+  animation: page-enter-right 0.250s cubic-bezier(0, 0, 0.1, 1) both;
 }
 
 .page-transition-fade {
-  animation: page-enter-fade 0.250s cubic-bezier(0, 0, 0, 1) both;
+  animation: page-enter-fade 0.250s cubic-bezier(0, 0, 0.1, 1) both;
 }
 
 /* AnimatedIcon */
