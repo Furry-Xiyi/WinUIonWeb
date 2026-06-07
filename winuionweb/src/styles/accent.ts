@@ -36,7 +36,7 @@ function requestAccentFromExtension() {
     chrome.runtime.sendMessage(
       EXTENSION_ID,
       { type: "get_accent" },
-      (response) => {
+      (response: any) => {
         if (chrome.runtime.lastError) return;
         if (response?.status === "ok" && response.accentColor) {
           applyAccentColor(response.accentColor);
