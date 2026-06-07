@@ -1,7 +1,7 @@
 .win-btn {
   position: relative;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 0 11px;
   font-size: 14px;
   height: 32px;
@@ -21,8 +21,6 @@
     position: absolute;
     inset: 0;
     border-radius: 4px;
-    border: 1px solid var(--ctrl-border);
-    border-bottom: 1px solid var(--ctrl-border-accent);
     pointer-events: none;
   }
 
@@ -31,7 +29,7 @@
   }
 
   .win-btn:active {
-    background: var(--ctrl-fill-tertiary);
+    background: color-mix(in srgb, var(--ctrl-fill-tertiary) 100%, black 8%);
     color: var(--text-secondary);
   }
 

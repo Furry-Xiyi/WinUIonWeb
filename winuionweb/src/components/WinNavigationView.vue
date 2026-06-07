@@ -592,33 +592,34 @@ const calcIndicator = () => {
   }
 };
 
+let resizeTimer = null;
 const onResize = () => {
   skipTransition = true;
-  nextTick(() => {
-    if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) {
-      const val = props.selectedValue;
-      if (val) {
-        const parentGroup = findParentGroup(val);
-        if (parentGroup && props.position === 'Top') {
-          lastSelectedEl = itemRefs[parentGroup.value] || null;
-          lastIsChild = false;
-        } else if (parentGroup && isCompact.value) {
-          lastSelectedEl = itemRefs[parentGroup.value] || null;
-          lastIsChild = false;
-        } else {
-          lastSelectedEl = itemRefs[val] || null;
-          lastIsChild = !!parentGroup;
-        }
+  if (resizeTimer) cancelAnimationFrame(resizeTimer);
+  if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) {
+    const val = props.selectedValue;
+    if (val) {
+      const parentGroup = findParentGroup(val);
+      if (parentGroup && (props.position === 'Top' || isCompact.value)) {
+        lastSelectedEl = itemRefs[parentGroup.value] || null;
+        lastIsChild = false;
+      } else {
+        lastSelectedEl = itemRefs[val] || null;
+        lastIsChild = !!parentGroup;
       }
     }
+  }
+  calcIndicator();
+  resizeTimer = requestAnimationFrame(() => {
     calcIndicator();
-    requestAnimationFrame(() => {
+    resizeTimer = requestAnimationFrame(() => {
       calcIndicator();
-      requestAnimationFrame(() => { skipTransition = false; });
+      resizeTimer = requestAnimationFrame(() => {
+        skipTransition = false;
+      });
     });
   });
 };
-
 const rebindRo = () => { if (ro) ro.disconnect(); ro = new ResizeObserver(onResize); if (navRef.value) ro.observe(navRef.value); };
 
 const refreshAfterPositionChange = () => {
