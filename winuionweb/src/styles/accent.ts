@@ -1,4 +1,5 @@
 // styles/accent.ts
+declare const chrome: any;
 const EXTENSION_ID = "pmdbpmknpllhgjcgbadidknaomabpfbb"; // chrome://extensions 里复制
 
 function applyAccentColor(color: string) {
