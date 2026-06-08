@@ -1,5 +1,6 @@
 <template>
   <h1 class="page-header">GridView</h1>
+
   <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Single Selection
@@ -11,54 +12,153 @@
       <template #item="{ item }">
         <div class="grid-sample-item">
           <div class="grid-img" :style="{ background: item.color }"></div>
-          <span style="padding: 4px; font-size: 12px;">{{ item.title }}</span>
         </div>
       </template>
     </WinGridView>
   </WinSettingsCard>
+
   <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Multiple Selection
     </template>
     <template #description>
-      Use checkboxes to select multiple items.
+      Use checkboxes or click items to select multiple.
     </template>
-    <WinGridView :items="items" selectionMode="Multiple" v-model:selectedItems="multiSel">
+    <WinGridView :items="multiItems" selectionMode="Multiple" v-model:selectedItems="multiSel">
       <template #item="{ item }">
         <div class="grid-sample-item">
           <div class="grid-img" :style="{ background: item.color }"></div>
-          <span style="padding: 4px; font-size: 12px;">{{ item.title }}</span>
         </div>
       </template>
     </WinGridView>
   </WinSettingsCard>
+
   <WinSettingsCard contentPlacement="bottom">
     <template #header>
-      Drag & Reorder
+      Customizable GridView
     </template>
     <template #description>
-      Drag items to rearrange their position.
+      Play with Layouts, Behaviors and Extended mode (Ctrl/Shift Select).
     </template>
-    <WinGridView :items="dragItems" selectionMode="None" canDragItems canReorderItems allowDrop @reorder="v => dragItems = v">
-      <template #item="{ item }">
-        <div class="grid-sample-item">
-          <div class="grid-img" :style="{ background: item.color }"></div>
-          <span style="padding: 4px; font-size: 12px;">{{ item.title }}</span>
+
+    <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+
+      <div style="flex: 1; min-width: 320px;">
+        <WinGridView :items="customItems"
+                     :selectionMode="selMode"
+                     :isItemClickEnabled="itemClick"
+                     :canDragItems="canDrag"
+                     :canReorderItems="canReorder"
+                     :allowDrop="allowDropVal"
+                     v-model:selectedItems="customSel"
+                     @reorder="v => customItems = v">
+
+          <template #item="{ item }">
+            <div class="grid-sample-item">
+              <template v-if="layout === 'Image'">
+                <div class="grid-img" :style="{ background: item.color }"></div>
+              </template>
+
+              <template v-else-if="layout === 'Icon/Text'">
+                <div class="layout-icon-text">
+                  <div class="layout-icon-text-header">
+                    <span class="icon" style="font-size: 16px;">{{ item.icon }}</span>
+                    <span class="layout-icon-text-title">{{ item.title }}</span>
+                  </div>
+                  <div class="layout-icon-text-desc">{{ item.desc }}</div>
+                </div>
+              </template>
+
+              <template v-else-if="layout === 'Image/Text'">
+                <div class="grid-img" :style="{ background: item.color, height: '100px', flex: 'none' }"></div>
+                <div class="layout-imagetext-body">
+                  <div style="font-weight: 600;">{{ item.title }}</div>
+                  <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">{{ item.desc }}</div>
+                </div>
+              </template>
+
+              <template v-else-if="layout === 'Text'">
+                <div class="layout-text-body">
+                  <div style="font-weight: 600;">{{ item.title }}</div>
+                  <div style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">{{ item.desc }}</div>
+                </div>
+              </template>
+            </div>
+          </template>
+        </WinGridView>
+      </div>
+
+      <div class="gridview-options-panel">
+        <div>
+          <div style="font-weight: 600; margin-bottom: 12px;">ItemTemplate</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <WinRadioButton name="layout" value="Image" v-model="layout">Image</WinRadioButton>
+            <WinRadioButton name="layout" value="Icon/Text" v-model="layout">Icon/Text</WinRadioButton>
+            <WinRadioButton name="layout" value="Image/Text" v-model="layout">Image/Text</WinRadioButton>
+            <WinRadioButton name="layout" value="Text" v-model="layout">Text</WinRadioButton>
+          </div>
         </div>
-      </template>
-    </WinGridView>
+
+        <div style="height: 1px; background: var(--stroke-divider);"></div>
+
+        <div>
+          <div style="font-weight: 600; margin-bottom: 12px;">Behaviors</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <WinCheckBox v-model="itemClick">IsItemClickEnabled</WinCheckBox>
+            <WinCheckBox v-model="canDrag">CanDragItems</WinCheckBox>
+            <WinCheckBox v-model="canReorder">CanReorderItems</WinCheckBox>
+            <WinCheckBox v-model="allowDropVal">AllowDrop</WinCheckBox>
+          </div>
+        </div>
+
+        <div style="height: 1px; background: var(--stroke-divider);"></div>
+
+        <div>
+          <div style="font-weight: 600; margin-bottom: 12px;">SelectionMode</div>
+          <WinComboBox :options="modeOptions" v-model="selModeIdx" style="width: 100%;" />
+        </div>
+      </div>
+    </div>
   </WinSettingsCard>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import WinGridView from '../components/WinGridView.vue';
 import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinRadioButton from '../components/WinRadioButton.vue';
+import WinCheckBox from '../components/WinCheckBox.vue';
+import WinComboBox from '../components/WinComboBox.vue';
 
-const items = Array.from({length: 8}, (_, i) => ({ title: `Item ${i+1}`, color: `hsl(${i*45}, 60%, 50%)` }));
+const items = Array.from({length: 4}, (_, i) => ({ id: `single-${i}`, title: `Item ${i+1}`, color: `hsl(${i*45}, 60%, 50%)` }));
+const multiItems = Array.from({length: 4}, (_, i) => ({ id: `multi-${i}`, title: `Item ${i+1}`, color: `hsl(${i*90 + 30}, 55%, 50%)` }));
 const singleSel = ref([]);
 const multiSel = ref([]);
-const dragItems = ref(Array.from({length: 6}, (_, i) => ({ title: `Drag ${i+1}`, color: `hsl(${i*60}, 55%, 55%)` })));
+
+const icons = ['\uE8B9', '\uE8A5', '\uE8C0', '\uE8E1', '\uE904', '\uE909'];
+const customItems = ref(Array.from({length: 6}, (_, i) => ({
+  id: `custom-${i}`,
+  title: `Item ${i+1}`,
+  desc: `Description for item ${i+1}`,
+  color: `hsl(${i*60}, 55%, 55%)`,
+  icon: icons[i % icons.length]
+})));
+const customSel = ref([]);
+
+const layout = ref('Image');
+const itemClick = ref(true);
+const canDrag = ref(false);
+const canReorder = ref(false);
+const allowDropVal = ref(false);
+
+const modeOptions = [
+  { label: 'None', value: 'None' },
+  { label: 'Single', value: 'Single' },
+  { label: 'Multiple', value: 'Multiple' },
+  { label: 'Extended', value: 'Extended' }
+];
+const selModeIdx = ref(0);
+const selMode = computed(() => modeOptions[selModeIdx.value].value);
 </script>
 
 <style scoped>
@@ -68,10 +168,66 @@ const dragItems = ref(Array.from({length: 6}, (_, i) => ({ title: `Drag ${i+1}`,
     background: var(--card-bg-secondary);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   .grid-img {
     width: 100%;
-    height: 130px;
+    flex: 1;
+  }
+
+  .layout-icon-text {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .layout-icon-text-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .layout-icon-text-title {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .layout-icon-text-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    flex: 1;
+  }
+
+  .layout-imagetext-body {
+    padding: 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .layout-text-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .gridview-options-panel {
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: var(--card-bg-secondary);
+    padding: 16px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 1px solid var(--stroke-divider);
   }
 </style>
