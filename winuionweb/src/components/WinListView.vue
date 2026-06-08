@@ -103,7 +103,7 @@ const onItemClick = (event, item) => {
   let newSel = [...props.selectedItems];
   if (props.selectionMode === 'Single') {
     newSel = [rawTarget];
-    anchorIndex = props.items.indexOf(item);
+    anchorIndex = internalItems.value.indexOf(item);
   } else if (props.selectionMode === 'Multiple') {
     const idx = newSel.findIndex(i => toRaw(i) === rawTarget);
     if (idx > -1) newSel.splice(idx, 1);
@@ -113,15 +113,15 @@ const onItemClick = (event, item) => {
       const idx = newSel.findIndex(i => toRaw(i) === rawTarget);
       if (idx > -1) newSel.splice(idx, 1);
       else newSel.push(rawTarget);
-      anchorIndex = props.items.indexOf(item);
+      anchorIndex = internalItems.value.indexOf(item);
     } else if (event.shiftKey && anchorIndex !== null) {
-      const currentIdx = props.items.indexOf(item);
+      const currentIdx = internalItems.value.indexOf(item);
       const start = Math.min(anchorIndex, currentIdx);
       const end = Math.max(anchorIndex, currentIdx);
-      newSel = props.items.slice(start, end + 1).map(i => toRaw(i));
+      newSel = internalItems.value.slice(start, end + 1).map(i => toRaw(i));
     } else {
       newSel = [rawTarget];
-      anchorIndex = props.items.indexOf(item);
+      anchorIndex = internalItems.value.indexOf(item);
     }
   }
   emitSelection(newSel);
