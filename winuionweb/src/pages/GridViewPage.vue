@@ -130,8 +130,8 @@ import WinRadioButton from '../components/WinRadioButton.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinComboBox from '../components/WinComboBox.vue';
 
-const items = Array.from({length: 4}, (_, i) => ({ id: `single-${i}`, title: `Item ${i+1}`, color: `hsl(${i*45}, 60%, 50%)` }));
-const multiItems = Array.from({length: 4}, (_, i) => ({ id: `multi-${i}`, title: `Item ${i+1}`, color: `hsl(${i*90 + 30}, 55%, 50%)` }));
+const items = ref(Array.from({ length: 4 }, (_, i) => ({ id: `single-${i}`, title: `Item ${i + 1}`, color: `hsl(${i * 45}, 60%, 50%)` })));
+const multiItems = ref(Array.from({ length: 4 }, (_, i) => ({ id: `multi-${i}`, title: `Item ${i + 1}`, color: `hsl(${i * 90 + 30}, 55%, 50%)` })));
 const singleSel = ref([]);
 const multiSel = ref([]);
 
