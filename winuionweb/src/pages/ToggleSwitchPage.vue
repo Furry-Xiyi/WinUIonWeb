@@ -22,17 +22,41 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import WinToggleSwitch from '../components/WinToggleSwitch.vue';
 import WinSettingsCard from '../components/WinSettingsCard.vue';
 
 const val1 = ref(false);
 const val2 = ref(false);
 
+const checkDark = () => {
+  return document.documentElement.classList.contains('dark')
+    || document.documentElement.classList.contains('theme-dark')
+    || window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
+const isDark = ref(checkDark());
+
+let observer;
+let mediaQuery;
+const onMediaChange = () => { isDark.value = checkDark(); };
+const onClassChange = () => { isDark.value = checkDark(); };
+
+onMounted(() => {
+  observer = new MutationObserver(onClassChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  mediaQuery.addEventListener('change', onMediaChange);
+});
+
+onUnmounted(() => {
+  observer?.disconnect();
+  mediaQuery?.removeEventListener('change', onMediaChange);
+});
+
 const gifSrc = computed(() => {
-  const dark = document.documentElement.classList.contains('dark')
-    || document.documentElement.classList.contains('theme-dark');
-  return dark
+  return isDark.value
     ? new URL('../styles/gif/LoadingRing_Dark.gif', import.meta.url).href
     : new URL('../styles/gif/LoadingRing_Light.gif', import.meta.url).href;
 });
