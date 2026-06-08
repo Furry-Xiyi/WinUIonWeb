@@ -1,6 +1,6 @@
 <!-- TimePickerPage.vue -->
 <template>
-  <div class="page-container page-transition-left">
+  <div class="page-container">
     <h1 class="page-header">TimePicker</h1>
 
     <div class="cards-layout">

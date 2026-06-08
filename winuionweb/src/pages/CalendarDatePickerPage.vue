@@ -1,6 +1,6 @@
 <!-- CalendarDatePickerPage.vue -->
 <template>
-  <div class="page-container page-transition-fade">
+  <div class="page-container">
     <h1 class="page-header">CalendarDatePicker</h1>
     <WinSettingsCard>
       <template #header>

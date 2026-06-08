@@ -1,6 +1,6 @@
 <!-- DatePickerPage.vue -->
 <template>
-  <div class="page-container page-transition-up">
+  <div class="page-container">
     <h1 class="page-header">DatePicker</h1>
 
     <div class="cards-layout">

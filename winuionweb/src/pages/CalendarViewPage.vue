@@ -1,6 +1,6 @@
 <!-- CalendarViewPage.vue -->
 <template>
-  <div class="page-container page-transition-fade">
+  <div class="page-container">
     <h1 class="page-header">CalendarView</h1>
     <div class="content-split">
       <div class="left-pane">
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import WinCalendarView from '../components/WinCalendarView.vue';
 import WinSettingsCard from '../components/WinSettingsCard.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
@@ -70,6 +70,21 @@ const languages = [
   { label: 'Chinese', value: 'Chinese' }
 ];
 const languageIndex = ref(0);
+
+watch(selectionModeIndex, (newIdx) => {
+  const mode = selectionModes[newIdx].value;
+  if (mode === 'Multiple') {
+    selectedDate.value = Array.isArray(selectedDate.value)
+      ? selectedDate.value
+      : selectedDate.value ? [selectedDate.value] : [];
+  } else if (mode === 'Single') {
+    selectedDate.value = Array.isArray(selectedDate.value)
+      ? (selectedDate.value[0] || new Date())
+      : (selectedDate.value || new Date());
+  } else {
+    selectedDate.value = null;
+  }
+});
 </script>
 
 <style scoped>

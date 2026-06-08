@@ -174,7 +174,7 @@ const onScroll = (e, type) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 1px solid var(--stroke-divider);
+    border-right: 1px solid var(--ctrl-border-rest);
   }
 
     .picker-column-text:last-child {
@@ -239,14 +239,14 @@ const onScroll = (e, type) => {
   .picker-actions {
     display: flex;
     height: 44px;
-    border-top: 1px solid var(--stroke-divider);
+    border-top: 1px solid var(--ctrl-border-rest);
   }
 
   .action-btn {
     flex: 1;
     background: transparent;
     border: none;
-    border-right: 1px solid var(--stroke-divider);
+    border-right: 1px solid var(--ctrl-border-rest);
     color: var(--text-primary);
     font-size: 16px;
   }

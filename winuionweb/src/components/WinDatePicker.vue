@@ -166,7 +166,7 @@ const onScroll = (e, type) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 1px solid var(--stroke-divider);
+    border-right: 1px solid var(--ctrl-border-rest);
   }
 
     .picker-column-text:last-child {
