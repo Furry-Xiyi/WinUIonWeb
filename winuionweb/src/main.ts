@@ -5,3 +5,7 @@ import './styles/theme.css'
 import './assets/base.css'
 
 createApp(App).mount('#app')
+
+document.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+});
