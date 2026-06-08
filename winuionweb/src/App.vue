@@ -17,6 +17,9 @@ import WinNavigationView from './components/WinNavigationView.vue';
 
 import HomePage from './pages/HomePage.vue';
 import ButtonPage from './pages/ButtonPage.vue';
+import CalendarViewPage from './pages/CalendarViewPage.vue';
+import CalendarDatePickerPage from './pages/CalendarDatePickerPage.vue';
+import DatePickerPage from './pages/DatePickerPage.vue';
 import DropDownButtonPage from './pages/DropDownButtonPage.vue';
 import HyperlinkButtonPage from './pages/HyperlinkButtonPage.vue';
 import ToggleButtonPage from './pages/ToggleButtonPage.vue';
@@ -35,11 +38,15 @@ import ListBoxPage from './pages/ListBoxPage.vue';
 import ListViewPage from './pages/ListViewPage.vue';
 import PullToRefreshPage from './pages/PullToRefreshPage.vue';
 import TreeViewPage from './pages/TreeViewPage.vue';
+import TimePickerPage from './pages/TimePickerPage.vue';
 import SettingsPage from './pages/SettingsPage.vue';
 
 const pageMap = {
   home: HomePage,
   button: ButtonPage,
+  calendardatepicker: CalendarDatePickerPage,
+  calendarview: CalendarViewPage,
+  datepicker: DatePickerPage,
   dropdownbutton: DropDownButtonPage,
   hyperlinkbutton: HyperlinkButtonPage,
   togglebutton: ToggleButtonPage,
@@ -50,6 +57,7 @@ const pageMap = {
   radiobuttons: RadioButtonsPage,
   rating: RatingPage,
   slider: SliderPage,
+  timepicker: TimePickerPage,
   toggleswitch: ToggleSwitchPage,
   expander: ExpanderPage,
   flipview: FlipViewPage,
@@ -103,6 +111,14 @@ const navMenuItems = [
     { value: 'pulltorefresh', icon: '\uE72C', label: 'PullToRefresh' },
     { value: 'treeview', icon: '\uED41', label: 'TreeView' }
   ]},
+  {
+    value: 'dateandtime', icon: '\uEC92', label: 'Date and Time', selectsOnInvoked: false, children: [
+      { value: 'calendardatepicker', icon: '\uE787', label: 'CalendarDatePicker' },
+      { value: 'calendarview', icon: '\uF763', label: 'CalendarView' },
+      { value: 'datepicker', icon: '\uE8BF', label: 'DatePicker' },
+      { value: 'timepicker', icon: '\uE823', label: 'TimePicker' }
+    ]
+  },
   { value: 'layout', icon: '\uEB3B', label: 'Layout', selectsOnInvoked: false, children: [
     { value: 'expander', icon: '\uE8C4', label: 'Expander' }
   ]}
