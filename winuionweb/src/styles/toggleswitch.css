@@ -86,11 +86,64 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
+  touch-action: none;
 }
 
 .win-switch-label {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   user-select: none;
   min-width: 20px;
+  cursor: pointer;
 }
+
+/* --- 禁用状态 --- */
+.win-switch-wrap.is-disabled {
+  cursor: default;
+}
+
+  .win-switch-wrap.is-disabled .win-switch-label {
+    color: var(--text-disabled);
+    cursor: default;
+  }
+
+.win-switch.is-disabled {
+  cursor: default;
+}
+
+  .win-switch.is-disabled .track {
+    border-color: var(--ctrl-strong-stroke-disabled);
+    background-color: transparent;
+  }
+
+  .win-switch.is-disabled .thumb {
+    background-color: var(--ctrl-strong-stroke-disabled);
+  }
+
+  .win-switch.is-disabled.is-on .track {
+    background-color: var(--accent-fill-disabled);
+    border-color: transparent;
+  }
+
+  .win-switch.is-disabled.is-on .thumb {
+    background-color: var(--text-disabled);
+  }
+
+  .win-switch.is-disabled:hover .track {
+    border-color: var(--ctrl-strong-stroke-disabled);
+  }
+
+  .win-switch.is-disabled:hover .thumb {
+    --scale: 1;
+    background-color: var(--ctrl-strong-stroke-disabled);
+  }
+
+  .win-switch.is-disabled:hover.is-on .track {
+    background-color: var(--accent-fill-disabled);
+  }
+
+  .win-switch.is-disabled:hover.is-on .thumb {
+    --scale: 1;
+    background-color: var(--text-disabled);
+  }

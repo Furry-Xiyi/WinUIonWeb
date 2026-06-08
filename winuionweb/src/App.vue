@@ -21,6 +21,7 @@ import DropDownButtonPage from './pages/DropDownButtonPage.vue';
 import HyperlinkButtonPage from './pages/HyperlinkButtonPage.vue';
 import ToggleButtonPage from './pages/ToggleButtonPage.vue';
 import SplitButtonPage from './pages/SplitButtonPage.vue';
+import ToggleSplitButtonPage from './pages/ToggleSplitButtonPage.vue';
 import CheckBoxPage from './pages/CheckBoxPage.vue';
 import ComboBoxPage from './pages/ComboBoxPage.vue';
 import RadioButtonsPage from './pages/RadioButtonsPage.vue';
@@ -43,6 +44,7 @@ const pageMap = {
   hyperlinkbutton: HyperlinkButtonPage,
   togglebutton: ToggleButtonPage,
   splitbutton: SplitButtonPage,
+  togglesplitbutton: ToggleSplitButtonPage,
   checkbox: CheckBoxPage,
   combobox: ComboBoxPage,
   radiobuttons: RadioButtonsPage,
@@ -77,19 +79,22 @@ const pageComponent = computed(() => pageMap[currentPage.value] || HomePage);
 
 const navMenuItems = [
   { value: 'home', icon: '\uE80F', label: 'Home' },
-  { value: 'buttons', icon: '\uE73A', label: 'Basic Input', selectsOnInvoked: false, children: [
-    { value: 'button', icon: '\uE71A', label: 'Button' },
-    { value: 'dropdownbutton', icon: '\uEB42', label: 'DropDownButton' },
-    { value: 'hyperlinkbutton', icon: '\uE71B', label: 'HyperlinkButton' },
-    { value: 'togglebutton', icon: '\uEF1F', label: 'ToggleButton' },
-    { value: 'splitbutton', icon: '\uE90D', label: 'SplitButton' },
-    { value: 'checkbox', icon: '\uE73D', label: 'CheckBox' },
-    { value: 'combobox', icon: '\uE7FB', label: 'ComboBox' },
-    { value: 'radiobuttons', icon: '\uECCB', label: 'RadioButtons' },
-    { value: 'rating', icon: '\uE734', label: 'RatingControl' },
-    { value: 'slider', icon: '\uE9E9', label: 'Slider' },
-    { value: 'toggleswitch', icon: '\uF19F', label: 'ToggleSwitch' }
-  ]},
+  {
+    value: 'buttons', icon: '\uE73A', label: 'Basic Input', selectsOnInvoked: false, children: [
+      { value: 'button', icon: '\uE71A', label: 'Button' },
+      { value: 'dropdownbutton', icon: '\uEB42', label: 'DropDownButton' },
+      { value: 'hyperlinkbutton', icon: '\uE71B', label: 'HyperlinkButton' },
+      { value: 'togglebutton', icon: '\uEF1F', label: 'ToggleButton' },
+      { value: 'splitbutton', icon: '\uE90D', label: 'SplitButton' },
+      { value: 'togglesplitbutton', icon: '\uE90D', label: 'ToggleSplitButton' },
+      { value: 'checkbox', icon: '\uE73D', label: 'CheckBox' },
+      { value: 'combobox', icon: '\uE7FB', label: 'ComboBox' },
+      { value: 'radiobuttons', icon: '\uECCB', label: 'RadioButtons' },
+      { value: 'rating', icon: '\uE734', label: 'RatingControl' },
+      { value: 'slider', icon: '\uE9E9', label: 'Slider' },
+      { value: 'toggleswitch', icon: '\uF19F', label: 'ToggleSwitch' }
+    ]
+  },
   { value: 'collections', icon: '\uE80A', label: 'Collections', selectsOnInvoked: false, children: [
     { value: 'flipview', icon: '\uF1CB', label: 'FlipView' },
     { value: 'gridview', icon: '\uF0E2', label: 'GridView' },

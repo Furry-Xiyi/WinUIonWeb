@@ -1,8 +1,8 @@
 <template>
-  <div class="win-switch-wrap">
+  <div class="win-switch-wrap" :class="{ 'is-disabled': disabled }" @click="onWrapClick">
     <div class="win-switch"
-         :class="{ 'is-on': modelValue, 'dragging': isDragging, 'is-pressed': isPressed }"
-         @pointerdown="onDown" @pointermove="onMove" @pointerup="onUp" @pointercancel="onUp">
+         :class="{ 'is-on': modelValue, 'dragging': isDragging, 'is-pressed': isPressed, 'is-disabled': disabled }"
+         @pointerdown.stop="onDown" @pointermove="onMove" @pointerup="onUp" @pointercancel="onUp">
       <div class="track"></div>
       <div class="thumb" :style="thumbStyle"></div>
     </div>
@@ -14,13 +14,14 @@ import { ref, computed, watch } from 'vue';
 const props = defineProps({
   modelValue: Boolean,
   onContent: { type: String, default: 'On' },
-  offContent: { type: String, default: 'Off' }
+  offContent: { type: String, default: 'Off' },
+  disabled: Boolean
 });
 const emit = defineEmits(['update:modelValue']);
 const isDragging = ref(false);
 const isPressed = ref(false);
 const currentTx = ref(0);
-let startX = 0, initialChecked = false, moved = false;
+let startX = 0, initialChecked = false, moved = false, didToggle = false;
 
 watch(() => props.modelValue, v => {
   if (!isDragging.value) currentTx.value = v ? 20 : 0;
@@ -31,8 +32,15 @@ const thumbStyle = computed(() => {
   return {};
 });
 
+const onWrapClick = () => {
+  if (props.disabled) return;
+  if (didToggle) { didToggle = false; return; }
+  emit('update:modelValue', !props.modelValue);
+};
+
 const onDown = (e) => {
-  isPressed.value = true; isDragging.value = true; moved = false;
+  if (props.disabled) return;
+  isPressed.value = true; isDragging.value = true; moved = false; didToggle = false;
   startX = e.clientX; initialChecked = props.modelValue;
   currentTx.value = initialChecked ? 16 : 0;
   e.currentTarget.setPointerCapture(e.pointerId);
@@ -47,6 +55,7 @@ const onUp = (e) => {
   if (!isDragging.value) return;
   isDragging.value = false; isPressed.value = false;
   e.currentTarget.releasePointerCapture(e.pointerId);
+  didToggle = true;
   if (moved && Math.abs(e.clientX - startX) > 3) emit('update:modelValue', currentTx.value > 8);
   else emit('update:modelValue', !initialChecked);
 };

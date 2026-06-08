@@ -85,7 +85,7 @@
     --ctrl-solid-fill: #454545;
     --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
     --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
-    --accent-base: #4CC2FF;
+    --accent-base: #60CDFF;
     --accent-hover: rgba(96, 205, 255, 0.90);
     --accent-pressed: rgba(96, 205, 255, 0.80);
     --accent-fill-disabled: rgba(255, 255, 255, 0.16);
@@ -203,7 +203,7 @@ html.theme-dark {
   --ctrl-solid-fill: #454545;
   --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
   --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
-  --accent-base: #4CC2FF;
+  --accent-base: #60CDFF;
   --accent-hover: rgba(96, 205, 255, 0.90);
   --accent-pressed: rgba(96, 205, 255, 0.80);
   --accent-fill-disabled: rgba(255, 255, 255, 0.16);
