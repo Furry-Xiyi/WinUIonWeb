@@ -27,15 +27,15 @@
         <div v-if="showHeader" class="win-list-header" :class="{ sticky: stickyHeader }">
           <slot name="header"></slot>
         </div>
-        <div v-for="(item, idx) in items" :key="idx"
+        <div v-for="(item, idx) in internalItems" :key="idx"
              ref="itemEls"
              class="win-list-item"
              :class="{
-               selected: isSelected(item),
-               clickEnabled: isItemClickEnabled && !isDragging,
-               'drag-shrink': isDragging && !dragIndices.includes(idx),
-               'dragging-source': isDragging && dragIndices.includes(idx)
-             }"
+       selected: isSelected(item),
+       clickEnabled: isItemClickEnabled && !isDragging,
+       'drag-shrink': isDragging && !dragIndices.includes(idx),
+       'dragging-source': isDragging && dragIndices.includes(idx)
+     }"
              :style="getItemStyle(idx)"
              :draggable="canDragItems"
              @click="onItemClick($event, item)"
@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, toRaw, nextTick } from 'vue';
+import { ref, toRaw, nextTick, watch } from 'vue';
 
 const props = defineProps({
   items: { type: Array, default: () => [] },
@@ -65,7 +65,13 @@ const props = defineProps({
   selectedItems: { type: Array, default: () => [] }
 });
 
-const emit = defineEmits(['itemClick', 'selectionChanged', 'update:selectedItems', 'reorder']);
+const emit = defineEmits(['itemClick', 'selectionChanged', 'update:selectedItems', 'update:items']);
+
+const internalItems = ref([...props.items]);
+
+watch(() => props.items, (val) => {
+  if (!isDragging.value) internalItems.value = [...val];
+}, { deep: true });
 
 const containerRef = ref(null);
 const listRef = ref(null);
@@ -241,11 +247,11 @@ const onViewportDrop = () => {
     return;
   }
 
-  const draggedItems = dragIndices.value.sort((a, b) => a - b).map(i => props.items[i]);
-  const remaining = props.items.filter((_, i) => !dragIndices.value.includes(i));
+  const draggedItems = dragIndices.value.sort((a, b) => a - b).map(i => internalItems.value[i]);
+  const remaining = internalItems.value.filter((_, i) => !dragIndices.value.includes(i));
 
   let actualInsert;
-  if (insertBeforeIndex.value >= props.items.length) {
+  if (insertBeforeIndex.value >= internalItems.value.length) {
     actualInsert = remaining.length;
   } else {
     actualInsert = 0;
@@ -256,8 +262,9 @@ const onViewportDrop = () => {
 
   const newItems = [...remaining];
   newItems.splice(actualInsert, 0, ...draggedItems);
+  internalItems.value = newItems;
+  emit('update:items', newItems);
   resetDrag();
-  emit('reorder', newItems);
 };
 
 const resetDrag = () => {
