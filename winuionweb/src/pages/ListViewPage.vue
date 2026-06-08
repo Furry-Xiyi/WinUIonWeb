@@ -50,7 +50,7 @@
       Drag items up and down to change order.
     </template>
     <div class="listview-demo-scroll">
-      <WinListView :items="dragList" selectionMode="Single" v-model:selectedItems="dragSel" canDragItems canReorderItems @reorder="onReorder">
+      <WinListView :items="dragList" selectionMode="Single" v-model:selectedItems="dragSel" canDragItems canReorderItems allowDrop @reorder="onReorder">
         <template #item="{ item }">
           <span>{{ item.firstName }} {{ item.lastName }}</span>
         </template>
@@ -108,11 +108,8 @@ const singleSel = ref([]);
 const groupSel = ref([]);
 const dragSel = ref([]);
 
-const onReorder = ({ from, to }) => {
-  const arr = [...dragList.value];
-  const [removed] = arr.splice(from, 1);
-  arr.splice(to, 0, removed);
-  dragList.value = arr;
+const onReorder = (newItems) => {
+  dragList.value = newItems;
 };</script>
 
 <style scoped>

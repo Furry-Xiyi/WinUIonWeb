@@ -21,6 +21,7 @@
   overflow-y: hidden;
   overflow-x: clip;
   scrollbar-width: thin;
+  position: relative;
   animation: win-list-scroll-reveal 0ms 300ms forwards;
 }
 
@@ -58,7 +59,7 @@
   align-items: center;
   gap: 12px;
   min-height: 36px;
-  transition: background var(--fast-duration);
+  transition: background var(--fast-duration), transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
 }
 
   .win-list-item.clickEnabled {
@@ -75,6 +76,25 @@
 
     .win-list-item.selected:hover {
       background: var(--subtle-tertiary);
+    }
+
+  .win-list-item.dragging-source {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .win-list-item.drag-shrink {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+    .win-list-item.drag-shrink::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(128, 128, 128, 0.08);
+      border-radius: 4px;
+      pointer-events: none;
     }
 
 .list-indicator {
