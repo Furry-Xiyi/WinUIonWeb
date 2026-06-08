@@ -29,7 +29,7 @@
       <WinToggleSwitch :modelValue="stickyOn" @update:modelValue="stickyOn = $event" onContent="Sticky" offContent="Static" />
     </template>
     <div class="listview-demo-scroll">
-      <WinListView :items="groups" isGrouped showHeader :stickyHeader="stickyOn" selectionMode="Multiple" v-model:selectedItems="groupSel">
+      <WinListView :items="groups" isGrouped showHeader :stickyHeader="stickyOn" selectionMode="Single" v-model:selectedItems="groupSel">
         <template #header="{ group }">
           {{ group.key }}
         </template>
