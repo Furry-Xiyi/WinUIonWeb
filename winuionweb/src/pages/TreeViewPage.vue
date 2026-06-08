@@ -16,14 +16,15 @@
       </template>
     </WinTreeView>
   </WinSettingsCard>
+
   <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Multi-select with Checkboxes
     </template>
     <template #description>
-      Select multiple items. Parent shows indeterminate state when partially selected.
+      Select multiple items. Parent shows indeterminate state when partially selected. Drag supported!
     </template>
-    <WinTreeView v-model:items="multiTree" selectionMode="Multiple">
+    <WinTreeView v-model:items="multiTree" selectionMode="Multiple" canDragItems allowDrop>
       <template #item="{ item }">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="icon">{{ item.children?.length ? '\uE8B7' : '\uE719' }}</span>
@@ -32,12 +33,13 @@
       </template>
     </WinTreeView>
   </WinSettingsCard>
+
   <WinSettingsCard contentPlacement="bottom">
     <template #header>
       Drag & Drop Grouping
     </template>
     <template #description>
-      Drag items onto others to form groups. Drag children out to ungroup.
+      Drag up/down edges to reorder as siblings. Drag to center to group. Drag to bottom blank area to ungroup to root.
     </template>
     <WinTreeView v-model:items="dragTree" selectionMode="Single" canDragItems allowDrop>
       <template #item="{ item }">

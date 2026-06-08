@@ -1,8 +1,12 @@
-/* styles/treeview.css */
 .win-tree-view {
   display: flex;
   flex-direction: column;
 }
+
+  .win-tree-view.is-root {
+    min-height: 60px; /* 为根节点预留独立出来的底部拖放区 */
+    flex: 1;
+  }
 
 .win-tree-node {
   display: flex;
@@ -10,12 +14,64 @@
 }
 
 .tree-item {
-  padding-left: 0;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  border-radius: 4px;
+  cursor: default;
+  box-sizing: border-box;
+  margin: 1px 0;
+  padding-right: 8px;
+  transition: background-color var(--fast-duration);
 }
 
+  .tree-item:hover {
+    background: var(--subtle-secondary);
+  }
+
+  .tree-item:active {
+    background: var(--subtle-tertiary);
+  }
+
+  .tree-item.selected {
+    background: var(--subtle-secondary);
+  }
+
+    .tree-item.selected:hover {
+      background: var(--subtle-tertiary);
+    }
+
+  /* 核心视效: WinUI风格拖放吸附线，无形变防抖 */
+  .tree-item.drop-top {
+    box-shadow: inset 0 2px 0 var(--accent-default);
+  }
+
+  .tree-item.drop-bottom {
+    box-shadow: inset 0 -2px 0 var(--accent-default);
+  }
+
+  .tree-item.drop-inside {
+    background: var(--subtle-tertiary);
+    box-shadow: inset 0 0 0 1px var(--accent-default);
+  }
+
+.tree-checkbox {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.tree-item-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 子代包裹层取消缩进距，让其子项占满整个左侧宽度以吸收左侧掉落 */
 .tree-children {
-  margin-left: 24px;
-  border-left: 1px solid var(--stroke-divider);
+  display: flex;
+  flex-direction: column;
 }
 
 .tree-chevron {
@@ -27,6 +83,7 @@
   justify-content: center;
   cursor: pointer;
   transition: transform var(--fast-duration);
+  flex-shrink: 0;
 }
 
   .tree-chevron.hidden {
