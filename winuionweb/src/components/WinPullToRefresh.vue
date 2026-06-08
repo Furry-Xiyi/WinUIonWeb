@@ -2,15 +2,26 @@
 <template>
   <div class="win-pull-to-refresh" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd">
     <div class="ptr-indicator" :style="indicatorStyle">
-      <span class="icon">&#xE72C;</span>
+      <span class="ptr-icon-wrapper" :style="iconStyle" :class="{ 'is-refreshing': isRefreshing }">
+        {{ icon }}
+      </span>
     </div>
     <div class="ptr-content" :style="contentStyle">
       <slot></slot>
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, computed } from 'vue';
+
+const props = defineProps({
+  icon: {
+    type: String,
+    // 使用 \u 前缀确保 JS 正确识别 Unicode 字符
+    default: '\uE72C'
+  }
+});
 
 const emit = defineEmits(['refresh']);
 const startY = ref(0);
@@ -18,19 +29,54 @@ const currentY = ref(0);
 const isPulling = ref(false);
 const isRefreshing = ref(false);
 
+const threshold = 100;
 const distance = computed(() => Math.max(0, currentY.value - startY.value));
-const pullDist = computed(() => isRefreshing.value ? 50 : Math.min(distance.value * 0.5, 80));
+const progress = computed(() => Math.min(distance.value / threshold, 1));
+const isReady = computed(() => distance.value >= threshold);
+
+const pullDist = computed(() => {
+  if (isRefreshing.value) return 50;
+  if (!isPulling.value) return 0;
+  return distance.value <= threshold
+    ? distance.value * 0.5
+    : (threshold * 0.5) + (distance.value - threshold) * 0.15;
+});
 
 const indicatorStyle = computed(() => ({
-  transform: `translateY(${pullDist.value - 40}px) rotate(${pullDist.value * 5}deg)`,
-  opacity: pullDist.value / 50
-}));
-const contentStyle = computed(() => ({
-  transform: `translateY(${pullDist.value}px)`
+  transform: `translateY(${pullDist.value - 40}px)`,
+  transition: isPulling.value ? 'none' : 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)'
 }));
 
+const contentStyle = computed(() => ({
+  transform: `translateY(${pullDist.value}px)`,
+  transition: isPulling.value ? 'none' : 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)'
+}));
+
+const iconStyle = computed(() => {
+  if (isRefreshing.value) {
+    return {
+      opacity: 1,
+      transform: 'scale(1.0)',
+      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+    };
+  }
+
+  const rotation = -180 + (progress.value * 180);
+  const scale = isReady.value ? 1.2 : 1.0;
+  const opacity = 0.3 + (progress.value * 0.7);
+
+  return {
+    // 合并 transform 解决浏览器 origin 偏移问题
+    transform: `rotate(${rotation}deg) scale(${scale})`,
+    opacity: opacity,
+    transition: isPulling.value
+      ? 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+      : 'all 0.3s cubic-bezier(0.25, 1, 0.5, 1)'
+  };
+});
+
 const onTouchStart = (e) => {
-  if (window.scrollY === 0 && !isRefreshing.value) {
+  if (e.currentTarget.scrollTop === 0 && !isRefreshing.value) {
     startY.value = e.touches[0].clientY;
     currentY.value = startY.value;
     isPulling.value = true;
@@ -47,7 +93,7 @@ const onTouchMove = (e) => {
 const onTouchEnd = () => {
   if (isPulling.value) {
     isPulling.value = false;
-    if (distance.value > 100) {
+    if (isReady.value) {
       isRefreshing.value = true;
       emit('refresh', () => {
         isRefreshing.value = false;
@@ -61,4 +107,5 @@ const onTouchEnd = () => {
   }
 };
 </script>
+
 <style src="../styles/pulltorefresh.css"></style>

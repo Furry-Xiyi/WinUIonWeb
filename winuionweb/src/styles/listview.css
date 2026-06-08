@@ -1,8 +1,38 @@
 /* styles/listview.css */
 .win-list-view {
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  animation: win-list-root-reveal 0ms 250ms forwards;
+}
+
+@keyframes win-list-root-reveal {
+  to {
+    overflow: visible;
+  }
+}
+
+.win-list-viewport {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: hidden;
+  overflow-x: clip;
+  scrollbar-width: thin;
+  animation: win-list-scroll-reveal 0ms 300ms forwards;
+}
+
+@keyframes win-list-scroll-reveal {
+  to {
+    overflow-y: auto;
+  }
+}
+
+.win-list-group {
+  display: block;
+  width: 100%;
 }
 
 .win-list-header {
@@ -20,12 +50,14 @@
 
 .win-list-item {
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
   padding: 8px 12px;
   border-radius: 4px;
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 40px;
+  min-height: 36px;
   transition: background var(--fast-duration);
 }
 
@@ -51,12 +83,16 @@
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
-  height: 16px;
+  height: 0;
   background: var(--accent-base);
   border-radius: 3px;
-  transition: height var(--fast-duration);
+  transition: height var(--fast-duration) var(--fast-out-slow-in);
 }
 
-.win-list-item.selected:active .list-indicator {
+  .list-indicator.active {
+    height: 16px;
+  }
+
+.win-list-item:active .list-indicator.active {
   height: 10px;
 }

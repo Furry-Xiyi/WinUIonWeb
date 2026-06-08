@@ -1,14 +1,21 @@
 <template>
-  <div class="win-switch"
-       :class="{ 'is-on': modelValue, 'dragging': isDragging, 'is-pressed': isPressed }"
-       @pointerdown="onDown" @pointermove="onMove" @pointerup="onUp" @pointercancel="onUp">
-    <div class="track"></div>
-    <div class="thumb" :style="thumbStyle"></div>
+  <div class="win-switch-wrap">
+    <div class="win-switch"
+         :class="{ 'is-on': modelValue, 'dragging': isDragging, 'is-pressed': isPressed }"
+         @pointerdown="onDown" @pointermove="onMove" @pointerup="onUp" @pointercancel="onUp">
+      <div class="track"></div>
+      <div class="thumb" :style="thumbStyle"></div>
+    </div>
+    <span class="win-switch-label">{{ modelValue ? onContent : offContent }}</span>
   </div>
 </template>
 <script setup>
 import { ref, computed, watch } from 'vue';
-const props = defineProps({ modelValue: Boolean });
+const props = defineProps({
+  modelValue: Boolean,
+  onContent: { type: String, default: 'On' },
+  offContent: { type: String, default: 'Off' }
+});
 const emit = defineEmits(['update:modelValue']);
 const isDragging = ref(false);
 const isPressed = ref(false);

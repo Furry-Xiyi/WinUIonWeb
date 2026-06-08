@@ -1,6 +1,6 @@
 <template>
   <h1 class="page-header">ComboBox</h1>
-  <WinSettingsCard contentPlacement="bottom">
+  <WinSettingsCard>
     <template #header>
       ComboBox
     </template>

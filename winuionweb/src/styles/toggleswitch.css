@@ -81,3 +81,16 @@
     background-color: var(--toggle-on-thumb);
     transition: none;
   }
+
+.win-switch-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.win-switch-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  user-select: none;
+  min-width: 20px;
+}

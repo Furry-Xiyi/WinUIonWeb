@@ -57,3 +57,11 @@
   gap: 8px;
   flex-shrink: 0;
 }
+
+.win-settings-card-header-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+}

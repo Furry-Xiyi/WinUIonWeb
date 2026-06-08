@@ -9,6 +9,7 @@
             <span class="win-settings-card-desc"><slot name="description"></slot></span>
           </div>
         </div>
+        <div class="win-settings-card-header-action"><slot name="headerAction"></slot></div>
       </div>
       <div class="win-settings-card-right"><slot></slot></div>
     </template>
