@@ -35,19 +35,8 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  animation: combo-flyout-enter var(--fast-duration) var(--fast-out-slow-in);
-}
-
-@keyframes combo-flyout-enter {
-  from {
-    opacity: 0;
-    transform: scaleY(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: scaleY(1);
-  }
+  animation: picker-flyout-enter var(--fast-duration) var(--fast-out-slow-in);
+  transform-origin: center center;
 }
 
 .win-flyout-item {

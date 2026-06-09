@@ -163,6 +163,40 @@
   animation: cal-slide-down 0.250s cubic-bezier(0, 0, 0.1, 1) both;
 }
 
+@keyframes picker-flyout-enter {
+  from {
+    opacity: 0;
+    transform: scaleY(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes picker-flyout-exit {
+  from {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scaleY(0.85);
+  }
+}
+
+.picker-flyout-animate {
+  animation: picker-flyout-enter var(--fast-duration) var(--fast-out-slow-in) both;
+  transform-origin: center center;
+}
+
+.picker-flyout-closing {
+  animation: picker-flyout-exit var(--fast-duration) var(--fast-out-slow-in) both;
+  transform-origin: center center;
+}
+
 /* AnimatedIcon */
 .animated-icon {
   display: inline-block;

@@ -6,7 +6,7 @@
   --fast-out-slow-in: cubic-bezier(0, 0, 0, 1);
   --app-bg: #F3F3F3;
   --layer-default: rgba(255, 255, 255, 0.50);
-  --flyout-bg: rgba(252, 252, 252, 0.85);
+  --flyout-bg: rgba(252, 252, 252);
   --flyout-backdrop: blur(20px) saturate(150%);
   --card-bg: rgba(255, 255, 255, 0.70);
   --card-stroke: rgba(0, 0, 0, 0.06);
@@ -54,13 +54,13 @@
   :root {
     --app-bg: #202020;
     --layer-default: rgba(58, 58, 58, 0.25);
-    --flyout-bg: rgba(44, 44, 44, 0.85);
+    --flyout-bg: rgba(44, 44, 44);
     --flyout-backdrop: blur(20px) saturate(150%);
     --card-bg: rgba(255, 255, 255, 0.04);
     --card-stroke: rgba(0, 0, 0, 0.10);
     --card-bg-secondary: rgba(255, 255, 255, 0.03);
     --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
-    --stroke-divider: rgba(0, 0, 0, 0.10);
+    --stroke-divider: rgba(255, 255, 255, 0.08);
     --ctrl-border-rest: rgba(255, 255, 255, 0.07);
     --ctrl-border: rgba(255, 255, 255, 0.07);
     --ctrl-border-accent: rgba(255, 255, 255, 0.09);
@@ -126,7 +126,7 @@ html.theme-light {
   color-scheme: light;
   --app-bg: #F3F3F3;
   --layer-default: rgba(255, 255, 255, 0.50);
-  --flyout-bg: rgba(252, 252, 252, 0.85);
+  --flyout-bg: rgba(252, 252, 252);
   --card-bg: rgba(255, 255, 255, 0.70);
   --card-stroke: rgba(0, 0, 0, 0.06);
   --card-bg-secondary: rgba(246, 246, 246, 0.50);
@@ -173,12 +173,12 @@ html.theme-dark {
   color-scheme: dark;
   --app-bg: #202020;
   --layer-default: rgba(58, 58, 58, 0.25);
-  --flyout-bg: rgba(44, 44, 44, 0.85);
+  --flyout-bg: rgba(44, 44, 44);
   --card-bg: rgba(255, 255, 255, 0.04);
   --card-stroke: rgba(0, 0, 0, 0.10);
   --card-bg-secondary: rgba(255, 255, 255, 0.03);
   --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
-  --stroke-divider: rgba(0, 0, 0, 0.10);
+  --stroke-divider: rgba(255, 255, 255, 0.08);
   --ctrl-border-rest: rgba(255, 255, 255, 0.07);
   --ctrl-border: rgba(255, 255, 255, 0.07);
   --ctrl-border-accent: rgba(255, 255, 255, 0.09);
