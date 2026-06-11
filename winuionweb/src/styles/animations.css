@@ -53,7 +53,7 @@
 @keyframes page-enter-up {
   from {
     opacity: 0;
-    transform: translateY(256px);
+    transform: translateY(140px);
   }
 
   to {
@@ -65,7 +65,7 @@
 @keyframes page-enter-left {
   from {
     opacity: 0;
-    transform: translateX(256px);
+    transform: translateX(200px);
   }
 
   to {
@@ -77,7 +77,7 @@
 @keyframes page-enter-right {
   from {
     opacity: 0;
-    transform: translateX(-256px);
+    transform: translateX(-200px);
   }
 
   to {
@@ -89,7 +89,7 @@
 @keyframes page-enter-fade {
   from {
     opacity: 0;
-    transform: scale(0.75);
+    transform: scale(0.94);
   }
 
   to {
@@ -101,7 +101,7 @@
 @keyframes page-enter-fade-reverse {
   from {
     opacity: 0;
-    transform: scale(1.15);
+    transform: scale(1.06);
   }
 
   to {
@@ -136,37 +136,37 @@
 }
 
 .page-transition-up {
-  animation: page-enter-up 0.250s cubic-bezier(0, 0, 0.1, 1) both;
+  animation: page-enter-up 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
 }
 
 .page-transition-left {
-  animation: page-enter-left 0.250s cubic-bezier(0, 0, 0.1, 1) both;
+  animation: page-enter-left 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
 }
 
 .page-transition-right {
-  animation: page-enter-right 0.250s cubic-bezier(0, 0, 0.1, 1) both;
+  animation: page-enter-right 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
 }
 
 .page-transition-fade {
-  animation: page-enter-fade 0.250s cubic-bezier(0, 0, 0.1, 1) both;
+  animation: page-enter-fade 0.333s cubic-bezier(0.1, 0.9, 0.2, 1) both;
 }
 
 .page-transition-fade-reverse {
-  animation: page-enter-fade-reverse 0.250s cubic-bezier(0, 0, 0.1, 1) both;
+  animation: page-enter-fade-reverse 0.333s cubic-bezier(0.12, 0, 0, 1) both;
 }
 
 .cal-slide-up-anim {
-  animation: cal-slide-up 0.250s cubic-bezier(0, 0, 0.1, 1) both;
+  animation: cal-slide-up 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
 }
 
 .cal-slide-down-anim {
-  animation: cal-slide-down 0.250s cubic-bezier(0, 0, 0.1, 1) both;
+  animation: cal-slide-down 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
 }
 
 @keyframes picker-flyout-enter {
   from {
     opacity: 0;
-    transform: scaleY(0.85);
+    transform: scaleY(0.94);
   }
 
   to {
@@ -183,17 +183,17 @@
 
   to {
     opacity: 0;
-    transform: scaleY(0.85);
+    transform: scaleY(0.94);
   }
 }
 
 .picker-flyout-animate {
-  animation: picker-flyout-enter var(--fast-duration) var(--fast-out-slow-in) both;
+  animation: picker-flyout-enter 0.333s cubic-bezier(0.1, 0.9, 0.2, 1) both;
   transform-origin: center center;
 }
 
 .picker-flyout-closing {
-  animation: picker-flyout-exit var(--fast-duration) var(--fast-out-slow-in) both;
+  animation: picker-flyout-exit 0.1s cubic-bezier(0.7, 0, 1, 0.5) both;
   transform-origin: center center;
 }
 

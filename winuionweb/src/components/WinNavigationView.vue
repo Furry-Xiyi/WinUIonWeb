@@ -580,12 +580,12 @@ const calcIndicator = () => {
     const movingDown = newY > oldY;
     const stretchH = dist + 16;
     indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' };
-    const dur = 300; const easeOut = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
+    const dur = 600; const easeOut = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
     let keyframes;
     if (movingDown) {
-      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeOut }, { transform: `translateY(${oldY}px)`, height: `${stretchH}px`, offset: 0.2, easing: easeOut }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeOut }, { transform: `translateY(${oldY}px)`, height: `${stretchH}px`, offset: 0.333, easing: easeOut }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
     } else {
-      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeOut }, { transform: `translateY(${newY}px)`, height: `${stretchH}px`, offset: 0.2, easing: easeOut }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeOut }, { transform: `translateY(${newY}px)`, height: `${stretchH}px`, offset: 0.333, easing: easeOut }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
     }
     const anim = indicatorEl.animate(keyframes, { duration: dur, fill: 'forwards' });
     anim.onfinish = () => snapToFinal(`translateY(${newY}px)`, 'y', '16px');
