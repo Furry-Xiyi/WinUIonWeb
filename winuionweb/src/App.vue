@@ -26,6 +26,7 @@ import ToggleButtonPage from './pages/ToggleButtonPage.vue';
 import SplitButtonPage from './pages/SplitButtonPage.vue';
 import ToggleSplitButtonPage from './pages/ToggleSplitButtonPage.vue';
 import CheckBoxPage from './pages/CheckBoxPage.vue';
+import ColorPickerPage from './pages/ColorPickerPage.vue';
 import ComboBoxPage from './pages/ComboBoxPage.vue';
 import RadioButtonsPage from './pages/RadioButtonsPage.vue';
 import RatingPage from './pages/RatingPage.vue';
@@ -53,6 +54,7 @@ const pageMap = {
   splitbutton: SplitButtonPage,
   togglesplitbutton: ToggleSplitButtonPage,
   checkbox: CheckBoxPage,
+  colorpicker: ColorPickerPage,
   combobox: ComboBoxPage,
   radiobuttons: RadioButtonsPage,
   rating: RatingPage,
@@ -90,12 +92,13 @@ const navMenuItems = [
   {
     value: 'buttons', icon: '\uE73A', label: 'Basic Input', selectsOnInvoked: false, children: [
       { value: 'button', icon: '\uE71A', label: 'Button' },
-      { value: 'dropdownbutton', icon: '\uEB42', label: 'DropDownButton' },
+      { value: 'dropdownbutton', icon: '\uE70D', label: 'DropDownButton' },
       { value: 'hyperlinkbutton', icon: '\uE71B', label: 'HyperlinkButton' },
       { value: 'togglebutton', icon: '\uEF1F', label: 'ToggleButton' },
       { value: 'splitbutton', icon: '\uE90D', label: 'SplitButton' },
       { value: 'togglesplitbutton', icon: '\uE90D', label: 'ToggleSplitButton' },
       { value: 'checkbox', icon: '\uE73D', label: 'CheckBox' },
+      { value: 'colorpicker', icon: '\uEF3C', label: 'ColorPicker' },
       { value: 'combobox', icon: '\uE7FB', label: 'ComboBox' },
       { value: 'radiobuttons', icon: '\uECCB', label: 'RadioButtons' },
       { value: 'rating', icon: '\uE734', label: 'RatingControl' },
