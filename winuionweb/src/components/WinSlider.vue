@@ -20,4 +20,64 @@ const onDown = (e) => {
   el.onpointerup = () => { el.onpointermove = null; el.releasePointerCapture(e.pointerId); };
 };
 </script>
-<style src="../styles/slider.css"></style>
+<style>
+  .win-slider {
+    position: relative;
+    width: 200px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    touch-action: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .win-slider-track {
+    width: 100%;
+    height: 4px;
+    background: var(--ctrl-strong-fill);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .win-slider-fill {
+    height: 100%;
+    background: var(--accent-base);
+    border-radius: 2px;
+  }
+
+  .win-slider-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--ctrl-solid-fill);
+    border: 1px solid var(--ctrl-elevation-bottom);
+    border-top-color: var(--ctrl-elevation-top);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    flex-shrink: 0;
+  }
+
+    .win-slider-thumb::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-base);
+      transition: transform var(--fast-duration) var(--fast-out-slow-in);
+    }
+
+    .win-slider-thumb:hover::after {
+      transform: scale(1.5);
+    }
+
+  .win-slider:active .win-slider-thumb::after {
+    transform: scale(0.9);
+  }
+</style>

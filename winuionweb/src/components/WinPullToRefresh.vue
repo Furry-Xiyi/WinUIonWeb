@@ -108,4 +108,56 @@ const onTouchEnd = () => {
 };
 </script>
 
-<style src="../styles/pulltorefresh.css"></style>
+<style>
+  /* styles/pulltorefresh.css */
+  .win-pull-to-refresh {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ptr-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .ptr-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
+    font-size: 20px;
+    line-height: 0;
+    color: var(--text-color);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    will-change: transform, opacity;
+    transform-origin: center center;
+  }
+
+    .ptr-icon-wrapper.is-refreshing {
+      animation: ptr-spin 0.8s linear infinite;
+    }
+
+  @keyframes ptr-spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .ptr-content {
+    will-change: transform;
+  }
+</style>

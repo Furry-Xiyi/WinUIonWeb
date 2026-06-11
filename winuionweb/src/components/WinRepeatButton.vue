@@ -8,4 +8,3 @@ let timer = null; const emit = defineEmits(['click']);
 const start = (e) => { e.target.setPointerCapture(e.pointerId); emit('click'); timer = setInterval(() => emit('click'), 150); };
 const stop = () => { clearInterval(timer); };
 </script>
-<style src="../styles/button.css"></style>

@@ -79,7 +79,6 @@ const onSelect = (item) => {
 };
 </script>
 
-<style src="../styles/splitbutton.css"></style>
 <style scoped>
   .win-split-button.toggled-on {
     background: var(--accent-base);

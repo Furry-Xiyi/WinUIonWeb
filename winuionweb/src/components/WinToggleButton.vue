@@ -4,4 +4,3 @@
   </button>
 </template>
 <script setup>defineProps({ modelValue: Boolean }); defineEmits(['update:modelValue']);</script>
-<style src="../styles/button.css"></style>
