@@ -136,19 +136,19 @@
 }
 
 .page-transition-up {
-  animation: page-enter-up 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  animation: page-enter-up 0.450s cubic-bezier(0.1, 0.9, 0.1, 1) both;
 }
 
 .page-transition-left {
-  animation: page-enter-left 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  animation: page-enter-left 0.450s cubic-bezier(0.1, 0.9, 0.1, 1) both;
 }
 
 .page-transition-right {
-  animation: page-enter-right 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  animation: page-enter-right 0.450s cubic-bezier(0.1, 0.9, 0.1, 1) both;
 }
 
 .page-transition-fade {
-  animation: page-enter-fade 0.333s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  animation: page-enter-fade 0.333s cubic-bezier(0.1, 0.9, 0.1, 1) both;
 }
 
 .page-transition-fade-reverse {

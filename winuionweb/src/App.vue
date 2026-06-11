@@ -40,6 +40,10 @@ import ListViewPage from './pages/ListViewPage.vue';
 import PullToRefreshPage from './pages/PullToRefreshPage.vue';
 import TreeViewPage from './pages/TreeViewPage.vue';
 import TimePickerPage from './pages/TimePickerPage.vue';
+import ContentDialogPage from './pages/ContentDialogPage.vue';
+import FlyoutPage from './pages/FlyoutPage.vue';
+import PopupPage from './pages/PopupPage.vue';
+import TeachingTipPage from './pages/TeachingTipPage.vue';
 import SettingsPage from './pages/SettingsPage.vue';
 
 const pageMap = {
@@ -68,6 +72,10 @@ const pageMap = {
   listview: ListViewPage,
   pulltorefresh: PullToRefreshPage,
   treeview: TreeViewPage,
+  contentdialog: ContentDialogPage,
+  flyout: FlyoutPage,
+  popup: PopupPage,
+  teachingtip: TeachingTipPage,
   settings: SettingsPage
 };
 
@@ -122,6 +130,12 @@ const navMenuItems = [
       { value: 'timepicker', icon: '\uE823', label: 'TimePicker' }
     ]
   },
+  { value: 'dialogsandflyouts', icon: '\uE8BD', label: 'Dialogs and Flyouts', selectsOnInvoked: false, children: [
+    { value: 'contentdialog', icon: '\uE8BD', label: 'ContentDialog' },
+    { value: 'flyout', icon: '\uE7C4', label: 'Flyout' },
+    { value: 'popup', icon: '\uE7C4', label: 'Popup' },
+    { value: 'teachingtip', icon: '\uE82F', label: 'TeachingTip' }
+  ]},
   { value: 'layout', icon: '\uEB3B', label: 'Layout', selectsOnInvoked: false, children: [
     { value: 'expander', icon: '\uE8C4', label: 'Expander' }
   ]}
