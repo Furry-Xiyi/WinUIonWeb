@@ -1,3 +1,254 @@
+@property --app-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #F3F3F3;
+}
+
+@property --layer-default {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255,255,255,0.50);
+}
+
+@property --flyout-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(252,252,252,1);
+}
+
+@property --card-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255,255,255,0.70);
+}
+
+@property --card-stroke {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.06);
+}
+
+@property --card-bg-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(246,246,246,0.50);
+}
+
+@property --stroke-surface-flyout {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.06);
+}
+
+@property --stroke-divider {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.06);
+}
+
+@property --ctrl-border-rest {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.06);
+}
+
+@property --ctrl-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.06);
+}
+
+@property --ctrl-border-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.16);
+}
+
+@property --accent-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255,255,255,0.08);
+}
+
+@property --accent-border-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.40);
+}
+
+@property --text-primary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.89);
+}
+
+@property --text-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.62);
+}
+
+@property --text-tertiary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.45);
+}
+
+@property --text-disabled {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.36);
+}
+
+@property --subtle-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.04);
+}
+
+@property --subtle-tertiary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.02);
+}
+
+@property --subtle-pressed {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.06);
+}
+
+@property --ctrl-fill-default {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255,255,255,0.70);
+}
+
+@property --ctrl-fill-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(249,249,249,0.50);
+}
+
+@property --ctrl-fill-tertiary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(249,249,249,0.30);
+}
+
+@property --ctrl-fill-disabled {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(249,249,249,0.30);
+}
+
+@property --ctrl-strong-fill {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.45);
+}
+
+@property --ctrl-strong-fill-disabled {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.32);
+}
+
+@property --ctrl-strong-stroke {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.45);
+}
+
+@property --ctrl-strong-stroke-disabled {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.22);
+}
+
+@property --ctrl-solid-fill {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #FFFFFF;
+}
+
+@property --ctrl-elevation-top {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255,255,255,0.08);
+}
+
+@property --ctrl-elevation-bottom {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.16);
+}
+
+@property --accent-base {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0067C0;
+}
+
+@property --accent-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,103,192,0.90);
+}
+
+@property --accent-pressed {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,103,192,0.80);
+}
+
+@property --accent-fill-disabled {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.22);
+}
+
+@property --accent-text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #FFFFFF;
+}
+
+@property --accent-text-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(255,255,255,0.70);
+}
+
+@property --toggle-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.45);
+}
+
+@property --toggle-thumb {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.61);
+}
+
+@property --toggle-thumb-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.89);
+}
+
+@property --toggle-on-thumb {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #FFFFFF;
+}
+
+@property --radio-border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(0,0,0,0.45);
+}
 :root {
   color-scheme: light dark;
   --faster-duration: 0.083s;
@@ -114,7 +365,7 @@ html, body, #app {
   font-size: 14px;
   color: var(--text-primary);
   background-color: var(--app-bg);
-  transition: background-color var(--normal-duration) var(--fast-out-slow-in), color var(--normal-duration) var(--fast-out-slow-in);
+  transition: --app-bg var(--normal-duration) var(--fast-out-slow-in), --layer-default var(--normal-duration) var(--fast-out-slow-in), --flyout-bg var(--normal-duration) var(--fast-out-slow-in), --card-bg var(--normal-duration) var(--fast-out-slow-in), --card-stroke var(--normal-duration) var(--fast-out-slow-in), --card-bg-secondary var(--normal-duration) var(--fast-out-slow-in), --stroke-surface-flyout var(--normal-duration) var(--fast-out-slow-in), --stroke-divider var(--normal-duration) var(--fast-out-slow-in), --ctrl-border-rest var(--normal-duration) var(--fast-out-slow-in), --ctrl-border var(--normal-duration) var(--fast-out-slow-in), --ctrl-border-accent var(--normal-duration) var(--fast-out-slow-in), --accent-border var(--normal-duration) var(--fast-out-slow-in), --accent-border-accent var(--normal-duration) var(--fast-out-slow-in), --text-primary var(--normal-duration) var(--fast-out-slow-in), --text-secondary var(--normal-duration) var(--fast-out-slow-in), --text-tertiary var(--normal-duration) var(--fast-out-slow-in), --text-disabled var(--normal-duration) var(--fast-out-slow-in), --subtle-secondary var(--normal-duration) var(--fast-out-slow-in), --subtle-tertiary var(--normal-duration) var(--fast-out-slow-in), --subtle-pressed var(--normal-duration) var(--fast-out-slow-in), --ctrl-fill-default var(--normal-duration) var(--fast-out-slow-in), --ctrl-fill-secondary var(--normal-duration) var(--fast-out-slow-in), --ctrl-fill-tertiary var(--normal-duration) var(--fast-out-slow-in), --ctrl-fill-disabled var(--normal-duration) var(--fast-out-slow-in), --ctrl-strong-fill var(--normal-duration) var(--fast-out-slow-in), --ctrl-strong-fill-disabled var(--normal-duration) var(--fast-out-slow-in), --ctrl-strong-stroke var(--normal-duration) var(--fast-out-slow-in), --ctrl-strong-stroke-disabled var(--normal-duration) var(--fast-out-slow-in), --ctrl-solid-fill var(--normal-duration) var(--fast-out-slow-in), --ctrl-elevation-top var(--normal-duration) var(--fast-out-slow-in), --ctrl-elevation-bottom var(--normal-duration) var(--fast-out-slow-in), --accent-base var(--normal-duration) var(--fast-out-slow-in), --accent-hover var(--normal-duration) var(--fast-out-slow-in), --accent-pressed var(--normal-duration) var(--fast-out-slow-in), --accent-fill-disabled var(--normal-duration) var(--fast-out-slow-in), --accent-text var(--normal-duration) var(--fast-out-slow-in), --accent-text-secondary var(--normal-duration) var(--fast-out-slow-in), --toggle-border var(--normal-duration) var(--fast-out-slow-in), --toggle-thumb var(--normal-duration) var(--fast-out-slow-in), --toggle-thumb-hover var(--normal-duration) var(--fast-out-slow-in), --toggle-on-thumb var(--normal-duration) var(--fast-out-slow-in), --radio-border var(--normal-duration) var(--fast-out-slow-in);
 }
 
 .icon {
@@ -123,7 +374,6 @@ html, body, #app {
 }
 
 html.theme-light {
-  color-scheme: light;
   --app-bg: #F3F3F3;
   --layer-default: rgba(255, 255, 255, 0.50);
   --flyout-bg: rgba(252, 252, 252);
@@ -170,7 +420,6 @@ html.theme-light {
 }
 
 html.theme-dark {
-  color-scheme: dark;
   --app-bg: #202020;
   --layer-default: rgba(58, 58, 58, 0.25);
   --flyout-bg: rgba(44, 44, 44);
