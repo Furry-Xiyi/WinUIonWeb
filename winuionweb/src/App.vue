@@ -33,6 +33,7 @@ import RatingPage from './pages/RatingPage.vue';
 import SliderPage from './pages/SliderPage.vue';
 import ToggleSwitchPage from './pages/ToggleSwitchPage.vue';
 import ExpanderPage from './pages/ExpanderPage.vue';
+import SplitViewPage from './pages/SplitViewPage.vue';
 import FlipViewPage from './pages/FlipViewPage.vue';
 import GridViewPage from './pages/GridViewPage.vue';
 import ListBoxPage from './pages/ListBoxPage.vue';
@@ -66,6 +67,7 @@ const pageMap = {
   timepicker: TimePickerPage,
   toggleswitch: ToggleSwitchPage,
   expander: ExpanderPage,
+  splitview: SplitViewPage,
   flipview: FlipViewPage,
   gridview: GridViewPage,
   listbox: ListBoxPage,
@@ -130,14 +132,15 @@ const navMenuItems = [
       { value: 'timepicker', icon: '\uE823', label: 'TimePicker' }
     ]
   },
-  { value: 'dialogsandflyouts', icon: '\uE8BD', label: 'Dialogs and Flyouts', selectsOnInvoked: false, children: [
+  { value: 'dialogsandflyouts', icon: '\uE8F2', label: 'Dialogs and Flyouts', selectsOnInvoked: false, children: [
     { value: 'contentdialog', icon: '\uE8BD', label: 'ContentDialog' },
-    { value: 'flyout', icon: '\uE7C4', label: 'Flyout' },
+    { value: 'flyout', icon: '\uE8A8', label: 'Flyout' },
     { value: 'popup', icon: '\uE7C4', label: 'Popup' },
-    { value: 'teachingtip', icon: '\uE82F', label: 'TeachingTip' }
+    { value: 'teachingtip', icon: '\uEC42', label: 'TeachingTip' }
   ]},
-  { value: 'layout', icon: '\uEB3B', label: 'Layout', selectsOnInvoked: false, children: [
-    { value: 'expander', icon: '\uE8C4', label: 'Expander' }
+  { value: 'layout', icon: '\uE8A1', label: 'Layout', selectsOnInvoked: false, children: [
+    { value: 'expander', icon: '\uE8C4', label: 'Expander' },
+    { value: 'splitview', icon: '\uE8BC', label: 'SplitView' }
   ]}
 ];
 

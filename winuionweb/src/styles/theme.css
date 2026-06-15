@@ -258,7 +258,10 @@
   --app-bg: #F3F3F3;
   --layer-default: rgba(255, 255, 255, 0.50);
   --dialog-content-bg: rgba(255, 255, 255, 0.95);
+  --dialog-divider: rgba(0, 0, 0, 0.06);
+  --dialog-button-bg: #F3F3F3;
   --flyout-bg: rgba(252, 252, 252);
+  --flyout-border: rgba(0, 0, 0, 0.06);
   --flyout-backdrop: blur(20px) saturate(150%);
   --card-bg: rgba(255, 255, 255, 0.70);
   --card-stroke: rgba(0, 0, 0, 0.06);
@@ -306,8 +309,11 @@
   :root {
     --app-bg: #202020;
     --layer-default: rgba(58, 58, 58, 0.25);
-    --dialog-content-bg: rgba(255, 255, 255, 0.054);
+    --dialog-content-bg: rgba(43, 43, 43, 0);
+    --dialog-divider: rgba(0, 0, 0, 0.20);
+    --dialog-button-bg: #202020;
     --flyout-bg: rgba(44, 44, 44);
+    --flyout-border: rgba(255, 255, 255, 0.10);
     --flyout-backdrop: blur(20px) saturate(150%);
     --card-bg: rgba(255, 255, 255, 0.04);
     --card-stroke: rgba(0, 0, 0, 0.10);
@@ -379,7 +385,11 @@ html.theme-light {
   --app-bg: #F3F3F3;
   --layer-default: rgba(255, 255, 255, 0.50);
   --dialog-content-bg: rgba(255, 255, 255, 0.95);
+  --dialog-divider: rgba(0, 0, 0, 0.06);
+  --dialog-button-bg: #F3F3F3;
   --flyout-bg: rgba(252, 252, 252);
+  --flyout-border: rgba(0, 0, 0, 0.06);
+  --flyout-backdrop: blur(20px) saturate(150%);
   --card-bg: rgba(255, 255, 255, 0.70);
   --card-stroke: rgba(0, 0, 0, 0.06);
   --card-bg-secondary: rgba(246, 246, 246, 0.50);
@@ -425,8 +435,12 @@ html.theme-light {
 html.theme-dark {
   --app-bg: #202020;
   --layer-default: rgba(58, 58, 58, 0.25);
-  --dialog-content-bg: rgba(255, 255, 255, 0.054);
   --flyout-bg: rgba(44, 44, 44);
+  --flyout-border: rgba(255, 255, 255, 0.10);
+  --flyout-backdrop: blur(20px) saturate(150%);
+  --dialog-content-bg: rgba(43, 43, 43, 0);
+  --dialog-divider: rgba(0, 0, 0, 0.20);
+  --dialog-button-bg: #202020;
   --card-bg: rgba(255, 255, 255, 0.04);
   --card-stroke: rgba(0, 0, 0, 0.10);
   --card-bg-secondary: rgba(255, 255, 255, 0.03);

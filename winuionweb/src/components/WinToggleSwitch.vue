@@ -152,6 +152,50 @@ const onUp = (e) => {
     gap: 8px;
     cursor: pointer;
     touch-action: none;
+    user-select: none;
+  }
+
+  .win-switch-wrap:not(.is-disabled):hover .win-switch:not(.is-on) .track {
+    border-color: var(--text-primary);
+  }
+
+  .win-switch-wrap:not(.is-disabled):hover .win-switch .thumb {
+    --scale: 1.167;
+    background-color: var(--toggle-thumb-hover);
+  }
+
+  .win-switch-wrap:not(.is-disabled):hover .win-switch.is-on .track {
+    background-color: var(--accent-hover);
+  }
+
+  .win-switch-wrap:not(.is-disabled):hover .win-switch.is-on .thumb {
+    --tx: 20px;
+    --scale: 1.167;
+    background-color: var(--toggle-on-thumb);
+  }
+
+  .win-switch-wrap:not(.is-disabled):active .win-switch:not(.is-on) .thumb {
+    --tx: 0px;
+    --scale: 1;
+    width: 17px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: var(--toggle-thumb-hover);
+    transition: none;
+  }
+
+  .win-switch-wrap:not(.is-disabled):active .win-switch.is-on .thumb {
+    --tx: 16px;
+    --scale: 1;
+    width: 17px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: var(--toggle-on-thumb);
+    transition: none;
+  }
+
+  .win-switch-wrap:not(.is-disabled):active .win-switch.is-on .track {
+    background-color: var(--accent-pressed);
   }
 
   .win-switch-label {

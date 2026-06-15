@@ -14,9 +14,6 @@
             <div v-if="subtitle" class="teaching-tip-subtitle">{{ subtitle }}</div>
             <slot></slot>
           </div>
-          <button v-if="showCloseButton" class="teaching-tip-close" @click="$emit('close')">
-            <span class="icon">&#xE711;</span>
-          </button>
         </div>
         <div v-if="$slots.actions" class="teaching-tip-actions">
           <slot name="actions"></slot>
@@ -78,17 +75,17 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocClick));
 </script>
 
 <style>
-.win-teaching-tip {
-  background: var(--flyout-bg);
-  backdrop-filter: var(--flyout-backdrop);
-  border: 1px solid var(--stroke-surface-flyout);
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-  white-space: nowrap;
-  width: max-content;
-  overflow: visible;
-  z-index: 9800;
-}
+  .win-teaching-tip {
+    background: var(--flyout-bg);
+    backdrop-filter: var(--flyout-backdrop);
+    border: 1px solid var(--flyout-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    white-space: nowrap;
+    width: max-content;
+    overflow: visible;
+    z-index: 9800;
+  }
 
 .win-teaching-tip.untargeted {
   position: fixed;
@@ -118,6 +115,10 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocClick));
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
+}
+
+.targeted .teaching-tip-close {
+  margin-top: -4px;
 }
 
 .teaching-tip-icon {
@@ -175,57 +176,46 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocClick));
   padding: 0 16px 16px;
 }
 
-.teaching-tip-tail {
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%) rotate(45deg);
-  width: 16px;
-  height: 16px;
-  background: var(--flyout-bg);
-  border-right: 1px solid var(--stroke-surface-flyout);
-  border-bottom: 1px solid var(--stroke-surface-flyout);
+  .teaching-tip-tail {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 16px;
+    height: 16px;
+    background: var(--flyout-bg);
+    border-right: 1px solid var(--flyout-border);
+    border-bottom: 1px solid var(--flyout-border);
+  }
+
+.teaching-tip-pop-enter-active {
+  animation: teaching-tip-scale-in 0.167s cubic-bezier(0, 0, 0, 1) both;
 }
 
-  .teaching-tip-pop-enter-active {
-    animation: teaching-tip-scale-in 0.167s cubic-bezier(0, 0, 0, 1) both;
-  }
-
-  .teaching-tip-pop-leave-active {
-    animation: teaching-tip-scale-out 0.167s cubic-bezier(0.7, 0, 1, 0.5) both;
-  }
-
-  @keyframes teaching-tip-scale-in {
-    from {
-      opacity: 0;
-      transform: translateX(-50%) scale(0.25);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(-50%) scale(1);
-    }
-  }
-
-  @keyframes teaching-tip-scale-out {
-    from {
-      opacity: 1;
-      transform: translateX(-50%) scale(1);
-    }
-
-    to {
-      opacity: 0;
-      transform: translateX(-50%) scale(0.25);
-    }
-  }
-
-.teaching-tip-pop-enter-from {
-  opacity: 0;
-  transform: translateX(-50%) scale(0.5);
+.teaching-tip-pop-leave-active {
+  animation: teaching-tip-scale-out 0.167s cubic-bezier(0.7, 0, 1, 0.5) both;
 }
 
-.teaching-tip-pop-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) scale(0.5);
+@keyframes teaching-tip-scale-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
 }
+
+@keyframes teaching-tip-scale-out {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.5);
+  }
+}
+
 </style>

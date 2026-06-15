@@ -48,18 +48,18 @@ const onLightDismiss = () => {};
   background: rgba(0, 0, 0, 0.30);
 }
 
-.win-dialog {
-  background: var(--flyout-bg);
-  border: 1px solid var(--stroke-surface-flyout);
-  border-radius: 8px;
-  min-width: 320px;
-  max-width: 480px;
-  width: 100%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+  .win-dialog {
+    background: var(--flyout-bg);
+    border: 1px solid var(--flyout-border);
+    border-radius: 8px;
+    min-width: 320px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
 
 .win-dialog-body {
   padding: 24px 24px 0 24px;
@@ -87,12 +87,13 @@ const onLightDismiss = () => {};
   margin: 0;
 }
 
-.win-dialog-commands {
-  display: flex;
-  gap: 8px;
-  padding: 16px 24px;
-  border-top: 1px solid var(--stroke-divider);
-}
+  .win-dialog-commands {
+    display: flex;
+    gap: 8px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--dialog-divider);
+    background: var(--dialog-button-bg);
+  }
 
 .win-dialog-commands .win-btn {
   flex: 1;

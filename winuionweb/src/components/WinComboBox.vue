@@ -12,7 +12,7 @@
     </button>
     <Teleport to="body">
       <div v-if="isOpen" class="win-combo-overlay" @click.stop="close" @contextmenu.prevent="close"></div>
-      <div v-if="isOpen" class="win-flyout win-combo-flyout" :style="flyoutStyle">
+      <div v-if="isOpen" class="win-combo-flyout" :style="flyoutStyle">
         <div class="win-flyout-item" v-for="(opt, i) in options" :key="i" :class="{ selected: selectedIndex === i }" @click="select(i)">
           <div v-if="selectedIndex === i" class="flyout-indicator"></div>
           {{ opt.label }}
@@ -91,12 +91,6 @@ const close = () => { isOpen.value = false; };</script>
   }
 
   .win-combo-flyout {
-    min-width: 100%;
-    width: max-content;
-    z-index: 1000;
-  }
-
-  .win-flyout {
     position: absolute;
     border: 1px solid var(--stroke-surface-flyout);
     border-radius: 6px;
@@ -110,48 +104,51 @@ const close = () => { isOpen.value = false; };</script>
     gap: 2px;
     animation: picker-flyout-enter var(--fast-duration) var(--fast-out-slow-in);
     transform-origin: center center;
+    min-width: 100%;
+    width: max-content;
+    z-index: 1000;
   }
 
-  .win-flyout-item {
-    position: relative;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    background: transparent;
-    color: var(--text-primary);
-    transition: background var(--fast-duration) var(--fast-out-slow-in);
-  }
-
-    .win-flyout-item:hover {
-      background: var(--subtle-secondary);
+    .win-combo-flyout .win-flyout-item {
+      position: relative;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-primary);
+      transition: background var(--fast-duration) var(--fast-out-slow-in);
     }
 
-    .win-flyout-item:active {
-      background: var(--subtle-tertiary);
-      color: var(--text-secondary);
-    }
-
-    .win-flyout-item.selected {
-      background: var(--subtle-secondary);
-    }
-
-      .win-flyout-item.selected:hover {
-        background: var(--subtle-tertiary);
+      .win-combo-flyout .win-flyout-item:hover {
+        background: var(--subtle-secondary);
       }
 
-    .win-flyout-item .flyout-indicator {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 16px;
-      background: var(--accent-base);
-      border-radius: 3px;
-      transition: height var(--fast-duration) var(--fast-out-slow-in);
-    }
+      .win-combo-flyout .win-flyout-item:active {
+        background: var(--subtle-tertiary);
+        color: var(--text-secondary);
+      }
 
-    .win-flyout-item.selected:active .flyout-indicator {
-      height: 10px;
-    }
+      .win-combo-flyout .win-flyout-item.selected {
+        background: var(--subtle-secondary);
+      }
+
+        .win-combo-flyout .win-flyout-item.selected:hover {
+          background: var(--subtle-tertiary);
+        }
+
+      .win-combo-flyout .win-flyout-item .flyout-indicator {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 16px;
+        background: var(--accent-base);
+        border-radius: 3px;
+        transition: height var(--fast-duration) var(--fast-out-slow-in);
+      }
+
+      .win-combo-flyout .win-flyout-item.selected:active .flyout-indicator {
+        height: 10px;
+      }
 </style>

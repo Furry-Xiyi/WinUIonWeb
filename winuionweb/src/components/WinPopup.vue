@@ -57,17 +57,17 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocClick));
   display: inline-flex;
 }
 
-.win-popup {
-  position: absolute;
-  z-index: 9500;
-  background: var(--flyout-bg);
-  backdrop-filter: var(--flyout-backdrop);
-  border: 1px solid var(--stroke-surface-flyout);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  min-width: 240px;
-}
+  .win-popup {
+    position: absolute;
+    z-index: 9500;
+    background: var(--flyout-bg);
+    backdrop-filter: var(--flyout-backdrop);
+    border: 1px solid var(--flyout-border);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    min-width: 240px;
+  }
 
 .popup-anim-enter-active {
   animation: popup-fade-in 0.250s cubic-bezier(0.1, 0.9, 0.2, 1) both;

@@ -23,7 +23,6 @@
       </div>
       <div class="right-pane">
         <WinSettingsCard contentPlacement="bottom">
-          <template #header>Options</template>
           <div class="options-list">
             <WinToggleSwitch v-model="isLightDismissEnabled">IsLightDismissEnabled</WinToggleSwitch>
             <div class="input-group">
