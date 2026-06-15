@@ -15,7 +15,8 @@ import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 const props = defineProps({
   visible: Boolean,
   horizontalOffset: { type: Number, default: 0 },
-  verticalOffset: { type: Number, default: 0 }
+  verticalOffset: { type: Number, default: 0 },
+  lightDismiss: { type: Boolean, default: true }
 });
 
 const emit = defineEmits(['update:visible']);
@@ -40,7 +41,7 @@ const onEnter = (el) => {
 };
 
 const onDocClick = (e) => {
-  if (!props.visible) return;
+  if (!props.visible || !props.lightDismiss) return;
   if (anchorRef.value && !anchorRef.value.contains(e.target)) {
     emit('update:visible', false);
   }

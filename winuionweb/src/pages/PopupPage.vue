@@ -9,6 +9,7 @@
           <WinPopup :visible="showPopup"
                     :verticalOffset="verticalOffset"
                     :horizontalOffset="horizontalOffset"
+                    :lightDismiss="isLightDismissEnabled"
                     @update:visible="showPopup = $event">
             <template #trigger>
               <WinButton data-popup-trigger @click="showPopup = !showPopup">Show Popup (using Offset)</WinButton>
@@ -24,6 +25,7 @@
         <WinSettingsCard contentPlacement="bottom">
           <template #header>Options</template>
           <div class="options-list">
+            <WinToggleSwitch v-model="isLightDismissEnabled">IsLightDismissEnabled</WinToggleSwitch>
             <div class="input-group">
               <label>VerticalOffset</label>
               <input type="number" class="win-input" v-model.number="verticalOffset" />
@@ -44,8 +46,10 @@ import { ref } from 'vue';
 import WinSettingsCard from '../components/WinSettingsCard.vue';
 import WinButton from '../components/WinButton.vue';
 import WinPopup from '../components/WinPopup.vue';
+import WinToggleSwitch from '../components/WinToggleSwitch.vue';
 
 const showPopup = ref(false);
+const isLightDismissEnabled = ref(true);
 const verticalOffset = ref(0);
 const horizontalOffset = ref(0);
 </script>
@@ -84,7 +88,7 @@ const horizontalOffset = ref(0);
 
 .input-group label {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .win-input {

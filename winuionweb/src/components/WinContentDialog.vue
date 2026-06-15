@@ -75,9 +75,16 @@ const onLightDismiss = () => {};
 }
 
 .win-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   font-size: 14px;
   color: var(--text-secondary);
   margin-bottom: 24px;
+}
+
+.win-dialog-content p {
+  margin: 0;
 }
 
 .win-dialog-commands {

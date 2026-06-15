@@ -6,7 +6,8 @@
       <div class="track"></div>
       <div class="thumb" :style="thumbStyle"></div>
     </div>
-    <span class="win-switch-label">{{ modelValue ? onContent : offContent }}</span>
+    <span v-if="$slots.default" class="win-switch-label"><slot></slot></span>
+    <span v-else class="win-switch-label">{{ modelValue ? onContent : offContent }}</span>
   </div>
 </template>
 <script setup>
