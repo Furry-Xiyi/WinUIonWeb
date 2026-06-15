@@ -73,32 +73,36 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
+import { ref, computed, inject, watch, onMounted, onUnmounted } from 'vue';
 import splashLight from '../assets/HomePage/Splash-Light.png';
 import splashDark from '../assets/HomePage/Splash-Dark.png';
 
 const currentPage = inject('currentPage');
 
-const isDark = ref(false);
-const detectTheme = () => {
-  const root = document.documentElement;
-  const attr = root.getAttribute('data-theme') || root.getAttribute('theme');
-  if (attr) {
-    isDark.value = attr.toLowerCase().includes('dark');
-  } else {
-    isDark.value = root.classList.contains('dark') || document.body.classList.contains('dark');
-  }
+const themeSetting = inject('themeSetting');
+
+const getEffectiveDark = () => {
+  const val = themeSetting.value;
+  if (val === 'dark') return true;
+  if (val === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
-let themeObserver = null;
+
+const isDark = ref(getEffectiveDark());
+
+let mediaQuery;
+const onMediaChange = () => { isDark.value = getEffectiveDark(); };
+
+watch(themeSetting, () => { isDark.value = getEffectiveDark(); });
+
 onMounted(() => {
-  detectTheme();
-  themeObserver = new MutationObserver(detectTheme);
-  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'theme', 'class'] });
-  themeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'theme', 'class'] });
+  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  mediaQuery.addEventListener('change', onMediaChange);
 });
 onUnmounted(() => {
-  themeObserver?.disconnect();
+  mediaQuery?.removeEventListener('change', onMediaChange);
 });
+
 const heroImage = computed(() => isDark.value ? splashDark : splashLight);
 
 const filter = ref('recent');

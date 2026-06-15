@@ -29,36 +29,34 @@ import WinSettingsCard from '../components/WinSettingsCard.vue';
 const val1 = ref(false);
 const val2 = ref(false);
 
-const checkDark = () => {
-  return document.documentElement.classList.contains('dark')
-    || document.documentElement.classList.contains('theme-dark')
-    || window.matchMedia('(prefers-color-scheme: dark)').matches;
+const themeSetting = inject('themeSetting');
+
+const getEffectiveDark = () => {
+  const val = themeSetting.value;
+  if (val === 'dark') return true;
+  if (val === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
-const isDark = ref(checkDark());
+const isDark = ref(getEffectiveDark());
 
-let observer;
 let mediaQuery;
-const onMediaChange = () => { isDark.value = checkDark(); };
-const onClassChange = () => { isDark.value = checkDark(); };
+const onMediaChange = () => { isDark.value = getEffectiveDark(); };
+
+watch(themeSetting, () => { isDark.value = getEffectiveDark(); });
 
 onMounted(() => {
-  observer = new MutationObserver(onClassChange);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
   mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   mediaQuery.addEventListener('change', onMediaChange);
 });
-
 onUnmounted(() => {
-  observer?.disconnect();
   mediaQuery?.removeEventListener('change', onMediaChange);
 });
 
 const gifSrc = computed(() => {
   return isDark.value
-    ? new URL('../styles/gif/LoadingRing_Dark.gif', import.meta.url).href
-    : new URL('../styles/gif/LoadingRing_Light.gif', import.meta.url).href;
+    ? new URL('../assets/LoadingRing/LoadingRing_Dark.gif', import.meta.url).href
+    : new URL('../assets/LoadingRing/LoadingRing_Light.gif', import.meta.url).href;
 });
 </script>
 
