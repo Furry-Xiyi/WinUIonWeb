@@ -17,53 +17,22 @@
       Control a loading ring animation.
     </template>
     <WinToggleSwitch v-model="val2" onContent="Playing" offContent="Stopped" />
-    <img v-if="val2" :src="gifSrc" class="loading-ring-gif" />
+    <WinLoadingRing v-if="val2" class="loading-ring-gif" color="var(--accent-base)" />
   </WinSettingsCard>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import WinToggleSwitch from '../components/WinToggleSwitch.vue';
 import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinLoadingRing from '../components/WinLoadingRing.vue';
 
 const val1 = ref(false);
 const val2 = ref(false);
-
-const themeSetting = inject('themeSetting');
-
-const getEffectiveDark = () => {
-  const val = themeSetting.value;
-  if (val === 'dark') return true;
-  if (val === 'light') return false;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-};
-
-const isDark = ref(getEffectiveDark());
-
-let mediaQuery;
-const onMediaChange = () => { isDark.value = getEffectiveDark(); };
-
-watch(themeSetting, () => { isDark.value = getEffectiveDark(); });
-
-onMounted(() => {
-  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  mediaQuery.addEventListener('change', onMediaChange);
-});
-onUnmounted(() => {
-  mediaQuery?.removeEventListener('change', onMediaChange);
-});
-
-const gifSrc = computed(() => {
-  return isDark.value
-    ? new URL('../assets/LoadingRing/LoadingRing_Dark.gif', import.meta.url).href
-    : new URL('../assets/LoadingRing/LoadingRing_Light.gif', import.meta.url).href;
-});
 </script>
 
 <style scoped>
   .loading-ring-gif {
-    width: 48px;
-    height: 48px;
     margin-top: 12px;
   }
 </style>

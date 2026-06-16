@@ -73,34 +73,55 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, watch, onMounted, onUnmounted } from 'vue';
-import splashLight from '../assets/HomePage/Splash-Light.png';
-import splashDark from '../assets/HomePage/Splash-Dark.png';
+import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
+import splashLight from '../assets/homepage/Splash-Light.png';
+import splashDark from '../assets/homepage/Splash-Dark.png';
 
 const currentPage = inject('currentPage');
 
-const themeSetting = inject('themeSetting');
+const isDark = ref(false);
 
-const getEffectiveDark = () => {
-  const val = themeSetting.value;
-  if (val === 'dark') return true;
-  if (val === 'light') return false;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+const detectTheme = () => {
+  const html = document.documentElement;
+
+  const isManualLight = html.classList.contains('theme-light') || html.classList.contains('light') || html.getAttribute('data-theme') === 'light' || html.getAttribute('theme') === 'light';
+
+  const isManualDark = html.classList.contains('theme-dark') || html.classList.contains('dark') || html.getAttribute('data-theme') === 'dark' || html.getAttribute('theme') === 'dark' || document.body.classList.contains('dark');
+
+  if (isManualLight) {
+    isDark.value = false;
+  } else if (isManualDark) {
+    isDark.value = true;
+  } else {
+    isDark.value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
 };
 
-const isDark = ref(getEffectiveDark());
+let themeObserver = null;
+let mediaQueryList = null;
 
-let mediaQuery;
-const onMediaChange = () => { isDark.value = getEffectiveDark(); };
-
-watch(themeSetting, () => { isDark.value = getEffectiveDark(); });
+const onSystemThemeChange = () => {
+  detectTheme();
+};
 
 onMounted(() => {
-  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  mediaQuery.addEventListener('change', onMediaChange);
+  detectTheme();
+
+  themeObserver = new MutationObserver(detectTheme);
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'theme', 'class'] });
+  themeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'theme', 'class'] });
+
+  if (window.matchMedia) {
+    mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQueryList.addEventListener('change', onSystemThemeChange);
+  }
 });
+
 onUnmounted(() => {
-  mediaQuery?.removeEventListener('change', onMediaChange);
+  themeObserver?.disconnect();
+  if (mediaQueryList) {
+    mediaQueryList.removeEventListener('change', onSystemThemeChange);
+  }
 });
 
 const heroImage = computed(() => isDark.value ? splashDark : splashLight);
