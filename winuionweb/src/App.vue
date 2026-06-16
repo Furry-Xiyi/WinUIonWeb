@@ -132,8 +132,8 @@ const navMenuItems = [
       { value: 'timepicker', icon: '\uE823', label: 'TimePicker' }
     ]
   },
-  { value: 'dialogsandflyouts', icon: '\uE8F2', label: 'Dialogs and Flyouts', selectsOnInvoked: false, children: [
-    { value: 'contentdialog', icon: '\uE8BD', label: 'ContentDialog' },
+  { value: 'dialogsandflyouts', icon: '\uE8BD', label: 'Dialogs and Flyouts', selectsOnInvoked: false, children: [
+    { value: 'contentdialog', icon: '\uE8F2', label: 'ContentDialog' },
     { value: 'flyout', icon: '\uE8A8', label: 'Flyout' },
     { value: 'popup', icon: '\uE7C4', label: 'Popup' },
     { value: 'teachingtip', icon: '\uEC42', label: 'TeachingTip' }
