@@ -74,8 +74,8 @@
 
 <script setup>
 import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
-import splashLight from '../assets/homepage/Splash-Light.png';
-import splashDark from '../assets/homepage/Splash-Dark.png';
+import splashLight from '../assets/HomePage/Splash-Light.png';
+import splashDark from '../assets/HomePage/Splash-Dark.png';
 
 const currentPage = inject('currentPage');
 
