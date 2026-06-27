@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="WinUIonWeb/winuionweb.esproj">
+  <Project Path="WinUIonWeb/winuionweb.esproj" DisplayName="WinUIonWeb">
     <Build />
     <Deploy />
   </Project>

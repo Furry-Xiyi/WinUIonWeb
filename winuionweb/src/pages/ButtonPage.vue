@@ -8,7 +8,7 @@
       A basic button with optional disabled state.
     </template>
     <div style="display: flex; align-items: center; gap: 12px;">
-      <WinButton :disabled="btnDisabled">Standard</WinButton>
+      <WinButton :disabled="btnDisabled">Standard button</WinButton>
       <WinCheckBox v-model="btnDisabled">Disabled</WinCheckBox>
     </div>
   </WinSettingsCard>
@@ -20,8 +20,8 @@
       Accent (primary) and Subtle (borderless) styles.
     </template>
     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-      <WinButton primary>Accent Style</WinButton>
-      <WinButton subtle>Subtle Style</WinButton>
+      <WinButton primary>Accent Style button</WinButton>
+      <WinButton subtle>Subtle Style button</WinButton>
     </div>
   </WinSettingsCard>
   <WinSettingsCard>
