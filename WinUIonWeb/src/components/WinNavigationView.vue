@@ -120,6 +120,8 @@ let lastIsChild = false;
 let prevIsChild = false;
 let ro = null;
 let skipTransition = false;
+let indicatorAnimationId = 0;
+let compactTransitionTimer = null;
 
 const gearClass = ref('');
 const hamburgerClass = ref('');
@@ -127,6 +129,40 @@ let gearPressed = false;
 let gearRewindDone = false;
 let hamburgerPressed = false;
 let hamburgerPressDone = false;
+
+const INDICATOR_SIZE = 16;
+const INDICATOR_MAX_STRETCH = INDICATOR_SIZE * 2.5;
+const EASE_OUT = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
+const EASE_COLLAPSE = 'cubic-bezier(0.4, 0.0, 0.7, 0.3)';
+
+const readTranslate = (el, axis, fallback) => {
+  const transform = getComputedStyle(el).transform;
+  if (transform && transform !== 'none') {
+    const matrix3d = transform.match(/^matrix3d\((.+)\)$/);
+    if (matrix3d) {
+      const parts = matrix3d[1].split(',').map(v => Number.parseFloat(v.trim()));
+      const value = axis === 'x' ? parts[12] : parts[13];
+      if (Number.isFinite(value)) return value;
+    }
+
+    const matrix = transform.match(/^matrix\((.+)\)$/);
+    if (matrix) {
+      const parts = matrix[1].split(',').map(v => Number.parseFloat(v.trim()));
+      const value = axis === 'x' ? parts[4] : parts[5];
+      if (Number.isFinite(value)) return value;
+    }
+  }
+
+  const styleTransform = indicatorStyle.value.transform || '';
+  const match = styleTransform.match(axis === 'x' ? /translateX\(([-\d.]+)px\)/ : /translateY\(([-\d.]+)px\)/);
+  return match ? Number.parseFloat(match[1]) : fallback;
+};
+
+const nextIndicatorAnimation = (indicatorEl) => {
+  indicatorAnimationId += 1;
+  indicatorEl?.getAnimations().forEach(a => a.cancel());
+  return indicatorAnimationId;
+};
 
 const childParentMap = computed(() => {
   const map = {};
@@ -150,11 +186,19 @@ const findParentGroup = (val) => {
 };
 
 const setItemRef = (value, el) => {
-  if (el) itemRefs[value] = el;
+  if (el) {
+    itemRefs[value] = el;
+  } else {
+    delete itemRefs[value];
+  }
 };
 
 const setChildrenRef = (value, el) => {
-  if (el) childrenRefs[value] = el;
+  if (el) {
+    childrenRefs[value] = el;
+  } else {
+    delete childrenRefs[value];
+  }
 };
 
 const groupChevronClass = (value) => {
@@ -412,6 +456,12 @@ const calcIndicator = () => {
     return `polygon(0% ${top1}px, 100% ${top1}px, 100% ${bottom1}px, 0% ${bottom1}px, 0% ${top2}px, 100% ${top2}px, 100% ${bottom2}px, 0% ${bottom2}px)`;
   };
 
+  const getRegion = (el) => {
+    const scrollEl = scrollArea.value;
+    if (props.position === 'Top') return 'top';
+    return scrollEl && scrollEl.contains(el) ? 'menu' : 'footer';
+  };
+
   const crossLevel = (lastIsChild !== prevIsChild) && sourceEl;
 
   const snapToFinal = (finalTransform, dimension, finalSize) => {
@@ -419,7 +469,12 @@ const calcIndicator = () => {
       if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) return;
       const freshTrackRect = track.getBoundingClientRect();
       const freshElRect = lastSelectedEl.getBoundingClientRect();
-      const freshTargetRect = getItemRectRelTrack(lastSelectedEl);
+      const freshTargetRect = {
+        left: freshElRect.left - freshTrackRect.left,
+        right: freshElRect.right - freshTrackRect.left,
+        top: freshElRect.top - freshTrackRect.top,
+        bottom: freshElRect.bottom - freshTrackRect.top
+      };
       let expectedPos;
       if (dimension === 'x') {
         expectedPos = freshElRect.left - freshTrackRect.left + freshElRect.width / 2 - 8;
@@ -436,38 +491,35 @@ const calcIndicator = () => {
   if (props.position === 'Top') {
     const newX = elRect.left - trackRect.left + elRect.width / 2 - 8;
     if (skipTransition || indicatorStyle.value.opacity === '0') {
-      indicatorEl.getAnimations().forEach(a => a.cancel());
+      nextIndicatorAnimation(indicatorEl);
       track.style.clipPath = makeClipX(targetRect, null);
       indicatorStyle.value = { transition: 'none', transform: `translateX(${newX}px)`, width: '16px', opacity: '1' };
       return;
     }
-    const currentTransform = indicatorStyle.value.transform || '';
-    const match = currentTransform.match(/translateX\(([-\d.]+)px\)/);
-    const oldX = match ? parseFloat(match[1]) : newX;
+    const oldX = readTranslate(indicatorEl, 'x', newX);
     const dist = Math.abs(newX - oldX);
     if (dist < 1) { track.style.clipPath = makeClipX(targetRect, null); indicatorStyle.value = { transform: `translateX(${newX}px)`, width: '16px', opacity: '1' }; return; }
 
-    const stretchW = dist + 16;
-    indicatorEl.getAnimations().forEach(a => a.cancel());
+    nextIndicatorAnimation(indicatorEl);
     const hideThreshold = 160;
 
-    if (stretchW <= hideThreshold) {
+    if (dist <= hideThreshold) {
       indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
       track.style.clipPath = makeClipX(targetRect, sourceRect);
       const movingRight = newX > oldX;
       const dur = 600;
-      const easeOut = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
+      const stretchW = Math.min(dist + INDICATOR_SIZE, INDICATOR_MAX_STRETCH);
       let keyframes;
       if (movingRight) {
         keyframes = [
-          { transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: easeOut },
-          { transform: `translateX(${oldX}px)`, width: `${stretchW}px`, offset: 0.333, easing: easeOut },
+          { transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_OUT },
+          { transform: `translateX(${oldX}px)`, width: `${stretchW}px`, offset: 0.333, easing: EASE_OUT },
           { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }
         ];
       } else {
         keyframes = [
-          { transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: easeOut },
-          { transform: `translateX(${newX}px)`, width: `${stretchW}px`, offset: 0.333, easing: easeOut },
+          { transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_OUT },
+          { transform: `translateX(${newX}px)`, width: `${stretchW}px`, offset: 0.333, easing: EASE_OUT },
           { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }
         ];
       }
@@ -480,14 +532,13 @@ const calcIndicator = () => {
     indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
     track.style.clipPath = makeClipX(targetRect, sourceRect);
     const collapseDur = 350; const expandDur = 350;
-    const easeCollapse = 'cubic-bezier(0.4, 0.0, 0.7, 0.3)'; const easeExpand = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
     let collapseKeyframes, expandKeyframes;
     if (movingRight) {
-      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: easeCollapse }, { transform: `translateX(${oldX + 16}px)`, width: '0px', offset: 1 }];
-      expandKeyframes = [{ transform: `translateX(${newX}px)`, width: '0px', offset: 0, easing: easeExpand }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }];
+      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateX(${oldX + 16}px)`, width: '0px', offset: 1 }];
+      expandKeyframes = [{ transform: `translateX(${newX}px)`, width: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }];
     } else {
-      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: easeCollapse }, { transform: `translateX(${oldX}px)`, width: '0px', offset: 1 }];
-      expandKeyframes = [{ transform: `translateX(${newX + 16}px)`, width: '0px', offset: 0, easing: easeExpand }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }];
+      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateX(${oldX}px)`, width: '0px', offset: 1 }];
+      expandKeyframes = [{ transform: `translateX(${newX + 16}px)`, width: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }];
     }
     const collapseAnim = indicatorEl.animate(collapseKeyframes, { duration: collapseDur, fill: 'forwards' });
     collapseAnim.onfinish = () => {
@@ -521,20 +572,19 @@ const calcIndicator = () => {
     };
 
     if (clampedTargetRect.top >= clampedTargetRect.bottom) {
+      nextIndicatorAnimation(indicatorEl);
       indicatorStyle.value = { opacity: '0', transition: 'none' };
       return;
     }
 
     if (skipTransition || indicatorStyle.value.opacity === '0') {
-      indicatorEl.getAnimations().forEach(a => a.cancel());
+      nextIndicatorAnimation(indicatorEl);
       track.style.clipPath = makeClipY(clampedTargetRect, null);
       indicatorStyle.value = { transition: 'none', transform: `translateY(${newY}px)`, height: '16px', opacity: '1' };
       indicatorIsChild.value = lastIsChild;
       return;
     }
-    const currentTransform = indicatorStyle.value.transform || '';
-    const match = currentTransform.match(/translateY\(([-\d.]+)px\)/);
-    const oldY = match ? parseFloat(match[1]) : newY;
+    const oldY = readTranslate(indicatorEl, 'y', newY);
     const dist = Math.abs(newY - oldY);
     if (dist < 1) { track.style.clipPath = makeClipY(clampedTargetRect, null); indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1' }; indicatorIsChild.value = lastIsChild; return; }
 
@@ -553,43 +603,64 @@ const calcIndicator = () => {
     }
 
     track.style.clipPath = makeClipY(clampedTargetRect, clampedSourceRect);
-    indicatorEl.getAnimations().forEach(a => a.cancel());
+    const animationId = nextIndicatorAnimation(indicatorEl);
 
     if (crossLevel) {
       indicatorStyle.value = { transform: `translateY(${oldY}px)`, height: '16px', opacity: '1', transition: 'none' };
       const movingDown = newY > oldY;
       const collapseDur = 350; const expandDur = 350;
-      const easeCollapse = 'cubic-bezier(0.4, 0.0, 0.7, 0.3)'; const easeExpand = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
       let collapseKf, expandKf;
       if (movingDown) {
-        collapseKf = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeCollapse }, { transform: `translateY(${oldY + 16}px)`, height: '0px', offset: 1 }];
-        expandKf = [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+        collapseKf = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateY(${oldY + 16}px)`, height: '0px', offset: 1 }];
+        expandKf = [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
       } else {
-        collapseKf = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeCollapse }, { transform: `translateY(${oldY}px)`, height: '0px', offset: 1 }];
-        expandKf = [{ transform: `translateY(${newY + 16}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+        collapseKf = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateY(${oldY}px)`, height: '0px', offset: 1 }];
+        expandKf = [{ transform: `translateY(${newY + 16}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
       }
       const collapseAnim = indicatorEl.animate(collapseKf, { duration: collapseDur, fill: 'forwards' });
       collapseAnim.onfinish = () => {
+        if (animationId !== indicatorAnimationId) return;
         indicatorIsChild.value = lastIsChild;
         const expandAnim = indicatorEl.animate(expandKf, { duration: expandDur, fill: 'forwards' });
-        expandAnim.onfinish = () => snapToFinal(`translateY(${newY}px)`, 'y', '16px');
+        expandAnim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateY(${newY}px)`, 'y', '16px'); };
       };
       return;
     }
 
     indicatorIsChild.value = lastIsChild;
     const movingDown = newY > oldY;
-    const stretchH = dist + 16;
     indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' };
-    const dur = 300; const easeOut = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
+    const sourceRegion = sourceEl ? getRegion(sourceEl) : getRegion(lastSelectedEl);
+    const targetRegion = getRegion(lastSelectedEl);
+    const forceMove = sourceRegion !== targetRegion;
+    const useStretchMove = forceMove || dist <= 160;
+    const dur = forceMove ? 350 : 300;
     let keyframes;
+
+    if (!useStretchMove) {
+      const collapseKf = movingDown
+        ? [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateY(${oldY + 16}px)`, height: '0px', offset: 1 }]
+        : [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateY(${oldY}px)`, height: '0px', offset: 1 }];
+      const expandKf = movingDown
+        ? [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }]
+        : [{ transform: `translateY(${newY + 16}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+      const collapseAnim = indicatorEl.animate(collapseKf, { duration: 350, fill: 'forwards' });
+      collapseAnim.onfinish = () => {
+        if (animationId !== indicatorAnimationId) return;
+        const expandAnim = indicatorEl.animate(expandKf, { duration: 350, fill: 'forwards' });
+        expandAnim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateY(${newY}px)`, 'y', '16px'); };
+      };
+      return;
+    }
+
+    const stretchH = Math.min(dist + INDICATOR_SIZE, INDICATOR_MAX_STRETCH);
     if (movingDown) {
-      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeOut }, { transform: `translateY(${oldY}px)`, height: `${stretchH}px`, offset: 0.2, easing: easeOut }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${oldY}px)`, height: `${stretchH}px`, offset: 0.2, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
     } else {
-      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeOut }, { transform: `translateY(${newY}px)`, height: `${stretchH}px`, offset: 0.2, easing: easeOut }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: `${stretchH}px`, offset: 0.2, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
     }
     const anim = indicatorEl.animate(keyframes, { duration: dur, fill: 'forwards' });
-    anim.onfinish = () => snapToFinal(`translateY(${newY}px)`, 'y', '16px');
+    anim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateY(${newY}px)`, 'y', '16px'); };
   }
 };
 
@@ -700,14 +771,22 @@ onBeforeUnmount(() => { if (ro) ro.disconnect(); window.removeEventListener('res
 watch(() => props.position, refreshAfterPositionChange);
 
 watch(isCompact, (compact) => {
+  const activeIndicator = indicatorTrack.value?.querySelector('.win-nav-indicator');
+  nextIndicatorAnimation(activeIndicator);
+
+  if (compactTransitionTimer) {
+    clearTimeout(compactTransitionTimer);
+    compactTransitionTimer = null;
+  }
+
   if (compact) {
     const parentGroup = findParentGroup(props.selectedValue);
-    let savedOldY = null;
-    if (parentGroup && lastSelectedEl && navRef.value && indicatorTrack.value) {
-      const trackRect = indicatorTrack.value.getBoundingClientRect();
-      const elRect = lastSelectedEl.getBoundingClientRect();
-      savedOldY = elRect.top - trackRect.top + elRect.height / 2 - 8;
-    }
+    const track = indicatorTrack.value;
+    const indicatorEl = track?.querySelector('.win-nav-indicator');
+    const childEl = parentGroup ? itemRefs[props.selectedValue] : null;
+    const savedOldY = parentGroup && childEl && track
+      ? childEl.getBoundingClientRect().top - track.getBoundingClientRect().top + childEl.getBoundingClientRect().height / 2 - 8
+      : null;
     const wasChild = lastIsChild;
     for (const item of props.menuItems) {
       if (item.children && groupExpanded[item.value]) {
@@ -715,77 +794,62 @@ watch(isCompact, (compact) => {
       }
     }
     if (parentGroup) {
-      let animating = true;
-      const origOnResize = onResize;
-      const guardedResize = () => { if (!animating) origOnResize(); };
-      if (ro) { ro.disconnect(); ro = new ResizeObserver(guardedResize); if (navRef.value) ro.observe(navRef.value); }
+      let animating = false;
       nextTick(() => {
         const header = itemRefs[parentGroup.value];
         if (header) {
           lastSelectedEl = header;
           lastIsChild = false;
-          if (savedOldY !== null && wasChild) {
-            const track = indicatorTrack.value;
-            const indicatorEl = track?.querySelector('.win-nav-indicator');
-            if (track && indicatorEl) {
-              const trackRect = track.getBoundingClientRect();
-              const headerRect = header.getBoundingClientRect();
-              const newY = headerRect.top - trackRect.top + headerRect.height / 2 - 8;
-              const targetR = { top: headerRect.top - trackRect.top, bottom: headerRect.bottom - trackRect.top };
-              indicatorEl.getAnimations().forEach(a => a.cancel());
-              track.style.clipPath = `polygon(0% ${Math.min(targetR.top, savedOldY)}px, 100% ${Math.min(targetR.top, savedOldY)}px, 100% ${Math.max(targetR.bottom, savedOldY + 16)}px, 0% ${Math.max(targetR.bottom, savedOldY + 16)}px)`;
+          if (savedOldY !== null && wasChild && track && indicatorEl) {
+            animating = true;
+            const animationId = nextIndicatorAnimation(indicatorEl);
+            const trackRect = track.getBoundingClientRect();
+            const childRect = childEl?.getBoundingClientRect();
+            const childClip = childRect
+              ? { top: childRect.top - trackRect.top, bottom: childRect.bottom - trackRect.top }
+              : { top: savedOldY, bottom: savedOldY + 16 };
+            indicatorIsChild.value = true;
+            track.style.clipPath = `polygon(0% ${childClip.top}px, 100% ${childClip.top}px, 100% ${childClip.bottom}px, 0% ${childClip.bottom}px)`;
+            indicatorStyle.value = { transform: `translateY(${savedOldY}px)`, height: '16px', opacity: '1', transition: 'none' };
+
+            const collapseAnim = indicatorEl.animate([
+              { transform: `translateY(${savedOldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE },
+              { transform: `translateY(${savedOldY}px)`, height: '0px', offset: 1 }
+            ], { duration: 200, fill: 'forwards' });
+
+            collapseAnim.onfinish = () => {
+              if (animationId !== indicatorAnimationId) return;
+              const freshTrackRect = track.getBoundingClientRect();
+              const freshHeaderRect = header.getBoundingClientRect();
+              const freshNewY = freshHeaderRect.top - freshTrackRect.top + freshHeaderRect.height / 2 - 8;
+              const freshTargetR = { top: freshHeaderRect.top - freshTrackRect.top, bottom: freshHeaderRect.bottom - freshTrackRect.top };
               indicatorIsChild.value = false;
-              indicatorStyle.value = { transform: `translateY(${savedOldY}px)`, height: '16px', opacity: '1', transition: 'none' };
-              const collapseDur = 300; const expandDur = 300;
-              const easeCollapse = 'cubic-bezier(0.4, 0.0, 0.7, 0.3)';
-              const easeExpand = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
-              const movingDown = newY > savedOldY;
-              let collapseKf, expandKf;
-              if (movingDown) {
-                collapseKf = [{ transform: `translateY(${savedOldY}px)`, height: '16px', offset: 0, easing: easeCollapse }, { transform: `translateY(${savedOldY + 16}px)`, height: '0px', offset: 1 }];
-                expandKf = [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-              } else {
-                collapseKf = [{ transform: `translateY(${savedOldY}px)`, height: '16px', offset: 0, easing: easeCollapse }, { transform: `translateY(${savedOldY}px)`, height: '0px', offset: 1 }];
-                expandKf = [{ transform: `translateY(${newY + 16}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-              }
-              const collapseAnim = indicatorEl.animate(collapseKf, { duration: collapseDur, fill: 'forwards' });
-              collapseAnim.onfinish = () => {
-                const freshTrackRect = track.getBoundingClientRect();
-                const freshHeaderRect = header.getBoundingClientRect();
-                const freshNewY = freshHeaderRect.top - freshTrackRect.top + freshHeaderRect.height / 2 - 8;
-                const freshTargetR = { top: freshHeaderRect.top - freshTrackRect.top, bottom: freshHeaderRect.bottom - freshTrackRect.top };
-                const finalExpandKf = [
-                  { transform: `translateY(${freshNewY}px)`, height: '0px', offset: 0, easing: easeExpand },
-                  { transform: `translateY(${freshNewY}px)`, height: '16px', offset: 1 }
-                ];
-                track.style.clipPath = `polygon(0% ${freshTargetR.top}px, 100% ${freshTargetR.top}px, 100% ${freshTargetR.bottom}px, 0% ${freshTargetR.bottom}px)`;
-                const expandAnim = indicatorEl.animate(finalExpandKf, { duration: expandDur, fill: 'forwards' });
-                expandAnim.onfinish = () => {
-                  animating = false;
-                  rebindRo();
-                  const ft = track.getBoundingClientRect();
-                  const fh = header.getBoundingClientRect();
-                  const fy = fh.top - ft.top + fh.height / 2 - 8;
-                  const ftr = { top: fh.top - ft.top, bottom: fh.bottom - ft.top };
-                  track.style.clipPath = `polygon(0% ${ftr.top}px, 100% ${ftr.top}px, 100% ${ftr.bottom}px, 0% ${ftr.bottom}px)`;
-                  indicatorStyle.value = { transform: `translateY(${fy}px)`, height: '16px', opacity: '1', transition: 'none' };
-                };
+              track.style.clipPath = `polygon(0% ${freshTargetR.top}px, 100% ${freshTargetR.top}px, 100% ${freshTargetR.bottom}px, 0% ${freshTargetR.bottom}px)`;
+              indicatorStyle.value = { transform: `translateY(${freshNewY + 16}px)`, height: '0px', opacity: '1', transition: 'none' };
+
+              const expandAnim = indicatorEl.animate([
+                { transform: `translateY(${freshNewY + 16}px)`, height: '0px', offset: 0, easing: EASE_OUT },
+                { transform: `translateY(${freshNewY}px)`, height: '16px', offset: 1 }
+              ], { duration: 300, fill: 'forwards' });
+
+              expandAnim.onfinish = () => {
+                if (animationId !== indicatorAnimationId) return;
+                animating = false;
+                const ft = track.getBoundingClientRect();
+                const fh = header.getBoundingClientRect();
+                const fy = fh.top - ft.top + fh.height / 2 - 8;
+                const ftr = { top: fh.top - ft.top, bottom: fh.bottom - ft.top };
+                track.style.clipPath = `polygon(0% ${ftr.top}px, 100% ${ftr.top}px, 100% ${ftr.bottom}px, 0% ${ftr.bottom}px)`;
+                indicatorStyle.value = { transform: `translateY(${fy}px)`, height: '16px', opacity: '1', transition: 'none' };
               };
-            } else {
-              animating = false;
-              rebindRo();
-            }
+            };
           } else {
-            animating = false;
-            rebindRo();
             skipTransition = true;
             calcIndicator();
             requestAnimationFrame(() => { skipTransition = false; });
           }
-        } else {
-          animating = false;
-          rebindRo();
         }
+        requestAnimationFrame(() => { if (!animating) calcIndicator(); });
       });
     }
   } else {
@@ -794,7 +858,7 @@ watch(isCompact, (compact) => {
       groupExpanded[parentGroup.value] = true;
       nextTick(() => {
         measureGroup(parentGroup.value);
-        setTimeout(() => {
+        compactTransitionTimer = setTimeout(() => {
           const sel = itemRefs[props.selectedValue];
           if (sel) {
             prevSelectedEl = lastSelectedEl;
