@@ -4,7 +4,7 @@
       <div class="win-nav-indicator-track" ref="indicatorTrack">
         <div class="win-nav-indicator" :style="indicatorStyle"></div>
       </div>
-      <div class="win-nav-menu">
+      <div class="win-nav-menu win-nav-top-footer">
         <template v-for="item in menuItems" :key="item.value">
           <div v-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
@@ -84,7 +84,7 @@
     <WinMenuFlyout :open="flyoutOpen" :anchorRect="flyoutAnchor" :items="flyoutItems" @close="closeFlyout" @select="onFlyoutSelect" />
   </div>
 </template>
-<script setup>import { ref, reactive, inject, provide, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+<script setup>import { ref, reactive, inject, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
 
 const props = defineProps({
@@ -119,6 +119,10 @@ let lastIsChild = false;
 let prevIsChild = false;
 let ro = null;
 let skipTransition = false;
+const indicatorLength = 16;
+const connectedAnimationDuration = 600;
+const farAnimationDuration = 350;
+const paneLayoutAnimationDuration = 360;
 
 const gearClass = ref('');
 const hamburgerClass = ref('');
@@ -126,18 +130,6 @@ let gearPressed = false;
 let gearRewindDone = false;
 let hamburgerPressed = false;
 let hamburgerPressDone = false;
-
-const childParentMap = computed(() => {
-  const map = {};
-  for (const item of props.menuItems) {
-    if (item.children) {
-      for (const child of item.children) {
-        map[child.value] = item.value;
-      }
-    }
-  }
-  return map;
-});
 
 const isChildOfGroup = (groupItem) => {
   if (!groupItem.children) return false;
@@ -150,10 +142,12 @@ const findParentGroup = (val) => {
 
 const setItemRef = (value, el) => {
   if (el) itemRefs[value] = el;
+  else delete itemRefs[value];
 };
 
 const setChildrenRef = (value, el) => {
   if (el) childrenRefs[value] = el;
+  else delete childrenRefs[value];
 };
 
 const groupChevronClass = (value) => {
@@ -173,14 +167,63 @@ const measureAllGroups = () => {
   }
 };
 
+const isFooterElement = (el) => {
+  if (!el) return false;
+  return !!el.closest('.win-nav-footer, .win-nav-top-footer');
+};
+
+const getResolvedIndicatorTarget = (value = props.selectedValue) => {
+  if (!value) return { el: null, isChild: false };
+
+  const parentGroup = findParentGroup(value);
+  if (!parentGroup) {
+    return { el: itemRefs[value] || null, isChild: false };
+  }
+
+  const childEl = itemRefs[value] || null;
+  const childCanHostIndicator =
+    props.position !== 'Top' &&
+    !isCompact.value &&
+    !!groupExpanded[parentGroup.value] &&
+    !!childEl &&
+    !!navRef.value?.contains(childEl);
+
+  if (childCanHostIndicator) {
+    return { el: childEl, isChild: true };
+  }
+
+  return { el: itemRefs[parentGroup.value] || null, isChild: false };
+};
+
+const setIndicatorTarget = (el, isChild, animate = true) => {
+  if (!el) return;
+  prevSelectedEl = animate ? lastSelectedEl : null;
+  prevIsChild = lastIsChild;
+  lastSelectedEl = el;
+  lastIsChild = isChild;
+  const previousSkipTransition = skipTransition;
+  if (!animate) skipTransition = true;
+  calcIndicator();
+  if (!animate) {
+    requestAnimationFrame(() => {
+      skipTransition = previousSkipTransition;
+    });
+  }
+};
+
+const syncIndicatorToSelected = (animate = true) => {
+  const target = getResolvedIndicatorTarget();
+  if (target.el) setIndicatorTarget(target.el, target.isChild, animate);
+};
+
 const onItemClick = (item) => {
   emit('update:selectedValue', item.value);
-  nextTick(() => moveIndicatorTo(item.value, false));
+  nextTick(() => syncIndicatorToSelected(true));
 };
 
 const onChildClick = (group, child) => {
   emit('update:selectedValue', child.value);
-  nextTick(() => moveIndicatorTo(child.value, true));
+  nextTick(() => syncIndicatorToSelected(true));
 };
 
 const onGroupHeaderClick = (item) => {
@@ -224,64 +267,28 @@ const onGroupHeaderClick = (item) => {
   }
   if (item.selectsOnInvoked !== false && !isChildOfGroup(item)) {
     emit('update:selectedValue', item.value);
-    nextTick(() => moveIndicatorTo(item.value, false));
+    nextTick(() => syncIndicatorToSelected(true));
   }
   const wasExpanded = groupExpanded[item.value];
   groupExpanded[item.value] = !wasExpanded;
-  nextTick(() => measureGroup(item.value));
-  if (wasExpanded && isChildOfGroup(item)) {
-    const header = itemRefs[item.value];
-    if (header) {
-      prevSelectedEl = lastSelectedEl;
-      prevIsChild = lastIsChild;
-      lastSelectedEl = header;
-      lastIsChild = false;
-      skipTransition = false;
-      calcIndicator();
-    }
-  } else if (!wasExpanded && isChildOfGroup(item)) {
-    nextTick(() => {
-      measureGroup(item.value);
-      setTimeout(() => {
-        const sel = itemRefs[props.selectedValue];
-        if (sel) {
-          prevSelectedEl = lastSelectedEl;
-          prevIsChild = lastIsChild;
-          lastSelectedEl = sel;
-          lastIsChild = true;
-          skipTransition = false;
-          calcIndicator();
-        }
-      }, 300);
-    });
-  } else {
-    trackIndicatorDuringTransition();
-  }
+  nextTick(() => {
+    measureGroup(item.value);
+    syncIndicatorToSelected(true);
+    trackIndicatorDuringTransition(paneLayoutAnimationDuration);
+  });
 };
 
 let trackingRaf = null;
-const trackIndicatorDuringTransition = () => {
+const trackIndicatorDuringTransition = (duration = paneLayoutAnimationDuration) => {
   if (trackingRaf) cancelAnimationFrame(trackingRaf);
-  const track = indicatorTrack.value;
-  const indicatorEl = track?.querySelector('.win-nav-indicator');
-  if (!track || !indicatorEl || !lastSelectedEl || !navRef.value) return;
-  indicatorEl.getAnimations().forEach(a => a.cancel());
   const startTime = performance.now();
-  const duration = 350;
   const tick = () => {
-    if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) {
+    const target = getResolvedIndicatorTarget();
+    if (!target.el || !navRef.value || !navRef.value.contains(target.el)) {
       trackingRaf = null;
       return;
     }
-    const trackRect = track.getBoundingClientRect();
-    const elRect = lastSelectedEl.getBoundingClientRect();
-    const newY = elRect.top - trackRect.top + elRect.height / 2 - 8;
-    const targetRect = {
-      top: elRect.top - trackRect.top,
-      bottom: elRect.bottom - trackRect.top
-    };
-    track.style.clipPath = `polygon(0% ${targetRect.top}px, 100% ${targetRect.top}px, 100% ${targetRect.bottom}px, 0% ${targetRect.bottom}px)`;
-    indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' };
+    setIndicatorTarget(target.el, target.isChild, false);
     if (performance.now() - startTime < duration) {
       trackingRaf = requestAnimationFrame(tick);
     } else {
@@ -305,41 +312,13 @@ const onFlyoutSelect = (item) => {
     groupChevrons[flyoutGroupValue.value] = 'chevron-close';
   }
   nextTick(() => {
-    if (props.position === 'Top') {
-      const groupEl = itemRefs[flyoutGroupValue.value];
-      if (groupEl && !item.isHeader) {
-        moveIndicatorToEl(groupEl, false);
-      } else {
-        moveIndicatorTo(item.value, false);
-      }
-    } else {
-      const parentGroup = findParentGroup(item.value);
-      if (parentGroup) {
-        moveIndicatorToEl(itemRefs[parentGroup.value], false);
-      } else {
-        moveIndicatorTo(item.value, false);
-      }
-    }
+    syncIndicatorToSelected(true);
   });
-};
-
-const moveIndicatorTo = (value, isChild) => {
-  const el = itemRefs[value];
-  if (!el) return;
-  moveIndicatorToEl(el, isChild);
-};
-
-const moveIndicatorToEl = (el, isChild) => {
-  prevSelectedEl = lastSelectedEl;
-  prevIsChild = lastIsChild;
-  lastSelectedEl = el;
-  lastIsChild = isChild;
-  calcIndicator();
 };
 
 const selectSettings = () => {
   emit('update:selectedValue', 'settings');
-  nextTick(() => moveIndicatorTo('settings', false));
+  nextTick(() => syncIndicatorToSelected(true));
 };
 
 const toggleCompact = () => {
@@ -363,18 +342,24 @@ const onHamburgerAnimEnd = () => {
 };
 
 const onScroll = () => {
-  if (lastSelectedEl && navRef.value && navRef.value.contains(lastSelectedEl)) {
-    skipTransition = true;
-    calcIndicator();
-    requestAnimationFrame(() => { skipTransition = false; });
-  }
+  syncIndicatorToSelected(false);
 };
 
 const calcIndicator = () => {
   const sourceEl = prevSelectedEl && prevSelectedEl !== lastSelectedEl ? prevSelectedEl : null;
   prevSelectedEl = lastSelectedEl;
-  if (!navRef.value || !lastSelectedEl) return;
-  if (!navRef.value.contains(lastSelectedEl)) return;
+  if (!navRef.value || !lastSelectedEl) {
+    const target = getResolvedIndicatorTarget();
+    if (!target.el) return;
+    lastSelectedEl = target.el;
+    lastIsChild = target.isChild;
+  }
+  if (!navRef.value.contains(lastSelectedEl)) {
+    const target = getResolvedIndicatorTarget();
+    if (!target.el || !navRef.value.contains(target.el)) return;
+    lastSelectedEl = target.el;
+    lastIsChild = target.isChild;
+  }
 
   const track = indicatorTrack.value;
   const indicatorEl = track?.querySelector('.win-nav-indicator');
@@ -383,9 +368,9 @@ const calcIndicator = () => {
   const trackRect = track.getBoundingClientRect();
   const elRect = lastSelectedEl.getBoundingClientRect();
 
-  const getItemRectRelTrack = (el) => {
+  const getItemRectRelTrack = (el, baseTrackRect = trackRect) => {
     const r = el.getBoundingClientRect();
-    return { left: r.left - trackRect.left, right: r.right - trackRect.left, top: r.top - trackRect.top, bottom: r.bottom - trackRect.top };
+    return { left: r.left - baseTrackRect.left, right: r.right - baseTrackRect.left, top: r.top - baseTrackRect.top, bottom: r.bottom - baseTrackRect.top };
   };
 
   const targetRect = getItemRectRelTrack(lastSelectedEl);
@@ -413,89 +398,92 @@ const calcIndicator = () => {
 
   const crossLevel = (lastIsChild !== prevIsChild) && sourceEl;
 
-  const snapToFinal = (finalTransform, dimension, finalSize) => {
+  const snapToFinal = (dimension) => {
     requestAnimationFrame(() => {
       if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) return;
       const freshTrackRect = track.getBoundingClientRect();
       const freshElRect = lastSelectedEl.getBoundingClientRect();
-      const freshTargetRect = getItemRectRelTrack(lastSelectedEl);
+      const freshTargetRect = getItemRectRelTrack(lastSelectedEl, freshTrackRect);
       let expectedPos;
       if (dimension === 'x') {
-        expectedPos = freshElRect.left - freshTrackRect.left + freshElRect.width / 2 - 8;
+        expectedPos = freshElRect.left - freshTrackRect.left + freshElRect.width / 2 - indicatorLength / 2;
         track.style.clipPath = makeClipX(freshTargetRect, null);
-        indicatorStyle.value = { transform: `translateX(${expectedPos}px)`, width: '16px', opacity: '1', transition: 'none' };
+        indicatorStyle.value = { transform: `translateX(${expectedPos}px)`, width: `${indicatorLength}px`, opacity: '1', transition: 'none' };
       } else {
-        expectedPos = freshElRect.top - freshTrackRect.top + freshElRect.height / 2 - 8;
+        expectedPos = freshElRect.top - freshTrackRect.top + freshElRect.height / 2 - indicatorLength / 2;
         track.style.clipPath = makeClipY(freshTargetRect, null);
-        indicatorStyle.value = { transform: `translateY(${expectedPos}px)`, height: '16px', opacity: '1', transition: 'none' };
+        indicatorStyle.value = { transform: `translateY(${expectedPos}px)`, height: `${indicatorLength}px`, opacity: '1', transition: 'none' };
       }
     });
   };
 
   if (props.position === 'Top') {
-    const newX = elRect.left - trackRect.left + elRect.width / 2 - 8;
+    const newX = elRect.left - trackRect.left + elRect.width / 2 - indicatorLength / 2;
     if (skipTransition || indicatorStyle.value.opacity === '0') {
       indicatorEl.getAnimations().forEach(a => a.cancel());
       track.style.clipPath = makeClipX(targetRect, null);
-      indicatorStyle.value = { transition: 'none', transform: `translateX(${newX}px)`, width: '16px', opacity: '1' };
+      indicatorStyle.value = { transition: 'none', transform: `translateX(${newX}px)`, width: `${indicatorLength}px`, opacity: '1' };
       return;
     }
     const currentTransform = indicatorStyle.value.transform || '';
     const match = currentTransform.match(/translateX\(([-\d.]+)px\)/);
     const oldX = match ? parseFloat(match[1]) : newX;
     const dist = Math.abs(newX - oldX);
-    if (dist < 1) { track.style.clipPath = makeClipX(targetRect, null); indicatorStyle.value = { transform: `translateX(${newX}px)`, width: '16px', opacity: '1' }; return; }
+    if (dist < 1) { track.style.clipPath = makeClipX(targetRect, null); indicatorStyle.value = { transform: `translateX(${newX}px)`, width: `${indicatorLength}px`, opacity: '1' }; return; }
 
-    const stretchW = dist + 16;
+    const stretchW = dist + indicatorLength;
     indicatorEl.getAnimations().forEach(a => a.cancel());
-    const hideThreshold = 160;
+    const sourceInFooter = sourceEl ? isFooterElement(sourceEl) : false;
+    const targetInFooter = isFooterElement(lastSelectedEl);
+    const useConnectedAnimation = sourceEl && !sourceInFooter && !targetInFooter;
+    const hideThreshold = useConnectedAnimation ? Infinity : 160;
 
     if (stretchW <= hideThreshold) {
-      indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
+      indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: `${indicatorLength}px`, opacity: '1', transition: 'none' };
       track.style.clipPath = makeClipX(targetRect, sourceRect);
       const movingRight = newX > oldX;
-      const dur = 600;
+      const dur = connectedAnimationDuration;
       const easeOut = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
       let keyframes;
       if (movingRight) {
         keyframes = [
-          { transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: easeOut },
+          { transform: `translateX(${oldX}px)`, width: `${indicatorLength}px`, offset: 0, easing: easeOut },
           { transform: `translateX(${oldX}px)`, width: `${stretchW}px`, offset: 0.333, easing: easeOut },
-          { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }
+          { transform: `translateX(${newX}px)`, width: `${indicatorLength}px`, offset: 1 }
         ];
       } else {
         keyframes = [
-          { transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: easeOut },
+          { transform: `translateX(${oldX}px)`, width: `${indicatorLength}px`, offset: 0, easing: easeOut },
           { transform: `translateX(${newX}px)`, width: `${stretchW}px`, offset: 0.333, easing: easeOut },
-          { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }
+          { transform: `translateX(${newX}px)`, width: `${indicatorLength}px`, offset: 1 }
         ];
       }
       const anim = indicatorEl.animate(keyframes, { duration: dur, fill: 'forwards' });
-      anim.onfinish = () => snapToFinal(`translateX(${newX}px)`, 'x', '16px');
+      anim.onfinish = () => snapToFinal('x');
       return;
     }
 
     const movingRight = newX > oldX;
-    indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
+    indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: `${indicatorLength}px`, opacity: '1', transition: 'none' };
     track.style.clipPath = makeClipX(targetRect, sourceRect);
-    const collapseDur = 350; const expandDur = 350;
+    const collapseDur = farAnimationDuration; const expandDur = farAnimationDuration;
     const easeCollapse = 'cubic-bezier(0.4, 0.0, 0.7, 0.3)'; const easeExpand = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
     let collapseKeyframes, expandKeyframes;
     if (movingRight) {
-      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: easeCollapse }, { transform: `translateX(${oldX + 16}px)`, width: '0px', offset: 1 }];
-      expandKeyframes = [{ transform: `translateX(${newX}px)`, width: '0px', offset: 0, easing: easeExpand }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }];
+      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: `${indicatorLength}px`, offset: 0, easing: easeCollapse }, { transform: `translateX(${oldX + indicatorLength}px)`, width: '0px', offset: 1 }];
+      expandKeyframes = [{ transform: `translateX(${newX}px)`, width: '0px', offset: 0, easing: easeExpand }, { transform: `translateX(${newX}px)`, width: `${indicatorLength}px`, offset: 1 }];
     } else {
-      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: easeCollapse }, { transform: `translateX(${oldX}px)`, width: '0px', offset: 1 }];
-      expandKeyframes = [{ transform: `translateX(${newX + 16}px)`, width: '0px', offset: 0, easing: easeExpand }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }];
+      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: `${indicatorLength}px`, offset: 0, easing: easeCollapse }, { transform: `translateX(${oldX}px)`, width: '0px', offset: 1 }];
+      expandKeyframes = [{ transform: `translateX(${newX + indicatorLength}px)`, width: '0px', offset: 0, easing: easeExpand }, { transform: `translateX(${newX}px)`, width: `${indicatorLength}px`, offset: 1 }];
     }
     const collapseAnim = indicatorEl.animate(collapseKeyframes, { duration: collapseDur, fill: 'forwards' });
     collapseAnim.onfinish = () => {
       const expandAnim = indicatorEl.animate(expandKeyframes, { duration: expandDur, fill: 'forwards' });
-      expandAnim.onfinish = () => snapToFinal(`translateX(${newX}px)`, 'x', '16px');
+      expandAnim.onfinish = () => snapToFinal('x');
     };
 
   } else {
-    const newY = elRect.top - trackRect.top + elRect.height / 2 - 8;
+    const newY = elRect.top - trackRect.top + elRect.height / 2 - indicatorLength / 2;
 
     const scrollEl = scrollArea.value;
     let visibleTop = 0;
@@ -527,7 +515,7 @@ const calcIndicator = () => {
     if (skipTransition || indicatorStyle.value.opacity === '0') {
       indicatorEl.getAnimations().forEach(a => a.cancel());
       track.style.clipPath = makeClipY(clampedTargetRect, null);
-      indicatorStyle.value = { transition: 'none', transform: `translateY(${newY}px)`, height: '16px', opacity: '1' };
+      indicatorStyle.value = { transition: 'none', transform: `translateY(${newY}px)`, height: `${indicatorLength}px`, opacity: '1' };
       indicatorIsChild.value = lastIsChild;
       return;
     }
@@ -535,7 +523,7 @@ const calcIndicator = () => {
     const match = currentTransform.match(/translateY\(([-\d.]+)px\)/);
     const oldY = match ? parseFloat(match[1]) : newY;
     const dist = Math.abs(newY - oldY);
-    if (dist < 1) { track.style.clipPath = makeClipY(clampedTargetRect, null); indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1' }; indicatorIsChild.value = lastIsChild; return; }
+    if (dist < 1) { track.style.clipPath = makeClipY(clampedTargetRect, null); indicatorStyle.value = { transform: `translateY(${newY}px)`, height: `${indicatorLength}px`, opacity: '1' }; indicatorIsChild.value = lastIsChild; return; }
 
     let clampedSourceRect = sourceRect;
     if (sourceRect && scrollEl) {
@@ -555,40 +543,40 @@ const calcIndicator = () => {
     indicatorEl.getAnimations().forEach(a => a.cancel());
 
     if (crossLevel) {
-      indicatorStyle.value = { transform: `translateY(${oldY}px)`, height: '16px', opacity: '1', transition: 'none' };
+      indicatorStyle.value = { transform: `translateY(${oldY}px)`, height: `${indicatorLength}px`, opacity: '1', transition: 'none' };
       const movingDown = newY > oldY;
-      const collapseDur = 350; const expandDur = 350;
+      const collapseDur = farAnimationDuration; const expandDur = farAnimationDuration;
       const easeCollapse = 'cubic-bezier(0.4, 0.0, 0.7, 0.3)'; const easeExpand = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
       let collapseKf, expandKf;
       if (movingDown) {
-        collapseKf = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeCollapse }, { transform: `translateY(${oldY + 16}px)`, height: '0px', offset: 1 }];
-        expandKf = [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+        collapseKf = [{ transform: `translateY(${oldY}px)`, height: `${indicatorLength}px`, offset: 0, easing: easeCollapse }, { transform: `translateY(${oldY + indicatorLength}px)`, height: '0px', offset: 1 }];
+        expandKf = [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: `${indicatorLength}px`, offset: 1 }];
       } else {
-        collapseKf = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeCollapse }, { transform: `translateY(${oldY}px)`, height: '0px', offset: 1 }];
-        expandKf = [{ transform: `translateY(${newY + 16}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+        collapseKf = [{ transform: `translateY(${oldY}px)`, height: `${indicatorLength}px`, offset: 0, easing: easeCollapse }, { transform: `translateY(${oldY}px)`, height: '0px', offset: 1 }];
+        expandKf = [{ transform: `translateY(${newY + indicatorLength}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: `${indicatorLength}px`, offset: 1 }];
       }
       const collapseAnim = indicatorEl.animate(collapseKf, { duration: collapseDur, fill: 'forwards' });
       collapseAnim.onfinish = () => {
         indicatorIsChild.value = lastIsChild;
         const expandAnim = indicatorEl.animate(expandKf, { duration: expandDur, fill: 'forwards' });
-        expandAnim.onfinish = () => snapToFinal(`translateY(${newY}px)`, 'y', '16px');
+        expandAnim.onfinish = () => snapToFinal('y');
       };
       return;
     }
 
     indicatorIsChild.value = lastIsChild;
     const movingDown = newY > oldY;
-    const stretchH = dist + 16;
-    indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' };
-    const dur = 600; const easeOut = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
+    const stretchH = dist + indicatorLength;
+    indicatorStyle.value = { transform: `translateY(${newY}px)`, height: `${indicatorLength}px`, opacity: '1', transition: 'none' };
+    const dur = connectedAnimationDuration; const easeOut = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
     let keyframes;
     if (movingDown) {
-      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeOut }, { transform: `translateY(${oldY}px)`, height: `${stretchH}px`, offset: 0.333, easing: easeOut }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+      keyframes = [{ transform: `translateY(${oldY}px)`, height: `${indicatorLength}px`, offset: 0, easing: easeOut }, { transform: `translateY(${oldY}px)`, height: `${stretchH}px`, offset: 0.333, easing: easeOut }, { transform: `translateY(${newY}px)`, height: `${indicatorLength}px`, offset: 1 }];
     } else {
-      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: easeOut }, { transform: `translateY(${newY}px)`, height: `${stretchH}px`, offset: 0.333, easing: easeOut }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
+      keyframes = [{ transform: `translateY(${oldY}px)`, height: `${indicatorLength}px`, offset: 0, easing: easeOut }, { transform: `translateY(${newY}px)`, height: `${stretchH}px`, offset: 0.333, easing: easeOut }, { transform: `translateY(${newY}px)`, height: `${indicatorLength}px`, offset: 1 }];
     }
     const anim = indicatorEl.animate(keyframes, { duration: dur, fill: 'forwards' });
-    anim.onfinish = () => snapToFinal(`translateY(${newY}px)`, 'y', '16px');
+    anim.onfinish = () => snapToFinal('y');
   }
 };
 
@@ -596,18 +584,10 @@ let resizeTimer = null;
 const onResize = () => {
   skipTransition = true;
   if (resizeTimer) cancelAnimationFrame(resizeTimer);
-  if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) {
-    const val = props.selectedValue;
-    if (val) {
-      const parentGroup = findParentGroup(val);
-      if (parentGroup && (props.position === 'Top' || isCompact.value)) {
-        lastSelectedEl = itemRefs[parentGroup.value] || null;
-        lastIsChild = false;
-      } else {
-        lastSelectedEl = itemRefs[val] || null;
-        lastIsChild = !!parentGroup;
-      }
-    }
+  const target = getResolvedIndicatorTarget();
+  if (target.el) {
+    lastSelectedEl = target.el;
+    lastIsChild = target.isChild;
   }
   calcIndicator();
   resizeTimer = requestAnimationFrame(() => {
@@ -627,23 +607,7 @@ const refreshAfterPositionChange = () => {
   nextTick(() => {
     rebindRo();
     measureAllGroups();
-    const val = props.selectedValue;
-    if (val) {
-      const parentGroup = findParentGroup(val);
-      if (parentGroup) {
-        if (props.position === 'Top') {
-          lastSelectedEl = itemRefs[parentGroup.value];
-          lastIsChild = false;
-        } else {
-          lastSelectedEl = itemRefs[val];
-          lastIsChild = true;
-        }
-      } else {
-        lastSelectedEl = itemRefs[val];
-        lastIsChild = false;
-      }
-      calcIndicator();
-    }
+    syncIndicatorToSelected(false);
     requestAnimationFrame(() => { skipTransition = false; });
   });
 };
@@ -652,38 +616,17 @@ const initIndicator = () => {
   skipTransition = true;
   nextTick(() => {
     measureAllGroups();
-    const val = props.selectedValue;
-    if (val) {
-      const parentGroup = findParentGroup(val);
-      if (parentGroup) {
-        if (props.position !== 'Top') {
-          if (!groupExpanded[parentGroup.value]) {
-            groupExpanded[parentGroup.value] = true;
-            nextTick(() => {
-              measureGroup(parentGroup.value);
-              nextTick(() => {
-                lastSelectedEl = itemRefs[val];
-                lastIsChild = true;
-                indicatorIsChild.value = true;
-                calcIndicator();
-                requestAnimationFrame(() => { skipTransition = false; });
-              });
-            });
-            return;
-          }
-          lastSelectedEl = itemRefs[val];
-          lastIsChild = true;
-          indicatorIsChild.value = true;
-        } else {
-          lastSelectedEl = itemRefs[parentGroup.value];
-          lastIsChild = false;
-        }
-      } else {
-        lastSelectedEl = itemRefs[val];
-        lastIsChild = false;
-      }
-      calcIndicator();
+    const parentGroup = findParentGroup(props.selectedValue);
+    if (parentGroup && props.position !== 'Top' && !isCompact.value) {
+      groupExpanded[parentGroup.value] = true;
+      nextTick(() => {
+        measureGroup(parentGroup.value);
+        syncIndicatorToSelected(false);
+        requestAnimationFrame(() => { skipTransition = false; });
+      });
+      return;
     }
+    syncIndicatorToSelected(false);
     requestAnimationFrame(() => { skipTransition = false; });
   });
 };
@@ -694,132 +637,47 @@ onMounted(() => {
   initIndicator();
 });
 
-onBeforeUnmount(() => { if (ro) ro.disconnect(); window.removeEventListener('resize', onResize); });
+onBeforeUnmount(() => {
+  if (ro) ro.disconnect();
+  if (trackingRaf) cancelAnimationFrame(trackingRaf);
+  if (resizeTimer) cancelAnimationFrame(resizeTimer);
+  window.removeEventListener('resize', onResize);
+});
 
 watch(() => props.position, refreshAfterPositionChange);
 
 watch(isCompact, (compact) => {
   if (compact) {
-    const parentGroup = findParentGroup(props.selectedValue);
-    let savedOldY = null;
-    if (parentGroup && lastSelectedEl && navRef.value && indicatorTrack.value) {
-      const trackRect = indicatorTrack.value.getBoundingClientRect();
-      const elRect = lastSelectedEl.getBoundingClientRect();
-      savedOldY = elRect.top - trackRect.top + elRect.height / 2 - 8;
-    }
-    const wasChild = lastIsChild;
     for (const item of props.menuItems) {
       if (item.children && groupExpanded[item.value]) {
         groupExpanded[item.value] = false;
       }
     }
-    if (parentGroup) {
-      let animating = true;
-      const origOnResize = onResize;
-      const guardedResize = () => { if (!animating) origOnResize(); };
-      if (ro) { ro.disconnect(); ro = new ResizeObserver(guardedResize); if (navRef.value) ro.observe(navRef.value); }
-      nextTick(() => {
-        const header = itemRefs[parentGroup.value];
-        if (header) {
-          lastSelectedEl = header;
-          lastIsChild = false;
-          if (savedOldY !== null && wasChild) {
-            const track = indicatorTrack.value;
-            const indicatorEl = track?.querySelector('.win-nav-indicator');
-            if (track && indicatorEl) {
-              const trackRect = track.getBoundingClientRect();
-              const headerRect = header.getBoundingClientRect();
-              const newY = headerRect.top - trackRect.top + headerRect.height / 2 - 8;
-              const targetR = { top: headerRect.top - trackRect.top, bottom: headerRect.bottom - trackRect.top };
-              indicatorEl.getAnimations().forEach(a => a.cancel());
-              track.style.clipPath = `polygon(0% ${Math.min(targetR.top, savedOldY)}px, 100% ${Math.min(targetR.top, savedOldY)}px, 100% ${Math.max(targetR.bottom, savedOldY + 16)}px, 0% ${Math.max(targetR.bottom, savedOldY + 16)}px)`;
-              indicatorIsChild.value = false;
-              indicatorStyle.value = { transform: `translateY(${savedOldY}px)`, height: '16px', opacity: '1', transition: 'none' };
-              const collapseDur = 300; const expandDur = 300;
-              const easeCollapse = 'cubic-bezier(0.4, 0.0, 0.7, 0.3)';
-              const easeExpand = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
-              const movingDown = newY > savedOldY;
-              let collapseKf, expandKf;
-              if (movingDown) {
-                collapseKf = [{ transform: `translateY(${savedOldY}px)`, height: '16px', offset: 0, easing: easeCollapse }, { transform: `translateY(${savedOldY + 16}px)`, height: '0px', offset: 1 }];
-                expandKf = [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-              } else {
-                collapseKf = [{ transform: `translateY(${savedOldY}px)`, height: '16px', offset: 0, easing: easeCollapse }, { transform: `translateY(${savedOldY}px)`, height: '0px', offset: 1 }];
-                expandKf = [{ transform: `translateY(${newY + 16}px)`, height: '0px', offset: 0, easing: easeExpand }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-              }
-              const collapseAnim = indicatorEl.animate(collapseKf, { duration: collapseDur, fill: 'forwards' });
-              collapseAnim.onfinish = () => {
-                const freshTrackRect = track.getBoundingClientRect();
-                const freshHeaderRect = header.getBoundingClientRect();
-                const freshNewY = freshHeaderRect.top - freshTrackRect.top + freshHeaderRect.height / 2 - 8;
-                const freshTargetR = { top: freshHeaderRect.top - freshTrackRect.top, bottom: freshHeaderRect.bottom - freshTrackRect.top };
-                const finalExpandKf = [
-                  { transform: `translateY(${freshNewY}px)`, height: '0px', offset: 0, easing: easeExpand },
-                  { transform: `translateY(${freshNewY}px)`, height: '16px', offset: 1 }
-                ];
-                track.style.clipPath = `polygon(0% ${freshTargetR.top}px, 100% ${freshTargetR.top}px, 100% ${freshTargetR.bottom}px, 0% ${freshTargetR.bottom}px)`;
-                const expandAnim = indicatorEl.animate(finalExpandKf, { duration: expandDur, fill: 'forwards' });
-                expandAnim.onfinish = () => {
-                  animating = false;
-                  rebindRo();
-                  const ft = track.getBoundingClientRect();
-                  const fh = header.getBoundingClientRect();
-                  const fy = fh.top - ft.top + fh.height / 2 - 8;
-                  const ftr = { top: fh.top - ft.top, bottom: fh.bottom - ft.top };
-                  track.style.clipPath = `polygon(0% ${ftr.top}px, 100% ${ftr.top}px, 100% ${ftr.bottom}px, 0% ${ftr.bottom}px)`;
-                  indicatorStyle.value = { transform: `translateY(${fy}px)`, height: '16px', opacity: '1', transition: 'none' };
-                };
-              };
-            } else {
-              animating = false;
-              rebindRo();
-            }
-          } else {
-            animating = false;
-            rebindRo();
-            skipTransition = true;
-            calcIndicator();
-            requestAnimationFrame(() => { skipTransition = false; });
-          }
-        } else {
-          animating = false;
-          rebindRo();
-        }
-      });
-    }
+    closeFlyout();
   } else {
     const parentGroup = findParentGroup(props.selectedValue);
     if (parentGroup) {
       groupExpanded[parentGroup.value] = true;
-      nextTick(() => {
-        measureGroup(parentGroup.value);
-        setTimeout(() => {
-          const sel = itemRefs[props.selectedValue];
-          if (sel) {
-            prevSelectedEl = lastSelectedEl;
-            prevIsChild = lastIsChild;
-            lastSelectedEl = sel;
-            lastIsChild = true;
-            skipTransition = false;
-            calcIndicator();
-          }
-        }, 300);
-      });
     }
   }
+  nextTick(() => {
+    measureAllGroups();
+    syncIndicatorToSelected(true);
+    trackIndicatorDuringTransition(paneLayoutAnimationDuration);
+  });
 });
 
 watch(() => props.selectedValue, (val) => {
   if (!val) return;
   const parentGroup = findParentGroup(val);
-  if (props.position === 'Top' && parentGroup) {
-    nextTick(() => {
-      const groupEl = itemRefs[parentGroup.value];
-      if (groupEl) {
-        moveIndicatorToEl(groupEl, false);
-      }
-    });
+  if (parentGroup && props.position !== 'Top' && !isCompact.value) {
+    groupExpanded[parentGroup.value] = true;
   }
+  nextTick(() => {
+    measureAllGroups();
+    syncIndicatorToSelected(true);
+    if (parentGroup) trackIndicatorDuringTransition(paneLayoutAnimationDuration);
+  });
 });</script>
 <style>
   .win-nav-shell {
