@@ -27,21 +27,26 @@
             <span class="label">{{ item.label }}</span>
           </div>
         </template>
-        <div class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === 'settings' }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef('settings', el)">
-          <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">&#xE713;</span>
-          <span class="label">Settings</span>
+        <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
+          <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
+          <span class="label">{{ settingsLabel }}</span>
         </div>
       </div>
     </nav>
-    <nav v-else class="win-nav-left-panel" :class="{ 'is-compact': isCompact, 'is-minimal': isLeftMinimalMode }" ref="navRef">
+    <nav v-else class="win-nav-left-panel" :class="{ 'is-compact': isCompact, 'is-minimal': isLeftMinimalMode }" :style="paneStyle" ref="navRef">
       <div class="win-nav-indicator-track" ref="indicatorTrack" v-show="!isLeftMinimalMode || !isCompact">
         <div class="win-nav-indicator" :class="{ 'is-child': indicatorIsChild }" :style="indicatorStyle"></div>
       </div>
       <div v-if="showBackButtonInLeftNav" class="win-nav-back-button" :class="{ 'is-disabled': !canGoBack }" role="button" :aria-disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
         <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
       </div>
-      <div class="win-nav-hamburger" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
+      <div v-if="isPaneToggleButtonVisible" class="win-nav-hamburger" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
         <span class="icon animated-icon animated-icon-hamburger" :class="hamburgerClass" @animationend="onHamburgerAnimEnd">&#xE700;</span>
+      </div>
+      <div v-if="$slots.paneHeader || paneTitle || $slots.autoSuggestBox" class="win-nav-pane-top" v-show="!isLeftMinimalMode || !isCompact">
+        <div v-if="$slots.paneHeader" class="win-nav-pane-header"><slot name="paneHeader"></slot></div>
+        <div v-if="paneTitle" class="win-nav-pane-title">{{ paneTitle }}</div>
+        <div v-if="$slots.autoSuggestBox" class="win-nav-pane-search"><slot name="autoSuggestBox"></slot></div>
       </div>
       <div class="win-nav-left-scrollable" ref="scrollArea" @scroll="onScroll" v-show="!isLeftMinimalMode || !isCompact">
         <div class="win-nav-menu">
@@ -69,19 +74,23 @@
         </div>
       </div>
       <div class="win-nav-footer" v-show="!isLeftMinimalMode || !isCompact">
+        <div v-if="$slots.paneFooter" class="win-nav-pane-footer"><slot name="paneFooter"></slot></div>
         <template v-for="item in footerItems" :key="item.value">
           <div class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
             <span class="label">{{ item.label }}</span>
           </div>
         </template>
-        <div class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === 'settings' }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef('settings', el)">
-          <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">&#xE713;</span>
-          <span class="label">Settings</span>
+        <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
+          <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
+          <span class="label">{{ settingsLabel }}</span>
         </div>
       </div>
     </nav>
     <main class="win-nav-content">
+      <div v-if="$slots.header || header" class="win-nav-page-header">
+        <slot name="header">{{ header }}</slot>
+      </div>
       <div class="win-nav-content-inner"><slot></slot></div>
     </main>
     <WinMenuFlyout :open="flyoutOpen" :anchorRect="flyoutAnchor" :items="flyoutItems" @close="closeFlyout" @select="onFlyoutSelect" />
@@ -93,16 +102,28 @@ import WinMenuFlyout from './WinMenuFlyout.vue';
 
 const props = defineProps({
   position: { type: String, default: 'Left' },
+  paneDisplayMode: String,
   selectedValue: String,
   menuItems: { type: Array, default: () => [] },
   footerItems: { type: Array, default: () => [] },
   showBackButton: { type: Boolean, default: false },
-  backTarget: { type: [String, Function], default: null }
+  isBackButtonVisible: { type: [Boolean, String], default: 'auto' },
+  backTarget: { type: [String, Function], default: null },
+  isSettingsVisible: { type: Boolean, default: true },
+  isPaneToggleButtonVisible: { type: Boolean, default: true },
+  isPaneOpen: { type: Boolean, default: undefined },
+  openPaneLength: { type: Number, default: 320 },
+  compactPaneLength: { type: Number, default: 48 },
+  paneTitle: { type: String, default: '' },
+  header: { type: String, default: '' },
+  settingsValue: { type: String, default: 'settings' },
+  settingsLabel: { type: String, default: 'Settings' },
+  settingsIcon: { type: String, default: '\uE713' }
 });
 
 const titleBarVisible = inject('winTitleBarVisible', ref(false));
 const hasTitlebar = computed(() => titleBarVisible.value);
-const emit = defineEmits(['update:selectedValue', 'back']);
+const emit = defineEmits(['update:selectedValue', 'update:isPaneOpen', 'back']);
 const isCompact = ref(false);
 const navRef = ref(null);
 const indicatorTrack = ref(null);
@@ -117,11 +138,29 @@ const flyoutAnchor = ref(null);
 const flyoutItems = ref([]);
 const flyoutGroupValue = ref(null);
 
-const isTopNavigation = computed(() => props.position === 'Top');
-const isLeftMinimalMode = computed(() => props.position === 'LeftMinimal');
-const isLeftCompactMode = computed(() => props.position === 'LeftCompact');
+const normalizedPaneDisplayMode = computed(() => props.paneDisplayMode || props.position);
+const isTopNavigation = computed(() => normalizedPaneDisplayMode.value === 'Top');
+const isLeftMinimalMode = computed(() => normalizedPaneDisplayMode.value === 'LeftMinimal');
+const isLeftCompactMode = computed(() => normalizedPaneDisplayMode.value === 'LeftCompact');
 const isLeftOverlayMode = computed(() => isLeftMinimalMode.value || isLeftCompactMode.value);
-const showBackButtonInLeftNav = computed(() => props.showBackButton && !isTopNavigation.value);
+const isSettingsVisible = computed(() => props.isSettingsVisible);
+const isPaneToggleButtonVisible = computed(() => props.isPaneToggleButtonVisible);
+const paneTitle = computed(() => props.paneTitle);
+const header = computed(() => props.header);
+const settingsValue = computed(() => props.settingsValue);
+const settingsLabel = computed(() => props.settingsLabel);
+const settingsIcon = computed(() => props.settingsIcon);
+const showBackButtonResolved = computed(() => {
+  if (props.isBackButtonVisible === 'visible') return true;
+  if (props.isBackButtonVisible === 'collapsed') return false;
+  if (typeof props.isBackButtonVisible === 'boolean') return props.isBackButtonVisible;
+  return props.showBackButton;
+});
+const showBackButtonInLeftNav = computed(() => showBackButtonResolved.value && !isTopNavigation.value);
+const paneStyle = computed(() => ({
+  '--win-nav-open-pane-length': `${props.openPaneLength}px`,
+  '--win-nav-compact-pane-length': `${props.compactPaneLength}px`
+}));
 const shellClasses = computed(() => [
   isTopNavigation.value ? 'is-top' : 'is-left',
   isLeftOverlayMode.value ? 'is-overlay-left' : '',
@@ -222,7 +261,7 @@ const findParentGroup = (val) => {
 };
 
 const isFooterValue = (value) => {
-  return value === 'settings' || props.footerItems.some(item => item.value === value);
+  return value === settingsValue.value || props.footerItems.some(item => item.value === value);
 };
 
 const getValueForElement = (el) => {
@@ -269,7 +308,7 @@ const collapseOverlayAfterNavigation = () => {
   if (!isLeftOverlayMode.value || isCompact.value) return;
   requestAnimationFrame(() => {
     if (isLeftOverlayMode.value && !isCompact.value) {
-      isCompact.value = true;
+      setCompact(true);
     }
   });
 };
@@ -587,14 +626,24 @@ const onBackClick = () => {
 };
 
 const selectSettings = () => {
-  selectNavigationValue('settings', false);
+  if (!isSettingsVisible.value) return;
+  selectNavigationValue(settingsValue.value, false);
 };
 
 const toggleCompact = () => {
-  isCompact.value = !isCompact.value;
+  setCompact(!isCompact.value);
+};
+
+const setCompact = (compact) => {
+  isCompact.value = compact;
+  emit('update:isPaneOpen', !compact);
 };
 
 const syncDisplayMode = () => {
+  if (typeof props.isPaneOpen === 'boolean') {
+    isCompact.value = !props.isPaneOpen;
+    return;
+  }
   if (isLeftOverlayMode.value) {
     isCompact.value = true;
   } else if (!isTopNavigation.value) {
@@ -607,7 +656,7 @@ const onDocumentPointerDown = (event) => {
   const target = event.target;
   if (navRef.value?.contains(target)) return;
   if (target?.closest?.('.win-menu-flyout-wrap')) return;
-  isCompact.value = true;
+  setCompact(true);
 };
 
 const onGearDown = () => { gearPressed = true; gearRewindDone = false; gearClass.value = 'gear-rewind'; };
@@ -1029,6 +1078,25 @@ watch(() => props.position, () => {
   refreshAfterPositionChange();
 });
 
+watch(() => props.paneDisplayMode, () => {
+  syncDisplayMode();
+  refreshAfterPositionChange();
+});
+
+watch(() => props.isPaneOpen, (value) => {
+  if (typeof value === 'boolean') {
+    isCompact.value = !value;
+  }
+});
+
+watch(isSettingsVisible, (visible) => {
+  if (visible) return;
+  delete itemRefs[settingsValue.value];
+  if (props.selectedValue === settingsValue.value) {
+    selectNavigationValue(props.menuItems[0]?.value || '', false);
+  }
+});
+
 watch(isCompact, (compact) => {
   const activeIndicator = indicatorTrack.value?.querySelector('.win-nav-indicator');
   nextIndicatorAnimation(activeIndicator);
@@ -1216,9 +1284,24 @@ watch(() => props.selectedValue, (val, oldVal) => {
     padding: 24px 32px;
   }
 
+  .win-nav-page-header {
+    min-height: 48px;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid transparent;
+  }
+
+    .win-nav-page-header + .win-nav-content-inner {
+      padding-top: 16px;
+    }
+
   .win-nav-left-panel {
     position: relative;
-    width: 320px;
+    width: var(--win-nav-open-pane-length, 320px);
     display: flex;
     flex-direction: column;
     padding: 4px 4px;
@@ -1244,11 +1327,11 @@ watch(() => props.selectedValue, (val, oldVal) => {
     }
 
     .win-nav-left-panel.is-compact {
-      width: 48px;
+      width: var(--win-nav-compact-pane-length, 48px);
     }
 
     .win-nav-shell.is-left-minimal .win-nav-left-panel.is-compact {
-      width: 48px;
+      width: var(--win-nav-compact-pane-length, 48px);
       background: transparent;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
@@ -1286,6 +1369,42 @@ watch(() => props.selectedValue, (val, oldVal) => {
     background: var(--app-bg);
   }
 
+  .win-nav-pane-top {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+    padding: 6px 8px 8px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .win-nav-pane-header,
+  .win-nav-pane-footer {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+  }
+
+  .win-nav-pane-title {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .win-nav-pane-search {
+    display: flex;
+    align-items: center;
+  }
+
+    .win-nav-pane-search > * {
+      width: 100%;
+    }
+
   .win-nav-shell.is-overlay-left .win-nav-footer {
     background: transparent;
   }
@@ -1317,6 +1436,10 @@ watch(() => props.selectedValue, (val, oldVal) => {
       height: 16px;
       font-size: 12px;
       line-height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translate(0.2px, 0px);
     }
 
   .win-nav-settings-item .animated-icon-gear {
