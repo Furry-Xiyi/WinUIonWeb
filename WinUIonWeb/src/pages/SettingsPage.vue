@@ -15,6 +15,19 @@
     <WinRadioButton value="light" v-model="themeSetting">Light</WinRadioButton>
     <WinRadioButton value="dark" v-model="themeSetting">Dark</WinRadioButton>
   </WinExpander>
+  <WinExpander v-if="isHostedInUwpWebView">
+    <template #header>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="icon" style="font-size: 20px; width: 25px; text-align: center;">&#xE2B1;</span>
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-size: 14px;">Material</span>
+          <span style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Choose the app background material</span>
+        </div>
+      </div>
+    </template>
+    <WinRadioButton value="mica" v-model="materialSetting">Mica</WinRadioButton>
+    <WinRadioButton value="acrylic" v-model="materialSetting">Acrylic</WinRadioButton>
+  </WinExpander>
   <WinExpander>
     <template #header>
       <div style="display: flex; align-items: center; gap: 12px;">
@@ -50,8 +63,10 @@ import WinRadioButton from '../components/WinRadioButton.vue';
 import WinSettingsCard from '../components/WinSettingsCard.vue';
 import WinComboBox from '../components/WinComboBox.vue';
 const themeSetting = inject('themeSetting');
+const materialSetting = inject('materialSetting');
 const animSetting = inject('animSetting');
 const navPosition = inject('navPosition');
+const isHostedInUwpWebView = inject('isHostedInUwpWebView');
 const navPositionOptions = [
   { label: 'Left', value: 'Auto' },
   { label: 'Top', value: 'Top' }

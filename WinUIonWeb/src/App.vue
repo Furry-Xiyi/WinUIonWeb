@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, watch, provide, computed } from 'vue';
+import { ref, watch, provide, computed, onMounted } from 'vue';
 import WinTitleBar from './components/WinTitleBar.vue';
 import WinNavigationView from './components/WinNavigationView.vue';
 
@@ -100,13 +100,17 @@ const currentPage = ref('home');
 const navPosition = ref(readStoredSetting('winui-nav-position', 'Auto', ['Auto', 'Top', 'Left']));
 if (navPosition.value === 'Left') navPosition.value = 'Auto';
 const themeSetting = ref(readStoredSetting('winui-theme-setting', 'system', ['system', 'light', 'dark']));
+const materialSetting = ref(readStoredSetting('winui-material-setting', 'mica', ['mica', 'acrylic']));
 const animSetting = ref(readStoredSetting('winui-animation-setting', 'entrance', ['entrance', 'drill', 'fade']));
 const pageTransition = ref('page-transition-up');
+const isHostedInUwpWebView = ref(false);
 
 provide('themeSetting', themeSetting);
+provide('materialSetting', materialSetting);
 provide('animSetting', animSetting);
 provide('navPosition', navPosition);
 provide('currentPage', currentPage);
+provide('isHostedInUwpWebView', isHostedInUwpWebView);
 
 const pageComponent = computed(() => pageMap[currentPage.value] || HomePage);
 
@@ -169,7 +173,27 @@ function applyTheme(mode) {
 watch(themeSetting, (val) => applyTheme(val), { immediate: true });
 persistSetting('winui-nav-position', navPosition);
 persistSetting('winui-theme-setting', themeSetting);
+persistSetting('winui-material-setting', materialSetting);
 persistSetting('winui-animation-setting', animSetting);
+
+function postUwpSetting(key, value) {
+  if (!isHostedInUwpWebView.value || !window.chrome?.webview?.postMessage) return;
+  window.chrome.webview.postMessage({
+    source: 'WinUIonWeb',
+    type: 'appSettingChanged',
+    key,
+    value
+  });
+}
+
+onMounted(() => {
+  isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__ || window.chrome?.webview);
+  postUwpSetting('theme', themeSetting.value);
+  postUwpSetting('material', materialSetting.value);
+});
+
+watch(themeSetting, (value) => postUwpSetting('theme', value));
+watch(materialSetting, (value) => postUwpSetting('material', value));
 
 watch(currentPage, (newVal, oldVal) => {
   const ni = allPages.indexOf(newVal);
