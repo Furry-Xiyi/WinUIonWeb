@@ -1,6 +1,6 @@
 <template>
-  <div class="win-nav-shell" :class="[position === 'Top' ? 'is-top' : 'is-left', hasTitlebar ? 'has-titlebar' : '']">
-    <nav v-if="position === 'Top'" class="win-nav-top-bar" ref="navRef">
+  <div class="win-nav-shell" :class="shellClasses">
+    <nav v-if="isTopNavigation" class="win-nav-top-bar" ref="navRef">
       <div class="win-nav-indicator-track" ref="indicatorTrack">
         <div class="win-nav-indicator" :style="indicatorStyle"></div>
       </div>
@@ -33,14 +33,14 @@
         </div>
       </div>
     </nav>
-    <nav v-else class="win-nav-left-panel" :class="{ 'is-compact': isCompact }" ref="navRef">
-      <div class="win-nav-indicator-track" ref="indicatorTrack">
+    <nav v-else class="win-nav-left-panel" :class="{ 'is-compact': isCompact, 'is-minimal': isLeftMinimalMode }" ref="navRef">
+      <div class="win-nav-indicator-track" ref="indicatorTrack" v-show="!isLeftMinimalMode || !isCompact">
         <div class="win-nav-indicator" :class="{ 'is-child': indicatorIsChild }" :style="indicatorStyle"></div>
       </div>
       <div class="win-nav-hamburger" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
         <span class="icon animated-icon animated-icon-hamburger" :class="hamburgerClass" @animationend="onHamburgerAnimEnd">&#xE700;</span>
       </div>
-      <div class="win-nav-left-scrollable" ref="scrollArea" @scroll="onScroll">
+      <div class="win-nav-left-scrollable" ref="scrollArea" @scroll="onScroll" v-show="!isLeftMinimalMode || !isCompact">
         <div class="win-nav-menu">
           <template v-for="item in menuItems" :key="item.value">
             <div v-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
@@ -65,7 +65,7 @@
           </template>
         </div>
       </div>
-      <div class="win-nav-footer">
+      <div class="win-nav-footer" v-show="!isLeftMinimalMode || !isCompact">
         <template v-for="item in footerItems" :key="item.value">
           <div class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
@@ -111,6 +111,18 @@ const flyoutOpen = ref(false);
 const flyoutAnchor = ref(null);
 const flyoutItems = ref([]);
 const flyoutGroupValue = ref(null);
+
+const isTopNavigation = computed(() => props.position === 'Top');
+const isLeftMinimalMode = computed(() => props.position === 'LeftMinimal');
+const isLeftCompactMode = computed(() => props.position === 'LeftCompact');
+const isLeftOverlayMode = computed(() => isLeftMinimalMode.value || isLeftCompactMode.value);
+const shellClasses = computed(() => [
+  isTopNavigation.value ? 'is-top' : 'is-left',
+  isLeftOverlayMode.value ? 'is-overlay-left' : '',
+  isLeftMinimalMode.value ? 'is-left-minimal' : '',
+  isLeftCompactMode.value ? 'is-left-compact' : '',
+  hasTitlebar.value ? 'has-titlebar' : ''
+]);
 
 let itemRefs = {};
 let childrenRefs = {};
@@ -243,7 +255,7 @@ const onChildClick = (group, child) => {
 };
 
 const onGroupHeaderClick = (item) => {
-  if (props.position === 'Top') {
+  if (isTopNavigation.value) {
     const el = itemRefs[item.value];
     if (el) {
       const rect = el.getBoundingClientRect();
@@ -358,7 +370,7 @@ const closeFlyout = () => {
 };
 
 const onFlyoutSelect = (item) => {
-  const movesTopChildToGroup = props.position === 'Top' && flyoutGroupValue.value && !item.isHeader;
+  const movesTopChildToGroup = isTopNavigation.value && flyoutGroupValue.value && !item.isHeader;
   if (movesTopChildToGroup) suppressNextTopChildWatcherMove = true;
 
   emit('update:selectedValue', item.value);
@@ -367,7 +379,7 @@ const onFlyoutSelect = (item) => {
     groupChevrons[flyoutGroupValue.value] = 'chevron-close';
   }
   nextTick(() => {
-    if (props.position === 'Top') {
+    if (isTopNavigation.value) {
       const groupEl = itemRefs[flyoutGroupValue.value];
       if (groupEl && !item.isHeader) {
         moveIndicatorToEl(groupEl, false);
@@ -406,6 +418,22 @@ const selectSettings = () => {
 
 const toggleCompact = () => {
   isCompact.value = !isCompact.value;
+};
+
+const syncDisplayMode = () => {
+  if (isLeftOverlayMode.value) {
+    isCompact.value = true;
+  } else if (!isTopNavigation.value) {
+    isCompact.value = false;
+  }
+};
+
+const onDocumentPointerDown = (event) => {
+  if (!isLeftOverlayMode.value || isCompact.value) return;
+  const target = event.target;
+  if (navRef.value?.contains(target)) return;
+  if (target?.closest?.('.win-menu-flyout-wrap')) return;
+  isCompact.value = true;
 };
 
 const onGearDown = () => { gearPressed = true; gearRewindDone = false; gearClass.value = 'gear-rewind'; };
@@ -475,7 +503,7 @@ const calcIndicator = () => {
 
   const getRegion = (el) => {
     const scrollEl = scrollArea.value;
-    if (props.position === 'Top') {
+    if (isTopNavigation.value) {
       const value = getValueForElement(el);
       if (value) return isFooterValue(value) ? 'top-footer' : 'top-menu';
       const menus = navRef.value ? Array.from(navRef.value.querySelectorAll('.win-nav-menu')) : [];
@@ -511,7 +539,7 @@ const calcIndicator = () => {
     });
   };
 
-  if (props.position === 'Top') {
+  if (isTopNavigation.value) {
     const newX = elRect.left - trackRect.left + elRect.width / 2 - 8;
     if (skipTransition || indicatorStyle.value.opacity === '0') {
       nextIndicatorAnimation(indicatorEl);
@@ -712,7 +740,7 @@ const onResize = () => {
     const val = props.selectedValue;
     if (val) {
       const parentGroup = findParentGroup(val);
-      if (parentGroup && (props.position === 'Top' || isCompact.value)) {
+      if (parentGroup && (isTopNavigation.value || isCompact.value)) {
         lastSelectedEl = itemRefs[parentGroup.value] || null;
         lastIsChild = false;
       } else {
@@ -743,7 +771,7 @@ const refreshAfterPositionChange = () => {
     if (val) {
       const parentGroup = findParentGroup(val);
       if (parentGroup) {
-        if (props.position === 'Top') {
+        if (isTopNavigation.value) {
           lastSelectedEl = itemRefs[parentGroup.value];
           lastIsChild = false;
         } else {
@@ -768,7 +796,7 @@ const initIndicator = () => {
     if (val) {
       const parentGroup = findParentGroup(val);
       if (parentGroup) {
-        if (props.position !== 'Top') {
+        if (!isTopNavigation.value) {
           if (!groupExpanded[parentGroup.value]) {
             groupExpanded[parentGroup.value] = true;
             nextTick(() => {
@@ -801,14 +829,23 @@ const initIndicator = () => {
 };
 
 onMounted(() => {
+  syncDisplayMode();
   rebindRo();
   window.addEventListener('resize', onResize);
+  document.addEventListener('pointerdown', onDocumentPointerDown, true);
   initIndicator();
 });
 
-onBeforeUnmount(() => { if (ro) ro.disconnect(); window.removeEventListener('resize', onResize); });
+onBeforeUnmount(() => {
+  if (ro) ro.disconnect();
+  window.removeEventListener('resize', onResize);
+  document.removeEventListener('pointerdown', onDocumentPointerDown, true);
+});
 
-watch(() => props.position, refreshAfterPositionChange);
+watch(() => props.position, () => {
+  syncDisplayMode();
+  refreshAfterPositionChange();
+});
 
 watch(isCompact, (compact) => {
   const activeIndicator = indicatorTrack.value?.querySelector('.win-nav-indicator');
@@ -917,7 +954,7 @@ watch(isCompact, (compact) => {
 watch(() => props.selectedValue, (val) => {
   if (!val) return;
   const parentGroup = findParentGroup(val);
-  if (props.position === 'Top' && parentGroup) {
+  if (isTopNavigation.value && parentGroup) {
     if (suppressNextTopChildWatcherMove) {
       suppressNextTopChildWatcherMove = false;
       return;
@@ -940,12 +977,16 @@ watch(() => props.selectedValue, (val) => {
     background: var(--app-bg);
   }
 
-    .win-nav-shell.is-left {
+  .win-nav-shell.is-left {
       flex-direction: row;
     }
 
     .win-nav-shell.is-top {
       flex-direction: column;
+    }
+
+    .win-nav-shell.is-overlay-left {
+      position: relative;
     }
 
   .win-nav-content {
@@ -963,6 +1004,14 @@ watch(() => props.selectedValue, (val) => {
     border-radius: 8px 0 0 0;
     border-top: 1px solid var(--ctrl-border-rest);
     border-left: 1px solid var(--ctrl-border-rest);
+  }
+
+  .win-nav-shell.is-overlay-left .win-nav-content {
+    margin-left: 0;
+  }
+
+  .win-nav-shell.is-left-compact .win-nav-content {
+    margin-left: 48px;
   }
 
   .win-nav-shell.is-top .win-nav-content {
@@ -985,8 +1034,31 @@ watch(() => props.selectedValue, (val) => {
     overflow: hidden;
   }
 
+    .win-nav-shell.is-overlay-left .win-nav-left-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 20;
+      background: color-mix(in srgb, var(--app-bg) 72%, transparent);
+      backdrop-filter: blur(28px) saturate(1.35);
+      -webkit-backdrop-filter: blur(28px) saturate(1.35);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+    }
+
+    .win-nav-shell.is-overlay-left .win-nav-left-panel.is-compact {
+      box-shadow: none;
+    }
+
     .win-nav-left-panel.is-compact {
       width: 48px;
+    }
+
+    .win-nav-shell.is-left-minimal .win-nav-left-panel.is-compact {
+      width: 48px;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
 
     .win-nav-left-panel .win-nav-indicator-track {
@@ -1018,6 +1090,10 @@ watch(() => props.selectedValue, (val) => {
     position: relative;
     z-index: 2;
     background: var(--app-bg);
+  }
+
+  .win-nav-shell.is-overlay-left .win-nav-footer {
+    background: transparent;
   }
 
   .win-nav-hamburger {
@@ -1200,7 +1276,16 @@ watch(() => props.selectedValue, (val) => {
     padding-top: calc(env(titlebar-area-height, 32px) + 8px);
   }
 
+  .win-nav-shell.has-titlebar.is-overlay-left .win-nav-left-panel {
+    padding-top: calc(env(titlebar-area-height, 32px) + 8px);
+  }
+
   .win-nav-shell.has-titlebar.is-left .win-nav-content {
+    margin-top: env(titlebar-area-height, 32px);
+    border-radius: 8px 0 0 0;
+  }
+
+  .win-nav-shell.has-titlebar.is-overlay-left .win-nav-content {
     margin-top: env(titlebar-area-height, 32px);
     border-radius: 8px 0 0 0;
   }

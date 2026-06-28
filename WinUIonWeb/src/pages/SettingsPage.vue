@@ -39,12 +39,12 @@
         </div>
       </div>
     </template>
-    <WinComboBox :options="[{label:'Left'}, {label:'Top'}]" :modelValue="navPosition === 'Left' ? 0 : 1" @update:modelValue="v => navPosition = v === 0 ? 'Left' : 'Top'" />
+    <WinComboBox :options="navPositionOptions" :modelValue="navPositionIndex" @update:modelValue="v => navPosition = navPositionValues[v]" />
   </WinSettingsCard>
 </template>
 
 <script setup>
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 import WinExpander from '../components/WinExpander.vue';
 import WinRadioButton from '../components/WinRadioButton.vue';
 import WinSettingsCard from '../components/WinSettingsCard.vue';
@@ -52,4 +52,12 @@ import WinComboBox from '../components/WinComboBox.vue';
 const themeSetting = inject('themeSetting');
 const animSetting = inject('animSetting');
 const navPosition = inject('navPosition');
+const navPositionOptions = [
+  { label: 'Left', value: 'Left' },
+  { label: 'Left minimal', value: 'LeftMinimal' },
+  { label: 'Left compact', value: 'LeftCompact' },
+  { label: 'Top', value: 'Top' }
+];
+const navPositionValues = navPositionOptions.map(option => option.value);
+const navPositionIndex = computed(() => Math.max(0, navPositionValues.indexOf(navPosition.value)));
 </script>

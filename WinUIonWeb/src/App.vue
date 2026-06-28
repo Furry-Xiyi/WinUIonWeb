@@ -84,10 +84,21 @@ const pageMap = {
 const titleBarActive = ref(false);
 provide('winTitleBarVisible', titleBarActive);
 
+const readStoredSetting = (key, fallback, allowedValues) => {
+  const value = localStorage.getItem(key);
+  return allowedValues.includes(value) ? value : fallback;
+};
+
+const persistSetting = (key, source) => {
+  watch(source, (value) => {
+    localStorage.setItem(key, value);
+  }, { immediate: true });
+};
+
 const currentPage = ref('home');
-const navPosition = ref('Left');
-const themeSetting = ref('system');
-const animSetting = ref('entrance');
+const navPosition = ref(readStoredSetting('winui-nav-position', 'Left', ['Left', 'LeftMinimal', 'LeftCompact', 'Top']));
+const themeSetting = ref(readStoredSetting('winui-theme-setting', 'system', ['system', 'light', 'dark']));
+const animSetting = ref(readStoredSetting('winui-animation-setting', 'entrance', ['entrance', 'drill', 'fade']));
 const pageTransition = ref('page-transition-up');
 
 provide('themeSetting', themeSetting);
@@ -154,6 +165,9 @@ function applyTheme(mode) {
 }
 
 watch(themeSetting, (val) => applyTheme(val), { immediate: true });
+persistSetting('winui-nav-position', navPosition);
+persistSetting('winui-theme-setting', themeSetting);
+persistSetting('winui-animation-setting', animSetting);
 
 watch(currentPage, (newVal, oldVal) => {
   const ni = allPages.indexOf(newVal);
