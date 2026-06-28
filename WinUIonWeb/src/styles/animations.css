@@ -255,27 +255,27 @@
 
 @keyframes animated-icon-back-press {
   from {
-    transform: translate(0.5px, -0.25px) scaleX(1);
+    transform: translate(0.2px, 0) scaleX(1);
   }
 
   to {
-    transform: translate(0.5px, -0.25px) scaleX(0.721);
+    transform: translate(0.2px, 0) scaleX(0.721);
   }
 }
 
 @keyframes animated-icon-back-release {
   0% {
-    transform: translate(0.5px, -0.25px) scaleX(0.721);
+    transform: translate(0.2px, 0) scaleX(0.721);
     animation-timing-function: cubic-bezier(0.55, 0, 0.75, 1);
   }
 
   53% {
-    transform: translate(0.5px, -0.25px) scaleX(1.009);
+    transform: translate(0.2px, 0) scaleX(1.009);
     animation-timing-function: cubic-bezier(0.35, 0, 0, 1);
   }
 
   100% {
-    transform: translate(0.5px, -0.25px) scaleX(1);
+    transform: translate(0.2px, 0) scaleX(1);
   }
 }
 

@@ -1,11 +1,14 @@
 <template>
-  <div class="win-nav-shell" :class="shellClasses">
+  <div class="win-nav-shell" :class="shellClasses" :style="paneStyle" ref="shellRef">
     <nav v-if="isTopNavigation" class="win-nav-top-bar" ref="navRef">
       <div class="win-nav-indicator-track" ref="indicatorTrack">
         <div class="win-nav-indicator" :style="indicatorStyle"></div>
       </div>
-      <div class="win-nav-menu">
-        <template v-for="item in menuItems" :key="item.value">
+      <div v-if="showBackButtonResolved" class="win-nav-back-button" :class="{ 'is-disabled': !canGoBack }" role="button" :aria-disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave" ref="topBackButtonRef">
+        <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
+      </div>
+      <div class="win-nav-menu win-nav-top-primary-menu" ref="topPrimaryMenuRef">
+        <template v-for="item in topVisibleMenuItems" :key="item.value">
           <div v-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
             <span class="label">{{ item.label }}</span>
@@ -18,9 +21,12 @@
             </div>
           </div>
         </template>
+        <div v-if="topOverflowMenuItems.length" class="win-nav-item win-nav-more-button" aria-label="More" @click="toggleMoreFlyout" ref="moreButtonRef">
+          <span class="icon">&#xE712;</span>
+        </div>
       </div>
       <div style="flex:1"></div>
-      <div class="win-nav-menu">
+      <div class="win-nav-menu win-nav-top-footer-menu" ref="topFooterMenuRef">
         <template v-for="item in footerItems" :key="item.value">
           <div class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
@@ -30,6 +36,18 @@
         <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
           <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
           <span class="label">{{ settingsLabel }}</span>
+        </div>
+      </div>
+      <div class="win-nav-top-measure" ref="topMeasureRef" aria-hidden="true">
+        <template v-for="item in menuItems" :key="item.value">
+          <div class="win-nav-item" :data-value="item.value">
+            <span class="icon">{{ item.icon }}</span>
+            <span class="label">{{ item.label }}</span>
+            <span v-if="item.children" class="icon win-nav-group-chevron">&#xE70D;</span>
+          </div>
+        </template>
+        <div class="win-nav-item win-nav-more-button" data-value="__more">
+          <span class="icon">&#xE712;</span>
         </div>
       </div>
     </nav>
@@ -94,6 +112,31 @@
       <div class="win-nav-content-inner"><slot></slot></div>
     </main>
     <WinMenuFlyout :open="flyoutOpen" :anchorRect="flyoutAnchor" :items="flyoutItems" @close="closeFlyout" @select="onFlyoutSelect" />
+    <WinMenuFlyout :open="moreFlyoutOpen" :anchorRect="moreFlyoutAnchor" :items="[]" alignment="right" @close="closeMoreFlyout">
+      <div class="win-nav-more-panel">
+        <template v-for="item in topOverflowMenuItems" :key="item.value">
+          <div v-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onMoreItemClick(item)">
+            <span class="icon">{{ item.icon }}</span>
+            <span class="label">{{ item.label }}</span>
+          </div>
+          <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
+            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" @click="onMoreGroupHeaderClick(item)">
+              <span class="icon">{{ item.icon }}</span>
+              <span class="label">{{ item.label }}</span>
+              <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
+            </div>
+            <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 38 + 2) + 'px' : '0px' }">
+              <div class="win-nav-group-children-inner">
+                <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value }" @click="onMoreChildClick(item, child)">
+                  <span class="icon">{{ child.icon }}</span>
+                  <span class="label">{{ child.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </WinMenuFlyout>
   </div>
 </template>
 <script setup>
@@ -114,6 +157,8 @@ const props = defineProps({
   isPaneOpen: { type: Boolean, default: undefined },
   openPaneLength: { type: Number, default: 320 },
   compactPaneLength: { type: Number, default: 48 },
+  compactModeThresholdWidth: { type: Number, default: 641 },
+  expandedModeThresholdWidth: { type: Number, default: 1008 },
   paneTitle: { type: String, default: '' },
   header: { type: String, default: '' },
   settingsValue: { type: String, default: 'settings' },
@@ -125,9 +170,15 @@ const titleBarVisible = inject('winTitleBarVisible', ref(false));
 const hasTitlebar = computed(() => titleBarVisible.value);
 const emit = defineEmits(['update:selectedValue', 'update:isPaneOpen', 'back']);
 const isCompact = ref(false);
+const shellRef = ref(null);
 const navRef = ref(null);
 const indicatorTrack = ref(null);
 const scrollArea = ref(null);
+const topPrimaryMenuRef = ref(null);
+const topFooterMenuRef = ref(null);
+const topMeasureRef = ref(null);
+const moreButtonRef = ref(null);
+const topBackButtonRef = ref(null);
 const indicatorStyle = ref({ opacity: '0' });
 const indicatorIsChild = ref(false);
 const groupExpanded = reactive({});
@@ -137,11 +188,24 @@ const flyoutOpen = ref(false);
 const flyoutAnchor = ref(null);
 const flyoutItems = ref([]);
 const flyoutGroupValue = ref(null);
+const moreFlyoutOpen = ref(false);
+const moreFlyoutAnchor = ref(null);
+const topAvailableWidth = ref(Number.POSITIVE_INFINITY);
+const topItemWidths = ref({});
+const topMoreButtonWidth = ref(72);
+const containerWidth = ref(typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
 
 const normalizedPaneDisplayMode = computed(() => props.paneDisplayMode || props.position);
-const isTopNavigation = computed(() => normalizedPaneDisplayMode.value === 'Top');
-const isLeftMinimalMode = computed(() => normalizedPaneDisplayMode.value === 'LeftMinimal');
-const isLeftCompactMode = computed(() => normalizedPaneDisplayMode.value === 'LeftCompact');
+const resolvedPaneDisplayMode = computed(() => {
+  if (normalizedPaneDisplayMode.value !== 'Auto') return normalizedPaneDisplayMode.value;
+  const width = containerWidth.value || (typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
+  if (width >= props.expandedModeThresholdWidth) return 'Left';
+  if (width >= props.compactModeThresholdWidth) return 'LeftCompact';
+  return 'LeftMinimal';
+});
+const isTopNavigation = computed(() => resolvedPaneDisplayMode.value === 'Top');
+const isLeftMinimalMode = computed(() => resolvedPaneDisplayMode.value === 'LeftMinimal');
+const isLeftCompactMode = computed(() => resolvedPaneDisplayMode.value === 'LeftCompact');
 const isLeftOverlayMode = computed(() => isLeftMinimalMode.value || isLeftCompactMode.value);
 const isSettingsVisible = computed(() => props.isSettingsVisible);
 const isPaneToggleButtonVisible = computed(() => props.isPaneToggleButtonVisible);
@@ -251,6 +315,84 @@ const childParentMap = computed(() => {
   return map;
 });
 
+const selectedTopRootValue = computed(() => {
+  const parentGroup = findParentGroup(props.selectedValue);
+  if (parentGroup) return parentGroup.value;
+  return props.menuItems.some(item => item.value === props.selectedValue) ? props.selectedValue : null;
+});
+
+const measureTopItemWidth = (value) => {
+  const measured = topItemWidths.value[value];
+  if (Number.isFinite(measured) && measured > 0) return measured;
+  const item = props.menuItems.find(entry => entry.value === value);
+  if (!item) return 84;
+  const labelWidth = String(item.label || '').length * 7.5;
+  return Math.ceil(labelWidth + 48 + (item.children ? 24 : 0));
+};
+
+const getTopItemsWidth = (values) => {
+  if (!values.length) return 0;
+  return values.reduce((sum, value) => sum + measureTopItemWidth(value), 0) + (values.length - 1) * 4;
+};
+
+const topLayout = computed(() => {
+  if (!isTopNavigation.value) {
+    return { visibleValues: props.menuItems.map(item => item.value), overflowValues: [] };
+  }
+
+  const orderedValues = props.menuItems.map(item => item.value);
+  const available = topAvailableWidth.value;
+  if (!Number.isFinite(available) || available <= 0) {
+    return { visibleValues: orderedValues, overflowValues: [] };
+  }
+
+  const allWidth = getTopItemsWidth(orderedValues);
+  if (allWidth <= available) {
+    return { visibleValues: orderedValues, overflowValues: [] };
+  }
+
+  const selectedRoot = selectedTopRootValue.value;
+  const protectedValue = orderedValues.includes(selectedRoot) ? selectedRoot : null;
+  const moreReserve = topMoreButtonWidth.value + 4;
+  const capacity = Math.max(0, available - moreReserve);
+  let visibleValues = [];
+
+  for (const value of orderedValues) {
+    const nextValues = [...visibleValues, value];
+    const nextFits = getTopItemsWidth(nextValues) <= capacity;
+    if (nextFits || value === protectedValue) {
+      visibleValues.push(value);
+    }
+    while (getTopItemsWidth(visibleValues) > capacity && visibleValues.length > 1) {
+      const removableIndex = [...visibleValues].reverse().findIndex(value => value !== protectedValue);
+      if (removableIndex < 0) break;
+      visibleValues.splice(visibleValues.length - 1 - removableIndex, 1);
+    }
+  }
+
+  if (protectedValue && !visibleValues.includes(protectedValue)) {
+    visibleValues = [protectedValue];
+  }
+
+  const visibleSet = new Set(visibleValues);
+  return {
+    visibleValues,
+    overflowValues: orderedValues.filter(value => !visibleSet.has(value))
+  };
+});
+
+const topVisibleMenuItems = computed(() => {
+  if (!isTopNavigation.value) return props.menuItems;
+  const visibleSet = new Set(topLayout.value.visibleValues);
+  return props.menuItems.filter(item => visibleSet.has(item.value));
+});
+
+const topOverflowMenuItems = computed(() => {
+  if (!isTopNavigation.value) return [];
+  const overflowSet = new Set(topLayout.value.overflowValues);
+  return props.menuItems.filter(item => overflowSet.has(item.value));
+});
+
 const isChildOfGroup = (groupItem) => {
   if (!groupItem.children) return false;
   return groupItem.children.some(c => c.value === props.selectedValue);
@@ -338,12 +480,15 @@ const selectNavigationValue = (value, isChild = null) => {
   emit('update:selectedValue', value);
   prepareSelectionTarget(value);
   nextTick(() => {
-    if (isChild === null) {
-      moveIndicatorForValue(value);
-    } else {
-      moveIndicatorTo(value, isChild);
-    }
-    collapseOverlayAfterNavigation();
+    updateTopNavigationLayout();
+    nextTick(() => {
+      if (isChild === null) {
+        moveIndicatorForValue(value);
+      } else {
+        moveIndicatorTo(value, isChild);
+      }
+      collapseOverlayAfterNavigation();
+    });
   });
 };
 
@@ -355,6 +500,75 @@ const onChildClick = (group, child) => {
   selectNavigationValue(child.value, true);
 };
 
+const updateTopNavigationLayout = () => {
+  if (!isTopNavigation.value) return;
+
+  const navEl = navRef.value;
+  const footerEl = topFooterMenuRef.value;
+  const topBackEl = topBackButtonRef.value;
+  const measureEl = topMeasureRef.value;
+  if (!navEl) return;
+
+  const navWidth = navEl.getBoundingClientRect().width;
+  const footerWidth = footerEl?.getBoundingClientRect().width || 0;
+  const topBackWidth = topBackEl?.getBoundingClientRect().width || 0;
+  topAvailableWidth.value = Math.max(0, navWidth - footerWidth - topBackWidth - 12);
+
+  if (measureEl) {
+    const nextWidths = {};
+    measureEl.querySelectorAll('[data-value]').forEach((el) => {
+      const value = el.getAttribute('data-value');
+      const width = Math.ceil(el.getBoundingClientRect().width);
+      if (value === '__more') {
+        topMoreButtonWidth.value = width;
+      } else if (value) {
+        nextWidths[value] = width;
+      }
+    });
+    topItemWidths.value = nextWidths;
+  }
+};
+
+const openMoreFlyout = () => {
+  const el = moreButtonRef.value;
+  if (!el) return;
+  moreFlyoutAnchor.value = el.getBoundingClientRect();
+  moreFlyoutOpen.value = true;
+};
+
+const closeMoreFlyout = () => {
+  moreFlyoutOpen.value = false;
+};
+
+const toggleMoreFlyout = () => {
+  if (moreFlyoutOpen.value) {
+    closeMoreFlyout();
+  } else {
+    openMoreFlyout();
+  }
+};
+
+const onMoreItemClick = (item) => {
+  closeMoreFlyout();
+  selectNavigationValue(item.value, false);
+};
+
+const onMoreChildClick = (group, child) => {
+  closeMoreFlyout();
+  selectNavigationValue(child.value, true);
+};
+
+const onMoreGroupHeaderClick = (item) => {
+  if (item.selectsOnInvoked !== false && !isChildOfGroup(item)) {
+    selectNavigationValue(item.value, false);
+    closeMoreFlyout();
+    return;
+  }
+
+  groupExpanded[item.value] = !groupExpanded[item.value];
+  groupChevrons[item.value] = groupExpanded[item.value] ? 'chevron-open' : 'chevron-close';
+};
+
 const onGroupHeaderClick = (item) => {
   if (isTopNavigation.value) {
     const el = itemRefs[item.value];
@@ -364,10 +578,10 @@ const onGroupHeaderClick = (item) => {
       flyoutGroupValue.value = item.value;
       const items = [];
       if (item.selectsOnInvoked !== false) {
-        items.push({ label: item.label, value: item.value, isHeader: true });
+        items.push({ label: item.label, value: item.value, icon: item.icon, isHeader: true });
       }
       for (const child of (item.children || [])) {
-        items.push({ label: child.label, value: child.value });
+        items.push({ label: child.label, value: child.value, icon: child.icon });
       }
       flyoutItems.value = items;
       flyoutOpen.value = !flyoutOpen.value;
@@ -383,10 +597,10 @@ const onGroupHeaderClick = (item) => {
       flyoutGroupValue.value = item.value;
       const items = [];
       if (item.selectsOnInvoked !== false) {
-        items.push({ label: item.label, value: item.value, isHeader: true });
+        items.push({ label: item.label, value: item.value, icon: item.icon, isHeader: true });
       }
       for (const child of (item.children || [])) {
-        items.push({ label: child.label, value: child.value });
+        items.push({ label: child.label, value: child.value, icon: child.icon });
       }
       flyoutItems.value = items;
       flyoutOpen.value = true;
@@ -965,6 +1179,8 @@ const calcIndicator = () => {
 
 let resizeTimer = null;
 const onResize = () => {
+  containerWidth.value = shellRef.value?.getBoundingClientRect().width || (typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
+  updateTopNavigationLayout();
   skipTransition = true;
   if (resizeTimer) cancelAnimationFrame(resizeTimer);
   if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) {
@@ -991,13 +1207,21 @@ const onResize = () => {
     });
   });
 };
-const rebindRo = () => { if (ro) ro.disconnect(); ro = new ResizeObserver(onResize); if (navRef.value) ro.observe(navRef.value); };
+const rebindRo = () => {
+  if (ro) ro.disconnect();
+  ro = new ResizeObserver(onResize);
+  if (shellRef.value) ro.observe(shellRef.value);
+  if (navRef.value) ro.observe(navRef.value);
+  if (topFooterMenuRef.value) ro.observe(topFooterMenuRef.value);
+  if (topBackButtonRef.value) ro.observe(topBackButtonRef.value);
+};
 
 const refreshAfterPositionChange = () => {
   skipTransition = true;
   nextTick(() => {
     rebindRo();
     measureAllGroups();
+    updateTopNavigationLayout();
     const val = props.selectedValue;
     if (val) {
       const parentGroup = findParentGroup(val);
@@ -1023,6 +1247,7 @@ const initIndicator = () => {
   skipTransition = true;
   nextTick(() => {
     measureAllGroups();
+    updateTopNavigationLayout();
     const val = props.selectedValue;
     if (val) {
       const parentGroup = findParentGroup(val);
@@ -1060,6 +1285,7 @@ const initIndicator = () => {
 };
 
 onMounted(() => {
+  containerWidth.value = shellRef.value?.getBoundingClientRect().width || window.innerWidth;
   syncDisplayMode();
   rebindRo();
   window.addEventListener('resize', onResize);
@@ -1079,6 +1305,11 @@ watch(() => props.position, () => {
 });
 
 watch(() => props.paneDisplayMode, () => {
+  syncDisplayMode();
+  refreshAfterPositionChange();
+});
+
+watch(resolvedPaneDisplayMode, () => {
   syncDisplayMode();
   refreshAfterPositionChange();
 });
@@ -1215,6 +1446,10 @@ watch(() => props.selectedValue, (val, oldVal) => {
   }
 
   const parentGroup = findParentGroup(val);
+  if (isTopNavigation.value) {
+    updateTopNavigationLayout();
+  }
+
   if (isTopNavigation.value && parentGroup) {
     if (suppressNextTopChildWatcherMove) {
       suppressNextTopChildWatcherMove = false;
@@ -1259,6 +1494,7 @@ watch(() => props.selectedValue, (val, oldVal) => {
     overflow-x: hidden;
     transition: background var(--normal-duration) var(--fast-out-slow-in);
     scrollbar-width: thin;
+    scrollbar-color: var(--ctrl-strong-stroke) transparent;
   }
 
   .win-nav-shell.is-left .win-nav-content {
@@ -1272,7 +1508,7 @@ watch(() => props.selectedValue, (val, oldVal) => {
   }
 
   .win-nav-shell.is-left-compact .win-nav-content {
-    margin-left: 48px;
+    margin-left: var(--win-nav-compact-pane-length, 48px);
   }
 
   .win-nav-shell.is-top .win-nav-content {
@@ -1356,6 +1592,7 @@ watch(() => props.selectedValue, (val, oldVal) => {
     overflow-x: hidden;
     position: relative;
     scrollbar-width: thin;
+    scrollbar-color: var(--ctrl-strong-stroke) transparent;
   }
 
   .win-nav-footer {
@@ -1434,7 +1671,7 @@ watch(() => props.selectedValue, (val, oldVal) => {
     .win-nav-back-button .icon {
       width: 16px;
       height: 16px;
-      font-size: 12px;
+      font-size: 11px;
       line-height: 16px;
       display: flex;
       align-items: center;
@@ -1443,7 +1680,7 @@ watch(() => props.selectedValue, (val, oldVal) => {
     }
 
   .win-nav-settings-item .animated-icon-gear {
-    font-size: 12px;
+    font-size: 11px;
   }
 
     .win-nav-back-button.is-disabled {
@@ -1476,6 +1713,18 @@ watch(() => props.selectedValue, (val, oldVal) => {
     transition: width var(--normal-duration) var(--fast-out-slow-in), background var(--normal-duration) var(--fast-out-slow-in);
     display: flex;
     align-items: center;
+  }
+
+  .win-nav-top-measure {
+    position: absolute;
+    left: -10000px;
+    top: -10000px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 48px;
+    visibility: hidden;
+    pointer-events: none;
   }
 
     .win-nav-top-bar .win-nav-indicator-track {
@@ -1585,6 +1834,17 @@ watch(() => props.selectedValue, (val, oldVal) => {
     justify-content: center;
     padding: 0 16px;
   }
+
+    .win-nav-top-bar .win-nav-more-button,
+    .win-nav-top-measure .win-nav-more-button {
+      width: 40px;
+      padding: 0;
+    }
+
+      .win-nav-top-bar .win-nav-more-button .icon,
+      .win-nav-top-measure .win-nav-more-button .icon {
+        margin-right: 0;
+      }
 
     .win-nav-top-bar .win-nav-item:hover {
       background: transparent;
@@ -1723,5 +1983,44 @@ watch(() => props.selectedValue, (val, oldVal) => {
     display: flex;
     align-items: center;
     height: 100%;
+  }
+
+  .win-nav-more-panel {
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .win-nav-more-title {
+    min-height: 32px;
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  .win-nav-more-panel .win-nav-item {
+    width: 100%;
+  }
+
+  .win-nav-content::-webkit-scrollbar,
+  .win-nav-left-scrollable::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  .win-nav-content::-webkit-scrollbar-thumb,
+  .win-nav-left-scrollable::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--ctrl-strong-stroke) 58%, transparent);
+    border: 4px solid transparent;
+    border-radius: 8px;
+    background-clip: content-box;
+  }
+
+  .win-nav-content::-webkit-scrollbar-thumb:hover,
+  .win-nav-left-scrollable::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--ctrl-strong-stroke) 76%, transparent);
   }
 </style>

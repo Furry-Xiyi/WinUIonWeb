@@ -1,7 +1,7 @@
 <template>
   <WinTitleBar title="WinUI on Web Gallery" :theme="themeSetting" />
   <WinNavigationView v-model:selectedValue="currentPage"
-                     :position="effectiveNavPosition"
+                     :paneDisplayMode="navPosition"
                      :menuItems="navMenuItems"
                      :footerItems="[]"
                      :showBackButton="true">
@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, watch, provide, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, watch, provide, computed } from 'vue';
 import WinTitleBar from './components/WinTitleBar.vue';
 import WinNavigationView from './components/WinNavigationView.vue';
 
@@ -97,11 +97,11 @@ const persistSetting = (key, source) => {
 };
 
 const currentPage = ref('home');
-const navPosition = ref(readStoredSetting('winui-nav-position', 'Left', ['Left', 'Top']));
+const navPosition = ref(readStoredSetting('winui-nav-position', 'Auto', ['Auto', 'Top', 'Left']));
+if (navPosition.value === 'Left') navPosition.value = 'Auto';
 const themeSetting = ref(readStoredSetting('winui-theme-setting', 'system', ['system', 'light', 'dark']));
 const animSetting = ref(readStoredSetting('winui-animation-setting', 'entrance', ['entrance', 'drill', 'fade']));
 const pageTransition = ref('page-transition-up');
-const windowWidth = ref(typeof window === 'undefined' ? 1200 : window.innerWidth);
 
 provide('themeSetting', themeSetting);
 provide('animSetting', animSetting);
@@ -109,12 +109,6 @@ provide('navPosition', navPosition);
 provide('currentPage', currentPage);
 
 const pageComponent = computed(() => pageMap[currentPage.value] || HomePage);
-const effectiveNavPosition = computed(() => {
-  if (navPosition.value === 'Top') return 'Top';
-  if (windowWidth.value < 640) return 'LeftMinimal';
-  if (windowWidth.value < 1008) return 'LeftCompact';
-  return 'Left';
-});
 
 const navMenuItems = [
   { value: 'home', icon: '\uE80F', label: 'Home' },
@@ -172,23 +166,10 @@ function applyTheme(mode) {
   else if (mode === 'dark') html.classList.add('theme-dark');
 }
 
-const updateWindowWidth = () => {
-  windowWidth.value = window.innerWidth;
-};
-
 watch(themeSetting, (val) => applyTheme(val), { immediate: true });
 persistSetting('winui-nav-position', navPosition);
 persistSetting('winui-theme-setting', themeSetting);
 persistSetting('winui-animation-setting', animSetting);
-
-onMounted(() => {
-  updateWindowWidth();
-  window.addEventListener('resize', updateWindowWidth);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateWindowWidth);
-});
 
 watch(currentPage, (newVal, oldVal) => {
   const ni = allPages.indexOf(newVal);

@@ -53,7 +53,7 @@ const themeSetting = inject('themeSetting');
 const animSetting = inject('animSetting');
 const navPosition = inject('navPosition');
 const navPositionOptions = [
-  { label: 'Left', value: 'Left' },
+  { label: 'Left', value: 'Auto' },
   { label: 'Top', value: 'Top' }
 ];
 const navPositionValues = navPositionOptions.map(option => option.value);
