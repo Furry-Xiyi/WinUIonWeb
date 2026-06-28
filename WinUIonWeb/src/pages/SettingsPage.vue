@@ -54,8 +54,6 @@ const animSetting = inject('animSetting');
 const navPosition = inject('navPosition');
 const navPositionOptions = [
   { label: 'Left', value: 'Left' },
-  { label: 'Left minimal', value: 'LeftMinimal' },
-  { label: 'Left compact', value: 'LeftCompact' },
   { label: 'Top', value: 'Top' }
 ];
 const navPositionValues = navPositionOptions.map(option => option.value);

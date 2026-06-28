@@ -37,6 +37,9 @@
       <div class="win-nav-indicator-track" ref="indicatorTrack" v-show="!isLeftMinimalMode || !isCompact">
         <div class="win-nav-indicator" :class="{ 'is-child': indicatorIsChild }" :style="indicatorStyle"></div>
       </div>
+      <div v-if="showBackButtonInLeftNav" class="win-nav-back-button" :class="{ 'is-disabled': !canGoBack }" role="button" :aria-disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
+        <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
+      </div>
       <div class="win-nav-hamburger" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
         <span class="icon animated-icon animated-icon-hamburger" :class="hamburgerClass" @animationend="onHamburgerAnimEnd">&#xE700;</span>
       </div>
@@ -92,12 +95,14 @@ const props = defineProps({
   position: { type: String, default: 'Left' },
   selectedValue: String,
   menuItems: { type: Array, default: () => [] },
-  footerItems: { type: Array, default: () => [] }
+  footerItems: { type: Array, default: () => [] },
+  showBackButton: { type: Boolean, default: false },
+  backTarget: { type: [String, Function], default: null }
 });
 
 const titleBarVisible = inject('winTitleBarVisible', ref(false));
 const hasTitlebar = computed(() => titleBarVisible.value);
-const emit = defineEmits(['update:selectedValue']);
+const emit = defineEmits(['update:selectedValue', 'back']);
 const isCompact = ref(false);
 const navRef = ref(null);
 const indicatorTrack = ref(null);
@@ -116,6 +121,7 @@ const isTopNavigation = computed(() => props.position === 'Top');
 const isLeftMinimalMode = computed(() => props.position === 'LeftMinimal');
 const isLeftCompactMode = computed(() => props.position === 'LeftCompact');
 const isLeftOverlayMode = computed(() => isLeftMinimalMode.value || isLeftCompactMode.value);
+const showBackButtonInLeftNav = computed(() => props.showBackButton && !isTopNavigation.value);
 const shellClasses = computed(() => [
   isTopNavigation.value ? 'is-top' : 'is-left',
   isLeftOverlayMode.value ? 'is-overlay-left' : '',
@@ -136,13 +142,28 @@ let skipTransition = false;
 let indicatorAnimationId = 0;
 let compactTransitionTimer = null;
 let suppressNextTopChildWatcherMove = false;
+let suppressNextHistoryRecord = false;
 
 const gearClass = ref('');
 const hamburgerClass = ref('');
+const backClass = ref('');
 let gearPressed = false;
 let gearRewindDone = false;
 let hamburgerPressed = false;
 let hamburgerPressDone = false;
+let backPressed = false;
+let backPressDone = false;
+
+const selectionHistory = ref([]);
+const backHandlers = new Set();
+const backHandlerCount = ref(0);
+const injectedBackTarget = ref(null);
+const canGoBack = computed(() => (
+  selectionHistory.value.length > 0 ||
+  !!props.backTarget ||
+  !!injectedBackTarget.value ||
+  backHandlerCount.value > 0
+));
 
 const INDICATOR_SIZE = 16;
 const TOP_INDICATOR_MAX_STRETCH = INDICATOR_SIZE * 2.75;
@@ -244,14 +265,55 @@ const measureAllGroups = () => {
   }
 };
 
+const collapseOverlayAfterNavigation = () => {
+  if (!isLeftOverlayMode.value || isCompact.value) return;
+  requestAnimationFrame(() => {
+    if (isLeftOverlayMode.value && !isCompact.value) {
+      isCompact.value = true;
+    }
+  });
+};
+
+const getIndicatorTargetForValue = (value) => {
+  const parentGroup = findParentGroup(value);
+  if (parentGroup && (isTopNavigation.value || isCompact.value)) {
+    return { value: parentGroup.value, isChild: false };
+  }
+  return { value, isChild: !!parentGroup };
+};
+
+const moveIndicatorForValue = (value) => {
+  const target = getIndicatorTargetForValue(value);
+  moveIndicatorTo(target.value, target.isChild);
+};
+
+const prepareSelectionTarget = (value) => {
+  const parentGroup = findParentGroup(value);
+  if (parentGroup && !isTopNavigation.value && !isCompact.value && !groupExpanded[parentGroup.value]) {
+    groupExpanded[parentGroup.value] = true;
+    nextTick(() => measureGroup(parentGroup.value));
+  }
+};
+
+const selectNavigationValue = (value, isChild = null) => {
+  emit('update:selectedValue', value);
+  prepareSelectionTarget(value);
+  nextTick(() => {
+    if (isChild === null) {
+      moveIndicatorForValue(value);
+    } else {
+      moveIndicatorTo(value, isChild);
+    }
+    collapseOverlayAfterNavigation();
+  });
+};
+
 const onItemClick = (item) => {
-  emit('update:selectedValue', item.value);
-  nextTick(() => moveIndicatorTo(item.value, false));
+  selectNavigationValue(item.value, false);
 };
 
 const onChildClick = (group, child) => {
-  emit('update:selectedValue', child.value);
-  nextTick(() => moveIndicatorTo(child.value, true));
+  selectNavigationValue(child.value, true);
 };
 
 const onGroupHeaderClick = (item) => {
@@ -294,8 +356,7 @@ const onGroupHeaderClick = (item) => {
     return;
   }
   if (item.selectsOnInvoked !== false && !isChildOfGroup(item)) {
-    emit('update:selectedValue', item.value);
-    nextTick(() => moveIndicatorTo(item.value, false));
+    selectNavigationValue(item.value, false);
   }
   const wasExpanded = groupExpanded[item.value];
   groupExpanded[item.value] = !wasExpanded;
@@ -394,6 +455,7 @@ const onFlyoutSelect = (item) => {
         moveIndicatorTo(item.value, false);
       }
     }
+    collapseOverlayAfterNavigation();
   });
 };
 
@@ -411,9 +473,121 @@ const moveIndicatorToEl = (el, isChild) => {
   calcIndicator();
 };
 
+const runBackHandlers = () => {
+  const context = {
+    selectedValue: props.selectedValue,
+    history: [...selectionHistory.value],
+    menuItems: props.menuItems,
+    footerItems: props.footerItems
+  };
+
+  for (const handler of Array.from(backHandlers).reverse()) {
+    const result = handler(context);
+    if (result === false) return { handled: true };
+    if (typeof result === 'string') return { value: result };
+    if (result && typeof result === 'object') {
+      if (result.handled) return { handled: true };
+      if (typeof result.value === 'string') return { value: result.value };
+    }
+  }
+
+  return null;
+};
+
+const resolveBackTarget = () => {
+  const handlerResult = runBackHandlers();
+  if (handlerResult) return handlerResult;
+
+  if (props.backTarget) {
+    const value = typeof props.backTarget === 'function'
+      ? props.backTarget({
+        selectedValue: props.selectedValue,
+        history: [...selectionHistory.value],
+        menuItems: props.menuItems,
+        footerItems: props.footerItems
+      })
+      : props.backTarget;
+    if (typeof value === 'string') return { value };
+    if (value === false) return { handled: true };
+  }
+
+  if (injectedBackTarget.value) {
+    const value = typeof injectedBackTarget.value === 'function'
+      ? injectedBackTarget.value({
+        selectedValue: props.selectedValue,
+        history: [...selectionHistory.value],
+        menuItems: props.menuItems,
+        footerItems: props.footerItems
+      })
+      : injectedBackTarget.value;
+    if (typeof value === 'string') return { value };
+    if (value === false) return { handled: true };
+  }
+
+  const value = selectionHistory.value.pop();
+  return typeof value === 'string' ? { value } : null;
+};
+
+const goBack = () => {
+  emit('back', {
+    selectedValue: props.selectedValue,
+    history: [...selectionHistory.value]
+  });
+
+  const target = resolveBackTarget();
+  if (!target || target.handled || target.value === props.selectedValue) return;
+
+  suppressNextHistoryRecord = true;
+  emit('update:selectedValue', target.value);
+  prepareSelectionTarget(target.value);
+  nextTick(() => {
+    moveIndicatorForValue(target.value);
+    collapseOverlayAfterNavigation();
+    requestAnimationFrame(() => {
+      suppressNextHistoryRecord = false;
+    });
+  });
+};
+
+const registerBackHandler = (handler) => {
+  if (typeof handler !== 'function') return () => {};
+  backHandlers.add(handler);
+  backHandlerCount.value = backHandlers.size;
+  return () => {
+    backHandlers.delete(handler);
+    backHandlerCount.value = backHandlers.size;
+  };
+};
+
+const setBackTarget = (target) => {
+  injectedBackTarget.value = target;
+  return () => {
+    if (injectedBackTarget.value === target) {
+      injectedBackTarget.value = null;
+    }
+  };
+};
+
+provide('winNavigationBack', {
+  goBack,
+  registerBackHandler,
+  setBackTarget,
+  history: selectionHistory
+});
+
+defineExpose({
+  goBack,
+  registerBackHandler,
+  setBackTarget
+});
+
+const onBackClick = () => {
+  if (!canGoBack.value) return;
+  goBack();
+};
+
 const selectSettings = () => {
-  emit('update:selectedValue', 'settings');
-  nextTick(() => moveIndicatorTo('settings', false));
+  selectNavigationValue('settings', false);
 };
 
 const toggleCompact = () => {
@@ -438,7 +612,7 @@ const onDocumentPointerDown = (event) => {
 
 const onGearDown = () => { gearPressed = true; gearRewindDone = false; gearClass.value = 'gear-rewind'; };
 const onGearUp = () => { if (!gearPressed) return; gearPressed = false; if (gearRewindDone) gearClass.value = 'gear-spin'; };
-const onGearLeave = () => { gearPressed = false; };
+const onGearLeave = () => { if (!gearPressed) return; gearPressed = false; if (gearRewindDone) gearClass.value = 'gear-spin'; };
 const onGearAnimEnd = () => {
   if (gearClass.value === 'gear-rewind') { gearRewindDone = true; if (!gearPressed) gearClass.value = 'gear-spin'; }
   else if (gearClass.value === 'gear-spin') { gearClass.value = ''; gearRewindDone = false; }
@@ -446,10 +620,18 @@ const onGearAnimEnd = () => {
 
 const onHamburgerDown = () => { hamburgerPressed = true; hamburgerPressDone = false; hamburgerClass.value = 'pressing'; };
 const onHamburgerUp = () => { if (!hamburgerPressed) return; hamburgerPressed = false; if (hamburgerPressDone) hamburgerClass.value = 'releasing'; };
-const onHamburgerLeave = () => { hamburgerPressed = false; };
-const onHamburgerAnimEnd = () => {
-  if (hamburgerClass.value === 'pressing') { hamburgerPressDone = true; if (!hamburgerPressed) hamburgerClass.value = 'releasing'; }
-  else if (hamburgerClass.value === 'releasing') { hamburgerClass.value = ''; hamburgerPressDone = false; }
+const onHamburgerLeave = () => { if (!hamburgerPressed) return; hamburgerPressed = false; if (hamburgerPressDone) hamburgerClass.value = 'releasing'; };
+const onHamburgerAnimEnd = (event) => {
+  if (hamburgerClass.value === 'pressing' && event.animationName === 'hamburger-press') { hamburgerPressDone = true; if (!hamburgerPressed) hamburgerClass.value = 'releasing'; }
+  else if (hamburgerClass.value === 'releasing' && event.animationName === 'hamburger-release') { hamburgerClass.value = ''; hamburgerPressDone = false; }
+};
+
+const onBackDown = () => { if (!canGoBack.value) return; backPressed = true; backPressDone = false; backClass.value = 'pressing'; };
+const onBackUp = () => { if (!backPressed) return; backPressed = false; if (backPressDone) backClass.value = 'releasing'; };
+const onBackLeave = () => { if (!backPressed) return; backPressed = false; if (backPressDone) backClass.value = 'releasing'; };
+const onBackAnimEnd = (event) => {
+  if (backClass.value === 'pressing' && event.animationName === 'animated-icon-back-press') { backPressDone = true; if (!backPressed) backClass.value = 'releasing'; }
+  else if (backClass.value === 'releasing' && event.animationName === 'animated-icon-back-release') { backClass.value = ''; backPressDone = false; }
 };
 
 const onScroll = () => {
@@ -951,8 +1133,19 @@ watch(isCompact, (compact) => {
   }
 });
 
-watch(() => props.selectedValue, (val) => {
+watch(() => props.selectedValue, (val, oldVal) => {
   if (!val) return;
+  if (oldVal && oldVal !== val) {
+    if (suppressNextHistoryRecord) {
+      suppressNextHistoryRecord = false;
+    } else {
+      const history = selectionHistory.value;
+      if (history[history.length - 1] !== oldVal) {
+        history.push(oldVal);
+      }
+    }
+  }
+
   const parentGroup = findParentGroup(val);
   if (isTopNavigation.value && parentGroup) {
     if (suppressNextTopChildWatcherMove) {
@@ -1075,6 +1268,7 @@ watch(() => props.selectedValue, (val) => {
   .win-nav-left-scrollable {
     flex: 1;
     min-height: 0;
+    margin-top: 2px;
     overflow-y: overlay;
     overflow-x: hidden;
     position: relative;
@@ -1096,10 +1290,11 @@ watch(() => props.selectedValue, (val) => {
     background: transparent;
   }
 
+  .win-nav-back-button,
   .win-nav-hamburger {
     width: 40px;
     height: 36px;
-    margin-bottom: 4px;
+    margin: 2px 0;
     border-radius: 4px;
     flex-shrink: 0;
     display: flex;
@@ -1110,10 +1305,37 @@ watch(() => props.selectedValue, (val) => {
     transition: background var(--fast-duration) var(--fast-out-slow-in);
   }
 
+    .win-nav-hamburger .icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      line-height: 16px;
+    }
+
+    .win-nav-back-button .icon {
+      width: 16px;
+      height: 16px;
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+  .win-nav-settings-item .animated-icon-gear {
+    font-size: 12px;
+  }
+
+    .win-nav-back-button.is-disabled {
+      color: var(--text-disabled);
+      cursor: default;
+      pointer-events: none;
+      opacity: 0.65;
+    }
+
+    .win-nav-back-button:hover,
     .win-nav-hamburger:hover {
       background: var(--subtle-secondary);
     }
 
+    .win-nav-back-button:active,
     .win-nav-hamburger:active {
       background: var(--subtle-tertiary);
     }
@@ -1193,6 +1415,10 @@ watch(() => props.selectedValue, (val) => {
     font-size: 16px;
     line-height: 1;
     position: relative;
+  }
+
+  .win-nav-item.win-nav-settings-item .icon.animated-icon-gear {
+    font-size: 14px;
   }
 
   .win-nav-left-panel.is-compact .win-nav-item .label {

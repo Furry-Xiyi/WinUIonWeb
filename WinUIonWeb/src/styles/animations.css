@@ -207,11 +207,11 @@
 }
 
   .animated-icon-hamburger.pressing {
-    animation: hamburger-press 0.083s ease-out forwards;
+    animation: hamburger-press 0.15s cubic-bezier(0.167, 0.167, 0, 1) forwards;
   }
 
   .animated-icon-hamburger.releasing {
-    animation: hamburger-release 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+    animation: hamburger-release 0.317s cubic-bezier(0.35, 0, 0, 1) forwards;
   }
 
 @keyframes hamburger-press {
@@ -220,16 +220,61 @@
   }
 
   to {
-    transform: scaleX(0.5);
+    transform: scaleX(0.521);
   }
 }
 
 @keyframes hamburger-release {
+  0% {
+    transform: scaleX(0.521);
+    animation-timing-function: cubic-bezier(0.85, 0, 0.75, 1);
+  }
+
+  42% {
+    transform: scaleX(1.048);
+    animation-timing-function: cubic-bezier(0.35, 0, 0, 1);
+  }
+
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.animated-icon-back {
+  animation: none;
+  transform-origin: 100% 50%;
+}
+
+  .animated-icon-back.pressing {
+    animation: animated-icon-back-press 0.15s cubic-bezier(0.167, 0.167, 0, 1) forwards;
+  }
+
+  .animated-icon-back.releasing {
+    animation: animated-icon-back-release 0.317s cubic-bezier(0.35, 0, 0, 1) forwards;
+  }
+
+@keyframes animated-icon-back-press {
   from {
-    transform: scaleX(0.5);
+    transform: scaleX(1);
   }
 
   to {
+    transform: scaleX(0.721);
+  }
+}
+
+@keyframes animated-icon-back-release {
+  0% {
+    transform: scaleX(0.721);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.75, 1);
+  }
+
+  53% {
+    transform: scaleX(1.009);
+    animation-timing-function: cubic-bezier(0.35, 0, 0, 1);
+  }
+
+  100% {
     transform: scaleX(1);
   }
 }
@@ -239,11 +284,11 @@
 }
 
   .animated-icon-gear.gear-rewind {
-    animation: animated-icon-gear-rewind 0.167s ease-out forwards;
+    animation: animated-icon-gear-rewind 0.15s cubic-bezier(0.167, 0.167, 1, 1) forwards;
   }
 
   .animated-icon-gear.gear-spin {
-    animation: animated-icon-gear-spin 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+    animation: animated-icon-gear-spin 0.65s cubic-bezier(0, 0, 0, 1) forwards;
   }
 
 @keyframes animated-icon-gear-rewind {
@@ -252,13 +297,13 @@
   }
 
   to {
-    transform: rotate(-15deg);
+    transform: rotate(-20deg);
   }
 }
 
 @keyframes animated-icon-gear-spin {
   from {
-    transform: rotate(-15deg);
+    transform: rotate(-20deg);
   }
 
   to {
