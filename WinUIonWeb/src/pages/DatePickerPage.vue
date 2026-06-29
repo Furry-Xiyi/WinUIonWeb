@@ -1,44 +1,40 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">DatePicker</h1>
     <p class="page-description">
       Use a DatePicker to let users set a date in your app, for example to schedule an appointment. The DatePicker displays three controls for month, date, and year. These controls are easy to use with touch or mouse, and they can be styled and configured in several different ways.
     </p>
 
-    <!-- Example 1: Simple DatePicker -->
-    <WinSettingsCard
-      header="A simple DatePicker with a header."
-      description="The DatePicker is used to pick a known date, such as a date of birth.">
-      <template #default>
+    <!-- Example 1: A simple DatePicker with a header -->
+    <WinControlExample headerText="A simple DatePicker with a header">
+      <template #example>
         <WinDatePicker
           v-model="selectedDate1"
           header="Pick a date" />
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
-    <!-- Example 2: DatePicker with custom format -->
-    <WinSettingsCard
-      header="A DatePicker with day formatted and year hidden."
-      description="Customize the DatePicker's display format.">
-      <template #default>
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <WinDatePicker
-            v-model="selectedDate2"
-            :yearVisible="false"
-            :dayFormatted="true" />
-          <div v-if="selectedDate2" class="output-text">
-            Selected: {{ formatDate(selectedDate2) }}
-          </div>
-        </div>
+    <!-- Example 2: A DatePicker with day formatted and year hidden -->
+    <WinControlExample headerText="A DatePicker with day formatted and year hidden">
+      <template #example>
+        <WinDatePicker
+          v-model="selectedDate2"
+          :yearVisible="false"
+          :dayFormatted="true" />
       </template>
-    </WinSettingsCard>
+      <template #output>
+        <p class="output-text" v-if="selectedDate2">
+          Selected: {{ formatDate(selectedDate2) }}
+        </p>
+      </template>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import WinDatePicker from '../components/WinDatePicker.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 
 const selectedDate1 = ref(null);
 const selectedDate2 = ref(null);
@@ -53,30 +49,24 @@ const formatDate = (date) => {
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 
 .output-text {
-  padding: 8px 12px;
-  background: var(--card-background-secondary);
-  border-radius: 4px;
-  font-family: 'Cascadia Code', 'Consolas', monospace;
-  font-size: 13px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0;
 }
 </style>

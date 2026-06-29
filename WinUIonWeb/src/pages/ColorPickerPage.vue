@@ -1,24 +1,33 @@
 <template>
-  <h1 class="page-header">ColorPicker</h1>
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>
-      ColorPicker
-    </template>
-    <template #description>
+  <div>
+    <h1 class="page-header">ColorPicker</h1>
+    <p class="page-description">
       A control that lets users pick a color from a spectrum, sliders, and text input.
-    </template>
-    <div class="cp-page-layout">
-      <div class="cp-page-left">
-        <WinColorPicker v-model="color"
-                        :isColorSliderVisible="colorSliderVisible"
-                        :isColorChannelTextInputVisible="colorChannelInputVisible"
-                        :isHexInputVisible="hexInputVisible"
-                        :isAlphaEnabled="alphaEnabled"
-                        :isAlphaSliderVisible="alphaSliderVisible"
-                        :isColorPreviewVisible="previewVisible"
-                        :colorSpectrumShape="spectrumShape" />
-      </div>
-      <div class="cp-page-right">
+    </p>
+
+    <WinControlExample headerText="A simple ColorPicker">
+      <template #example>
+        <div class="cp-layout">
+          <div class="cp-left">
+            <WinColorPicker v-model="color"
+                            :isColorSliderVisible="colorSliderVisible"
+                            :isColorChannelTextInputVisible="colorChannelInputVisible"
+                            :isHexInputVisible="hexInputVisible"
+                            :isAlphaEnabled="alphaEnabled"
+                            :isAlphaSliderVisible="alphaSliderVisible"
+                            :isColorPreviewVisible="previewVisible"
+                            :colorSpectrumShape="spectrumShape" />
+          </div>
+          <div class="cp-right">
+            <div class="cp-result-block">
+              <span class="cp-result-label">Selected color</span>
+              <div class="cp-result-rect" :style="{ background: color }"></div>
+              <span class="cp-result-hex">{{ color }}</span>
+            </div>
+          </div>
+        </div>
+      </template>
+      <template #options>
         <WinCheckBox v-model="colorSliderVisible">IsColorSliderVisible</WinCheckBox>
         <WinCheckBox v-model="colorChannelInputVisible">IsColorChannelTextInputVisible</WinCheckBox>
         <WinCheckBox v-model="hexInputVisible">IsHexInputVisible</WinCheckBox>
@@ -30,19 +39,14 @@
           <WinRadioButton v-model="spectrumShape" value="Box">Box</WinRadioButton>
           <WinRadioButton v-model="spectrumShape" value="Ring">Ring</WinRadioButton>
         </div>
-        <div class="cp-result-block">
-          <span class="cp-result-label">Selected color</span>
-          <div class="cp-result-rect" :style="{ background: color }"></div>
-          <span class="cp-result-hex">{{ color }}</span>
-        </div>
-      </div>
-    </div>
-  </WinSettingsCard>
+      </template>
+    </WinControlExample>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinColorPicker from '../components/WinColorPicker.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinRadioButton from '../components/WinRadioButton.vue';
@@ -58,18 +62,18 @@ const spectrumShape = ref('Box');
 </script>
 
 <style scoped>
-  .cp-page-layout {
+  .cp-layout {
     display: flex;
     gap: 32px;
     align-items: flex-start;
     flex-wrap: wrap;
   }
 
-  .cp-page-left {
+  .cp-left {
     flex-shrink: 0;
   }
 
-  .cp-page-right {
+  .cp-right {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -93,7 +97,6 @@ const spectrumShape = ref('Box');
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-top: 12px;
   }
 
   .cp-result-label {

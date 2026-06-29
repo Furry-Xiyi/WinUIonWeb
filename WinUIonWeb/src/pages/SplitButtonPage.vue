@@ -1,14 +1,12 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">SplitButton</h1>
     <p class="page-description">
       The SplitButton is a dropdown button, but with an addition execution hit target. It's used for scenarios where you want a user to be able to invoke a command or make a choice.
     </p>
 
-    <WinSettingsCard
-      header="A SplitButton for color picking."
-      description="Click the left side to apply the current color, or click the dropdown to choose a new color.">
-      <template #default>
+    <WinControlExample headerText="A SplitButton for color picking.">
+      <template #example>
         <WinSplitButton
           :options="colorOptions"
           @click="applyColor"
@@ -21,14 +19,14 @@
           </template>
         </WinSplitButton>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import WinSplitButton from '../components/WinSplitButton.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 
 const currentColor = ref('Green');
 
@@ -53,22 +51,17 @@ const selectColor = (color) => {
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 

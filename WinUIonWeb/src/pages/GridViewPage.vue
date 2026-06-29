@@ -1,131 +1,123 @@
 <template>
   <h1 class="page-header">GridView</h1>
+  <p class="page-description">The GridView lets people browse and select from a collection of items arranged in a grid layout.</p>
 
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>
-      Single Selection
+  <WinControlExample headerText="Single Selection">
+    <template #example>
+      <WinGridView :items="items" selectionMode="Single" isItemClickEnabled v-model:selectedItems="singleSel">
+        <template #item="{ item }">
+          <div class="grid-sample-item">
+            <div class="grid-img" :style="{ background: item.color }"></div>
+          </div>
+        </template>
+      </WinGridView>
     </template>
-    <template #description>
-      Click to select one item at a time.
+    <template #output>
+      <div class="example-output">
+        Selected: {{ singleSel.length > 0 ? singleSel[0].title : 'None' }}
+      </div>
     </template>
-    <WinGridView :items="items" selectionMode="Single" isItemClickEnabled v-model:selectedItems="singleSel">
-      <template #item="{ item }">
-        <div class="grid-sample-item">
-          <div class="grid-img" :style="{ background: item.color }"></div>
+  </WinControlExample>
+
+  <WinControlExample headerText="Multiple Selection">
+    <template #example>
+      <WinGridView :items="multiItems" selectionMode="Multiple" v-model:selectedItems="multiSel">
+        <template #item="{ item }">
+          <div class="grid-sample-item">
+            <div class="grid-img" :style="{ background: item.color }"></div>
+          </div>
+        </template>
+      </WinGridView>
+    </template>
+    <template #output>
+      <div class="example-output">
+        Selected: {{ multiSel.length > 0 ? multiSel.map(s => s.title).join(', ') : 'None' }}
+      </div>
+    </template>
+  </WinControlExample>
+
+  <WinControlExample headerText="Customizable GridView">
+    <template #example>
+      <WinGridView :items="customItems"
+                   :selectionMode="selMode"
+                   :isItemClickEnabled="itemClick"
+                   :canDragItems="canDrag"
+                   :canReorderItems="canReorder"
+                   :allowDrop="allowDropVal"
+                   v-model:selectedItems="customSel"
+                   @reorder="v => customItems = v">
+
+        <template #item="{ item }">
+          <div class="grid-sample-item">
+            <template v-if="layout === 'Image'">
+              <div class="grid-img" :style="{ background: item.color }"></div>
+            </template>
+
+            <template v-else-if="layout === 'Icon/Text'">
+              <div class="layout-icon-text">
+                <div class="layout-icon-text-header">
+                  <span class="icon" style="font-size: 16px;">{{ item.icon }}</span>
+                  <span class="layout-icon-text-title">{{ item.title }}</span>
+                </div>
+                <div class="layout-icon-text-desc">{{ item.desc }}</div>
+              </div>
+            </template>
+
+            <template v-else-if="layout === 'Image/Text'">
+              <div class="grid-img" :style="{ background: item.color, height: '100px', flex: 'none' }"></div>
+              <div class="layout-imagetext-body">
+                <div style="font-weight: 600;">{{ item.title }}</div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">{{ item.desc }}</div>
+              </div>
+            </template>
+
+            <template v-else-if="layout === 'Text'">
+              <div class="layout-text-body">
+                <div style="font-weight: 600;">{{ item.title }}</div>
+                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">{{ item.desc }}</div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </WinGridView>
+    </template>
+    <template #options>
+      <div class="options-section">
+        <div class="options-label">ItemTemplate</div>
+        <div class="options-group">
+          <WinRadioButton name="layout" value="Image" v-model="layout">Image</WinRadioButton>
+          <WinRadioButton name="layout" value="Icon/Text" v-model="layout">Icon/Text</WinRadioButton>
+          <WinRadioButton name="layout" value="Image/Text" v-model="layout">Image/Text</WinRadioButton>
+          <WinRadioButton name="layout" value="Text" v-model="layout">Text</WinRadioButton>
         </div>
-      </template>
-    </WinGridView>
-  </WinSettingsCard>
-
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>
-      Multiple Selection
-    </template>
-    <template #description>
-      Use checkboxes or click items to select multiple.
-    </template>
-    <WinGridView :items="multiItems" selectionMode="Multiple" v-model:selectedItems="multiSel">
-      <template #item="{ item }">
-        <div class="grid-sample-item">
-          <div class="grid-img" :style="{ background: item.color }"></div>
-        </div>
-      </template>
-    </WinGridView>
-  </WinSettingsCard>
-
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>
-      Customizable GridView
-    </template>
-    <template #description>
-      Play with Layouts, Behaviors and Extended mode (Ctrl/Shift Select).
-    </template>
-
-    <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
-
-      <div style="flex: 1; min-width: 320px;">
-        <WinGridView :items="customItems"
-                     :selectionMode="selMode"
-                     :isItemClickEnabled="itemClick"
-                     :canDragItems="canDrag"
-                     :canReorderItems="canReorder"
-                     :allowDrop="allowDropVal"
-                     v-model:selectedItems="customSel"
-                     @reorder="v => customItems = v">
-
-          <template #item="{ item }">
-            <div class="grid-sample-item">
-              <template v-if="layout === 'Image'">
-                <div class="grid-img" :style="{ background: item.color }"></div>
-              </template>
-
-              <template v-else-if="layout === 'Icon/Text'">
-                <div class="layout-icon-text">
-                  <div class="layout-icon-text-header">
-                    <span class="icon" style="font-size: 16px;">{{ item.icon }}</span>
-                    <span class="layout-icon-text-title">{{ item.title }}</span>
-                  </div>
-                  <div class="layout-icon-text-desc">{{ item.desc }}</div>
-                </div>
-              </template>
-
-              <template v-else-if="layout === 'Image/Text'">
-                <div class="grid-img" :style="{ background: item.color, height: '100px', flex: 'none' }"></div>
-                <div class="layout-imagetext-body">
-                  <div style="font-weight: 600;">{{ item.title }}</div>
-                  <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">{{ item.desc }}</div>
-                </div>
-              </template>
-
-              <template v-else-if="layout === 'Text'">
-                <div class="layout-text-body">
-                  <div style="font-weight: 600;">{{ item.title }}</div>
-                  <div style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">{{ item.desc }}</div>
-                </div>
-              </template>
-            </div>
-          </template>
-        </WinGridView>
       </div>
 
-      <div class="gridview-options-panel">
-        <div>
-          <div style="font-weight: 600; margin-bottom: 12px;">ItemTemplate</div>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <WinRadioButton name="layout" value="Image" v-model="layout">Image</WinRadioButton>
-            <WinRadioButton name="layout" value="Icon/Text" v-model="layout">Icon/Text</WinRadioButton>
-            <WinRadioButton name="layout" value="Image/Text" v-model="layout">Image/Text</WinRadioButton>
-            <WinRadioButton name="layout" value="Text" v-model="layout">Text</WinRadioButton>
-          </div>
-        </div>
+      <div class="options-divider"></div>
 
-        <div style="height: 1px; background: var(--stroke-divider);"></div>
-
-        <div>
-          <div style="font-weight: 600; margin-bottom: 12px;">Behaviors</div>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <WinCheckBox v-model="itemClick">IsItemClickEnabled</WinCheckBox>
-            <WinCheckBox v-model="canDrag">CanDragItems</WinCheckBox>
-            <WinCheckBox v-model="canReorder">CanReorderItems</WinCheckBox>
-            <WinCheckBox v-model="allowDropVal">AllowDrop</WinCheckBox>
-          </div>
-        </div>
-
-        <div style="height: 1px; background: var(--stroke-divider);"></div>
-
-        <div>
-          <div style="font-weight: 600; margin-bottom: 12px;">SelectionMode</div>
-          <WinComboBox :options="modeOptions" v-model="selModeIdx" style="width: 100%;" />
+      <div class="options-section">
+        <div class="options-label">Behaviors</div>
+        <div class="options-group">
+          <WinCheckBox v-model="itemClick">IsItemClickEnabled</WinCheckBox>
+          <WinCheckBox v-model="canDrag">CanDragItems</WinCheckBox>
+          <WinCheckBox v-model="canReorder">CanReorderItems</WinCheckBox>
+          <WinCheckBox v-model="allowDropVal">AllowDrop</WinCheckBox>
         </div>
       </div>
-    </div>
-  </WinSettingsCard>
+
+      <div class="options-divider"></div>
+
+      <div class="options-section">
+        <div class="options-label">SelectionMode</div>
+        <WinComboBox :options="modeOptions" v-model="selModeIdx" style="width: 100%;" />
+      </div>
+    </template>
+  </WinControlExample>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import WinGridView from '../components/WinGridView.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinRadioButton from '../components/WinRadioButton.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinComboBox from '../components/WinComboBox.vue';
@@ -135,7 +127,7 @@ const multiItems = ref(Array.from({ length: 4 }, (_, i) => ({ id: `multi-${i}`, 
 const singleSel = ref([]);
 const multiSel = ref([]);
 
-const icons = ['\uE8B9', '\uE8A5', '\uE8C0', '\uE8E1', '\uE904', '\uE909'];
+const icons = ['', '', '', '', '', ''];
 const customItems = ref(Array.from({length: 6}, (_, i) => ({
   id: `custom-${i}`,
   title: `Item ${i+1}`,
@@ -219,15 +211,31 @@ const selMode = computed(() => modeOptions[selModeIdx.value].value);
     box-sizing: border-box;
   }
 
-  .gridview-options-panel {
-    width: 240px;
+  .example-output {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .options-section {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    background: var(--card-bg-secondary);
-    padding: 16px;
-    border-radius: 8px;
-    flex-shrink: 0;
-    border: 1px solid var(--stroke-divider);
+    gap: 12px;
+  }
+
+  .options-label {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .options-divider {
+    height: 1px;
+    background: var(--stroke-divider);
+    margin: 8px 0;
   }
 </style>

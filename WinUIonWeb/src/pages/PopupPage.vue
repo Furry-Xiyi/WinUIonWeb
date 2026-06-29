@@ -1,14 +1,12 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">Popup</h1>
     <p class="page-description">
       Displays content on top of existing content, within the bounds of the app window. Use a Popup for temporarily displaying content that should appear above other UI.
     </p>
 
-    <WinSettingsCard
-      header="Popup with offset positioning."
-      description="Show a popup positioned relative to the button using offset values.">
-      <template #default>
+    <WinControlExample headerText="Popup with offset positioning.">
+      <template #example>
         <div class="popup-demo-container">
           <WinPopup
             :visible="showPopup"
@@ -63,13 +61,13 @@
           </div>
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
 import WinPopup from '../components/WinPopup.vue';
 import WinToggleSwitch from '../components/WinToggleSwitch.vue';
@@ -81,22 +79,17 @@ const horizontalOffset = ref(200);
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 

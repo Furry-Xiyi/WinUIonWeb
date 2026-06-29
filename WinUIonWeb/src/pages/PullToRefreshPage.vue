@@ -1,42 +1,34 @@
 <template>
   <h1 class="page-header">PullToRefresh</h1>
+  <p class="page-description">A container that allows users to refresh content by pulling down from the top on touch devices.</p>
 
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>
-      Default Style
+  <WinControlExample headerText="Default Style">
+    <template #example>
+      <WinPullToRefresh @refresh="onRefresh" style="width: 100%; height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
+        <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <p style="margin: 0;">Pull down to refresh</p>
+          <p style="margin: 0; font-weight: 600; color: var(--accent-base);">Refresh count: {{ count }}</p>
+        </div>
+      </WinPullToRefresh>
     </template>
-    <template #description>
-      Pull down from the top on a touch device to refresh content.
-    </template>
-    <WinPullToRefresh @refresh="onRefresh" style="height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
-      <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <p style="margin: 0;">Pull down to refresh: </p>
-        <p style="margin: 0; font-weight: 600; color: var(--accent-base);">Refresh count: {{ count }}</p>
-      </div>
-    </WinPullToRefresh>
-  </WinSettingsCard>
+  </WinControlExample>
 
-  <WinSettingsCard contentPlacement="bottom" style="margin-top: 16px;">
-    <template #header>
-      Custom Symbol
+  <WinControlExample headerText="Custom Symbol">
+    <template #example>
+      <WinPullToRefresh icon="&#xE117" @refresh="onRefreshCustom" style="width: 100%; height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
+        <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <p style="margin: 0;">Pull down to sync data</p>
+          <p style="margin: 0; font-weight: 600; color: var(--accent-base);">Sync count: {{ customCount }}</p>
+        </div>
+      </WinPullToRefresh>
     </template>
-    <template #description>
-      Override the default symbol using the 'icon' prop.
-    </template>
-    <!-- 这里传递 unicode 字符直接通过 JS 字符串形式 -->
-    <WinPullToRefresh icon="&#xE117" @refresh="onRefreshCustom" style="height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
-      <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <p style="margin: 0;">Pull down to sync data: </p>
-        <p style="margin: 0; font-weight: 600; color: var(--accent-base);">Sync count: {{ customCount }}</p>
-      </div>
-    </WinPullToRefresh>
-  </WinSettingsCard>
+  </WinControlExample>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import WinPullToRefresh from '../components/WinPullToRefresh.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 
 const count = ref(0);
 const customCount = ref(0);
@@ -49,3 +41,19 @@ const onRefreshCustom = (done) => {
   setTimeout(() => { customCount.value++; done(); }, 1500);
 };
 </script>
+
+<style scoped>
+.page-header {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
+
+.page-description {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 24px 0;
+  line-height: 20px;
+}
+</style>

@@ -320,7 +320,7 @@
     --card-bg-secondary: rgba(255, 255, 255, 0.03);
     --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
     --stroke-divider: rgba(255, 255, 255, 0.08);
-    --ctrl-border-rest: rgba(255, 255, 255, 0.07);
+    --ctrl-border-rest: rgba(0, 0, 0, 0.07);
     --ctrl-border: rgba(255, 255, 255, 0.07);
     --ctrl-border-accent: rgba(255, 255, 255, 0.09);
     --accent-border: rgba(0, 0, 0, 0.14);
@@ -446,7 +446,7 @@ html.theme-dark {
   --card-bg-secondary: rgba(255, 255, 255, 0.03);
   --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
   --stroke-divider: rgba(255, 255, 255, 0.08);
-  --ctrl-border-rest: rgba(255, 255, 255, 0.07);
+  --ctrl-border-rest: rgba(0, 0, 0, 0.07);
   --ctrl-border: rgba(255, 255, 255, 0.07);
   --ctrl-border-accent: rgba(255, 255, 255, 0.09);
   --accent-border: rgba(0, 0, 0, 0.14);

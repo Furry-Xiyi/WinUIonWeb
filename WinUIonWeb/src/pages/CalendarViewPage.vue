@@ -1,68 +1,61 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">CalendarView</h1>
     <p class="page-description">
       The CalendarView gives a standardized way to let users view and interact with a calendar. If you just need to let a user select a date, consider using a CalendarDatePicker. If you need to let users select multiple dates, you must use a CalendarView.
     </p>
 
-    <WinSettingsCard
-      header="A basic CalendarView."
-      description="Configure the CalendarView with the options on the right.">
-      <template #default>
-        <div class="calendar-container">
-          <div class="calendar-view-wrapper">
-            <WinCalendarView
-              v-model="selectedDate"
-              :selectionMode="currentSelectionMode"
-              :isOutOfScopeEnabled="isOutOfScopeEnabled"
-              :isGroupLabelVisible="isGroupLabelVisible"
-              :language="currentLanguage"
-              :calendarIdentifier="currentCalendar" />
-          </div>
-          <div class="options-panel">
-            <div class="options-section">
-              <WinCheckBox v-model="isGroupLabelVisible">
-                IsGroupLabelVisible
-              </WinCheckBox>
-              <WinCheckBox v-model="isOutOfScopeEnabled">
-                IsOutOfScopeEnabled
-              </WinCheckBox>
-            </div>
+    <WinControlExample headerText="A basic CalendarView.">
+      <template #example>
+        <WinCalendarView
+          v-model="selectedDate"
+          :selectionMode="currentSelectionMode"
+          :isOutOfScopeEnabled="isOutOfScopeEnabled"
+          :isGroupLabelVisible="isGroupLabelVisible"
+          :language="currentLanguage"
+          :calendarIdentifier="currentCalendar" />
+      </template>
 
-            <div class="options-section">
-              <label class="option-label">SelectionMode</label>
-              <WinComboBox
-                :options="selectionModes"
-                v-model="selectionModeIndex"
-                style="width: 100%;" />
-            </div>
+      <template #options>
+        <WinCheckBox v-model="isGroupLabelVisible">
+          IsGroupLabelVisible
+        </WinCheckBox>
+        <WinCheckBox v-model="isOutOfScopeEnabled">
+          IsOutOfScopeEnabled
+        </WinCheckBox>
 
-            <div class="options-section">
-              <label class="option-label">CalendarIdentifier</label>
-              <WinComboBox
-                :options="calendars"
-                v-model="calendarIndex"
-                style="width: 100%;" />
-            </div>
+        <div class="option-group">
+          <label class="option-label">SelectionMode</label>
+          <WinComboBox
+            :options="selectionModes"
+            v-model="selectionModeIndex"
+            style="width: 100%;" />
+        </div>
 
-            <div class="options-section">
-              <label class="option-label">Language</label>
-              <WinComboBox
-                :options="languages"
-                v-model="languageIndex"
-                style="width: 100%;" />
-            </div>
-          </div>
+        <div class="option-group">
+          <label class="option-label">CalendarIdentifier</label>
+          <WinComboBox
+            :options="calendars"
+            v-model="calendarIndex"
+            style="width: 100%;" />
+        </div>
+
+        <div class="option-group">
+          <label class="option-label">Language</label>
+          <WinComboBox
+            :options="languages"
+            v-model="languageIndex"
+            style="width: 100%;" />
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import WinCalendarView from '../components/WinCalendarView.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinComboBox from '../components/WinComboBox.vue';
 
@@ -122,46 +115,21 @@ watch(selectionModeIndex, (newIdx) => {
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 
-.calendar-container {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
-.calendar-view-wrapper {
-  flex: 0 0 auto;
-}
-
-.options-panel {
-  flex: 1;
-  min-width: 220px;
-  max-width: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.options-section {
+.option-group {
   display: flex;
   flex-direction: column;
   gap: 8px;

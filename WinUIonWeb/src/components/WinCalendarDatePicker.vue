@@ -61,30 +61,82 @@ const onDateSelect = (date) => {
   }
 
   .picker-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 296px;
+    position: relative;
+    border: none;
+    border-radius: 4px;
+    padding: 0 11px;
+    font-size: 14px;
     height: 32px;
     background: var(--ctrl-fill-default);
-    border: 1px solid var(--ctrl-border-rest);
-    border-bottom-color: var(--ctrl-border-accent);
-    border-radius: 4px;
-    padding: 0 12px;
     color: var(--text-primary);
-    font-family: inherit;
-    font-size: 14px;
-    text-align: left;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background var(--fast-duration) var(--fast-out-slow-in), color var(--fast-duration);
+    user-select: none;
   }
 
-    .picker-btn:hover {
-      background: var(--ctrl-fill-secondary);
+  .picker-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+    pointer-events: none;
+  }
+
+  .picker-btn:active::after {
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .picker-btn.primary::after {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.40);
+  }
+
+  .picker-btn.primary:active::after {
+    border-color: transparent;
+  }
+
+  .picker-btn:hover {
+    background: var(--ctrl-fill-secondary);
+  }
+
+  .picker-btn:active {
+    background: color-mix(in srgb, var(--ctrl-fill-tertiary) 100%, black 8%);
+    color: var(--text-secondary);
+  }
+
+    .picker-btn:active::after {
+      border-bottom-color: var(--ctrl-border);
     }
 
-    .picker-btn:active {
-      background: var(--ctrl-fill-tertiary);
-      color: var(--text-secondary);
+  .picker-btn.primary {
+    background: var(--accent-base);
+    color: var(--accent-text);
+  }
+
+    .picker-btn.primary::after {
+      border-color: var(--accent-border);
+      border-bottom-color: var(--accent-border-accent);
     }
+
+    .picker-btn.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .picker-btn.primary:active {
+      background: var(--accent-pressed);
+      color: var(--accent-text-secondary);
+    }
+
+      .picker-btn.primary:active::after {
+        border-color: transparent;
+      }
 
   .picker-text.placeholder {
     color: var(--text-secondary);
@@ -105,7 +157,7 @@ const onDateSelect = (date) => {
     position: fixed;
     z-index: 100;
     background: var(--flyout-bg);
-    border: 1px solid var(--stroke-surface-flyout);
+    border: 1px solid var(--ctrl-border);
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.14);
     backdrop-filter: var(--flyout-backdrop);

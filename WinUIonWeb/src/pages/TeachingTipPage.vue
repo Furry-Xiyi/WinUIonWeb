@@ -1,15 +1,13 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">TeachingTip</h1>
     <p class="page-description">
       A teaching tip is a notification flyout used to provide contextually relevant information. It supports rich content (including titles, subtitles, icons, images, and text) and can be configured for either explicit or light-dismiss.
     </p>
 
     <!-- Example 1: Targeted TeachingTip -->
-    <WinSettingsCard
-      header="Show a targeted TeachingTip on a button."
-      description="A teaching tip anchored to the target element with a tail pointing to it.">
-      <template #default>
+    <WinControlExample headerText="Show a targeted TeachingTip on a button.">
+      <template #example>
         <div class="tip-container">
           <WinButton ref="targetButton1" @click="showTip1 = !showTip1">
             Show TeachingTip
@@ -26,13 +24,11 @@
           </WinTeachingTip>
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
     <!-- Example 2: Non-targeted TeachingTip -->
-    <WinSettingsCard
-      header="Show a non-targeted TeachingTip with buttons."
-      description="A floating teaching tip that appears at the center of the screen without a target.">
-      <template #default>
+    <WinControlExample headerText="Show a non-targeted TeachingTip with buttons.">
+      <template #example>
         <WinButton @click="showTip2 = !showTip2">
           Show TeachingTip
         </WinButton>
@@ -47,13 +43,11 @@
           @action="showTip2 = false"
           @close="showTip2 = false" />
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
     <!-- Example 3: TeachingTip with Hero Content -->
-    <WinSettingsCard
-      header="Show a targeted TeachingTip with hero content on a button."
-      description="A teaching tip with an image area at the top (hero content).">
-      <template #default>
+    <WinControlExample headerText="Show a targeted TeachingTip with hero content on a button.">
+      <template #example>
         <div class="tip-container">
           <WinButton ref="targetButton3" @click="showTip3 = !showTip3">
             Show TeachingTip
@@ -79,13 +73,13 @@
           </WinTeachingTip>
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
 import WinTeachingTip from '../components/WinTeachingTip.vue';
 
@@ -97,22 +91,17 @@ const showTip3 = ref(false);
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 

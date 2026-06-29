@@ -1,15 +1,12 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">Expander</h1>
     <p class="page-description">
       The Expander control lets you show or hide less important content that's related to a piece of primary content that's always visible. Items contained in the Header are always visible. The user can expand and collapse the Content area to display the body content.
     </p>
 
-    <!-- Example 1: Text in header and content -->
-    <WinSettingsCard
-      header="An Expander with text in the header and content."
-      description="Click the header to expand and collapse the content.">
-      <template #default>
+    <WinControlExample headerText="An Expander with text in the header and content.">
+      <template #example>
         <WinExpander
           v-model:isExpanded="expander1Expanded"
           :expandDirection="expandDirection">
@@ -30,13 +27,10 @@
             style="width: 100%;" />
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
-    <!-- Example 2: Modifying content alignment -->
-    <WinSettingsCard
-      header="Modifying an Expander's content alignment."
-      description="The header is centered, but the content is left-aligned.">
-      <template #default>
+    <WinControlExample headerText="Modifying an Expander's content alignment.">
+      <template #example>
         <WinExpander style="width: 500px; max-width: 100%;">
           <template #header>
             <div style="text-align: center; width: 100%;">
@@ -50,14 +44,14 @@
           </template>
         </WinExpander>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import WinExpander from '../components/WinExpander.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinComboBox from '../components/WinComboBox.vue';
 
 const expander1Expanded = ref(false);
@@ -71,22 +65,17 @@ const expandDirection = computed(() => expandDirections[expandDirectionIndex.val
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 

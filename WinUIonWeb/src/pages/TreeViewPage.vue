@@ -1,104 +1,88 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">TreeView</h1>
     <p class="page-description">
       The TreeView control is a hierarchical list pattern with expanding and collapsing nodes that contain nested items. It can be used to illustrate a folder structure or nested relationships in your UI.
     </p>
 
-    <!-- Example 1: Simple TreeView with drag and drop -->
-    <WinSettingsCard
-      header="A simple TreeView with drag and drop enabled."
-      description="Drag items to reorder them within the tree.">
-      <template #default>
-        <div style="min-height: 280px; border: 1px solid var(--control-stroke-default); border-radius: 4px; padding: 12px;">
-          <WinTreeView
-            v-model:items="simpleTree"
-            selectionMode="Single"
-            :canDragItems="true"
-            :allowDrop="true">
-            <template #item="{ item }">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
-                  {{ item.children?.length ? '' : '' }}
-                </span>
-                {{ item.label }}
-              </div>
-            </template>
-          </WinTreeView>
-        </div>
+    <WinControlExample headerText="A simple TreeView with drag and drop enabled.">
+      <template #example>
+        <WinTreeView
+          v-model:items="simpleTree"
+          selectionMode="Single"
+          :canDragItems="true"
+          :allowDrop="true"
+          style="min-height: 280px;">
+          <template #item="{ item }">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
+                {{ item.children?.length ? '' : '' }}
+              </span>
+              {{ item.label }}
+            </div>
+          </template>
+        </WinTreeView>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
-    <!-- Example 2: TreeView with multiple selection -->
-    <WinSettingsCard
-      header="A TreeView with multiple selection enabled."
-      description="Select multiple items using checkboxes.">
-      <template #default>
-        <div style="min-height: 280px; border: 1px solid var(--control-stroke-default); border-radius: 4px; padding: 12px;">
-          <WinTreeView
-            v-model:items="multiSelectTree"
-            selectionMode="Multiple">
-            <template #item="{ item }">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
-                  {{ item.children?.length ? '' : '' }}
-                </span>
-                {{ item.label }}
-              </div>
-            </template>
-          </WinTreeView>
-        </div>
+    <WinControlExample headerText="A TreeView with multiple selection enabled.">
+      <template #example>
+        <WinTreeView
+          v-model:items="multiSelectTree"
+          selectionMode="Multiple"
+          style="min-height: 280px;">
+          <template #item="{ item }">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
+                {{ item.children?.length ? '' : '' }}
+              </span>
+              {{ item.label }}
+            </div>
+          </template>
+        </WinTreeView>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
-    <!-- Example 3: Data-bound TreeView -->
-    <WinSettingsCard
-      header="A TreeView using data binding with ItemsSource."
-      description="TreeView populated from a hierarchical data source.">
-      <template #default>
-        <div style="min-height: 200px; border: 1px solid var(--control-stroke-default); border-radius: 4px; padding: 12px;">
-          <WinTreeView
-            v-model:items="dataSource"
-            selectionMode="Single">
-            <template #item="{ item }">
+    <WinControlExample headerText="A TreeView using data binding with ItemsSource.">
+      <template #example>
+        <WinTreeView
+          v-model:items="dataSource"
+          selectionMode="Single"
+          style="min-height: 200px;">
+          <template #item="{ item }">
+            {{ item.name }}
+          </template>
+        </WinTreeView>
+      </template>
+    </WinControlExample>
+
+    <WinControlExample headerText="A TreeView using an ItemTemplateSelector.">
+      <template #example>
+        <WinTreeView
+          v-model:items="fileTree"
+          selectionMode="Single"
+          style="min-height: 200px;">
+          <template #item="{ item }">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span v-if="item.type === 'folder'" style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
+                📁
+              </span>
+              <span v-else style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
+
+              </span>
               {{ item.name }}
-            </template>
-          </WinTreeView>
-        </div>
+            </div>
+          </template>
+        </WinTreeView>
       </template>
-    </WinSettingsCard>
-
-    <!-- Example 4: TreeView with ItemTemplateSelector -->
-    <WinSettingsCard
-      header="A TreeView using an ItemTemplateSelector."
-      description="Different templates for folders and files.">
-      <template #default>
-        <div style="min-height: 200px; border: 1px solid var(--control-stroke-default); border-radius: 4px; padding: 12px;">
-          <WinTreeView
-            v-model:items="fileTree"
-            selectionMode="Single">
-            <template #item="{ item }">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span v-if="item.type === 'folder'" style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
-                  📁
-                </span>
-                <span v-else style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
-                  
-                </span>
-                {{ item.name }}
-              </div>
-            </template>
-          </WinTreeView>
-        </div>
-      </template>
-    </WinSettingsCard>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import WinTreeView from '../components/WinTreeView.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 
 // Example 1: Simple tree with drag and drop
 const simpleTree = ref([
@@ -188,22 +172,17 @@ const fileTree = ref([
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 </style>

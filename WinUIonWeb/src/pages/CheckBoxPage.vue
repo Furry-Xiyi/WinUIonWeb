@@ -1,48 +1,37 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">CheckBox</h1>
     <p class="page-description">
-      CheckBox controls let the user select a combination of binary options. In contrast, RadioButton controls allow the user to select from mutually exclusive options. The indeterminate state is used to indicate that an option is set for some, but not all, child options.
+      CheckBox controls let the user select a combination of binary options. In contrast, RadioButton controls allow the user to select from mutually exclusive options. The indeterminate state is used to indicate that an option is set for some, but not all, child options. Don't allow users to set an indeterminate state directly to indicate a third option.
     </p>
 
-    <!-- Example 1: Two-state CheckBox -->
-    <WinSettingsCard
-      header="A two-state CheckBox."
-      description="Use a two-state CheckBox for a single option that the user can switch on or off.">
-      <template #default>
-        <WinCheckBox
-          v-model="twoStateChecked"
-          @change="onTwoStateChanged">
+    <!-- Example 1: A 2-state CheckBox -->
+    <WinControlExample headerText="A 2-state CheckBox">
+      <template #example>
+        <WinCheckBox v-model="twoStateChecked" @change="onTwoStateChanged">
           Two-state CheckBox
         </WinCheckBox>
       </template>
       <template #output>
-        <div v-if="twoStateOutput" class="output-text">{{ twoStateOutput }}</div>
+        <p class="output-text">{{ twoStateOutput }}</p>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
-    <!-- Example 2: Three-state CheckBox -->
-    <WinSettingsCard
-      header="A three-state CheckBox."
-      description="Use a three-state CheckBox to represent an option that can be checked, unchecked, or indeterminate.">
-      <template #default>
-        <WinCheckBox
-          v-model="threeStateValue"
-          :three-state="true"
-          @change="onThreeStateChanged">
+    <!-- Example 2: A 3-state CheckBox -->
+    <WinControlExample headerText="A 3-state CheckBox">
+      <template #example>
+        <WinCheckBox v-model="threeStateValue" :three-state="true" @change="onThreeStateChanged">
           Three-state CheckBox
         </WinCheckBox>
       </template>
       <template #output>
-        <div v-if="threeStateOutput" class="output-text">{{ threeStateOutput }}</div>
+        <p class="output-text">{{ threeStateOutput }}</p>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
-    <!-- Example 3: Select All CheckBox -->
-    <WinSettingsCard
-      header="Using indeterminate state to represent a collection"
-      description="Use a three-state CheckBox to represent a collection with partial selection.">
-      <template #default>
+    <!-- Example 3: Using a 3-state CheckBox for a collection -->
+    <WinControlExample headerText="Using a 3-state CheckBox">
+      <template #example>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <WinCheckBox
             :modelValue="selectAllChecked"
@@ -50,59 +39,56 @@
             @change="onSelectAllChanged">
             Select all
           </WinCheckBox>
-          <div style="margin-left: 24px; display: flex; flex-direction: column; gap: 8px;">
-            <WinCheckBox
-              v-model="option1Checked"
-              @change="onOptionChanged">
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-left: 24px;">
+            <WinCheckBox v-model="option1Checked" @change="updateSelectAllState">
               Option 1
             </WinCheckBox>
-            <WinCheckBox
-              v-model="option2Checked"
-              @change="onOptionChanged">
+            <WinCheckBox v-model="option2Checked" @change="updateSelectAllState">
               Option 2
             </WinCheckBox>
-            <WinCheckBox
-              v-model="option3Checked"
-              @change="onOptionChanged">
+            <WinCheckBox v-model="option3Checked" @change="updateSelectAllState">
               Option 3
             </WinCheckBox>
           </div>
         </div>
       </template>
-    </WinSettingsCard>
+      <template #output>
+        <p class="output-text">{{ selectAllOutput }}</p>
+      </template>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 
-// Two-state example
+// Example 1: 2-state CheckBox
 const twoStateChecked = ref(false);
-const twoStateOutput = ref('');
+const twoStateOutput = ref('CheckBox is unchecked');
 
 const onTwoStateChanged = () => {
-  twoStateOutput.value = twoStateChecked.value ? 'Checked' : 'Unchecked';
+  twoStateOutput.value = twoStateChecked.value ? 'CheckBox is checked' : 'CheckBox is unchecked';
 };
 
-// Three-state example
+// Example 2: 3-state CheckBox
 const threeStateValue = ref(null); // null = indeterminate, true = checked, false = unchecked
-const threeStateOutput = ref('');
+const threeStateOutput = ref('CheckBox is indeterminate');
 
 const onThreeStateChanged = () => {
   if (threeStateValue.value === null) {
-    threeStateOutput.value = 'Indeterminate';
+    threeStateOutput.value = 'CheckBox is indeterminate';
   } else if (threeStateValue.value === true) {
-    threeStateOutput.value = 'Checked';
+    threeStateOutput.value = 'CheckBox is checked';
   } else {
-    threeStateOutput.value = 'Unchecked';
+    threeStateOutput.value = 'CheckBox is unchecked';
   }
 };
 
-// Select all example
+// Example 3: Select all
 const option1Checked = ref(false);
-const option2Checked = ref(true);
+const option2Checked = ref(false);
 const option3Checked = ref(false);
 
 const selectAllChecked = computed(() =>
@@ -114,44 +100,43 @@ const selectAllIndeterminate = computed(() => {
   return checkedCount > 0 && checkedCount < 3;
 });
 
+const selectAllOutput = computed(() => {
+  const checkedCount = [option1Checked.value, option2Checked.value, option3Checked.value].filter(Boolean).length;
+  if (checkedCount === 0) return 'Nothing is checked';
+  if (checkedCount === 3) return 'All options are checked';
+  return `${checkedCount} option${checkedCount > 1 ? 's' : ''} checked`;
+});
+
 const onSelectAllChanged = (newValue) => {
   option1Checked.value = newValue;
   option2Checked.value = newValue;
   option3Checked.value = newValue;
 };
 
-const onOptionChanged = () => {
-  // This function is called when individual options change
-  // The computed properties will automatically update selectAll state
+const updateSelectAllState = () => {
+  // Computed properties automatically handle this
 };
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 
 .output-text {
-  padding: 8px 12px;
-  background: var(--card-background-secondary);
-  border-radius: 4px;
-  font-family: 'Cascadia Code', 'Consolas', monospace;
-  font-size: 13px;
-  margin-top: 12px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0;
 }
 </style>

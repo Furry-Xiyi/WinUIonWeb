@@ -1,33 +1,31 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">ContentDialog</h1>
     <p class="page-description">
       Use a ContentDialog to show relevant information or to provide a modal dialog experience that requires action from the user.
     </p>
 
     <!-- Example 1: Basic ContentDialog -->
-    <WinSettingsCard
-      header="A basic content dialog with content."
-      description="Show a dialog with a default button set.">
-      <template #default>
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <WinButton @click="showDialog1 = true">Show dialog</WinButton>
-          <div v-if="dialogResult1" class="output-text">Result: {{ dialogResult1 }}</div>
-        </div>
+    <WinControlExample headerText="A basic content dialog with content.">
+      <template #example>
+        <WinButton @click="showDialog1 = true">Show dialog</WinButton>
       </template>
-    </WinSettingsCard>
+      <template #output>
+        <div v-if="dialogResult1" class="output-text">Result: {{ dialogResult1 }}</div>
+        <div v-else class="output-text">Click the button to show the dialog.</div>
+      </template>
+    </WinControlExample>
 
     <!-- Example 2: ContentDialog without default button -->
-    <WinSettingsCard
-      header="A content dialog without a default button."
-      description="Show a dialog without highlighting any button.">
-      <template #default>
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <WinButton @click="showDialog2 = true">Show dialog without default button</WinButton>
-          <div v-if="dialogResult2" class="output-text">Result: {{ dialogResult2 }}</div>
-        </div>
+    <WinControlExample headerText="A content dialog without a default button.">
+      <template #example>
+        <WinButton @click="showDialog2 = true">Show dialog without default button</WinButton>
       </template>
-    </WinSettingsCard>
+      <template #output>
+        <div v-if="dialogResult2" class="output-text">Result: {{ dialogResult2 }}</div>
+        <div v-else class="output-text">Click the button to show the dialog.</div>
+      </template>
+    </WinControlExample>
 
     <!-- Dialog 1 with default button -->
     <WinContentDialog
@@ -62,7 +60,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
 import WinContentDialog from '../components/WinContentDialog.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
@@ -106,30 +104,24 @@ const handleDialog2Close = () => {
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 
 .output-text {
-  padding: 8px 12px;
-  background: var(--card-background-secondary);
-  border-radius: 4px;
-  font-family: 'Cascadia Code', 'Consolas', monospace;
-  font-size: 13px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0;
 }
 </style>

@@ -1,80 +1,71 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">ComboBox</h1>
     <p class="page-description">
       Use a ComboBox (also known as a drop-down list) to present a list of items a user can select from. A ComboBox starts in a compact state and expands to show a list of selectable items.
     </p>
 
-    <!-- Example 1: Simple ComboBox -->
-    <WinSettingsCard
-      header="A ComboBox with inline items."
-      description="Pick a color from the drop-down list.">
-      <template #default>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <WinComboBox
-            :options="colors"
-            v-model="selectedColorIndex"
-            placeholder="Pick a color"
-            header="Colors"
-            style="width: 200px;" />
-          <div
-            v-if="selectedColorIndex !== null && selectedColorIndex >= 0"
-            class="color-preview"
-            :style="{ backgroundColor: colors[selectedColorIndex].value }">
-          </div>
+    <WinControlExample headerText="A ComboBox with inline items.">
+      <template #example>
+        <WinComboBox
+          :options="colors"
+          v-model="selectedColorIndex"
+          placeholder="Pick a color"
+          header="Colors"
+          style="width: 200px;" />
+      </template>
+      <template #output>
+        <div
+          v-if="selectedColorIndex !== null && selectedColorIndex >= 0"
+          class="color-preview"
+          :style="{ backgroundColor: colors[selectedColorIndex].value }">
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
-    <!-- Example 2: ComboBox with ItemsSource -->
-    <WinSettingsCard
-      header="A ComboBox with an ItemsSource."
-      description="Select a font from the list.">
-      <template #default>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <WinComboBox
-            :options="fonts"
-            v-model="selectedFontIndex"
-            header="Font"
-            style="min-width: 200px;" />
-          <div
-            v-if="selectedFontIndex !== null && selectedFontIndex >= 0"
-            class="output-text"
-            :style="{ fontFamily: fonts[selectedFontIndex].value }">
-            You can set the font used for this text.
-          </div>
+    <WinControlExample headerText="A ComboBox with an ItemsSource.">
+      <template #example>
+        <WinComboBox
+          :options="fonts"
+          v-model="selectedFontIndex"
+          header="Font"
+          style="min-width: 200px;" />
+      </template>
+      <template #output>
+        <div
+          v-if="selectedFontIndex !== null && selectedFontIndex >= 0"
+          class="output-text"
+          :style="{ fontFamily: fonts[selectedFontIndex].value }">
+          You can set the font used for this text.
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
-    <!-- Example 3: Editable ComboBox -->
-    <WinSettingsCard
-      header="An editable ComboBox."
-      description="Type or select a font size.">
-      <template #default>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <WinComboBox
-            :options="fontSizes"
-            v-model="selectedFontSizeIndex"
-            :editable="true"
-            header="Font Size"
-            style="width: 200px;" />
-          <div
-            v-if="selectedFontSizeIndex !== null && selectedFontSizeIndex >= 0"
-            class="output-text"
-            :style="{ fontSize: fontSizes[selectedFontSizeIndex].value }">
-            You can set the font size used for this text.
-          </div>
+    <WinControlExample headerText="An editable ComboBox.">
+      <template #example>
+        <WinComboBox
+          :options="fontSizes"
+          v-model="selectedFontSizeIndex"
+          :editable="true"
+          header="Font Size"
+          style="width: 200px;" />
+      </template>
+      <template #output>
+        <div
+          v-if="selectedFontSizeIndex !== null && selectedFontSizeIndex >= 0"
+          class="output-text"
+          :style="{ fontSize: fontSizes[selectedFontSizeIndex].value }">
+          You can set the font size used for this text.
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import WinComboBox from '../components/WinComboBox.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 
 // Color options
 const colors = [
@@ -119,22 +110,17 @@ const selectedFontSizeIndex = ref(5); // Default to 14
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 
@@ -146,10 +132,9 @@ const selectedFontSizeIndex = ref(5); // Default to 14
 }
 
 .output-text {
-  padding: 8px 12px;
-  background: var(--card-background-secondary);
-  border-radius: 4px;
-  font-family: 'Segoe UI', sans-serif;
-  line-height: 1.5;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0;
 }
 </style>

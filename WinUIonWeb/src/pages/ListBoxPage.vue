@@ -1,22 +1,21 @@
 <template>
   <h1 class="page-header">ListBox</h1>
+  <p class="page-description">A control that presents an inline list of items that the user can select from.</p>
 
-  <WinSettingsCard
-    header="Basic ListBox"
-    description="Select a single item from a flat list.">
-    <WinListBox :items="['Blue', 'Green', 'Red', 'Yellow']" v-model:selectedIndex="idx" style="width: 200px;" />
-  </WinSettingsCard>
-
-  <WinSettingsCard
-    header="Output"
-    description="Currently selected color.">
-    <span>{{ ['Blue', 'Green', 'Red', 'Yellow'][idx] || 'None' }}</span>
-  </WinSettingsCard>
+  <WinControlExample headerText="A simple ListBox">
+    <template #example>
+      <WinListBox :items="['Blue', 'Green', 'Red', 'Yellow']" v-model:selectedIndex="idx" style="width: 200px;" />
+    </template>
+    <template #output>
+      <span>Selected color: {{ ['Blue', 'Green', 'Red', 'Yellow'][idx] || 'None' }}</span>
+    </template>
+  </WinControlExample>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import WinListBox from '../components/WinListBox.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
+
 const idx = ref(0);
 </script>

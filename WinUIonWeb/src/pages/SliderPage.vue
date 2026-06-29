@@ -1,29 +1,25 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">Slider</h1>
     <p class="page-description">
       Use a Slider to let users set a value by moving a thumb along a track. A Slider is a good choice when you know that users think of the value as a relative quantity, not a numeric value.
     </p>
 
     <!-- Example 1: Simple Slider -->
-    <WinSettingsCard
-      header="A simple Slider."
-      description="Drag the slider to change its value.">
-      <template #default>
+    <WinControlExample header-text="A simple Slider.">
+      <template #example>
         <WinSlider
           v-model="sliderValue1"
           style="width: 200px;" />
       </template>
       <template #output>
-        <div class="output-text">{{ sliderValue1 }}</div>
+        <p class="output-text">{{ sliderValue1 }}</p>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
     <!-- Example 2: Slider with Range and Steps -->
-    <WinSettingsCard
-      header="A Slider with range and steps specified."
-      description="Configure the Slider's range and step behavior.">
-      <template #default>
+    <WinControlExample header-text="A Slider with range and steps specified.">
+      <template #example>
         <WinSlider
           v-model="sliderValue2"
           :min="minimumValue"
@@ -33,7 +29,7 @@
           style="width: 200px;" />
       </template>
       <template #output>
-        <div class="output-text">{{ sliderValue2 }}</div>
+        <p class="output-text">{{ sliderValue2 }}</p>
       </template>
       <template #options>
         <div class="options-grid">
@@ -63,13 +59,11 @@
             class="number-input" />
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
     <!-- Example 3: Slider with Tick Marks -->
-    <WinSettingsCard
-      header="A Slider with tick marks."
-      description="Tick marks provide visual reference points for the Slider.">
-      <template #default>
+    <WinControlExample header-text="A Slider with tick marks.">
+      <template #example>
         <WinSlider
           v-model="sliderValue3"
           :show-ticks="true"
@@ -78,7 +72,7 @@
           style="width: 290px;" />
       </template>
       <template #output>
-        <div class="output-text">{{ sliderValue3 }}</div>
+        <p class="output-text">{{ sliderValue3 }}</p>
       </template>
       <template #options>
         <div>
@@ -93,13 +87,11 @@
           </div>
         </div>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
 
     <!-- Example 4: Vertical Slider -->
-    <WinSettingsCard
-      header="A vertical Slider."
-      description="Set the Orientation property to Vertical to make the Slider vertical.">
-      <template #default>
+    <WinControlExample header-text="A vertical Slider.">
+      <template #example>
         <WinSlider
           v-model="sliderValue4"
           :min="-50"
@@ -110,16 +102,16 @@
           style="width: 100px; height: 100px;" />
       </template>
       <template #output>
-        <div class="output-text">{{ sliderValue4 }}</div>
+        <p class="output-text">{{ sliderValue4 }}</p>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import WinSlider from '../components/WinSlider.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinRadioButton from '../components/WinRadioButton.vue';
 
 // Example 1: Simple Slider
@@ -142,32 +134,25 @@ const sliderValue4 = ref(0);
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 
 .output-text {
-  padding: 8px 12px;
-  background: var(--card-background-secondary);
-  border-radius: 4px;
-  font-family: 'Cascadia Code', 'Consolas', monospace;
-  font-size: 13px;
-  margin-top: 12px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .options-grid {

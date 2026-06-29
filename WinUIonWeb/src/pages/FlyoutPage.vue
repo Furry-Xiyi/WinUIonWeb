@@ -1,14 +1,12 @@
 <template>
-  <div class="control-page">
+  <div>
     <h1 class="page-header">Flyout</h1>
     <p class="page-description">
       A Flyout displays lightweight UI that is either information, or requires user interaction. Unlike a dialog, a Flyout can be light dismissed by clicking or tapping outside of it, pressing the device's back button, or pressing the 'Esc' key.
     </p>
 
-    <WinSettingsCard
-      header="A button with a flyout"
-      description="Click the button to show a confirmation flyout.">
-      <template #default>
+    <WinControlExample headerText="A button with a flyout">
+      <template #example>
         <WinFlyout ref="flyoutRef">
           <template #trigger>
             <WinButton @click="flyoutRef?.toggle()">Empty cart</WinButton>
@@ -21,13 +19,13 @@
           </template>
         </WinFlyout>
       </template>
-    </WinSettingsCard>
+    </WinControlExample>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
 import WinFlyout from '../components/WinFlyout.vue';
 
@@ -40,22 +38,17 @@ const handleConfirm = () => {
 </script>
 
 <style scoped>
-.control-page {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .page-header {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0 0 8px 0;
+  color: var(--text-primary);
 }
 
 .page-description {
   font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 

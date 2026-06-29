@@ -1682,7 +1682,6 @@ watch(() => props.selectedValue, (val, oldVal) => {
       display: flex;
       align-items: center;
       justify-content: center;
-      transform: translate(0.2px, 0px);
     }
 
   .win-nav-settings-item .animated-icon-gear {

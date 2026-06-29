@@ -1,71 +1,66 @@
 <template>
   <h1 class="page-header">ListView</h1>
+  <p class="page-description">A ListView displays data in a vertical list with selection support.</p>
 
-  <WinSettingsCard
-    header="Basic ListView"
-    description="Select contacts from the list."
-    content-alignment="Vertical"
-    horizontal-content-alignment="Left">
-    <template #description>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span>Selection Mode:</span>
+  <WinControlExample headerText="Basic ListView with Selection Modes">
+    <template #example>
+      <div class="listview-demo-scroll">
+        <WinListView :items="contacts" :selectionMode="basicMode" v-model:selectedItems="singleSel">
+          <template #item="{ item }">
+            <span>{{ item.firstName }} {{ item.lastName }} — {{ item.company }}</span>
+          </template>
+        </WinListView>
+      </div>
+    </template>
+    <template #options>
+      <div class="option-row">
+        <span class="option-label">Selection Mode:</span>
         <WinComboBox :options="selModeOptions" v-model="basicModeIdx" style="width: 150px;" />
       </div>
     </template>
-    <div class="listview-demo-scroll">
-      <WinListView :items="contacts" :selectionMode="basicMode" v-model:selectedItems="singleSel">
-        <template #item="{ item }">
-          <span>{{ item.firstName }} {{ item.lastName }} — {{ item.company }}</span>
-        </template>
-      </WinListView>
-    </div>
-  </WinSettingsCard>
+  </WinControlExample>
 
-  <WinSettingsCard
-    header="Grouped Data"
-    description="Contacts grouped by first letter."
-    content-alignment="Vertical"
-    horizontal-content-alignment="Left">
-    <template #description>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span>Contacts grouped by first letter.</span>
-        <WinToggleSwitch :modelValue="stickyOn" @update:modelValue="stickyOn = $event" onContent="Sticky" offContent="Static" />
+  <WinControlExample headerText="Grouped Data with Sticky Headers">
+    <template #example>
+      <div class="listview-demo-scroll">
+        <WinListView :items="groups" isGrouped showHeader :stickyHeader="stickyOn" selectionMode="Single" v-model:selectedItems="groupSel">
+          <template #header="{ group }">
+            {{ group.key }}
+          </template>
+          <template #item="{ item }">
+            <div style="display: flex; flex-direction: column;">
+              <span>{{ item.firstName }} {{ item.lastName }}</span>
+              <span style="font-size: 12px; color: var(--text-secondary);">{{ item.company }}</span>
+            </div>
+          </template>
+        </WinListView>
       </div>
     </template>
-    <div class="listview-demo-scroll">
-      <WinListView :items="groups" isGrouped showHeader :stickyHeader="stickyOn" selectionMode="Single" v-model:selectedItems="groupSel">
-        <template #header="{ group }">
-          {{ group.key }}
-        </template>
-        <template #item="{ item }">
-          <div style="display: flex; flex-direction: column;">
-            <span>{{ item.firstName }} {{ item.lastName }}</span>
-            <span style="font-size: 12px; color: var(--text-secondary);">{{ item.company }}</span>
-          </div>
-        </template>
-      </WinListView>
-    </div>
-  </WinSettingsCard>
+    <template #options>
+      <div class="option-row">
+        <span class="option-label">Sticky Headers:</span>
+        <WinToggleSwitch :modelValue="stickyOn" @update:modelValue="stickyOn = $event" onContent="On" offContent="Off" />
+      </div>
+    </template>
+  </WinControlExample>
 
-  <WinSettingsCard
-    header="Drag to Reorder"
-    description="Drag items up and down to change order."
-    content-alignment="Vertical"
-    horizontal-content-alignment="Left">
-    <div class="listview-demo-scroll">
-      <WinListView v-model:items="dragList" selectionMode="Single" v-model:selectedItems="dragSel" canDragItems canReorderItems allowDrop>
-        <template #item="{ item }">
-          <span>{{ item.firstName }} {{ item.lastName }}</span>
-        </template>
-      </WinListView>
-    </div>
-  </WinSettingsCard>
+  <WinControlExample headerText="Drag to Reorder">
+    <template #example>
+      <div class="listview-demo-scroll">
+        <WinListView v-model:items="dragList" selectionMode="Single" v-model:selectedItems="dragSel" canDragItems canReorderItems allowDrop>
+          <template #item="{ item }">
+            <span>{{ item.firstName }} {{ item.lastName }}</span>
+          </template>
+        </WinListView>
+      </div>
+    </template>
+  </WinControlExample>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import WinListView from '../components/WinListView.vue';
-import WinSettingsCard from '../components/WinSettingsCard.vue';
+import WinControlExample from '../components/WinControlExample.vue';
 import WinComboBox from '../components/WinComboBox.vue';
 import WinToggleSwitch from '../components/WinToggleSwitch.vue';
 
@@ -114,21 +109,32 @@ const dragSel = ref([]);
 </script>
 
 <style scoped>
-  .listview-demo-scroll {
-    width: 100%;
-    height: 300px;
-    border: 1px solid var(--card-stroke);
-    border-radius: 8px;
-    background: var(--card-bg);
-    display: block;
-    position: relative;
-    overflow: visible;
-  }
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-  .listview-demo-scroll .win-list-view {
-    width: 100%;
-    height: 100%;
-    border-radius: 7px;
-    padding: 0;
-  }
+.option-label {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.listview-demo-scroll {
+  width: 100%;
+  height: 300px;
+  border: 1px solid var(--card-stroke);
+  border-radius: 8px;
+  background: var(--card-bg);
+  display: block;
+  position: relative;
+  overflow: visible;
+}
+
+.listview-demo-scroll .win-list-view {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  padding: 0;
+}
 </style>
