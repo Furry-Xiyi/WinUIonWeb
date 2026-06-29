@@ -14,7 +14,8 @@ const onDown = (e) => {
   const update = (evt) => {
     const rect = el.getBoundingClientRect();
     let p = Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width));
-    emit('update:modelValue', Math.round(props.min + p * (props.max - props.min)));
+    const newValue = props.min + p * (props.max - props.min);
+    emit('update:modelValue', newValue);
   };
   update(e); el.onpointermove = update;
   el.onpointerup = () => { el.onpointermove = null; el.releasePointerCapture(e.pointerId); };

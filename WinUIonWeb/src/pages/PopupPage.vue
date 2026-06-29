@@ -1,42 +1,69 @@
 <template>
-  <div class="page-container">
+  <div class="control-page">
     <h1 class="page-header">Popup</h1>
-    <div class="content-split">
-      <div class="left-pane">
-        <WinSettingsCard>
-          <template #header>Popup with Offset Positioning</template>
-          <template #description>Show a popup positioned below the button.</template>
-          <WinPopup :visible="showPopup"
-                    :verticalOffset="verticalOffset"
-                    :horizontalOffset="horizontalOffset"
-                    :lightDismiss="isLightDismissEnabled"
-                    @update:visible="showPopup = $event">
+    <p class="page-description">
+      Displays content on top of existing content, within the bounds of the app window. Use a Popup for temporarily displaying content that should appear above other UI.
+    </p>
+
+    <WinSettingsCard
+      header="Popup with offset positioning."
+      description="Show a popup positioned relative to the button using offset values.">
+      <template #default>
+        <div class="popup-demo-container">
+          <WinPopup
+            :visible="showPopup"
+            :verticalOffset="verticalOffset"
+            :horizontalOffset="horizontalOffset"
+            :lightDismiss="isLightDismissEnabled"
+            @update:visible="showPopup = $event">
             <template #trigger>
-              <WinButton data-popup-trigger @click="showPopup = !showPopup">Show Popup (using Offset)</WinButton>
+              <WinButton @click="showPopup = !showPopup">
+                Show Popup (using Offset)
+              </WinButton>
             </template>
-            <div class="popup-sample">
-              <p>This is a popup with offset positioning.</p>
-              <WinButton @click="showPopup = false">Close Popup</WinButton>
-            </div>
+            <template #default>
+              <div class="popup-content">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">
+                  Simple Popup
+                </div>
+                <WinButton @click="showPopup = false">Close</WinButton>
+              </div>
+            </template>
           </WinPopup>
-        </WinSettingsCard>
-      </div>
-      <div class="right-pane">
-        <WinSettingsCard contentPlacement="bottom">
-          <div class="options-list">
-            <WinToggleSwitch v-model="isLightDismissEnabled">IsLightDismissEnabled</WinToggleSwitch>
-            <div class="input-group">
-              <label>VerticalOffset</label>
-              <input type="number" class="win-input" v-model.number="verticalOffset" />
-            </div>
-            <div class="input-group">
-              <label>HorizontalOffset</label>
-              <input type="number" class="win-input" v-model.number="horizontalOffset" />
-            </div>
+        </div>
+      </template>
+      <template #options>
+        <div class="options-panel">
+          <WinToggleSwitch
+            v-model="isLightDismissEnabled"
+            header="IsLightDismissEnabled"
+            onContent="True"
+            offContent="False" />
+
+          <div class="input-section">
+            <label class="input-label">VerticalOffset</label>
+            <input
+              type="number"
+              v-model.number="verticalOffset"
+              class="number-input"
+              :min="-100"
+              :max="100"
+              :step="10" />
           </div>
-        </WinSettingsCard>
-      </div>
-    </div>
+
+          <div class="input-section">
+            <label class="input-label">HorizontalOffset</label>
+            <input
+              type="number"
+              v-model.number="horizontalOffset"
+              class="number-input"
+              :min="-100"
+              :max="500"
+              :step="10" />
+          </div>
+        </div>
+      </template>
+    </WinSettingsCard>
   </div>
 </template>
 
@@ -50,72 +77,71 @@ import WinToggleSwitch from '../components/WinToggleSwitch.vue';
 const showPopup = ref(false);
 const isLightDismissEnabled = ref(true);
 const verticalOffset = ref(0);
-const horizontalOffset = ref(0);
+const horizontalOffset = ref(200);
 </script>
 
 <style scoped>
-.page-container {
-  padding: 0;
+.control-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.content-split {
-  display: flex;
-  gap: 32px;
-  align-items: flex-start;
+.page-header {
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
 }
 
-.left-pane {
-  flex: 1;
-}
-
-.right-pane {
-  flex: 0 0 320px;
-}
-
-.options-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px 0;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.input-group label {
+.page-description {
   font-size: 14px;
-  color: var(--text-primary);
+  color: var(--text-secondary);
+  margin: 0 0 24px 0;
+  line-height: 1.5;
 }
 
-.win-input {
-  height: 32px;
-  padding: 0 11px;
+.popup-demo-container {
+  display: inline-block;
+  position: relative;
+}
+
+.popup-content {
+  min-width: 240px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.options-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.number-input {
+  padding: 6px 12px;
+  border: 1px solid var(--control-stroke-default);
   border-radius: 4px;
-  border: 1px solid var(--ctrl-border);
-  border-bottom: 1px solid var(--ctrl-border-accent);
-  background: var(--ctrl-fill-default);
+  background: var(--control-fill-default);
   color: var(--text-primary);
   font-size: 14px;
+  width: 100%;
+}
+
+.number-input:focus {
   outline: none;
-  transition: border var(--fast-duration);
-}
-
-.win-input:focus {
-  border-bottom: 2px solid var(--accent-base);
-}
-
-.popup-sample {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.popup-sample p {
-  margin: 0;
-  font-size: 14px;
-  color: var(--text-primary);
+  border-color: var(--accent-default);
 }
 </style>

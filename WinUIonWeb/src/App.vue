@@ -42,6 +42,11 @@ import ListViewPage from './pages/ListViewPage.vue';
 import PullToRefreshPage from './pages/PullToRefreshPage.vue';
 import TreeViewPage from './pages/TreeViewPage.vue';
 import TimePickerPage from './pages/TimePickerPage.vue';
+import AnimatedVisualPlayerPage from './pages/AnimatedVisualPlayerPage.vue';
+import CaptureElementPage from './pages/CaptureElementPage.vue';
+import ImagePage from './pages/ImagePage.vue';
+import MediaPlayerElementPage from './pages/MediaPlayerElementPage.vue';
+import PersonPicturePage from './pages/PersonPicturePage.vue';
 import ContentDialogPage from './pages/ContentDialogPage.vue';
 import FlyoutPage from './pages/FlyoutPage.vue';
 import PopupPage from './pages/PopupPage.vue';
@@ -75,6 +80,11 @@ const pageMap = {
   listview: ListViewPage,
   pulltorefresh: PullToRefreshPage,
   treeview: TreeViewPage,
+  animatedvisualplayer: AnimatedVisualPlayerPage,
+  captureelement: CaptureElementPage,
+  image: ImagePage,
+  mediaplayerelement: MediaPlayerElementPage,
+  personpicture: PersonPicturePage,
   contentdialog: ContentDialogPage,
   flyout: FlyoutPage,
   popup: PopupPage,
@@ -158,6 +168,13 @@ const navMenuItems = [
   { value: 'layout', icon: '\uE8A1', label: 'Layout', selectsOnInvoked: false, children: [
     { value: 'expander', icon: '\uE8C4', label: 'Expander' },
     { value: 'splitview', icon: '\uE8BC', label: 'SplitView' }
+  ]},
+  { value: 'media', icon: '\uE786', label: 'Media', selectsOnInvoked: false, children: [
+    { value: 'animatedvisualplayer', icon: '\uF5B0', label: 'AnimatedVisualPlayer' },
+    { value: 'captureelement', icon: '\uE722', label: 'Capture Element / Camera' },
+    { value: 'image', icon: '\uE8B9', label: 'Image' },
+    { value: 'mediaplayerelement', icon: '\uE714', label: 'MediaPlayerElement' },
+    { value: 'personpicture', icon: '\uE77B', label: 'PersonPicture' }
   ]}
 ];
 

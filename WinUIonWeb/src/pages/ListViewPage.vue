@@ -1,14 +1,16 @@
 <template>
   <h1 class="page-header">ListView</h1>
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>
-      Basic ListView
-    </template>
+
+  <WinSettingsCard
+    header="Basic ListView"
+    description="Select contacts from the list."
+    content-alignment="Vertical"
+    horizontal-content-alignment="Left">
     <template #description>
-      Select contacts from the list.
-    </template>
-    <template #headerAction>
-      <WinComboBox :options="selModeOptions" v-model="basicModeIdx" />
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span>Selection Mode:</span>
+        <WinComboBox :options="selModeOptions" v-model="basicModeIdx" style="width: 150px;" />
+      </div>
     </template>
     <div class="listview-demo-scroll">
       <WinListView :items="contacts" :selectionMode="basicMode" v-model:selectedItems="singleSel">
@@ -18,15 +20,17 @@
       </WinListView>
     </div>
   </WinSettingsCard>
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>
-      Grouped Data
-    </template>
+
+  <WinSettingsCard
+    header="Grouped Data"
+    description="Contacts grouped by first letter."
+    content-alignment="Vertical"
+    horizontal-content-alignment="Left">
     <template #description>
-      Contacts grouped by first letter.
-    </template>
-    <template #headerAction>
-      <WinToggleSwitch :modelValue="stickyOn" @update:modelValue="stickyOn = $event" onContent="Sticky" offContent="Static" />
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span>Contacts grouped by first letter.</span>
+        <WinToggleSwitch :modelValue="stickyOn" @update:modelValue="stickyOn = $event" onContent="Sticky" offContent="Static" />
+      </div>
     </template>
     <div class="listview-demo-scroll">
       <WinListView :items="groups" isGrouped showHeader :stickyHeader="stickyOn" selectionMode="Single" v-model:selectedItems="groupSel">
@@ -42,13 +46,12 @@
       </WinListView>
     </div>
   </WinSettingsCard>
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>
-      Drag to Reorder
-    </template>
-    <template #description>
-      Drag items up and down to change order.
-    </template>
+
+  <WinSettingsCard
+    header="Drag to Reorder"
+    description="Drag items up and down to change order."
+    content-alignment="Vertical"
+    horizontal-content-alignment="Left">
     <div class="listview-demo-scroll">
       <WinListView v-model:items="dragList" selectionMode="Single" v-model:selectedItems="dragSel" canDragItems canReorderItems allowDrop>
         <template #item="{ item }">
@@ -59,7 +62,8 @@
   </WinSettingsCard>
 </template>
 
-<script setup>import { ref, computed, watch } from 'vue';
+<script setup>
+import { ref, computed, watch } from 'vue';
 import WinListView from '../components/WinListView.vue';
 import WinSettingsCard from '../components/WinSettingsCard.vue';
 import WinComboBox from '../components/WinComboBox.vue';
@@ -106,7 +110,8 @@ const dragList = ref([
 
 const singleSel = ref([]);
 const groupSel = ref([]);
-const dragSel = ref([]);</script>
+const dragSel = ref([]);
+</script>
 
 <style scoped>
   .listview-demo-scroll {
@@ -120,10 +125,10 @@ const dragSel = ref([]);</script>
     overflow: visible;
   }
 
-    .listview-demo-scroll .win-list-view {
-      width: 100%;
-      height: 100%;
-      border-radius: 7px;
-      padding: 0;
-    }
+  .listview-demo-scroll .win-list-view {
+    width: 100%;
+    height: 100%;
+    border-radius: 7px;
+    padding: 0;
+  }
 </style>

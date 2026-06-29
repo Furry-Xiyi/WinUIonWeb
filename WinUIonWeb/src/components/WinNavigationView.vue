@@ -2011,10 +2011,10 @@ watch(() => props.selectedValue, (val, oldVal) => {
     width: 100%;
   }
 
+  /* 注释掉 webkit-scrollbar 自定义样式，让 Edge FluentScrollBarStyle 完全接管 */
+  /*
   .win-nav-content::-webkit-scrollbar,
   .win-nav-left-scrollable::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
   }
 
   .win-nav-content::-webkit-scrollbar-thumb,
@@ -2029,4 +2029,5 @@ watch(() => props.selectedValue, (val, oldVal) => {
   .win-nav-left-scrollable::-webkit-scrollbar-thumb:hover {
     background-color: color-mix(in srgb, var(--ctrl-strong-stroke) 76%, transparent);
   }
+  */
 </style>

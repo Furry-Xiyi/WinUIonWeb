@@ -240,8 +240,9 @@ const posStyle = computed(() => {
     animation: flyout-scroll-reveal 0ms 250ms forwards;
   }
 
+  /* 注释掉 webkit-scrollbar 自定义样式，让 Edge FluentScrollBarStyle 完全接管 */
+  /*
   .win-menu-flyout-scroll::-webkit-scrollbar {
-    width: 12px;
   }
 
   .win-menu-flyout-scroll::-webkit-scrollbar-thumb {
@@ -250,6 +251,7 @@ const posStyle = computed(() => {
     border-radius: 8px;
     background-clip: content-box;
   }
+  */
 
   @keyframes flyout-scroll-reveal {
     to {

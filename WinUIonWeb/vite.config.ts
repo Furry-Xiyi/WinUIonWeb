@@ -16,7 +16,7 @@ export default defineConfig({
             generateBundle() {
                 // Update manifest.json start_url to match the base path
                 const manifestPath = path.join(__dirname, 'dist/manifest.json');
-                if (fs.existsSync(manifestPath)) {
+                if (fs.existsSync(manifestPath, 'utf-8')) {
                     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
                     manifest.start_url = '/WinUIonWeb/';
                     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));

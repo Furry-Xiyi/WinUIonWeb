@@ -229,9 +229,10 @@ const recentAdded = [
   z-index: 1;
 }
 
+/* 注释掉 webkit-scrollbar 自定义样式，让 Edge FluentScrollBarStyle 完全接管 */
+/*
 .home-hero-tiles-wrap::-webkit-scrollbar {
   display: block;
-  height: 12px;
 }
 
 .home-hero-tiles-wrap::-webkit-scrollbar-track {
@@ -244,6 +245,7 @@ const recentAdded = [
   border: 4px solid transparent;
   border-radius: 8px;
 }
+*/
 
 .home-hero-tiles {
   display: flex;
