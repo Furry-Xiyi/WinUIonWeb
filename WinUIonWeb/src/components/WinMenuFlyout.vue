@@ -155,7 +155,7 @@ const posStyle = computed(() => {
     border: 1px solid var(--stroke-surface-flyout);
     border-radius: 8px;
     padding: 4px;
-    background: var(--flyout-bg);
+    background: var(--layer-default);
     backdrop-filter: var(--flyout-backdrop);
     -webkit-backdrop-filter: var(--flyout-backdrop);
     min-width: 20px;
@@ -163,9 +163,13 @@ const posStyle = computed(() => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    animation:
-      flyout-menu-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both,
-      flyout-menu-opacity 83ms linear both;
+    animation: flyout-menu-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, flyout-menu-opacity 83ms linear both;
+  }
+
+  html.winui-webview-host .win-menu-flyout {
+    background: var(--host-flyout-bg);
+    backdrop-filter: var(--flyout-backdrop);
+    -webkit-backdrop-filter: var(--flyout-backdrop);
   }
 
   .win-menu-flyout-wrap.from-bottom .win-menu-flyout {

@@ -224,19 +224,32 @@ const recentAdded = [
   bottom: 24px;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ctrl-strong-stroke) 58%, transparent) transparent;
   z-index: 1;
 }
 
 .home-hero-tiles-wrap::-webkit-scrollbar {
-  display: none;
+  display: block;
+  height: 12px;
+}
+
+.home-hero-tiles-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.home-hero-tiles-wrap::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--ctrl-strong-stroke) 58%, transparent);
+  background-clip: content-box;
+  border: 4px solid transparent;
+  border-radius: 8px;
 }
 
 .home-hero-tiles {
   display: flex;
   flex-direction: row;
   gap: 12px;
-  padding: 0 36px;
+  padding: 0 36px 12px 36px;
   width: max-content;
 }
 
@@ -307,32 +320,35 @@ const recentAdded = [
   display: flex;
   flex-direction: row;
   align-self: center;
-  gap: 4px;
+  gap: 8px;
   margin: 24px 0 16px 0;
-  padding: 4px;
-  border-radius: 999px;
-  background: var(--card-bg);
-  border: 1px solid var(--card-stroke);
+  padding: 0;
+  background: transparent;
+  border: 0;
 }
 
 .home-selector-item {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 32px;
   padding: 6px 14px;
   border-radius: 999px;
+  background: var(--ctrl-fill-secondary);
+  border: 1px solid var(--ctrl-border);
   cursor: pointer;
   font-size: 13px;
   color: var(--text-primary);
-  transition: background var(--fast-duration) var(--fast-out-slow-in);
+  transition: background var(--fast-duration) var(--fast-out-slow-in), border-color var(--fast-duration) var(--fast-out-slow-in);
 }
 
 .home-selector-item:hover {
-  background: var(--subtle-secondary);
+  background: var(--ctrl-fill-tertiary);
 }
 
 .home-selector-item.active {
   background: var(--accent-base);
+  border-color: var(--accent-border);
   color: var(--accent-text);
 }
 

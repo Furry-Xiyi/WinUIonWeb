@@ -1558,6 +1558,12 @@ watch(() => props.selectedValue, (val, oldVal) => {
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
     }
 
+    html.winui-webview-host .win-nav-shell.is-overlay-left .win-nav-left-panel:not(.is-compact) {
+      background: var(--host-nav-pane-bg);
+      backdrop-filter: blur(28px) saturate(1.35);
+      -webkit-backdrop-filter: blur(28px) saturate(1.35);
+    }
+
     .win-nav-shell.is-overlay-left .win-nav-left-panel.is-compact {
       box-shadow: none;
     }
