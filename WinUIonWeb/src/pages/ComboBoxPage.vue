@@ -1,11 +1,28 @@
 <template>
   <div>
-    <h1 class="page-header">ComboBox</h1>
-    <p class="page-description">
-      Use a ComboBox (also known as a drop-down list) to present a list of items a user can select from. A ComboBox starts in a compact state and expands to show a list of selectable items.
-    </p>
+    <div style="position: relative;">
+      <h1 class="page-header">ComboBox</h1>
+      <p class="page-description">
+        Use a ComboBox (also known as a drop-down list) to present a list of items a user can select from. A ComboBox starts in a compact state and expands to show a list of selectable items.
+      </p>
+      <div class="page-header-actions">
+        <WinButton
+          subtle
+          @click="toggleTheme"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">&#xE793;</span>
+        </WinButton>
+        <WinToggleButton
+          v-model="isFavoriteState"
+          subtle
+          @update:modelValue="toggleFavorite"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+        </WinToggleButton>
+      </div>
+    </div>
 
-    <WinControlExample headerText="A ComboBox with inline items.">
+    <WinControlExample headerText="A ComboBox with inline items." :theme="pageTheme">
       <template #example>
         <WinComboBox
           :options="colors"
@@ -23,7 +40,7 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A ComboBox with an ItemsSource.">
+    <WinControlExample headerText="A ComboBox with an ItemsSource." :theme="pageTheme">
       <template #example>
         <WinComboBox
           :options="fonts"
@@ -41,7 +58,7 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="An editable ComboBox.">
+    <WinControlExample headerText="An editable ComboBox." :theme="pageTheme">
       <template #example>
         <WinComboBox
           :options="fontSizes"
@@ -63,9 +80,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, inject, computed, watch } from 'vue';
 import WinComboBox from '../components/WinComboBox.vue';
 import WinControlExample from '../components/WinControlExample.vue';
+import WinButton from '../components/WinButton.vue';
+import WinToggleButton from '../components/WinToggleButton.vue';
+import { useFavorites } from '../composables/useFavorites';
+import { usePageTheme } from '../composables/usePageTheme';
+
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'combobox');
+
+const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
+const isFavorite = computed(() => checkFavorite(pageKey.value));
+const isFavoriteState = ref(isFavorite.value);
+
+watch(isFavorite, (newVal) => {
+  isFavoriteState.value = newVal;
+});
+
+const toggleFavorite = () => {
+  toggleFav(pageKey.value);
+};
+
+const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
+const toggleTheme = () => doToggleTheme();
 
 // Color options
 const colors = [
@@ -122,6 +161,20 @@ const selectedFontSizeIndex = ref(5); // Default to 14
   color: var(--text-secondary);
   margin: 0 0 16px 0;
   line-height: 1.5;
+}
+
+.page-header-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.icon {
+  font-size: 16px;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 
 .color-preview {

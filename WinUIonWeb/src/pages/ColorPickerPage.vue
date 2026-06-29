@@ -1,31 +1,37 @@
 <template>
   <div>
-    <h1 class="page-header">ColorPicker</h1>
-    <p class="page-description">
-      A control that lets users pick a color from a spectrum, sliders, and text input.
-    </p>
+    <div style="position: relative;">
+      <h1 class="page-header">ColorPicker</h1>
+      <p class="page-description">
+        A control that lets users pick a color from a spectrum, sliders, and text input.
+      </p>
+      <div class="page-header-actions">
+        <WinButton
+          subtle
+          @click="toggleTheme"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">&#xE793;</span>
+        </WinButton>
+        <WinToggleButton
+          v-model="isFavoriteState"
+          subtle
+          @update:modelValue="toggleFavorite"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+        </WinToggleButton>
+      </div>
+    </div>
 
-    <WinControlExample headerText="A simple ColorPicker">
+    <WinControlExample headerText="A simple ColorPicker" :theme="pageTheme">
       <template #example>
-        <div class="cp-layout">
-          <div class="cp-left">
-            <WinColorPicker v-model="color"
-                            :isColorSliderVisible="colorSliderVisible"
-                            :isColorChannelTextInputVisible="colorChannelInputVisible"
-                            :isHexInputVisible="hexInputVisible"
-                            :isAlphaEnabled="alphaEnabled"
-                            :isAlphaSliderVisible="alphaSliderVisible"
-                            :isColorPreviewVisible="previewVisible"
-                            :colorSpectrumShape="spectrumShape" />
-          </div>
-          <div class="cp-right">
-            <div class="cp-result-block">
-              <span class="cp-result-label">Selected color</span>
-              <div class="cp-result-rect" :style="{ background: color }"></div>
-              <span class="cp-result-hex">{{ color }}</span>
-            </div>
-          </div>
-        </div>
+        <WinColorPicker v-model="color"
+                        :isColorSliderVisible="colorSliderVisible"
+                        :isColorChannelTextInputVisible="colorChannelInputVisible"
+                        :isHexInputVisible="hexInputVisible"
+                        :isAlphaEnabled="alphaEnabled"
+                        :isAlphaSliderVisible="alphaSliderVisible"
+                        :isColorPreviewVisible="previewVisible"
+                        :colorSpectrumShape="spectrumShape" />
       </template>
       <template #options>
         <WinCheckBox v-model="colorSliderVisible">IsColorSliderVisible</WinCheckBox>
@@ -39,17 +45,43 @@
           <WinRadioButton v-model="spectrumShape" value="Box">Box</WinRadioButton>
           <WinRadioButton v-model="spectrumShape" value="Ring">Ring</WinRadioButton>
         </div>
+        <div class="cp-preview-section">
+          <span class="cp-preview-label">ColorPicker applied on a Rectangle</span>
+          <div class="cp-preview-rect" :style="{ background: color }"></div>
+        </div>
       </template>
     </WinControlExample>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, inject, computed, watch } from 'vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinColorPicker from '../components/WinColorPicker.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinRadioButton from '../components/WinRadioButton.vue';
+import WinButton from '../components/WinButton.vue';
+import WinToggleButton from '../components/WinToggleButton.vue';
+import { useFavorites } from '../composables/useFavorites';
+import { usePageTheme } from '../composables/usePageTheme';
+
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'colorpicker');
+
+const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
+const isFavorite = computed(() => checkFavorite(pageKey.value));
+const isFavoriteState = ref(isFavorite.value);
+
+watch(isFavorite, (newVal) => {
+  isFavoriteState.value = newVal;
+});
+
+const toggleFavorite = () => {
+  toggleFav(pageKey.value);
+};
+
+const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
+const toggleTheme = () => doToggleTheme();
 
 const color = ref('#0067C0');
 const colorSliderVisible = ref(true);
@@ -62,58 +94,63 @@ const spectrumShape = ref('Box');
 </script>
 
 <style scoped>
-  .cp-layout {
-    display: flex;
-    gap: 32px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
+.page-header {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
 
-  .cp-left {
-    flex-shrink: 0;
-  }
+.page-description {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
 
-  .cp-right {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 200px;
-  }
+.page-header-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
 
-  .cp-radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 4px;
-  }
+.icon {
+  font-size: 16px;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+}
 
-  .cp-radio-header {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
+.cp-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
 
-  .cp-result-block {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+.cp-radio-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
 
-  .cp-result-label {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
+.cp-preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
 
-  .cp-result-rect {
-    width: 100%;
-    height: 80px;
-    border-radius: 4px;
-    border: 1px solid var(--card-stroke);
-  }
+.cp-preview-label {
+  font-size: 14px;
+  color: var(--text-primary);
+}
 
-  .cp-result-hex {
-    font-size: 12px;
-    font-family: 'Cascadia Code', 'Consolas', monospace;
-    color: var(--text-primary);
-  }
+.cp-preview-rect {
+  width: 100%;
+  height: 100px;
+  border-radius: 4px;
+  border: 1px solid var(--ctrl-border);
+}
 </style>

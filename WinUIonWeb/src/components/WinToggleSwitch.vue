@@ -149,7 +149,7 @@ const onUp = (e) => {
   .win-switch-wrap {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     cursor: pointer;
     touch-action: none;
     user-select: none;

@@ -1,8 +1,10 @@
 <template>
   <div>
     <div style="position: relative;">
-      <h1 class="page-header">HyperlinkButton</h1>
-      <p class="page-description">A button that appears as a hyperlink.</p>
+      <h1 class="page-header">RepeatButton</h1>
+      <p class="page-description">
+        A button that raises its Click event repeatedly from the time it's pressed until it's released.
+      </p>
       <div class="page-header-actions">
         <WinButton
           subtle
@@ -20,27 +22,41 @@
       </div>
     </div>
 
-    <WinControlExample headerText="A HyperlinkButton with NavigateUri." :theme="pageTheme">
+    <WinControlExample headerText="A simple RepeatButton" :theme="pageTheme">
       <template #example>
-        <WinHyperlinkButton
-          navigateUri="https://www.microsoft.com"
-          :openInNewWindow="true"
-          :disabled="disableControl1">
-          Microsoft home page
-        </WinHyperlinkButton>
+        <WinRepeatButton :disabled="!isEnabled" @click="onRepeatClick">
+          Click and hold
+        </WinRepeatButton>
+      </template>
+      <template #output>
+        <p class="output-text">Click count: {{ clickCount }}</p>
       </template>
       <template #options>
-        <WinCheckBox v-model="disableControl1">
-          Disable hyperlink button
+        <WinCheckBox v-model="isEnabled">
+          Enable button
         </WinCheckBox>
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A HyperlinkButton handling the Click event." :theme="pageTheme">
+    <WinControlExample headerText="RepeatButton with custom delay and interval" :theme="pageTheme">
       <template #example>
-        <WinHyperlinkButton @click="goToToggleButton">
-          Go to ToggleButton
-        </WinHyperlinkButton>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <WinRepeatButton
+            :delay="500"
+            :interval="100"
+            @click="decrementValue">
+            <span class="icon">&#xE74B;</span>
+          </WinRepeatButton>
+          <span style="font-size: 24px; font-weight: 600; min-width: 60px; text-align: center;">
+            {{ value }}
+          </span>
+          <WinRepeatButton
+            :delay="500"
+            :interval="100"
+            @click="incrementValue">
+            <span class="icon">&#xE74A;</span>
+          </WinRepeatButton>
+        </div>
       </template>
     </WinControlExample>
   </div>
@@ -48,7 +64,7 @@
 
 <script setup>
 import { ref, inject, computed, watch } from 'vue';
-import WinHyperlinkButton from '../components/WinHyperlinkButton.vue';
+import WinRepeatButton from '../components/WinRepeatButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinButton from '../components/WinButton.vue';
@@ -57,7 +73,7 @@ import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
 const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'hyperlinkbutton');
+const pageKey = computed(() => currentPage?.value || 'repeatbutton');
 
 const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
 const isFavorite = computed(() => checkFavorite(pageKey.value));
@@ -74,10 +90,20 @@ const toggleFavorite = () => {
 const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
 const toggleTheme = () => doToggleTheme();
 
-const disableControl1 = ref(false);
+const isEnabled = ref(true);
+const clickCount = ref(0);
+const value = ref(0);
 
-const goToToggleButton = () => {
-  currentPage.value = 'togglebutton';
+const onRepeatClick = () => {
+  clickCount.value++;
+};
+
+const incrementValue = () => {
+  value.value++;
+};
+
+const decrementValue = () => {
+  value.value--;
 };
 </script>
 
@@ -103,6 +129,13 @@ const goToToggleButton = () => {
   display: flex;
   gap: 4px;
   align-items: center;
+}
+
+.output-text {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .icon {

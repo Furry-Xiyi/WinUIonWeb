@@ -1,12 +1,29 @@
 <template>
   <div>
-    <h1 class="page-header">Slider</h1>
-    <p class="page-description">
-      Use a Slider to let users set a value by moving a thumb along a track. A Slider is a good choice when you know that users think of the value as a relative quantity, not a numeric value.
-    </p>
+    <div style="position: relative;">
+      <h1 class="page-header">Slider</h1>
+      <p class="page-description">
+        Use a Slider to let users set a value by moving a thumb along a track. A Slider is a good choice when you know that users think of the value as a relative quantity, not a numeric value.
+      </p>
+      <div class="page-header-actions">
+        <WinButton
+          subtle
+          @click="toggleTheme"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">&#xE793;</span>
+        </WinButton>
+        <WinToggleButton
+          v-model="isFavoriteState"
+          subtle
+          @update:modelValue="toggleFavorite"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+        </WinToggleButton>
+      </div>
+    </div>
 
     <!-- Example 1: Simple Slider -->
-    <WinControlExample header-text="A simple Slider.">
+    <WinControlExample header-text="A simple Slider." :theme="pageTheme">
       <template #example>
         <WinSlider
           v-model="sliderValue1"
@@ -18,7 +35,7 @@
     </WinControlExample>
 
     <!-- Example 2: Slider with Range and Steps -->
-    <WinControlExample header-text="A Slider with range and steps specified.">
+    <WinControlExample header-text="A Slider with range and steps specified." :theme="pageTheme">
       <template #example>
         <WinSlider
           v-model="sliderValue2"
@@ -62,7 +79,7 @@
     </WinControlExample>
 
     <!-- Example 3: Slider with Tick Marks -->
-    <WinControlExample header-text="A Slider with tick marks.">
+    <WinControlExample header-text="A Slider with tick marks." :theme="pageTheme">
       <template #example>
         <WinSlider
           v-model="sliderValue3"
@@ -75,22 +92,20 @@
         <p class="output-text">{{ sliderValue3 }}</p>
       </template>
       <template #options>
-        <div>
-          <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">Snaps to:</div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <WinRadioButton value="step" v-model="snapsToMode">
-              StepValues
-            </WinRadioButton>
-            <WinRadioButton value="ticks" v-model="snapsToMode">
-              Ticks
-            </WinRadioButton>
-          </div>
+        <div class="radio-group">
+          <div class="radio-header">Snaps to:</div>
+          <WinRadioButton value="step" v-model="snapsToMode">
+            StepValues
+          </WinRadioButton>
+          <WinRadioButton value="ticks" v-model="snapsToMode">
+            Ticks
+          </WinRadioButton>
         </div>
       </template>
     </WinControlExample>
 
     <!-- Example 4: Vertical Slider -->
-    <WinControlExample header-text="A vertical Slider.">
+    <WinControlExample header-text="A vertical Slider." :theme="pageTheme">
       <template #example>
         <WinSlider
           v-model="sliderValue4"
@@ -109,10 +124,32 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, inject, computed, watch } from 'vue';
 import WinSlider from '../components/WinSlider.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinRadioButton from '../components/WinRadioButton.vue';
+import WinButton from '../components/WinButton.vue';
+import WinToggleButton from '../components/WinToggleButton.vue';
+import { useFavorites } from '../composables/useFavorites';
+import { usePageTheme } from '../composables/usePageTheme';
+
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'slider');
+
+const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
+const isFavorite = computed(() => checkFavorite(pageKey.value));
+const isFavoriteState = ref(isFavorite.value);
+
+watch(isFavorite, (newVal) => {
+  isFavoriteState.value = newVal;
+});
+
+const toggleFavorite = () => {
+  toggleFav(pageKey.value);
+};
+
+const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
+const toggleTheme = () => doToggleTheme();
 
 // Example 1: Simple Slider
 const sliderValue1 = ref(0);
@@ -148,6 +185,33 @@ const sliderValue4 = ref(0);
   line-height: 1.5;
 }
 
+.page-header-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.icon {
+  font-size: 16px;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-header {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
 .output-text {
   font-family: 'Segoe UI', system-ui, sans-serif;
   font-size: 14px;
@@ -168,17 +232,18 @@ const sliderValue4 = ref(0);
 }
 
 .number-input {
+  width: 100%;
   padding: 4px 8px;
-  border: 1px solid var(--control-stroke-default);
-  border-radius: 4px;
-  background: var(--control-fill-default);
-  color: var(--text-primary);
   font-size: 14px;
-  min-width: 80px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--ctrl-fill-default);
+  border: 1px solid var(--ctrl-border);
+  border-radius: 4px;
+  color: var(--text-primary);
 }
 
 .number-input:focus {
-  outline: none;
-  border-color: var(--accent-default);
+  outline: 2px solid var(--accent-base);
+  outline-offset: -1px;
 }
 </style>

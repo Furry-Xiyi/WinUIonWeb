@@ -23,6 +23,7 @@ import CalendarDatePickerPage from './pages/CalendarDatePickerPage.vue';
 import DatePickerPage from './pages/DatePickerPage.vue';
 import DropDownButtonPage from './pages/DropDownButtonPage.vue';
 import HyperlinkButtonPage from './pages/HyperlinkButtonPage.vue';
+import RepeatButtonPage from './pages/RepeatButtonPage.vue';
 import ToggleButtonPage from './pages/ToggleButtonPage.vue';
 import SplitButtonPage from './pages/SplitButtonPage.vue';
 import ToggleSplitButtonPage from './pages/ToggleSplitButtonPage.vue';
@@ -61,6 +62,7 @@ const pageMap = {
   datepicker: DatePickerPage,
   dropdownbutton: DropDownButtonPage,
   hyperlinkbutton: HyperlinkButtonPage,
+  repeatbutton: RepeatButtonPage,
   togglebutton: ToggleButtonPage,
   splitbutton: SplitButtonPage,
   togglesplitbutton: ToggleSplitButtonPage,
@@ -131,6 +133,7 @@ const navMenuItems = [
       { value: 'button', icon: '\uE71A', label: 'Button' },
       { value: 'dropdownbutton', icon: '\uE70D', label: 'DropDownButton' },
       { value: 'hyperlinkbutton', icon: '\uE71B', label: 'HyperlinkButton' },
+      { value: 'repeatbutton', icon: '\uE8AB', label: 'RepeatButton' },
       { value: 'togglebutton', icon: '\uEF1F', label: 'ToggleButton' },
       { value: 'splitbutton', icon: '\uE90D', label: 'SplitButton' },
       { value: 'togglesplitbutton', icon: '\uE90D', label: 'ToggleSplitButton' },

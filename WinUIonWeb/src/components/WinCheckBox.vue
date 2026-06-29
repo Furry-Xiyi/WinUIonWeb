@@ -1,36 +1,87 @@
 <template>
   <label class="win-checkbox" :class="{ 'is-disabled': disabled }">
     <input type="checkbox"
-           :checked="modelValue"
+           :checked="isChecked"
            :disabled="disabled"
+           :indeterminate.prop="isIndeterminate"
            @change="handleChange"
+           ref="inputRef"
            style="display:none">
-    <div class="checkbox-box" :class="{ 'is-indeterminate': indeterminate }"></div>
+    <div class="checkbox-box" :class="{ 'is-indeterminate': isIndeterminate }"></div>
     <slot></slot>
   </label>
 </template>
 
 <script setup>
+import { computed, watch, ref, onMounted } from 'vue';
+
 const props = defineProps({
-  modelValue: Boolean,
-  indeterminate: Boolean,
+  modelValue: { type: [Boolean, null], default: false },
+  isThreeState: { type: Boolean, default: false },  // 对齐官方命名：IsThreeState
+  indeterminate: Boolean,  // 外部控制的indeterminate状态
   disabled: Boolean
 });
 
-const emit = defineEmits(['update:modelValue', 'change']);
+const emit = defineEmits(['update:modelValue', 'checked', 'unchecked', 'indeterminate']);
+
+const inputRef = ref(null);
+
+// 计算是否为中间态
+const isIndeterminate = computed(() => {
+  // 优先使用外部传入的indeterminate属性
+  if (props.indeterminate !== undefined) {
+    return props.indeterminate;
+  }
+  // IsThreeState模式下，null值表示indeterminate
+  if (props.isThreeState && props.modelValue === null) {
+    return true;
+  }
+  return false;
+});
+
+// 计算是否选中
+const isChecked = computed(() => {
+  return props.modelValue === true;
+});
+
+// 同步indeterminate属性到DOM元素
+watch([isIndeterminate, inputRef], ([indeterminate, input]) => {
+  if (input) {
+    input.indeterminate = indeterminate;
+  }
+}, { immediate: true });
+
+onMounted(() => {
+  if (inputRef.value) {
+    inputRef.value.indeterminate = isIndeterminate.value;
+  }
+});
 
 const handleChange = (e) => {
   if (props.disabled) return;
 
-  let targetValue = e.target.checked;
-
-  if (props.indeterminate) {
-    targetValue = false;
+  if (props.isThreeState) {
+    // 三段式切换: null (indeterminate) -> true (checked) -> false (unchecked) -> null
+    if (props.modelValue === null) {
+      emit('update:modelValue', true);
+      emit('checked', true);
+    } else if (props.modelValue === true) {
+      emit('update:modelValue', false);
+      emit('unchecked', false);
+    } else {
+      emit('update:modelValue', null);
+      emit('indeterminate', null);
+    }
+  } else {
+    // 二段式切换
+    const newValue = e.target.checked;
+    emit('update:modelValue', newValue);
+    if (newValue) {
+      emit('checked', newValue);
+    } else {
+      emit('unchecked', newValue);
+    }
   }
-
-  e.target.checked = targetValue;
-  emit('update:modelValue', targetValue);
-  emit('change', targetValue);
 };
 </script>
 

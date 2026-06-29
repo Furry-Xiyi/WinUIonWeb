@@ -62,10 +62,19 @@
 
     <template v-else>
       <div class="home-section">
-        <div class="home-favorites-empty">
+        <div v-if="favoriteItems.length === 0" class="home-favorites-empty">
           <span class="icon home-favorites-empty-icon">&#xE734;</span>
           <div class="home-favorites-empty-title">No favorites yet</div>
           <div class="home-favorites-empty-desc">Favorite samples by clicking the star icon on the sample page.</div>
+        </div>
+        <div v-else class="home-card-grid">
+          <div v-for="item in favoriteItems" :key="item.key" class="home-card" @click="currentPage = item.key">
+            <div class="home-card-icon-wrap"><span class="icon">{{ item.icon }}</span></div>
+            <div class="home-card-text">
+              <div class="home-card-title">{{ item.title }}</div>
+              <div class="home-card-desc">{{ item.desc }}</div>
+            </div>
+          </div>
         </div>
       </div>
     </template>
@@ -76,8 +85,11 @@
 import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
 import splashLight from '../assets/HomePage/Splash-Light.png';
 import splashDark from '../assets/HomePage/Splash-Dark.png';
+import { useFavorites } from '../composables/useFavorites';
 
 const currentPage = inject('currentPage');
+
+const { favorites } = useFavorites();
 
 const isDark = ref(false);
 
@@ -161,6 +173,38 @@ const recentAdded = [
   { key: 'rating', icon: '\uE735', title: 'Rating', desc: 'Capture user sentiment with stars.' },
   { key: 'gridview', icon: '\uF0E2', title: 'GridView', desc: 'Items in a flexible grid.' }
 ];
+
+// \u6240\u6709\u9875\u9762\u7684\u5B8C\u6574\u5143\u6570\u636E
+const allPagesMetadata = [
+  ...recentVisited,
+  ...recentAdded,
+  { key: 'datepicker', icon: '\uE8BF', title: 'DatePicker', desc: 'A control that lets users pick a date value.' },
+  { key: 'timepicker', icon: '\uE823', title: 'TimePicker', desc: 'A control that lets users pick a time value.' },
+  { key: 'calendardatepicker', icon: '\uE787', title: 'CalendarDatePicker', desc: 'A control that lets users pick a date from a calendar.' },
+  { key: 'togglebutton', icon: '\uEF1F', title: 'ToggleButton', desc: 'A button that can be on or off.' },
+  { key: 'checkbox', icon: '\uE73D', title: 'CheckBox', desc: 'A control that a user can select or clear.' },
+  { key: 'radiobuttons', icon: '\uECCB', title: 'RadioButtons', desc: 'A control that allows a user to select a single option from a group of options.' },
+  { key: 'togglesplitbutton', icon: '\uE90D', title: 'ToggleSplitButton', desc: 'A toggleable split button.' },
+  { key: 'dropdownbutton', icon: '\uE70D', title: 'DropDownButton', desc: 'A button that displays a flyout of choices when clicked.' },
+  { key: 'hyperlinkbutton', icon: '\uE71B', title: 'HyperlinkButton', desc: 'A button that appears as a hyperlink.' },
+  { key: 'listview', icon: '\uE8FD', title: 'ListView', desc: 'A control that presents a collection of items in a vertical list.' },
+  { key: 'listbox', icon: '\uEA37', title: 'ListBox', desc: 'A control that presents an inline list of items that the user can select from.' },
+  { key: 'splitview', icon: '\uE8BC', title: 'SplitView', desc: 'A container with two views: one for primary content and one for navigation.' },
+  { key: 'flyout', icon: '\uE8A8', title: 'Flyout', desc: 'A lightweight popup container.' },
+  { key: 'popup', icon: '\uE7C4', title: 'Popup', desc: 'Displays content on top of existing content.' },
+  { key: 'animatedvisualplayer', icon: '\uF5B0', title: 'AnimatedVisualPlayer', desc: 'Plays animated content.' },
+  { key: 'captureelement', icon: '\uE722', title: 'Capture Element / Camera', desc: 'Captures media from a camera.' },
+  { key: 'image', icon: '\uE8B9', title: 'Image', desc: 'Displays an image.' },
+  { key: 'mediaplayerelement', icon: '\uE714', title: 'MediaPlayerElement', desc: 'Plays media content.' },
+  { key: 'personpicture', icon: '\uE77B', title: 'PersonPicture', desc: 'Displays a person\'s picture.' }
+];
+
+// \u6839\u636E\u6536\u85CF\u7684key\u751F\u6210\u5B8C\u6574\u7684\u6536\u85CF\u9879\u4FE1\u606F
+const favoriteItems = computed(() => {
+  return favorites.value
+    .map(key => allPagesMetadata.find(item => item.key === key))
+    .filter(Boolean);
+});
 </script>
 
 <style scoped>

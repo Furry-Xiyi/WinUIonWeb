@@ -334,7 +334,7 @@
     --subtle-tertiary: rgba(255, 255, 255, 0.04);
     --subtle-pressed: rgba(255, 255, 255, 0.03);
     --ctrl-fill-default: rgba(255, 255, 255, 0.02);
-    --ctrl-fill-secondary: rgba(255,255,255,0.03);
+    --ctrl-fill-secondary: rgba(39,39,39,0.03);
     --ctrl-fill-tertiary: rgba(255, 255, 255, 0.03);
     --ctrl-fill-disabled: rgba(255, 255, 255, 0.04);
     --ctrl-strong-fill: rgba(255, 255, 255, 0.54);
@@ -460,7 +460,7 @@ html.theme-dark {
   --subtle-tertiary: rgba(255, 255, 255, 0.04);
   --subtle-pressed: rgba(255, 255, 255, 0.03);
   --ctrl-fill-default: rgba(255, 255, 255, 0.02);
-  --ctrl-fill-secondary: rgba(255,255,255,0.03);
+  --ctrl-fill-secondary: rgba(39,39,39,0.03);
   --ctrl-fill-tertiary: rgba(255, 255, 255, 0.03);
   --ctrl-fill-disabled: rgba(255, 255, 255, 0.04);
   --ctrl-strong-fill: rgba(255, 255, 255, 0.54);

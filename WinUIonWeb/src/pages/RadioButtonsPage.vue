@@ -1,22 +1,39 @@
 <template>
   <div>
-    <h1 class="page-header">RadioButtons</h1>
-    <p class="page-description">
-      RadioButtons are used to select a single option from a group of related options. The RadioButtons control provides a modern layout and interaction model, while individual RadioButton elements can be used for more custom layouts.
-    </p>
+    <div style="position: relative;">
+      <h1 class="page-header">RadioButtons</h1>
+      <p class="page-description">
+        RadioButtons are used to select a single option from a group of related options. The RadioButtons control provides a modern layout and interaction model, while individual RadioButton elements can be used for more custom layouts.
+      </p>
+      <div class="page-header-actions">
+        <WinButton
+          subtle
+          @click="toggleTheme"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">&#xE793;</span>
+        </WinButton>
+        <WinToggleButton
+          v-model="isFavoriteState"
+          subtle
+          @update:modelValue="toggleFavorite"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+        </WinToggleButton>
+      </div>
+    </div>
 
     <!-- Example 1: A group of RadioButtons -->
-    <WinControlExample headerText="A group of RadioButtons">
+    <WinControlExample headerText="A group of RadioButtons" :theme="pageTheme">
       <template #example>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Options:</div>
-          <WinRadioButton value="1" v-model="selectedOption" @change="onOptionChanged">
+        <div class="radio-group">
+          <div class="radio-header">Options:</div>
+          <WinRadioButton value="1" v-model="selectedOption" @update:modelValue="onOptionChanged">
             Option 1
           </WinRadioButton>
-          <WinRadioButton value="2" v-model="selectedOption" @change="onOptionChanged">
+          <WinRadioButton value="2" v-model="selectedOption" @update:modelValue="onOptionChanged">
             Option 2
           </WinRadioButton>
-          <WinRadioButton value="3" v-model="selectedOption" @change="onOptionChanged">
+          <WinRadioButton value="3" v-model="selectedOption" @update:modelValue="onOptionChanged">
             Option 3
           </WinRadioButton>
         </div>
@@ -27,13 +44,13 @@
     </WinControlExample>
 
     <!-- Example 2: RadioButtons with visual output -->
-    <WinControlExample headerText="RadioButtons with visual output">
+    <WinControlExample headerText="RadioButtons with visual output" :theme="pageTheme">
       <template #example>
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <!-- Background color selection -->
-          <div>
-            <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">Background</div>
-            <div style="display: flex; gap: 16px;">
+          <div class="radio-group">
+            <div class="radio-header">Background</div>
+            <div class="radio-row">
               <WinRadioButton value="green" v-model="backgroundColor">
                 Green
               </WinRadioButton>
@@ -47,9 +64,9 @@
           </div>
 
           <!-- Border color selection -->
-          <div>
-            <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">Border</div>
-            <div style="display: flex; gap: 16px;">
+          <div class="radio-group">
+            <div class="radio-header">Border</div>
+            <div class="radio-row">
               <WinRadioButton value="green" v-model="borderColor">
                 Green
               </WinRadioButton>
@@ -77,9 +94,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, inject, computed, watch } from 'vue';
 import WinRadioButton from '../components/WinRadioButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
+import WinButton from '../components/WinButton.vue';
+import WinToggleButton from '../components/WinToggleButton.vue';
+import { useFavorites } from '../composables/useFavorites';
+import { usePageTheme } from '../composables/usePageTheme';
+
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'radiobuttons');
+
+const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
+const isFavorite = computed(() => checkFavorite(pageKey.value));
+const isFavoriteState = ref(isFavorite.value);
+
+watch(isFavorite, (newVal) => {
+  isFavoriteState.value = newVal;
+});
+
+const toggleFavorite = () => {
+  toggleFav(pageKey.value);
+};
+
+const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
+const toggleTheme = () => doToggleTheme();
 
 // Example 1: Basic RadioButtons
 const selectedOption = ref('1');
@@ -117,6 +156,41 @@ const getColorValue = (colorName) => {
   color: var(--text-secondary);
   margin: 0 0 16px 0;
   line-height: 1.5;
+}
+
+.page-header-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.icon {
+  font-size: 16px;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+}
+
+/* RadioButtons容器 - 垂直布局，对齐官方间距 */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-header {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+/* RadioButtons水平布局 - MaxColumns模式 */
+.radio-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .output-text {
