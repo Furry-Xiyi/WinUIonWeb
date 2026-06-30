@@ -5,14 +5,12 @@
       <p class="page-description">A button that appears as a hyperlink.</p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -20,7 +18,8 @@
       </div>
     </div>
 
-    <WinControlExample headerText="A HyperlinkButton with NavigateUri." :theme="pageTheme">
+    <p class="control-example-description">A HyperlinkButton with NavigateUri.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinHyperlinkButton
           navigateUri="https://www.microsoft.com"
@@ -36,7 +35,8 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A HyperlinkButton handling the Click event." :theme="pageTheme">
+    <p class="control-example-description">A HyperlinkButton handling the Click event.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinHyperlinkButton @click="goToToggleButton">
           Go to ToggleButton
@@ -47,32 +47,17 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinHyperlinkButton from '../components/WinHyperlinkButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'hyperlinkbutton');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const disableControl1 = ref(false);
 
@@ -110,3 +95,7 @@ const goToToggleButton = () => {
   font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 </style>
+
+
+
+

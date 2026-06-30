@@ -655,7 +655,9 @@ onMounted(() => {
   .win-calendar-view {
     width: 300px;
     background: var(--layer-default);
+    background-image: var(--flyout-material-overlay);
     backdrop-filter: var(--flyout-backdrop);
+    -webkit-backdrop-filter: var(--flyout-backdrop);
     border: 1px solid var(--ctrl-border-rest);
     border-radius: 4px;
     padding: 12px;

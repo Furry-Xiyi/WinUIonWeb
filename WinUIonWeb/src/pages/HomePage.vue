@@ -85,11 +85,10 @@
 import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
 import splashLight from '../assets/HomePage/Splash-Light.png';
 import splashDark from '../assets/HomePage/Splash-Dark.png';
-import { useFavorites } from '../composables/useFavorites';
+import { getStoredFavorites } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
-
-const { favorites } = useFavorites();
+const favorites = ref(getStoredFavorites());
 
 const isDark = ref(false);
 
@@ -127,6 +126,9 @@ onMounted(() => {
     mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
     mediaQueryList.addEventListener('change', onSystemThemeChange);
   }
+
+  window.addEventListener('storage', syncFavorites);
+  window.addEventListener('winui-favorites-changed', syncFavorites);
 });
 
 onUnmounted(() => {
@@ -134,11 +136,17 @@ onUnmounted(() => {
   if (mediaQueryList) {
     mediaQueryList.removeEventListener('change', onSystemThemeChange);
   }
+  window.removeEventListener('storage', syncFavorites);
+  window.removeEventListener('winui-favorites-changed', syncFavorites);
 });
 
 const heroImage = computed(() => isDark.value ? splashDark : splashLight);
 
 const filter = ref('recent');
+
+const syncFavorites = () => {
+  favorites.value = getStoredFavorites();
+};
 
 const tiles = [
   { icon: '\uE7C3', title: 'Getting started', desc: 'Get started with WinUI and explore detailed documentation.', link: 'https://aka.ms/winui-getstarted' },
@@ -187,6 +195,17 @@ const allPagesMetadata = [
   { key: 'togglesplitbutton', icon: '\uE90D', title: 'ToggleSplitButton', desc: 'A toggleable split button.' },
   { key: 'dropdownbutton', icon: '\uE70D', title: 'DropDownButton', desc: 'A button that displays a flyout of choices when clicked.' },
   { key: 'hyperlinkbutton', icon: '\uE71B', title: 'HyperlinkButton', desc: 'A button that appears as a hyperlink.' },
+  { key: 'repeatbutton', icon: '\uE8AB', title: 'RepeatButton', desc: 'A button that raises its click event repeatedly while pressed.' },
+  { key: 'splitbutton', icon: '\uE90D', title: 'SplitButton', desc: 'A button with a primary action and a secondary menu.' },
+  { key: 'combobox', icon: '\uE7FB', title: 'ComboBox', desc: 'Lets users pick one item from a list.' },
+  { key: 'colorpicker', icon: '\uEF3C', title: 'ColorPicker', desc: 'Lets the user pick a color.' },
+  { key: 'slider', icon: '\uE9E9', title: 'Slider', desc: 'Lets users select from a range of values.' },
+  { key: 'toggleswitch', icon: '\uF19F', title: 'ToggleSwitch', desc: 'Switch that can be toggled between two states.' },
+  { key: 'textbox', icon: '\uE8AC', title: 'TextBox', desc: 'Lets users enter simple text input.' },
+  { key: 'textblock', icon: '\uE8D2', title: 'TextBlock', desc: 'Displays read-only text.' },
+  { key: 'richtextblock', icon: '\uE8D2', title: 'RichTextBlock', desc: 'Displays rich formatted text.' },
+  { key: 'richeditbox', icon: '\uE8D2', title: 'RichEditBox', desc: 'Lets users edit rich formatted text.' },
+  { key: 'typography', icon: '\uE8D2', title: 'Typography', desc: 'Shows the WinUI type ramp.' },
   { key: 'listview', icon: '\uE8FD', title: 'ListView', desc: 'A control that presents a collection of items in a vertical list.' },
   { key: 'listbox', icon: '\uEA37', title: 'ListBox', desc: 'A control that presents an inline list of items that the user can select from.' },
   { key: 'splitview', icon: '\uE8BC', title: 'SplitView', desc: 'A container with two views: one for primary content and one for navigation.' },

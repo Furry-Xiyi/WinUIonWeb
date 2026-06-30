@@ -12,8 +12,8 @@
         </template>
       </WinGridView>
     </template>
-    <template #output>
-      <div class="example-output">
+    <template #options>
+      <div class="grid-output">
         Selected: {{ singleSel.length > 0 ? singleSel[0].title : 'None' }}
       </div>
     </template>
@@ -28,9 +28,10 @@
           </div>
         </template>
       </WinGridView>
+
     </template>
-    <template #output>
-      <div class="example-output">
+    <template #options>
+      <div class="grid-output">
         Selected: {{ multiSel.length > 0 ? multiSel.map(s => s.title).join(', ') : 'None' }}
       </div>
     </template>
@@ -80,8 +81,7 @@
           </div>
         </template>
       </WinGridView>
-    </template>
-    <template #options>
+
       <div class="options-section">
         <div class="options-label">ItemTemplate</div>
         <div class="options-group">
@@ -211,7 +211,7 @@ const selMode = computed(() => modeOptions[selModeIdx.value].value);
     box-sizing: border-box;
   }
 
-  .example-output {
+  .grid-output {
     font-size: 14px;
     color: var(--text-secondary);
   }

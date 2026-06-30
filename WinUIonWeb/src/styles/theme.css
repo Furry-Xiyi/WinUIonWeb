@@ -13,7 +13,7 @@
 @property --flyout-bg {
   syntax: '<color>';
   inherits: true;
-  initial-value: rgba(252,252,252,1);
+  initial-value: rgba(252,252,252);
 }
 
 @property --card-bg {
@@ -142,6 +142,12 @@
   initial-value: rgba(249,249,249,0.30);
 }
 
+@property --ctrl-fill-input-active {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #FFFFFF;
+}
+
 @property --ctrl-strong-fill {
   syntax: '<color>';
   inherits: true;
@@ -262,7 +268,8 @@
   --dialog-button-bg: #F3F3F3;
   --flyout-bg: rgba(252, 252, 252);
   --flyout-border: rgba(0, 0, 0, 0.06);
-  --flyout-backdrop: blur(20px) saturate(150%);
+  --flyout-backdrop: blur(30px) saturate(160%) brightness(1.02);
+  --flyout-material-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
   --card-bg: rgba(255, 255, 255, 0.70);
   --card-stroke: rgba(0, 0, 0, 0.06);
   --card-bg-secondary: rgba(246, 246, 246, 0.50);
@@ -284,6 +291,9 @@
   --ctrl-fill-disabled: rgba(249, 249, 249, 0.30);
   --ctrl-fill-secondary: rgba(249, 249, 249, 0.50);
   --ctrl-fill-tertiary: rgba(249, 249, 249, 0.30);
+  --ctrl-fill-input-active: #FFFFFF;
+  --control-fill-color-input-active: var(--ctrl-fill-input-active);
+  --control-fill-input-active: var(--ctrl-fill-input-active);
   --ctrl-strong-fill: rgba(0, 0, 0, 0.45);
   --ctrl-strong-fill-disabled: rgba(0, 0, 0, 0.32);
   --ctrl-strong-stroke: rgba(0, 0, 0, 0.45);
@@ -303,6 +313,17 @@
   --toggle-thumb-hover: rgba(0, 0, 0, 0.89);
   --toggle-on-thumb: #FFFFFF;
   --radio-border: rgba(0, 0, 0, 0.45);
+  --layer-fill-color-default: var(--layer-default);
+  --layer-on-acrylic-fill-color-default: var(--layer-default);
+  --surface-stroke-color-flyout: var(--stroke-surface-flyout);
+  --subtle-fill-color-secondary: var(--subtle-secondary);
+  --subtle-fill-color-tertiary: var(--subtle-tertiary);
+  --divider-stroke: var(--stroke-divider);
+  --divider-stroke-default: var(--stroke-divider);
+  --divider-stroke-color-default: var(--stroke-divider);
+  --flyout-background: var(--flyout-bg);
+  --host-flyout-bg: var(--flyout-bg);
+  --host-nav-pane-bg: color-mix(in srgb, var(--app-bg) 64%, transparent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -314,7 +335,8 @@
     --dialog-button-bg: #202020;
     --flyout-bg: rgba(44, 44, 44);
     --flyout-border: rgba(255, 255, 255, 0.10);
-    --flyout-backdrop: blur(20px) saturate(150%);
+    --flyout-backdrop: blur(44px) saturate(190%) brightness(1.22) contrast(1.05);
+    --flyout-material-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.025) 45%, rgba(0, 0, 0, 0.12));
     --card-bg: rgba(255, 255, 255, 0.04);
     --card-stroke: rgba(0, 0, 0, 0.10);
     --card-bg-secondary: rgba(255, 255, 255, 0.03);
@@ -337,6 +359,9 @@
     --ctrl-fill-secondary: rgba(39,39,39,0.03);
     --ctrl-fill-tertiary: rgba(255, 255, 255, 0.03);
     --ctrl-fill-disabled: rgba(255, 255, 255, 0.04);
+    --ctrl-fill-input-active: rgba(30, 30, 30, 0.70);
+    --control-fill-color-input-active: var(--ctrl-fill-input-active);
+    --control-fill-input-active: var(--ctrl-fill-input-active);
     --ctrl-strong-fill: rgba(255, 255, 255, 0.54);
     --ctrl-strong-fill-disabled: rgba(255, 255, 255, 0.25);
     --ctrl-strong-stroke-disabled: rgba(255, 255, 255, 0.16);
@@ -355,6 +380,17 @@
     --toggle-thumb-hover: #FFFFFF;
     --toggle-on-thumb: #000000;
     --radio-border: rgba(255, 255, 255, 0.54);
+    --layer-fill-color-default: var(--layer-default);
+    --layer-on-acrylic-fill-color-default: var(--layer-default);
+    --surface-stroke-color-flyout: var(--stroke-surface-flyout);
+    --subtle-fill-color-secondary: var(--subtle-secondary);
+    --subtle-fill-color-tertiary: var(--subtle-tertiary);
+    --divider-stroke: var(--stroke-divider);
+    --divider-stroke-default: var(--stroke-divider);
+    --divider-stroke-color-default: var(--stroke-divider);
+    --flyout-background: var(--flyout-bg);
+    --host-flyout-bg: var(--flyout-bg);
+    --host-nav-pane-bg: color-mix(in srgb, var(--app-bg) 56%, transparent);
   }
 }
 
@@ -389,7 +425,8 @@ html.theme-light {
   --dialog-button-bg: #F3F3F3;
   --flyout-bg: rgba(252, 252, 252);
   --flyout-border: rgba(0, 0, 0, 0.06);
-  --flyout-backdrop: blur(20px) saturate(150%);
+  --flyout-backdrop: blur(30px) saturate(160%) brightness(1.02);
+  --flyout-material-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
   --card-bg: rgba(255, 255, 255, 0.70);
   --card-stroke: rgba(0, 0, 0, 0.06);
   --card-bg-secondary: rgba(246, 246, 246, 0.50);
@@ -412,6 +449,9 @@ html.theme-light {
   --ctrl-fill-secondary: rgba(249, 249, 249, 0.50);
   --ctrl-fill-tertiary: rgba(249, 249, 249, 0.30);
   --ctrl-fill-disabled: rgba(249, 249, 249, 0.30);
+  --ctrl-fill-input-active: #FFFFFF;
+  --control-fill-color-input-active: var(--ctrl-fill-input-active);
+  --control-fill-input-active: var(--ctrl-fill-input-active);
   --ctrl-strong-fill: rgba(0, 0, 0, 0.45);
   --ctrl-strong-fill-disabled: rgba(0, 0, 0, 0.32);
   --ctrl-strong-stroke: rgba(0, 0, 0, 0.45);
@@ -430,6 +470,17 @@ html.theme-light {
   --toggle-thumb-hover: rgba(0, 0, 0, 0.89);
   --toggle-on-thumb: #FFFFFF;
   --radio-border: rgba(0, 0, 0, 0.45);
+  --layer-fill-color-default: var(--layer-default);
+  --layer-on-acrylic-fill-color-default: var(--layer-default);
+  --surface-stroke-color-flyout: var(--stroke-surface-flyout);
+  --subtle-fill-color-secondary: var(--subtle-secondary);
+  --subtle-fill-color-tertiary: var(--subtle-tertiary);
+  --divider-stroke: var(--stroke-divider);
+  --divider-stroke-default: var(--stroke-divider);
+  --divider-stroke-color-default: var(--stroke-divider);
+  --flyout-background: var(--flyout-bg);
+  --host-flyout-bg: var(--flyout-bg);
+  --host-nav-pane-bg: color-mix(in srgb, var(--app-bg) 64%, transparent);
 }
 
 html.theme-dark {
@@ -437,7 +488,8 @@ html.theme-dark {
   --layer-default: rgba(58, 58, 58, 0.50);
   --flyout-bg: rgba(44, 44, 44);
   --flyout-border: rgba(255, 255, 255, 0.10);
-  --flyout-backdrop: blur(20px) saturate(150%);
+  --flyout-backdrop: blur(44px) saturate(190%) brightness(1.22) contrast(1.05);
+  --flyout-material-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.025) 45%, rgba(0, 0, 0, 0.12));
   --dialog-content-bg: rgba(43, 43, 43, 0);
   --dialog-divider: rgba(0, 0, 0, 0.20);
   --dialog-button-bg: #202020;
@@ -463,6 +515,9 @@ html.theme-dark {
   --ctrl-fill-secondary: rgba(39,39,39,0.03);
   --ctrl-fill-tertiary: rgba(255, 255, 255, 0.03);
   --ctrl-fill-disabled: rgba(255, 255, 255, 0.04);
+  --ctrl-fill-input-active: rgba(30, 30, 30, 0.70);
+  --control-fill-color-input-active: var(--ctrl-fill-input-active);
+  --control-fill-input-active: var(--ctrl-fill-input-active);
   --ctrl-strong-fill: rgba(255, 255, 255, 0.54);
   --ctrl-strong-fill-disabled: rgba(255, 255, 255, 0.25);
   --ctrl-strong-stroke: rgba(255, 255, 255, 0.54);
@@ -481,4 +536,15 @@ html.theme-dark {
   --toggle-thumb-hover: #FFFFFF;
   --toggle-on-thumb: #000000;
   --radio-border: rgba(255, 255, 255, 0.54);
+  --layer-fill-color-default: var(--layer-default);
+  --layer-on-acrylic-fill-color-default: var(--layer-default);
+  --surface-stroke-color-flyout: var(--stroke-surface-flyout);
+  --subtle-fill-color-secondary: var(--subtle-secondary);
+  --subtle-fill-color-tertiary: var(--subtle-tertiary);
+  --divider-stroke: var(--stroke-divider);
+  --divider-stroke-default: var(--stroke-divider);
+  --divider-stroke-color-default: var(--stroke-divider);
+  --flyout-background: var(--flyout-bg);
+  --host-flyout-bg: var(--flyout-bg);
+  --host-nav-pane-bg: color-mix(in srgb, var(--app-bg) 56%, transparent);
 }

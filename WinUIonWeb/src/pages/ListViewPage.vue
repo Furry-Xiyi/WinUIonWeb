@@ -35,8 +35,7 @@
           </template>
         </WinListView>
       </div>
-    </template>
-    <template #options>
+
       <div class="option-row">
         <span class="option-label">Sticky Headers:</span>
         <WinToggleSwitch :modelValue="stickyOn" @update:modelValue="stickyOn = $event" onContent="On" offContent="Off" />

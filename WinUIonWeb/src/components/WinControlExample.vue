@@ -1,78 +1,127 @@
 <template>
-  <div class="control-example-wrapper">
-    <div class="control-example">
-      <div class="example-header" v-if="headerText">
-        <h3 class="example-title">{{ headerText }}</h3>
-      </div>
-      <div class="example-content" :style="contentStyle">
-        <div class="example-display" :style="displayStyle" :class="themeClass" :data-theme="theme">
-          <slot name="example"></slot>
-        </div>
-        <div v-if="$slots.output || $slots.options" class="example-sidebar">
-          <div v-if="$slots.output" class="example-output">
-            <slot name="output"></slot>
-          </div>
-          <div v-if="$slots.options" class="example-options">
-            <slot name="options"></slot>
-          </div>
-        </div>
-      </div>
-    </div>
+  <section class="control-example-root">
+    <h3 v-if="headerText" class="control-example-header">{{ headerText }}</h3>
 
-    <!-- Expander作为独立组件放在下方 -->
-    <WinExpander
-      v-if="vueCode || templateCode"
-      :isExpanded="false"
-      header="Source code"
-      class="code-expander">
-      <div class="code-section">
-        <WinSelectorBar
-          :items="codeTabItems"
-          :selectedIndex="selectedCodeTab"
-          @selectionChanged="onCodeTabChanged"
-          class="code-selector" />
-        <div class="code-display">
-          <pre v-if="selectedCodeTab === 0" class="code-block"><code>{{ templateCode }}</code></pre>
-          <pre v-else class="code-block"><code>{{ vueCode }}</code></pre>
+    <div class="control-example-frame">
+      <div class="example-container">
+        <div
+          class="example-display"
+          :data-theme="theme"
+          :style="displayStyle">
+          <slot name="example">
+            <slot></slot>
+          </slot>
         </div>
+
+        <aside v-if="hasOptions" class="example-options">
+          <slot name="options">{{ options }}</slot>
+        </aside>
       </div>
-    </WinExpander>
-  </div>
+
+      <WinExpander
+        v-if="showSourceCode"
+        :isExpanded="false"
+        header="Source code"
+        class="code-expander">
+        <div class="source-code-presenter">
+          <WinSelectorBar
+            v-if="codeTabItems.length > 1"
+            :items="codeTabItems"
+            :selectedIndex="selectedCodeTab"
+            @selectionChanged="onCodeTabChanged" />
+          <WinTextBlock
+            class="code-block"
+            :Text="activeCode"
+            IsTextSelectionEnabled />
+        </div>
+      </WinExpander>
+    </div>
+  </section>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, useSlots, watch } from 'vue';
 import WinExpander from './WinExpander.vue';
 import WinSelectorBar from './WinSelectorBar.vue';
+import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
   headerText: { type: String, default: '' },
-  exampleHeight: { type: String, default: 'auto' },
-  theme: { type: String, default: 'system' },
-  templateCode: { type: String, default: '' },
-  vueCode: { type: String, default: '' }
+  exampleHeight: { type: [String, Number], default: 'auto' },
+  webViewHeight: { type: Number, default: 400 },
+  webViewWidth: { type: Number, default: 800 },
+  horizontalContentAlignment: { type: String, default: 'Left' },
+  sourceCodeVisibility: { type: [Boolean, String], default: true },
+  theme: { type: String, default: 'light' },
+  options: { type: [String, Number, Boolean, Object], default: null },
+  xaml: { type: String, default: '' },
+  cSharp: { type: String, default: '' },
+  vue: { type: String, default: '' },
+  xamlSource: { type: String, default: '' },
+  cSharpSource: { type: String, default: '' },
+  sampleDefinition: { type: String, default: '' },
+  substitutions: { type: Array, default: () => [] }
 });
-
-const contentStyle = computed(() => ({
-  minHeight: props.exampleHeight !== 'auto' ? props.exampleHeight : undefined
-}));
-
-const displayStyle = computed(() => ({
-  height: props.exampleHeight !== 'auto' ? props.exampleHeight : undefined
-}));
-
-const themeClass = computed(() => {
-  if (props.theme === 'light') return 'theme-light';
-  if (props.theme === 'dark') return 'theme-dark';
-  return '';
-});
-
-const codeTabItems = [
-  { text: 'Template' },
-  { text: 'Vue' }
-];
 
 const selectedCodeTab = ref(0);
+const slots = useSlots();
+
+const hasSlottedContent = (slotName) => {
+  const nodes = slots[slotName]?.() ?? [];
+  return nodes.some((node) => {
+    if (typeof node.children === 'string') {
+      return node.children.trim().length > 0;
+    }
+    return node.children !== null || node.shapeFlag > 1;
+  });
+};
+
+const normalizeCssLength = (value) => {
+  if (value === 'auto' || value === null || value === undefined || value === '') {
+    return undefined;
+  }
+  return typeof value === 'number' ? `${value}px` : value;
+};
+
+const codeTabs = computed(() => {
+  const tabs = [];
+  if (props.vue) {
+    tabs.push({ text: 'Vue', code: props.vue });
+  }
+  if (props.xaml || props.xamlSource) {
+    tabs.push({ text: 'XAML', code: props.xaml || props.xamlSource });
+  }
+  if (props.cSharp || props.cSharpSource) {
+    tabs.push({ text: 'C#', code: props.cSharp || props.cSharpSource });
+  }
+  return tabs;
+});
+
+const codeTabItems = computed(() => codeTabs.value.map(({ text }) => ({ text })));
+const activeCode = computed(() => codeTabs.value[selectedCodeTab.value]?.code ?? '');
+
+const showSourceCode = computed(() => {
+  const visible = props.sourceCodeVisibility !== false && props.sourceCodeVisibility !== 'Collapsed';
+  return visible && codeTabs.value.length > 0;
+});
+
+const hasOptions = computed(() => props.options !== null || hasSlottedContent('options'));
+
+watch(codeTabs, (tabs) => {
+  if (selectedCodeTab.value >= tabs.length) {
+    selectedCodeTab.value = 0;
+  }
+});
+
+const displayStyle = computed(() => ({
+  minHeight: normalizeCssLength(props.exampleHeight),
+  justifyContent: {
+    Left: 'flex-start',
+    Center: 'center',
+    Right: 'flex-end',
+    Stretch: 'stretch'
+  }[props.horizontalContentAlignment] ?? 'flex-start'
+}));
 
 const onCodeTabChanged = ({ selectedIndex }) => {
   selectedCodeTab.value = selectedIndex;
@@ -80,154 +129,122 @@ const onCodeTabChanged = ({ selectedIndex }) => {
 </script>
 
 <style scoped>
-.control-example-wrapper {
+.control-example-root {
   margin-top: 16px;
   display: flex;
   flex-direction: column;
 }
 
-  .control-example {
-    border-radius: 8px 8px 0 0;
-    overflow: hidden;
-    background: var(--ctrl-fill-default);
-    border: 1px solid var(--ctrl-border-rest);
-    border-bottom: none;
-  }
-
-.control-example:first-child {
-  margin-top: 0;
-}
-
-/* 当没有Expander时，恢复下圆角和边框 */
-.control-example-wrapper:not(:has(.code-expander)) .control-example {
-  border-radius: 8px;
-  border-bottom: 1px solid var(--ctrl-border-rest);
-}
-
-.example-header {
-  padding: 16px 16px 8px 16px;
-  background: var(--card-bg-default);
-}
-
-.example-title {
-  margin: 0;
+.control-example-header {
+  margin: 12px 0;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
+  line-height: 20px;
 }
 
-.example-content {
+.control-example-frame {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.example-container {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid var(--card-stroke);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: var(--card-bg);
+}
+
+.control-example-frame:not(:has(.code-expander)) .example-container {
+  border-bottom: 1px solid var(--card-stroke);
+  border-radius: 8px;
 }
 
 .example-display {
+  min-height: 80px;
   padding: 12px;
-  background: var(--card-bg-secondary);
   display: flex;
   align-items: center;
-  min-height: 80px;
+  background: var(--control-example-display-bg, var(--ctrl-solid-fill));
+  color: var(--text-primary);
 }
 
-.example-sidebar {
+.example-options {
+  width: min(320px, 32vw);
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  max-width: 320px;
-  min-width: 220px;
-  background: var(--card-bg-default);
+  gap: 12px;
+  align-self: stretch;
+  background: var(--card-bg);
+  border-left: 1px solid var(--stroke-divider);
+  border-radius: 0 8px 0 0;
+  color: var(--text-primary);
 }
 
-.example-output {
-  padding: 16px;
-  border-left: 1px solid var(--ctrl-border-rest);
-  border-bottom: 1px solid var(--ctrl-border-rest);
-}
-
-.example-output:last-child {
-  border-bottom: none;
-}
-
-  .example-options {
-    padding: 16px;
-    border-left: 1px solid var(--layer-default);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-/* Expander样式调整 - 贴合上方 */
 .code-expander {
-  margin-top: 0;
-  margin-bottom: 4px;
+  margin: 0;
   border-radius: 0 0 8px 8px;
   border-top: none;
 }
 
 .code-expander :deep(.win-expander-header) {
+  border-radius: 0 0 8px 8px;
+  background: var(--card-bg-secondary);
+}
+
+.code-expander.is-expanded :deep(.win-expander-header) {
   border-radius: 0;
 }
 
-.code-expander :deep(.win-expander.is-expanded .win-expander-header) {
-  border-radius: 0;
+.code-expander.is-expanded :deep(.win-expander-content) {
+  border-radius: 0 0 8px 8px;
 }
 
-.code-section {
+.code-expander :deep(.win-expander-content) {
+  padding: 0;
+  gap: 0;
+}
+
+.source-code-presenter {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.code-selector {
-  margin-left: 4px;
-}
-
-.code-display {
-  background: var(--card-bg-default);
-  border-radius: 4px;
-  overflow: auto;
-  max-height: 400px;
-}
-
-.code-block {
-  margin: 0;
+  gap: 12px;
   padding: 16px;
-  font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
-  font-size: 13px;
-  line-height: 1.5;
+  background: var(--card-bg-secondary);
+}
+
+.source-code-presenter :deep(.win-selector-bar) {
+  margin: 0;
+}
+
+.source-code-presenter :deep(.code-block) {
+  display: block;
+  margin: 0;
+  padding: 0;
+  max-height: 400px;
+  overflow: auto;
   color: var(--text-primary);
   background: transparent;
-  overflow-x: auto;
+  font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
   white-space: pre;
   tab-size: 2;
 }
 
-/* 响应式 */
-@media (max-width: 768px) {
-  .example-content {
-    grid-template-columns: 1fr;
-  }
-
-  .example-sidebar {
-    max-width: none;
-    border-left: none;
-    border-top: 1px solid var(--ctrl-border-rest);
-  }
-
-  .example-output {
-    border-left: none;
-    border-top: 1px solid var(--ctrl-border-rest);
+@media (max-width: 739px) {
+  .example-container {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .example-options {
-    border-left: none;
+    width: auto;
+    border-left: 0;
+    border-top: 1px solid var(--stroke-divider);
   }
-}
-
-.control-example :deep(.output-text) {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
 }
 </style>

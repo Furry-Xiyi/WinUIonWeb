@@ -7,14 +7,12 @@
       </p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -22,7 +20,8 @@
       </div>
     </div>
 
-    <WinControlExample headerText="A SplitButton for color picking." :theme="pageTheme">
+    <p class="control-example-description">A SplitButton for color picking.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinSplitButton
           :options="colorOptions"
@@ -46,7 +45,8 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A SplitButton with text content." :theme="pageTheme">
+    <p class="control-example-description">A SplitButton with text content.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinSplitButton
           :options="colorOptions"
@@ -59,31 +59,16 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinSplitButton from '../components/WinSplitButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'splitbutton');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const currentColor = ref('Green');
 const outputText = ref('');
@@ -147,3 +132,7 @@ const selectColor2 = (color) => {
   border-radius: 4px 0 0 4px;
 }
 </style>
+
+
+
+

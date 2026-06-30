@@ -29,7 +29,7 @@
               </button>
             </template>
             <div class="win-media-volume-panel">
-              <WinButton subtle class="win-media-volume-subtle" @click="toggleMute">
+              <WinButton Style="{StaticResource SubtleButtonStyle}" class="win-media-volume-subtle" @click="toggleMute">
                 <span class="icon">{{ muteIcon }}</span>
               </WinButton>
               <WinSlider v-model="volumeValue" :min="0" :max="100" />

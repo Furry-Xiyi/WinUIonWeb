@@ -5,14 +5,12 @@
       <p class="page-description">A button that can be toggled on or off.</p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -20,16 +18,16 @@
       </div>
     </div>
 
-    <WinControlExample headerText="A simple ToggleButton" :theme="pageTheme">
+    <p class="control-example-description">A simple ToggleButton</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
-        <WinToggleButton v-model="val" :disabled="!isEnabled">Toggle Me</WinToggleButton>
-      </template>
-      <template #output>
-        <p class="output-text">{{ val ? 'On' : 'Off' }}</p>
+        <WinToggleButton v-model="val" :disabled="disableControl1">Toggle Me</WinToggleButton>
       </template>
       <template #options>
-        <WinCheckBox v-model="isEnabled">
-          Enable button
+        <p class="output-text">{{ val ? 'On' : 'Off' }}</p>
+
+        <WinCheckBox v-model="disableControl1">
+          Disable button
         </WinCheckBox>
       </template>
     </WinControlExample>
@@ -37,34 +35,19 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
+import { createPageState } from '../utils/pageState';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinButton from '../components/WinButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'togglebutton');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const val = ref(false);
-const isEnabled = ref(true);
+const disableControl1 = ref(false);
 </script>
 
 <style scoped>
@@ -103,3 +86,7 @@ const isEnabled = ref(true);
   margin: 0;
 }
 </style>
+
+
+
+

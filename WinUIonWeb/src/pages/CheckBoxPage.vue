@@ -7,14 +7,12 @@
       </p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -23,11 +21,11 @@
     </div>
 
     <!-- Example 1: A 2-state CheckBox -->
-    <WinControlExample
-      headerText="A 2-state CheckBox"
+    <p class="control-example-description">A 2-state CheckBox</p>
+    <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
+      :xaml="example1Template"
+      :cSharp="example1Vue">
       <template #example>
         <WinCheckBox
           v-model="twoStateChecked"
@@ -36,17 +34,17 @@
           Two-state CheckBox
         </WinCheckBox>
       </template>
-      <template #output>
+      <template #options>
         <p class="output-text">{{ twoStateOutput }}</p>
       </template>
     </WinControlExample>
 
     <!-- Example 2: A 3-state CheckBox -->
-    <WinControlExample
-      headerText="A 3-state CheckBox"
+    <p class="control-example-description">A 3-state CheckBox</p>
+    <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
+      :xaml="example2Template"
+      :cSharp="example2Vue">
       <template #example>
         <WinCheckBox
           v-model="threeStateValue"
@@ -57,17 +55,17 @@
           Three-state CheckBox
         </WinCheckBox>
       </template>
-      <template #output>
+      <template #options>
         <p class="output-text">{{ threeStateOutput }}</p>
       </template>
     </WinControlExample>
 
     <!-- Example 3: Using a 3-state CheckBox for a collection -->
-    <WinControlExample
-      headerText="Using a 3-state CheckBox"
+    <p class="control-example-description">Using a 3-state CheckBox</p>
+    <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
+      :xaml="example3Template"
+      :cSharp="example3Vue">
       <template #example>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <WinCheckBox
@@ -90,7 +88,7 @@
           </div>
         </div>
       </template>
-      <template #output>
+      <template #options>
         <p class="output-text">{{ selectAllOutput }}</p>
       </template>
     </WinControlExample>
@@ -98,31 +96,16 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'checkbox');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Example 1: 2-state CheckBox
 const twoStateChecked = ref(false);
@@ -310,3 +293,7 @@ const onSelectAllUnchecked = () => {
   margin: 0;
 }
 </style>
+
+
+
+

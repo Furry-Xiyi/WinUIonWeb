@@ -7,14 +7,12 @@
       </p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -22,7 +20,8 @@
       </div>
     </div>
 
-    <WinControlExample headerText="A ComboBox with inline items." :theme="pageTheme">
+    <p class="control-example-description">A ComboBox with inline items.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinComboBox
           :options="colors"
@@ -31,7 +30,7 @@
           header="Colors"
           style="width: 200px;" />
       </template>
-      <template #output>
+      <template #options>
         <div
           v-if="selectedColorIndex !== null && selectedColorIndex >= 0"
           class="color-preview"
@@ -40,7 +39,8 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A ComboBox with an ItemsSource." :theme="pageTheme">
+    <p class="control-example-description">A ComboBox with an ItemsSource.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinComboBox
           :options="fonts"
@@ -48,7 +48,7 @@
           header="Font"
           style="min-width: 200px;" />
       </template>
-      <template #output>
+      <template #options>
         <div
           v-if="selectedFontIndex !== null && selectedFontIndex >= 0"
           class="output-text"
@@ -58,7 +58,8 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="An editable ComboBox." :theme="pageTheme">
+    <p class="control-example-description">An editable ComboBox.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinComboBox
           :options="fontSizes"
@@ -67,7 +68,7 @@
           header="Font Size"
           style="width: 200px;" />
       </template>
-      <template #output>
+      <template #options>
         <div
           v-if="selectedFontSizeIndex !== null && selectedFontSizeIndex >= 0"
           class="output-text"
@@ -80,31 +81,16 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinComboBox from '../components/WinComboBox.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'combobox');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Color options
 const colors = [
@@ -191,3 +177,7 @@ const selectedFontSizeIndex = ref(5); // Default to 14
   margin: 0;
 }
 </style>
+
+
+
+

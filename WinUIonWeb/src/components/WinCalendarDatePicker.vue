@@ -157,9 +157,11 @@ const onDateSelect = (date) => {
     position: fixed;
     z-index: 100;
     background: var(--flyout-bg);
+    background-image: var(--flyout-material-overlay);
     border: 1px solid var(--ctrl-border);
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.14);
     backdrop-filter: var(--flyout-backdrop);
+    -webkit-backdrop-filter: var(--flyout-backdrop);
   }
 </style>

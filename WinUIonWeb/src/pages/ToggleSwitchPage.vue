@@ -7,14 +7,12 @@
       </p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -23,14 +21,16 @@
     </div>
 
     <!-- Example 1: Simple ToggleSwitch -->
-    <WinControlExample headerText="A simple ToggleSwitch." :theme="pageTheme">
+    <p class="control-example-description">A simple ToggleSwitch.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinToggleSwitch v-model="simpleToggle" />
       </template>
     </WinControlExample>
 
     <!-- Example 2: ToggleSwitch with Custom Content -->
-    <WinControlExample headerText="A ToggleSwitch with custom labels." :theme="pageTheme">
+    <p class="control-example-description">A ToggleSwitch with custom labels.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <div style="display: flex; align-items: center; gap: 16px;">
           <WinToggleSwitch
@@ -48,32 +48,17 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinToggleSwitch from '../components/WinToggleSwitch.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinProgressRing from '../components/WinProgressRing.vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'toggleswitch');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Example 1: Simple ToggleSwitch
 const simpleToggle = ref(false);
@@ -111,3 +96,7 @@ const workToggle = ref(true);
   font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 </style>
+
+
+
+

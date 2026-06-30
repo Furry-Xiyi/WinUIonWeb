@@ -7,14 +7,12 @@
       </p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -23,19 +21,21 @@
     </div>
 
     <!-- Example 1: Simple Slider -->
-    <WinControlExample header-text="A simple Slider." :theme="pageTheme">
+    <p class="control-example-description">A simple Slider.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinSlider
           v-model="sliderValue1"
           style="width: 200px;" />
       </template>
-      <template #output>
+      <template #options>
         <p class="output-text">{{ sliderValue1 }}</p>
       </template>
     </WinControlExample>
 
     <!-- Example 2: Slider with Range and Steps -->
-    <WinControlExample header-text="A Slider with range and steps specified." :theme="pageTheme">
+    <p class="control-example-description">A Slider with range and steps specified.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinSlider
           v-model="sliderValue2"
@@ -45,10 +45,9 @@
           header="Control header"
           style="width: 200px;" />
       </template>
-      <template #output>
-        <p class="output-text">{{ sliderValue2 }}</p>
-      </template>
       <template #options>
+        <p class="output-text">{{ sliderValue2 }}</p>
+
         <div class="options-grid">
           <label class="option-label">Minimum:</label>
           <input
@@ -79,7 +78,8 @@
     </WinControlExample>
 
     <!-- Example 3: Slider with Tick Marks -->
-    <WinControlExample header-text="A Slider with tick marks." :theme="pageTheme">
+    <p class="control-example-description">A Slider with tick marks.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinSlider
           v-model="sliderValue3"
@@ -88,10 +88,9 @@
           :snap-to-ticks="snapsToTicks"
           style="width: 290px;" />
       </template>
-      <template #output>
-        <p class="output-text">{{ sliderValue3 }}</p>
-      </template>
       <template #options>
+        <p class="output-text">{{ sliderValue3 }}</p>
+
         <div class="radio-group">
           <div class="radio-header">Snaps to:</div>
           <WinRadioButton value="step" v-model="snapsToMode">
@@ -105,7 +104,8 @@
     </WinControlExample>
 
     <!-- Example 4: Vertical Slider -->
-    <WinControlExample header-text="A vertical Slider." :theme="pageTheme">
+    <p class="control-example-description">A vertical Slider.</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinSlider
           v-model="sliderValue4"
@@ -116,7 +116,7 @@
           :tick-frequency="10"
           style="width: 100px; height: 100px;" />
       </template>
-      <template #output>
+      <template #options>
         <p class="output-text">{{ sliderValue4 }}</p>
       </template>
     </WinControlExample>
@@ -124,32 +124,17 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinSlider from '../components/WinSlider.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinRadioButton from '../components/WinRadioButton.vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'slider');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Example 1: Simple Slider
 const sliderValue1 = ref(0);
@@ -247,3 +232,7 @@ const sliderValue4 = ref(0);
   outline-offset: -1px;
 }
 </style>
+
+
+
+

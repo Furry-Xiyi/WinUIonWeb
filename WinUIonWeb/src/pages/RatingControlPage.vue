@@ -10,7 +10,7 @@
       <template #example>
         <WinRating v-model="rating1" />
       </template>
-      <template #output>
+      <template #options>
         <p class="output-text">{{ rating1 ? `You rated ${rating1} star${rating1 !== 1 ? 's' : ''}` : 'Rate something' }}</p>
       </template>
     </WinControlExample>
@@ -19,8 +19,7 @@
     <WinControlExample headerText="A RatingControl with custom maximum rating.">
       <template #example>
         <WinRating v-model="rating2" :max="10" />
-      </template>
-      <template #output>
+
         <p class="output-text">{{ rating2 ? `Rating: ${rating2}/10` : 'Rate from 1 to 10' }}</p>
       </template>
     </WinControlExample>
@@ -31,11 +30,9 @@
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <WinRating v-model="rating3" :disabled="isReadOnly" />
         </div>
-      </template>
-      <template #output>
+
         <p class="output-text">{{ rating3 ? `Current rating: ${rating3} star${rating3 !== 1 ? 's' : ''}` : 'No rating set' }}</p>
-      </template>
-      <template #options>
+
         <WinCheckBox v-model="isReadOnly">
           Read-only
         </WinCheckBox>
@@ -59,8 +56,7 @@
             <WinRating v-model="serviceRating" />
           </div>
         </div>
-      </template>
-      <template #output>
+
         <p class="output-text">
           Average: {{ averageRating ? averageRating.toFixed(1) : 'N/A' }} stars
         </p>

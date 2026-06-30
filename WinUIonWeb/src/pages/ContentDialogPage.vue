@@ -10,7 +10,7 @@
       <template #example>
         <WinButton @click="showDialog1 = true">Show dialog</WinButton>
       </template>
-      <template #output>
+      <template #options>
         <div v-if="dialogResult1" class="output-text">Result: {{ dialogResult1 }}</div>
         <div v-else class="output-text">Click the button to show the dialog.</div>
       </template>
@@ -20,8 +20,7 @@
     <WinControlExample headerText="A content dialog without a default button.">
       <template #example>
         <WinButton @click="showDialog2 = true">Show dialog without default button</WinButton>
-      </template>
-      <template #output>
+
         <div v-if="dialogResult2" class="output-text">Result: {{ dialogResult2 }}</div>
         <div v-else class="output-text">Click the button to show the dialog.</div>
       </template>

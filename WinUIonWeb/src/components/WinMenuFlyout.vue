@@ -7,12 +7,13 @@
       <div class="win-menu-flyout"
            @animationend="onAnimEnd">
         <div class="win-menu-flyout-scroll">
-          <div v-for="(item, i) in items" :key="i"
-               class="win-menu-flyout-item"
-               @click="onItemClick(item, i)">
-            <span v-if="item.icon" class="icon win-menu-flyout-icon">{{ item.icon }}</span>
-            <span>{{ item.label || item }}</span>
-          </div>
+          <template v-for="(item, i) in items" :key="i">
+            <div class="win-menu-flyout-item"
+                 @click="onItemClick(item, i)">
+              <span v-if="item.icon" class="icon win-menu-flyout-icon">{{ item.icon }}</span>
+              <span>{{ item.label || item }}</span>
+            </div>
+          </template>
           <slot></slot>
         </div>
       </div>
@@ -25,7 +26,8 @@ const props = defineProps({
   open: Boolean,
   anchorRect: Object,
   items: { type: Array, default: () => [] },
-  alignment: { type: String, default: 'center' }
+  alignment: { type: String, default: 'center' },
+  minWidth: { type: [Number, String], default: 20 }
 });
 const emit = defineEmits(['close', 'select']);
 const shadowVisible = ref(false);
@@ -64,7 +66,9 @@ watch(() => props.open, (val) => {
 }, { immediate: true });
 
 const close = () => { emit('close'); };
-const onItemClick = (item, index) => { emit('select', item, index); };
+const onItemClick = (item, index) => {
+  emit('select', item, index);
+};
 const onAnimEnd = () => { if (!isClosing.value) shadowVisible.value = true; };
 
 const posStyle = computed(() => {
@@ -79,8 +83,9 @@ const posStyle = computed(() => {
     openDirection.value = 'down';
     return {
       top: r.top + 'px',
-      left: (r.left + gap) + 'px',
-      '--flyout-max-height': maxH + 'px'
+      left: (props.alignment === 'left' ? r.left : r.left + gap) + 'px',
+      '--flyout-max-height': maxH + 'px',
+      '--flyout-min-width': cssSize(props.minWidth)
     };
   }
 
@@ -94,14 +99,16 @@ const posStyle = computed(() => {
         top: (r.bottom + gap) + 'px',
         left: r.right + 'px',
         transform: 'translateX(-100%)',
-        '--flyout-max-height': Math.max(0, spaceBelow) + 'px'
+        '--flyout-max-height': Math.max(0, spaceBelow) + 'px',
+        '--flyout-min-width': cssSize(props.minWidth)
       };
     }
     return {
       top: (r.bottom + gap) + 'px',
       left: (r.left + r.width / 2) + 'px',
       transform: 'translateX(-50%)',
-      '--flyout-max-height': Math.max(0, spaceBelow) + 'px'
+      '--flyout-max-height': Math.max(0, spaceBelow) + 'px',
+      '--flyout-min-width': cssSize(props.minWidth)
     };
   } else {
     openDirection.value = 'up';
@@ -110,17 +117,21 @@ const posStyle = computed(() => {
         bottom: (viewH - r.top + gap) + 'px',
         left: r.right + 'px',
         transform: 'translateX(-100%)',
-        '--flyout-max-height': Math.max(0, spaceAbove) + 'px'
+        '--flyout-max-height': Math.max(0, spaceAbove) + 'px',
+        '--flyout-min-width': cssSize(props.minWidth)
       };
     }
     return {
       bottom: (viewH - r.top + gap) + 'px',
       left: (r.left + r.width / 2) + 'px',
       transform: 'translateX(-50%)',
-      '--flyout-max-height': Math.max(0, spaceAbove) + 'px'
+      '--flyout-max-height': Math.max(0, spaceAbove) + 'px',
+      '--flyout-min-width': cssSize(props.minWidth)
     };
   }
 });
+
+const cssSize = (value) => typeof value === 'number' ? `${value}px` : value;
 </script>
 <style>
   .win-menu-flyout-wrap {
@@ -152,13 +163,14 @@ const posStyle = computed(() => {
 
   .win-menu-flyout {
     position: relative;
-    border: 1px solid var(--stroke-surface-flyout);
+    border: 1px solid var(--flyout-border);
     border-radius: 8px;
     padding: 4px;
     background: var(--layer-default);
+    background-image: var(--flyout-material-overlay);
     backdrop-filter: var(--flyout-backdrop);
     -webkit-backdrop-filter: var(--flyout-backdrop);
-    min-width: 20px;
+    min-width: var(--flyout-min-width, 20px);
     max-height: var(--flyout-max-height, 600px);
     display: flex;
     flex-direction: column;
@@ -168,6 +180,7 @@ const posStyle = computed(() => {
 
   html.winui-webview-host .win-menu-flyout {
     background: var(--host-flyout-bg);
+    background-image: var(--flyout-material-overlay);
     backdrop-filter: var(--flyout-backdrop);
     -webkit-backdrop-filter: var(--flyout-backdrop);
   }
@@ -279,6 +292,7 @@ const posStyle = computed(() => {
     min-width: 16px;
     margin-right: 12px;
     text-align: center;
+    font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
     font-size: 16px;
     line-height: 1;
   }
@@ -291,12 +305,6 @@ const posStyle = computed(() => {
       background: var(--subtle-tertiary);
       color: var(--text-secondary);
     }
-
-  .win-menu-flyout-separator {
-    height: 1px;
-    background: var(--stroke-divider);
-    margin: 4px 0;
-  }
 
   .win-menu-flyout-overlay {
     position: fixed;

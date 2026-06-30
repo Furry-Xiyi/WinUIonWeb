@@ -53,6 +53,8 @@ import FlyoutPage from './pages/FlyoutPage.vue';
 import PopupPage from './pages/PopupPage.vue';
 import TeachingTipPage from './pages/TeachingTipPage.vue';
 import SettingsPage from './pages/SettingsPage.vue';
+import TextBoxPage from './pages/TextBoxPage.vue';
+import TextBlockPage from './pages/TextBlockPage.vue';
 
 const pageMap = {
   home: HomePage,
@@ -91,6 +93,8 @@ const pageMap = {
   flyout: FlyoutPage,
   popup: PopupPage,
   teachingtip: TeachingTipPage,
+  textbox: TextBoxPage,
+  textblock: TextBlockPage,
   settings: SettingsPage
 };
 
@@ -178,6 +182,10 @@ const navMenuItems = [
     { value: 'image', icon: '\uE8B9', label: 'Image' },
     { value: 'mediaplayerelement', icon: '\uE714', label: 'MediaPlayerElement' },
     { value: 'personpicture', icon: '\uE77B', label: 'PersonPicture' }
+  ]},
+  { value: 'text', icon: '\uE8D2', label: 'Text', selectsOnInvoked: false, children: [
+    { value: 'textbox', icon: '\uE8AC', label: 'TextBox' },
+    { value: 'textblock', icon: '\uE8E4', label: 'TextBlock' }
   ]}
 ];
 
@@ -250,6 +258,154 @@ watch(currentPage, (newVal, oldVal) => {
     margin-top: 0;
     margin-bottom: 24px;
     color: var(--text-primary);
+  }
+
+  .control-example-description {
+    margin: 28px 0 -4px 0;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  .basic-input-example-theme:has(.example-display[data-theme='light']) .example-container {
+    color-scheme: light;
+    --text-primary: rgba(0, 0, 0, 0.89);
+    --text-secondary: rgba(0, 0, 0, 0.62);
+    --text-tertiary: rgba(0, 0, 0, 0.45);
+    --text-disabled: rgba(0, 0, 0, 0.36);
+    --layer-default: rgba(255, 255, 255, 0.50);
+    --card-bg: rgba(255, 255, 255, 0.70);
+    --card-bg-secondary: rgba(246, 246, 246, 0.50);
+    --card-stroke: rgba(0, 0, 0, 0.06);
+    --stroke-divider: rgba(0, 0, 0, 0.06);
+    --stroke-surface-flyout: rgba(0, 0, 0, 0.06);
+    --flyout-bg: rgba(252, 252, 252, 0.78);
+    --flyout-backdrop: blur(30px) saturate(160%) brightness(1.02);
+    --flyout-material-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
+    --ctrl-fill-default: rgba(255, 255, 255, 0.70);
+    --ctrl-fill-secondary: rgba(249, 249, 249, 0.50);
+    --ctrl-fill-tertiary: rgba(249, 249, 249, 0.30);
+    --ctrl-fill-disabled: rgba(249, 249, 249, 0.30);
+    --ctrl-fill-input-active: #FFFFFF;
+    --control-fill-color-default: var(--ctrl-fill-default);
+    --control-fill-color-secondary: var(--ctrl-fill-secondary);
+    --control-fill-color-tertiary: var(--ctrl-fill-tertiary);
+    --control-fill-color-disabled: var(--ctrl-fill-disabled);
+    --control-fill-color-input-active: var(--ctrl-fill-input-active);
+    --control-fill-input-active: var(--ctrl-fill-input-active);
+    --ctrl-solid-fill: #FFFFFF;
+    --ctrl-border: rgba(0, 0, 0, 0.06);
+    --ctrl-border-rest: rgba(0, 0, 0, 0.06);
+    --ctrl-border-accent: rgba(0, 0, 0, 0.16);
+    --control-stroke-color-default: var(--ctrl-border-rest);
+    --control-strong-stroke-color-default: rgba(0, 0, 0, 0.45);
+    --ctrl-strong-fill: rgba(0, 0, 0, 0.45);
+    --ctrl-strong-stroke: rgba(0, 0, 0, 0.45);
+    --ctrl-strong-stroke-disabled: rgba(0, 0, 0, 0.22);
+    --ctrl-elevation-top: rgba(255, 255, 255, 0.08);
+    --ctrl-elevation-bottom: rgba(0, 0, 0, 0.16);
+    --subtle-secondary: rgba(0, 0, 0, 0.04);
+    --subtle-tertiary: rgba(0, 0, 0, 0.02);
+    --subtle-pressed: rgba(0, 0, 0, 0.06);
+    --accent-base: #0067C0;
+    --accent-hover: rgba(0, 103, 192, 0.90);
+    --accent-pressed: rgba(0, 103, 192, 0.80);
+    --accent-fill-disabled: rgba(0, 0, 0, 0.22);
+    --accent-text: #FFFFFF;
+    --accent-text-secondary: rgba(255, 255, 255, 0.70);
+    --accent-border: rgba(255, 255, 255, 0.08);
+    --accent-border-accent: rgba(0, 0, 0, 0.40);
+    --button-stroke: rgba(0, 0, 0, 0.06);
+    --button-stroke-bottom: rgba(0, 0, 0, 0.16);
+    --button-stroke-pressed: rgba(0, 0, 0, 0.06);
+    --button-stroke-pressed-bottom: rgba(0, 0, 0, 0.06);
+    --toggle-border: rgba(0, 0, 0, 0.45);
+    --toggle-thumb: rgba(0, 0, 0, 0.61);
+    --toggle-thumb-hover: rgba(0, 0, 0, 0.89);
+    --toggle-on-thumb: #FFFFFF;
+    --radio-border: rgba(0, 0, 0, 0.45);
+    --system-accent-color-dark-1: var(--accent-base);
+    --control-example-display-bg: #FFFFFF;
+    --layer-fill-color-default: var(--layer-default);
+    --layer-on-acrylic-fill-color-default: var(--layer-default);
+    --surface-stroke-color-flyout: var(--stroke-surface-flyout);
+    --subtle-fill-color-secondary: var(--subtle-secondary);
+    --subtle-fill-color-tertiary: var(--subtle-tertiary);
+    --divider-stroke: var(--stroke-divider);
+    --divider-stroke-default: var(--stroke-divider);
+    --divider-stroke-color-default: var(--stroke-divider);
+    --flyout-background: var(--flyout-bg);
+  }
+
+  .basic-input-example-theme:has(.example-display[data-theme='dark']) .example-container {
+    color-scheme: dark;
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(255, 255, 255, 0.77);
+    --text-tertiary: rgba(255, 255, 255, 0.53);
+    --text-disabled: rgba(255, 255, 255, 0.36);
+    --layer-default: rgba(58, 58, 58, 0.50);
+    --card-bg: #2B2B2B;
+    --card-bg-secondary: #252525;
+    --card-stroke: rgba(0, 0, 0, 0.10);
+    --stroke-divider: rgba(255, 255, 255, 0.08);
+    --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
+    --flyout-bg: rgba(44, 44, 44, 0.58);
+    --flyout-backdrop: blur(44px) saturate(190%) brightness(1.22) contrast(1.05);
+    --flyout-material-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.025) 45%, rgba(0, 0, 0, 0.12));
+    --ctrl-fill-default: #2D2D2D;
+    --ctrl-fill-secondary: #333333;
+    --ctrl-fill-tertiary: #272727;
+    --ctrl-fill-disabled: rgba(255, 255, 255, 0.04);
+    --ctrl-fill-input-active: rgba(30, 30, 30, 0.70);
+    --control-fill-color-default: var(--ctrl-fill-default);
+    --control-fill-color-secondary: var(--ctrl-fill-secondary);
+    --control-fill-color-tertiary: var(--ctrl-fill-tertiary);
+    --control-fill-color-disabled: var(--ctrl-fill-disabled);
+    --control-fill-color-input-active: var(--ctrl-fill-input-active);
+    --control-fill-input-active: var(--ctrl-fill-input-active);
+    --ctrl-solid-fill: #202020;
+    --ctrl-border: rgba(255, 255, 255, 0.07);
+    --ctrl-border-rest: rgba(0, 0, 0, 0.07);
+    --ctrl-border-accent: rgba(255, 255, 255, 0.09);
+    --control-stroke-color-default: var(--ctrl-border);
+    --control-strong-stroke-color-default: rgba(255, 255, 255, 0.54);
+    --ctrl-strong-fill: rgba(255, 255, 255, 0.54);
+    --ctrl-strong-stroke: rgba(255, 255, 255, 0.54);
+    --ctrl-strong-stroke-disabled: rgba(255, 255, 255, 0.16);
+    --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
+    --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
+    --subtle-secondary: rgba(255, 255, 255, 0.06);
+    --subtle-tertiary: rgba(255, 255, 255, 0.04);
+    --subtle-pressed: rgba(255, 255, 255, 0.03);
+    --accent-base: #4CC2FF;
+    --accent-hover: rgba(96, 205, 255, 0.90);
+    --accent-pressed: rgba(96, 205, 255, 0.80);
+    --accent-fill-disabled: rgba(255, 255, 255, 0.16);
+    --accent-text: #000000;
+    --accent-text-secondary: rgba(0, 0, 0, 0.50);
+    --accent-border: rgba(0, 0, 0, 0.14);
+    --accent-border-accent: rgba(255, 255, 255, 0.08);
+    --button-stroke: rgba(255, 255, 255, 0.0075);
+    --button-stroke-bottom: rgba(255, 255, 255, 0.05);
+    --button-stroke-pressed: rgba(255, 255, 255, 0.07);
+    --button-stroke-pressed-bottom: rgba(255, 255, 255, 0.07);
+    --toggle-border: rgba(255, 255, 255, 0.54);
+    --toggle-thumb: rgba(255, 255, 255, 0.79);
+    --toggle-thumb-hover: #FFFFFF;
+    --toggle-on-thumb: #000000;
+    --radio-border: rgba(255, 255, 255, 0.54);
+    --system-accent-color-light-2: var(--accent-base);
+    --control-example-display-bg: #202020;
+    --layer-fill-color-default: var(--layer-default);
+    --layer-on-acrylic-fill-color-default: var(--layer-default);
+    --surface-stroke-color-flyout: var(--stroke-surface-flyout);
+    --subtle-fill-color-secondary: var(--subtle-secondary);
+    --subtle-fill-color-tertiary: var(--subtle-tertiary);
+    --divider-stroke: var(--stroke-divider);
+    --divider-stroke-default: var(--stroke-divider);
+    --divider-stroke-color-default: var(--stroke-divider);
+    --flyout-background: var(--flyout-bg);
   }
 
   .grid-sample-item {

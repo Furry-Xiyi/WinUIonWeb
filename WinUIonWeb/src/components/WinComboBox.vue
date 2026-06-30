@@ -97,6 +97,7 @@ const close = () => { isOpen.value = false; };</script>
     padding: 4px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.14);
     background: var(--flyout-bg);
+    background-image: var(--flyout-material-overlay);
     backdrop-filter: var(--flyout-backdrop);
     -webkit-backdrop-filter: var(--flyout-backdrop);
     display: flex;

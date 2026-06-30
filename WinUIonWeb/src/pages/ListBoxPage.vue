@@ -6,7 +6,7 @@
     <template #example>
       <WinListBox :items="['Blue', 'Green', 'Red', 'Yellow']" v-model:selectedIndex="idx" style="width: 200px;" />
     </template>
-    <template #output>
+    <template #options>
       <span>Selected color: {{ ['Blue', 'Green', 'Red', 'Yellow'][idx] || 'None' }}</span>
     </template>
   </WinControlExample>

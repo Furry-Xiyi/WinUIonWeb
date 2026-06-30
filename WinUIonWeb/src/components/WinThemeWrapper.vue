@@ -51,6 +51,9 @@ const themeClass = computed(() => {
   --ctrl-fill-secondary: rgba(249, 249, 249, 0.5);
   --ctrl-fill-tertiary: rgba(249, 249, 249, 0.3);
   --ctrl-fill-disabled: rgba(249, 249, 249, 0.3);
+  --ctrl-fill-input-active: #FFFFFF;
+  --control-fill-color-input-active: var(--ctrl-fill-input-active);
+  --control-fill-input-active: var(--ctrl-fill-input-active);
 
   --ctrl-stroke-default: rgba(0, 0, 0, 0.0578);
   --ctrl-strong-stroke: rgba(0, 0, 0, 0.6555);
@@ -74,6 +77,9 @@ const themeClass = computed(() => {
   --ctrl-fill-secondary: rgba(255, 255, 255, 0.0837);
   --ctrl-fill-tertiary: rgba(255, 255, 255, 0.0326);
   --ctrl-fill-disabled: rgba(255, 255, 255, 0.0419);
+  --ctrl-fill-input-active: #B31E1E1E;
+  --control-fill-color-input-active: var(--ctrl-fill-input-active);
+  --control-fill-input-active: var(--ctrl-fill-input-active);
 
   --ctrl-stroke-default: rgba(255, 255, 255, 0.0698);
   --ctrl-strong-stroke: rgba(255, 255, 255, 0.5442);

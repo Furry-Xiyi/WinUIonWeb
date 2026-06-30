@@ -9,7 +9,7 @@
       <template #example>
         <WinTimePicker v-model="selectedTime1" />
       </template>
-      <template #output>
+      <template #options>
         <p class="output-text">Selected time: {{ formatTime(selectedTime1) }}</p>
       </template>
     </WinControlExample>
@@ -20,8 +20,7 @@
           v-model="selectedTime2"
           header="Arrival time"
           :minuteIncrement="15" />
-      </template>
-      <template #output>
+
         <p class="output-text">Selected time: {{ formatTime(selectedTime2) }}</p>
       </template>
     </WinControlExample>
@@ -32,8 +31,7 @@
           v-model="selectedTime3"
           header="24 hour clock"
           clockIdentifier="24HourClock" />
-      </template>
-      <template #output>
+
         <p class="output-text">Selected time: {{ formatTime24Hour(selectedTime3) }}</p>
       </template>
     </WinControlExample>

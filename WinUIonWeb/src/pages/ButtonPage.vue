@@ -7,14 +7,12 @@
       </p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -23,89 +21,83 @@
     </div>
 
     <!-- Example 1: Simple Button with text content -->
-    <WinControlExample
-      headerText="A simple Button with text content."
+    <p class="control-example-description">A simple Button with text content.</p>
+    <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
+      :vue="example1Template">
       <template #example>
         <WinButton
-          :disabled="!example1Enabled"
-          @click="onButton1Click">
-          Standard XAML button
-        </WinButton>
-      </template>
-      <template #output>
-        <p class="output-text">{{ control1Output || 'Click the button' }}</p>
+          :IsEnabled="!disableControl1"
+          AutomationProperties.Name="Standard XAML"
+          Content="Standard XAML button"
+          @click="onButton1Click" />
       </template>
       <template #options>
-        <WinCheckBox v-model="example1Enabled">
-          Enable button
+        <WinTextBlock FontFamily="Global User Interface" :Text="control1Output" />
+
+        <WinCheckBox v-model="disableControl1">
+          Disable button
         </WinCheckBox>
       </template>
     </WinControlExample>
 
     <!-- Example 2: Button with graphical content -->
-    <WinControlExample
-      headerText="A Button with graphical content."
+    <p class="control-example-description">A Button with graphical content.</p>
+    <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
+      :vue="example2Template">
       <template #example>
         <WinButton
+          Width="50"
+          Height="50"
+          AutomationProperties.Name="Pie"
           @click="onButton2Click"
-          style="width: 50px; height: 50px; padding: 4px;">
+          style="padding: 4px;">
           <img
-            src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/Slices.png"
+            src="/assets/Slices.png"
             alt="Pie slice"
             style="width: 100%; height: 100%; object-fit: contain;" />
         </WinButton>
       </template>
-      <template #output>
-        <p class="output-text">{{ control2Output || 'Click the button' }}</p>
+      <template #options>
+        <WinTextBlock :Text="control2Output" />
       </template>
     </WinControlExample>
 
     <!-- Example 3: Accent and Subtle styles -->
-    <WinControlExample
-      headerText="Accent and Subtle styles"
+    <p class="control-example-description">Accent and Subtle styles</p>
+    <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
+      :vue="example3Template">
       <template #example>
         <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-          <WinButton primary>Accent style button</WinButton>
-          <WinButton subtle>Subtle style button</WinButton>
+          <WinButton Style="{StaticResource AccentButtonStyle}" Content="Accent style button"/>
+          <WinButton Style="{StaticResource SubtleButtonStyle}" Content="Subtle style button"/>
         </div>
       </template>
     </WinControlExample>
 
     <!-- Example 4: Text wrapping -->
-    <WinControlExample headerText="Text wrapping" :theme="pageTheme">
+    <p class="control-example-description">Text wrapping</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example4Template">
       <template #example>
         <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-          <p style="margin: 0 0 12px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-            The following buttons' content may get clipped if we don't pay careful attention to their layout containers.
-          </p>
-          <p style="margin: 0 0 12px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-            One option to mitigate clipped content is to place Buttons underneath each other, allowing for more space to grow horizontally:
-          </p>
-          <WinButton style="width: 100%; max-width: 400px; margin-bottom: 5px;">
+          <WinTextBlock Margin="0,0,0,8" Text="The following buttons' content may get clipped if we don't pay careful attention to their layout containers." TextWrapping="Wrap" />
+          <WinTextBlock Margin="0,0,0,8" Text="One option to mitigate clipped content is to place Buttons underneath each other, allowing for more space to grow horizontally:" TextWrapping="Wrap" />
+          <WinButton HorizontalAlignment="Stretch" Margin="0,0,0,5" style="width: 100%; max-width: 400px; margin-bottom: 5px;">
             This is some text that is too long and will get cut off
           </WinButton>
-          <WinButton style="width: 100%; max-width: 400px;">
+          <WinButton HorizontalAlignment="Stretch" style="width: 100%; max-width: 400px;">
             This is another text that would result in being cut off
           </WinButton>
 
-          <p style="margin: 12px 0 8px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-            Another option is to explicitly wrap the Button's content:
-          </p>
+          <WinTextBlock Margin="0,8,0,8" Text="Another option is to explicitly wrap the Button's content" />
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <WinButton :wrap="true" style="max-width: 240px;">
-              This is some text that is too long and will get cut off without wrapping
+            <WinButton MaxWidth="240" Margin="0,0,8,0" style="max-width: 240px;">
+              <WinTextBlock Text="This is some text that is too long and will get cut off without wrapping" TextWrapping="WrapWholeWords" />
             </WinButton>
-            <WinButton :wrap="true" style="max-width: 240px;">
-              This is another text that would result in being cut off without wrapping
+            <WinButton MaxWidth="240" style="max-width: 240px;">
+              <WinTextBlock Text="This is another text that would result in being cut off without wrapping" TextWrapping="WrapWholeWords" />
             </WinButton>
           </div>
         </div>
@@ -115,72 +107,85 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinButton from '../components/WinButton.vue';
+import WinTextBlock from '../components/WinTextBlock.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
+import { createPageState } from '../utils/pageState';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'button');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
-
-const example1Enabled = ref(true);
+const disableControl1 = ref(false);
 const control1Output = ref('');
 const control2Output = ref('');
 
 const onButton1Click = () => {
-  control1Output.value = `You clicked: Standard XAML button`;
+  control1Output.value = `You clicked: Button1`;
 };
 
 const onButton2Click = () => {
-  control2Output.value = `You clicked: The image button`;
+  control2Output.value = `You clicked: Button2`;
 };
 
 // 示例代码
 const example1Template = `<WinButton
-  :disabled="!isEnabled"
-  @click="onClick">
-  Standard XAML button
-</WinButton>`;
+  :IsEnabled="!disableControl"
+  AutomationProperties.Name="Standard XAML"
+  Content="Standard XAML button"
+  @click="onButtonClick" />
 
-const example1Vue = `const isEnabled = ref(true);
-
-const onClick = () => {
-  console.log('Button clicked');
-};`;
+<WinTextBlock FontFamily="Global User Interface" :Text="controlOutput" />`;
 
 const example2Template = `<WinButton
-  @click="onClick"
-  style="width: 50px; height: 50px;">
-  <img src="icon.png" alt="Icon" />
-</WinButton>`;
+  Width="50"
+  Height="50"
+  AutomationProperties.Name="Pie"
+  @click="onButtonClick"
+  style="padding: 4px;">
+  <img src="/assets/Slices.png" alt="Pie slice" />
+</WinButton>
 
-const example2Vue = `const onClick = () => {
-  console.log('Image button clicked');
-};`;
+<WinTextBlock :Text="controlOutput" />`;
 
-const example3Template = `<WinButton primary>Accent style button</WinButton>
-<WinButton subtle>Subtle style button</WinButton>`;
+const example3Template = `<div style="display: flex; gap: 16px; flex-wrap: wrap;">
+  <WinButton Style="{StaticResource AccentButtonStyle}" Content="Accent style button" />
+  <WinButton Style="{StaticResource SubtleButtonStyle}" Content="Subtle style button" />
+</div>`;
 
-const example3Vue = `// Accent style uses 'primary' prop
-// Subtle style uses 'subtle' prop`;
+const example4Template = `<div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+  <WinTextBlock
+    Margin="0,0,0,8"
+    Text="The following buttons' content may get clipped if we don't pay careful attention to their layout containers."
+    TextWrapping="Wrap" />
+  <WinTextBlock
+    Margin="0,0,0,8"
+    Text="One option to mitigate clipped content is to place Buttons underneath each other, allowing for more space to grow horizontally:"
+    TextWrapping="Wrap" />
+  <WinButton HorizontalAlignment="Stretch" Margin="0,0,0,5">
+    This is some text that is too long and will get cut off
+  </WinButton>
+  <WinButton HorizontalAlignment="Stretch">
+    This is another text that would result in being cut off
+  </WinButton>
+
+  <WinTextBlock Margin="0,8,0,8" Text="Another option is to explicitly wrap the Button's content" />
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <WinButton MaxWidth="240" Margin="0,0,8,0">
+      <WinTextBlock
+        Text="This is some text that is too long and will get cut off without wrapping"
+        TextWrapping="WrapWholeWords" />
+    </WinButton>
+    <WinButton MaxWidth="240">
+      <WinTextBlock
+        Text="This is another text that would result in being cut off without wrapping"
+        TextWrapping="WrapWholeWords" />
+    </WinButton>
+  </div>
+</div>`;
 </script>
 
 <style scoped>
@@ -218,4 +223,9 @@ const example3Vue = `// Accent style uses 'primary' prop
   color: var(--text-primary);
   margin: 0;
 }
+
 </style>
+
+
+
+

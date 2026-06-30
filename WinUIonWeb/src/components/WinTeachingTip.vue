@@ -77,7 +77,9 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocClick));
 <style>
   .win-teaching-tip {
     background: var(--flyout-bg);
+    background-image: var(--flyout-material-overlay);
     backdrop-filter: var(--flyout-backdrop);
+    -webkit-backdrop-filter: var(--flyout-backdrop);
     border: 1px solid var(--flyout-border);
     border-radius: 8px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
@@ -184,6 +186,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocClick));
     width: 16px;
     height: 16px;
     background: var(--flyout-bg);
+    background-image: var(--flyout-material-overlay);
     border-right: 1px solid var(--flyout-border);
     border-bottom: 1px solid var(--flyout-border);
   }

@@ -1,11 +1,27 @@
 <template>
   <div>
-    <h1 class="page-header">DropDownButton</h1>
-    <p class="page-description">
-      A DropDownButton is a button that displays a chevron as a visual indicator that it has an attached flyout that contains more options. It has the same behavior as a standard Button with a flyout; only the appearance is different.
-    </p>
+    <div style="position: relative;">
+      <h1 class="page-header">DropDownButton</h1>
+      <p class="page-description">
+        A DropDownButton is a button that displays a chevron as a visual indicator that it has an attached flyout that contains more options. It has the same behavior as a standard Button with a flyout; only the appearance is different.
+      </p>
+      <div class="page-header-actions">
+        <WinButton
+          @click="toggleTheme"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">&#xE793;</span>
+        </WinButton>
+        <WinToggleButton
+          v-model="isFavoriteState"
+          @update:modelValue="toggleFavorite"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+        </WinToggleButton>
+      </div>
+    </div>
 
-    <WinControlExample headerText="A simple DropDownButton with text content">
+    <p class="control-example-description">A simple DropDownButton with text content</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinDropDownButton :items="emailActions">
           Email
@@ -13,7 +29,8 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A DropDownButton with an icon">
+    <p class="control-example-description">A DropDownButton with an icon</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <WinDropDownButton :items="emailActionsWithIcons">
           <template #default>
@@ -26,8 +43,16 @@
 </template>
 
 <script setup>
+import { computed, inject } from 'vue';
 import WinDropDownButton from '../components/WinDropDownButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
+import WinButton from '../components/WinButton.vue';
+import WinToggleButton from '../components/WinToggleButton.vue';
+import { createPageState } from '../utils/pageState';
+
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'dropdownbutton');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const emailActions = ['Send', 'Reply', 'Reply All'];
 
@@ -53,8 +78,19 @@ const emailActionsWithIcons = [
   line-height: 1.5;
 }
 
+.page-header-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
 .icon {
   font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', 'WinUIOnWebIcons';
   font-size: 16px;
 }
 </style>
+
+

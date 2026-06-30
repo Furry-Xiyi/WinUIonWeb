@@ -10,9 +10,9 @@
             </div>
           </div>
           <div class="win-dialog-commands">
-            <WinButton v-if="primaryText" :primary="defaultButton === 'primary'" @click="$emit('primary')">{{ primaryText }}</WinButton>
-            <WinButton v-if="secondaryText" :primary="defaultButton === 'secondary'" @click="$emit('secondary')">{{ secondaryText }}</WinButton>
-            <WinButton v-if="closeText" :primary="defaultButton === 'close'" @click="$emit('close')">{{ closeText }}</WinButton>
+            <WinButton v-if="primaryText" :Style="buttonStyle('primary')" @click="$emit('primary')">{{ primaryText }}</WinButton>
+            <WinButton v-if="secondaryText" :Style="buttonStyle('secondary')" @click="$emit('secondary')">{{ secondaryText }}</WinButton>
+            <WinButton v-if="closeText" :Style="buttonStyle('close')" @click="$emit('close')">{{ closeText }}</WinButton>
           </div>
         </div>
       </div>
@@ -23,7 +23,7 @@
 <script setup>
 import WinButton from './WinButton.vue';
 
-defineProps({
+const props = defineProps({
   visible: Boolean,
   title: String,
   primaryText: String,
@@ -35,6 +35,9 @@ defineProps({
 defineEmits(['primary', 'secondary', 'close']);
 
 const onLightDismiss = () => {};
+const buttonStyle = (buttonName) => (
+  props.defaultButton === buttonName ? '{StaticResource AccentButtonStyle}' : ''
+);
 </script>
 
 <style>

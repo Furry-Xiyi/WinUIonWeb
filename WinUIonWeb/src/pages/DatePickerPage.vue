@@ -22,7 +22,7 @@
           :yearVisible="false"
           :dayFormatted="true" />
       </template>
-      <template #output>
+      <template #options>
         <p class="output-text" v-if="selectedDate2">
           Selected: {{ formatDate(selectedDate2) }}
         </p>

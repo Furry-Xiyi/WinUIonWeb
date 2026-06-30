@@ -55,7 +55,6 @@ const getIconCode = (iconName) => {
   display: inline-flex;
   align-items: center;
   gap: 0;
-  border-bottom: 1px solid var(--stroke-divider);
 }
 
 .selector-bar-item {
@@ -93,14 +92,12 @@ const getIconCode = (iconName) => {
 
 .item-icon .icon {
   font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 
 .item-text {
   line-height: 1;
 }
 
-/* 底部指示条 - 从ComboBox借鉴并改为横版 */
 .selector-indicator {
   position: absolute;
   left: 50%;

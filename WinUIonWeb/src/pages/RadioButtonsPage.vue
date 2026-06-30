@@ -7,14 +7,12 @@
       </p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -23,7 +21,8 @@
     </div>
 
     <!-- Example 1: A group of RadioButtons -->
-    <WinControlExample headerText="A group of RadioButtons" :theme="pageTheme">
+    <p class="control-example-description">A group of RadioButtons</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <div class="radio-group">
           <div class="radio-header">Options:</div>
@@ -38,13 +37,14 @@
           </WinRadioButton>
         </div>
       </template>
-      <template #output>
+      <template #options>
         <p class="output-text">{{ outputText }}</p>
       </template>
     </WinControlExample>
 
     <!-- Example 2: RadioButtons with visual output -->
-    <WinControlExample headerText="RadioButtons with visual output" :theme="pageTheme">
+    <p class="control-example-description">RadioButtons with visual output</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <!-- Background color selection -->
@@ -94,31 +94,16 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinRadioButton from '../components/WinRadioButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'radiobuttons');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Example 1: Basic RadioButtons
 const selectedOption = ref('1');
@@ -207,3 +192,7 @@ const getColorValue = (colorName) => {
   margin-top: 8px;
 }
 </style>
+
+
+
+

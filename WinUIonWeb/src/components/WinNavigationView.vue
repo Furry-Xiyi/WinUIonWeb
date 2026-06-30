@@ -1552,16 +1552,18 @@ watch(() => props.selectedValue, (val, oldVal) => {
       left: 0;
       bottom: 0;
       z-index: 20;
-      background: color-mix(in srgb, var(--app-bg) 72%, transparent);
-      backdrop-filter: blur(28px) saturate(1.35);
-      -webkit-backdrop-filter: blur(28px) saturate(1.35);
+      background: var(--host-nav-pane-bg);
+      background-image: var(--flyout-material-overlay);
+      backdrop-filter: var(--flyout-backdrop);
+      -webkit-backdrop-filter: var(--flyout-backdrop);
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
     }
 
     html.winui-webview-host .win-nav-shell.is-overlay-left .win-nav-left-panel:not(.is-compact) {
       background: var(--host-nav-pane-bg);
-      backdrop-filter: blur(28px) saturate(1.35);
-      -webkit-backdrop-filter: blur(28px) saturate(1.35);
+      background-image: var(--flyout-material-overlay);
+      backdrop-filter: var(--flyout-backdrop);
+      -webkit-backdrop-filter: var(--flyout-backdrop);
     }
 
     .win-nav-shell.is-overlay-left .win-nav-left-panel.is-compact {

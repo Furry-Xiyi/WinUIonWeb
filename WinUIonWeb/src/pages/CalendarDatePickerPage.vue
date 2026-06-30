@@ -13,7 +13,7 @@
           header="Calendar"
           placeholder="Pick a date" />
       </template>
-      <template #output>
+      <template #options>
         <div v-if="selectedDate" class="output-text">Selected: {{ selectedDate }}</div>
       </template>
     </WinControlExample>

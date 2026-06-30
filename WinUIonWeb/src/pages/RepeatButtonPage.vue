@@ -7,14 +7,12 @@
       </p>
       <div class="page-header-actions">
         <WinButton
-          subtle
           @click="toggleTheme"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
           v-model="isFavoriteState"
-          subtle
           @update:modelValue="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
@@ -22,23 +20,24 @@
       </div>
     </div>
 
-    <WinControlExample headerText="A simple RepeatButton" :theme="pageTheme">
+    <p class="control-example-description">A simple RepeatButton</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
-        <WinRepeatButton :disabled="!isEnabled" @click="onRepeatClick">
+        <WinRepeatButton :disabled="disableControl1" @click="onRepeatClick">
           Click and hold
         </WinRepeatButton>
       </template>
-      <template #output>
-        <p class="output-text">Click count: {{ clickCount }}</p>
-      </template>
       <template #options>
-        <WinCheckBox v-model="isEnabled">
-          Enable button
+        <p class="output-text">Click count: {{ clickCount }}</p>
+
+        <WinCheckBox v-model="disableControl1">
+          Disable button
         </WinCheckBox>
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="RepeatButton with custom delay and interval" :theme="pageTheme">
+    <p class="control-example-description">RepeatButton with custom delay and interval</p>
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
       <template #example>
         <div style="display: flex; gap: 16px; align-items: center;">
           <WinRepeatButton
@@ -63,34 +62,19 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinRepeatButton from '../components/WinRepeatButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinCheckBox from '../components/WinCheckBox.vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'repeatbutton');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
-
-const isEnabled = ref(true);
+const disableControl1 = ref(false);
 const clickCount = ref(0);
 const value = ref(0);
 
@@ -143,3 +127,7 @@ const decrementValue = () => {
   font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 </style>
+
+
+
+
