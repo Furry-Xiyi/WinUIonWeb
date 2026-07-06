@@ -31,7 +31,7 @@
       <div class="split-view-options-list">
         <div class="split-option-item">
           <span class="split-option-label"></span>
-          <WinToggleButton v-model="isPaneOpen">IsPaneOpen</WinToggleButton>
+          <WinToggleButton v-model:IsChecked="isPaneOpen">IsPaneOpen</WinToggleButton>
         </div>
         <div class="split-option-item">
           <span class="split-option-label">Placement</span>

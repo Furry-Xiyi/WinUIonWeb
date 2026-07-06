@@ -5,7 +5,7 @@
       <WinTextBlock class="page-description" Text="A PasswordBox is a text input box that conceals the characters typed into it for the purpose of privacy. A PasswordBox looks like a text box, except that it renders placeholder characters in place of the text that has been entered. You can configure the placeholder character." TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE793;</span></WinButton>
-        <WinToggleButton v-model="isFavoriteState" subtle @update:modelValue="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
       </div>
     </div>
 

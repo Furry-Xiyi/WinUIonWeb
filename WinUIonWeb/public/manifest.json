@@ -4,6 +4,14 @@
   "display": "standalone",
   "display_override": [ "window-controls-overlay" ],
   "start_url": "/WinUIonWeb/",
+  "icons": [
+    {
+      "src": "/src/assets/AppIcon.ico",
+      "sizes": "16x16 32x32 48x48 64x64 128x128 256x256",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ],
   "theme_color": "transparent",
   "background_color": "transparent"
 }

@@ -1,87 +1,122 @@
 <template>
   <div class="win-date-picker" ref="containerRef">
-    <div v-if="header" class="picker-header">{{ header }}</div>
+    <div v-if="Header" class="picker-header">{{ Header }}</div>
     <button class="picker-btn" @click="toggleOpen">
-      <div class="picker-column-text" :class="{ wide: !yearVisible }">{{ monthText }}</div>
-      <div class="picker-column-text">{{ dayText }}</div>
-      <div v-if="yearVisible" class="picker-column-text">{{ yearText }}</div>
+      <div v-if="MonthVisible" class="picker-column-text" :class="{ wide: !YearVisible }">{{ monthText }}</div>
+      <div v-if="DayVisible" class="picker-column-text">{{ dayText }}</div>
+      <div v-if="YearVisible" class="picker-column-text">{{ yearText }}</div>
     </button>
 
     <Teleport to="body">
       <div v-if="showFlyout" class="picker-overlay" @click="close(false)"></div>
-      <div v-if="showFlyout"
-           class="picker-flyout"
-           :class="flyoutAnimClass"
-           :style="flyoutStyle"
-           @animationend="onFlyoutAnimEnd">
+      <div
+        v-if="showFlyout"
+        class="picker-flyout"
+        :class="flyoutAnimClass"
+        :style="flyoutStyle"
+        @animationend="onFlyoutAnimEnd">
         <div class="picker-columns">
-          <div class="picker-col-wrapper" :class="{ wide: !yearVisible }"
-               @mouseenter="hoverCol = 'month'" @mouseleave="hoverCol = ''">
-            <button v-show="hoverCol === 'month'" class="picker-arrow picker-arrow-up"
-                    :class="{ pressed: pressedKey === 'month-up' }"
-                    @mousedown="pressedKey = 'month-up'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                    @click="scrollUp('month')">
+          <div
+            v-if="MonthVisible"
+            class="picker-col-wrapper"
+            :class="{ wide: !YearVisible }"
+            @mouseenter="hoverCol = 'month'"
+            @mouseleave="hoverCol = ''">
+            <button
+              v-show="hoverCol === 'month'"
+              class="picker-arrow picker-arrow-up"
+              :class="{ pressed: pressedKey === 'month-up' }"
+              @mousedown="pressedKey = 'month-up'"
+              @mouseup="pressedKey = ''"
+              @mouseleave="pressedKey = ''"
+              @click="scrollUp('month')">
               <span class="icon">&#xEDDB;</span>
             </button>
-            <div class="picker-column" ref="monthCol">
-              <div class="picker-item" v-for="(item, i) in monthDisplay" :key="'m'+i"
-                   :class="{ active: item.active }">
+            <div class="picker-column" @wheel.prevent="onWheel($event, 'month')">
+              <div v-for="(item, i) in monthDisplay" :key="'m' + i" class="picker-item" :class="{ active: item.active }">
                 {{ item.label }}
               </div>
             </div>
-            <button v-show="hoverCol === 'month'" class="picker-arrow picker-arrow-down"
-                    :class="{ pressed: pressedKey === 'month-down' }"
-                    @mousedown="pressedKey = 'month-down'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                    @click="scrollDown('month')">
+            <button
+              v-show="hoverCol === 'month'"
+              class="picker-arrow picker-arrow-down"
+              :class="{ pressed: pressedKey === 'month-down' }"
+              @mousedown="pressedKey = 'month-down'"
+              @mouseup="pressedKey = ''"
+              @mouseleave="pressedKey = ''"
+              @click="scrollDown('month')">
               <span class="icon">&#xEDDC;</span>
             </button>
           </div>
-          <div class="picker-col-divider"></div>
-          <div class="picker-col-wrapper"
-               @mouseenter="hoverCol = 'day'" @mouseleave="hoverCol = ''">
-            <button v-show="hoverCol === 'day'" class="picker-arrow picker-arrow-up"
-                    :class="{ pressed: pressedKey === 'day-up' }"
-                    @mousedown="pressedKey = 'day-up'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                    @click="scrollUp('day')">
+
+          <div v-if="MonthVisible && DayVisible" class="picker-col-divider"></div>
+
+          <div
+            v-if="DayVisible"
+            class="picker-col-wrapper"
+            @mouseenter="hoverCol = 'day'"
+            @mouseleave="hoverCol = ''">
+            <button
+              v-show="hoverCol === 'day'"
+              class="picker-arrow picker-arrow-up"
+              :class="{ pressed: pressedKey === 'day-up' }"
+              @mousedown="pressedKey = 'day-up'"
+              @mouseup="pressedKey = ''"
+              @mouseleave="pressedKey = ''"
+              @click="scrollUp('day')">
               <span class="icon">&#xEDDB;</span>
             </button>
-            <div class="picker-column" ref="dayCol">
-              <div class="picker-item" v-for="(item, i) in dayDisplay" :key="'d'+i"
-                   :class="{ active: item.active }">
+            <div class="picker-column" @wheel.prevent="onWheel($event, 'day')">
+              <div v-for="(item, i) in dayDisplay" :key="'d' + i" class="picker-item" :class="{ active: item.active }">
                 {{ item.label }}
               </div>
             </div>
-            <button v-show="hoverCol === 'day'" class="picker-arrow picker-arrow-down"
-                    :class="{ pressed: pressedKey === 'day-down' }"
-                    @mousedown="pressedKey = 'day-down'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                    @click="scrollDown('day')">
+            <button
+              v-show="hoverCol === 'day'"
+              class="picker-arrow picker-arrow-down"
+              :class="{ pressed: pressedKey === 'day-down' }"
+              @mousedown="pressedKey = 'day-down'"
+              @mouseup="pressedKey = ''"
+              @mouseleave="pressedKey = ''"
+              @click="scrollDown('day')">
               <span class="icon">&#xEDDC;</span>
             </button>
           </div>
-          <template v-if="yearVisible">
-            <div class="picker-col-divider"></div>
-            <div class="picker-col-wrapper"
-                 @mouseenter="hoverCol = 'year'" @mouseleave="hoverCol = ''">
-              <button v-show="hoverCol === 'year'" class="picker-arrow picker-arrow-up"
-                      :class="{ pressed: pressedKey === 'year-up' }"
-                      @mousedown="pressedKey = 'year-up'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                      @click="scrollUp('year')">
+
+          <template v-if="YearVisible">
+            <div v-if="MonthVisible || DayVisible" class="picker-col-divider"></div>
+            <div
+              class="picker-col-wrapper"
+              @mouseenter="hoverCol = 'year'"
+              @mouseleave="hoverCol = ''">
+              <button
+                v-show="hoverCol === 'year'"
+                class="picker-arrow picker-arrow-up"
+                :class="{ pressed: pressedKey === 'year-up' }"
+                @mousedown="pressedKey = 'year-up'"
+                @mouseup="pressedKey = ''"
+                @mouseleave="pressedKey = ''"
+                @click="scrollUp('year')">
                 <span class="icon">&#xEDDB;</span>
               </button>
-              <div class="picker-column" ref="yearCol">
-                <div class="picker-item" v-for="(item, i) in yearDisplay" :key="'y'+i"
-                     :class="{ active: item.active }">
+              <div class="picker-column" @wheel.prevent="onWheel($event, 'year')">
+                <div v-for="(item, i) in yearDisplay" :key="'y' + i" class="picker-item" :class="{ active: item.active }">
                   {{ item.label }}
                 </div>
               </div>
-              <button v-show="hoverCol === 'year'" class="picker-arrow picker-arrow-down"
-                      :class="{ pressed: pressedKey === 'year-down' }"
-                      @mousedown="pressedKey = 'year-down'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                      @click="scrollDown('year')">
+              <button
+                v-show="hoverCol === 'year'"
+                class="picker-arrow picker-arrow-down"
+                :class="{ pressed: pressedKey === 'year-down' }"
+                @mousedown="pressedKey = 'year-down'"
+                @mouseup="pressedKey = ''"
+                @mouseleave="pressedKey = ''"
+                @click="scrollDown('year')">
                 <span class="icon">&#xEDDC;</span>
               </button>
             </div>
           </template>
+
           <div class="picker-highlight"></div>
         </div>
         <div class="picker-actions">
@@ -94,16 +129,28 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, watch } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 
 const props = defineProps({
-  modelValue: { type: Date, default: () => new Date() },
-  header: { type: String, default: '' },
-  yearVisible: { type: Boolean, default: true },
-  dayFormatted: { type: Boolean, default: false }
+  CalendarIdentifier: { type: String, default: 'GregorianCalendar' },
+  Date: { type: Date, default: () => new globalThis.Date() },
+  DayFormat: { type: String, default: 'day.integer' },
+  DayVisible: { type: Boolean, default: true },
+  Header: { type: String, default: '' },
+  HeaderPlacement: { type: String, default: 'Top' },
+  HeaderTemplate: { type: Object, default: null },
+  LightDismissOverlayMode: { type: String, default: 'Auto' },
+  MaxYear: { type: Date, default: () => new globalThis.Date(new globalThis.Date().getFullYear() + 50, 11, 31) },
+  MinYear: { type: Date, default: () => new globalThis.Date(new globalThis.Date().getFullYear() - 50, 0, 1) },
+  MonthFormat: { type: String, default: 'month.full' },
+  MonthVisible: { type: Boolean, default: true },
+  Orientation: { type: String, default: 'Horizontal' },
+  SelectedDate: { type: Date, default: null },
+  YearFormat: { type: String, default: 'year.full' },
+  YearVisible: { type: Boolean, default: true }
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:Date', 'update:SelectedDate', 'DateChanged', 'SelectedDateChanged']);
 
 const showFlyout = ref(false);
 const isOpen = ref(false);
@@ -113,21 +160,31 @@ const flyoutStyle = ref({});
 const hoverCol = ref('');
 const pressedKey = ref('');
 
-const monthCol = ref(null);
-const dayCol = ref(null);
-const yearCol = ref(null);
-
 const tempMonth = ref(1);
 const tempDay = ref(1);
 const tempYear = ref(2024);
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const years = Array.from({ length: 101 }, (_, i) => new Date().getFullYear() - 50 + i);
+const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const VISIBLE_ITEMS = 7;
 const ITEM_HEIGHT = 40;
 const COLUMNS_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT;
 const BAND_CENTER_FROM_TOP = 1 + COLUMNS_HEIGHT / 2;
+
+const isValidDate = (value) => value instanceof globalThis.Date && !Number.isNaN(value.getTime());
+const currentDate = computed(() => {
+  if (isValidDate(props.SelectedDate)) return props.SelectedDate;
+  if (isValidDate(props.Date)) return props.Date;
+  return new globalThis.Date();
+});
+const minYearValue = computed(() => isValidDate(props.MinYear) ? props.MinYear.getFullYear() : new globalThis.Date().getFullYear() - 50);
+const maxYearValue = computed(() => isValidDate(props.MaxYear) ? props.MaxYear.getFullYear() : new globalThis.Date().getFullYear() + 50);
+const years = computed(() => {
+  const min = Math.min(minYearValue.value, maxYearValue.value);
+  const max = Math.max(minYearValue.value, maxYearValue.value);
+  return Array.from({ length: max - min + 1 }, (_, i) => min + i);
+});
 
 const flyoutAnimClass = computed(() => {
   if (isClosing.value) return 'picker-flyout-closing';
@@ -135,14 +192,33 @@ const flyoutAnimClass = computed(() => {
   return '';
 });
 
-const daysInTempMonth = computed(() => new Date(tempYear.value, tempMonth.value, 0).getDate());
+const daysInTempMonth = computed(() => new globalThis.Date(tempYear.value, tempMonth.value, 0).getDate());
 
-const monthText = computed(() => monthNames[props.modelValue.getMonth()]);
-const dayText = computed(() => {
-  const d = props.modelValue.getDate();
-  return props.dayFormatted ? d.toString().padStart(2, '0') : d;
-});
-const yearText = computed(() => props.modelValue.getFullYear());
+const formatMonth = (date) => {
+  if (props.MonthFormat.includes('abbreviated')) return monthNamesShort[date.getMonth()];
+  if (props.MonthFormat.includes('integer')) return String(date.getMonth() + 1);
+  return monthNames[date.getMonth()];
+};
+
+const formatDay = (date) => {
+  const day = date.getDate();
+  const text = props.DayFormat.includes('integer(2)') ? String(day).padStart(2, '0') : String(day);
+  if (props.DayFormat.includes('dayofweek.abbreviated')) {
+    return `${text} (${date.toLocaleDateString(undefined, { weekday: 'short' })})`;
+  }
+  if (props.DayFormat.includes('dayofweek.full')) {
+    return `${text} (${date.toLocaleDateString(undefined, { weekday: 'long' })})`;
+  }
+  return text;
+};
+
+const formatYear = (date) => props.YearFormat.includes('abbreviated')
+  ? String(date.getFullYear()).slice(-2)
+  : String(date.getFullYear());
+
+const monthText = computed(() => formatMonth(currentDate.value));
+const dayText = computed(() => formatDay(currentDate.value));
+const yearText = computed(() => formatYear(currentDate.value));
 
 function loopingWindow(items, currentIndex, count) {
   const half = Math.floor(count / 2);
@@ -156,48 +232,48 @@ function loopingWindow(items, currentIndex, count) {
 }
 
 const monthDisplay = computed(() => loopingWindow(monthNames, tempMonth.value - 1, VISIBLE_ITEMS));
-
 const dayDisplay = computed(() => {
-  const total = daysInTempMonth.value;
-  const items = Array.from({ length: total }, (_, i) => props.dayFormatted ? (i + 1).toString().padStart(2, '0') : String(i + 1));
+  const items = Array.from({ length: daysInTempMonth.value }, (_, i) => formatDay(new globalThis.Date(tempYear.value, tempMonth.value - 1, i + 1)));
   return loopingWindow(items, tempDay.value - 1, VISIBLE_ITEMS);
 });
-
 const yearDisplay = computed(() => {
-  const items = years.map(String);
-  const idx = years.indexOf(tempYear.value);
-  return loopingWindow(items, idx >= 0 ? idx : 0, VISIBLE_ITEMS);
+  const idx = years.value.indexOf(tempYear.value);
+  return loopingWindow(years.value.map(String), idx >= 0 ? idx : 0, VISIBLE_ITEMS);
 });
 
 function scrollUp(type) {
-  if (type === 'month') {
-    tempMonth.value = tempMonth.value <= 1 ? 12 : tempMonth.value - 1;
-  } else if (type === 'day') {
-    const max = daysInTempMonth.value;
-    tempDay.value = tempDay.value <= 1 ? max : tempDay.value - 1;
-  } else if (type === 'year') {
-    const idx = years.indexOf(tempYear.value);
-    tempYear.value = years[(idx - 1 + years.length) % years.length];
+  if (type === 'month') tempMonth.value = tempMonth.value <= 1 ? 12 : tempMonth.value - 1;
+  if (type === 'day') tempDay.value = tempDay.value <= 1 ? daysInTempMonth.value : tempDay.value - 1;
+  if (type === 'year') {
+    const idx = years.value.indexOf(tempYear.value);
+    tempYear.value = years.value[(idx - 1 + years.value.length) % years.value.length];
   }
 }
 
 function scrollDown(type) {
-  if (type === 'month') {
-    tempMonth.value = tempMonth.value >= 12 ? 1 : tempMonth.value + 1;
-  } else if (type === 'day') {
-    const max = daysInTempMonth.value;
-    tempDay.value = tempDay.value >= max ? 1 : tempDay.value + 1;
-  } else if (type === 'year') {
-    const idx = years.indexOf(tempYear.value);
-    tempYear.value = years[(idx + 1) % years.length];
+  if (type === 'month') tempMonth.value = tempMonth.value >= 12 ? 1 : tempMonth.value + 1;
+  if (type === 'day') tempDay.value = tempDay.value >= daysInTempMonth.value ? 1 : tempDay.value + 1;
+  if (type === 'year') {
+    const idx = years.value.indexOf(tempYear.value);
+    tempYear.value = years.value[(idx + 1) % years.value.length];
   }
 }
 
+const clampDate = (date) => {
+  if (isValidDate(props.MinYear) && date < props.MinYear) return new globalThis.Date(props.MinYear);
+  if (isValidDate(props.MaxYear) && date > props.MaxYear) return new globalThis.Date(props.MaxYear);
+  return date;
+};
+
 const toggleOpen = async () => {
-  if (isOpen.value) { close(false); return; }
-  tempMonth.value = props.modelValue.getMonth() + 1;
-  tempDay.value = props.modelValue.getDate();
-  tempYear.value = props.modelValue.getFullYear();
+  if (isOpen.value) {
+    close(false);
+    return;
+  }
+  const date = clampDate(currentDate.value);
+  tempMonth.value = date.getMonth() + 1;
+  tempDay.value = date.getDate();
+  tempYear.value = Math.max(minYearValue.value, Math.min(maxYearValue.value, date.getFullYear()));
   showFlyout.value = true;
   isOpen.value = true;
   isClosing.value = false;
@@ -215,9 +291,13 @@ const toggleOpen = async () => {
 
 const close = (accept) => {
   if (accept) {
-    const maxDay = new Date(tempYear.value, tempMonth.value, 0).getDate();
-    const finalDay = tempDay.value > maxDay ? maxDay : tempDay.value;
-    emit('update:modelValue', new Date(tempYear.value, tempMonth.value - 1, finalDay));
+    const finalDay = Math.min(tempDay.value, new globalThis.Date(tempYear.value, tempMonth.value, 0).getDate());
+    const oldDate = currentDate.value;
+    const newDate = clampDate(new globalThis.Date(tempYear.value, tempMonth.value - 1, finalDay));
+    emit('update:Date', newDate);
+    emit('update:SelectedDate', newDate);
+    emit('DateChanged', { oldDate, newDate });
+    emit('SelectedDateChanged', { oldDate, newDate });
   }
   isClosing.value = true;
   isOpen.value = false;
@@ -230,20 +310,10 @@ const onFlyoutAnimEnd = () => {
   }
 };
 
-function onWheel(e, type) {
-  e.preventDefault();
-  if (e.deltaY > 0) scrollDown(type);
+function onWheel(event, type) {
+  if (event.deltaY > 0) scrollDown(type);
   else scrollUp(type);
 }
-
-const setupWheel = async () => {
-  await nextTick();
-  if (monthCol.value) monthCol.value.addEventListener('wheel', (e) => onWheel(e, 'month'), { passive: false });
-  if (dayCol.value) dayCol.value.addEventListener('wheel', (e) => onWheel(e, 'day'), { passive: false });
-  if (yearCol.value) yearCol.value.addEventListener('wheel', (e) => onWheel(e, 'year'), { passive: false });
-};
-
-watch(showFlyout, (val) => { if (val) setupWheel(); });
 </script>
 
 <style scoped>

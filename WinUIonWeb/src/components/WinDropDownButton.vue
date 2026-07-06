@@ -10,7 +10,7 @@
             :class="[chevronClass, { open: isOpen }]"
             @animationend="onChevronAnimEnd">&#xE70D;</span>
     </button>
-    <WinMenuFlyout :open="isOpen" :anchorRect="anchorRect" :items="flyoutItems" @close="isOpen = false" @select="onSelect" />
+    <WinMenuFlyout :Open="isOpen" :AnchorRect="anchorRect" :Items="flyoutItems" @Close="isOpen = false" @Select="onSelect" />
   </div>
 </template>
 <script setup>
@@ -25,7 +25,7 @@ const chevronClass = ref('');
 let chevronPressed = false;
 let chevronPressDone = false;
 
-const flyoutItems = computed(() => props.items.map(item => ({ label: item, value: item })));
+const flyoutItems = computed(() => props.items.map(item => ({ Text: item, Value: item })));
 
 const onChevronDown = () => {
   chevronPressed = true;
@@ -54,7 +54,7 @@ const toggle = () => {
   anchorRect.value = { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
   isOpen.value = true;
 };
-const onSelect = (item) => { emit('select', item.value); isOpen.value = false; };
+const onSelect = (item) => { emit('select', item.Value); isOpen.value = false; };
 </script>
 <style>
   .win-dd-chevron {

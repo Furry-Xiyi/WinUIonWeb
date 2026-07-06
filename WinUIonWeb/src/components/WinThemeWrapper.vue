@@ -94,7 +94,7 @@ const themeClass = computed(() => {
   --ctrl-fill-secondary: rgba(255, 255, 255, 0.0837);
   --ctrl-fill-tertiary: rgba(255, 255, 255, 0.0326);
   --ctrl-fill-disabled: rgba(255, 255, 255, 0.0419);
-  --ctrl-fill-input-active: #B31E1E1E;
+  --ctrl-fill-input-active: rgba(30, 30, 30, 0.70);
   --control-fill-color-input-active: var(--ctrl-fill-input-active);
   --control-fill-input-active: var(--ctrl-fill-input-active);
 

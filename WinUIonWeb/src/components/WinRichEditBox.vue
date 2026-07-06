@@ -37,15 +37,15 @@
     </div>
 
     <WinCommandBarFlyout
-      :open="commandBarOpen"
-      :anchorRect="commandBarAnchor"
+      :Open="commandBarOpen"
+      :AnchorRect="commandBarAnchor"
       :PrimaryCommands="commandBarPrimaryCommands"
       :SecondaryCommands="commandBarSecondaryCommands"
       Placement="Auto"
       ShowMode="Standard"
-      :showPrimaryLabels="true"
-      @close="commandBarOpen = false"
-      @command="onFlyoutCommand" />
+      :ShowPrimaryLabels="true"
+      @Close="commandBarOpen = false"
+      @Command="onFlyoutCommand" />
   </div>
 </template>
 

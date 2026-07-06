@@ -10,8 +10,8 @@
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
-          v-model="isFavoriteState"
-          @update:modelValue="toggleFavorite"
+          v-model:IsChecked="isFavoriteState"
+          @update:IsChecked="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>

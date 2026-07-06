@@ -21,6 +21,7 @@
 
 <script setup>
 import { ref, watch, inject, onMounted, onUnmounted, computed } from 'vue';
+import appIcon from '../assets/AppIcon.ico';
 
 const windowFocused = ref(document.hasFocus());
 
@@ -41,7 +42,7 @@ const props = defineProps({
 
 const finalIcon = computed(() => {
   if (props.icon) return props.icon;
-  return import.meta.env.BASE_URL + 'AppIcon.ico';
+  return appIcon;
 });
 
 const parentVisible = inject('winTitleBarVisible', null);

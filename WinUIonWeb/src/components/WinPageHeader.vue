@@ -11,10 +11,9 @@
 
     <!-- 收藏按钮 -->
     <WinToggleButton
-      v-model="favoriteState"
-      subtle
+      v-model:IsChecked="favoriteState"
       :title="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
-      @update:modelValue="$emit('favorite-toggle')"
+      @update:IsChecked="$emit('favorite-toggle')"
       style="width: 32px; height: 32px; padding: 0; min-width: 0;">
       <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
     </WinToggleButton>

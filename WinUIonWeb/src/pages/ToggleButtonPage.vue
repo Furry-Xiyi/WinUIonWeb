@@ -1,8 +1,11 @@
 <template>
   <div>
     <div style="position: relative;">
-      <h1 class="page-header">ToggleButton</h1>
-      <p class="page-description">A button that can be toggled on or off.</p>
+      <WinTextBlock class="page-header" Text="ToggleButton" />
+      <WinTextBlock
+        class="page-description"
+        Text="A ToggleButton looks like a Button, but works like a CheckBox. It typically has two states, checked (on) or unchecked (off), but can be indeterminate if the IsThreeState property is true. You can determine it's state by checking the IsChecked property."
+        TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton
           @click="toggleTheme"
@@ -10,24 +13,33 @@
           <span class="icon">&#xE793;</span>
         </WinButton>
         <WinToggleButton
-          v-model="isFavoriteState"
-          @update:modelValue="toggleFavorite"
+          v-model:IsChecked="isFavoriteState"
+          @update:IsChecked="toggleFavorite"
           style="width: 32px; height: 32px; padding: 0; min-width: 0;">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
     </div>
 
-    <p class="control-example-description">A simple ToggleButton</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample
+      class="basic-input-example-theme"
+      :theme="pageTheme"
+      :vue="toggleButtonVue"
+      :xaml="toggleButtonXaml"
+      :cSharp="toggleButtonCSharp">
       <template #example>
-        <WinToggleButton v-model="val" :disabled="disableControl1">Toggle Me</WinToggleButton>
+        <WinToggleButton
+          v-model:IsChecked="Toggle1"
+          Content="ToggleButton"
+          :IsEnabled="DisableToggle1 !== true"
+          @Checked="ToggleButton_Checked"
+          @Unchecked="ToggleButton_Unchecked" />
       </template>
-      <template #options>
-        <p class="output-text">{{ val ? 'On' : 'Off' }}</p>
 
-        <WinCheckBox v-model="disableControl1">
-          Disable button
+      <template #options>
+        <WinTextBlock class="output-text" :Text="Control1Output" />
+        <WinCheckBox v-model="DisableToggle1">
+          Disable ToggleButton
         </WinCheckBox>
       </template>
     </WinControlExample>
@@ -35,19 +47,64 @@
 </template>
 
 <script setup>
-import { ref, inject, computed } from 'vue';
+import { computed, inject, ref } from 'vue';
+import WinButton from '../components/WinButton.vue';
+import WinCheckBox from '../components/WinCheckBox.vue';
+import WinControlExample from '../components/WinControlExample.vue';
+import WinTextBlock from '../components/WinTextBlock.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
 import { createPageState } from '../utils/pageState';
-import WinControlExample from '../components/WinControlExample.vue';
-import WinCheckBox from '../components/WinCheckBox.vue';
-import WinButton from '../components/WinButton.vue';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'togglebutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const val = ref(false);
-const disableControl1 = ref(false);
+const Toggle1 = ref(false);
+const DisableToggle1 = ref(false);
+const Control1Output = ref(Toggle1.value === true ? 'On' : 'Off');
+
+const ToggleButton_Checked = () => {
+  Control1Output.value = 'On';
+};
+
+const ToggleButton_Unchecked = () => {
+  Control1Output.value = 'Off';
+};
+
+const toggleButtonVue = `<WinToggleButton
+  v-model:IsChecked="Toggle1"
+  Content="ToggleButton"
+  :IsEnabled="DisableToggle1 !== true"
+  @Checked="ToggleButton_Checked"
+  @Unchecked="ToggleButton_Unchecked" />`;
+
+const toggleButtonXaml = `<ToggleButton
+    x:Name="Toggle1"
+    Checked="ToggleButton_Checked"
+    Content="ToggleButton"
+    IsEnabled="{x:Bind DisableToggle1.IsChecked.Value.Equals(x:False), Mode=OneWay}"
+    Unchecked="ToggleButton_Unchecked" />`;
+
+const toggleButtonCSharp = `public sealed partial class ToggleButtonPage : Page
+{
+    public ToggleButtonPage()
+    {
+        this.InitializeComponent();
+
+        // Set initial output value.
+        Control1Output.Text = Toggle1.IsChecked is true ? "On" : "Off";
+    }
+
+    private void ToggleButton_Checked(object sender, RoutedEventArgs e)
+    {
+        Control1Output.Text = "On";
+    }
+
+    private void ToggleButton_Unchecked(object sender, RoutedEventArgs e)
+    {
+        Control1Output.Text = "Off";
+    }
+}`;
 </script>
 
 <style scoped>
@@ -86,7 +143,3 @@ const disableControl1 = ref(false);
   margin: 0;
 }
 </style>
-
-
-
-

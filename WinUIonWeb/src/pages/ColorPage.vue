@@ -6,7 +6,9 @@
         <WinButton @click="toggleTheme">
           <span class="icon">&#xE793;</span>
         </WinButton>
-        <WinToggleButton v-model="isFavoriteState" subtle>
+        <WinToggleButton
+          v-model:IsChecked="isFavoriteState"
+          @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
@@ -34,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef } from 'vue';
+import { computed, inject, ref, shallowRef } from 'vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
 import WinSelectorBar from '../components/WinSelectorBar.vue';
@@ -44,11 +46,11 @@ import StrokeColorSection from '../components/ColorSections/StrokeColorSection.v
 import BackgroundColorSection from '../components/ColorSections/BackgroundColorSection.vue';
 import SignalColorSection from '../components/ColorSections/SignalColorSection.vue';
 import HighContrastColorSection from '../components/ColorSections/HighContrastColorSection.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
-const { isFavoriteState } = useFavorites('ColorPage');
-const { toggleTheme } = usePageTheme();
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'color');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const selectorItems = [
   { text: 'Text' },
@@ -137,5 +139,4 @@ const onSectionChanged = (index) => {
   margin-top: 20px;
 }
 </style>
-
 

@@ -10,10 +10,10 @@
       </div>
     </div>
     <button v-show="hover && currentIndex > 0" class="flip-btn prev" @click="prev">
-      <span class="icon flip-arrow">{{ orientation === 'vertical' ? '\uF090' : '\uF08D' }}</span>
+      <span class="icon flip-arrow">{{ orientation === 'vertical' ? '\uEDDB' : '\uEDD9' }}</span>
     </button>
     <button v-show="hover && currentIndex < items.length - 1" class="flip-btn next" @click="next">
-      <span class="icon flip-arrow">{{ orientation === 'vertical' ? '\uF08E' : '\uF08F' }}</span>
+      <span class="icon flip-arrow">{{ orientation === 'vertical' ? '\uEDDC' : '\uEDDA' }}</span>
     </button>
   </div>
 </template>
@@ -137,7 +137,7 @@ const trackStyle = computed(() => {
     top: 50%;
     transform: translateY(-50%);
     width: 16px;
-    height: 40px;
+    height: 38px;
   }
 
     .win-flip-view.horizontal .flip-btn.prev {

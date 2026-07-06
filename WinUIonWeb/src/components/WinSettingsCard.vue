@@ -11,8 +11,8 @@
     <div class="win-settings-card-header">
       <span v-if="headerIcon" class="win-settings-card-icon icon" v-html="headerIcon"></span>
       <div class="win-settings-card-text">
-        <span v-if="header" class="win-settings-card-title">{{ header }}</span>
-        <span v-if="description" class="win-settings-card-desc">{{ description }}</span>
+        <WinTextBlock v-if="header" class="win-settings-card-title" :Text="header" />
+        <WinTextBlock v-if="description" class="win-settings-card-desc" :Text="description" TextWrapping="Wrap" />
         <div v-if="$slots.description" class="win-settings-card-desc-slot">
           <slot name="description"></slot>
         </div>
@@ -27,6 +27,8 @@
 </template>
 
 <script setup>
+import WinTextBlock from './WinTextBlock.vue';
+
 const props = defineProps({
   header: String,
   description: String,

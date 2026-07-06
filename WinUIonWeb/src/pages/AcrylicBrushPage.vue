@@ -7,7 +7,9 @@
         <WinButton @click="toggleTheme">
           <span class="icon">&#xE793;</span>
         </WinButton>
-        <WinToggleButton v-model="isFavoriteState" subtle>
+        <WinToggleButton
+          v-model:IsChecked="isFavoriteState"
+          @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
@@ -109,19 +111,19 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
 import WinHyperlinkButton from '../components/WinHyperlinkButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinSlider from '../components/WinSlider.vue';
 import WinComboBox from '../components/WinComboBox.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 // Theme and Favorite
-const { toggleTheme } = usePageTheme();
-const { isFavorite: isFavoriteState } = useFavorites('AcrylicBrush');
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'acrylicbrush');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Demo sizing (responsive)
 const demoWidth = ref(320);

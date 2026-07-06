@@ -7,7 +7,7 @@
         Text="Use an AutoSuggestBox to provide a list of suggestions for a user to select from as they type." />
       <div class="page-header-actions">
         <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE793;</span></WinButton>
-        <WinToggleButton v-model="isFavoriteState" subtle @update:modelValue="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
       </div>
     </div>
 

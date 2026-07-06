@@ -9,6 +9,10 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="public\assets\**" />
+    <TypeScriptConfiguration Remove="public\assets\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include=".github\workflows\deploy.yml" />
   </ItemGroup>
   <ItemGroup>

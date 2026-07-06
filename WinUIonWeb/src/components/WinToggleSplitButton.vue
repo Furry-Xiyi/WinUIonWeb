@@ -13,7 +13,7 @@
             :class="chevronClass"
             @animationend="onChevronAnimEnd">&#xE70D;</span>
     </button>
-    <WinMenuFlyout :open="isOpen" :anchorRect="anchorRect" :items="flyoutItems" @close="isOpen = false" @select="onSelect" />
+    <WinMenuFlyout :Open="isOpen" :AnchorRect="anchorRect" :Items="flyoutItems" @Close="isOpen = false" @Select="onSelect" />
   </div>
 </template>
 
@@ -36,8 +36,8 @@ let chevronPressed = false;
 let chevronPressDone = false;
 
 const flyoutItems = computed(() => props.options.map((item, idx) => ({
-  label: typeof item === 'string' ? item : item.label,
-  value: idx
+  Text: typeof item === 'string' ? item : item.Text,
+  Value: idx
 })));
 
 const toggle = () => {
@@ -74,7 +74,7 @@ const toggleFlyout = () => {
 };
 
 const onSelect = (item) => {
-  emit('optionClick', item.value);
+  emit('optionClick', item.Value);
   isOpen.value = false;
 };
 </script>

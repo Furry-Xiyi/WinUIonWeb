@@ -5,7 +5,7 @@
       <WinTextBlock class="page-description" Text="The NumberBox control allows users to enter numbers. It supports validation, stepping, and calculating inline expressions such as basic equations." TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE793;</span></WinButton>
-        <WinToggleButton v-model="isFavoriteState" subtle @update:modelValue="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
       </div>
     </div>
 

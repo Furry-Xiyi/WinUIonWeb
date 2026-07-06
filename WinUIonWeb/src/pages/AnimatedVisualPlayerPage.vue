@@ -12,7 +12,7 @@
       </div>
       <div class="avp-buttons">
         <WinButton @click="play" title="Play"><span class="icon">&#xE768;</span></WinButton>
-        <WinToggleButton v-model="paused" title="Pause"><span class="icon">&#xE769;</span></WinToggleButton>
+        <WinToggleButton v-model:IsChecked="paused" title="Pause"><span class="icon">&#xE769;</span></WinToggleButton>
         <WinButton @click="stop" title="Stop"><span class="icon">&#xE71A;</span></WinButton>
         <WinButton @click="reverse" title="Reverse"><span class="icon">&#xE892;</span></WinButton>
       </div>

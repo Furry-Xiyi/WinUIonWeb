@@ -1,63 +1,123 @@
-<!-- WinCalendarDatePicker.vue -->
 <template>
   <div class="win-calendar-date-picker" ref="containerRef">
+    <div v-if="Header" class="picker-header">{{ Header }}</div>
     <button class="picker-btn" @click="toggleOpen">
-      <span class="picker-text" :class="{ 'placeholder': !modelValue }">{{ displayText }}</span>
+      <span class="picker-text" :class="{ placeholder: !Date }">{{ displayText }}</span>
       <span class="icon picker-icon">&#xE787;</span>
     </button>
+    <div v-if="Description" class="picker-description">{{ Description }}</div>
+
     <Teleport to="body">
-      <div v-if="isOpen" class="picker-overlay" @click="isOpen = false"></div>
-      <div v-if="isOpen" class="picker-flyout flyout-animate" :style="flyoutStyle">
-        <WinCalendarView :modelValue="modelValue"
-                         @update:modelValue="onDateSelect"
-                         selectionMode="Single" />
+      <div v-if="isCalendarOpen" class="picker-overlay" @click="closeCalendar"></div>
+      <div v-if="isCalendarOpen" class="picker-flyout flyout-animate" :style="flyoutStyle">
+        <WinCalendarView
+          :CalendarIdentifier="CalendarIdentifier"
+          :DayOfWeekFormat="DayOfWeekFormat"
+          :DisplayMode="DisplayMode"
+          :FirstDayOfWeek="FirstDayOfWeek"
+          :IsGroupLabelVisible="IsGroupLabelVisible"
+          :IsOutOfScopeEnabled="IsOutOfScopeEnabled"
+          :IsTodayHighlighted="IsTodayHighlighted"
+          :MinDate="MinDate"
+          :MaxDate="MaxDate"
+          :SelectedDates="selectedDates"
+          SelectionMode="Single"
+          @update:SelectedDates="onDateSelect" />
       </div>
     </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import WinCalendarView from './WinCalendarView.vue';
 
 const props = defineProps({
-  modelValue: { type: Date, default: null },
-  placeholder: { type: String, default: 'pick a date' }
+  CalendarIdentifier: { type: String, default: 'GregorianCalendar' },
+  CalendarViewStyle: { type: Object, default: null },
+  Date: { type: Date, default: null },
+  DateFormat: { type: String, default: 'shortdate' },
+  DayOfWeekFormat: { type: String, default: '{dayofweek.abbreviated(2)}' },
+  Description: { type: String, default: '' },
+  DisplayMode: { type: String, default: 'Month' },
+  FirstDayOfWeek: { type: String, default: 'Sunday' },
+  Header: { type: String, default: '' },
+  HeaderPlacement: { type: String, default: 'Top' },
+  HeaderTemplate: { type: Object, default: null },
+  IsCalendarOpen: { type: Boolean, default: false },
+  IsGroupLabelVisible: { type: Boolean, default: true },
+  IsOutOfScopeEnabled: { type: Boolean, default: true },
+  IsTodayHighlighted: { type: Boolean, default: true },
+  LightDismissOverlayMode: { type: String, default: 'Auto' },
+  MaxDate: { type: Date, default: () => new globalThis.Date(2120, 11, 31) },
+  MinDate: { type: Date, default: () => new globalThis.Date(1920, 0, 1) },
+  PlaceholderText: { type: String, default: 'Select a date' }
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:Date', 'update:IsCalendarOpen', 'DateChanged', 'Opened', 'Closed', 'CalendarViewDayItemChanging']);
 
-const isOpen = ref(false);
 const containerRef = ref(null);
 const flyoutStyle = ref({});
+const localIsCalendarOpen = ref(false);
+
+const selectedDates = computed(() => props.Date ? [props.Date] : []);
+const isCalendarOpen = computed(() => props.IsCalendarOpen || localIsCalendarOpen.value);
 
 const displayText = computed(() => {
-  if (!props.modelValue) return props.placeholder;
-  return props.modelValue.toLocaleDateString();
+  if (!props.Date) return props.PlaceholderText;
+  if (props.DateFormat === 'longdate') return props.Date.toLocaleDateString(undefined, { dateStyle: 'long' });
+  return props.Date.toLocaleDateString();
 });
 
 const toggleOpen = async () => {
-  isOpen.value = !isOpen.value;
-  if (isOpen.value) {
-    await nextTick();
-    const rect = containerRef.value.getBoundingClientRect();
-    flyoutStyle.value = {
-      top: `${rect.bottom + 4}px`,
-      left: `${rect.left}px`
-    };
+  if (isCalendarOpen.value) {
+    closeCalendar();
+    return;
   }
+  localIsCalendarOpen.value = true;
+  emit('update:IsCalendarOpen', true);
+  emit('Opened');
+  await nextTick();
+  const rect = containerRef.value.getBoundingClientRect();
+  flyoutStyle.value = {
+    top: `${rect.bottom + 4}px`,
+    left: `${rect.left}px`
+  };
 };
 
-const onDateSelect = (date) => {
-  emit('update:modelValue', date);
-  isOpen.value = false;
+const closeCalendar = () => {
+  localIsCalendarOpen.value = false;
+  emit('update:IsCalendarOpen', false);
+  emit('Closed');
+};
+
+const onDateSelect = (dates) => {
+  const oldDate = props.Date;
+  const newDate = dates[0] ?? null;
+  emit('update:Date', newDate);
+  emit('DateChanged', { oldDate, newDate });
+  closeCalendar();
 };
 </script>
 
 <style scoped>
   .win-calendar-date-picker {
-    display: inline-block;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 8px;
     position: relative;
+  }
+
+  .picker-header {
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .picker-description {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 16px;
   }
 
   .picker-btn {
@@ -66,13 +126,14 @@ const onDateSelect = (date) => {
     border-radius: 4px;
     padding: 0 11px;
     font-size: 14px;
+    width: 296px;
     height: 32px;
     background: var(--ctrl-fill-default);
     color: var(--text-primary);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 8px;
     transition: background var(--fast-duration) var(--fast-out-slow-in), color var(--fast-duration);
     user-select: none;
@@ -88,20 +149,6 @@ const onDateSelect = (date) => {
     pointer-events: none;
   }
 
-  .picker-btn:active::after {
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  }
-
-  .picker-btn.primary::after {
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.40);
-  }
-
-  .picker-btn.primary:active::after {
-    border-color: transparent;
-  }
-
   .picker-btn:hover {
     background: var(--ctrl-fill-secondary);
   }
@@ -110,33 +157,6 @@ const onDateSelect = (date) => {
     background: color-mix(in srgb, var(--ctrl-fill-tertiary) 100%, black 8%);
     color: var(--text-secondary);
   }
-
-    .picker-btn:active::after {
-      border-bottom-color: var(--ctrl-border);
-    }
-
-  .picker-btn.primary {
-    background: var(--accent-base);
-    color: var(--accent-text);
-  }
-
-    .picker-btn.primary::after {
-      border-color: var(--accent-border);
-      border-bottom-color: var(--accent-border-accent);
-    }
-
-    .picker-btn.primary:hover {
-      background: var(--accent-hover);
-    }
-
-    .picker-btn.primary:active {
-      background: var(--accent-pressed);
-      color: var(--accent-text-secondary);
-    }
-
-      .picker-btn.primary:active::after {
-        border-color: transparent;
-      }
 
   .picker-text.placeholder {
     color: var(--text-secondary);

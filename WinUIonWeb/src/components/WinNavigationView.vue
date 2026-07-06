@@ -111,8 +111,8 @@
       </div>
       <div class="win-nav-content-inner"><slot></slot></div>
     </main>
-    <WinMenuFlyout :open="flyoutOpen" :anchorRect="flyoutAnchor" :items="flyoutItems" @close="closeFlyout" @select="onFlyoutSelect" />
-    <WinMenuFlyout :open="moreFlyoutOpen" :anchorRect="moreFlyoutAnchor" :items="[]" alignment="right" @close="closeMoreFlyout">
+    <WinMenuFlyout :Open="flyoutOpen" :AnchorRect="flyoutAnchor" :Items="flyoutItems" @Close="closeFlyout" @Select="onFlyoutSelect" />
+    <WinMenuFlyout :Open="moreFlyoutOpen" :AnchorRect="moreFlyoutAnchor" :Items="[]" Placement="BottomEdgeAlignedRight" @Close="closeMoreFlyout">
       <div class="win-nav-more-panel">
         <template v-for="item in topOverflowMenuItems" :key="item.value">
           <div v-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onMoreItemClick(item)">
@@ -578,10 +578,10 @@ const onGroupHeaderClick = (item) => {
       flyoutGroupValue.value = item.value;
       const items = [];
       if (item.selectsOnInvoked !== false) {
-        items.push({ label: item.label, value: item.value, icon: item.icon, isHeader: true });
+        items.push({ Text: item.label, Value: item.value, Icon: item.icon, IsHeader: true });
       }
       for (const child of (item.children || [])) {
-        items.push({ label: child.label, value: child.value, icon: child.icon });
+        items.push({ Text: child.label, Value: child.value, Icon: child.icon });
       }
       flyoutItems.value = items;
       flyoutOpen.value = !flyoutOpen.value;
@@ -597,10 +597,10 @@ const onGroupHeaderClick = (item) => {
       flyoutGroupValue.value = item.value;
       const items = [];
       if (item.selectsOnInvoked !== false) {
-        items.push({ label: item.label, value: item.value, icon: item.icon, isHeader: true });
+        items.push({ Text: item.label, Value: item.value, Icon: item.icon, IsHeader: true });
       }
       for (const child of (item.children || [])) {
-        items.push({ label: child.label, value: child.value, icon: child.icon });
+        items.push({ Text: child.label, Value: child.value, Icon: child.icon });
       }
       flyoutItems.value = items;
       flyoutOpen.value = true;
@@ -684,10 +684,12 @@ const closeFlyout = () => {
 };
 
 const onFlyoutSelect = (item) => {
-  const movesTopChildToGroup = isTopNavigation.value && flyoutGroupValue.value && !item.isHeader;
+  const itemValue = item.Value;
+  const isHeader = item.IsHeader;
+  const movesTopChildToGroup = isTopNavigation.value && flyoutGroupValue.value && !isHeader;
   if (movesTopChildToGroup) suppressNextTopChildWatcherMove = true;
 
-  emit('update:selectedValue', item.value);
+  emit('update:selectedValue', itemValue);
   flyoutOpen.value = false;
   if (flyoutGroupValue.value) {
     groupChevrons[flyoutGroupValue.value] = 'chevron-close';
@@ -695,17 +697,17 @@ const onFlyoutSelect = (item) => {
   nextTick(() => {
     if (isTopNavigation.value) {
       const groupEl = itemRefs[flyoutGroupValue.value];
-      if (groupEl && !item.isHeader) {
+      if (groupEl && !isHeader) {
         moveIndicatorToEl(groupEl, false);
       } else {
-        moveIndicatorTo(item.value, false);
+        moveIndicatorTo(itemValue, false);
       }
     } else {
-      const parentGroup = findParentGroup(item.value);
+      const parentGroup = findParentGroup(itemValue);
       if (parentGroup) {
         moveIndicatorToEl(itemRefs[parentGroup.value], false);
       } else {
-        moveIndicatorTo(item.value, false);
+        moveIndicatorTo(itemValue, false);
       }
     }
     collapseOverlayAfterNavigation();

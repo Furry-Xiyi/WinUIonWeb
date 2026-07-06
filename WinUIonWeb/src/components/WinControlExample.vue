@@ -117,7 +117,6 @@ watch(codeTabs, (tabs) => {
 });
 
 const displayStyle = computed(() => ({
-  minHeight: normalizeCssLength(props.exampleHeight),
   justifyContent: {
     Left: 'flex-start',
     Center: 'center',
@@ -196,6 +195,13 @@ const onCodeTabChanged = ({ selectedIndex }) => {
 .code-expander :deep(.win-expander-header) {
   border-radius: 0 0 8px 8px;
   background: var(--card-bg-secondary);
+  min-height: auto;
+  padding: 8px 12px;
+}
+
+.code-expander :deep(.win-expander-chevron) {
+  width: 32px;
+  height: 32px;
 }
 
 .code-expander.is-expanded :deep(.win-expander-header) {

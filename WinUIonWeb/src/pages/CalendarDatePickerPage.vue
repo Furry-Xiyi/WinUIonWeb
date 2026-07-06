@@ -1,31 +1,58 @@
 <template>
   <div>
-    <h1 class="page-header">CalendarDatePicker</h1>
-    <p class="page-description">
-      The CalendarDatePicker is a drop down control that's optimized for picking a single date from a calendar view where contextual information like the day of the week or fullness of the calendar is important. You can modify the calendar to provide additional context or to limit available dates.
-    </p>
+    <div style="position: relative;">
+      <WinTextBlock class="page-header" Text="CalendarDatePicker" />
+      <WinTextBlock
+        class="page-description"
+        Text="The CalendarDatePicker is a drop down control that's optimized for picking a single date from a calendar view where contextual information like the day of the week or fullness of the calendar is important. You can modify the calendar to provide additional context or to limit available dates."
+        TextWrapping="WrapWholeWords" />
+      <div class="page-header-actions">
+        <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">&#xE793;</span>
+        </WinButton>
+        <WinToggleButton
+          v-model:IsChecked="isFavoriteState"
+          @update:IsChecked="toggleFavorite"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+        </WinToggleButton>
+      </div>
+    </div>
 
-    <WinControlExample
-      headerText="A simple CalendarDatePicker with a header and placeholder text.">
+    <WinTextBlock class="control-example-description" Text="CalendarDatePicker with a header and placeholder text." />
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Vue" :xaml="example1Xaml">
       <template #example>
         <WinCalendarDatePicker
-          v-model="selectedDate"
-          header="Calendar"
-          placeholder="Pick a date" />
-      </template>
-      <template #options>
-        <div v-if="selectedDate" class="output-text">Selected: {{ selectedDate }}</div>
+          v-model:Date="selectedDate"
+          v-model:IsCalendarOpen="isCalendarOpen"
+          Header="Calendar"
+          PlaceholderText="Pick a date" />
       </template>
     </WinControlExample>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, inject, ref } from 'vue';
+import WinButton from '../components/WinButton.vue';
 import WinCalendarDatePicker from '../components/WinCalendarDatePicker.vue';
 import WinControlExample from '../components/WinControlExample.vue';
+import WinTextBlock from '../components/WinTextBlock.vue';
+import WinToggleButton from '../components/WinToggleButton.vue';
+import { createPageState } from '../utils/pageState';
+
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'calendardatepicker');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const selectedDate = ref(null);
+const isCalendarOpen = ref(false);
+
+const example1Vue = `<WinCalendarDatePicker
+  v-model:Date="selectedDate"
+  Header="Calendar"
+  PlaceholderText="Pick a date" />`;
+const example1Xaml = `<CalendarDatePicker PlaceholderText="Pick a date" Header="Calendar" />`;
 </script>
 
 <style scoped>
@@ -43,10 +70,25 @@ const selectedDate = ref(null);
   line-height: 1.5;
 }
 
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
+.page-header-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.control-example-description {
+  margin: 12px 0;
   color: var(--text-primary);
-  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.icon {
+  font-size: 16px;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 </style>

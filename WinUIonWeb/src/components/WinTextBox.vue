@@ -96,13 +96,13 @@
     </div>
 
     <WinMenuFlyout
-      :open="contextMenuOpen"
-      :anchorRect="contextMenuAnchor"
-      :items="contextMenuItems"
-      :minWidth="160"
-      alignment="left"
-      @close="closeContextMenu"
-      @select="onContextMenuSelect" />
+      :Open="contextMenuOpen"
+      :AnchorRect="contextMenuAnchor"
+      :Items="contextMenuItems"
+      :MinWidth="160"
+      Placement="Right"
+      @Close="closeContextMenu"
+      @Select="onContextMenuSelect" />
   </div>
 </template>
 
@@ -116,9 +116,9 @@ type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
 type CharacterCasing = 'Normal' | 'Lower' | 'Upper';
 type TextBoxMenuCommand = 'cut' | 'copy' | 'paste' | 'undo' | 'redo' | 'selectAll';
 type TextBoxMenuItem = {
-  label?: string;
-  icon?: string;
-  value?: TextBoxMenuCommand;
+  Text?: string;
+  Icon?: string;
+  Value?: TextBoxMenuCommand;
 };
 
 const props = withDefaults(defineProps<{
@@ -303,24 +303,24 @@ const contextMenuItems = computed<TextBoxMenuItem[]>(() => {
   const canPaste = canEdit && clipboardText.value.length > 0;
 
   if (hasSelection) {
-    if (canEdit) items.push({ label: 'Cut', icon: '\uE8C6', value: 'cut' });
-    items.push({ label: 'Copy', icon: '\uE8C8', value: 'copy' });
+    if (canEdit) items.push({ Text: 'Cut', Icon: '\uE8C6', Value: 'cut' });
+    items.push({ Text: 'Copy', Icon: '\uE8C8', Value: 'copy' });
   }
 
   if (canPaste) {
-    items.push({ label: 'Paste', icon: '\uE77F', value: 'paste' });
+    items.push({ Text: 'Paste', Icon: '\uE77F', Value: 'paste' });
   }
 
   if (canUndo.value) {
-    items.push({ label: 'Undo', icon: '\uE7A7', value: 'undo' });
+    items.push({ Text: 'Undo', Icon: '\uE7A7', Value: 'undo' });
   }
 
   if (canRedo.value) {
-    items.push({ label: 'Redo', icon: '\uE7A6', value: 'redo' });
+    items.push({ Text: 'Redo', Icon: '\uE7A6', Value: 'redo' });
   }
 
   if (hasText) {
-    items.push({ label: 'Select all', icon: '\uE8B3', value: 'selectAll' });
+    items.push({ Text: 'Select all', Icon: '\uE8B3', Value: 'selectAll' });
   }
 
   return items;
@@ -502,8 +502,8 @@ const closeContextMenu = () => {
 };
 
 const onContextMenuSelect = (item: TextBoxMenuItem) => {
-  if (!item.value) return;
-  const command = item.value;
+  if (!item.Value) return;
+  const command = item.Value;
   closeContextMenu();
 
   if (command === 'cut') cutContextSelectionToClipboard();

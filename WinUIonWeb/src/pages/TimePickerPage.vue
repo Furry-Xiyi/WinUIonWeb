@@ -1,78 +1,77 @@
 <template>
   <div>
-    <h1 class="page-header">TimePicker</h1>
-    <p class="page-description">
-      Use a TimePicker to let users set a time in your app, for example to set a reminder. The TimePicker displays three controls for hour, minute, and AM/PM. These controls are easy to use with touch or mouse, and they can be styled and configured in several different ways.
-    </p>
+    <div style="position: relative;">
+      <WinTextBlock class="page-header" Text="TimePicker" />
+      <WinTextBlock
+        class="page-description"
+        Text="Use a TimePicker to let users set a time in your app, for example to set a reminder. The TimePicker displays three controls for hour, minute, and AM/PM. These controls are easy to use with touch or mouse, and they can be styled and configured in several different ways."
+        TextWrapping="WrapWholeWords" />
+      <div class="page-header-actions">
+        <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">&#xE793;</span>
+        </WinButton>
+        <WinToggleButton
+          v-model:IsChecked="isFavoriteState"
+          @update:IsChecked="toggleFavorite"
+          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+        </WinToggleButton>
+      </div>
+    </div>
 
-    <WinControlExample headerText="A simple TimePicker">
+    <WinTextBlock class="control-example-description" Text="A simple TimePicker." />
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Vue" :xaml="example1Xaml">
       <template #example>
-        <WinTimePicker v-model="selectedTime1" />
-      </template>
-      <template #options>
-        <p class="output-text">Selected time: {{ formatTime(selectedTime1) }}</p>
+        <WinTimePicker />
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A TimePicker with a header and minute increments specified">
+    <WinTextBlock class="control-example-description" Text="A TimePicker with a header and minute increments specified." />
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Vue" :xaml="example2Xaml">
       <template #example>
-        <WinTimePicker
-          v-model="selectedTime2"
-          header="Arrival time"
-          :minuteIncrement="15" />
-
-        <p class="output-text">Selected time: {{ formatTime(selectedTime2) }}</p>
+        <WinTimePicker Header="Arrival time" :MinuteIncrement="15" />
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A TimePicker using a 24-hour clock">
+    <WinTextBlock class="control-example-description" Text="A TimePicker using a 24-hour clock, initialized to current time." />
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Vue" :xaml="example3Xaml">
       <template #example>
         <WinTimePicker
-          v-model="selectedTime3"
-          header="24 hour clock"
-          clockIdentifier="24HourClock" />
-
-        <p class="output-text">Selected time: {{ formatTime24Hour(selectedTime3) }}</p>
+          v-model:SelectedTime="selectedTime"
+          ClockIdentifier="24HourClock"
+          Header="24 hour clock" />
       </template>
     </WinControlExample>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import WinTimePicker from '../components/WinTimePicker.vue';
+import { computed, inject, ref } from 'vue';
+import WinButton from '../components/WinButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
+import WinTextBlock from '../components/WinTextBlock.vue';
+import WinTimePicker from '../components/WinTimePicker.vue';
+import WinToggleButton from '../components/WinToggleButton.vue';
+import { createPageState } from '../utils/pageState';
 
-const selectedTime1 = ref(null);
-const selectedTime2 = ref(null);
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'timepicker');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Set default time to current time for 24-hour clock example
 const now = new Date();
-const selectedTime3 = ref({
-  hour: now.getHours(),
-  minute: now.getMinutes()
-});
+const selectedTime = ref({ hour: now.getHours(), minute: now.getMinutes() });
 
-// Format time for 12-hour clock
-const formatTime = (time) => {
-  if (!time || typeof time.hour === 'undefined') return 'No time selected';
+const example1Vue = `<WinTimePicker />`;
+const example1Xaml = `<TimePicker />`;
 
-  const hour = time.hour === 0 ? 12 : time.hour > 12 ? time.hour - 12 : time.hour;
-  const minute = String(time.minute).padStart(2, '0');
-  const period = time.hour >= 12 ? 'PM' : 'AM';
+const example2Vue = `<WinTimePicker Header="Arrival time" :MinuteIncrement="15" />`;
+const example2Xaml = `<TimePicker Header="Arrival time" MinuteIncrement="15" />`;
 
-  return `${hour}:${minute} ${period}`;
-};
-
-// Format time for 24-hour clock
-const formatTime24Hour = (time) => {
-  if (!time || typeof time.hour === 'undefined') return 'No time selected';
-
-  const hour = String(time.hour).padStart(2, '0');
-  const minute = String(time.minute).padStart(2, '0');
-
-  return `${hour}:${minute}`;
-};
+const example3Vue = `<WinTimePicker
+  v-model:SelectedTime="selectedTime"
+  ClockIdentifier="24HourClock"
+  Header="24 hour clock" />`;
+const example3Xaml = `<TimePicker ClockIdentifier="24HourClock" Header="24 hour clock" SelectedTime="{x:Bind sys:DateTime.Now.TimeOfDay}" />`;
 </script>
 
 <style scoped>
@@ -90,10 +89,25 @@ const formatTime24Hour = (time) => {
   line-height: 1.5;
 }
 
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
+.page-header-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.control-example-description {
+  margin: 12px 0;
   color: var(--text-primary);
-  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.icon {
+  font-size: 16px;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 </style>

@@ -89,54 +89,54 @@ type CommandBarFlyoutCommand = {
 };
 
 const props = withDefaults(defineProps<{
-  open?: boolean;
-  anchorRect?: AnchorRect | null;
+  Open?: boolean;
+  AnchorRect?: AnchorRect | null;
   PrimaryCommands?: CommandBarFlyoutCommand[];
   SecondaryCommands?: CommandBarFlyoutCommand[];
   AlwaysExpanded?: boolean;
   Placement?: Placement;
   ShowMode?: ShowMode;
-  minWidth?: number;
-  showPrimaryLabels?: boolean;
-  theme?: string;
+  MinWidth?: number;
+  ShowPrimaryLabels?: boolean;
+  Theme?: string;
 }>(), {
-  open: false,
-  anchorRect: null,
+  Open: false,
+  AnchorRect: null,
   PrimaryCommands: () => [],
   SecondaryCommands: () => [],
   AlwaysExpanded: false,
   Placement: 'Auto',
   ShowMode: 'Standard',
-  minWidth: 0,
-  showPrimaryLabels: false,
-  theme: ''
+  MinWidth: 0,
+  ShowPrimaryLabels: false,
+  Theme: ''
 });
 
 const emit = defineEmits<{
-  close: [];
-  command: [command: CommandBarFlyoutCommand];
-  opening: [];
-  opened: [];
-  closing: [];
-  closed: [];
+  Close: [];
+  Command: [command: CommandBarFlyoutCommand];
+  Opening: [];
+  Opened: [];
+  Closing: [];
+  Closed: [];
 }>();
 
 const flyoutRef = ref<HTMLElement | null>(null);
-const isOpen = ref(props.open);
+const isOpen = ref(props.Open);
 const secondaryOpen = ref(props.AlwaysExpanded);
-const anchorRect = ref<AnchorRect | null>(props.anchorRect);
+const anchorRect = ref<AnchorRect | null>(props.AnchorRect);
 const actualPlacement = ref<Placement>(props.Placement);
 const position = ref({ top: 0, left: 0 });
 const opensUp = computed(() => actualPlacement.value.includes('Top'));
 const primaryCommands = computed(() => props.PrimaryCommands ?? []);
 const secondaryCommands = computed(() => props.SecondaryCommands ?? []);
-const showPrimaryLabels = computed(() => props.showPrimaryLabels);
-const themeClass = computed(() => props.theme === 'light' || props.theme === 'dark' ? `win-theme-scope theme-${props.theme}` : '');
+const showPrimaryLabels = computed(() => props.ShowPrimaryLabels);
+const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
 
 const flyoutStyle = computed<CSSProperties>(() => ({
   top: `${position.value.top}px`,
   left: `${position.value.left}px`,
-  minWidth: props.minWidth ? `${props.minWidth}px` : undefined
+  minWidth: props.MinWidth ? `${props.MinWidth}px` : undefined
 }));
 
 const iconMap: Record<string, string> = {
@@ -214,31 +214,31 @@ const openAt = async (rect: AnchorRect, options: { Placement?: Placement; ShowMo
   anchorRect.value = rect;
   actualPlacement.value = options.Placement ?? props.Placement;
   secondaryOpen.value = props.AlwaysExpanded;
-  emit('opening');
+  emit('Opening');
   isOpen.value = true;
   await nextTick();
   await updatePosition();
-  emit('opened');
+  emit('Opened');
 };
 
-const showAt = async (target: HTMLElement, options: { placement?: Placement; showMode?: ShowMode; Placement?: Placement; ShowMode?: ShowMode } = {}) => {
+const showAt = async (target: HTMLElement, options: { Placement?: Placement; ShowMode?: ShowMode } = {}) => {
   await openAt(target.getBoundingClientRect(), {
-    Placement: options.Placement ?? options.placement,
-    ShowMode: options.ShowMode ?? options.showMode
+    Placement: options.Placement,
+    ShowMode: options.ShowMode
   });
 };
 
 const hide = () => {
   if (!isOpen.value) return;
-  emit('closing');
+  emit('Closing');
   isOpen.value = false;
   secondaryOpen.value = props.AlwaysExpanded;
-  emit('close');
-  emit('closed');
+  emit('Close');
+  emit('Closed');
 };
 
 const invoke = (command: CommandBarFlyoutCommand) => {
-  emit('command', command);
+  emit('Command', command);
   hide();
 };
 
@@ -255,12 +255,12 @@ const onPointerDown = (event: PointerEvent) => {
   hide();
 };
 
-watch(() => props.open, (value) => {
-  if (value && props.anchorRect) void openAt(props.anchorRect);
+watch(() => props.Open, (value) => {
+  if (value && props.AnchorRect) void openAt(props.AnchorRect);
   else if (!value) hide();
 });
 
-watch(() => props.anchorRect, (value) => {
+watch(() => props.AnchorRect, (value) => {
   anchorRect.value = value;
   if (isOpen.value) void updatePosition();
 });

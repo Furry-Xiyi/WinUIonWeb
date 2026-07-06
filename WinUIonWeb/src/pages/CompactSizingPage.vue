@@ -61,7 +61,7 @@
               Header="Confirm Password:"
               placeholder="Confirm password" />
             <WinDatePicker
-              v-model="chosenDate"
+              v-model:Date="chosenDate"
               Header="Pick a date" />
           </div>
         </div>
@@ -113,7 +113,7 @@ const firstName = ref('');
 const lastName = ref('');
 const password = ref('');
 const confirmPassword = ref('');
-const chosenDate = ref(null);
+const chosenDate = ref(new Date());
 
 const toggleTheme = () => {
   theme.value = theme.value === 'light' ? 'dark' : 'light';
@@ -147,7 +147,7 @@ const templateCode = `<div class="sizing-demo" :class="{ 'compact-mode': isCompa
       Header="Confirm Password:"
       placeholder="Confirm password" />
     <WinDatePicker
-      v-model="chosenDate"
+      v-model:Date="chosenDate"
       Header="Pick a date" />
   </div>
 </div>`;
@@ -164,7 +164,7 @@ const firstName = ref('');
 const lastName = ref('');
 const password = ref('');
 const confirmPassword = ref('');
-const chosenDate = ref(null);`;
+const chosenDate = ref(new Date());`;
 </script>
 
 <style scoped>

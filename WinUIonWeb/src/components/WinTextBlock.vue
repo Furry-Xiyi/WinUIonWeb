@@ -12,13 +12,13 @@
   </span>
 
   <WinMenuFlyout
-    :open="contextMenuOpen"
-    :anchorRect="contextMenuAnchor"
-    :items="contextMenuItems"
-    :minWidth="160"
-    alignment="left"
-    @close="closeContextMenu"
-    @select="onContextMenuSelect" />
+    :Open="contextMenuOpen"
+    :AnchorRect="contextMenuAnchor"
+    :Items="contextMenuItems"
+    :MinWidth="160"
+    Placement="Right"
+    @Close="closeContextMenu"
+    @Select="onContextMenuSelect" />
 </template>
 
 <script setup>
@@ -69,11 +69,11 @@ const contextMenuItems = computed(() => {
   const items = [];
 
   if (contextSelection.value) {
-    items.push({ label: 'Copy', icon: '\uE8C8', value: 'copy' });
+    items.push({ Text: 'Copy', Icon: '\uE8C8', Value: 'copy' });
   }
 
   if (hasText) {
-    items.push({ label: 'Select all', icon: '\uE8B3', value: 'selectAll' });
+    items.push({ Text: 'Select all', Icon: '\uE8B3', Value: 'selectAll' });
   }
 
   return items;
@@ -254,11 +254,11 @@ const selectAll = () => {
 };
 
 const onContextMenuSelect = (item) => {
-  if (!item.value) return;
+  if (!item.Value) return;
   closeContextMenu();
 
-  if (item.value === 'copy') copySelectionToClipboard();
-  if (item.value === 'selectAll') selectAll();
+  if (item.Value === 'copy') copySelectionToClipboard();
+  if (item.Value === 'selectAll') selectAll();
 };
 
 onBeforeUnmount(() => {

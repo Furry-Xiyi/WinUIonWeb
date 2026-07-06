@@ -48,14 +48,14 @@
                     class="calendar-day"
                     :class="{
                       'out-of-scope': cell.outOfScope,
-                      hidden: cell.outOfScope && !isOutOfScopeEnabled,
-                      today: cell.isToday,
+                      hidden: cell.outOfScope && !IsOutOfScopeEnabled,
+                      today: cell.isToday && IsTodayHighlighted,
                       selected: isSelected(cell),
                     }"
                     @click="onSelectDay(cell)"
                   >
                     <span
-                      v-if="cell.showLabel && isGroupLabelVisible"
+                      v-if="cell.showLabel && IsGroupLabelVisible"
                       class="group-label"
                       :class="{ 'label-accent': isDayLabelAccent(cell) }"
                     >
@@ -94,7 +94,7 @@
                     @click="onSelectMonth(item)"
                   >
                     <span
-                      v-if="item.showLabel && isGroupLabelVisible"
+                      v-if="item.showLabel && IsGroupLabelVisible"
                       class="group-label"
                       :class="{ 'label-accent': isMonthLabelAccent(item) }"
                     >
@@ -147,21 +147,34 @@
 import { ref, computed, nextTick, onMounted } from "vue";
 
 const props = defineProps({
-  modelValue: { type: [Date, Array], default: null },
-  selectionMode: { type: String, default: "Single" },
-  isOutOfScopeEnabled: { type: Boolean, default: true },
-  isGroupLabelVisible: { type: Boolean, default: true },
-  language: { type: String, default: "English" },
+  CalendarIdentifier: { type: String, default: "GregorianCalendar" },
+  DayOfWeekFormat: { type: String, default: "{dayofweek.abbreviated(2)}" },
+  DisplayMode: { type: String, default: "Month" },
+  FirstDayOfWeek: { type: String, default: "Sunday" },
+  IsGroupLabelVisible: { type: Boolean, default: true },
+  IsOutOfScopeEnabled: { type: Boolean, default: true },
+  IsTodayHighlighted: { type: Boolean, default: true },
+  MaxDate: { type: Date, default: () => new globalThis.Date(2120, 11, 31) },
+  MinDate: { type: Date, default: () => new globalThis.Date(1920, 0, 1) },
+  NumberOfWeeksInView: { type: Number, default: 6 },
+  SelectedDates: { type: Array, default: () => [] },
+  SelectionMode: { type: String, default: "Single" },
+  Language: { type: String, default: "en-US" },
 });
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:SelectedDates", "SelectedDatesChanged", "CalendarViewDayItemChanging"]);
 
 const today = new Date();
 const todayYear = today.getFullYear();
 const todayMonth = today.getMonth();
 const todayStr = today.toDateString();
 
-const viewMode = ref(0);
+const displayModeIndexes = {
+  Month: 0,
+  Year: 1,
+  Decade: 2,
+};
+const viewMode = ref(displayModeIndexes[props.DisplayMode] ?? 0);
 const transitionDir = ref("out");
 
 const dayScrollEl = ref(null);
@@ -172,47 +185,24 @@ const headerMonth = ref(todayMonth);
 const headerYear = ref(todayYear);
 const headerDecade = ref(Math.floor(todayYear / 10) * 10);
 
-const shortMonths = computed(() =>
-  props.language === "English"
-    ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    : ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
-);
-const monthNames = computed(() =>
-  props.language === "English"
-    ? [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ]
-    : [
-        "一月",
-        "二月",
-        "三月",
-        "四月",
-        "五月",
-        "六月",
-        "七月",
-        "八月",
-        "九月",
-        "十月",
-        "十一月",
-        "十二月",
-      ],
-);
-const dayNames = computed(() =>
-  props.language === "English"
-    ? ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
-    : ["日", "一", "二", "三", "四", "五", "六"],
-);
+const formatMonthName = (month, style) => new Intl.DateTimeFormat(props.Language, { month: style }).format(new Date(2024, month, 1));
+const shortMonths = computed(() => Array.from({ length: 12 }, (_, month) => formatMonthName(month, "short")));
+const monthNames = computed(() => Array.from({ length: 12 }, (_, month) => formatMonthName(month, "long")));
+const dayOfWeekIndexes = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+};
+const firstDayIndex = dayOfWeekIndexes[props.FirstDayOfWeek] ?? 0;
+const dayNames = computed(() => {
+  const formatter = new Intl.DateTimeFormat(props.Language, { weekday: "short" });
+  const names = Array.from({ length: 7 }, (_, day) => formatter.format(new Date(2024, 0, 7 + day)).slice(0, 2));
+  return [...names.slice(firstDayIndex), ...names.slice(0, firstDayIndex)];
+});
 
 const labelText = computed(() => {
   if (viewMode.value === 0) return `${monthNames.value[headerMonth.value]} ${headerYear.value}`;
@@ -220,8 +210,8 @@ const labelText = computed(() => {
   return `${headerDecade.value} - ${headerDecade.value + 9}`;
 });
 
-const MIN_YEAR = 1920;
-const MAX_YEAR = 2120;
+const MIN_YEAR = props.MinDate.getFullYear();
+const MAX_YEAR = props.MaxDate.getFullYear();
 const ROW_H = 40;
 const LARGE_ROW_H = 60;
 const LARGE_PAGE_ROWS = 4;
@@ -231,7 +221,7 @@ const MONTH_PAGE_H = LARGE_ROW_H * MONTH_PAGE_ROWS;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const dateSerial = (y, m, d) => Math.floor(Date.UTC(y, m, d) / DAY_MS);
-const weekdayOfSerial = (serial) => new Date(serial * DAY_MS).getUTCDay();
+const weekdayOfSerial = (serial) => (new Date(serial * DAY_MS).getUTCDay() - firstDayIndex + 7) % 7;
 const dateFromSerial = (serial) => {
   const d = new Date(serial * DAY_MS);
   return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
@@ -395,8 +385,8 @@ const computeMonthView = () => {
 };
 
 const isMonthSelected = (item) => {
-  if (!props.modelValue) return false;
-  const dates = Array.isArray(props.modelValue) ? props.modelValue : [props.modelValue];
+  if (!props.SelectedDates.length) return false;
+  const dates = props.SelectedDates;
   return dates.some((d) => d && d.getFullYear() === item.year && d.getMonth() === item.month);
 };
 
@@ -464,13 +454,9 @@ const computeYearView = () => {
 };
 
 const isSelected = (cell) => {
-  if (!props.modelValue) return false;
+  if (!props.SelectedDates.length) return false;
   const d = cell.fullDate;
-  if (props.selectionMode === "Single") return props.modelValue.toDateString() === d.toDateString();
-  return (
-    Array.isArray(props.modelValue) &&
-    props.modelValue.some((v) => v.toDateString() === d.toDateString())
-  );
+  return props.SelectedDates.some((v) => v.toDateString() === d.toDateString());
 };
 
 const isMonthLabelAccent = (item) => {
@@ -593,14 +579,26 @@ const onSelectYear = (item) => {
 };
 
 const onSelectDay = (cell) => {
-  if (cell.outOfScope && !props.isOutOfScopeEnabled) return;
-  if (props.selectionMode === "Single") emit("update:modelValue", cell.fullDate);
-  else if (props.selectionMode === "Multiple") {
-    const list = Array.isArray(props.modelValue) ? [...props.modelValue] : [];
+  if (cell.outOfScope && !props.IsOutOfScopeEnabled) return;
+  if (props.SelectionMode === "None") return;
+
+  const oldDates = [...props.SelectedDates];
+  if (props.SelectionMode === "Single") {
+    const newDates = [cell.fullDate];
+    emit("update:SelectedDates", newDates);
+    emit("SelectedDatesChanged", { addedDates: newDates, removedDates: oldDates });
+  } else if (props.SelectionMode === "Multiple") {
+    const list = [...props.SelectedDates];
     const idx = list.findIndex((d) => d.toDateString() === cell.fullDate.toDateString());
-    if (idx >= 0) list.splice(idx, 1);
-    else list.push(cell.fullDate);
-    emit("update:modelValue", list);
+    const addedDates = [];
+    const removedDates = [];
+    if (idx >= 0) removedDates.push(...list.splice(idx, 1));
+    else {
+      list.push(cell.fullDate);
+      addedDates.push(cell.fullDate);
+    }
+    emit("update:SelectedDates", list);
+    emit("SelectedDatesChanged", { addedDates, removedDates });
   }
 };
 

@@ -182,12 +182,6 @@ const navMenuItems = [
       { value: 'timepicker', icon: '\uE823', label: 'TimePicker' }
     ]
   },
-  { value: 'menusandtoolbars', icon: '\uE74E', label: 'Menus & toolbars', selectsOnInvoked: false, children: [
-    { value: 'commandbar', icon: '\uE76F', label: 'CommandBar' },
-    { value: 'commandbarflyout', icon: '\uF0E2', label: 'CommandBarFlyout' },
-    { value: 'menubar', icon: '\uE76F', label: 'MenuBar' },
-    { value: 'menuflyout', icon: '\uF0E2', label: 'MenuFlyout' }
-  ]},
   { value: 'dialogsandflyouts', icon: '\uE8BD', label: 'Dialogs and Flyouts', selectsOnInvoked: false, children: [
     { value: 'contentdialog', icon: '\uE8F2', label: 'ContentDialog' },
     { value: 'flyout', icon: '\uE8A8', label: 'Flyout' },
@@ -204,6 +198,12 @@ const navMenuItems = [
     { value: 'image', icon: '\uE8B9', label: 'Image' },
     { value: 'mediaplayerelement', icon: '\uE714', label: 'MediaPlayerElement' },
     { value: 'personpicture', icon: '\uE77B', label: 'PersonPicture' }
+  ]},
+  { value: 'menusandtoolbars', icon: '\uE74E', label: 'Menus & toolbars', selectsOnInvoked: false, children: [
+    { value: 'commandbar', icon: '\uE76F', label: 'CommandBar' },
+    { value: 'commandbarflyout', icon: '\uF0E2', label: 'CommandBarFlyout' },
+    { value: 'menubar', icon: '\uE76F', label: 'MenuBar' },
+    { value: 'menuflyout', icon: '\uF0E2', label: 'MenuFlyout' }
   ]},
   { value: 'text', icon: '\uE8D2', label: 'Text', selectsOnInvoked: false, children: [
     { value: 'autosuggestbox', icon: '\uE721', label: 'AutoSuggestBox' },

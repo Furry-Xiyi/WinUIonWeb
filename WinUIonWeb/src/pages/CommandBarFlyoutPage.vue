@@ -8,7 +8,7 @@
         TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE793;</span></WinButton>
-        <WinToggleButton v-model="isFavoriteState" subtle @update:modelValue="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
       </div>
     </div>
 
@@ -18,7 +18,6 @@
       :vue="exampleTemplate">
       <template #example>
         <div class="commandbarflyout-sample">
-          <WinTextBlock Text="Click or right click the image to open a CommandBarFlyout" />
           <button
             ref="myImageButton"
             class="image-button"
@@ -28,7 +27,12 @@
             @contextmenu.prevent="myImageButtonContextRequested">
             <img ref="image1" class="sample-image" src="/assets/rainier.jpg" alt="mountain" />
           </button>
-          <WinTextBlock :Text="selectedOptionText" />
+        </div>
+      </template>
+      <template #options>
+        <div class="options-stack">
+          <WinTextBlock Text="Click or right click the image to open a CommandBarFlyout" TextWrapping="WrapWholeWords" />
+          <WinTextBlock :Text="selectedOptionText || 'You clicked:'" TextWrapping="WrapWholeWords" />
         </div>
       </template>
     </WinControlExample>
@@ -38,9 +42,9 @@
       :PrimaryCommands="primaryCommands"
       :SecondaryCommands="secondaryCommands"
       Placement="Right"
-      :showPrimaryLabels="true"
-      :theme="pageTheme"
-      @command="onElementClicked" />
+      :ShowPrimaryLabels="true"
+      :Theme="pageTheme"
+      @Command="onElementClicked" />
   </div>
 </template>
 
@@ -105,13 +109,11 @@ const exampleTemplate = `<WinCommandBarFlyout
     { Label: 'Move' }
   ]"
   Placement="Right"
-  :showPrimaryLabels="true" />
+  :ShowPrimaryLabels="true" />
 
-<WinTextBlock Text="Click or right click the image to open a CommandBarFlyout" />
 <WinButton Padding="0" AutomationProperties.Name="mountain">
   <img Height="300" src="/assets/rainier.jpg" />
-</WinButton>
-<WinTextBlock Text="You clicked: Share" />`;
+</WinButton>`;
 </script>
 
 <style scoped>
@@ -122,4 +124,5 @@ const exampleTemplate = `<WinCommandBarFlyout
 .commandbarflyout-sample { display: flex; flex-direction: column; align-items: flex-start; color: var(--text-primary); }
 .image-button { margin: 12px 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .sample-image { height: 300px; display: block; }
+.options-stack { display: flex; flex-direction: column; gap: 8px; }
 </style>

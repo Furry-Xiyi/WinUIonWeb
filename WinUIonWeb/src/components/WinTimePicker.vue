@@ -1,83 +1,102 @@
 <template>
   <div class="win-time-picker" ref="containerRef">
-    <div v-if="header" class="picker-header">{{ header }}</div>
+    <div v-if="Header" class="picker-header">{{ Header }}</div>
     <button class="picker-btn" @click="toggleOpen">
       <div class="picker-column-text">{{ hourText }}</div>
       <div class="picker-column-text">{{ minuteText }}</div>
-      <div v-if="clockIdentifier === '12HourClock'" class="picker-column-text">{{ amPmText }}</div>
+      <div v-if="ClockIdentifier === '12HourClock'" class="picker-column-text">{{ amPmText }}</div>
     </button>
 
     <Teleport to="body">
       <div v-if="showFlyout" class="picker-overlay" @click="close(false)"></div>
-      <div v-if="showFlyout"
-           class="picker-flyout"
-           :class="flyoutAnimClass"
-           :style="flyoutStyle"
-           @animationend="onFlyoutAnimEnd">
+      <div
+        v-if="showFlyout"
+        class="picker-flyout"
+        :class="flyoutAnimClass"
+        :style="flyoutStyle"
+        @animationend="onFlyoutAnimEnd">
         <div class="picker-columns">
-          <div class="picker-col-wrapper"
-               @mouseenter="hoverCol = 'hour'" @mouseleave="hoverCol = ''">
-            <button v-show="hoverCol === 'hour'" class="picker-arrow picker-arrow-up"
-                    :class="{ pressed: pressedKey === 'hour-up' }"
-                    @mousedown="pressedKey = 'hour-up'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                    @click="scrollUp('hour')">
+          <div class="picker-col-wrapper" @mouseenter="hoverCol = 'hour'" @mouseleave="hoverCol = ''">
+            <button
+              v-show="hoverCol === 'hour'"
+              class="picker-arrow picker-arrow-up"
+              :class="{ pressed: pressedKey === 'hour-up' }"
+              @mousedown="pressedKey = 'hour-up'"
+              @mouseup="pressedKey = ''"
+              @mouseleave="pressedKey = ''"
+              @click="scrollUp('hour')">
               <span class="icon">&#xEDDB;</span>
             </button>
-            <div class="picker-column" ref="hourCol">
-              <div class="picker-item" v-for="(item, i) in hourDisplay" :key="'h'+i"
-                   :class="{ active: item.active }">
+            <div class="picker-column" @wheel.prevent="onWheel($event, 'hour')">
+              <div v-for="(item, i) in hourDisplay" :key="'h' + i" class="picker-item" :class="{ active: item.active }">
                 {{ item.label }}
               </div>
             </div>
-            <button v-show="hoverCol === 'hour'" class="picker-arrow picker-arrow-down"
-                    :class="{ pressed: pressedKey === 'hour-down' }"
-                    @mousedown="pressedKey = 'hour-down'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                    @click="scrollDown('hour')">
+            <button
+              v-show="hoverCol === 'hour'"
+              class="picker-arrow picker-arrow-down"
+              :class="{ pressed: pressedKey === 'hour-down' }"
+              @mousedown="pressedKey = 'hour-down'"
+              @mouseup="pressedKey = ''"
+              @mouseleave="pressedKey = ''"
+              @click="scrollDown('hour')">
               <span class="icon">&#xEDDC;</span>
             </button>
           </div>
           <div class="picker-col-divider"></div>
-          <div class="picker-col-wrapper"
-               @mouseenter="hoverCol = 'minute'" @mouseleave="hoverCol = ''">
-            <button v-show="hoverCol === 'minute'" class="picker-arrow picker-arrow-up"
-                    :class="{ pressed: pressedKey === 'minute-up' }"
-                    @mousedown="pressedKey = 'minute-up'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                    @click="scrollUp('minute')">
+          <div class="picker-col-wrapper" @mouseenter="hoverCol = 'minute'" @mouseleave="hoverCol = ''">
+            <button
+              v-show="hoverCol === 'minute'"
+              class="picker-arrow picker-arrow-up"
+              :class="{ pressed: pressedKey === 'minute-up' }"
+              @mousedown="pressedKey = 'minute-up'"
+              @mouseup="pressedKey = ''"
+              @mouseleave="pressedKey = ''"
+              @click="scrollUp('minute')">
               <span class="icon">&#xEDDB;</span>
             </button>
-            <div class="picker-column" ref="minuteCol">
-              <div class="picker-item" v-for="(item, i) in minuteDisplay" :key="'m'+i"
-                   :class="{ active: item.active }">
+            <div class="picker-column" @wheel.prevent="onWheel($event, 'minute')">
+              <div v-for="(item, i) in minuteDisplay" :key="'m' + i" class="picker-item" :class="{ active: item.active }">
                 {{ item.label }}
               </div>
             </div>
-            <button v-show="hoverCol === 'minute'" class="picker-arrow picker-arrow-down"
-                    :class="{ pressed: pressedKey === 'minute-down' }"
-                    @mousedown="pressedKey = 'minute-down'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                    @click="scrollDown('minute')">
+            <button
+              v-show="hoverCol === 'minute'"
+              class="picker-arrow picker-arrow-down"
+              :class="{ pressed: pressedKey === 'minute-down' }"
+              @mousedown="pressedKey = 'minute-down'"
+              @mouseup="pressedKey = ''"
+              @mouseleave="pressedKey = ''"
+              @click="scrollDown('minute')">
               <span class="icon">&#xEDDC;</span>
             </button>
           </div>
-          <template v-if="clockIdentifier === '12HourClock'">
+          <template v-if="ClockIdentifier === '12HourClock'">
             <div class="picker-col-divider"></div>
-            <div class="picker-col-wrapper"
-                 @mouseenter="hoverCol = 'ampm'" @mouseleave="hoverCol = ''">
-              <button v-show="hoverCol === 'ampm' && tempAmPm === 'PM'" class="picker-arrow picker-arrow-up"
-                      :class="{ pressed: pressedKey === 'ampm-up' }"
-                      @mousedown="pressedKey = 'ampm-up'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                      @click="scrollUp('ampm')">
+            <div class="picker-col-wrapper" @mouseenter="hoverCol = 'ampm'" @mouseleave="hoverCol = ''">
+              <button
+                v-show="hoverCol === 'ampm' && tempAmPm === 'PM'"
+                class="picker-arrow picker-arrow-up"
+                :class="{ pressed: pressedKey === 'ampm-up' }"
+                @mousedown="pressedKey = 'ampm-up'"
+                @mouseup="pressedKey = ''"
+                @mouseleave="pressedKey = ''"
+                @click="scrollUp('ampm')">
                 <span class="icon">&#xEDDB;</span>
               </button>
-              <div class="picker-column" ref="ampmCol">
-                <div class="picker-item" v-for="(item, i) in ampmDisplay" :key="'ap'+i"
-                     :class="{ active: item.active }">
+              <div class="picker-column" @wheel.prevent="onWheel($event, 'ampm')">
+                <div v-for="(item, i) in ampmDisplay" :key="'ap' + i" class="picker-item" :class="{ active: item.active }">
                   {{ item.label }}
                 </div>
               </div>
-              <button v-show="hoverCol === 'ampm' && tempAmPm === 'AM'" class="picker-arrow picker-arrow-down"
-                      :class="{ pressed: pressedKey === 'ampm-down' }"
-                      @mousedown="pressedKey = 'ampm-down'" @mouseup="pressedKey = ''" @mouseleave="pressedKey = ''"
-                      @click="scrollDown('ampm')">
+              <button
+                v-show="hoverCol === 'ampm' && tempAmPm === 'AM'"
+                class="picker-arrow picker-arrow-down"
+                :class="{ pressed: pressedKey === 'ampm-down' }"
+                @mousedown="pressedKey = 'ampm-down'"
+                @mouseup="pressedKey = ''"
+                @mouseleave="pressedKey = ''"
+                @click="scrollDown('ampm')">
                 <span class="icon">&#xEDDC;</span>
               </button>
             </div>
@@ -94,16 +113,26 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, watch } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 
 const props = defineProps({
-  modelValue: { type: Date, default: () => new Date() },
-  header: { type: String, default: '' },
-  minuteIncrement: { type: Number, default: 1 },
-  clockIdentifier: { type: String, default: '12HourClock' }
+  ClockIdentifier: { type: String, default: '12HourClock' },
+  Header: { type: String, default: '' },
+  HeaderPlacement: { type: String, default: 'Top' },
+  HeaderTemplate: { type: Object, default: null },
+  LightDismissOverlayMode: { type: String, default: 'Auto' },
+  MinuteIncrement: { type: Number, default: 1 },
+  SelectedTime: { type: Object, default: null },
+  Time: {
+    type: Object,
+    default: () => {
+      const now = new globalThis.Date();
+      return { hour: now.getHours(), minute: now.getMinutes() };
+    }
+  }
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:Time', 'update:SelectedTime', 'TimeChanged', 'SelectedTimeChanged']);
 
 const showFlyout = ref(false);
 const isOpen = ref(false);
@@ -113,24 +142,29 @@ const flyoutStyle = ref({});
 const hoverCol = ref('');
 const pressedKey = ref('');
 
-const hourCol = ref(null);
-const minuteCol = ref(null);
-const ampmCol = ref(null);
-
 const tempHour = ref(0);
 const tempMinute = ref(0);
 const tempAmPm = ref('AM');
-
-const hours = computed(() => {
-  if (props.clockIdentifier === '12HourClock') return Array.from({ length: 12 }, (_, i) => i + 1);
-  return Array.from({ length: 24 }, (_, i) => i);
-});
-const minutes = computed(() => Array.from({ length: Math.floor(60 / props.minuteIncrement) }, (_, i) => i * props.minuteIncrement));
 
 const VISIBLE_ITEMS = 7;
 const ITEM_HEIGHT = 40;
 const COLUMNS_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT;
 const BAND_CENTER_FROM_TOP = 1 + COLUMNS_HEIGHT / 2;
+
+const normalizedMinuteIncrement = computed(() => {
+  const value = Math.trunc(props.MinuteIncrement);
+  return value > 0 && value <= 59 ? value : 1;
+});
+
+const timeValue = computed(() => normalizeTime(props.SelectedTime ?? props.Time));
+const hours = computed(() => {
+  if (props.ClockIdentifier === '12HourClock') return Array.from({ length: 12 }, (_, i) => i + 1);
+  return Array.from({ length: 24 }, (_, i) => i);
+});
+const minutes = computed(() => {
+  const count = Math.ceil(60 / normalizedMinuteIncrement.value);
+  return Array.from({ length: count }, (_, i) => Math.min(59, i * normalizedMinuteIncrement.value));
+});
 
 const flyoutAnimClass = computed(() => {
   if (isClosing.value) return 'picker-flyout-closing';
@@ -139,13 +173,22 @@ const flyoutAnimClass = computed(() => {
 });
 
 const hourText = computed(() => {
-  const h = props.modelValue.getHours();
-  if (props.clockIdentifier === '24HourClock') return h.toString().padStart(2, '0');
+  const h = timeValue.value.hour;
+  if (props.ClockIdentifier === '24HourClock') return String(h).padStart(2, '0');
   const h12 = h % 12;
   return h12 === 0 ? 12 : h12;
 });
-const minuteText = computed(() => props.modelValue.getMinutes().toString().padStart(2, '0'));
-const amPmText = computed(() => props.modelValue.getHours() >= 12 ? 'PM' : 'AM');
+const minuteText = computed(() => String(timeValue.value.minute).padStart(2, '0'));
+const amPmText = computed(() => timeValue.value.hour >= 12 ? 'PM' : 'AM');
+
+function normalizeTime(value) {
+  const hour = Number.isFinite(value?.hour) ? value.hour : 0;
+  const minute = Number.isFinite(value?.minute) ? value.minute : 0;
+  return {
+    hour: Math.max(0, Math.min(23, Math.trunc(hour))),
+    minute: Math.max(0, Math.min(59, Math.trunc(minute)))
+  };
+}
 
 function loopingWindow(items, currentIndex, count) {
   const half = Math.floor(count / 2);
@@ -159,16 +202,13 @@ function loopingWindow(items, currentIndex, count) {
 }
 
 const hourDisplay = computed(() => {
-  const items = hours.value.map(h => {
-    if (props.clockIdentifier === '12HourClock') return String(h);
-    return h.toString().padStart(2, '0');
-  });
+  const items = hours.value.map((h) => props.ClockIdentifier === '12HourClock' ? String(h) : String(h).padStart(2, '0'));
   const idx = hours.value.indexOf(tempHour.value);
   return loopingWindow(items, idx >= 0 ? idx : 0, VISIBLE_ITEMS);
 });
 
 const minuteDisplay = computed(() => {
-  const items = minutes.value.map(m => m.toString().padStart(2, '0'));
+  const items = minutes.value.map((m) => String(m).padStart(2, '0'));
   const idx = minutes.value.indexOf(tempMinute.value);
   return loopingWindow(items, idx >= 0 ? idx : 0, VISIBLE_ITEMS);
 });
@@ -180,11 +220,7 @@ const ampmDisplay = computed(() => {
   const result = [];
   for (let offset = -half; offset <= half; offset++) {
     const i = idx + offset;
-    if (i < 0 || i >= items.length) {
-      result.push({ label: '', active: false });
-    } else {
-      result.push({ label: items[i], active: offset === 0 });
-    }
+    result.push(i < 0 || i >= items.length ? { label: '', active: false } : { label: items[i], active: offset === 0 });
   }
   return result;
 });
@@ -193,39 +229,40 @@ function scrollUp(type) {
   if (type === 'hour') {
     const idx = hours.value.indexOf(tempHour.value);
     tempHour.value = hours.value[(idx - 1 + hours.value.length) % hours.value.length];
-  } else if (type === 'minute') {
+  }
+  if (type === 'minute') {
     const idx = minutes.value.indexOf(tempMinute.value);
     tempMinute.value = minutes.value[(idx - 1 + minutes.value.length) % minutes.value.length];
-  } else if (type === 'ampm') {
-    if (tempAmPm.value === 'PM') tempAmPm.value = 'AM';
   }
+  if (type === 'ampm' && tempAmPm.value === 'PM') tempAmPm.value = 'AM';
 }
 
 function scrollDown(type) {
   if (type === 'hour') {
     const idx = hours.value.indexOf(tempHour.value);
     tempHour.value = hours.value[(idx + 1) % hours.value.length];
-  } else if (type === 'minute') {
+  }
+  if (type === 'minute') {
     const idx = minutes.value.indexOf(tempMinute.value);
     tempMinute.value = minutes.value[(idx + 1) % minutes.value.length];
-  } else if (type === 'ampm') {
-    if (tempAmPm.value === 'AM') tempAmPm.value = 'PM';
   }
+  if (type === 'ampm' && tempAmPm.value === 'AM') tempAmPm.value = 'PM';
 }
 
 const toggleOpen = async () => {
-  if (isOpen.value) { close(false); return; }
-  const h = props.modelValue.getHours();
-  if (props.clockIdentifier === '12HourClock') {
+  if (isOpen.value) {
+    close(false);
+    return;
+  }
+  const h = timeValue.value.hour;
+  if (props.ClockIdentifier === '12HourClock') {
     const h12 = h % 12;
     tempHour.value = h12 === 0 ? 12 : h12;
     tempAmPm.value = h >= 12 ? 'PM' : 'AM';
   } else {
     tempHour.value = h;
   }
-  const m = props.modelValue.getMinutes();
-  tempMinute.value = m - (m % props.minuteIncrement);
-
+  tempMinute.value = timeValue.value.minute - (timeValue.value.minute % normalizedMinuteIncrement.value);
   showFlyout.value = true;
   isOpen.value = true;
   isClosing.value = false;
@@ -243,15 +280,17 @@ const toggleOpen = async () => {
 
 const close = (accept) => {
   if (accept) {
-    const newDate = new Date(props.modelValue);
+    const oldTime = timeValue.value;
     let finalHour = tempHour.value;
-    if (props.clockIdentifier === '12HourClock') {
+    if (props.ClockIdentifier === '12HourClock') {
       if (tempAmPm.value === 'PM' && finalHour !== 12) finalHour += 12;
       if (tempAmPm.value === 'AM' && finalHour === 12) finalHour = 0;
     }
-    newDate.setHours(finalHour);
-    newDate.setMinutes(tempMinute.value);
-    emit('update:modelValue', newDate);
+    const newTime = { hour: finalHour, minute: tempMinute.value };
+    emit('update:Time', newTime);
+    emit('update:SelectedTime', newTime);
+    emit('TimeChanged', { oldTime, newTime });
+    emit('SelectedTimeChanged', { oldTime, newTime });
   }
   isClosing.value = true;
   isOpen.value = false;
@@ -264,20 +303,10 @@ const onFlyoutAnimEnd = () => {
   }
 };
 
-function onWheel(e, type) {
-  e.preventDefault();
-  if (e.deltaY > 0) scrollDown(type);
+function onWheel(event, type) {
+  if (event.deltaY > 0) scrollDown(type);
   else scrollUp(type);
 }
-
-const setupWheel = async () => {
-  await nextTick();
-  if (hourCol.value) hourCol.value.addEventListener('wheel', (e) => onWheel(e, 'hour'), { passive: false });
-  if (minuteCol.value) minuteCol.value.addEventListener('wheel', (e) => onWheel(e, 'minute'), { passive: false });
-  if (ampmCol.value) ampmCol.value.addEventListener('wheel', (e) => onWheel(e, 'ampm'), { passive: false });
-};
-
-watch(showFlyout, (val) => { if (val) setupWheel(); });
 </script>
 
 <style scoped>

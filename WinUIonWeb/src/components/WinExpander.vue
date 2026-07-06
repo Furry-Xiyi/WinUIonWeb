@@ -115,12 +115,10 @@ const toggleExpanded = () => {
   transition: transform var(--fast-duration) var(--fast-out-slow-in);
 }
 
-/* Down模式：展开时箭头向下 */
 .win-expander:not(.expand-up).is-expanded .win-expander-arrow {
   transform: rotate(180deg);
 }
 
-/* Up模式：展开时箭头向上 */
 .win-expander.expand-up.is-expanded .win-expander-arrow {
   transform: rotate(0deg);
 }
@@ -147,7 +145,6 @@ const toggleExpanded = () => {
   border-top: 1px solid var(--stroke-divider);
 }
 
-/* Up模式：边框在底部 */
 .win-expander.expand-up.is-expanded .win-expander-inner {
   border-top: none;
   border-bottom: 1px solid var(--stroke-divider);
@@ -162,7 +159,6 @@ const toggleExpanded = () => {
   border-radius: 0 0 3px 3px;
 }
 
-/* Up模式：圆角在上方 */
 .win-expander.expand-up .win-expander-content {
   border-radius: 3px 3px 0 0;
 }

@@ -5,7 +5,7 @@
       <WinTextBlock class="page-description" Text="A command bar with labels on the side free floating in a page" TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-        <WinToggleButton v-model="isFavoriteState" class="header-action" subtle @update:modelValue="toggleFavorite">
+        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
@@ -38,11 +38,11 @@
               </template>
             </template>
           </WinCommandBar>
-          <WinTextBlock v-if="selectedOption" :Text="selectedOption" />
         </div>
       </template>
       <template #options>
         <div class="options-stack">
+          <WinTextBlock :Text="selectedOption || 'You clicked:'" TextWrapping="WrapWholeWords" />
           <WinTextBlock class="options-title" Text="Show or hide" />
           <WinButton @click="isOpen = true"><WinTextBlock Text="Open command bar" /></WinButton>
           <WinButton @click="isOpen = false"><WinTextBlock Text="Close command bar" /></WinButton>

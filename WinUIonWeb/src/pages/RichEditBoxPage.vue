@@ -5,7 +5,7 @@
       <WinTextBlock class="page-description" Text="The RichEditBox control lets a user enter formatted text such as bold, italic, and underlined. RichEditBox can also display and edit Rich Text Format (.rtf) files." TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE793;</span></WinButton>
-        <WinToggleButton v-model="isFavoriteState" subtle @update:modelValue="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
       </div>
     </div>
 

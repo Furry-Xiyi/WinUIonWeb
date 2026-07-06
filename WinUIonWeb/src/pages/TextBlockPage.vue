@@ -5,7 +5,7 @@
       <WinTextBlock class="page-description" Text="The TextBlock control provides flexible text display options for scenarios that don't require interactivity. It supports rich text formatting, inline elements like Bold and Italic, and text selection." TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-        <WinToggleButton v-model="isFavoriteState" class="header-action" @update:modelValue="toggleFavorite">
+        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>

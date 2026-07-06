@@ -5,7 +5,7 @@
       <WinTextBlock class="page-description" Text="The MenuBar simplifies the creation of basic menu systems for apps. It works out of the box with little customization, supports keyboard accelerators, and automatically adjusts UI for different input types and devices." TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-        <WinToggleButton v-model="isFavoriteState" class="header-action" subtle @update:modelValue="toggleFavorite">
+        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
@@ -14,27 +14,33 @@
     <WinControlExample class="basic-input-example-theme" headerText="A simple MenuBar" :theme="pageTheme" :vue="simpleCode">
       <template #example>
         <div class="sample-stack">
-          <WinTextBlock :Text="simpleOutput" />
-          <WinMenuBar :items="simpleItems" :theme="pageTheme" @itemClick="simpleOutput = `You clicked: ${$event.item.text}`" />
+          <WinMenuBar :Items="simpleItems" :Theme="pageTheme" @ItemClick="simpleOutput = `You clicked: ${$event.Item.Text}`" />
         </div>
+      </template>
+      <template #options>
+        <WinTextBlock :Text="simpleOutput" TextWrapping="WrapWholeWords" />
       </template>
     </WinControlExample>
 
     <WinControlExample class="basic-input-example-theme" headerText="A MenuBar with keyboard accelerators" :theme="pageTheme" :vue="acceleratorCode">
       <template #example>
         <div class="sample-stack">
-          <WinTextBlock :Text="acceleratorOutput" />
-          <WinMenuBar :items="acceleratorItems" :theme="pageTheme" @itemClick="acceleratorOutput = `You clicked: ${$event.item.text}`" />
+          <WinMenuBar :Items="acceleratorItems" :Theme="pageTheme" @ItemClick="acceleratorOutput = `You clicked: ${$event.Item.Text}`" />
         </div>
+      </template>
+      <template #options>
+        <WinTextBlock :Text="acceleratorOutput" TextWrapping="WrapWholeWords" />
       </template>
     </WinControlExample>
 
     <WinControlExample class="basic-input-example-theme" headerText="A MenuBar with submenus, separators, and radio menu items" :theme="pageTheme" :vue="submenuCode">
       <template #example>
         <div class="sample-stack">
-          <WinTextBlock :Text="submenuOutput" />
-          <WinMenuBar :items="submenuItems" :theme="pageTheme" @itemClick="submenuOutput = `You clicked: ${$event.item.text}`" />
+          <WinMenuBar :Items="submenuItems" :Theme="pageTheme" @ItemClick="submenuOutput = `You clicked: ${$event.Item.Text}`" />
         </div>
+      </template>
+      <template #options>
+        <WinTextBlock :Text="submenuOutput" TextWrapping="WrapWholeWords" />
       </template>
     </WinControlExample>
   </div>
@@ -58,49 +64,115 @@ const acceleratorOutput = ref('You clicked:');
 const submenuOutput = ref('You clicked:');
 
 const baseMenus = [
-  { title: 'File', items: [{ text: 'New' }, { text: 'Open' }, { text: 'Save' }, { text: 'Exit' }] },
-  { title: 'Edit', items: [{ text: 'Undo' }, { text: 'Cut' }, { text: 'Copy' }, { text: 'Paste' }] },
-  { title: 'Help', items: [{ text: 'About' }] }
+  { Title: 'File', Items: [{ Text: 'New' }, { Text: 'Open...' }, { Text: 'Save' }, { Text: 'Exit' }] },
+  { Title: 'Edit', Items: [{ Text: 'Undo' }, { Text: 'Cut' }, { Text: 'Copy' }, { Text: 'Paste' }] },
+  { Title: 'Help', Items: [{ Text: 'About' }] }
 ];
 
 const simpleItems = baseMenus;
 const acceleratorItems = [
-  { title: 'File', items: [{ text: 'New', keyboardAccelerator: { key: 'N', modifiers: ['Control'] } }, { text: 'Open', keyboardAccelerator: { key: 'O', modifiers: ['Control'] } }, { text: 'Save', keyboardAccelerator: { key: 'S', modifiers: ['Control'] } }, { text: 'Exit', keyboardAccelerator: { key: 'E', modifiers: ['Control'] } }] },
-  { title: 'Edit', items: [{ text: 'Undo', keyboardAccelerator: { key: 'Z', modifiers: ['Control'] } }, { text: 'Cut', keyboardAccelerator: { key: 'X', modifiers: ['Control'] } }, { text: 'Copy', keyboardAccelerator: { key: 'C', modifiers: ['Control'] } }, { text: 'Paste', keyboardAccelerator: { key: 'V', modifiers: ['Control'] } }] },
-  { title: 'Help', items: [{ text: 'About', keyboardAccelerator: { key: 'I', modifiers: ['Control'] } }] }
+  { Title: 'File', Items: [{ Text: 'New', KeyboardAccelerators: [{ Key: 'N', Modifiers: ['Control'] }] }, { Text: 'Open', KeyboardAccelerators: [{ Key: 'O', Modifiers: ['Control'] }] }, { Text: 'Save', KeyboardAccelerators: [{ Key: 'S', Modifiers: ['Control'] }] }, { Text: 'Exit', KeyboardAccelerators: [{ Key: 'E', Modifiers: ['Control'] }] }] },
+  { Title: 'Edit', Items: [{ Text: 'Undo', KeyboardAccelerators: [{ Key: 'Z', Modifiers: ['Control'] }] }, { Text: 'Cut', KeyboardAccelerators: [{ Key: 'X', Modifiers: ['Control'] }] }, { Text: 'Copy', KeyboardAccelerators: [{ Key: 'C', Modifiers: ['Control'] }] }, { Text: 'Paste', KeyboardAccelerators: [{ Key: 'V', Modifiers: ['Control'] }] }] },
+  { Title: 'Help', Items: [{ Text: 'About', KeyboardAccelerators: [{ Key: 'I', Modifiers: ['Control'] }] }] }
 ];
 const submenuItems = ref([
   {
-    title: 'File',
-    items: [
-      { type: 'submenu', text: 'New', items: [{ text: 'Plain Text Document' }, { text: 'Rich Text Document' }, { text: 'Other Formats' }] },
-      { text: 'Open' },
-      { text: 'Save' },
-      { type: 'separator' },
-      { text: 'Exit' }
+    Title: 'File',
+    Items: [
+      { Kind: 'MenuFlyoutSubItem', Text: 'New', Items: [{ Text: 'Plain Text Document' }, { Text: 'Rich Text Document' }, { Text: 'Other Formats' }] },
+      { Text: 'Open' },
+      { Text: 'Save' },
+      { Kind: 'MenuFlyoutSeparator' },
+      { Text: 'Exit' }
     ]
   },
-  { title: 'Edit', items: [{ text: 'Undo' }, { text: 'Cut' }, { text: 'Copy' }, { text: 'Paste' }] },
+  { Title: 'Edit', Items: [{ Text: 'Undo' }, { Text: 'Cut' }, { Text: 'Copy' }, { Text: 'Paste' }] },
   {
-    title: 'View',
-    items: [
-      { text: 'Output' },
-      { type: 'separator' },
-      { type: 'radio', text: 'Landscape', groupName: 'orientation', isChecked: false },
-      { type: 'radio', text: 'Portrait', groupName: 'orientation', isChecked: true },
-      { type: 'separator' },
-      { type: 'radio', text: 'Small icons', groupName: 'size', isChecked: false },
-      { type: 'radio', text: 'Medium icons', groupName: 'size', isChecked: true },
-      { type: 'radio', text: 'Large icons', groupName: 'size', isChecked: false }
+    Title: 'View',
+    Items: [
+      { Text: 'Output' },
+      { Kind: 'MenuFlyoutSeparator' },
+      { Text: 'Landscape', GroupName: 'orientation', IsChecked: false },
+      { Text: 'Portrait', GroupName: 'orientation', IsChecked: true },
+      { Kind: 'MenuFlyoutSeparator' },
+      { Text: 'Small icons', GroupName: 'size', IsChecked: false },
+      { Text: 'Medium icons', GroupName: 'size', IsChecked: true },
+      { Text: 'Large icons', GroupName: 'size', IsChecked: false }
     ]
   },
-  { title: 'Help', items: [{ text: 'About' }] }
+  { Title: 'Help', Items: [{ Text: 'About' }] }
 ]);
 
-const simpleCode = `<WinTextBlock :Text="output" />
-<WinMenuBar :items="menuItems" @itemClick="output = \`You clicked: \${$event.item.text}\`" />`;
-const acceleratorCode = `<WinMenuBar :items="menuItemsWithKeyboardAccelerators" />`;
-const submenuCode = `<WinMenuBar :items="menuItemsWithSubmenusAndRadioItems" />`;
+const simpleCode = `<WinMenuBar :Items="[
+  {
+    Title: 'File',
+    Items: [
+      { Text: 'New' },
+      { Text: 'Open...' },
+      { Text: 'Save' },
+      { Text: 'Exit' }
+    ]
+  },
+  {
+    Title: 'Edit',
+    Items: [
+      { Text: 'Undo' },
+      { Text: 'Cut' },
+      { Text: 'Copy' },
+      { Text: 'Paste' }
+    ]
+  },
+  {
+    Title: 'Help',
+    Items: [
+      { Text: 'About' }
+    ]
+  }
+]" />`;
+const acceleratorCode = `<WinMenuBar :Items="[
+  {
+    Title: 'File',
+    Items: [
+      {
+        Text: 'New',
+        KeyboardAccelerators: [{ Key: 'N', Modifiers: ['Control'] }]
+      },
+      {
+        Text: 'Open',
+        KeyboardAccelerators: [{ Key: 'O', Modifiers: ['Control'] }]
+      }
+    ]
+  }
+]" />`;
+const submenuCode = `<WinMenuBar :Items="[
+  {
+    Title: 'File',
+    Items: [
+      {
+        Kind: 'MenuFlyoutSubItem',
+        Text: 'New',
+        Items: [
+          { Text: 'Plain Text Document' },
+          { Text: 'Rich Text Document' },
+          { Text: 'Other Formats' }
+        ]
+      },
+      { Text: 'Open' },
+      { Text: 'Save' },
+      { Kind: 'MenuFlyoutSeparator' },
+      { Text: 'Exit' }
+    ]
+  },
+  {
+    Title: 'View',
+    Items: [
+      { Text: 'Output' },
+      { Kind: 'MenuFlyoutSeparator' },
+      { Text: 'Landscape', GroupName: 'OrientationGroup' },
+      { Text: 'Portrait', GroupName: 'OrientationGroup', IsChecked: true }
+    ]
+  }
+]" />`;
 </script>
 
 <style scoped>
