@@ -272,7 +272,7 @@ const scrollWithAnimation = () => {
   const duration = animationDuration.value;
   const startTime = performance.now();
 
-  const animate = (currentTime: number) => {
+  const animate = (currentTime) => {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
     const easedProgress = getAnimationProgress(progress);
