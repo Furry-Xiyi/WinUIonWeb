@@ -61,7 +61,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   Password: '',
   Header: '',
-  HeaderTemplate: null,
+  HeaderTemplate: undefined,
   Description: '',
   PlaceholderText: '',
   PasswordChar: '\u25CF',
@@ -70,7 +70,7 @@ const props = withDefaults(defineProps<{
   IsEnabled: true,
   CanPasteClipboardContent: true,
   InputScope: 'Password',
-  SelectionFlyout: null,
+  SelectionFlyout: undefined,
   SelectionHighlightColor: '',
   TextReadingOrder: 'Default',
   PreventKeyboardDisplayOnProgrammaticFocus: false,

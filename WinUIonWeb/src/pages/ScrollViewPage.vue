@@ -172,7 +172,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, inject, ref } from 'vue';
 import WinButton from '../components/WinButton.vue';
 import WinComboBox from '../components/WinComboBox.vue';
@@ -183,28 +183,16 @@ import WinTextBlock from '../components/WinTextBlock.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
 import { createPageState } from '../utils/pageState';
 
-type ScrollViewInstance = InstanceType<typeof WinScrollViewer> & {
-  ZoomTo?: (zoomFactor: number) => number;
-  ScrollTo?: (horizontalOffset: number, verticalOffset: number) => number;
-  AddScrollVelocity?: (offsetsVelocity: { x: number; y: number }) => number;
-  CancelScrollVelocity?: () => void;
-  scrollTop?: number;
-  scrollHeight?: number;
-};
-type ScrollMode = 'Enabled' | 'Disabled' | 'Auto';
-type ScrollBarVisibility = 'Auto' | 'Visible' | 'Hidden';
-type ZoomMode = 'Enabled' | 'Disabled';
-
-const currentPage = inject<{ value?: string } | string>('currentPage');
+const currentPage = inject('currentPage');
 const pageKey = computed(() => {
   if (typeof currentPage === 'string') return currentPage;
   return currentPage?.value || 'scrollview';
 });
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const scrollView1Ref = ref<ScrollViewInstance>();
-const scrollView2Ref = ref<ScrollViewInstance>();
-const scrollView3Ref = ref<ScrollViewInstance>();
+const scrollView1Ref = ref();
+const scrollView2Ref = ref();
+const scrollView3Ref = ref();
 
 const zoomModeIndex = ref(0);
 const zoomFactor = ref(4);
@@ -236,11 +224,11 @@ const animationOptions = [
   { label: 'Teleportation', value: 'Teleportation' }
 ];
 
-const zoomMode = computed(() => zoomModeOptions[zoomModeIndex.value]?.value as ZoomMode);
-const horizontalScrollMode = computed(() => scrollModeOptions[horizontalScrollModeIndex.value]?.value as ScrollMode);
-const verticalScrollMode = computed(() => scrollModeOptions[verticalScrollModeIndex.value]?.value as ScrollMode);
-const horizontalScrollBarVisibility = computed(() => scrollBarVisibilityOptions[horizontalScrollBarVisibilityIndex.value]?.value as ScrollBarVisibility);
-const verticalScrollBarVisibility = computed(() => scrollBarVisibilityOptions[verticalScrollBarVisibilityIndex.value]?.value as ScrollBarVisibility);
+const zoomMode = computed(() => zoomModeOptions[zoomModeIndex.value]?.value);
+const horizontalScrollMode = computed(() => scrollModeOptions[horizontalScrollModeIndex.value]?.value);
+const verticalScrollMode = computed(() => scrollModeOptions[verticalScrollModeIndex.value]?.value);
+const horizontalScrollBarVisibility = computed(() => scrollBarVisibilityOptions[horizontalScrollBarVisibilityIndex.value]?.value);
+const verticalScrollBarVisibility = computed(() => scrollBarVisibilityOptions[verticalScrollBarVisibilityIndex.value]?.value);
 const verticalAnimation = computed(() => animationOptions[verticalAnimationIndex.value]?.value || 'Default');
 
 const velocityImages = [
@@ -262,11 +250,11 @@ const animationImages = [
   { alt: 'mountain', src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800' }
 ];
 
-const onZoomFactorChanged = (args: { newValue: number }) => {
+const onZoomFactorChanged = (args) => {
   scrollView1Ref.value?.ZoomTo?.(args.newValue);
 };
 
-const onVerticalVelocityChanged = (args: { oldValue: number; newValue: number }) => {
+const onVerticalVelocityChanged = (args) => {
   if (Number.isNaN(args.oldValue)) return;
   scrollView2Ref.value?.CancelScrollVelocity?.();
   if (args.newValue <= 30 && args.newValue >= -30) return;
@@ -295,7 +283,7 @@ const scrollWithAnimation = () => {
   requestAnimationFrame(animate);
 };
 
-const getAnimationProgress = (progress: number) => {
+const getAnimationProgress = (progress) => {
   if (verticalAnimation.value === 'Accordion') {
     return progress < 0.5
       ? 0.5 * Math.pow(2 * progress, 2)
@@ -309,14 +297,14 @@ const getAnimationProgress = (progress: number) => {
     : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 };
 
-const contentInsideScrollViewXaml = `<ScrollView Height="266" Width="400" ContentOrientation="None"
+const contentInsideScrollViewXaml = computed(() => `<ScrollView Height="266" Width="400" ContentOrientation="None"
     ZoomMode="${zoomMode.value}" IsTabStop="True"
     VerticalAlignment="Top" HorizontalAlignment="Left"
     HorizontalScrollMode="${horizontalScrollMode.value}" HorizontalScrollBarVisibility="${horizontalScrollBarVisibility.value}"
     VerticalScrollMode="${verticalScrollMode.value}" VerticalScrollBarVisibility="${verticalScrollBarVisibility.value}">
     <Image Source="ms-appx:///Assets/SampleMedia/cliff.jpg" AutomationProperties.Name="cliff" Stretch="None"
         HorizontalAlignment="Center" VerticalAlignment="Center"/>
-</ScrollView>`;
+</ScrollView>`);
 const constantVelocityXaml = `<ScrollView Height="300" Width="400" IsTabStop="True"
     VerticalAlignment="Top" HorizontalAlignment="Left">
     <Image Source="ms-appx:///Assets/SampleMedia/grapes.jpg" Stretch="Uniform" AutomationProperties.Name="grapes"/>

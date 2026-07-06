@@ -130,7 +130,7 @@ const emit = defineEmits<{
 // Refs
 const scrollViewerRef = ref<HTMLDivElement>()
 const contentRef = ref<HTMLDivElement>()
-const currentZoomFactor = ref(props.zoomFactor)
+const currentZoomFactor = ref(props.ZoomFactor ?? props.zoomFactor)
 const isScrolling = ref(false)
 const isZooming = ref(false)
 const showVerticalScrollBar = ref(false)
@@ -151,22 +151,22 @@ const dragStartX = ref(0)
 const dragStartScrollTop = ref(0)
 const dragStartScrollLeft = ref(0)
 
-const effectiveZoomMode = computed(() => props.ZoomMode ?? props.zoomMode)
-const effectiveMinZoomFactor = computed(() => props.MinZoomFactor ?? props.minZoomFactor)
-const effectiveMaxZoomFactor = computed(() => props.MaxZoomFactor ?? props.maxZoomFactor)
-const effectiveZoomFactor = computed(() => props.ZoomFactor ?? props.zoomFactor)
-const effectiveHorizontalScrollMode = computed(() => props.HorizontalScrollMode ?? props.horizontalScrollMode)
-const effectiveVerticalScrollMode = computed(() => props.VerticalScrollMode ?? props.verticalScrollMode)
-const effectiveHorizontalScrollBarVisibility = computed(() => props.HorizontalScrollBarVisibility ?? props.horizontalScrollBarVisibility)
-const effectiveVerticalScrollBarVisibility = computed(() => props.VerticalScrollBarVisibility ?? props.verticalScrollBarVisibility)
-const effectiveContentOrientation = computed(() => props.ContentOrientation ?? props.contentOrientation)
-const effectiveIsVerticalScrollChainingEnabled = computed(() => props.IsVerticalScrollChainingEnabled ?? props.isVerticalScrollChainingEnabled)
-const effectiveIsHorizontalScrollChainingEnabled = computed(() => props.IsHorizontalScrollChainingEnabled ?? props.isHorizontalScrollChainingEnabled)
-const effectiveIsTabStop = computed(() => props.IsTabStop ?? props.isTabStop)
+const effectiveZoomMode = computed<ZoomMode>(() => props.ZoomMode ?? props.zoomMode ?? 'Disabled')
+const effectiveMinZoomFactor = computed(() => props.MinZoomFactor ?? props.minZoomFactor ?? 0.1)
+const effectiveMaxZoomFactor = computed(() => props.MaxZoomFactor ?? props.maxZoomFactor ?? 10)
+const effectiveZoomFactor = computed(() => props.ZoomFactor ?? props.zoomFactor ?? 1)
+const effectiveHorizontalScrollMode = computed<ScrollMode>(() => props.HorizontalScrollMode ?? props.horizontalScrollMode ?? 'Auto')
+const effectiveVerticalScrollMode = computed<ScrollMode>(() => props.VerticalScrollMode ?? props.verticalScrollMode ?? 'Auto')
+const effectiveHorizontalScrollBarVisibility = computed<ScrollBarVisibility>(() => props.HorizontalScrollBarVisibility ?? props.horizontalScrollBarVisibility ?? 'Auto')
+const effectiveVerticalScrollBarVisibility = computed<ScrollBarVisibility>(() => props.VerticalScrollBarVisibility ?? props.verticalScrollBarVisibility ?? 'Auto')
+const effectiveContentOrientation = computed<ContentOrientation>(() => props.ContentOrientation ?? props.contentOrientation ?? 'Vertical')
+const effectiveIsVerticalScrollChainingEnabled = computed(() => props.IsVerticalScrollChainingEnabled ?? props.isVerticalScrollChainingEnabled ?? true)
+const effectiveIsHorizontalScrollChainingEnabled = computed(() => props.IsHorizontalScrollChainingEnabled ?? props.isHorizontalScrollChainingEnabled ?? true)
+const effectiveIsTabStop = computed(() => props.IsTabStop ?? props.isTabStop ?? false)
 const effectiveWidth = computed(() => props.Width ?? props.width)
 const effectiveHeight = computed(() => props.Height ?? props.height)
-const effectiveHorizontalAlignment = computed(() => props.HorizontalAlignment ?? props.horizontalAlignment)
-const effectiveVerticalAlignment = computed(() => props.VerticalAlignment ?? props.verticalAlignment)
+const effectiveHorizontalAlignment = computed<HorizontalAlignment>(() => props.HorizontalAlignment ?? props.horizontalAlignment ?? 'Stretch')
+const effectiveVerticalAlignment = computed<VerticalAlignment>(() => props.VerticalAlignment ?? props.verticalAlignment ?? 'Stretch')
 
 const hasCssSize = (value: number | string | undefined) => (
   value !== undefined &&
@@ -417,6 +417,21 @@ function changeView(
 ) {
   if (!scrollViewerRef.value) return
 
+  setOffsets(horizontalOffset, verticalOffset)
+
+  if (zoomFactor !== null && zoomFactor !== undefined) {
+    zoomToFactor(zoomFactor)
+  }
+
+  emitViewChanged(false)
+}
+
+function setOffsets(
+  horizontalOffset?: number | null,
+  verticalOffset?: number | null
+) {
+  if (!scrollViewerRef.value) return
+
   if (horizontalOffset !== null && horizontalOffset !== undefined) {
     scrollViewerRef.value.scrollLeft = horizontalOffset
   }
@@ -424,12 +439,6 @@ function changeView(
   if (verticalOffset !== null && verticalOffset !== undefined) {
     scrollViewerRef.value.scrollTop = verticalOffset
   }
-
-  if (zoomFactor !== null && zoomFactor !== undefined) {
-    zoomToFactor(zoomFactor)
-  }
-
-  emitViewChanged(false)
 }
 
 function cancelScrollVelocity() {
@@ -446,7 +455,8 @@ function ZoomTo(zoomFactor: number) {
 
 function ScrollTo(horizontalOffset: number, verticalOffset: number) {
   cancelScrollVelocity()
-  changeView(horizontalOffset, verticalOffset, null)
+  setOffsets(horizontalOffset, verticalOffset)
+  emitViewChanged(false)
   return 0
 }
 

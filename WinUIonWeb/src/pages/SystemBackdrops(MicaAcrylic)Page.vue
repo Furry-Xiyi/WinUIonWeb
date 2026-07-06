@@ -78,7 +78,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, inject } from 'vue';
 import WinButton from '../components/WinButton.vue';
 import WinControlExample from '../components/WinControlExample.vue';
@@ -86,7 +86,7 @@ import WinTextBlock from '../components/WinTextBlock.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
 import { createPageState } from '../utils/pageState';
 
-const currentPage = inject<{ value?: string } | string>('currentPage');
+const currentPage = inject('currentPage');
 const pageKey = computed(() => {
   if (typeof currentPage === 'string') return currentPage;
   return currentPage?.value || 'systembackdrops';

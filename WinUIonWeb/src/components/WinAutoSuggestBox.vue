@@ -108,7 +108,7 @@ const props = withDefaults(defineProps<{
   AutoMaximizeSuggestionArea: false,
   DesiredCandidateWindowAlignment: 'BottomEdge',
   LightDismissOverlayMode: 'Auto',
-  TextBoxStyle: null,
+  TextBoxStyle: undefined,
   KeepInteriorCornersSquare: false,
   IsEnabled: true,
   Width: ''
