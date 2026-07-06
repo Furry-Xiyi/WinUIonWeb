@@ -25,7 +25,7 @@
             aria-label="mountain"
             @click="myImageButtonClick"
             @contextmenu.prevent="myImageButtonContextRequested">
-            <img ref="image1" class="sample-image" src="/assets/rainier.jpg" alt="mountain" />
+            <img ref="image1" class="sample-image" :src="rainierImageUrl" alt="mountain" />
           </button>
         </div>
       </template>
@@ -65,6 +65,7 @@ const commandBarFlyout1 = ref(null);
 const image1 = ref(null);
 const myImageButton = ref(null);
 const selectedOptionText = ref('');
+const rainierImageUrl = 'https://raw.githubusercontent.com/Furry-Xiyi/WinUIonWeb/master/WinUI-Gallery/WinUIGallery/Assets/SampleMedia/rainier.jpg';
 
 const primaryCommands = [
   { Icon: 'Share', Label: 'Share', ToolTipServiceToolTip: 'Share' },
@@ -112,7 +113,7 @@ const exampleTemplate = `<WinCommandBarFlyout
   :ShowPrimaryLabels="true" />
 
 <WinButton Padding="0" AutomationProperties.Name="mountain">
-  <img Height="300" src="/assets/rainier.jpg" />
+  <img Height="300" src="${rainierImageUrl}" />
 </WinButton>`;
 </script>
 

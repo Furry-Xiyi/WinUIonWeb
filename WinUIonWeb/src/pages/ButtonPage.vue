@@ -55,7 +55,7 @@
           @click="onButton2Click"
           style="padding: 4px;">
           <img
-            src="/assets/Slices.png"
+            :src="pieSliceImageUrl"
             alt="Pie slice"
             style="width: 100%; height: 100%; object-fit: contain;" />
         </WinButton>
@@ -123,6 +123,7 @@ const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageSt
 const disableControl1 = ref(false);
 const control1Output = ref('');
 const control2Output = ref('');
+const pieSliceImageUrl = 'https://raw.githubusercontent.com/Furry-Xiyi/WinUIonWeb/master/WinUI-Gallery/WinUIGallery/Assets/SampleMedia/Slices.png';
 
 const onButton1Click = () => {
   control1Output.value = `You clicked: Button1`;
@@ -147,7 +148,7 @@ const example2Template = `<WinButton
   AutomationProperties.Name="Pie"
   @click="onButtonClick"
   style="padding: 4px;">
-  <img src="/assets/Slices.png" alt="Pie slice" />
+  <img src="${pieSliceImageUrl}" alt="Pie slice" />
 </WinButton>
 
 <WinTextBlock :Text="controlOutput" />`;
