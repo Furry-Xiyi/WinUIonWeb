@@ -17,7 +17,7 @@
             :is="command.component"
             v-bind="command.props"
             :label-position="effectiveLabelPosition"
-            @click="(e) => handleCommandClick(command, e)"
+            @click="(e: MouseEvent) => handleCommandClick(command, e)"
           />
         </slot>
       </div>
@@ -57,7 +57,7 @@
               v-bind="command.props"
               :is-compact="true"
               label-position="Right"
-              @click="(e) => handleCommandClick(command, e)"
+              @click="(e: MouseEvent) => handleCommandClick(command, e)"
             />
             <div v-if="hasSecondaryCommands" class="commandbar-separator"></div>
           </template>
@@ -71,7 +71,7 @@
               v-bind="command.props"
               :is-compact="true"
               label-position="Right"
-              @click="(e) => handleCommandClick(command, e)"
+              @click="(e: MouseEvent) => handleCommandClick(command, e)"
             />
           </slot>
         </div>

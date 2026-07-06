@@ -1,204 +1,171 @@
 <template>
   <div>
-    <div style="position: relative;">
-      <h1 class="page-header">ScrollView</h1>
-      <p class="page-description">
-        The ScrollView control provides a viewport for viewing scrollable content, with optional zoom capabilities. It offers precise control over scrolling behavior, custom scroll animations, and programmatic scrolling with velocity-based motion.
-      </p>
+    <div class="page-heading">
+      <WinTextBlock class="page-header" Text="ScrollView" />
+      <WinTextBlock
+        class="page-description"
+        Text="The ScrollView control provides a viewport for viewing scrollable content. It supports horizontal and vertical scrolling, zooming, scroll velocity, and programmatic scroll animations."
+        TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+        <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
     </div>
 
-    <!-- Example 1: Content inside ScrollView -->
     <WinControlExample
-      headerText="Content inside ScrollView"
+      headerText="Content inside of a ScrollView."
       :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
+      :xaml="contentInsideScrollViewXaml"
+      :vue="contentInsideScrollViewVue">
       <template #example>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <p style="max-width: 600px;">
-            This ScrollView allows horizontal and vertical scrolling, as well as zooming. Change the settings on the right to alter those capabilities or the built-in scrollbars' visibility.
-          </p>
+        <div class="example-stack">
+          <WinTextBlock
+            class="example-copy"
+            Text="This ScrollView allows horizontal and vertical scrolling, as well as zooming. Change the settings on the right to alter those capabilities or the built-in scrollbars' visibility."
+            TextWrapping="WrapWholeWords" />
 
           <WinScrollViewer
             ref="scrollView1Ref"
-            :width="400"
-            :height="266"
-            :zoomMode="zoomMode"
-            :zoomFactor="zoomFactor"
-            :horizontalScrollMode="horizontalScrollMode"
-            :verticalScrollMode="verticalScrollMode"
-            :horizontalScrollBarVisibility="horizontalScrollBarVisibility"
-            :verticalScrollBarVisibility="verticalScrollBarVisibility"
-            :isTabStop="true"
-            horizontalAlignment="Left"
-            verticalAlignment="Top">
+            :Width="400"
+            :Height="266"
+            ContentOrientation="None"
+            :ZoomMode="zoomMode"
+            :ZoomFactor="zoomFactor"
+            :HorizontalScrollMode="horizontalScrollMode"
+            :VerticalScrollMode="verticalScrollMode"
+            :HorizontalScrollBarVisibility="horizontalScrollBarVisibility"
+            :VerticalScrollBarVisibility="verticalScrollBarVisibility"
+            :IsTabStop="true"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top">
             <img
+              class="scroll-image scroll-image-single"
               src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"
-              alt="cliff"
-              style="display: block; max-width: 100%; height: auto;" />
+              alt="cliff" />
           </WinScrollViewer>
         </div>
       </template>
+
       <template #options>
-        <div style="display: grid; grid-template-columns: auto 1fr; gap: 12px 12px; align-items: center; min-width: 200px;">
-          <span>ZoomMode</span>
-          <WinComboBox
-            v-model="zoomMode"
-            :options="zoomModeOptions"
-            style="width: 100%;" />
+        <div class="options-grid options-grid-wide">
+          <WinTextBlock Text="ZoomMode" />
+          <WinComboBox v-model="zoomModeIndex" :options="zoomModeOptions" />
 
-          <span>ZoomFactor</span>
+          <WinTextBlock Text="ZoomFactor" />
           <WinNumberBox
-            v-model="zoomFactor"
-            :minimum="0.1"
-            :maximum="10"
-            :smallChange="1"
-            :largeChange="10"
-            spinButtonPlacementMode="Inline" />
+            v-model:Value="zoomFactor"
+            :Minimum="0.1"
+            :Maximum="10"
+            :SmallChange="1"
+            :LargeChange="10"
+            SpinButtonPlacementMode="Inline"
+            @ValueChanged="onZoomFactorChanged" />
 
-          <span style="grid-column: 1 / -1; text-align: center; margin-top: 8px;">ScrollMode</span>
+          <WinTextBlock class="options-section-label" Text="ScrollMode" />
 
-          <span>Horizontal</span>
-          <WinComboBox
-            v-model="horizontalScrollMode"
-            :options="scrollModeOptions"
-            style="width: 100%;" />
+          <WinTextBlock Text="Horizontal" />
+          <WinComboBox v-model="horizontalScrollModeIndex" :options="scrollModeOptions" />
 
-          <span>Vertical</span>
-          <WinComboBox
-            v-model="verticalScrollMode"
-            :options="scrollModeOptions"
-            style="width: 100%;" />
+          <WinTextBlock Text="Vertical" />
+          <WinComboBox v-model="verticalScrollModeIndex" :options="scrollModeOptions" />
 
-          <span style="grid-column: 1 / -1; text-align: center; margin-top: 8px;">ScrollbarVisibility</span>
+          <WinTextBlock class="options-section-label" Text="ScrollbarVisibility" />
 
-          <span>Horizontal</span>
-          <WinComboBox
-            v-model="horizontalScrollBarVisibility"
-            :options="scrollBarVisibilityOptions"
-            style="width: 100%;" />
+          <WinTextBlock Text="Horizontal" />
+          <WinComboBox v-model="horizontalScrollBarVisibilityIndex" :options="scrollBarVisibilityOptions" />
 
-          <span>Vertical</span>
-          <WinComboBox
-            v-model="verticalScrollBarVisibility"
-            :options="scrollBarVisibilityOptions"
-            style="width: 100%;" />
+          <WinTextBlock Text="Vertical" />
+          <WinComboBox v-model="verticalScrollBarVisibilityIndex" :options="scrollBarVisibilityOptions" />
         </div>
       </template>
     </WinControlExample>
 
-    <!-- Example 2: Constant velocity scrolling -->
     <WinControlExample
-      headerText="ScrollView constant velocity scrolling"
+      headerText="Constant velocity scrolling."
       :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
+      :xaml="constantVelocityXaml"
+      :cSharp="constantVelocityCSharp"
+      :vue="constantVelocityVue">
       <template #example>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <p style="max-width: 600px;">
-            Set the vertical velocity to a value greater than 30 to scroll down, or a value smaller than -30 to scroll up at a constant speed.
-          </p>
+        <div class="example-stack">
+          <WinTextBlock
+            class="example-copy"
+            Text="Set the vertical velocity to a value greater than 30 to scroll down, or a value smaller than -30 to scroll up at a constant speed."
+            TextWrapping="WrapWholeWords" />
 
           <WinScrollViewer
             ref="scrollView2Ref"
-            :width="400"
-            :height="300"
-            :isTabStop="true"
-            horizontalAlignment="Left"
-            verticalAlignment="Top">
-            <div style="display: flex; flex-direction: column;">
-              <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800" alt="grapes" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800" alt="rainier" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1495567720989-cebdbdd97913?w=800" alt="sunset" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800" alt="treetops" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800" alt="valley" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800" alt="cliff" style="display: block; width: 100%; height: auto;" />
+            :Width="400"
+            :Height="300"
+            :IsTabStop="true"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top">
+            <div class="image-stack">
+              <img v-for="image in velocityImages" :key="image.alt" class="scroll-image" :src="image.src" :alt="image.alt" />
             </div>
           </WinScrollViewer>
         </div>
+      </template>
 
-        <div style="display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; min-width: 200px;">
-          <span>Vertical velocity</span>
+      <template #options>
+        <div class="options-grid">
+          <WinTextBlock Text="Vertical velocity" />
           <WinNumberBox
-            v-model="verticalVelocity"
-            :minimum="-200"
-            :maximum="200"
-            :smallChange="10"
-            :largeChange="30"
-            spinButtonPlacementMode="Inline"
-            @update:modelValue="onVerticalVelocityChanged" />
+            v-model:Value="verticalVelocity"
+            :Minimum="-200"
+            :Maximum="200"
+            :SmallChange="10"
+            :LargeChange="30"
+            SpinButtonPlacementMode="Inline"
+            @ValueChanged="onVerticalVelocityChanged" />
         </div>
       </template>
     </WinControlExample>
 
-    <!-- Example 3: Programmatic scroll with custom animation -->
     <WinControlExample
-      headerText="ScrollView programmatic scroll with custom animation"
+      headerText="Programmatic scroll with custom animation."
       :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
+      :xaml="programmaticScrollXaml"
+      :cSharp="programmaticScrollCSharp"
+      :vue="programmaticScrollVue">
       <template #example>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <p style="max-width: 600px;">
-            Pick an animation type and its duration and then click the button on the right to launch a programmatic scroll.
-          </p>
+        <div class="example-stack">
+          <WinTextBlock
+            class="example-copy"
+            Text="Pick an animation type and its duration and then click the button on the right to launch a programmatic scroll."
+            TextWrapping="WrapWholeWords" />
 
           <WinScrollViewer
             ref="scrollView3Ref"
-            :width="400"
-            :height="300"
-            :isTabStop="true"
-            horizontalAlignment="Left"
-            verticalAlignment="Top">
-            <div style="display: flex; flex-direction: column;">
-              <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800" alt="leaves" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800" alt="carousel" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1507069009738-de3f6f155e3a?w=800" alt="bicycles" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800" alt="pond" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800" alt="marina" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800" alt="beach" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=800" alt="rampart" style="display: block; width: 100%; height: auto;" />
-              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800" alt="mountain" style="display: block; width: 100%; height: auto;" />
+            :Width="400"
+            :Height="300"
+            :IsTabStop="true"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top">
+            <div class="image-stack">
+              <img v-for="image in animationImages" :key="image.alt" class="scroll-image" :src="image.src" :alt="image.alt" />
             </div>
           </WinScrollViewer>
         </div>
+      </template>
 
-        <div style="display: grid; grid-template-columns: auto 1fr; gap: 12px 16px; align-items: center; min-width: 320px;">
-          <span>Scroll with animation</span>
-          <WinComboBox
-            v-model="verticalAnimation"
-            :options="animationOptions"
-            style="width: 100%;" />
+      <template #options>
+        <div class="options-grid options-grid-animation">
+          <WinTextBlock Text="Scroll with animation" />
+          <WinComboBox v-model="verticalAnimationIndex" :options="animationOptions" />
 
-          <span>Animation duration (msec)</span>
+          <WinTextBlock Text="Animation duration (msec)" />
           <WinNumberBox
-            v-model="animationDuration"
-            :minimum="1000"
-            :maximum="5000"
-            :smallChange="500"
-            :largeChange="1000"
-            spinButtonPlacementMode="Inline" />
+            v-model:Value="animationDuration"
+            :Minimum="1000"
+            :Maximum="5000"
+            :SmallChange="500"
+            :LargeChange="1000"
+            SpinButtonPlacementMode="Inline" />
 
-          <div style="grid-column: 1 / -1;">
-            <WinButton
-              @click="scrollWithAnimation"
-              style="width: 100%;">
-              Scroll with animation
-            </WinButton>
-          </div>
+          <WinButton class="options-span" Content="Scroll with animation" @click="scrollWithAnimation" />
         </div>
       </template>
     </WinControlExample>
@@ -206,294 +173,212 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, watch } from 'vue'
-import WinButton from '../components/WinButton.vue'
-import WinToggleButton from '../components/WinToggleButton.vue'
-import WinControlExample from '../components/WinControlExample.vue'
-import WinComboBox from '../components/WinComboBox.vue'
-import WinNumberBox from '../components/WinNumberBox.vue'
-import WinScrollViewer from '../components/WinScrollViewer.vue'
-import { usePageTheme } from '../composables/usePageTheme'
-import { useFavorites } from '../composables/useFavorites'
+import { computed, inject, ref } from 'vue';
+import WinButton from '../components/WinButton.vue';
+import WinComboBox from '../components/WinComboBox.vue';
+import WinControlExample from '../components/WinControlExample.vue';
+import WinNumberBox from '../components/WinNumberBox.vue';
+import WinScrollViewer from '../components/WinScrollViewer.vue';
+import WinTextBlock from '../components/WinTextBlock.vue';
+import WinToggleButton from '../components/WinToggleButton.vue';
+import { createPageState } from '../utils/pageState';
 
-// Get current page info
-const currentPage = inject<{ key: string, title: string }>('currentPage')
+type ScrollViewInstance = InstanceType<typeof WinScrollViewer> & {
+  ZoomTo?: (zoomFactor: number) => number;
+  ScrollTo?: (horizontalOffset: number, verticalOffset: number) => number;
+  AddScrollVelocity?: (offsetsVelocity: { x: number; y: number }) => number;
+  CancelScrollVelocity?: () => void;
+  scrollTop?: number;
+  scrollHeight?: number;
+};
+type ScrollMode = 'Enabled' | 'Disabled' | 'Auto';
+type ScrollBarVisibility = 'Auto' | 'Visible' | 'Hidden';
+type ZoomMode = 'Enabled' | 'Disabled';
 
-// Theme and favorites
-const { theme: pageTheme, toggleTheme } = usePageTheme()
-const { isFavorite, toggleFavorite } = useFavorites(currentPage?.key || 'ScrollView')
-const isFavoriteState = ref(isFavorite.value)
+const currentPage = inject<{ value?: string } | string>('currentPage');
+const pageKey = computed(() => {
+  if (typeof currentPage === 'string') return currentPage;
+  return currentPage?.value || 'scrollview';
+});
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal
-})
+const scrollView1Ref = ref<ScrollViewInstance>();
+const scrollView2Ref = ref<ScrollViewInstance>();
+const scrollView3Ref = ref<ScrollViewInstance>();
 
-// Example 1: Content inside ScrollView
-const scrollView1Ref = ref<InstanceType<typeof WinScrollViewer>>()
-const zoomMode = ref<'Enabled' | 'Disabled'>('Enabled')
-const zoomFactor = ref(4)
-const horizontalScrollMode = ref<'Enabled' | 'Disabled' | 'Auto'>('Auto')
-const verticalScrollMode = ref<'Enabled' | 'Disabled' | 'Auto'>('Auto')
-const horizontalScrollBarVisibility = ref<'Auto' | 'Visible' | 'Hidden'>('Auto')
-const verticalScrollBarVisibility = ref<'Auto' | 'Visible' | 'Hidden'>('Auto')
+const zoomModeIndex = ref(0);
+const zoomFactor = ref(4);
+const horizontalScrollModeIndex = ref(2);
+const verticalScrollModeIndex = ref(2);
+const horizontalScrollBarVisibilityIndex = ref(0);
+const verticalScrollBarVisibilityIndex = ref(0);
+const verticalVelocity = ref(30);
+const verticalAnimationIndex = ref(0);
+const animationDuration = ref(1500);
 
 const zoomModeOptions = [
-  { value: 'Enabled', label: 'Enabled' },
-  { value: 'Disabled', label: 'Disabled' }
-]
-
+  { label: 'Enabled', value: 'Enabled' },
+  { label: 'Disabled', value: 'Disabled' }
+];
 const scrollModeOptions = [
-  { value: 'Enabled', label: 'Enabled' },
-  { value: 'Disabled', label: 'Disabled' },
-  { value: 'Auto', label: 'Auto' }
-]
-
+  { label: 'Enabled', value: 'Enabled' },
+  { label: 'Disabled', value: 'Disabled' },
+  { label: 'Auto', value: 'Auto' }
+];
 const scrollBarVisibilityOptions = [
-  { value: 'Auto', label: 'Auto' },
-  { value: 'Visible', label: 'Visible' },
-  { value: 'Hidden', label: 'Hidden' }
-]
-
-// Example 2: Constant velocity scrolling
-const scrollView2Ref = ref<InstanceType<typeof WinScrollViewer>>()
-const verticalVelocity = ref(30)
-let velocityAnimationFrame: number | null = null
-
-function onVerticalVelocityChanged(value: number) {
-  // Stop previous animation
-  if (velocityAnimationFrame !== null) {
-    cancelAnimationFrame(velocityAnimationFrame)
-    velocityAnimationFrame = null
-  }
-
-  // Only start scrolling if velocity is significant
-  if (Math.abs(value) >= 30 && scrollView2Ref.value) {
-    const scroll = () => {
-      const el = (scrollView2Ref.value as any)?.scrollViewerRef
-      if (el) {
-        el.scrollTop += value / 60 // Approximate 60fps
-
-        // Continue animation if velocity is still significant
-        if (Math.abs(verticalVelocity.value) >= 30) {
-          velocityAnimationFrame = requestAnimationFrame(scroll)
-        }
-      }
-    }
-    velocityAnimationFrame = requestAnimationFrame(scroll)
-  }
-}
-
-// Example 3: Programmatic scroll with custom animation
-const scrollView3Ref = ref<InstanceType<typeof WinScrollViewer>>()
-const verticalAnimation = ref('Default')
-const animationDuration = ref(1500)
-
+  { label: 'Auto', value: 'Auto' },
+  { label: 'Visible', value: 'Visible' },
+  { label: 'Hidden', value: 'Hidden' }
+];
 const animationOptions = [
-  { value: 'Default', label: 'Default' },
-  { value: 'Accordion', label: 'Accordion' },
-  { value: 'Teleportation', label: 'Teleportation' }
-]
+  { label: 'Default', value: 'Default' },
+  { label: 'Accordion', value: 'Accordion' },
+  { label: 'Teleportation', value: 'Teleportation' }
+];
 
-function scrollWithAnimation() {
-  if (!scrollView3Ref.value) return
+const zoomMode = computed(() => zoomModeOptions[zoomModeIndex.value]?.value as ZoomMode);
+const horizontalScrollMode = computed(() => scrollModeOptions[horizontalScrollModeIndex.value]?.value as ScrollMode);
+const verticalScrollMode = computed(() => scrollModeOptions[verticalScrollModeIndex.value]?.value as ScrollMode);
+const horizontalScrollBarVisibility = computed(() => scrollBarVisibilityOptions[horizontalScrollBarVisibilityIndex.value]?.value as ScrollBarVisibility);
+const verticalScrollBarVisibility = computed(() => scrollBarVisibilityOptions[verticalScrollBarVisibilityIndex.value]?.value as ScrollBarVisibility);
+const verticalAnimation = computed(() => animationOptions[verticalAnimationIndex.value]?.value || 'Default');
 
-  const el = (scrollView3Ref.value as any)?.scrollViewerRef
-  if (!el) return
+const velocityImages = [
+  { alt: 'grapes', src: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800' },
+  { alt: 'rainier', src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800' },
+  { alt: 'sunset', src: 'https://images.unsplash.com/photo-1495567720989-cebdbdd97913?w=800' },
+  { alt: 'treetops', src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800' },
+  { alt: 'valley', src: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800' },
+  { alt: 'cliff', src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800' }
+];
+const animationImages = [
+  { alt: 'leaves', src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800' },
+  { alt: 'carousel', src: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800' },
+  { alt: 'bicycles', src: 'https://images.unsplash.com/photo-1507069009738-de3f6f155e3a?w=800' },
+  { alt: 'pond', src: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800' },
+  { alt: 'marina', src: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800' },
+  { alt: 'beach', src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' },
+  { alt: 'rampart', src: 'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=800' },
+  { alt: 'mountain', src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800' }
+];
 
-  const startTop = el.scrollTop
-  const targetTop = el.scrollHeight / 2 // Scroll to middle
-  const distance = targetTop - startTop
-  const duration = animationDuration.value
-  const startTime = performance.now()
+const onZoomFactorChanged = (args: { newValue: number }) => {
+  scrollView1Ref.value?.ZoomTo?.(args.newValue);
+};
 
-  function animate(currentTime: number) {
-    const elapsed = currentTime - startTime
-    const progress = Math.min(elapsed / duration, 1)
+const onVerticalVelocityChanged = (args: { oldValue: number; newValue: number }) => {
+  if (Number.isNaN(args.oldValue)) return;
+  scrollView2Ref.value?.CancelScrollVelocity?.();
+  if (args.newValue <= 30 && args.newValue >= -30) return;
+  scrollView2Ref.value?.AddScrollVelocity?.({ x: 0, y: args.newValue });
+};
 
-    let easedProgress: number
-    switch (verticalAnimation.value) {
-      case 'Accordion':
-        // Elastic easing
-        easedProgress = progress < 0.5
-          ? 0.5 * Math.pow(2 * progress, 2)
-          : 1 - 0.5 * Math.pow(2 * (1 - progress), 2)
-        break
-      case 'Teleportation':
-        // Step function - instant jump at midpoint
-        easedProgress = progress < 0.5 ? 0 : 1
-        break
-      default:
-        // Default smooth easing
-        easedProgress = progress < 0.5
-          ? 2 * progress * progress
-          : 1 - Math.pow(-2 * progress + 2, 2) / 2
-    }
+const scrollWithAnimation = () => {
+  const scrollView = scrollView3Ref.value;
+  if (!scrollView) return;
 
-    el.scrollTop = startTop + distance * easedProgress
+  const startTop = scrollView.scrollTop ?? 0;
+  const scrollableHeight = Math.max(0, (scrollView.scrollHeight ?? 0) - 300);
+  const targetTop = startTop > scrollableHeight / 2 ? scrollableHeight / 5 : 4 * scrollableHeight / 5;
+  const distance = targetTop - startTop;
+  const duration = animationDuration.value;
+  const startTime = performance.now();
 
-    if (progress < 1) {
-      requestAnimationFrame(animate)
-    }
+  const animate = (currentTime: number) => {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easedProgress = getAnimationProgress(progress);
+    scrollView.ScrollTo?.(0, startTop + distance * easedProgress);
+    if (progress < 1) requestAnimationFrame(animate);
+  };
+
+  requestAnimationFrame(animate);
+};
+
+const getAnimationProgress = (progress: number) => {
+  if (verticalAnimation.value === 'Accordion') {
+    return progress < 0.5
+      ? 0.5 * Math.pow(2 * progress, 2)
+      : 1 - 0.5 * Math.pow(2 * (1 - progress), 2);
   }
-
-  requestAnimationFrame(animate)
-}
-
-// Code examples
-const example1Template = `<WinScrollViewer
-  :width="400"
-  :height="266"
-  zoomMode="Enabled"
-  horizontalScrollMode="Auto"
-  verticalScrollMode="Auto"
-  horizontalScrollBarVisibility="Auto"
-  verticalScrollBarVisibility="Auto"
-  :isTabStop="true">
-  <img src="image.jpg" alt="cliff" />
-</WinScrollViewer>`
-
-const example1Vue = `<script setup>
-import { ref } from 'vue'
-import WinScrollViewer from '../components/WinScrollViewer.vue'
-
-const zoomMode = ref('Enabled')
-const zoomFactor = ref(4)
-const horizontalScrollMode = ref('Auto')
-const verticalScrollMode = ref('Auto')
-const horizontalScrollBarVisibility = ref('Auto')
-const verticalScrollBarVisibility = ref('Auto')
-<\/script>`
-
-const example2Template = `<WinScrollViewer
-  :width="400"
-  :height="300"
-  :isTabStop="true">
-  <div style="display: flex; flex-direction: column;">
-    <img src="image1.jpg" />
-    <img src="image2.jpg" />
-    <img src="image3.jpg" />
-  </div>
-</WinScrollViewer>`
-
-const example2Vue = `<script setup>
-import { ref } from 'vue'
-import WinScrollViewer from '../components/WinScrollViewer.vue'
-import WinNumberBox from '../components/WinNumberBox.vue'
-
-const scrollViewRef = ref()
-const verticalVelocity = ref(30)
-
-function onVerticalVelocityChanged(value) {
-  // Implement constant velocity scrolling
-  const el = scrollViewRef.value?.scrollViewerRef
-  if (el && Math.abs(value) >= 30) {
-    const scroll = () => {
-      el.scrollTop += value / 60
-      if (Math.abs(verticalVelocity.value) >= 30) {
-        requestAnimationFrame(scroll)
-      }
-    }
-    requestAnimationFrame(scroll)
+  if (verticalAnimation.value === 'Teleportation') {
+    return progress < 0.5 ? progress * 0.2 : 0.8 + (progress - 0.5) * 0.4;
   }
-}
-<\/script>`
+  return progress < 0.5
+    ? 2 * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+};
 
-const example3Template = `<WinScrollViewer
-  :width="400"
-  :height="300"
-  :isTabStop="true">
-  <div style="display: flex; flex-direction: column;">
-    <img src="image1.jpg" />
-    <img src="image2.jpg" />
-    <!-- More images -->
-  </div>
-</WinScrollViewer>`
-
-const example3Vue = `<script setup>
-import { ref } from 'vue'
-import WinScrollViewer from '../components/WinScrollViewer.vue'
-import WinButton from '../components/WinButton.vue'
-
-const scrollViewRef = ref()
-const animationDuration = ref(1500)
-const verticalAnimation = ref('Default')
-
-function scrollWithAnimation() {
-  const el = scrollViewRef.value?.scrollViewerRef
-  if (!el) return
-
-  const startTop = el.scrollTop
-  const targetTop = el.scrollHeight / 2
-  const distance = targetTop - startTop
-  const duration = animationDuration.value
-  const startTime = performance.now()
-
-  function animate(currentTime) {
-    const elapsed = currentTime - startTime
-    const progress = Math.min(elapsed / duration, 1)
-
-    // Apply easing based on animation type
-    let easedProgress
-    switch (verticalAnimation.value) {
-      case 'Accordion':
-        easedProgress = progress < 0.5
-          ? 0.5 * Math.pow(2 * progress, 2)
-          : 1 - 0.5 * Math.pow(2 * (1 - progress), 2)
-        break
-      case 'Teleportation':
-        easedProgress = progress < 0.5 ? 0 : 1
-        break
-      default:
-        easedProgress = progress < 0.5
-          ? 2 * progress * progress
-          : 1 - Math.pow(-2 * progress + 2, 2) / 2
-    }
-
-    el.scrollTop = startTop + distance * easedProgress
-
-    if (progress < 1) {
-      requestAnimationFrame(animate)
-    }
-  }
-
-  requestAnimationFrame(animate)
-}
-<\/script>`
+const contentInsideScrollViewXaml = `<ScrollView Height="266" Width="400" ContentOrientation="None"
+    ZoomMode="${zoomMode.value}" IsTabStop="True"
+    VerticalAlignment="Top" HorizontalAlignment="Left"
+    HorizontalScrollMode="${horizontalScrollMode.value}" HorizontalScrollBarVisibility="${horizontalScrollBarVisibility.value}"
+    VerticalScrollMode="${verticalScrollMode.value}" VerticalScrollBarVisibility="${verticalScrollBarVisibility.value}">
+    <Image Source="ms-appx:///Assets/SampleMedia/cliff.jpg" AutomationProperties.Name="cliff" Stretch="None"
+        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+</ScrollView>`;
+const constantVelocityXaml = `<ScrollView Height="300" Width="400" IsTabStop="True"
+    VerticalAlignment="Top" HorizontalAlignment="Left">
+    <Image Source="ms-appx:///Assets/SampleMedia/grapes.jpg" Stretch="Uniform" AutomationProperties.Name="grapes"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/rainier.jpg" Stretch="Uniform" AutomationProperties.Name="rainier"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/sunset.jpg" Stretch="Uniform" AutomationProperties.Name="sunset"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/treetops.jpg" Stretch="Uniform" AutomationProperties.Name="treetops"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/valley.jpg" Stretch="Uniform" AutomationProperties.Name="valley"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/cliff.jpg" Stretch="Uniform" AutomationProperties.Name="cliff"/>
+</ScrollView>`;
+const programmaticScrollXaml = `<ScrollView Height="300" Width="400" IsTabStop="True"
+    ScrollAnimationStarting="ScrollView_ScrollAnimationStarting"
+    VerticalAlignment="Top" HorizontalAlignment="Left">
+    <Image Source="ms-appx:///Assets/SampleMedia/LandscapeImage1.jpg" Stretch="Uniform" AutomationProperties.Name="leaves"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/LandscapeImage2.jpg" Stretch="Uniform" AutomationProperties.Name="carousel"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/LandscapeImage3.jpg" Stretch="Uniform" AutomationProperties.Name="bicycles"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/LandscapeImage4.jpg" Stretch="Uniform" AutomationProperties.Name="pond"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/LandscapeImage5.jpg" Stretch="Uniform" AutomationProperties.Name="marina"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/LandscapeImage6.jpg" Stretch="Uniform" AutomationProperties.Name="beach"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/LandscapeImage7.jpg" Stretch="Uniform" AutomationProperties.Name="rampart"/>
+    <Image Source="ms-appx:///Assets/SampleMedia/LandscapeImage8.jpg" Stretch="Uniform" AutomationProperties.Name="mountain"/>
+</ScrollView>`;
+const constantVelocityCSharp = `scrollView2.AddScrollVelocity(
+    new Vector2(0f, verticalConstantVelocity),
+    new Vector2() /*empty inertia decay rate for a constant velocity*/);`;
+const programmaticScrollCSharp = `scrollView3.ScrollTo(
+    scrollView3.HorizontalOffset,
+    GetTargetVerticalOffset(),
+    new ScrollingScrollOptions(ScrollingAnimationMode.Enabled, ScrollingSnapPointsMode.Ignore));`;
+const contentInsideScrollViewVue = `<WinScrollViewer
+  :Width="400"
+  :Height="266"
+  ContentOrientation="None"
+  ZoomMode="Enabled"
+  HorizontalScrollMode="Auto"
+  VerticalScrollMode="Auto"
+  HorizontalScrollBarVisibility="Auto"
+  VerticalScrollBarVisibility="Auto"
+  :IsTabStop="true"
+  HorizontalAlignment="Left"
+  VerticalAlignment="Top">
+  <img src="cliff.jpg" alt="cliff" />
+</WinScrollViewer>`;
+const constantVelocityVue = `scrollViewRef.value?.AddScrollVelocity({ x: 0, y: verticalConstantVelocity });`;
+const programmaticScrollVue = `scrollViewRef.value?.ScrollTo(0, targetVerticalOffset);`;
 </script>
 
 <style scoped>
-.page-header {
-  margin: 0 0 16px 0;
-  font-size: 32px;
-  font-weight: 600;
-  line-height: 40px;
-}
-
-.page-description {
-  margin: 0 0 32px 0;
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--text-fill-color-secondary);
-  max-width: 800px;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 8px;
-}
-
-.icon {
-  font-family: 'Segoe MDL2 Assets', 'Segoe Fluent Icons', 'Segoe UI Symbol';
-  font-size: 16px;
-  line-height: 1;
-}
-
-.output-text {
-  margin: 0;
-  font-size: 14px;
-  color: var(--text-fill-color-secondary);
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.example-stack { display: flex; flex-direction: column; gap: 16px; }
+.example-copy { max-width: 600px; }
+.image-stack { display: flex; flex-direction: column; }
+.scroll-image { display: block; width: 100%; height: auto; }
+.scroll-image-single { max-width: none; width: 800px; }
+.options-grid { min-width: 200px; display: grid; grid-template-columns: auto minmax(120px, 1fr); gap: 12px; align-items: center; }
+.options-grid-wide { gap: 12px 16px; }
+.options-grid-animation { min-width: 320px; }
+.options-section-label,
+.options-span { grid-column: 1 / -1; }
+.options-section-label { justify-self: center; margin-top: 8px; }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick, useSlots } from 'vue'
 
 export interface PivotItem {
   header: string
@@ -30,9 +30,7 @@ const emit = defineEmits<{
 }>()
 
 // Slots for PivotItems
-const slots = defineSlots<{
-  default?: any
-}>()
+const slots = useSlots()
 
 // 内部状态
 const internalSelectedIndex = ref(props.selectedIndex ?? 0)

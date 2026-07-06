@@ -3,11 +3,11 @@
     ref="scrollViewerRef"
     class="win-scroll-viewer"
     :class="[
-      `zoom-mode-${zoomMode.toLowerCase()}`,
+      `zoom-mode-${effectiveZoomMode.toLowerCase()}`,
       { 'scrolling': isScrolling, 'zooming': isZooming }
     ]"
     :style="scrollViewerStyle"
-    :tabindex="isTabStop ? 0 : -1"
+    :tabindex="effectiveIsTabStop ? 0 : -1"
     @scroll="handleScroll"
     @wheel.passive="handleWheel"
     @touchstart.passive="handleTouchStart"
@@ -56,26 +56,44 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 type ZoomMode = 'Disabled' | 'Enabled'
 type ScrollMode = 'Disabled' | 'Enabled' | 'Auto'
 type ScrollBarVisibility = 'Disabled' | 'Auto' | 'Hidden' | 'Visible'
+type ContentOrientation = 'None' | 'Horizontal' | 'Vertical' | 'Both'
 type HorizontalAlignment = 'Left' | 'Center' | 'Right' | 'Stretch'
 type VerticalAlignment = 'Top' | 'Center' | 'Bottom' | 'Stretch'
 
 // Props - 100% aligned with official WinUI API
 interface Props {
   zoomMode?: ZoomMode
+  ZoomMode?: ZoomMode
   minZoomFactor?: number
+  MinZoomFactor?: number
   maxZoomFactor?: number
+  MaxZoomFactor?: number
   zoomFactor?: number
+  ZoomFactor?: number
   horizontalScrollMode?: ScrollMode
+  HorizontalScrollMode?: ScrollMode
   verticalScrollMode?: ScrollMode
+  VerticalScrollMode?: ScrollMode
   horizontalScrollBarVisibility?: ScrollBarVisibility
+  HorizontalScrollBarVisibility?: ScrollBarVisibility
   verticalScrollBarVisibility?: ScrollBarVisibility
+  VerticalScrollBarVisibility?: ScrollBarVisibility
+  contentOrientation?: ContentOrientation
+  ContentOrientation?: ContentOrientation
   isVerticalScrollChainingEnabled?: boolean
+  IsVerticalScrollChainingEnabled?: boolean
   isHorizontalScrollChainingEnabled?: boolean
+  IsHorizontalScrollChainingEnabled?: boolean
   isTabStop?: boolean
+  IsTabStop?: boolean
   width?: number | string
+  Width?: number | string
   height?: number | string
+  Height?: number | string
   horizontalAlignment?: HorizontalAlignment
+  HorizontalAlignment?: HorizontalAlignment
   verticalAlignment?: VerticalAlignment
+  VerticalAlignment?: VerticalAlignment
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -117,6 +135,7 @@ const isScrolling = ref(false)
 const isZooming = ref(false)
 const showVerticalScrollBar = ref(false)
 const showHorizontalScrollBar = ref(false)
+const velocityAnimationFrame = ref<number>()
 
 // Touch/Gesture state
 const touchStartDistance = ref(0)
@@ -132,28 +151,56 @@ const dragStartX = ref(0)
 const dragStartScrollTop = ref(0)
 const dragStartScrollLeft = ref(0)
 
+const effectiveZoomMode = computed(() => props.ZoomMode ?? props.zoomMode)
+const effectiveMinZoomFactor = computed(() => props.MinZoomFactor ?? props.minZoomFactor)
+const effectiveMaxZoomFactor = computed(() => props.MaxZoomFactor ?? props.maxZoomFactor)
+const effectiveZoomFactor = computed(() => props.ZoomFactor ?? props.zoomFactor)
+const effectiveHorizontalScrollMode = computed(() => props.HorizontalScrollMode ?? props.horizontalScrollMode)
+const effectiveVerticalScrollMode = computed(() => props.VerticalScrollMode ?? props.verticalScrollMode)
+const effectiveHorizontalScrollBarVisibility = computed(() => props.HorizontalScrollBarVisibility ?? props.horizontalScrollBarVisibility)
+const effectiveVerticalScrollBarVisibility = computed(() => props.VerticalScrollBarVisibility ?? props.verticalScrollBarVisibility)
+const effectiveContentOrientation = computed(() => props.ContentOrientation ?? props.contentOrientation)
+const effectiveIsVerticalScrollChainingEnabled = computed(() => props.IsVerticalScrollChainingEnabled ?? props.isVerticalScrollChainingEnabled)
+const effectiveIsHorizontalScrollChainingEnabled = computed(() => props.IsHorizontalScrollChainingEnabled ?? props.isHorizontalScrollChainingEnabled)
+const effectiveIsTabStop = computed(() => props.IsTabStop ?? props.isTabStop)
+const effectiveWidth = computed(() => props.Width ?? props.width)
+const effectiveHeight = computed(() => props.Height ?? props.height)
+const effectiveHorizontalAlignment = computed(() => props.HorizontalAlignment ?? props.horizontalAlignment)
+const effectiveVerticalAlignment = computed(() => props.VerticalAlignment ?? props.verticalAlignment)
+
+const hasCssSize = (value: number | string | undefined) => (
+  value !== undefined &&
+  value !== null &&
+  value !== '' &&
+  !(typeof value === 'number' && Number.isNaN(value))
+)
+
+const cssSize = (value: number | string | undefined) => (
+  typeof value === 'number' ? `${value}px` : value
+)
+
 // Computed styles
 const scrollViewerStyle = computed(() => {
   const styles: Record<string, string> = {}
 
-  if (!isNaN(props.width as number)) {
-    styles.width = typeof props.width === 'number' ? `${props.width}px` : props.width
+  if (hasCssSize(effectiveWidth.value)) {
+    styles.width = cssSize(effectiveWidth.value) ?? ''
   }
-  if (!isNaN(props.height as number)) {
-    styles.height = typeof props.height === 'number' ? `${props.height}px` : props.height
+  if (hasCssSize(effectiveHeight.value)) {
+    styles.height = cssSize(effectiveHeight.value) ?? ''
   }
 
   // Alignment
-  if (props.horizontalAlignment !== 'Stretch') {
-    styles.justifySelf = props.horizontalAlignment.toLowerCase()
+  if (effectiveHorizontalAlignment.value !== 'Stretch') {
+    styles.justifySelf = effectiveHorizontalAlignment.value.toLowerCase()
   }
-  if (props.verticalAlignment !== 'Stretch') {
-    styles.alignSelf = props.verticalAlignment.toLowerCase()
+  if (effectiveVerticalAlignment.value !== 'Stretch') {
+    styles.alignSelf = effectiveVerticalAlignment.value.toLowerCase()
   }
 
   // Overflow based on ScrollMode
-  const overflowX = getOverflowValue(props.horizontalScrollMode, props.horizontalScrollBarVisibility)
-  const overflowY = getOverflowValue(props.verticalScrollMode, props.verticalScrollBarVisibility)
+  const overflowX = getOverflowValue(effectiveHorizontalScrollMode.value, effectiveHorizontalScrollBarVisibility.value)
+  const overflowY = getOverflowValue(effectiveVerticalScrollMode.value, effectiveVerticalScrollBarVisibility.value)
 
   styles.overflowX = overflowX
   styles.overflowY = overflowY
@@ -164,19 +211,25 @@ const scrollViewerStyle = computed(() => {
 const contentStyle = computed(() => {
   const styles: Record<string, string> = {}
 
-  if (props.zoomMode === 'Enabled') {
-    const zoom = Math.max(props.minZoomFactor, Math.min(props.maxZoomFactor, currentZoomFactor.value))
+  if (effectiveZoomMode.value === 'Enabled') {
+    const zoom = Math.max(effectiveMinZoomFactor.value, Math.min(effectiveMaxZoomFactor.value, currentZoomFactor.value))
     styles.transform = `scale(${zoom})`
     styles.transformOrigin = 'top left'
+  }
+
+  if (effectiveContentOrientation.value === 'Horizontal') {
+    styles.display = 'inline-flex'
+  } else if (effectiveContentOrientation.value === 'Both' || effectiveContentOrientation.value === 'None') {
+    styles.display = 'inline-block'
   }
 
   return styles
 })
 
 const computedVerticalScrollBarVisibility = computed(() => {
-  if (props.verticalScrollBarVisibility === 'Disabled') return 'hidden'
-  if (props.verticalScrollBarVisibility === 'Hidden') return 'hidden'
-  if (props.verticalScrollBarVisibility === 'Visible') return 'visible'
+  if (effectiveVerticalScrollBarVisibility.value === 'Disabled') return 'hidden'
+  if (effectiveVerticalScrollBarVisibility.value === 'Hidden') return 'hidden'
+  if (effectiveVerticalScrollBarVisibility.value === 'Visible') return 'visible'
 
   // Auto mode - show only when content overflows
   if (!scrollViewerRef.value) return 'hidden'
@@ -184,9 +237,9 @@ const computedVerticalScrollBarVisibility = computed(() => {
 })
 
 const computedHorizontalScrollBarVisibility = computed(() => {
-  if (props.horizontalScrollBarVisibility === 'Disabled') return 'hidden'
-  if (props.horizontalScrollBarVisibility === 'Hidden') return 'hidden'
-  if (props.horizontalScrollBarVisibility === 'Visible') return 'visible'
+  if (effectiveHorizontalScrollBarVisibility.value === 'Disabled') return 'hidden'
+  if (effectiveHorizontalScrollBarVisibility.value === 'Hidden') return 'hidden'
+  if (effectiveHorizontalScrollBarVisibility.value === 'Visible') return 'visible'
 
   // Auto mode
   if (!scrollViewerRef.value) return 'hidden'
@@ -279,7 +332,7 @@ function updateScrollBarVisibility() {
 
 // Zoom handling (wheel/pinch)
 function handleWheel(event: WheelEvent) {
-  if (props.zoomMode === 'Disabled') return
+  if (effectiveZoomMode.value === 'Disabled') return
 
   // Ctrl+Wheel for zoom (standard browser behavior)
   if (event.ctrlKey) {
@@ -289,7 +342,7 @@ function handleWheel(event: WheelEvent) {
   }
 
   // Handle scroll chaining
-  if (!props.isVerticalScrollChainingEnabled && scrollViewerRef.value) {
+  if (!effectiveIsVerticalScrollChainingEnabled.value && scrollViewerRef.value) {
     const atTop = scrollViewerRef.value.scrollTop === 0
     const atBottom = scrollViewerRef.value.scrollTop + scrollViewerRef.value.clientHeight >= scrollViewerRef.value.scrollHeight
 
@@ -298,7 +351,7 @@ function handleWheel(event: WheelEvent) {
     }
   }
 
-  if (!props.isHorizontalScrollChainingEnabled && scrollViewerRef.value) {
+  if (!effectiveIsHorizontalScrollChainingEnabled.value && scrollViewerRef.value) {
     const atLeft = scrollViewerRef.value.scrollLeft === 0
     const atRight = scrollViewerRef.value.scrollLeft + scrollViewerRef.value.clientWidth >= scrollViewerRef.value.scrollWidth
 
@@ -310,7 +363,7 @@ function handleWheel(event: WheelEvent) {
 
 // Touch/Pinch handling
 function handleTouchStart(event: TouchEvent) {
-  if (props.zoomMode === 'Disabled' || event.touches.length !== 2) return
+  if (effectiveZoomMode.value === 'Disabled' || event.touches.length !== 2) return
 
   const touch1 = event.touches[0]
   const touch2 = event.touches[1]
@@ -323,7 +376,7 @@ function handleTouchStart(event: TouchEvent) {
 }
 
 function handleTouchMove(event: TouchEvent) {
-  if (props.zoomMode === 'Disabled' || event.touches.length !== 2) return
+  if (effectiveZoomMode.value === 'Disabled' || event.touches.length !== 2) return
 
   const touch1 = event.touches[0]
   const touch2 = event.touches[1]
@@ -349,9 +402,9 @@ function handleTouchEnd() {
 
 // Public methods (exposed for programmatic control)
 function zoomToFactor(factor: number) {
-  if (props.zoomMode === 'Disabled') return
+  if (effectiveZoomMode.value === 'Disabled') return
 
-  const clampedFactor = Math.max(props.minZoomFactor, Math.min(props.maxZoomFactor, factor))
+  const clampedFactor = Math.max(effectiveMinZoomFactor.value, Math.min(effectiveMaxZoomFactor.value, factor))
   currentZoomFactor.value = clampedFactor
 
   emitViewChanged(true)
@@ -377,6 +430,40 @@ function changeView(
   }
 
   emitViewChanged(false)
+}
+
+function cancelScrollVelocity() {
+  if (velocityAnimationFrame.value !== undefined) {
+    cancelAnimationFrame(velocityAnimationFrame.value)
+    velocityAnimationFrame.value = undefined
+  }
+}
+
+function ZoomTo(zoomFactor: number) {
+  zoomToFactor(zoomFactor)
+  return 0
+}
+
+function ScrollTo(horizontalOffset: number, verticalOffset: number) {
+  cancelScrollVelocity()
+  changeView(horizontalOffset, verticalOffset, null)
+  return 0
+}
+
+function AddScrollVelocity(offsetsVelocity: { x?: number; y?: number } | [number, number]) {
+  cancelScrollVelocity()
+  const horizontalVelocity = Array.isArray(offsetsVelocity) ? offsetsVelocity[0] : offsetsVelocity.x ?? 0
+  const verticalVelocity = Array.isArray(offsetsVelocity) ? offsetsVelocity[1] : offsetsVelocity.y ?? 0
+
+  const scroll = () => {
+    if (!scrollViewerRef.value) return
+    scrollViewerRef.value.scrollLeft += horizontalVelocity / 60
+    scrollViewerRef.value.scrollTop += verticalVelocity / 60
+    velocityAnimationFrame.value = requestAnimationFrame(scroll)
+  }
+
+  velocityAnimationFrame.value = requestAnimationFrame(scroll)
+  return 0
 }
 
 // Custom scrollbar dragging
@@ -429,7 +516,7 @@ function stopHorizontalDrag() {
 }
 
 // Watch for external zoomFactor changes
-watch(() => props.zoomFactor, (newValue) => {
+watch(effectiveZoomFactor, (newValue) => {
   currentZoomFactor.value = newValue
 })
 
@@ -437,6 +524,11 @@ watch(() => props.zoomFactor, (newValue) => {
 defineExpose({
   zoomToFactor,
   changeView,
+  ZoomTo,
+  ScrollTo,
+  AddScrollVelocity,
+  CancelScrollVelocity: cancelScrollVelocity,
+  scrollViewerRef,
   scrollTop: computed(() => scrollViewerRef.value?.scrollTop || 0),
   scrollLeft: computed(() => scrollViewerRef.value?.scrollLeft || 0),
   scrollHeight: computed(() => scrollViewerRef.value?.scrollHeight || 0),
@@ -457,6 +549,7 @@ onBeforeUnmount(() => {
   if (scrollTimer.value) {
     clearTimeout(scrollTimer.value)
   }
+  cancelScrollVelocity()
 
   document.removeEventListener('mousemove', handleVerticalDrag)
   document.removeEventListener('mouseup', stopVerticalDrag)

@@ -31,7 +31,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits, useSlots } from 'vue'
+import { ref, computed, useSlots } from 'vue'
+import type { CSSProperties } from 'vue'
 
 export interface AppBarButtonProps {
   icon?: string // SymbolIcon name (e.g., 'Save', 'Edit', 'Delete')
@@ -134,7 +135,7 @@ const getSymbolGlyph = (symbolName: string): string => {
 }
 
 // Flyout positioning (basic implementation)
-const flyoutStyle = computed(() => {
+const flyoutStyle = computed<CSSProperties>(() => {
   return {
     position: 'absolute',
     top: '0px',

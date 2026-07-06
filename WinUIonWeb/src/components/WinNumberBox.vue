@@ -70,11 +70,11 @@ const props = withDefaults(defineProps<{
   SmallChange?: number;
   LargeChange?: number;
   Header?: string;
-  HeaderTemplate?: unknown;
+  HeaderTemplate?: unknown | null;
   Description?: string;
   PlaceholderText?: string;
   InputScope?: string;
-  SelectionFlyout?: unknown;
+  SelectionFlyout?: unknown | null;
   SelectionHighlightColor?: string;
   TextReadingOrder?: string;
   PreventKeyboardDisplayOnProgrammaticFocus?: boolean;

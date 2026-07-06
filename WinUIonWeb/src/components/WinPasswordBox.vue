@@ -44,7 +44,7 @@ type PasswordRevealMode = 'Peek' | 'Hidden' | 'Visible';
 const props = withDefaults(defineProps<{
   Password?: string;
   Header?: string;
-  HeaderTemplate?: unknown;
+  HeaderTemplate?: unknown | null;
   Description?: string;
   PlaceholderText?: string;
   PasswordChar?: string;
@@ -53,7 +53,7 @@ const props = withDefaults(defineProps<{
   IsEnabled?: boolean;
   CanPasteClipboardContent?: boolean;
   InputScope?: string;
-  SelectionFlyout?: unknown;
+  SelectionFlyout?: unknown | null;
   SelectionHighlightColor?: string;
   TextReadingOrder?: string;
   PreventKeyboardDisplayOnProgrammaticFocus?: boolean;

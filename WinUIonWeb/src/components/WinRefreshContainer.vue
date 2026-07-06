@@ -231,7 +231,13 @@ const resetPull = () => {
 }
 
 // RefreshStateChanged 事件处理
-const handleRefreshStateChanged = (state: RefreshVisualizerState) => {
+interface RefreshStateChangedEventArgs {
+  oldState: RefreshVisualizerState
+  newState: RefreshVisualizerState
+}
+
+const handleRefreshStateChanged = (args: RefreshStateChangedEventArgs) => {
+  currentRefreshState.value = args.newState
   // 可以在这里添加额外的状态变更逻辑
 }
 

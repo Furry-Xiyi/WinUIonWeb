@@ -84,7 +84,7 @@ const props = withDefaults(defineProps<{
   DisabledFormattingAccelerators?: string;
   Header?: string;
   HeaderPlacement?: HeaderPlacement;
-  HeaderTemplate?: unknown;
+  HeaderTemplate?: unknown | null;
   HorizontalTextAlignment?: TextAlignment;
   InputScope?: string;
   IsColorFontEnabled?: boolean;
@@ -95,8 +95,8 @@ const props = withDefaults(defineProps<{
   MaxLength?: number;
   PlaceholderText?: string;
   PreventKeyboardDisplayOnProgrammaticFocus?: boolean;
-  ProofingMenuFlyout?: unknown;
-  SelectionFlyout?: unknown;
+  ProofingMenuFlyout?: unknown | null;
+  SelectionFlyout?: unknown | null;
   SelectionHighlightColor?: string;
   SelectionHighlightColorWhenNotFocused?: string;
   ShowFormattingCommands?: boolean;

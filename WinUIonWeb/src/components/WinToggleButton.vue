@@ -14,6 +14,7 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import type { CSSProperties } from 'vue';
+import type { Booleanish } from '@vue/shared';
 
 defineOptions({
   inheritAttrs: false
@@ -93,7 +94,7 @@ const buttonAttrs = computed(() => {
 const isDisabled = computed(() => props.IsEnabled === false);
 const isChecked = computed(() => props.IsChecked === true);
 const isIndeterminate = computed(() => props.IsChecked === null);
-const ariaPressed = computed(() => isIndeterminate.value ? 'mixed' : String(isChecked.value));
+const ariaPressed = computed<Booleanish | 'mixed'>(() => isIndeterminate.value ? 'mixed' : isChecked.value);
 
 const stateClasses = computed(() => ({
   'is-checked': isChecked.value,
