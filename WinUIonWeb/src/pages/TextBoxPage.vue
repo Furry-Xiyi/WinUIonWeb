@@ -1,10 +1,8 @@
 <template>
   <div>
     <div style="position: relative;">
-      <h1 class="page-header">TextBox</h1>
-      <p class="page-description">
-        Use a TextBox to let a user enter simple text input in your app. You can customize the TextBox in a number of ways to fit your needs.
-      </p>
+      <WinTextBlock class="page-header" Text="TextBox" />
+      <WinTextBlock class="page-description" Text="Use a TextBox to let a user enter simple text input in your app. You can customize the TextBox in a number of ways to fit your needs." TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton
           @click="toggleTheme"
@@ -22,7 +20,7 @@
     </div>
 
     <!-- Example 1: A simple TextBox -->
-    <p class="control-example-description">A simple TextBox</p>
+    <WinTextBlock class="control-example-description" Text="A simple TextBox" />
     <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
       :vue="example1Template">
@@ -32,7 +30,7 @@
     </WinControlExample>
 
     <!-- Example 2: A TextBox with a header and placeholder text -->
-    <p class="control-example-description">A TextBox with a header and placeholder text</p>
+    <WinTextBlock class="control-example-description" Text="A TextBox with a header and placeholder text" />
     <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
       :vue="example2Template">
@@ -45,7 +43,7 @@
     </WinControlExample>
 
     <!-- Example 3: A read-only TextBox with various properties set -->
-    <p class="control-example-description">A read-only TextBox with various properties set</p>
+    <WinTextBlock class="control-example-description" Text="A read-only TextBox with various properties set" />
     <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
       :vue="example3Template">
@@ -62,7 +60,7 @@
     </WinControlExample>
 
     <!-- Example 4: A multi-line TextBox with spell checking and custom selection highlight color -->
-    <p class="control-example-description">A multi-line TextBox with spell checking and custom selection highlight color</p>
+    <WinTextBlock class="control-example-description" Text="A multi-line TextBox with spell checking and custom selection highlight color" />
     <WinControlExample class="basic-input-example-theme"
       :theme="pageTheme"
       :vue="example4Template">
@@ -81,6 +79,7 @@
 <script setup>
 import { ref, computed, inject } from 'vue';
 import WinTextBox from '../components/WinTextBox.vue';
+import WinTextBlock from '../components/WinTextBlock.vue';
 import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';

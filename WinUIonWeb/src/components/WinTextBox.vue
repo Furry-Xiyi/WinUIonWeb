@@ -38,6 +38,9 @@
           @select="onSelect"
           @cut="onCuttingToClipboard"
           @copy="onCopyingToClipboard"
+          @compositionstart="emit('TextCompositionStarted')"
+          @compositionupdate="emit('TextCompositionChanged')"
+          @compositionend="emit('TextCompositionEnded')"
           @pointerenter="onPointerEnter"
           @pointerleave="onPointerLeave" />
 
@@ -66,6 +69,9 @@
           @select="onSelect"
           @cut="onCuttingToClipboard"
           @copy="onCopyingToClipboard"
+          @compositionstart="emit('TextCompositionStarted')"
+          @compositionupdate="emit('TextCompositionChanged')"
+          @compositionend="emit('TextCompositionEnded')"
           @pointerenter="onPointerEnter"
           @pointerleave="onPointerLeave" />
 
@@ -80,6 +86,8 @@
             <span class="win-textbox-delete-glyph">&#xE894;</span>
           </span>
         </button>
+
+        <slot name="actions"></slot>
       </div>
     </div>
 
@@ -184,6 +192,9 @@ const emit = defineEmits<{
   CuttingToClipboard: [args: { cancel: boolean; text: string }];
   CopyingToClipboard: [args: { cancel: boolean; text: string }];
   CandidateWindowBoundsChanged: [args: { rect: DOMRect | { x: number; y: number; width: number; height: number } }];
+  TextCompositionStarted: [];
+  TextCompositionChanged: [];
+  TextCompositionEnded: [];
 }>();
 
 const fieldRef = ref<HTMLInputElement | HTMLTextAreaElement | null>(null);
@@ -656,13 +667,13 @@ defineExpose({
 
 <style scoped>
 .win-textbox {
-  --textbox-background: var(--control-fill-color-default, var(--ctrl-fill-default, rgba(255, 255, 255, 0.7)));
-  --textbox-background-pointer-over: var(--control-fill-color-secondary, var(--ctrl-fill-secondary, rgba(249, 249, 249, 0.5)));
-  --textbox-background-focused: var(--control-fill-color-input-active, var(--ctrl-fill-input-active, #ffffff));
-  --textbox-background-disabled: var(--control-fill-color-disabled, var(--ctrl-fill-disabled, rgba(249, 249, 249, 0.3)));
-  --textbox-border-top: var(--control-stroke-color-default, var(--ctrl-border-rest, rgba(0, 0, 0, 0.06)));
-  --textbox-border-bottom: var(--control-strong-stroke-color-default, var(--ctrl-strong-stroke, rgba(0, 0, 0, 0.45)));
-  --textbox-border-focused: var(--system-accent-color-dark-1, var(--accent-base, var(--accent-default, #0067c0)));
+  --textbox-background: var(--control-fill-color-default, var(--ctrl-fill-default));
+  --textbox-background-pointer-over: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
+  --textbox-background-focused: var(--control-fill-color-input-active, var(--ctrl-fill-input-active));
+  --textbox-background-disabled: var(--control-fill-color-disabled, var(--ctrl-fill-disabled));
+  --textbox-border-top: var(--control-stroke-color-default, var(--ctrl-border-rest));
+  --textbox-border-bottom: var(--control-strong-stroke-color-default, var(--ctrl-strong-stroke));
+  --textbox-border-focused: var(--system-accent-color-dark-1, var(--accent-base, var(--accent-default)));
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -671,23 +682,23 @@ defineExpose({
 
 :global(html.theme-dark) .win-textbox,
 :global(.example-theme-wrapper.theme-dark) .win-textbox {
-  --textbox-border-focused: var(--system-accent-color-light-2, var(--accent-base, var(--accent-default, #4cc2ff)));
+  --textbox-border-focused: var(--system-accent-color-light-2, var(--accent-base, var(--accent-default)));
 }
 
 :global(html.theme-light) .win-textbox,
 :global(.example-theme-wrapper.theme-light) .win-textbox {
-  --textbox-border-focused: var(--system-accent-color-dark-1, var(--accent-base, var(--accent-default, #0067c0)));
+  --textbox-border-focused: var(--system-accent-color-dark-1, var(--accent-base, var(--accent-default)));
 }
 
 @media (prefers-color-scheme: dark) {
   .win-textbox {
-    --textbox-border-focused: var(--system-accent-color-light-2, var(--accent-base, var(--accent-default, #4cc2ff)));
+    --textbox-border-focused: var(--system-accent-color-light-2, var(--accent-base, var(--accent-default)));
   }
 }
 
 .win-textbox-header {
   margin-bottom: 8px;
-  color: var(--text-primary, var(--text-fill-color-primary, rgba(0, 0, 0, 0.89)));
+  color: var(--text-primary, var(--text-fill-color-primary));
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
@@ -734,7 +745,7 @@ defineExpose({
   width: 100%;
   box-sizing: border-box;
   padding: 5px 6px 6px 10px;
-  color: var(--text-primary, var(--text-fill-color-primary, rgba(0, 0, 0, 0.89)));
+  color: var(--text-primary, var(--text-fill-color-primary));
   background: transparent;
   border: 0;
   outline: 0;
@@ -756,8 +767,8 @@ defineExpose({
   -webkit-appearance: none;
   align-self: stretch;
   position: relative;
-  width: 30px;
-  min-width: 30px;
+  width: 40px;
+  min-width: 40px;
   height: auto;
   min-height: 0;
   margin: 0;
@@ -768,14 +779,62 @@ defineExpose({
   border: 0;
   border-radius: 0;
   cursor: pointer;
-  flex: 0 0 30px;
+  flex: 0 0 40px;
   font: inherit;
   line-height: 1;
 }
 
+:slotted(.win-textbox-action-button) {
+  appearance: none;
+  -webkit-appearance: none;
+  align-self: stretch;
+  position: relative;
+  width: 40px;
+  min-width: 40px;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  color: var(--text-secondary, var(--text-fill-color-secondary, rgba(0, 0, 0, 0.62)));
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  flex: 0 0 40px;
+  font: inherit;
+  line-height: 1;
+}
+
+:slotted(.win-textbox-action-button.win-textbox-action-query) {
+  width: 40px;
+  min-width: 40px;
+  flex-basis: 40px;
+  margin-left: 0;
+}
+
+:slotted(.win-textbox-action-button.win-textbox-action-number) {
+  width: 40px;
+  min-width: 40px;
+  flex-basis: 40px;
+}
+
+:slotted(.win-textbox-action-button:hover) {
+  color: var(--text-primary, var(--text-fill-color-primary, rgba(0, 0, 0, 0.89)));
+}
+
+:slotted(.win-textbox-action-button:active) {
+  color: var(--text-tertiary, var(--text-fill-color-tertiary, rgba(0, 0, 0, 0.45)));
+}
+
+:slotted(.win-textbox-action-button:disabled) {
+  color: var(--text-disabled, var(--text-fill-color-disabled, rgba(0, 0, 0, 0.36)));
+  cursor: default;
+}
+
 .win-textbox-delete-button-layout {
   position: absolute;
-  inset: 4px 4px 4px 0;
+  inset: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -785,10 +844,31 @@ defineExpose({
   box-sizing: border-box;
 }
 
+.win-textbox-delete-button,
+:slotted(.win-textbox-action-button) {
+  display: block;
+}
+
+:deep(.win-textbox-action-button > span) {
+  position: absolute;
+  inset: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+:deep(.win-textbox-action-button.win-textbox-action-query > span) {
+  inset: 4px;
+}
+
+:deep(.win-textbox-action-button:hover > span),
 .win-textbox-delete-button:hover .win-textbox-delete-button-layout {
   background: var(--subtle-fill-color-secondary, var(--subtle-secondary, rgba(0, 0, 0, 0.06)));
 }
 
+:deep(.win-textbox-action-button:active > span),
 .win-textbox-delete-button:active .win-textbox-delete-button-layout {
   background: var(--subtle-fill-color-tertiary, var(--subtle-tertiary, rgba(0, 0, 0, 0.03)));
   color: var(--text-tertiary, var(--text-fill-color-tertiary, rgba(0, 0, 0, 0.45)));

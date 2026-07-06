@@ -1,6 +1,6 @@
 <template>
   <section class="control-example-root">
-    <h3 v-if="headerText" class="control-example-header">{{ headerText }}</h3>
+    <WinTextBlock v-if="headerText" class="control-example-header" :Text="headerText" />
 
     <div class="control-example-frame">
       <div class="example-container">
@@ -8,9 +8,11 @@
           class="example-display"
           :data-theme="theme"
           :style="displayStyle">
-          <slot name="example">
-            <slot></slot>
-          </slot>
+          <WinThemeWrapper :theme="theme">
+            <slot name="example">
+              <slot></slot>
+            </slot>
+          </WinThemeWrapper>
         </div>
 
         <aside v-if="hasOptions" class="example-options">
@@ -44,6 +46,7 @@ import { ref, computed, useSlots, watch } from 'vue';
 import WinExpander from './WinExpander.vue';
 import WinSelectorBar from './WinSelectorBar.vue';
 import WinTextBlock from './WinTextBlock.vue';
+import WinThemeWrapper from './WinThemeWrapper.vue';
 
 const props = defineProps({
   headerText: { type: String, default: '' },
@@ -164,7 +167,6 @@ const onCodeTabChanged = ({ selectedIndex }) => {
 }
 
 .example-display {
-  min-height: 80px;
   padding: 12px;
   display: flex;
   align-items: center;
@@ -225,8 +227,7 @@ const onCodeTabChanged = ({ selectedIndex }) => {
   display: block;
   margin: 0;
   padding: 0;
-  max-height: 400px;
-  overflow: auto;
+  overflow: visible;
   color: var(--text-primary);
   background: transparent;
   font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;

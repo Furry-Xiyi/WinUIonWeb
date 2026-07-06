@@ -6,7 +6,7 @@
       :aria-expanded="isExpandedState"
       type="button">
       <slot name="header">
-        <span v-if="header">{{ header }}</span>
+        <WinTextBlock v-if="header" :Text="header" />
       </slot>
       <span class="win-expander-chevron">
         <span class="icon win-expander-arrow">&#xE70D;</span>
@@ -22,6 +22,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
   isExpanded: { type: Boolean, default: false },
@@ -139,7 +140,6 @@ const toggleExpanded = () => {
 }
 
 .win-expander-inner {
-  min-height: 0;
   overflow: hidden;
 }
 

@@ -1,627 +1,448 @@
 <template>
-  <div class="win-auto-suggest-box" ref="containerRef" :class="{ disabled: disabled }">
-    <div class="win-asb-input-container" :class="visualStateClass">
-      <input
-        ref="inputRef"
-        type="text"
-        class="win-asb-input"
-        :value="text"
-        :placeholder="placeholderText"
-        :disabled="disabled"
-        @input="onInput"
-        @focus="onFocus"
-        @blur="onBlur"
-        @keydown="onKeyDown"
-        @mouseenter="onPointerEnter"
-        @mouseleave="onPointerLeave"
-        :aria-autocomplete="'list'"
-        :aria-controls="isSuggestionListOpen ? suggestionListId : undefined"
-        :aria-expanded="isSuggestionListOpen"
-        :aria-activedescendant="highlightedIndex >= 0 ? `${suggestionListId}-item-${highlightedIndex}` : undefined"
-        role="combobox"
-      />
-      <button
-        v-if="queryIcon"
-        class="win-asb-query-button"
-        :disabled="disabled"
-        @click="onQueryButtonClick"
-        @mouseenter="onQueryButtonEnter"
-        @mouseleave="onQueryButtonLeave"
-        :aria-label="'Search'"
-        type="button"
-      >
-        <span class="icon">{{ queryIcon }}</span>
-      </button>
+  <div
+    ref="rootRef"
+    class="win-auto-suggest-box"
+    :class="{ 'is-suggestion-open-down': isOpen && openDirection === 'down', 'is-suggestion-open-up': isOpen && openDirection === 'up' }"
+    :style="rootStyle">
+    <div v-if="Header || $slots.header" class="win-asb-header">
+      <slot name="header">{{ Header }}</slot>
     </div>
 
-    <!-- Suggestion List Popup -->
+    <div ref="anchorRef" class="win-asb-anchor">
+      <WinTextBox
+        class="win-asb-textbox"
+        :Text="currentText"
+        :PlaceholderText="PlaceholderText"
+        :IsEnabled="IsEnabled"
+        :Description="''"
+        @update:Text="onTextInput"
+        @GotFocus="onFocus"
+        @LostFocus="onBlur"
+        @keydown.capture="onKeydown"
+        @TextCompositionStarted="onCompositionStart"
+        @TextCompositionEnded="onCompositionEnd">
+        <template #actions>
+          <button
+            v-if="QueryIcon"
+            class="win-textbox-action-button win-textbox-action-query win-asb-query-button"
+            type="button"
+            :disabled="!IsEnabled"
+            aria-label="Submit query"
+            @pointerdown.prevent
+            @click="submitQuery()">
+            <span class="win-asb-icon">{{ resolvedQueryIcon }}</span>
+          </button>
+        </template>
+      </WinTextBox>
+    </div>
+
+    <div v-if="Description || $slots.description" class="win-asb-description">
+      <slot name="description">{{ Description }}</slot>
+    </div>
+
     <Teleport to="body">
       <div
-        v-if="isSuggestionListOpen && hasItems"
-        class="win-asb-popup"
-        :style="popupStyle"
+        v-if="isOpen && suggestionItems.length"
         ref="popupRef"
-      >
-        <div
-          class="win-asb-suggestions"
-          :style="{ maxHeight: maxSuggestionListHeight !== 'auto' ? `${maxSuggestionListHeight}px` : undefined }"
-          :id="suggestionListId"
-          role="listbox"
-        >
-          <div
-            v-for="(item, index) in itemsSource"
-            :key="index"
-            class="win-asb-suggestion-item"
-            :class="{ highlighted: highlightedIndex === index }"
-            :id="`${suggestionListId}-item-${index}`"
-            role="option"
-            :aria-selected="highlightedIndex === index"
-            @click="onSuggestionClick(index)"
-            @mouseenter="onSuggestionHover(index)"
-          >
-            {{ getItemText(item) }}
-          </div>
-        </div>
+        class="win-asb-popup"
+        :class="openDirection === 'up' ? 'opens-up' : 'opens-down'"
+        :style="popupStyle"
+        role="listbox">
+        <button
+          v-for="(item, index) in suggestionItems"
+          :key="`${getItemText(item)}-${index}`"
+          class="win-asb-item"
+          :class="{ 'is-highlighted': highlightedIndex === index, 'is-disabled': isNoResultsItem(item) }"
+          type="button"
+          role="option"
+          :disabled="isNoResultsItem(item)"
+          :aria-selected="highlightedIndex === index"
+          @mouseenter="highlightedIndex = isNoResultsItem(item) ? highlightedIndex : index"
+          @pointerdown.prevent
+          @click="chooseSuggestion(index)">
+          <span class="win-asb-item-title">{{ getItemText(item) }}</span>
+          <span v-if="getItemSubtitle(item)" class="win-asb-item-subtitle">{{ getItemSubtitle(item) }}</span>
+        </button>
       </div>
     </Teleport>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
+<script setup lang="ts">
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { CSSProperties } from 'vue';
+import WinTextBox from './WinTextBox.vue';
 
-const props = defineProps({
-  text: {
-    type: String,
-    default: ''
-  },
-  placeholderText: {
-    type: String,
-    default: ''
-  },
-  queryIcon: {
-    type: String,
-    default: null
-  },
-  itemsSource: {
-    type: Array,
-    default: null
-  },
-  textMemberPath: {
-    type: String,
-    default: ''
-  },
-  maxSuggestionListHeight: {
-    type: [Number, String],
-    default: 'auto'
-  },
-  isSuggestionListOpen: {
-    type: Boolean,
-    default: false
-  },
-  updateTextOnSelect: {
-    type: Boolean,
-    default: true
-  },
-  width: {
-    type: [Number, String],
-    default: 'auto'
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }
+type Suggestion = string | number | Record<string, unknown>;
+type TextChangedReason = 'UserInput' | 'ProgrammaticChange' | 'SuggestionChosen';
+
+const props = withDefaults(defineProps<{
+  Text?: string;
+  PlaceholderText?: string;
+  Header?: string;
+  Description?: string;
+  QueryIcon?: string;
+  ItemsSource?: Suggestion[];
+  TextMemberPath?: string;
+  UpdateTextOnSelect?: boolean;
+  IsSuggestionListOpen?: boolean;
+  MaxSuggestionListHeight?: number | string;
+  AutoMaximizeSuggestionArea?: boolean;
+  DesiredCandidateWindowAlignment?: 'Default' | 'BottomEdge';
+  LightDismissOverlayMode?: string;
+  TextBoxStyle?: unknown;
+  KeepInteriorCornersSquare?: boolean;
+  IsEnabled?: boolean;
+  Width?: number | string;
+}>(), {
+  Text: '',
+  PlaceholderText: '',
+  Header: '',
+  Description: '',
+  QueryIcon: '',
+  ItemsSource: () => [],
+  TextMemberPath: '',
+  UpdateTextOnSelect: true,
+  IsSuggestionListOpen: false,
+  MaxSuggestionListHeight: 300,
+  AutoMaximizeSuggestionArea: false,
+  DesiredCandidateWindowAlignment: 'BottomEdge',
+  LightDismissOverlayMode: 'Auto',
+  TextBoxStyle: null,
+  KeepInteriorCornersSquare: false,
+  IsEnabled: true,
+  Width: ''
 });
 
-const emit = defineEmits([
-  'update:text',
-  'update:isSuggestionListOpen',
-  'textChanged',
-  'suggestionChosen',
-  'querySubmitted'
-]);
+const emit = defineEmits<{
+  'update:Text': [value: string];
+  'update:IsSuggestionListOpen': [value: boolean];
+  TextChanged: [args: { text: string; reason: TextChangedReason }];
+  SuggestionChosen: [args: { selectedItem: Suggestion }];
+  QuerySubmitted: [args: { queryText: string; chosenSuggestion: Suggestion | null }];
+}>();
 
-// Refs
-const containerRef = ref(null);
-const inputRef = ref(null);
-const popupRef = ref(null);
-
-// State
-const internalText = ref(props.text);
-const internalIsOpen = ref(props.isSuggestionListOpen);
+const rootRef = ref<HTMLElement | null>(null);
+const anchorRef = ref<HTMLElement | null>(null);
+const popupRef = ref<HTMLElement | null>(null);
+const localText = ref(props.Text);
+const localOpen = ref(props.IsSuggestionListOpen);
 const highlightedIndex = ref(-1);
-const isFocused = ref(false);
-const isPointerOver = ref(false);
-const isQueryButtonHover = ref(false);
-const suggestionListId = ref(`win-asb-${Math.random().toString(36).substring(7)}`);
-const popupStyle = ref({});
+const popupStyle = ref<CSSProperties & Record<string, string>>({});
+const openDirection = ref<'up' | 'down'>('down');
+const candidateWindowGap = ref(0);
 
-// Visual State
-const visualStateClass = computed(() => {
-  if (props.disabled) return 'disabled';
-  if (isFocused.value) return 'focused';
-  if (isPointerOver.value) return 'pointer-over';
-  return 'normal';
-});
+const isOpen = computed(() => localOpen.value && props.IsEnabled);
+const suggestionItems = computed(() => props.ItemsSource ?? []);
+const currentText = computed(() => props.Text ?? localText.value);
+const resolvedQueryIcon = computed(() => props.QueryIcon === 'Find' ? '\uE721' : props.QueryIcon);
+const rootStyle = computed<CSSProperties & Record<string, string | undefined>>(() => ({
+  width: props.Width === '' ? undefined : typeof props.Width === 'number' ? `${props.Width}px` : props.Width,
+  '--asb-input-bottom-radius': isOpen.value && openDirection.value === 'down' ? '0' : '4px'
+}));
 
-const hasItems = computed(() => {
-  return props.itemsSource && props.itemsSource.length > 0;
-});
-
-// Get display text for an item
-const getItemText = (item) => {
-  if (!item) return '';
-  if (props.textMemberPath && typeof item === 'object') {
-    return item[props.textMemberPath] || '';
+const getItemText = (item: Suggestion) => {
+  if (item && typeof item === 'object') {
+    const key = props.TextMemberPath || 'title';
+    return String(item[key] ?? item.text ?? item.name ?? '');
   }
-  return String(item);
+  return String(item ?? '');
 };
 
-// Text input handler
-const onInput = (event) => {
-  const newText = event.target.value;
-  internalText.value = newText;
-  emit('update:text', newText);
-
-  // Fire TextChanged with UserInput reason
-  emit('textChanged', {
-    text: newText,
-    reason: 'UserInput'
-  });
-
-  // Open suggestion list on user input
-  if (!internalIsOpen.value && hasItems.value) {
-    openSuggestionList();
-  }
-
-  // Reset highlighted index on new input
-  highlightedIndex.value = -1;
+const getItemSubtitle = (item: Suggestion) => {
+  if (item && typeof item === 'object') return String(item.subtitle ?? '');
+  return '';
 };
 
-// Focus handlers
-const onFocus = () => {
-  isFocused.value = true;
-  if (hasItems.value && internalText.value) {
-    openSuggestionList();
-  }
-};
+const isNoResultsItem = (item: Suggestion) => getItemText(item).trim().toLowerCase() === 'no results found';
 
-const onBlur = () => {
-  isFocused.value = false;
-  // Delay closing to allow click events on suggestions
-  setTimeout(() => {
-    if (!isFocused.value) {
-      closeSuggestionList();
-    }
-  }, 200);
-};
+const selectableIndexes = computed(() => suggestionItems.value
+  .map((item, index) => isNoResultsItem(item) ? -1 : index)
+  .filter((index) => index >= 0));
 
-const onPointerEnter = () => {
-  isPointerOver.value = true;
-};
-
-const onPointerLeave = () => {
-  isPointerOver.value = false;
-};
-
-const onQueryButtonEnter = () => {
-  isQueryButtonHover.value = true;
-};
-
-const onQueryButtonLeave = () => {
-  isQueryButtonHover.value = false;
-};
-
-// Keyboard navigation
-const onKeyDown = (event) => {
-  if (!internalIsOpen.value || !hasItems.value) {
-    if (event.key === 'Enter') {
-      onEnterKey();
-    }
-    return;
-  }
-
-  switch (event.key) {
-    case 'ArrowDown':
-      event.preventDefault();
-      if (highlightedIndex.value < props.itemsSource.length - 1) {
-        highlightedIndex.value++;
-        scrollToHighlighted();
-      }
-      break;
-
-    case 'ArrowUp':
-      event.preventDefault();
-      if (highlightedIndex.value > 0) {
-        highlightedIndex.value--;
-        scrollToHighlighted();
-      }
-      break;
-
-    case 'Enter':
-      event.preventDefault();
-      onEnterKey();
-      break;
-
-    case 'Escape':
-      event.preventDefault();
-      closeSuggestionList();
-      break;
-
-    case 'Tab':
-      closeSuggestionList();
-      break;
-  }
-};
-
-const scrollToHighlighted = async () => {
-  await nextTick();
-  if (popupRef.value && highlightedIndex.value >= 0) {
-    const highlighted = popupRef.value.querySelector('.win-asb-suggestion-item.highlighted');
-    if (highlighted) {
-      highlighted.scrollIntoView({ block: 'nearest' });
-    }
-  }
-};
-
-// Enter key handler
-const onEnterKey = () => {
-  if (internalIsOpen.value && highlightedIndex.value >= 0) {
-    // Select highlighted suggestion
-    selectSuggestion(highlightedIndex.value);
-  } else {
-    // Submit query with current text
-    emit('querySubmitted', {
-      queryText: internalText.value,
-      chosenSuggestion: null
-    });
-    closeSuggestionList();
-  }
-};
-
-// Query button click
-const onQueryButtonClick = () => {
-  if (internalIsOpen.value && highlightedIndex.value >= 0) {
-    // Submit with selected suggestion
-    const chosenItem = props.itemsSource[highlightedIndex.value];
-    emit('querySubmitted', {
-      queryText: internalText.value,
-      chosenSuggestion: chosenItem
-    });
-  } else {
-    // Submit with current text
-    emit('querySubmitted', {
-      queryText: internalText.value,
-      chosenSuggestion: null
-    });
-  }
-  closeSuggestionList();
-};
-
-// Suggestion selection
-const onSuggestionClick = (index) => {
-  selectSuggestion(index);
-};
-
-const onSuggestionHover = (index) => {
-  highlightedIndex.value = index;
-
-  // Fire SuggestionChosen on hover
-  const chosenItem = props.itemsSource[index];
-  emit('suggestionChosen', {
-    selectedItem: chosenItem
-  });
-};
-
-const selectSuggestion = (index) => {
-  const chosenItem = props.itemsSource[index];
-  const itemText = getItemText(chosenItem);
-
-  // Fire SuggestionChosen
-  emit('suggestionChosen', {
-    selectedItem: chosenItem
-  });
-
-  // Update text if UpdateTextOnSelect is true
-  if (props.updateTextOnSelect) {
-    internalText.value = itemText;
-    emit('update:text', itemText);
-
-    // Fire TextChanged with SuggestionChosen reason
-    emit('textChanged', {
-      text: itemText,
-      reason: 'SuggestionChosen'
-    });
-  }
-
-  // Fire QuerySubmitted
-  emit('querySubmitted', {
-    queryText: itemText,
-    chosenSuggestion: chosenItem
-  });
-
-  closeSuggestionList();
-  inputRef.value?.focus();
-};
-
-// Suggestion list control
-const openSuggestionList = async () => {
-  internalIsOpen.value = true;
-  emit('update:isSuggestionListOpen', true);
-
-  await nextTick();
-  updatePopupPosition();
-};
-
-const closeSuggestionList = () => {
-  internalIsOpen.value = false;
-  emit('update:isSuggestionListOpen', false);
-  highlightedIndex.value = -1;
-};
-
-// Position popup
-const updatePopupPosition = () => {
-  if (!containerRef.value) return;
-
-  const rect = containerRef.value.getBoundingClientRect();
-  const spaceBelow = window.innerHeight - rect.bottom;
-  const spaceAbove = rect.top;
-
-  const maxHeight = typeof props.maxSuggestionListHeight === 'number'
-    ? props.maxSuggestionListHeight
-    : 300;
-
-  let top = rect.bottom + 4;
-  let transformOrigin = 'top center';
-
-  // If not enough space below, show above
-  if (spaceBelow < Math.min(maxHeight, 200) && spaceAbove > spaceBelow) {
-    top = rect.top - 4;
-    transformOrigin = 'bottom center';
-
-    popupStyle.value = {
-      left: `${rect.left}px`,
-      bottom: `${window.innerHeight - rect.top + 4}px`,
-      width: `${rect.width}px`,
-      transformOrigin
-    };
-  } else {
-    popupStyle.value = {
-      left: `${rect.left}px`,
-      top: `${top}px`,
-      width: `${rect.width}px`,
-      transformOrigin
-    };
-  }
-};
-
-// Watch props
-watch(() => props.text, (newVal) => {
-  if (newVal !== internalText.value) {
-    internalText.value = newVal;
-
-    // Fire TextChanged with ProgrammaticChange reason
-    emit('textChanged', {
-      text: newVal,
-      reason: 'ProgrammaticChange'
-    });
-  }
-});
-
-watch(() => props.isSuggestionListOpen, (newVal) => {
-  if (newVal !== internalIsOpen.value) {
-    if (newVal) {
-      openSuggestionList();
-    } else {
-      closeSuggestionList();
-    }
-  }
-});
-
-watch(() => props.itemsSource, () => {
-  if (isFocused.value && hasItems.value && internalText.value) {
-    openSuggestionList();
-  }
-}, { deep: true });
-
-// Click outside handler
-const handleClickOutside = (event) => {
-  if (internalIsOpen.value) {
-    const clickedInside = containerRef.value?.contains(event.target) ||
-                          popupRef.value?.contains(event.target);
-    if (!clickedInside) {
-      closeSuggestionList();
-    }
-  }
-};
-
-// Resize handler
-const handleResize = () => {
-  if (internalIsOpen.value) {
+const setOpen = async (value: boolean) => {
+  localOpen.value = value && suggestionItems.value.length > 0;
+  emit('update:IsSuggestionListOpen', localOpen.value);
+  if (localOpen.value) {
+    highlightedIndex.value = -1;
+    await nextTick();
     updatePopupPosition();
   }
 };
 
+const onTextInput = (value: string) => {
+  localText.value = value;
+  emit('update:Text', value);
+  emit('TextChanged', { text: value, reason: 'UserInput' });
+  void setOpen(suggestionItems.value.length > 0);
+};
+
+const onFocus = () => {
+  if (suggestionItems.value.length) void setOpen(true);
+};
+
+const onBlur = () => {
+  window.setTimeout(() => setOpen(false), 120);
+};
+
+const chooseSuggestion = (index: number) => {
+  const item = suggestionItems.value[index];
+  if (item === undefined || isNoResultsItem(item)) return;
+  const text = getItemText(item);
+  emit('SuggestionChosen', { selectedItem: item });
+  if (props.UpdateTextOnSelect) {
+    localText.value = text;
+    emit('update:Text', text);
+    emit('TextChanged', { text, reason: 'SuggestionChosen' });
+  }
+  submitQuery(item, text);
+};
+
+const submitQuery = (chosenSuggestion: Suggestion | null = null, queryText = currentText.value) => {
+  emit('QuerySubmitted', { queryText, chosenSuggestion });
+  void setOpen(false);
+};
+
+const onKeydown = (event: KeyboardEvent) => {
+  if (!isOpen.value || !suggestionItems.value.length) {
+    if (event.key === 'Enter') submitQuery();
+    return;
+  }
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    const indexes = selectableIndexes.value;
+    const current = indexes.indexOf(highlightedIndex.value);
+    highlightedIndex.value = indexes[Math.min(current + 1, indexes.length - 1)] ?? -1;
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault();
+    const indexes = selectableIndexes.value;
+    const current = indexes.indexOf(highlightedIndex.value);
+    highlightedIndex.value = indexes[Math.max(current - 1, 0)] ?? -1;
+  } else if (event.key === 'Enter') {
+    event.preventDefault();
+    highlightedIndex.value >= 0 ? chooseSuggestion(highlightedIndex.value) : submitQuery();
+  } else if (event.key === 'Escape') {
+    event.preventDefault();
+    void setOpen(false);
+  }
+};
+
+const updatePopupPosition = () => {
+  const rect = anchorRef.value?.getBoundingClientRect() ?? rootRef.value?.getBoundingClientRect();
+  if (!rect) return;
+  const maxHeight = typeof props.MaxSuggestionListHeight === 'number' ? props.MaxSuggestionListHeight : Number(props.MaxSuggestionListHeight) || 300;
+  const estimatedImeHeight = candidateWindowGap.value;
+  const gap = estimatedImeHeight;
+  const spaceBelow = window.innerHeight - rect.bottom - gap - 8;
+  const spaceAbove = rect.top - gap - 8;
+  openDirection.value = spaceBelow >= Math.min(maxHeight, 160) || spaceBelow >= spaceAbove ? 'down' : 'up';
+
+  if (openDirection.value === 'up') {
+    popupStyle.value = {
+      left: `${rect.left}px`,
+      bottom: `${window.innerHeight - rect.top + gap}px`,
+      width: `${rect.width}px`,
+      maxHeight: `${props.AutoMaximizeSuggestionArea ? Math.max(120, spaceAbove) : Math.min(maxHeight, Math.max(80, spaceAbove))}px`,
+      '--asb-input-bottom-radius': '4px',
+      '--asb-popup-radius': '8px 8px 0 0'
+    };
+    return;
+  }
+
+  popupStyle.value = {
+    left: `${rect.left}px`,
+    top: `${rect.bottom + gap}px`,
+    width: `${rect.width}px`,
+    maxHeight: `${props.AutoMaximizeSuggestionArea ? Math.max(120, spaceBelow) : Math.min(maxHeight, Math.max(80, spaceBelow))}px`,
+    '--asb-input-bottom-radius': localOpen.value ? '0' : '4px',
+    '--asb-popup-radius': '0 0 8px 8px'
+  };
+};
+
+const updateCandidateWindowGap = () => {
+  if (!window.visualViewport) {
+    candidateWindowGap.value = 0;
+    return;
+  }
+  const occluded = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
+  candidateWindowGap.value = Math.max(0, Math.min(occluded, 96));
+  if (isOpen.value) updatePopupPosition();
+};
+
+const onCompositionStart = () => {
+  candidateWindowGap.value = Math.max(candidateWindowGap.value, 40);
+  if (isOpen.value) updatePopupPosition();
+};
+
+const onCompositionEnd = () => {
+  window.setTimeout(() => {
+    updateCandidateWindowGap();
+    if (candidateWindowGap.value === 0 && isOpen.value) updatePopupPosition();
+  }, 180);
+};
+
+const onDocumentPointerDown = (event: PointerEvent) => {
+  const target = event.target as Node;
+  if (rootRef.value?.contains(target) || popupRef.value?.contains(target)) return;
+  void setOpen(false);
+};
+
+watch(() => props.Text, (value) => {
+  localText.value = value ?? '';
+  emit('TextChanged', { text: localText.value, reason: 'ProgrammaticChange' });
+});
+
+watch(() => props.IsSuggestionListOpen, (value) => setOpen(Boolean(value)));
+watch(() => props.ItemsSource, () => {
+  if (isOpen.value) void setOpen(suggestionItems.value.length > 0);
+}, { deep: true });
+
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
-  window.addEventListener('resize', handleResize);
-  window.addEventListener('scroll', handleResize, true);
+  document.addEventListener('pointerdown', onDocumentPointerDown);
+  window.addEventListener('resize', updatePopupPosition);
+  window.addEventListener('scroll', updatePopupPosition, true);
+  window.visualViewport?.addEventListener('resize', updateCandidateWindowGap);
+  window.visualViewport?.addEventListener('scroll', updateCandidateWindowGap);
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside);
-  window.removeEventListener('resize', handleResize);
-  window.removeEventListener('scroll', handleResize, true);
+  document.removeEventListener('pointerdown', onDocumentPointerDown);
+  window.removeEventListener('resize', updatePopupPosition);
+  window.removeEventListener('scroll', updatePopupPosition, true);
+  window.visualViewport?.removeEventListener('resize', updateCandidateWindowGap);
+  window.visualViewport?.removeEventListener('scroll', updateCandidateWindowGap);
 });
 </script>
 
 <style scoped>
 .win-auto-suggest-box {
-  display: inline-block;
-  width: v-bind(width === 'auto' ? 'auto' : (typeof width === 'number' ? `${width}px` : width));
-  min-width: 200px;
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 64px;
 }
 
-.win-asb-input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  background: var(--control-fill-color-default);
-  border: 1px solid var(--control-stroke-color-default);
-  border-radius: 4px;
-  transition: background var(--fast-duration) var(--fast-out-slow-in),
-              border-color var(--fast-duration) var(--fast-out-slow-in),
-              box-shadow var(--fast-duration) var(--fast-out-slow-in);
-}
-
-.win-asb-input-container.pointer-over {
-  background: var(--control-fill-color-secondary);
-  border-color: var(--control-stroke-color-default);
-}
-
-.win-asb-input-container.focused {
-  background: var(--control-fill-color-default);
-  border-color: var(--accent-fill-color-default);
-  box-shadow: 0 0 0 2px var(--focus-stroke-outer);
-}
-
-.win-asb-input-container.disabled {
-  background: var(--control-fill-color-disabled);
-  border-color: var(--control-stroke-color-default);
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.win-asb-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 5px 12px;
-  font-family: var(--font-family-base);
-  font-size: var(--body-font-size);
-  color: var(--text-fill-color-primary);
+.win-asb-header {
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
   line-height: 20px;
-  min-height: 32px;
 }
 
-.win-asb-input::placeholder {
-  color: var(--text-fill-color-disabled);
-}
+.win-asb-anchor { display: flex; }
 
-.win-asb-input:disabled {
-  cursor: not-allowed;
-  color: var(--text-fill-color-disabled);
+.win-asb-textbox {
+  width: 100%;
 }
 
 .win-asb-query-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  border-left: 1px solid var(--control-stroke-color-default);
-  cursor: pointer;
-  color: var(--text-fill-color-secondary);
-  transition: background var(--fast-duration) var(--fast-out-slow-in),
-              color var(--fast-duration) var(--fast-out-slow-in);
-  flex-shrink: 0;
+  display: grid;
+  place-items: center;
 }
 
-.win-asb-query-button:hover {
-  background: var(--subtle-fill-color-secondary);
-  color: var(--text-fill-color-primary);
+.win-asb-textbox :deep(.win-textbox-delete-button) {
+  width: 40px;
+  min-width: 40px;
+  flex-basis: 40px;
 }
 
-.win-asb-query-button:active {
-  background: var(--subtle-fill-color-secondary);
-  color: var(--text-fill-color-secondary);
+.win-asb-textbox :deep(.win-textbox-delete-button-layout) {
+  inset: 4px;
 }
 
-.win-asb-query-button:disabled {
-  cursor: not-allowed;
-  color: var(--text-fill-color-disabled);
+.win-auto-suggest-box.is-suggestion-open-down :deep(.win-textbox-border),
+.win-auto-suggest-box.is-suggestion-open-up :deep(.win-textbox-border) {
+  border-radius: 4px;
 }
 
-.win-asb-query-button .icon {
-  font-family: 'Segoe MDL2 Assets', 'Segoe Fluent Icons', 'Segoe UI Symbol';
+.win-auto-suggest-box.is-suggestion-open-down :deep(.win-textbox-border) {
+  border-bottom-left-radius: var(--asb-input-bottom-radius, 0);
+  border-bottom-right-radius: var(--asb-input-bottom-radius, 0);
+}
+
+.win-auto-suggest-box.is-suggestion-open-up :deep(.win-textbox-border) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.win-asb-icon {
+  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
+  font-size: 13px;
+}
+
+.win-asb-description {
+  margin-top: 6px;
+  color: var(--text-secondary);
   font-size: 12px;
-  display: block;
+  line-height: 16px;
 }
 
-/* Popup */
 .win-asb-popup {
   position: fixed;
   z-index: 1000;
-  animation: asb-popup-enter var(--fast-duration) var(--fast-out-slow-in);
-}
-
-@keyframes asb-popup-enter {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.win-asb-suggestions {
-  background: var(--layer-fill-color-default);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid var(--surface-stroke-color-flyout);
-  border-radius: 8px;
+  overflow: auto;
   padding: 4px;
+  box-sizing: border-box;
+  background: var(--flyout-background, var(--layer-fill-color-default));
+  border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--card-stroke)));
+  border-radius: var(--asb-popup-radius, 8px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  overflow-y: auto;
-  overflow-x: hidden;
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+  animation: asb-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, asb-opacity 83ms linear both;
 }
 
-.win-asb-suggestion-item {
-  padding: 8px 12px;
+.win-asb-popup.opens-up {
+  animation-name: asb-open-up, asb-opacity;
+}
+
+@keyframes asb-opacity {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes asb-open-down {
+  from { clip-path: inset(0 0 calc(100% - 1px) 0); transform: translateY(-16px); }
+  to { clip-path: inset(0 0 0 0); transform: translateY(0); }
+}
+
+@keyframes asb-open-up {
+  from { clip-path: inset(calc(100% - 1px) 0 0 0); transform: translateY(16px); }
+  to { clip-path: inset(0 0 0 0); transform: translateY(0); }
+}
+
+.win-asb-item {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  border: 0;
   border-radius: 4px;
+  background: transparent;
+  color: var(--text-primary);
   cursor: pointer;
-  color: var(--text-fill-color-primary);
-  background: transparent;
-  transition: background var(--fast-duration) var(--fast-out-slow-in);
-  user-select: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font: inherit;
+  text-align: left;
 }
 
-.win-asb-suggestion-item:hover {
-  background: var(--subtle-fill-color-secondary);
+.win-asb-item:hover,
+.win-asb-item.is-highlighted {
+  background: var(--subtle-fill-color-secondary, var(--subtle-secondary));
 }
 
-.win-asb-suggestion-item.highlighted {
-  background: var(--subtle-fill-color-secondary);
+.win-asb-item.is-disabled {
+  color: var(--text-secondary);
+  cursor: default;
 }
 
-.win-asb-suggestion-item:active {
-  background: var(--subtle-fill-color-secondary);
-  color: var(--text-fill-color-secondary);
-}
-
-/* Scrollbar styling */
-.win-asb-suggestions::-webkit-scrollbar {
-  width: 8px;
-}
-
-.win-asb-suggestions::-webkit-scrollbar-track {
+.win-asb-item.is-disabled:hover {
   background: transparent;
 }
 
-.win-asb-suggestions::-webkit-scrollbar-thumb {
-  background: var(--control-fill-color-default);
-  border-radius: 4px;
-}
-
-.win-asb-suggestions::-webkit-scrollbar-thumb:hover {
-  background: var(--control-fill-color-secondary);
+.win-asb-item-subtitle {
+  color: var(--text-secondary);
+  font-size: 12px;
 }
 </style>

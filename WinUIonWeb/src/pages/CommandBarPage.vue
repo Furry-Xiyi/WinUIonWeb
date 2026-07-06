@@ -1,119 +1,54 @@
 <template>
   <div>
-    <div style="position: relative;">
-      <h1 class="page-header">CommandBar</h1>
-      <p class="page-description">
-        A command bar with labels on the side free floating in a page
-      </p>
+    <div class="page-heading">
+      <WinTextBlock class="page-header" Text="CommandBar" />
+      <WinTextBlock class="page-description" Text="A command bar with labels on the side free floating in a page" TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model="isFavoriteState"
-          subtle
-          @update:modelValue="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+        <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
+        <WinToggleButton v-model="isFavoriteState" class="header-action" subtle @update:modelValue="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
     </div>
 
-    <!-- Example: CommandBar with labels on the side -->
     <WinControlExample
-      headerText="CommandBar with labels on the side"
+      class="basic-input-example-theme"
+      headerText="A command bar with labels on the side free floating in a page"
       :theme="pageTheme"
-      :templateCode="exampleTemplate"
-      :vueCode="exampleVue">
+      :vue="exampleCode">
       <template #example>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="commandbar-sample">
           <WinCommandBar
-            ref="commandBarRef"
             :isOpen="isOpen"
-            :isSticky="isSticky"
             defaultLabelPosition="Right"
             @update:isOpen="isOpen = $event">
             <template #primary>
-              <WinAppBarButton
-                icon="Add"
-                label="Add"
-                @click="onElementClicked('Add')" />
-              <WinAppBarButton
-                icon="Edit"
-                label="Edit"
-                @click="onElementClicked('Edit')" />
-              <WinAppBarButton
-                icon="Share"
-                label="Share"
-                @click="onElementClicked('Share')" />
+              <WinAppBarButton icon="Add" label="Add" @click="onElementClicked('Add')" />
+              <WinAppBarButton icon="Edit" label="Edit" @click="onElementClicked('Edit')" />
+              <WinAppBarButton icon="Share" label="Share" @click="onElementClicked('Share')" />
             </template>
             <template #secondary>
-              <WinAppBarButton
-                icon="Setting"
-                label="Settings"
-                :isCompact="true"
-                labelPosition="Right"
-                @click="onElementClicked('Settings')" />
-              <template v-if="showMultipleSecondaryCommands">
-                <WinAppBarButton
-                  icon="Add"
-                  label="Button 1"
-                  :isCompact="true"
-                  labelPosition="Right"
-                  @click="onElementClicked('Button 1')" />
-                <WinAppBarButton
-                  icon="Delete"
-                  label="Button 2"
-                  :isCompact="true"
-                  labelPosition="Right"
-                  @click="onElementClicked('Button 2')" />
+              <WinAppBarButton icon="Setting" label="Settings" :isCompact="true" labelPosition="Right" @click="onElementClicked('Settings')" />
+              <template v-if="hasExtraCommands">
+                <WinAppBarButton icon="Add" label="Button 1" :isCompact="true" labelPosition="Right" @click="onElementClicked('Button 1')" />
+                <WinAppBarButton icon="Delete" label="Button 2" :isCompact="true" labelPosition="Right" @click="onElementClicked('Button 2')" />
                 <div class="commandbar-separator"></div>
-                <WinAppBarButton
-                  icon="FontDecrease"
-                  label="Button 3"
-                  :isCompact="true"
-                  labelPosition="Right"
-                  @click="onElementClicked('Button 3')" />
-                <WinAppBarButton
-                  icon="FontIncrease"
-                  label="Button 4"
-                  :isCompact="true"
-                  labelPosition="Right"
-                  @click="onElementClicked('Button 4')" />
+                <WinAppBarButton icon="FontDecrease" label="Button 3" :isCompact="true" labelPosition="Right" @click="onElementClicked('Button 3')" />
+                <WinAppBarButton icon="FontIncrease" label="Button 4" :isCompact="true" labelPosition="Right" @click="onElementClicked('Button 4')" />
               </template>
             </template>
           </WinCommandBar>
-          <p v-if="selectedOption" class="output-text" style="margin-top: 8px;">
-            {{ selectedOption }}
-          </p>
+          <WinTextBlock v-if="selectedOption" :Text="selectedOption" />
         </div>
       </template>
       <template #options>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div>
-            <p style="font-weight: 600; margin-bottom: 8px;">Show or hide</p>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <WinButton @click="openCommandBar">
-                Open command bar
-              </WinButton>
-              <WinButton @click="closeCommandBar">
-                Close command bar
-              </WinButton>
-            </div>
-          </div>
-          <div>
-            <p style="font-weight: 600; margin-bottom: 8px;">Modify content</p>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <WinButton @click="addSecondaryCommands">
-                Add secondary commands
-              </WinButton>
-              <WinButton @click="removeSecondaryCommands">
-                Remove secondary commands
-              </WinButton>
-            </div>
-          </div>
+        <div class="options-stack">
+          <WinTextBlock class="options-title" Text="Show or hide" />
+          <WinButton @click="isOpen = true"><WinTextBlock Text="Open command bar" /></WinButton>
+          <WinButton @click="isOpen = false"><WinTextBlock Text="Close command bar" /></WinButton>
+          <WinTextBlock class="options-title" Text="Modify content" />
+          <WinButton @click="hasExtraCommands = true"><WinTextBlock Text="Add secondary commands" /></WinButton>
+          <WinButton @click="hasExtraCommands = false"><WinTextBlock Text="Remove secondary commands" /></WinButton>
         </div>
       </template>
     </WinControlExample>
@@ -121,177 +56,51 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
-import WinCommandBar from '../components/WinCommandBar.vue';
+import { computed, inject, ref } from 'vue';
 import WinAppBarButton from '../components/WinAppBarButton.vue';
-import WinControlExample from '../components/WinControlExample.vue';
 import WinButton from '../components/WinButton.vue';
+import WinCommandBar from '../components/WinCommandBar.vue';
+import WinControlExample from '../components/WinControlExample.vue';
+import WinTextBlock from '../components/WinTextBlock.vue';
 import WinToggleButton from '../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'commandbar');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
-
-// CommandBar state
-const commandBarRef = ref(null);
 const isOpen = ref(false);
-const isSticky = ref(false);
-const showMultipleSecondaryCommands = ref(false);
+const hasExtraCommands = ref(false);
 const selectedOption = ref('');
 
-// Event handlers
-const onElementClicked = (buttonName) => {
-  selectedOption.value = `You clicked: ${buttonName}`;
+const onElementClicked = (name) => {
+  selectedOption.value = `You clicked: ${name}`;
 };
 
-const openCommandBar = () => {
-  isOpen.value = true;
-};
-
-const closeCommandBar = () => {
-  isOpen.value = false;
-};
-
-const addSecondaryCommands = () => {
-  showMultipleSecondaryCommands.value = true;
-};
-
-const removeSecondaryCommands = () => {
-  showMultipleSecondaryCommands.value = false;
-};
-
-// Code examples
-const exampleTemplate = `<WinCommandBar
+const exampleCode = `<WinCommandBar
   :isOpen="isOpen"
-  :isSticky="isSticky"
   defaultLabelPosition="Right"
   @update:isOpen="isOpen = $event">
   <template #primary>
-    <WinAppBarButton
-      icon="Add"
-      label="Add"
-      @click="onElementClicked('Add')" />
-    <WinAppBarButton
-      icon="Edit"
-      label="Edit"
-      @click="onElementClicked('Edit')" />
-    <WinAppBarButton
-      icon="Share"
-      label="Share"
-      @click="onElementClicked('Share')" />
+    <WinAppBarButton icon="Add" label="Add" />
+    <WinAppBarButton icon="Edit" label="Edit" />
+    <WinAppBarButton icon="Share" label="Share" />
   </template>
   <template #secondary>
-    <WinAppBarButton
-      icon="Setting"
-      label="Settings"
-      :isCompact="true"
-      labelPosition="Right"
-      @click="onElementClicked('Settings')" />
+    <WinAppBarButton icon="Setting" label="Settings" :isCompact="true" labelPosition="Right" />
   </template>
 </WinCommandBar>`;
-
-const exampleVue = `import { ref } from 'vue';
-import WinCommandBar from '../components/WinCommandBar.vue';
-import WinAppBarButton from '../components/WinAppBarButton.vue';
-
-const isOpen = ref(false);
-const isSticky = ref(false);
-const selectedOption = ref('');
-
-const onElementClicked = (buttonName) => {
-  selectedOption.value = \`You clicked: \${buttonName}\`;
-};
-
-const openCommandBar = () => {
-  isOpen.value = true;
-};
-
-const closeCommandBar = () => {
-  isOpen.value = false;
-};`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 32px;
-  font-weight: 600;
-  margin: 0 0 12px 0;
-  font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
-}
-
-.page-description {
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--text-secondary, #605E5C);
-  margin: 0 0 24px 0;
-  max-width: 800px;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 8px;
-}
-
-.icon {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-  font-size: 16px;
-}
-
-.output-text {
-  font-size: 14px;
-  color: var(--text-primary, #000000);
-  margin: 0;
-}
-
-.commandbar-separator {
-  height: 1px;
-  background: var(--stroke-surface-flyout, rgba(0, 0, 0, 0.08));
-  margin: 4px 0;
-}
-
-/* Dark theme */
-@media (prefers-color-scheme: dark) {
-  .page-description {
-    color: var(--text-secondary, #C8C6C4);
-  }
-
-  .output-text {
-    color: var(--text-primary, #FFFFFF);
-  }
-
-  .commandbar-separator {
-    background: var(--stroke-surface-flyout, rgba(255, 255, 255, 0.08));
-  }
-}
-
-html.theme-dark .page-description {
-  color: var(--text-secondary, #C8C6C4);
-}
-
-html.theme-dark .output-text {
-  color: var(--text-primary, #FFFFFF);
-}
-
-html.theme-dark .commandbar-separator {
-  background: var(--stroke-surface-flyout, rgba(255, 255, 255, 0.08));
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.commandbar-sample { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.commandbar-separator { height: 1px; margin: 4px 0; background: var(--flyout-border, var(--stroke-divider)); }
+.options-stack { display: flex; flex-direction: column; gap: 8px; }
+.options-title { margin-top: 4px; font-weight: 600; }
 </style>

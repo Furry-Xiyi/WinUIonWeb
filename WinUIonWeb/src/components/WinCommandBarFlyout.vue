@@ -1,718 +1,452 @@
 <template>
   <Teleport to="body">
-    <Transition :name="transitionName">
-      <div
-        v-if="isVisible"
-        ref="flyoutRef"
-        class="win-commandbarflyout"
-        :class="flyoutClasses"
-        :style="flyoutStyle"
-        role="menu"
-        :aria-label="ariaLabel"
-        @keydown="handleKeyDown"
-      >
-        <!-- Primary Commands Toolbar -->
-        <div class="commandbarflyout-primary" role="toolbar">
-          <slot name="primary">
-            <component
-              v-for="(command, index) in primaryCommandsList"
-              :key="command.key || `primary-${index}`"
-              :is="command.component"
-              v-bind="command.props"
-              :is-compact="true"
-              label-position="Collapsed"
-              @click="(e) => handleCommandClick(command, e)"
-            />
-          </slot>
+    <div
+      v-if="isOpen"
+      ref="flyoutRef"
+      class="win-commandbar-flyout"
+      :class="[themeClass, `placement-${actualPlacement.toLowerCase()}`, { 'is-expanded': secondaryOpen, 'opens-up': opensUp }]"
+      :style="flyoutStyle"
+      role="menu"
+      @keydown="onKeydown"
+      @pointerdown.stop>
+      <div class="win-cbf-top">
+        <div v-if="primaryCommands.length" class="win-cbf-primary" role="toolbar">
+          <button
+            v-for="command in primaryCommands"
+            :key="commandKey(command)"
+            class="win-cbf-appbar-button"
+            :class="{ 'is-toggle': command.IsToggle, 'is-checked': command.IsChecked }"
+            type="button"
+            role="menuitem"
+            :aria-pressed="command.IsToggle ? Boolean(command.IsChecked) : undefined"
+            :title="command.ToolTipServiceToolTip || command.ToolTip || command.Label"
+            :disabled="command.IsEnabled === false"
+            @click="invoke(command)">
+            <span v-if="command.Icon" class="win-cbf-icon">{{ iconGlyph(command.Icon) }}</span>
+            <span v-if="showPrimaryLabels" class="win-cbf-primary-label">{{ command.Label }}</span>
+          </button>
         </div>
 
-        <!-- Secondary Commands Dropdown -->
-        <Transition name="commandbarflyout-secondary">
-          <div
-            v-if="showSecondary"
-            class="commandbarflyout-secondary"
-            role="menu"
-          >
-            <slot name="secondary">
-              <component
-                v-for="(command, index) in secondaryCommandsList"
-                :key="command.key || `secondary-${index}`"
-                :is="command.component"
-                v-bind="command.props"
-                :is-compact="true"
-                label-position="Right"
-                @click="(e) => handleCommandClick(command, e)"
-              />
-            </slot>
-          </div>
-        </Transition>
-
-        <!-- More Button (for secondary commands) -->
         <button
-          v-if="hasSecondaryCommands"
-          class="commandbarflyout-more-button"
-          :class="{ 'active': showSecondary }"
-          :aria-label="showSecondary ? 'Close menu' : 'More options'"
-          :aria-expanded="showSecondary"
-          @click.stop="toggleSecondary"
-        >
-          <span class="symbol-icon"></span>
+          v-if="secondaryCommands.length"
+          class="win-cbf-more-button"
+          type="button"
+          aria-label="More"
+          :aria-expanded="secondaryOpen"
+          @click="secondaryOpen = !secondaryOpen">
+          <span class="win-cbf-icon">&#xE712;</span>
         </button>
       </div>
-    </Transition>
+
+      <div v-if="secondaryOpen && secondaryCommands.length" class="win-cbf-secondary" role="menu">
+        <button
+          v-for="command in secondaryCommands"
+          :key="commandKey(command)"
+          class="win-cbf-overflow-button"
+          type="button"
+          role="menuitem"
+          :disabled="command.IsEnabled === false"
+          @click="invoke(command)">
+          <span v-if="command.Icon" class="win-cbf-overflow-icon">{{ iconGlyph(command.Icon) }}</span>
+          <span class="win-cbf-overflow-label">{{ command.Label }}</span>
+        </button>
+      </div>
+    </div>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { CSSProperties } from 'vue';
 
-export interface CommandBarFlyoutCommand {
-  component: any
-  props: Record<string, any>
-  key?: string
-}
+type Placement =
+  | 'Auto'
+  | 'Top'
+  | 'Bottom'
+  | 'Left'
+  | 'Right'
+  | 'TopEdgeAlignedLeft'
+  | 'TopEdgeAlignedRight'
+  | 'BottomEdgeAlignedLeft'
+  | 'BottomEdgeAlignedRight'
+  | 'LeftEdgeAlignedTop'
+  | 'LeftEdgeAlignedBottom'
+  | 'RightEdgeAlignedTop'
+  | 'RightEdgeAlignedBottom';
 
-export interface FlyoutShowOptions {
-  showMode?: 'Standard' | 'Transient'
-  placement?: string // FlyoutPlacementMode
-}
+type ShowMode = 'Standard' | 'Transient';
+type AnchorRect = DOMRect | { top: number; bottom: number; left: number; right: number; width: number; height: number; x?: number; y?: number };
+type CommandBarFlyoutCommand = {
+  Label: string;
+  Icon?: string;
+  Name?: string;
+  Command?: string;
+  ToolTip?: string;
+  ToolTipServiceToolTip?: string;
+  IsEnabled?: boolean;
+  IsToggle?: boolean;
+  IsChecked?: boolean;
+};
 
-export interface CommandBarFlyoutProps {
-  placement?: string // 'Auto' | 'Top' | 'Bottom' | 'Left' | 'Right' | 'TopEdgeAlignedLeft' | 'TopEdgeAlignedRight' | 'BottomEdgeAlignedLeft' | 'BottomEdgeAlignedRight' | 'LeftEdgeAlignedTop' | 'LeftEdgeAlignedBottom' | 'RightEdgeAlignedTop' | 'RightEdgeAlignedBottom'
-  primaryCommands?: CommandBarFlyoutCommand[]
-  secondaryCommands?: CommandBarFlyoutCommand[]
-  ariaLabel?: string
-}
-
-const props = withDefaults(defineProps<CommandBarFlyoutProps>(), {
-  placement: 'Auto',
-  primaryCommands: () => [],
-  secondaryCommands: () => [],
-  ariaLabel: 'Command bar flyout'
-})
+const props = withDefaults(defineProps<{
+  open?: boolean;
+  anchorRect?: AnchorRect | null;
+  PrimaryCommands?: CommandBarFlyoutCommand[];
+  SecondaryCommands?: CommandBarFlyoutCommand[];
+  AlwaysExpanded?: boolean;
+  Placement?: Placement;
+  ShowMode?: ShowMode;
+  minWidth?: number;
+  showPrimaryLabels?: boolean;
+  theme?: string;
+}>(), {
+  open: false,
+  anchorRect: null,
+  PrimaryCommands: () => [],
+  SecondaryCommands: () => [],
+  AlwaysExpanded: false,
+  Placement: 'Auto',
+  ShowMode: 'Standard',
+  minWidth: 0,
+  showPrimaryLabels: false,
+  theme: ''
+});
 
 const emit = defineEmits<{
-  opening: []
-  opened: []
-  closing: []
-  closed: []
-}>()
+  close: [];
+  command: [command: CommandBarFlyoutCommand];
+  opening: [];
+  opened: [];
+  closing: [];
+  closed: [];
+}>();
 
-// State
-const isVisible = ref(false)
-const showSecondary = ref(false)
-const flyoutRef = ref<HTMLElement>()
-const targetElement = ref<HTMLElement>()
-const position = ref({ top: 0, left: 0 })
-const actualPlacement = ref('Bottom')
-const showMode = ref<'Standard' | 'Transient'>('Standard')
-const isAnimating = ref(false)
-const focusedIndex = ref(-1)
+const flyoutRef = ref<HTMLElement | null>(null);
+const isOpen = ref(props.open);
+const secondaryOpen = ref(props.AlwaysExpanded);
+const anchorRect = ref<AnchorRect | null>(props.anchorRect);
+const actualPlacement = ref<Placement>(props.Placement);
+const position = ref({ top: 0, left: 0 });
+const opensUp = computed(() => actualPlacement.value.includes('Top'));
+const primaryCommands = computed(() => props.PrimaryCommands ?? []);
+const secondaryCommands = computed(() => props.SecondaryCommands ?? []);
+const showPrimaryLabels = computed(() => props.showPrimaryLabels);
+const themeClass = computed(() => props.theme === 'light' || props.theme === 'dark' ? `win-theme-scope theme-${props.theme}` : '');
 
-// Computed
-const primaryCommandsList = computed(() => props.primaryCommands)
-const secondaryCommandsList = computed(() => props.secondaryCommands)
-const hasSecondaryCommands = computed(() => secondaryCommandsList.value.length > 0)
+const flyoutStyle = computed<CSSProperties>(() => ({
+  top: `${position.value.top}px`,
+  left: `${position.value.left}px`,
+  minWidth: props.minWidth ? `${props.minWidth}px` : undefined
+}));
 
-const flyoutClasses = computed(() => {
-  const classes = []
-  classes.push(`placement-${actualPlacement.value.toLowerCase()}`)
-  if (showMode.value === 'Transient') classes.push('transient')
-  if (showSecondary.value) classes.push('secondary-open')
-  if (isAnimating.value) classes.push('animating')
-  return classes
-})
+const iconMap: Record<string, string> = {
+  Share: '\uE72D',
+  Save: '\uE74E',
+  Delete: '\uE74D',
+  Cut: '\uE8C6',
+  Copy: '\uE8C8',
+  Paste: '\uE77F',
+  Undo: '\uE7A7',
+  Redo: '\uE7A6',
+  SelectAll: '\uE8B3',
+  Bold: '\uE8DD',
+  Italic: '\uE8DB',
+  Underline: '\uE8DC'
+};
 
-const transitionName = computed(() => {
-  // Different animations based on placement
-  if (actualPlacement.value.includes('Top')) return 'commandbarflyout-top'
-  if (actualPlacement.value.includes('Bottom')) return 'commandbarflyout-bottom'
-  if (actualPlacement.value.includes('Left')) return 'commandbarflyout-left'
-  if (actualPlacement.value.includes('Right')) return 'commandbarflyout-right'
-  return 'commandbarflyout-bottom'
-})
+const commandKey = (command: CommandBarFlyoutCommand) => command.Name || command.Command || command.Label;
+const iconGlyph = (icon: string) => iconMap[icon] ?? icon;
 
-const flyoutStyle = computed(() => {
-  return {
-    top: `${position.value.top}px`,
-    left: `${position.value.left}px`
-  }
-})
+const choosePlacement = (rect: AnchorRect, requested: Placement) => {
+  if (requested !== 'Auto') return requested;
+  const below = window.innerHeight - rect.bottom;
+  const above = rect.top;
+  const right = window.innerWidth - rect.right;
+  const left = rect.left;
+  if (below >= 120) return 'Bottom';
+  if (above >= 120) return 'Top';
+  if (right >= 180) return 'Right';
+  if (left >= 180) return 'Left';
+  return 'Bottom';
+};
 
-// Methods
-const computePlacement = (target: HTMLElement, options?: FlyoutShowOptions) => {
-  const placement = options?.placement || props.placement
+const updatePosition = async () => {
+  const rect = anchorRect.value;
+  if (!rect) return;
+  actualPlacement.value = choosePlacement(rect, props.Placement);
 
-  if (placement !== 'Auto') {
-    actualPlacement.value = placement
-    return
-  }
+  const gap = 0;
+  let top = rect.bottom + gap;
+  let left = rect.left;
 
-  // Auto placement: determine best position based on available space
-  const rect = target.getBoundingClientRect()
-  const spaceBelow = window.innerHeight - rect.bottom
-  const spaceAbove = rect.top
-  const spaceRight = window.innerWidth - rect.right
-  const spaceLeft = rect.left
-
-  // Prefer bottom, then top, then right, then left
-  if (spaceBelow >= 150) {
-    actualPlacement.value = 'Bottom'
-  } else if (spaceAbove >= 150) {
-    actualPlacement.value = 'Top'
-  } else if (spaceRight >= 200) {
-    actualPlacement.value = 'Right'
-  } else if (spaceLeft >= 200) {
-    actualPlacement.value = 'Left'
-  } else {
-    actualPlacement.value = 'Bottom' // Fallback
-  }
-}
-
-const computePosition = (target: HTMLElement) => {
-  if (!target) return
-
-  const rect = target.getBoundingClientRect()
-  const scrollX = window.scrollX || window.pageXOffset
-  const scrollY = window.scrollY || window.pageYOffset
-
-  let top = 0
-  let left = 0
-
-  switch (actualPlacement.value) {
-    case 'Top':
-    case 'TopEdgeAlignedLeft':
-    case 'TopEdgeAlignedRight':
-      top = rect.top + scrollY - 8
-      left = rect.left + scrollX
-      break
-
-    case 'Bottom':
-    case 'BottomEdgeAlignedLeft':
-    case 'BottomEdgeAlignedRight':
-      top = rect.bottom + scrollY + 8
-      left = rect.left + scrollX
-      break
-
-    case 'Left':
-    case 'LeftEdgeAlignedTop':
-    case 'LeftEdgeAlignedBottom':
-      top = rect.top + scrollY
-      left = rect.left + scrollX - 8
-      break
-
-    case 'Right':
-    case 'RightEdgeAlignedTop':
-    case 'RightEdgeAlignedBottom':
-      top = rect.top + scrollY
-      left = rect.right + scrollX + 8
-      break
-
-    default:
-      top = rect.bottom + scrollY + 8
-      left = rect.left + scrollX
-  }
-
-  // Edge alignment adjustments
-  if (actualPlacement.value.includes('AlignedRight')) {
-    left = rect.right + scrollX
-  } else if (actualPlacement.value.includes('AlignedBottom')) {
-    top = rect.bottom + scrollY
-  }
-
-  position.value = { top, left }
-}
-
-const adjustPosition = () => {
-  if (!flyoutRef.value || !targetElement.value) return
-
-  const flyoutRect = flyoutRef.value.getBoundingClientRect()
-  const currentPos = position.value
-
-  // Adjust for Top placement (need to offset by flyout height)
-  if (actualPlacement.value.includes('Top')) {
-    position.value.top = currentPos.top - flyoutRect.height
-  }
-
-  // Adjust for Left placement (need to offset by flyout width)
+  if (actualPlacement.value.includes('Top')) top = rect.top - gap;
+  if (actualPlacement.value.includes('Bottom')) top = rect.bottom + gap;
   if (actualPlacement.value.includes('Left')) {
-    position.value.left = currentPos.left - flyoutRect.width
+    top = rect.top;
+    left = rect.left - gap;
   }
-
-  // Adjust for Right alignment
-  if (actualPlacement.value.includes('AlignedRight')) {
-    position.value.left = currentPos.left - flyoutRect.width
+  if (actualPlacement.value.includes('Right')) {
+    top = rect.top;
+    left = rect.right + gap;
   }
+  if (actualPlacement.value.includes('AlignedBottom')) top = rect.bottom;
+  if (actualPlacement.value.includes('AlignedRight')) left = rect.right;
 
-  // Keep within viewport bounds
-  const viewportPadding = 8
-  if (position.value.left < viewportPadding) {
-    position.value.left = viewportPadding
-  }
-  if (position.value.left + flyoutRect.width > window.innerWidth - viewportPadding) {
-    position.value.left = window.innerWidth - flyoutRect.width - viewportPadding
-  }
-  if (position.value.top < viewportPadding) {
-    position.value.top = viewportPadding
-  }
-  if (position.value.top + flyoutRect.height > window.innerHeight - viewportPadding) {
-    position.value.top = window.innerHeight - flyoutRect.height - viewportPadding
-  }
-}
+  position.value = { top, left };
+  await nextTick();
 
-const showAt = async (target: HTMLElement, options?: FlyoutShowOptions) => {
-  if (isVisible.value) return
+  const flyout = flyoutRef.value;
+  if (!flyout) return;
+  const flyoutRect = flyout.getBoundingClientRect();
+  let nextTop = position.value.top;
+  let nextLeft = position.value.left;
 
-  targetElement.value = target
-  showMode.value = options?.showMode || 'Standard'
+  if (actualPlacement.value.includes('Top')) nextTop -= flyoutRect.height;
+  if (actualPlacement.value.includes('Left')) nextLeft -= flyoutRect.width;
+  if (actualPlacement.value.includes('AlignedRight')) nextLeft -= flyoutRect.width;
 
-  emit('opening')
-  isAnimating.value = true
+  nextLeft = Math.max(8, Math.min(window.innerWidth - flyoutRect.width - 8, nextLeft));
+  nextTop = Math.max(8, Math.min(window.innerHeight - flyoutRect.height - 8, nextTop));
+  position.value = { top: nextTop, left: nextLeft };
+};
 
-  // Compute placement and position
-  computePlacement(target, options)
-  computePosition(target)
+const openAt = async (rect: AnchorRect, options: { Placement?: Placement; ShowMode?: ShowMode } = {}) => {
+  anchorRect.value = rect;
+  actualPlacement.value = options.Placement ?? props.Placement;
+  secondaryOpen.value = props.AlwaysExpanded;
+  emit('opening');
+  isOpen.value = true;
+  await nextTick();
+  await updatePosition();
+  emit('opened');
+};
 
-  isVisible.value = true
+const showAt = async (target: HTMLElement, options: { placement?: Placement; showMode?: ShowMode; Placement?: Placement; ShowMode?: ShowMode } = {}) => {
+  await openAt(target.getBoundingClientRect(), {
+    Placement: options.Placement ?? options.placement,
+    ShowMode: options.ShowMode ?? options.showMode
+  });
+};
 
-  await nextTick()
+const hide = () => {
+  if (!isOpen.value) return;
+  emit('closing');
+  isOpen.value = false;
+  secondaryOpen.value = props.AlwaysExpanded;
+  emit('close');
+  emit('closed');
+};
 
-  // Adjust position after render
-  adjustPosition()
+const invoke = (command: CommandBarFlyoutCommand) => {
+  emit('command', command);
+  hide();
+};
 
-  setTimeout(() => {
-    isAnimating.value = false
-    emit('opened')
-
-    // Focus flyout in Standard mode
-    if (showMode.value === 'Standard' && flyoutRef.value) {
-      flyoutRef.value.focus()
-    }
-  }, 250)
-}
-
-const hide = async () => {
-  if (!isVisible.value) return
-
-  emit('closing')
-  isAnimating.value = true
-
-  setTimeout(() => {
-    isVisible.value = false
-    showSecondary.value = false
-    isAnimating.value = false
-    focusedIndex.value = -1
-    emit('closed')
-
-    // Return focus to target in Standard mode
-    if (showMode.value === 'Standard' && targetElement.value) {
-      targetElement.value.focus()
-    }
-  }, 150)
-}
-
-const toggleSecondary = () => {
-  showSecondary.value = !showSecondary.value
-}
-
-const handleCommandClick = (command: CommandBarFlyoutCommand, event: MouseEvent) => {
-  // Command's own click handler is called via v-bind
-
-  // Close flyout after command execution (unless in Transient mode with secondary open)
-  if (showMode.value === 'Standard' || !showSecondary.value) {
-    setTimeout(() => {
-      hide()
-    }, 100)
-  }
-}
-
-// Keyboard navigation
-const handleKeyDown = (event: KeyboardEvent) => {
+const onKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
-    event.preventDefault()
-    if (showSecondary.value) {
-      showSecondary.value = false
-    } else {
-      hide()
-    }
-    return
+    event.preventDefault();
+    hide();
   }
+};
 
-  // Arrow navigation in primary toolbar
-  if (!showSecondary.value && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
-    event.preventDefault()
-    navigatePrimary(event.key === 'ArrowRight' ? 1 : -1)
-  }
+const onPointerDown = (event: PointerEvent) => {
+  if (!isOpen.value) return;
+  if (flyoutRef.value?.contains(event.target as Node)) return;
+  hide();
+};
 
-  // Arrow navigation in secondary menu
-  if (showSecondary.value && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
-    event.preventDefault()
-    navigateSecondary(event.key === 'ArrowDown' ? 1 : -1)
-  }
-}
+watch(() => props.open, (value) => {
+  if (value && props.anchorRect) void openAt(props.anchorRect);
+  else if (!value) hide();
+});
 
-const navigatePrimary = (direction: number) => {
-  if (!flyoutRef.value) return
-
-  const buttons = flyoutRef.value.querySelectorAll('.commandbarflyout-primary button')
-  if (buttons.length === 0) return
-
-  let currentIndex = Array.from(buttons).findIndex(btn => btn === document.activeElement)
-  if (currentIndex === -1) currentIndex = direction > 0 ? -1 : buttons.length
-
-  const nextIndex = (currentIndex + direction + buttons.length) % buttons.length
-  ;(buttons[nextIndex] as HTMLElement).focus()
-}
-
-const navigateSecondary = (direction: number) => {
-  if (!flyoutRef.value) return
-
-  const buttons = flyoutRef.value.querySelectorAll('.commandbarflyout-secondary button')
-  if (buttons.length === 0) return
-
-  focusedIndex.value = (focusedIndex.value + direction + buttons.length) % buttons.length
-  ;(buttons[focusedIndex.value] as HTMLElement).focus()
-}
-
-// Click outside handler
-const handleClickOutside = (event: MouseEvent) => {
-  if (!isVisible.value) return
-
-  const target = event.target as Node
-  if (flyoutRef.value && !flyoutRef.value.contains(target)) {
-    // In Transient mode, clicking outside keeps the flyout (focus remains on target)
-    if (showMode.value === 'Standard') {
-      hide()
-    }
-  }
-}
-
-// Update position on scroll/resize
-const updatePosition = () => {
-  if (isVisible.value && targetElement.value) {
-    computePosition(targetElement.value)
-    nextTick(() => adjustPosition())
-  }
-}
-
-watch(isVisible, (newVal) => {
-  if (newVal) {
-    window.addEventListener('scroll', updatePosition, true)
-    window.addEventListener('resize', updatePosition)
-  } else {
-    window.removeEventListener('scroll', updatePosition, true)
-    window.removeEventListener('resize', updatePosition)
-  }
-})
+watch(() => props.anchorRect, (value) => {
+  anchorRect.value = value;
+  if (isOpen.value) void updatePosition();
+});
 
 onMounted(() => {
-  document.addEventListener('pointerdown', handleClickOutside)
-})
+  document.addEventListener('pointerdown', onPointerDown);
+  window.addEventListener('resize', updatePosition);
+  window.addEventListener('scroll', updatePosition, true);
+});
 
 onBeforeUnmount(() => {
-  document.removeEventListener('pointerdown', handleClickOutside)
-  window.removeEventListener('scroll', updatePosition, true)
-  window.removeEventListener('resize', updatePosition)
-})
+  document.removeEventListener('pointerdown', onPointerDown);
+  window.removeEventListener('resize', updatePosition);
+  window.removeEventListener('scroll', updatePosition, true);
+});
 
-// Public API
-defineExpose({
-  showAt,
-  hide,
-  isVisible
-})
+defineExpose({ showAt, hide, openAt, isOpen });
 </script>
 
 <style scoped>
-.win-commandbarflyout {
-  position: absolute;
+.win-commandbar-flyout {
+  position: fixed;
   z-index: 9100;
-  background: var(--layer-fill-color-default);
+  display: flex;
+  flex-direction: column;
+  color: var(--text-primary);
+  background: var(--flyout-background, var(--layer-fill-color-default));
   background-image: var(--flyout-material-overlay);
-  backdrop-filter: var(--flyout-backdrop);
-  -webkit-backdrop-filter: var(--flyout-backdrop);
-  border: 1px solid var(--surface-stroke-color-flyout);
+  border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--control-stroke-color-default)));
   border-radius: 8px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  display: flex;
-  flex-direction: column;
-  min-width: fit-content;
-  outline: none;
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  overflow: hidden;
+  animation: cbf-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, cbf-fade 83ms linear both;
 }
 
-/* Primary Commands Toolbar */
-.commandbarflyout-primary {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 4px;
-  position: relative;
+.win-commandbar-flyout.opens-up {
+  animation-name: cbf-open-up, cbf-fade;
 }
 
-.commandbarflyout-primary :deep(.win-appbar-button) {
-  min-width: 40px;
+.win-cbf-top {
+  display: flex;
+  align-items: stretch;
+  min-height: 46px;
+}
+
+.win-cbf-primary {
   min-height: 40px;
-  padding: 8px;
+  margin: 3px 0 3px 3px;
+  display: flex;
+  align-items: stretch;
 }
 
-/* More Button */
-.commandbarflyout-more-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.win-cbf-more-button {
   min-width: 40px;
   height: 40px;
-  border: none;
-  background: transparent;
-  color: var(--text-fill-color-primary);
-  cursor: pointer;
+  margin: 3px 3px 3px 0;
+}
+
+.win-cbf-appbar-button,
+.win-cbf-more-button,
+.win-cbf-overflow-button {
+  appearance: none;
+  border: 0;
   border-radius: 4px;
-  transition: background-color 0.1s ease;
-  margin: 4px;
-  padding: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
 
-.commandbarflyout-more-button:hover {
-  background-color: var(--subtle-fill-color-secondary);
+.win-cbf-appbar-button {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
-.commandbarflyout-more-button:active,
-.commandbarflyout-more-button.active {
-  background-color: var(--subtle-fill-color-tertiary);
+.win-commandbar-flyout:has(.win-cbf-primary-label) .win-cbf-appbar-button {
+  min-width: 64px;
+  height: 52px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
 }
 
-.commandbarflyout-more-button:focus-visible {
-  outline: 2px solid var(--accent-base);
-  outline-offset: -2px;
+.win-commandbar-flyout:has(.win-cbf-primary-label) .win-cbf-top {
+  min-height: 58px;
 }
 
-.commandbarflyout-more-button .symbol-icon {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+.win-commandbar-flyout:has(.win-cbf-primary-label) .win-cbf-more-button {
+  height: 52px;
+  min-width: 52px;
+}
+
+.win-cbf-more-button {
+  display: grid;
+  place-items: center;
+}
+
+.win-cbf-appbar-button:hover,
+.win-cbf-more-button:hover,
+.win-cbf-overflow-button:hover {
+  background: var(--subtle-fill-color-secondary, var(--subtle-secondary));
+}
+
+.win-cbf-appbar-button.is-checked {
+  background: var(--accent-base);
+  color: var(--accent-text);
+}
+
+.win-cbf-appbar-button.is-checked:hover {
+  background: var(--accent-hover, var(--accent-base));
+}
+
+.win-cbf-appbar-button:active,
+.win-cbf-more-button:active,
+.win-cbf-overflow-button:active {
+  background: var(--subtle-fill-color-tertiary, var(--subtle-tertiary));
+  color: var(--text-secondary);
+}
+
+.win-cbf-appbar-button:disabled,
+.win-cbf-overflow-button:disabled {
+  color: var(--text-disabled);
+  cursor: default;
+}
+
+.win-cbf-icon,
+.win-cbf-overflow-icon {
+  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons", sans-serif;
   font-size: 16px;
-  display: inline-block;
+  line-height: 1;
 }
 
-.commandbarflyout-more-button .symbol-icon::before {
-  content: ''; /* More icon */
+.win-cbf-primary-label {
+  font-size: 12px;
+  line-height: 14px;
 }
 
-.commandbarflyout-more-button.active .symbol-icon::before {
-  content: ''; /* ChevronUp icon */
-}
-
-/* Secondary Commands Dropdown */
-.commandbarflyout-secondary {
+.win-cbf-secondary {
   min-width: 200px;
-  background: var(--layer-fill-color-default);
-  border-top: 1px solid var(--surface-stroke-color-flyout);
   padding: 4px;
+  border-top: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--divider-stroke)));
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 2px;
 }
 
-.commandbarflyout-secondary :deep(.win-appbar-button) {
+.win-cbf-overflow-button {
+  min-height: 32px;
   width: 100%;
-  justify-content: flex-start;
-  min-height: 40px;
-  padding: 8px 12px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   text-align: left;
 }
 
-/* Transient mode styling */
-.win-commandbarflyout.transient {
-  pointer-events: auto;
+.win-cbf-overflow-icon {
+  width: 16px;
+  text-align: center;
 }
 
-/* Placement-specific transform origins */
-.win-commandbarflyout.placement-top,
-.win-commandbarflyout.placement-topedgealignedleft,
-.win-commandbarflyout.placement-topedgealignedright {
-  transform-origin: bottom center;
+.win-cbf-overflow-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
 }
 
-.win-commandbarflyout.placement-bottom,
-.win-commandbarflyout.placement-bottomedgealignedleft,
-.win-commandbarflyout.placement-bottomedgealignedright {
-  transform-origin: top center;
+@keyframes cbf-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.win-commandbarflyout.placement-left,
-.win-commandbarflyout.placement-leftedgealignedtop,
-.win-commandbarflyout.placement-leftedgealignedbottom {
-  transform-origin: center right;
+@keyframes cbf-open-down {
+  from { clip-path: inset(0 0 calc(100% - 1px) 0); transform: translateY(-8px); }
+  to { clip-path: inset(0); transform: translateY(0); }
 }
 
-.win-commandbarflyout.placement-right,
-.win-commandbarflyout.placement-rightedgealignedtop,
-.win-commandbarflyout.placement-rightedgealignedbottom {
-  transform-origin: center left;
-}
-
-/* Animations - Bottom */
-.commandbarflyout-bottom-enter-active {
-  transition: opacity 0.250s cubic-bezier(0, 0, 0, 1), transform 0.250s cubic-bezier(0, 0, 0, 1);
-}
-
-.commandbarflyout-bottom-leave-active {
-  transition: opacity 0.150s ease, transform 0.150s ease;
-}
-
-.commandbarflyout-bottom-enter-from {
-  opacity: 0;
-  transform: scale(0.95) translateY(-8px);
-}
-
-.commandbarflyout-bottom-leave-to {
-  opacity: 0;
-  transform: scale(0.95) translateY(-4px);
-}
-
-/* Animations - Top */
-.commandbarflyout-top-enter-active {
-  transition: opacity 0.250s cubic-bezier(0, 0, 0, 1), transform 0.250s cubic-bezier(0, 0, 0, 1);
-}
-
-.commandbarflyout-top-leave-active {
-  transition: opacity 0.150s ease, transform 0.150s ease;
-}
-
-.commandbarflyout-top-enter-from {
-  opacity: 0;
-  transform: scale(0.95) translateY(8px);
-}
-
-.commandbarflyout-top-leave-to {
-  opacity: 0;
-  transform: scale(0.95) translateY(4px);
-}
-
-/* Animations - Right */
-.commandbarflyout-right-enter-active {
-  transition: opacity 0.250s cubic-bezier(0, 0, 0, 1), transform 0.250s cubic-bezier(0, 0, 0, 1);
-}
-
-.commandbarflyout-right-leave-active {
-  transition: opacity 0.150s ease, transform 0.150s ease;
-}
-
-.commandbarflyout-right-enter-from {
-  opacity: 0;
-  transform: scale(0.95) translateX(-8px);
-}
-
-.commandbarflyout-right-leave-to {
-  opacity: 0;
-  transform: scale(0.95) translateX(-4px);
-}
-
-/* Animations - Left */
-.commandbarflyout-left-enter-active {
-  transition: opacity 0.250s cubic-bezier(0, 0, 0, 1), transform 0.250s cubic-bezier(0, 0, 0, 1);
-}
-
-.commandbarflyout-left-leave-active {
-  transition: opacity 0.150s ease, transform 0.150s ease;
-}
-
-.commandbarflyout-left-enter-from {
-  opacity: 0;
-  transform: scale(0.95) translateX(8px);
-}
-
-.commandbarflyout-left-leave-to {
-  opacity: 0;
-  transform: scale(0.95) translateX(4px);
-}
-
-/* Secondary dropdown animation */
-.commandbarflyout-secondary-enter-active {
-  transition: opacity 0.15s ease, max-height 0.15s ease;
-}
-
-.commandbarflyout-secondary-leave-active {
-  transition: opacity 0.1s ease, max-height 0.1s ease;
-}
-
-.commandbarflyout-secondary-enter-from,
-.commandbarflyout-secondary-leave-to {
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-}
-
-/* Dark Theme */
-html.theme-dark .win-commandbarflyout {
-  background: var(--layer-fill-color-default);
-  border-color: var(--surface-stroke-color-flyout);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-}
-
-html.theme-dark .commandbarflyout-more-button {
-  color: var(--text-fill-color-primary);
-}
-
-html.theme-dark .commandbarflyout-more-button:hover {
-  background-color: var(--subtle-fill-color-secondary);
-}
-
-html.theme-dark .commandbarflyout-more-button:active,
-html.theme-dark .commandbarflyout-more-button.active {
-  background-color: var(--subtle-fill-color-tertiary);
-}
-
-html.theme-dark .commandbarflyout-secondary {
-  background: var(--layer-fill-color-default);
-  border-top-color: var(--surface-stroke-color-flyout);
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not(.theme-light) .win-commandbarflyout {
-    background: var(--layer-fill-color-default);
-    border-color: var(--surface-stroke-color-flyout);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-  }
-
-  html:not(.theme-light) .commandbarflyout-more-button {
-    color: var(--text-fill-color-primary);
-  }
-
-  html:not(.theme-light) .commandbarflyout-more-button:hover {
-    background-color: var(--subtle-fill-color-secondary);
-  }
-
-  html:not(.theme-light) .commandbarflyout-more-button:active,
-  html:not(.theme-light) .commandbarflyout-more-button.active {
-    background-color: var(--subtle-fill-color-tertiary);
-  }
-
-  html:not(.theme-light) .commandbarflyout-secondary {
-    background: var(--layer-fill-color-default);
-    border-top-color: var(--surface-stroke-color-flyout);
-  }
-}
-
-html.theme-dark .win-commandbarflyout {
-  background: var(--layer-fill-color-default);
-  border-color: var(--surface-stroke-color-flyout);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-}
-
-html.theme-dark .commandbarflyout-more-button {
-  color: var(--text-fill-color-primary);
-}
-
-html.theme-dark .commandbarflyout-more-button:hover {
-  background-color: var(--subtle-fill-color-secondary);
-}
-
-html.theme-dark .commandbarflyout-more-button:active,
-html.theme-dark .commandbarflyout-more-button.active {
-  background-color: var(--subtle-fill-color-tertiary);
-}
-
-html.theme-dark .commandbarflyout-secondary {
-  background: var(--layer-fill-color-default);
-  border-top-color: var(--surface-stroke-color-flyout);
+@keyframes cbf-open-up {
+  from { clip-path: inset(calc(100% - 1px) 0 0 0); transform: translateY(8px); }
+  to { clip-path: inset(0); transform: translateY(0); }
 }
 </style>

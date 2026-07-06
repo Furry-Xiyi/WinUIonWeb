@@ -1,244 +1,125 @@
 <template>
   <div>
     <div style="position: relative;">
-      <h1 class="page-header">CommandBarFlyout</h1>
-      <p class="page-description">
-        The CommandBarFlyout lets you provide users with easy access to common tasks by showing commands in a floating toolbar related to an element on your UI canvas.
-      </p>
+      <WinTextBlock class="page-header" Text="CommandBarFlyout" />
+      <WinTextBlock
+        class="page-description"
+        Text="The CommandBarFlyout lets you provide users with easy access to common tasks by showing commands in a floating toolbar related to an element on your UI canvas."
+        TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model="isFavoriteState"
-          subtle
-          @update:modelValue="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+        <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE793;</span></WinButton>
+        <WinToggleButton v-model="isFavoriteState" subtle @update:modelValue="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
       </div>
     </div>
 
-    <!-- Example: CommandBarFlyout for commands on an in-app object -->
     <WinControlExample
-      headerText="CommandBarFlyout for commands on an in-app object"
+      class="basic-input-example-theme"
       :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
+      :vue="exampleTemplate">
       <template #example>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <p style="margin: 0; font-size: 14px; color: var(--text-secondary);">
-            Click or right click the image to open a CommandBarFlyout
-          </p>
-          <div style="position: relative; display: inline-block; width: fit-content;">
-            <button
-              ref="imageButton"
-              @click="handleImageClick"
-              @contextmenu.prevent="handleImageContextMenu"
-              style="padding: 0; border: none; background: none; cursor: pointer;">
-              <img
-                src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Rainier.jpg"
-                alt="Mountain"
-                style="height: 300px; display: block; border-radius: 4px;" />
-            </button>
-            <WinCommandBarFlyout
-              v-if="showFlyout"
-              :target="imageButton"
-              :placement="flyoutPlacement"
-              :isTransient="isTransient"
-              @closed="handleFlyoutClosed">
-              <template #primaryCommands>
-                <WinAppBarButton
-                  icon="&#xE72D;"
-                  label="Share"
-                  @click="handleCommand('Share')" />
-                <WinAppBarButton
-                  icon="&#xE74E;"
-                  label="Save"
-                  @click="handleCommand('Save')" />
-                <WinAppBarButton
-                  icon="&#xE74D;"
-                  label="Delete"
-                  @click="handleCommand('Delete')" />
-              </template>
-              <template #secondaryCommands>
-                <WinAppBarButton
-                  label="Resize"
-                  @click="handleCommand('Resize')" />
-                <WinAppBarButton
-                  label="Move"
-                  @click="handleCommand('Move')" />
-              </template>
-            </WinCommandBarFlyout>
-          </div>
+        <div class="commandbarflyout-sample">
+          <WinTextBlock Text="Click or right click the image to open a CommandBarFlyout" />
+          <button
+            ref="myImageButton"
+            class="image-button"
+            type="button"
+            aria-label="mountain"
+            @click="myImageButtonClick"
+            @contextmenu.prevent="myImageButtonContextRequested">
+            <img ref="image1" class="sample-image" src="/assets/rainier.jpg" alt="mountain" />
+          </button>
+          <WinTextBlock :Text="selectedOptionText" />
         </div>
       </template>
-      <template #options>
-        <p class="output-text">{{ selectedOption }}</p>
-      </template>
     </WinControlExample>
+
+    <WinCommandBarFlyout
+      ref="commandBarFlyout1"
+      :PrimaryCommands="primaryCommands"
+      :SecondaryCommands="secondaryCommands"
+      Placement="Right"
+      :showPrimaryLabels="true"
+      :theme="pageTheme"
+      @command="onElementClicked" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
-import WinControlExample from '../components/WinControlExample.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../components/WinButton.vue';
-import WinToggleButton from '../components/WinToggleButton.vue';
 import WinCommandBarFlyout from '../components/WinCommandBarFlyout.vue';
-import WinAppBarButton from '../components/WinAppBarButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import WinControlExample from '../components/WinControlExample.vue';
+import WinTextBlock from '../components/WinTextBlock.vue';
+import WinToggleButton from '../components/WinToggleButton.vue';
+import { createPageState } from '../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'commandbarflyout');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
+const commandBarFlyout1 = ref(null);
+const image1 = ref(null);
+const myImageButton = ref(null);
+const selectedOptionText = ref('');
 
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
+const primaryCommands = [
+  { Icon: 'Share', Label: 'Share', ToolTipServiceToolTip: 'Share' },
+  { Icon: 'Save', Label: 'Save', ToolTipServiceToolTip: 'Save' },
+  { Icon: 'Delete', Label: 'Delete', ToolTipServiceToolTip: 'Delete' }
+];
 
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
+const secondaryCommands = [
+  { Label: 'Resize' },
+  { Label: 'Move' }
+];
+
+const onElementClicked = (command) => {
+  selectedOptionText.value = `You clicked: ${command.Label}`;
 };
 
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
-
-// Example: CommandBarFlyout
-const imageButton = ref(null);
-const showFlyout = ref(false);
-const isTransient = ref(true);
-const flyoutPlacement = ref('right');
-const selectedOption = ref('');
-
-const handleImageClick = () => {
-  // Show in transient mode (focus stays on image)
-  isTransient.value = true;
-  showFlyout.value = true;
+const showMenu = (isTransient) => {
+  const target = image1.value ?? myImageButton.value;
+  if (!target) return;
+  commandBarFlyout1.value?.showAt(target, {
+    ShowMode: isTransient ? 'Transient' : 'Standard',
+    Placement: 'RightEdgeAlignedTop'
+  });
 };
 
-const handleImageContextMenu = () => {
-  // Show in standard mode (focus moves to menu)
-  isTransient.value = false;
-  showFlyout.value = true;
+const myImageButtonContextRequested = () => {
+  showMenu(false);
 };
 
-const handleCommand = (command) => {
-  selectedOption.value = `You clicked: ${command}`;
-  showFlyout.value = false;
+const myImageButtonClick = () => {
+  showMenu(true);
 };
 
-const handleFlyoutClosed = () => {
-  showFlyout.value = false;
-};
+const exampleTemplate = `<WinCommandBarFlyout
+  :PrimaryCommands="[
+    { Icon: 'Share', Label: 'Share', ToolTipServiceToolTip: 'Share' },
+    { Icon: 'Save', Label: 'Save', ToolTipServiceToolTip: 'Save' },
+    { Icon: 'Delete', Label: 'Delete', ToolTipServiceToolTip: 'Delete' }
+  ]"
+  :SecondaryCommands="[
+    { Label: 'Resize' },
+    { Label: 'Move' }
+  ]"
+  Placement="Right"
+  :showPrimaryLabels="true" />
 
-const example1Template = `<button
-  ref="imageButton"
-  @click="handleImageClick"
-  @contextmenu.prevent="handleImageContextMenu"
-  style="padding: 0; border: none; background: none; cursor: pointer;">
-  <img
-    src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Rainier.jpg"
-    alt="Mountain"
-    style="height: 300px; display: block;" />
-</button>
-
-<WinCommandBarFlyout
-  v-if="showFlyout"
-  :target="imageButton"
-  :placement="flyoutPlacement"
-  :isTransient="isTransient"
-  @closed="handleFlyoutClosed">
-  <template #primaryCommands>
-    <WinAppBarButton
-      icon="&#xE72D;"
-      label="Share"
-      @click="handleCommand('Share')" />
-    <WinAppBarButton
-      icon="&#xE74E;"
-      label="Save"
-      @click="handleCommand('Save')" />
-    <WinAppBarButton
-      icon="&#xE74D;"
-      label="Delete"
-      @click="handleCommand('Delete')" />
-  </template>
-  <template #secondaryCommands>
-    <WinAppBarButton
-      label="Resize"
-      @click="handleCommand('Resize')" />
-    <WinAppBarButton
-      label="Move"
-      @click="handleCommand('Move')" />
-  </template>
-</WinCommandBarFlyout>`;
-
-const example1Vue = `const imageButton = ref(null);
-const showFlyout = ref(false);
-const isTransient = ref(true);
-const selectedOption = ref('');
-
-const handleImageClick = () => {
-  // Transient mode - focus stays on image
-  isTransient.value = true;
-  showFlyout.value = true;
-};
-
-const handleImageContextMenu = () => {
-  // Standard mode - focus moves to menu
-  isTransient.value = false;
-  showFlyout.value = true;
-};
-
-const handleCommand = (command) => {
-  selectedOption.value = \`You clicked: \${command}\`;
-  showFlyout.value = false;
-};
-
-const handleFlyoutClosed = () => {
-  showFlyout.value = false;
-};`;
+<WinTextBlock Text="Click or right click the image to open a CommandBarFlyout" />
+<WinButton Padding="0" AutomationProperties.Name="mountain">
+  <img Height="300" src="/assets/rainier.jpg" />
+</WinButton>
+<WinTextBlock Text="You clicked: Share" />`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
-
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
-}
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-primary); }
+.page-description { font-size: 14px; color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.5; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; align-items: center; }
+.icon { font-size: 16px; font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets'; }
+.commandbarflyout-sample { display: flex; flex-direction: column; align-items: flex-start; color: var(--text-primary); }
+.image-button { margin: 12px 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.sample-image { height: 300px; display: block; }
 </style>

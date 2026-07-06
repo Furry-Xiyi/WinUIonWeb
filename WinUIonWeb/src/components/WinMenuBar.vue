@@ -1,5 +1,10 @@
 <template>
-  <nav class="win-menu-bar" role="menubar" :aria-label="ariaLabel">
+  <nav
+    ref="menuBarRef"
+    class="win-menu-bar"
+    role="menubar"
+    :aria-label="ariaLabel"
+    @mouseleave="scheduleCloseMenu">
     <div
       v-for="(item, index) in items"
       :key="index"
@@ -20,7 +25,7 @@
         @keydown="handleMenuBarKeyDown($event, index)"
         @focus="focusedIndex = index"
       >
-        {{ item.title }}
+        <WinTextBlock :Text="item.title" />
       </button>
 
       <!-- MenuFlyout -->
@@ -28,17 +33,20 @@
         <div
           v-if="openIndex === index"
           class="win-menu-flyout-overlay"
-          @click="closeMenu"
+          @pointerdown="closeMenu"
           @contextmenu.prevent="closeMenu"
         ></div>
         <div
           v-if="openIndex === index"
           ref="flyoutRef"
           class="win-menu-flyout"
+          :class="themeClass"
           role="menu"
           :aria-label="item.title"
           :style="flyoutStyle"
           @keydown="handleFlyoutKeyDown"
+          @mouseenter="cancelCloseMenu"
+          @mouseleave="scheduleCloseMenu"
         >
           <template v-for="(child, childIndex) in item.items" :key="childIndex">
             <!-- MenuFlyoutSeparator -->
@@ -46,6 +54,7 @@
               v-if="child.type === 'separator'"
               class="win-menu-flyout-separator"
               role="separator"
+              @mouseenter="closeSubmenu"
             ></div>
 
             <!-- MenuFlyoutSubItem -->
@@ -62,13 +71,14 @@
               @mouseleave="scheduleCloseSubmenu"
               @focus="flyoutFocusedIndex = childIndex"
             >
-              <span class="win-menu-flyout-item-text">{{ child.text }}</span>
+              <WinTextBlock class="win-menu-flyout-item-text" :Text="child.text" />
               <span class="win-menu-flyout-chevron icon">&#xE76C;</span>
 
               <!-- Submenu Flyout -->
               <div
                 v-if="submenuOpenIndex === childIndex"
                 class="win-menu-submenu-flyout"
+                :class="themeClass"
                 role="menu"
                 :aria-label="child.text"
                 @mouseenter="cancelCloseSubmenu"
@@ -92,10 +102,8 @@
                     tabindex="-1"
                     @click="handleSubmenuItemClick(subChild, $event)"
                   >
-                    <span class="win-menu-flyout-item-text">{{ subChild.text }}</span>
-                    <span v-if="subChild.keyboardAccelerator" class="win-menu-flyout-accelerator">
-                      {{ formatAccelerator(subChild.keyboardAccelerator) }}
-                    </span>
+                    <WinTextBlock class="win-menu-flyout-item-text" :Text="subChild.text" />
+                    <WinTextBlock v-if="subChild.keyboardAccelerator" class="win-menu-flyout-accelerator" :Text="formatAccelerator(subChild.keyboardAccelerator)" />
                   </div>
                 </template>
               </div>
@@ -111,15 +119,14 @@
               :aria-disabled="child.isDisabled"
               :tabindex="flyoutFocusedIndex === childIndex ? 0 : -1"
               @click="handleRadioItemClick(item, child, childIndex, $event)"
+              @mouseenter="closeSubmenu"
               @focus="flyoutFocusedIndex = childIndex"
             >
               <span class="win-menu-flyout-radio-indicator">
                 <span v-if="child.isChecked" class="win-menu-flyout-radio-dot"></span>
               </span>
-              <span class="win-menu-flyout-item-text">{{ child.text }}</span>
-              <span v-if="child.keyboardAccelerator" class="win-menu-flyout-accelerator">
-                {{ formatAccelerator(child.keyboardAccelerator) }}
-              </span>
+              <WinTextBlock class="win-menu-flyout-item-text" :Text="child.text" />
+              <WinTextBlock v-if="child.keyboardAccelerator" class="win-menu-flyout-accelerator" :Text="formatAccelerator(child.keyboardAccelerator)" />
             </div>
 
             <!-- Regular MenuFlyoutItem -->
@@ -131,12 +138,11 @@
               :aria-disabled="child.isDisabled"
               :tabindex="flyoutFocusedIndex === childIndex ? 0 : -1"
               @click="handleItemClick(child, $event)"
+              @mouseenter="closeSubmenu"
               @focus="flyoutFocusedIndex = childIndex"
             >
-              <span class="win-menu-flyout-item-text">{{ child.text }}</span>
-              <span v-if="child.keyboardAccelerator" class="win-menu-flyout-accelerator">
-                {{ formatAccelerator(child.keyboardAccelerator) }}
-              </span>
+              <WinTextBlock class="win-menu-flyout-item-text" :Text="child.text" />
+              <WinTextBlock v-if="child.keyboardAccelerator" class="win-menu-flyout-accelerator" :Text="formatAccelerator(child.keyboardAccelerator)" />
             </div>
           </template>
         </div>
@@ -147,6 +153,7 @@
 
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue';
+import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
   items: {
@@ -157,6 +164,10 @@ const props = defineProps({
   ariaLabel: {
     type: String,
     default: 'Menu'
+  },
+  theme: {
+    type: String,
+    default: ''
   }
 });
 
@@ -169,8 +180,11 @@ const flyoutFocusedIndex = ref(0);
 const submenuOpenIndex = ref(null);
 const flyoutStyle = ref({});
 const flyoutRef = ref(null);
+const menuBarRef = ref(null);
 const isMouseMode = ref(false);
+const themeClass = computed(() => props.theme === 'light' || props.theme === 'dark' ? `win-theme-scope theme-${props.theme}` : '');
 let submenuCloseTimer = null;
+let menuCloseTimer = null;
 
 // Toggle menu
 const toggleMenu = async (index) => {
@@ -184,6 +198,7 @@ const toggleMenu = async (index) => {
     flyoutFocusedIndex.value = 0;
     submenuOpenIndex.value = null;
     isMouseMode.value = true;
+    cancelCloseMenu();
 
     await nextTick();
     positionFlyout(index);
@@ -192,12 +207,12 @@ const toggleMenu = async (index) => {
 
 // Position flyout
 const positionFlyout = (index) => {
-  const button = document.querySelectorAll('.win-menu-bar-button')[index];
+  const button = menuBarRef.value?.querySelectorAll('.win-menu-bar-button')[index];
   if (!button) return;
 
   const rect = button.getBoundingClientRect();
   flyoutStyle.value = {
-    top: `${rect.bottom + 2}px`,
+    top: `${rect.bottom}px`,
     left: `${rect.left}px`,
     minWidth: `${Math.max(rect.width, 200)}px`
   };
@@ -205,6 +220,7 @@ const positionFlyout = (index) => {
 
 // Mouse interactions
 const handleMouseEnter = (index) => {
+  cancelCloseMenu();
   if (openIndex.value !== null && openIndex.value !== index && !props.items[index]?.isDisabled) {
     openIndex.value = index;
     focusedIndex.value = index;
@@ -212,6 +228,20 @@ const handleMouseEnter = (index) => {
     submenuOpenIndex.value = null;
     isMouseMode.value = true;
     nextTick(() => positionFlyout(index));
+  }
+};
+
+const scheduleCloseMenu = () => {
+  cancelCloseMenu();
+  menuCloseTimer = setTimeout(() => {
+    closeMenu();
+  }, 220);
+};
+
+const cancelCloseMenu = () => {
+  if (menuCloseTimer) {
+    clearTimeout(menuCloseTimer);
+    menuCloseTimer = null;
   }
 };
 
@@ -234,11 +264,17 @@ const cancelCloseSubmenu = () => {
   }
 };
 
+const closeSubmenu = () => {
+  cancelCloseSubmenu();
+  submenuOpenIndex.value = null;
+};
+
 // Close menu
 const closeMenu = () => {
   openIndex.value = null;
   submenuOpenIndex.value = null;
   cancelCloseSubmenu();
+  cancelCloseMenu();
 };
 
 // Item click handlers
@@ -455,6 +491,7 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('keydown', handleGlobalKeyDown);
   cancelCloseSubmenu();
+  cancelCloseMenu();
 });
 
 // Watch for open state changes
@@ -467,12 +504,14 @@ watch(openIndex, (newVal) => {
 
 <style scoped>
 .win-menu-bar {
+  position: relative;
+  z-index: 1001;
   display: flex;
   align-items: center;
   gap: 2px;
   padding: 4px 8px;
-  background: var(--layer-alt);
-  border-bottom: 1px solid var(--stroke-surface-flyout);
+  background: var(--layer-alt, transparent);
+  border-bottom: 1px solid var(--flyout-border, var(--stroke-surface-flyout));
   height: 40px;
 }
 
@@ -522,17 +561,17 @@ watch(openIndex, (newVal) => {
 .win-menu-flyout-overlay {
   position: fixed;
   inset: 0;
-  z-index: 999;
+  z-index: 1000;
 }
 
 /* MenuFlyout */
 .win-menu-flyout {
   position: fixed;
-  border: 1px solid var(--stroke-surface-flyout);
+  border: 1px solid var(--flyout-border, var(--stroke-surface-flyout));
   border-radius: 8px;
   padding: 4px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-  background: var(--flyout-bg);
+  background: var(--flyout-bg, var(--layer-default));
   background-image: var(--flyout-material-overlay);
   backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
@@ -540,7 +579,7 @@ watch(openIndex, (newVal) => {
   flex-direction: column;
   gap: 2px;
   animation: menu-flyout-enter 0.167s var(--fast-out-slow-in);
-  z-index: 1000;
+  z-index: 1002;
   min-width: 200px;
 }
 
@@ -605,7 +644,7 @@ watch(openIndex, (newVal) => {
 /* MenuFlyoutSeparator */
 .win-menu-flyout-separator {
   height: 1px;
-  background: var(--divider-stroke);
+  background: var(--flyout-border, var(--divider-stroke));
   margin: 4px 0;
 }
 
@@ -659,11 +698,11 @@ watch(openIndex, (newVal) => {
   position: absolute;
   left: 100%;
   top: -4px;
-  border: 1px solid var(--stroke-surface-flyout);
+  border: 1px solid var(--flyout-border, var(--stroke-surface-flyout));
   border-radius: 8px;
   padding: 4px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-  background: var(--flyout-bg);
+  background: var(--flyout-bg, var(--layer-default));
   background-image: var(--flyout-material-overlay);
   backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
@@ -671,7 +710,7 @@ watch(openIndex, (newVal) => {
   flex-direction: column;
   gap: 2px;
   animation: submenu-flyout-enter 0.15s var(--fast-out-slow-in);
-  z-index: 1001;
+  z-index: 1003;
   min-width: 180px;
   margin-left: 2px;
 }

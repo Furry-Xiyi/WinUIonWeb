@@ -1,243 +1,396 @@
 <template>
-  <div class="win-number-box" :class="{ 'has-spinner': spinButtonPlacementMode === 'Inline' }">
-    <input
-      ref="inputRef"
-      type="number"
-      class="number-input"
-      :value="modelValue"
-      :min="minimum"
-      :max="maximum"
-      :step="step"
-      :disabled="disabled"
-      @input="handleInput"
-      @change="handleChange"
-      @blur="handleBlur" />
-
-    <div v-if="spinButtonPlacementMode === 'Inline'" class="spin-buttons">
-      <button
-        type="button"
-        class="spin-button spin-up"
-        :disabled="disabled || (maximum !== undefined && modelValue >= maximum)"
-        @click="increment"
-        tabindex="-1">
-        <span class="icon">&#xE70E;</span>
-      </button>
-      <button
-        type="button"
-        class="spin-button spin-down"
-        :disabled="disabled || (minimum !== undefined && modelValue <= minimum)"
-        @click="decrement"
-        tabindex="-1">
-        <span class="icon">&#xE70D;</span>
-      </button>
+  <div ref="rootRef" class="win-number-box" :class="{ 'is-disabled': !IsEnabled, 'is-inline': SpinButtonPlacementMode === 'Inline', 'is-compact': SpinButtonPlacementMode === 'Compact' }" :style="rootStyle">
+    <div class="win-number-shell">
+      <WinTextBox
+        class="win-number-textbox"
+        :Text="displayText"
+        :Header="Header"
+        :Description="Description"
+        :PlaceholderText="PlaceholderText"
+        :IsEnabled="IsEnabled"
+        :InputScope="InputScope || 'Decimal'"
+        :AcceptsReturn="IsWrapEnabled"
+        :TextAlignment="TextAlignment"
+        :SelectionHighlightColor="SelectionHighlightColor"
+        :PreventKeyboardDisplayOnProgrammaticFocus="PreventKeyboardDisplayOnProgrammaticFocus"
+        @update:Text="onTextInput"
+        @GotFocus="onFocus"
+        @LostFocus="onLostFocus"
+        @keydown.capture="onKeydown">
+        <template #actions>
+          <div v-if="SpinButtonPlacementMode === 'Inline'" class="win-number-spin inline">
+            <button type="button" class="win-textbox-action-button win-number-spin-button" :disabled="!canIncrease" @pointerdown.prevent @click="changeBy(SmallChange)">
+              <span>&#xE70E;</span>
+            </button>
+            <button type="button" class="win-textbox-action-button win-number-spin-button" :disabled="!canDecrease" @pointerdown.prevent @click="changeBy(-SmallChange)">
+              <span>&#xE70D;</span>
+            </button>
+          </div>
+          <span
+            v-else-if="SpinButtonPlacementMode === 'Compact'"
+            class="win-number-compact-indicator"
+            aria-hidden="true">
+            <span>&#xEC8F;</span>
+          </span>
+        </template>
+      </WinTextBox>
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="compactPopupOpen"
+        class="win-number-compact-popup"
+        :style="compactPopupStyle"
+        @pointerdown.prevent>
+        <button type="button" class="win-number-popup-button" :disabled="!canIncrease" @click="changeBy(SmallChange)">
+          <span>&#xE70E;</span>
+        </button>
+        <button type="button" class="win-number-popup-button" :disabled="!canDecrease" @click="changeBy(-SmallChange)">
+          <span>&#xE70D;</span>
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { CSSProperties } from 'vue';
+import WinTextBox from './WinTextBox.vue';
 
-const props = defineProps({
-  // 官方属性：Value - 当前值
-  modelValue: {
-    type: Number,
-    default: 0
-  },
-  // 官方属性：Minimum - 最小值
-  minimum: {
-    type: Number,
-    default: undefined
-  },
-  // 官方属性：Maximum - 最大值
-  maximum: {
-    type: Number,
-    default: undefined
-  },
-  // 官方属性：SmallChange - 步进值
-  step: {
-    type: Number,
-    default: 1
-  },
-  // 官方属性：SpinButtonPlacementMode - 按钮位置 ("Inline" | "Compact" | "Hidden")
-  spinButtonPlacementMode: {
-    type: String,
-    default: 'Hidden'
-  },
-  // 官方属性：IsEnabled
-  disabled: {
-    type: Boolean,
-    default: false
-  }
+type SpinPlacement = 'Hidden' | 'Compact' | 'Inline';
+type ValidationMode = 'InvalidInputOverwritten' | 'Disabled';
+type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
+
+const props = withDefaults(defineProps<{
+  Value?: number;
+  Text?: string;
+  Minimum?: number;
+  Maximum?: number;
+  SmallChange?: number;
+  LargeChange?: number;
+  Header?: string;
+  HeaderTemplate?: unknown;
+  Description?: string;
+  PlaceholderText?: string;
+  InputScope?: string;
+  SelectionFlyout?: unknown;
+  SelectionHighlightColor?: string;
+  TextReadingOrder?: string;
+  PreventKeyboardDisplayOnProgrammaticFocus?: boolean;
+  NumberFormatter?: Intl.NumberFormat | null;
+  SpinButtonPlacementMode?: SpinPlacement;
+  ValidationMode?: ValidationMode;
+  IsWrapEnabled?: boolean;
+  AcceptsExpression?: boolean;
+  IsEnabled?: boolean;
+  TextAlignment?: TextAlignment;
+  Width?: number | string;
+}>(), {
+  Value: Number.NaN,
+  Text: '',
+  Minimum: Number.NEGATIVE_INFINITY,
+  Maximum: Number.POSITIVE_INFINITY,
+  SmallChange: 1,
+  LargeChange: 10,
+  Header: '',
+  HeaderTemplate: null,
+  Description: '',
+  PlaceholderText: '',
+  InputScope: 'Decimal',
+  SelectionFlyout: null,
+  SelectionHighlightColor: '',
+  TextReadingOrder: 'Default',
+  PreventKeyboardDisplayOnProgrammaticFocus: false,
+  NumberFormatter: null,
+  SpinButtonPlacementMode: 'Hidden',
+  ValidationMode: 'InvalidInputOverwritten',
+  IsWrapEnabled: false,
+  AcceptsExpression: false,
+  IsEnabled: true,
+  TextAlignment: 'Left',
+  Width: ''
 });
 
-const emit = defineEmits(['update:modelValue', 'valueChanged']);
+const emit = defineEmits<{
+  'update:Value': [value: number];
+  'update:Text': [value: string];
+  ValueChanged: [args: { oldValue: number; newValue: number }];
+}>();
 
-const inputRef = ref(null);
+const rootRef = ref<HTMLElement | null>(null);
+const text = ref(props.Text || (Number.isNaN(props.Value) ? '' : String(props.Value)));
+const isFocused = ref(false);
+const compactPopupStyle = ref<CSSProperties>({});
 
-const handleInput = (event) => {
-  const value = event.target.value === '' ? 0 : parseFloat(event.target.value);
-  if (!isNaN(value)) {
-    updateValue(value);
+const displayText = computed(() => text.value);
+const compactPopupOpen = computed(() => props.SpinButtonPlacementMode === 'Compact' && props.IsEnabled && isFocused.value);
+const rootStyle = computed<CSSProperties>(() => ({
+  width: props.Width === '' ? undefined : typeof props.Width === 'number' ? `${props.Width}px` : props.Width
+}));
+const canIncrease = computed(() => props.IsEnabled && (Number.isNaN(props.Value) || props.Value + props.SmallChange <= props.Maximum));
+const canDecrease = computed(() => props.IsEnabled && (Number.isNaN(props.Value) || props.Value - props.SmallChange >= props.Minimum));
+
+const clamp = (value: number) => Math.min(props.Maximum, Math.max(props.Minimum, value));
+
+const evaluateExpression = (source: string) => {
+  const normalized = source.replace(/\^/g, '**');
+  if (!/^[\d+\-*/().\s%*]+$/.test(normalized)) return Number.NaN;
+  try {
+    return Number(Function(`"use strict"; return (${normalized});`)());
+  } catch {
+    return Number.NaN;
   }
 };
 
-const handleChange = (event) => {
-  const value = event.target.value === '' ? 0 : parseFloat(event.target.value);
-  if (!isNaN(value)) {
-    updateValue(value);
-    emit('valueChanged', value);
+const parseText = (source: string) => {
+  const value = props.AcceptsExpression ? evaluateExpression(source) : Number(source);
+  return Number.isFinite(value) ? value : Number.NaN;
+};
+
+const sanitizeText = (value: string) => {
+  const allowed = props.AcceptsExpression ? /[0-9+\-*/().%\s^]/ : /[0-9+\-.]/;
+  let next = '';
+  for (const char of value) {
+    if (allowed.test(char)) next += char;
+  }
+  if (!props.AcceptsExpression) {
+    next = next.replace(/(?!^)-/g, '');
+    const firstDot = next.indexOf('.');
+    if (firstDot !== -1) next = next.slice(0, firstDot + 1) + next.slice(firstDot + 1).replace(/\./g, '');
+  }
+  return next;
+};
+
+const setValue = (value: number) => {
+  const oldValue = props.Value;
+  const newValue = Number.isNaN(value) ? Number.NaN : clamp(value);
+  text.value = Number.isNaN(newValue) ? '' : String(newValue);
+  emit('update:Value', newValue);
+  emit('update:Text', text.value);
+  if (!Object.is(oldValue, newValue)) emit('ValueChanged', { oldValue, newValue });
+};
+
+const onTextInput = (value: string) => {
+  const sanitized = sanitizeText(value);
+  text.value = sanitized;
+  emit('update:Text', sanitized);
+  const parsed = parseText(sanitized);
+  if (!Number.isNaN(parsed)) emit('update:Value', clamp(parsed));
+};
+
+const updateCompactPopupPosition = async () => {
+  if (!rootRef.value) return;
+  const rect = (rootRef.value.querySelector('.win-textbox-border') as HTMLElement | null)?.getBoundingClientRect()
+    ?? rootRef.value.getBoundingClientRect();
+  const popupHeight = 88;
+  compactPopupStyle.value = {
+    left: `${rect.right - 44}px`,
+    top: `${rect.top + rect.height / 2 - popupHeight / 2}px`
+  };
+  await nextTick();
+};
+
+const onFocus = () => {
+  isFocused.value = true;
+  void updateCompactPopupPosition();
+};
+
+const onLostFocus = () => {
+  window.setTimeout(() => {
+    isFocused.value = false;
+    commitText();
+  }, 120);
+};
+
+const commitText = () => {
+  if (text.value.trim() === '') {
+    setValue(Number.NaN);
+    return;
+  }
+  const parsed = parseText(text.value);
+  if (Number.isNaN(parsed)) {
+    if (props.ValidationMode === 'InvalidInputOverwritten') text.value = Number.isNaN(props.Value) ? '' : String(props.Value);
+    return;
+  }
+  setValue(parsed);
+};
+
+const changeBy = (delta: number) => {
+  const base = Number.isNaN(props.Value) ? 0 : props.Value;
+  setValue(base + delta);
+};
+
+const onKeydown = (event: KeyboardEvent) => {
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
+  if (event.key.length === 1 && sanitizeText(event.key) !== event.key) event.preventDefault();
+  if (event.key === 'Enter') commitText();
+  if (event.key === 'ArrowUp') {
+    event.preventDefault();
+    changeBy(event.shiftKey ? props.LargeChange : props.SmallChange);
+  }
+  if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    changeBy(event.shiftKey ? -props.LargeChange : -props.SmallChange);
+  }
+  if (event.key === 'PageUp') {
+    event.preventDefault();
+    changeBy(props.LargeChange);
+  }
+  if (event.key === 'PageDown') {
+    event.preventDefault();
+    changeBy(-props.LargeChange);
   }
 };
 
-const handleBlur = () => {
-  // 确保值在范围内
-  let value = props.modelValue;
-  if (props.minimum !== undefined && value < props.minimum) {
-    value = props.minimum;
-  }
-  if (props.maximum !== undefined && value > props.maximum) {
-    value = props.maximum;
-  }
-  if (value !== props.modelValue) {
-    updateValue(value);
-  }
+const onWindowMove = () => {
+  if (compactPopupOpen.value) void updateCompactPopupPosition();
 };
 
-const updateValue = (value) => {
-  let newValue = value;
-  if (props.minimum !== undefined) {
-    newValue = Math.max(props.minimum, newValue);
-  }
-  if (props.maximum !== undefined) {
-    newValue = Math.min(props.maximum, newValue);
-  }
-  emit('update:modelValue', newValue);
-};
+watch(() => props.Value, (value) => {
+  text.value = Number.isNaN(value) ? '' : String(value);
+});
 
-const increment = () => {
-  const newValue = props.modelValue + props.step;
-  if (props.maximum === undefined || newValue <= props.maximum) {
-    updateValue(newValue);
-    emit('valueChanged', newValue);
-  }
-};
+watch(() => props.Text, (value) => {
+  if (value !== undefined && value !== text.value) text.value = value;
+});
 
-const decrement = () => {
-  const newValue = props.modelValue - props.step;
-  if (props.minimum === undefined || newValue >= props.minimum) {
-    updateValue(newValue);
-    emit('valueChanged', newValue);
-  }
-};
+onMounted(() => {
+  window.addEventListener('resize', onWindowMove);
+  window.addEventListener('scroll', onWindowMove, true);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onWindowMove);
+  window.removeEventListener('scroll', onWindowMove, true);
+});
 </script>
 
 <style scoped>
 .win-number-box {
   display: inline-flex;
-  align-items: center;
-  position: relative;
-  background: var(--control-fill-color-default);
-  border: 1px solid var(--control-stroke-color-default);
-  border-radius: 4px;
-  transition: all var(--fast-duration) var(--fast-out-slow-in);
-  min-height: 32px;
+  min-width: 64px;
 }
 
-.win-number-box:hover {
-  background: var(--control-fill-color-secondary);
-  border-color: var(--control-stroke-secondary);
+.win-number-shell { width: 100%; }
+
+.win-number-textbox {
+  width: 100%;
 }
 
-.win-number-box:focus-within {
-  background: var(--control-fill-input-active);
-  border-color: var(--control-stroke-focus);
-  outline: 2px solid var(--control-stroke-focus-outer);
-  outline-offset: 1px;
+.win-number-spin {
+  display: flex;
+  align-self: stretch;
+  color: var(--text-secondary);
 }
 
-.number-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 4px 8px;
-  font-size: 14px;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  color: var(--text-fill-color-primary);
+.win-number-spin.inline {
+  flex-direction: row;
+}
+
+.win-number-spin-button {
+  display: grid;
+  place-items: center;
   min-width: 0;
 }
 
-.number-input:disabled {
-  color: var(--text-fill-color-disabled);
-  cursor: not-allowed;
+.win-number-spin-button:first-child {
+  width: 40px;
+  min-width: 40px;
+  flex: 0 0 40px;
 }
 
-/* Hide default number spinners */
-.number-input::-webkit-inner-spin-button,
-.number-input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.win-number-spin-button:last-child {
+  width: 36px;
+  min-width: 36px;
+  flex: 0 0 36px;
 }
 
-.number-input[type=number] {
-  -moz-appearance: textfield;
+.win-number-spin-button:first-child span {
+  inset: 4px;
 }
 
-.win-number-box.has-spinner .number-input {
-  padding-right: 4px;
+.win-number-spin-button:last-child span {
+  inset: 4px 4px 4px 0;
 }
 
-.spin-buttons {
+.win-number-spin-button span,
+.win-number-compact-indicator span,
+.win-number-popup-button span {
+  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
+  font-size: 12px;
+}
+
+.win-number-compact-indicator {
+  align-self: stretch;
+  width: 40px;
+  min-width: 40px;
   display: flex;
-  flex-direction: column;
-  margin-right: 4px;
-}
-
-.spin-button {
-  display: flex;
+  place-items: center;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 15px;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.win-number-compact-indicator span {
+  position: static;
+  inset: auto;
+  display: block;
+  font-size: 12px;
+}
+
+.win-number-compact-popup {
+  position: fixed;
+  z-index: 1000;
+  width: 48px;
+  padding: 6px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--flyout-background, var(--layer-fill-color-default));
+  background-image: var(--flyout-material-overlay);
+  border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--card-stroke)));
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.win-number-popup-button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
   background: transparent;
-  border: none;
+  color: var(--text-secondary);
   cursor: pointer;
-  padding: 0;
-  color: var(--text-fill-color-secondary);
-  transition: all var(--fast-duration) var(--fast-out-slow-in);
 }
 
-.spin-button:hover:not(:disabled) {
-  background: var(--subtle-fill-color-secondary);
-  color: var(--text-fill-color-primary);
+.win-number-popup-button span {
+  font-size: 16px;
 }
 
-.spin-button:active:not(:disabled) {
-  background: var(--subtle-tertiary);
+.win-number-popup-button:hover {
+  background: var(--subtle-fill-color-secondary, var(--subtle-secondary));
+  color: var(--text-primary);
 }
 
-.spin-button:disabled {
-  color: var(--text-fill-color-disabled);
-  cursor: not-allowed;
+.win-number-popup-button:disabled {
+  color: var(--text-disabled);
+  cursor: default;
 }
 
-.spin-button .icon {
-  font-size: 10px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-  line-height: 1;
+.win-number-textbox :deep(.win-textbox-delete-button) {
+  width: 40px;
+  min-width: 40px;
+  flex-basis: 40px;
 }
 
-.spin-up {
-  border-bottom: 1px solid var(--control-stroke-color-default);
-}
-
-@media (prefers-color-scheme: dark) {
-  .win-number-box {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .win-number-box:hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
+.win-number-textbox :deep(.win-textbox-delete-button-layout) {
+  inset: 4px;
 }
 </style>

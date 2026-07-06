@@ -3,7 +3,8 @@
     <div style="position: relative;">
       <h1 class="page-header">Button</h1>
       <p class="page-description">
-        A button gives the user a way to trigger an immediate action.
+        The Button control provides a Click event to respond to user input from a touch, mouse, keyboard, stylus, or other input device. You
+        can put different kinds of content in a button, such as text or an image, or you can restyle a button to give it a new look.
       </p>
       <div class="page-header-actions">
         <WinButton

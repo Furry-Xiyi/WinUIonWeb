@@ -1,604 +1,563 @@
 <template>
-  <div class="win-richeditbox-container" :class="containerClasses">
-    <!-- Header -->
-    <div v-if="header || $slots.header" class="richeditbox-header">
-      <slot name="header">{{ header }}</slot>
+  <div
+    ref="rootRef"
+    class="win-rich-edit-box"
+    :class="{ 'is-disabled': !IsEnabled, 'is-readonly': IsReadOnly, 'is-focused': isFocused }"
+    :style="rootStyle">
+    <div v-if="Header || $slots.header" class="win-reb-header">
+      <slot name="header">{{ Header }}</slot>
     </div>
 
-    <!-- Main RichEditBox -->
-    <div class="win-richeditbox" :class="stateClasses" @click="focusEditor">
-      <!-- Toolbar (optional, shown when not readonly) -->
-      <div v-if="showToolbar && !isReadOnly" class="richeditbox-toolbar">
-        <button
-          v-for="tool in toolbarButtons"
-          :key="tool.command"
-          class="toolbar-button"
-          :class="{ 'is-active': isFormatActive(tool.command) }"
-          :title="tool.title"
-          @mousedown.prevent="execCommand(tool.command, tool.value)"
-          :disabled="disabled"
-        >
-          <span class="toolbar-icon" v-html="tool.icon"></span>
-        </button>
-      </div>
-
-      <!-- Editor Content -->
+    <div class="win-reb-border" @click="focus">
       <div
         ref="editorRef"
-        class="richeditbox-editor"
-        :contenteditable="!isReadOnly && !disabled"
-        :data-placeholder="placeholderText"
-        @input="handleInput"
-        @keydown="handleKeyDown"
-        @focus="handleFocus"
-        @blur="handleBlur"
-        @paste="handlePaste"
-        @select="handleSelectionChange"
-        @mouseup="handleSelectionChange"
-        @keyup="handleSelectionChange"
+        class="win-reb-editor"
+        :contenteditable="IsEnabled && !IsReadOnly"
+        :data-placeholder="PlaceholderText"
+        :spellcheck="IsSpellCheckEnabled"
+        :autocomplete="IsTextPredictionEnabled ? 'on' : 'off'"
+        :style="editorStyle"
         role="textbox"
-        :aria-label="ariaLabel"
-        :aria-readonly="isReadOnly"
-        :aria-disabled="disabled"
-        :aria-multiline="acceptsReturn"
-        :aria-placeholder="placeholderText"
-      ></div>
+        aria-multiline="true"
+        :aria-readonly="IsReadOnly"
+        @input="onInput"
+        @focus="onFocus"
+        @blur="onBlur"
+        @keydown="onKeydown"
+        @paste="onPaste"
+        @copy="onCopy"
+        @cut="onCut"
+        @contextmenu="onContextMenu"
+        @mouseup="onSelectionGesture"
+        @keyup="onSelectionGesture"></div>
     </div>
 
-    <!-- Description -->
-    <div v-if="description || $slots.description" class="richeditbox-description">
-      <slot name="description">{{ description }}</slot>
+    <div v-if="Description || $slots.description" class="win-reb-description">
+      <slot name="description">{{ Description }}</slot>
     </div>
+
+    <WinCommandBarFlyout
+      :open="commandBarOpen"
+      :anchorRect="commandBarAnchor"
+      :PrimaryCommands="commandBarPrimaryCommands"
+      :SecondaryCommands="commandBarSecondaryCommands"
+      Placement="Auto"
+      ShowMode="Standard"
+      :showPrimaryLabels="true"
+      @close="commandBarOpen = false"
+      @command="onFlyoutCommand" />
   </div>
 </template>
 
-<script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+<script setup lang="ts">
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { CSSProperties } from 'vue';
+import WinCommandBarFlyout from './WinCommandBarFlyout.vue';
 
-const props = defineProps({
-  modelValue: { type: String, default: '' },
-  isReadOnly: { type: Boolean, default: false },
-  acceptsReturn: { type: Boolean, default: true },
-  textAlignment: {
-    type: String,
-    default: 'Left',
-    validator: (v) => ['Left', 'Center', 'Right', 'Justify'].includes(v)
-  },
-  textWrapping: {
-    type: String,
-    default: 'Wrap',
-    validator: (v) => ['NoWrap', 'Wrap', 'WrapWholeWords'].includes(v)
-  },
-  isSpellCheckEnabled: { type: Boolean, default: true },
-  placeholderText: { type: String, default: '' },
-  header: { type: String, default: '' },
-  description: { type: String, default: '' },
-  maxLength: { type: Number, default: 0 }, // 0 = unlimited
-  characterCasing: {
-    type: String,
-    default: 'Normal',
-    validator: (v) => ['Normal', 'Lower', 'Upper'].includes(v)
-  },
-  disabled: { type: Boolean, default: false },
-  showToolbar: { type: Boolean, default: true },
-  ariaLabel: { type: String, default: 'Rich text editor' }
+type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
+type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
+type CharacterCasing = 'Normal' | 'Lower' | 'Upper';
+type ClipboardCopyFormat = 'AllFormats' | 'PlainText' | 'RichText';
+type TextReadingOrder = 'Default' | 'DetectFromContent' | 'UseFlowDirection';
+type CandidateWindowAlignment = 'Default' | 'BottomEdge';
+type HeaderPlacement = 'Top' | 'Left';
+type CommandBarFlyoutCommand = {
+  Label: string;
+  Icon?: string;
+  Name?: string;
+  Command?: string;
+  ToolTip?: string;
+  ToolTipServiceToolTip?: string;
+  IsEnabled?: boolean;
+  IsToggle?: boolean;
+  IsChecked?: boolean;
+};
+
+const props = withDefaults(defineProps<{
+  Text?: string;
+  Html?: string;
+  AcceptsReturn?: boolean;
+  CharacterCasing?: CharacterCasing;
+  ClipboardCopyFormat?: ClipboardCopyFormat;
+  Description?: string;
+  DesiredCandidateWindowAlignment?: CandidateWindowAlignment;
+  DisabledFormattingAccelerators?: string;
+  Header?: string;
+  HeaderPlacement?: HeaderPlacement;
+  HeaderTemplate?: unknown;
+  HorizontalTextAlignment?: TextAlignment;
+  InputScope?: string;
+  IsColorFontEnabled?: boolean;
+  IsReadOnly?: boolean;
+  IsEnabled?: boolean;
+  IsSpellCheckEnabled?: boolean;
+  IsTextPredictionEnabled?: boolean;
+  MaxLength?: number;
+  PlaceholderText?: string;
+  PreventKeyboardDisplayOnProgrammaticFocus?: boolean;
+  ProofingMenuFlyout?: unknown;
+  SelectionFlyout?: unknown;
+  SelectionHighlightColor?: string;
+  SelectionHighlightColorWhenNotFocused?: string;
+  ShowFormattingCommands?: boolean;
+  TextAlignment?: TextAlignment;
+  TextReadingOrder?: TextReadingOrder;
+  TextWrapping?: TextWrapping;
+  Width?: number | string;
+  Height?: number | string;
+}>(), {
+  Text: '',
+  Html: '',
+  AcceptsReturn: true,
+  CharacterCasing: 'Normal',
+  ClipboardCopyFormat: 'AllFormats',
+  Description: '',
+  DesiredCandidateWindowAlignment: 'Default',
+  DisabledFormattingAccelerators: '',
+  Header: '',
+  HeaderPlacement: 'Top',
+  HeaderTemplate: null,
+  HorizontalTextAlignment: 'Left',
+  InputScope: 'Default',
+  IsColorFontEnabled: true,
+  IsReadOnly: false,
+  IsEnabled: true,
+  IsSpellCheckEnabled: true,
+  IsTextPredictionEnabled: true,
+  MaxLength: 0,
+  PlaceholderText: '',
+  PreventKeyboardDisplayOnProgrammaticFocus: false,
+  ProofingMenuFlyout: null,
+  SelectionFlyout: null,
+  SelectionHighlightColor: '',
+  SelectionHighlightColorWhenNotFocused: '',
+  ShowFormattingCommands: true,
+  TextAlignment: 'Left',
+  TextReadingOrder: 'DetectFromContent',
+  TextWrapping: 'Wrap',
+  Width: '',
+  Height: ''
 });
 
-const emit = defineEmits([
-  'update:modelValue',
-  'textChanged',
-  'selectionChanged',
-  'contextMenuOpening',
-  'paste',
-  'textCompositionStarted',
-  'textCompositionChanged',
-  'textCompositionEnded',
-  'gotFocus',
-  'lostFocus'
-]);
+const emit = defineEmits<{
+  'update:Text': [value: string];
+  'update:Html': [value: string];
+  TextChanged: [args: { text: string; html: string }];
+  SelectionChanged: [args: { selectionStart: number; selectionLength: number; selectedText: string }];
+  ContextMenuOpening: [args: { handled: boolean; x: number; y: number }];
+  Paste: [args: { handled: boolean; text: string }];
+  CopyingToClipboard: [args: { cancel: boolean; text: string }];
+  CuttingToClipboard: [args: { cancel: boolean; text: string }];
+  TextChanging: [args: { isContentChanging: boolean; text: string }];
+  TextCompositionStarted: [];
+  TextCompositionChanged: [];
+  TextCompositionEnded: [];
+  CandidateWindowBoundsChanged: [args: { rect: DOMRect | { x: number; y: number; width: number; height: number } }];
+  GotFocus: [];
+  LostFocus: [];
+}>();
 
-const editorRef = ref(null);
+const rootRef = ref<HTMLElement | null>(null);
+const editorRef = ref<HTMLDivElement | null>(null);
 const isFocused = ref(false);
-const isComposing = ref(false);
-const currentSelection = ref(null);
+const commandBarOpen = ref(false);
+const commandBarAnchor = ref<DOMRect | { x: number; y: number; top: number; bottom: number; left: number; right: number; width: number; height: number } | null>(null);
+const internalHtml = ref(props.Html || escapeText(props.Text));
+const savedSelection = ref<Range | null>(null);
 
-// Toolbar configuration
-const toolbarButtons = [
-  { command: 'bold', title: 'Bold (Ctrl+B)', icon: '<strong>B</strong>' },
-  { command: 'italic', title: 'Italic (Ctrl+I)', icon: '<em>I</em>' },
-  { command: 'underline', title: 'Underline (Ctrl+U)', icon: '<u>U</u>' },
-  { command: 'strikeThrough', title: 'Strikethrough', icon: '<s>S</s>' },
-  { command: 'separator-1', title: '', icon: '' },
-  { command: 'justifyLeft', title: 'Align Left', icon: '☰' },
-  { command: 'justifyCenter', title: 'Align Center', icon: '☰' },
-  { command: 'justifyRight', title: 'Align Right', icon: '☰' },
-  { command: 'separator-2', title: '', icon: '' },
-  { command: 'insertOrderedList', title: 'Numbered List', icon: '1.' },
-  { command: 'insertUnorderedList', title: 'Bulleted List', icon: '•' },
-  { command: 'separator-3', title: '', icon: '' },
-  { command: 'removeFormat', title: 'Clear Formatting', icon: '✕' }
-];
+const disabledFormatting = computed(() => props.DisabledFormattingAccelerators.toLowerCase());
+const commandBarPrimaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
+  const commands: CommandBarFlyoutCommand[] = [];
+  if (!props.ShowFormattingCommands) return commands;
+  if (!disabledFormatting.value.includes('bold')) commands.push({ Label: 'Bold', Icon: 'Bold', Command: 'bold', IsToggle: true, IsChecked: isCommandActive('bold') });
+  if (!disabledFormatting.value.includes('italic')) commands.push({ Label: 'Italic', Icon: 'Italic', Command: 'italic', IsToggle: true, IsChecked: isCommandActive('italic') });
+  if (!disabledFormatting.value.includes('underline')) commands.push({ Label: 'Underline', Icon: 'Underline', Command: 'underline', IsToggle: true, IsChecked: isCommandActive('underline') });
+  return commands;
+});
 
-// Computed classes
-const containerClasses = computed(() => ({
-  'is-disabled': props.disabled,
-  'is-readonly': props.isReadOnly
+const commandBarSecondaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
+  const selected = getSelectionText();
+  const canEdit = !props.IsReadOnly && props.IsEnabled;
+  const commands: CommandBarFlyoutCommand[] = [];
+  if (selected && canEdit) commands.push({ Label: 'Cut', Icon: 'Cut', Command: 'cut' });
+  if (selected) commands.push({ Label: 'Copy', Icon: 'Copy', Command: 'copy' });
+  if (canEdit) commands.push({ Label: 'Paste', Icon: 'Paste', Command: 'paste' });
+  commands.push({ Label: 'Undo', Icon: 'Undo', Command: 'undo' });
+  commands.push({ Label: 'Redo', Icon: 'Redo', Command: 'redo' });
+  commands.push({ Label: 'Select all', Icon: 'SelectAll', Command: 'selectAll' });
+  if (props.ShowFormattingCommands && canEdit) {
+    commands.push({ Label: 'Bullets', Icon: '\uE8FD', Command: 'insertUnorderedList' });
+    commands.push({ Label: 'Numbering', Icon: '\uE8EF', Command: 'insertOrderedList' });
+    commands.push({ Label: 'Clear formatting', Icon: '\uE894', Command: 'removeFormat' });
+  }
+  return commands;
+});
+
+const cssSize = (value: number | string) => value === '' ? undefined : typeof value === 'number' ? `${value}px` : value;
+const rootStyle = computed<CSSProperties & Record<string, string | undefined>>(() => ({
+  width: cssSize(props.Width),
+  '--reb-selection-background': props.SelectionHighlightColor || undefined,
+  '--reb-selection-background-blur': props.SelectionHighlightColorWhenNotFocused || undefined
 }));
 
-const stateClasses = computed(() => ({
-  'is-focused': isFocused.value,
-  'is-disabled': props.disabled,
-  'is-readonly': props.isReadOnly,
-  [`text-align-${props.textAlignment.toLowerCase()}`]: true,
-  [`text-wrap-${props.textWrapping.toLowerCase()}`]: true
+const editorStyle = computed<CSSProperties>(() => ({
+  height: cssSize(props.Height),
+  textAlign: (props.TextAlignment || props.HorizontalTextAlignment || 'Left').toLowerCase() as CSSProperties['textAlign'],
+  whiteSpace: props.TextWrapping === 'NoWrap' ? 'pre' : 'pre-wrap',
+  overflowWrap: props.TextWrapping === 'WrapWholeWords' ? 'normal' : 'break-word',
+  direction: props.TextReadingOrder === 'UseFlowDirection' ? 'inherit' : undefined
 }));
 
-// Initialize editor content
-const initializeContent = () => {
-  if (editorRef.value && props.modelValue !== editorRef.value.innerHTML) {
-    editorRef.value.innerHTML = props.modelValue;
-  }
+function escapeText(value: string) {
+  const div = document.createElement('div');
+  div.innerText = value ?? '';
+  return div.innerHTML;
+}
+
+const plainText = () => editorRef.value?.innerText.replace(/\n$/, '') ?? '';
+
+const syncDom = () => {
+  if (!editorRef.value || isFocused.value) return;
+  editorRef.value.innerHTML = internalHtml.value;
 };
 
-// Handle input
-const handleInput = (e) => {
-  if (isComposing.value) return;
-
-  let content = editorRef.value.innerHTML;
-
-  // Apply character casing
-  if (props.characterCasing !== 'Normal') {
-    const selection = saveSelection();
-    if (props.characterCasing === 'Upper') {
-      editorRef.value.innerHTML = content.toUpperCase();
-    } else if (props.characterCasing === 'Lower') {
-      editorRef.value.innerHTML = content.toLowerCase();
-    }
-    restoreSelection(selection);
-    content = editorRef.value.innerHTML;
-  }
-
-  // Check max length
-  if (props.maxLength > 0) {
-    const textLength = editorRef.value.innerText.length;
-    if (textLength > props.maxLength) {
-      editorRef.value.innerHTML = props.modelValue;
-      return;
-    }
-  }
-
-  emit('update:modelValue', content);
-  emit('textChanged', { newText: content, source: editorRef.value });
-};
-
-// Handle keyboard events
-const handleKeyDown = (e) => {
-  // Handle AcceptsReturn
-  if (e.key === 'Enter' && !props.acceptsReturn && !e.shiftKey) {
-    e.preventDefault();
-    return;
-  }
-
-  // Keyboard shortcuts
-  if (e.ctrlKey || e.metaKey) {
-    switch (e.key.toLowerCase()) {
-      case 'b':
-        e.preventDefault();
-        execCommand('bold');
-        break;
-      case 'i':
-        e.preventDefault();
-        execCommand('italic');
-        break;
-      case 'u':
-        e.preventDefault();
-        execCommand('underline');
-        break;
-    }
-  }
-};
-
-// Handle composition events (IME input)
-const handleCompositionStart = () => {
-  isComposing.value = true;
-  emit('textCompositionStarted');
-};
-
-const handleCompositionUpdate = () => {
-  emit('textCompositionChanged');
-};
-
-const handleCompositionEnd = () => {
-  isComposing.value = false;
-  emit('textCompositionEnded');
-  handleInput();
-};
-
-// Handle focus
-const handleFocus = (e) => {
-  if (props.disabled || props.isReadOnly) return;
-  isFocused.value = true;
-  emit('gotFocus', e);
-};
-
-const handleBlur = (e) => {
-  isFocused.value = false;
-  emit('lostFocus', e);
-};
-
-// Handle paste
-const handlePaste = (e) => {
-  emit('paste', {
-    originalEvent: e,
-    clipboardData: e.clipboardData
-  });
-
-  // Allow default paste, but sanitize if needed
-  if (props.maxLength > 0) {
-    e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    const currentLength = editorRef.value.innerText.length;
-    const remaining = props.maxLength - currentLength;
-    if (remaining > 0) {
-      document.execCommand('insertText', false, text.substring(0, remaining));
-    }
-  }
-};
-
-// Selection handling
-const handleSelectionChange = () => {
-  const selection = window.getSelection();
-  if (selection.rangeCount > 0) {
-    currentSelection.value = selection.getRangeAt(0);
-    emit('selectionChanged', {
-      selection: selection,
-      range: currentSelection.value
-    });
-  }
+const normalizeText = (value: string) => {
+  let next = value;
+  if (props.CharacterCasing === 'Upper') next = next.toUpperCase();
+  if (props.CharacterCasing === 'Lower') next = next.toLowerCase();
+  if (props.MaxLength > 0 && next.length > props.MaxLength) next = next.slice(0, props.MaxLength);
+  return next;
 };
 
 const saveSelection = () => {
   const selection = window.getSelection();
-  if (selection.rangeCount > 0) {
-    return selection.getRangeAt(0);
-  }
-  return null;
-};
-
-const restoreSelection = (range) => {
-  if (range) {
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
+  if (selection && selection.rangeCount > 0 && editorRef.value?.contains(selection.anchorNode)) {
+    savedSelection.value = selection.getRangeAt(0).cloneRange();
   }
 };
 
-// Execute formatting command
-const execCommand = (command, value = null) => {
-  if (props.disabled || props.isReadOnly) return;
-
-  editorRef.value?.focus();
-  document.execCommand(command, false, value);
-
-  nextTick(() => {
-    handleInput();
-  });
+const restoreSelection = () => {
+  const range = savedSelection.value;
+  const selection = window.getSelection();
+  if (!range || !selection) return;
+  selection.removeAllRanges();
+  selection.addRange(range);
 };
 
-// Check if format is active
-const isFormatActive = (command) => {
-  if (!editorRef.value || props.isReadOnly) return false;
+const getSelectionText = () => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || !editorRef.value?.contains(selection.anchorNode)) return '';
+  return selection.toString();
+};
 
+function isCommandActive(command: string) {
   try {
+    restoreSelection();
     return document.queryCommandState(command);
   } catch {
     return false;
   }
+}
+
+const onInput = () => {
+  const editor = editorRef.value;
+  if (!editor) return;
+  let text = normalizeText(plainText());
+  if (text !== plainText()) {
+    editor.innerText = text;
+  }
+  internalHtml.value = editor.innerHTML;
+  emit('TextChanging', { isContentChanging: true, text });
+  emit('update:Text', text);
+  emit('update:Html', internalHtml.value);
+  emit('TextChanged', { text, html: internalHtml.value });
 };
 
-// Focus the editor
-const focusEditor = () => {
-  if (!props.disabled && !props.isReadOnly) {
-    editorRef.value?.focus();
+const emitSelection = () => {
+  const text = getSelectionText();
+  emit('SelectionChanged', { selectionStart: 0, selectionLength: text.length, selectedText: text });
+};
+
+const onSelectionGesture = async () => {
+  saveSelection();
+  emitSelection();
+  await nextTick();
+  updateSelectionFlyout();
+};
+
+const updateSelectionFlyout = () => {
+  if (!props.IsEnabled || props.SelectionFlyout === false) return;
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || !getSelectionText()) {
+    commandBarOpen.value = false;
+    return;
+  }
+  const rect = selection.getRangeAt(0).getBoundingClientRect();
+  commandBarAnchor.value = rect;
+  commandBarOpen.value = commandBarPrimaryCommands.value.length > 0 || commandBarSecondaryCommands.value.length > 0;
+};
+
+const onKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter' && !props.AcceptsReturn) event.preventDefault();
+  if (!(event.ctrlKey || event.metaKey)) return;
+  const key = event.key.toLowerCase();
+  const disabled = props.DisabledFormattingAccelerators.toLowerCase();
+  if (key === 'b' && !disabled.includes('bold')) {
+    event.preventDefault();
+    runTextCommand('bold');
+  }
+  if (key === 'i' && !disabled.includes('italic')) {
+    event.preventDefault();
+    runTextCommand('italic');
+  }
+  if (key === 'u' && !disabled.includes('underline')) {
+    event.preventDefault();
+    runTextCommand('underline');
   }
 };
 
-// Public methods (exposed via defineExpose)
-const getText = () => {
-  return editorRef.value?.innerText || '';
+const onPaste = (event: ClipboardEvent) => {
+  const args = { handled: false, text: event.clipboardData?.getData('text/plain') ?? '' };
+  emit('Paste', args);
+  if (args.handled) event.preventDefault();
 };
 
-const setText = (text) => {
-  if (editorRef.value) {
-    editorRef.value.innerText = text;
-    handleInput();
+const onCopy = (event: ClipboardEvent) => {
+  const args = { cancel: false, text: getSelectionText() };
+  emit('CopyingToClipboard', args);
+  if (args.cancel) event.preventDefault();
+  if (props.ClipboardCopyFormat === 'PlainText' && args.text) {
+    event.clipboardData?.setData('text/plain', args.text);
+    event.preventDefault();
   }
 };
 
-const getHtml = () => {
-  return editorRef.value?.innerHTML || '';
+const onCut = (event: ClipboardEvent) => {
+  const args = { cancel: false, text: getSelectionText() };
+  emit('CuttingToClipboard', args);
+  if (args.cancel) event.preventDefault();
 };
 
-const setHtml = (html) => {
-  if (editorRef.value) {
-    editorRef.value.innerHTML = html;
-    handleInput();
+const onContextMenu = (event: MouseEvent) => {
+  const args = { handled: false, x: event.clientX, y: event.clientY };
+  emit('ContextMenuOpening', args);
+  if (args.handled) return;
+  event.preventDefault();
+  saveSelection();
+  commandBarAnchor.value = {
+    x: event.clientX,
+    y: event.clientY,
+    top: event.clientY,
+    bottom: event.clientY,
+    left: event.clientX,
+    right: event.clientX,
+    width: 0,
+    height: 0
+  };
+  commandBarOpen.value = commandBarPrimaryCommands.value.length > 0 || commandBarSecondaryCommands.value.length > 0;
+};
+
+const runTextCommand = async (command: string) => {
+  if (!props.IsEnabled) return;
+  restoreSelection();
+  if (command === 'copy') document.execCommand('copy');
+  else if (command === 'cut' && !props.IsReadOnly) document.execCommand('cut');
+  else if (command === 'paste' && !props.IsReadOnly) {
+    const text = await navigator.clipboard?.readText().catch(() => '');
+    if (text) document.execCommand('insertText', false, text);
+  } else if (command === 'selectAll') {
+    const range = document.createRange();
+    if (editorRef.value) {
+      range.selectNodeContents(editorRef.value);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      saveSelection();
+    }
+  } else if (command === 'undo') {
+    document.execCommand('undo');
+  } else if (command === 'redo') {
+    document.execCommand('redo');
+  } else if (!props.IsReadOnly) {
+    document.execCommand(command, false);
   }
+  commandBarOpen.value = false;
+  onInput();
+  updateSelectionFlyout();
 };
 
-const clearFormatting = () => {
-  execCommand('removeFormat');
+const onFlyoutCommand = (item: CommandBarFlyoutCommand) => {
+  if (item?.Command) void runTextCommand(item.Command);
 };
 
-const insertText = (text) => {
-  execCommand('insertText', text);
+const onFocus = () => {
+  isFocused.value = true;
+  emit('GotFocus');
 };
 
-// Watch for external content changes
-watch(() => props.modelValue, (newValue) => {
-  if (editorRef.value && newValue !== editorRef.value.innerHTML && !isFocused.value) {
-    editorRef.value.innerHTML = newValue;
-  }
+const onBlur = () => {
+  isFocused.value = false;
+  emit('LostFocus');
+};
+
+const focus = () => {
+  if (!props.IsEnabled || props.IsReadOnly) return;
+  editorRef.value?.focus({ preventScroll: props.PreventKeyboardDisplayOnProgrammaticFocus });
+};
+
+const execCommand = (command: string, value?: string) => {
+  focus();
+  document.execCommand(command, false, value);
+  onInput();
+};
+
+const setText = (value: string) => {
+  internalHtml.value = escapeText(value);
+  if (editorRef.value) editorRef.value.innerText = value;
+  onInput();
+};
+
+const setHtml = (value: string) => {
+  internalHtml.value = value;
+  if (editorRef.value) editorRef.value.innerHTML = value;
+  onInput();
+};
+
+const onCompositionStart = () => emit('TextCompositionStarted');
+const onCompositionUpdate = () => emit('TextCompositionChanged');
+const onCompositionEnd = () => emit('TextCompositionEnded');
+
+watch(() => props.Text, (value) => {
+  if (props.Html) return;
+  internalHtml.value = escapeText(value ?? '');
+  syncDom();
 });
 
-// Lifecycle
-onMounted(() => {
-  initializeContent();
+watch(() => props.Html, (value) => {
+  internalHtml.value = value ?? '';
+  syncDom();
+});
 
-  // Add composition event listeners
-  if (editorRef.value) {
-    editorRef.value.addEventListener('compositionstart', handleCompositionStart);
-    editorRef.value.addEventListener('compositionupdate', handleCompositionUpdate);
-    editorRef.value.addEventListener('compositionend', handleCompositionEnd);
-  }
+onMounted(() => {
+  syncDom();
+  editorRef.value?.addEventListener('compositionstart', onCompositionStart);
+  editorRef.value?.addEventListener('compositionupdate', onCompositionUpdate);
+  editorRef.value?.addEventListener('compositionend', onCompositionEnd);
 });
 
 onBeforeUnmount(() => {
-  if (editorRef.value) {
-    editorRef.value.removeEventListener('compositionstart', handleCompositionStart);
-    editorRef.value.removeEventListener('compositionupdate', handleCompositionUpdate);
-    editorRef.value.removeEventListener('compositionend', handleCompositionEnd);
-  }
+  editorRef.value?.removeEventListener('compositionstart', onCompositionStart);
+  editorRef.value?.removeEventListener('compositionupdate', onCompositionUpdate);
+  editorRef.value?.removeEventListener('compositionend', onCompositionEnd);
 });
 
-// Expose public methods
 defineExpose({
-  getText,
+  focus,
+  execCommand,
   setText,
-  getHtml,
   setHtml,
-  clearFormatting,
-  insertText,
-  focus: focusEditor,
-  execCommand
+  getText: plainText,
+  getHtml: () => editorRef.value?.innerHTML ?? '',
+  TextDocument: {
+    getText: plainText,
+    setText,
+    setHtml,
+    getHtml: () => editorRef.value?.innerHTML ?? ''
+  }
 });
 </script>
 
 <style scoped>
-.win-richeditbox-container {
+.win-rich-edit-box {
+  --reb-background: var(--control-fill-color-default, var(--ctrl-fill-default));
+  --reb-background-hover: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
+  --reb-background-focused: var(--control-fill-color-input-active, var(--ctrl-fill-input-active));
+  --reb-border-top: var(--control-stroke-color-default, var(--ctrl-border-rest));
+  --reb-border-bottom: var(--control-strong-stroke-color-default, var(--ctrl-strong-stroke));
+  --reb-accent: var(--system-accent-color-dark-1, var(--accent-base));
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-family: var(--font-family);
+  width: 100%;
 }
 
-.win-richeditbox-container.is-disabled {
-  opacity: 0.6;
-  pointer-events: none;
+:global(html.theme-dark) .win-rich-edit-box,
+:global(.example-theme-wrapper.theme-dark) .win-rich-edit-box {
+  --reb-accent: var(--system-accent-color-light-2, var(--accent-base));
 }
 
-/* Header */
-.richeditbox-header {
+.win-reb-header {
+  margin-bottom: 8px;
+  color: var(--text-primary);
   font-size: 14px;
-  font-weight: 600;
-  color: var(--text-fill-color-primary);
-  margin-bottom: 4px;
+  line-height: 20px;
 }
 
-/* Main container */
-.win-richeditbox {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--ctrl-strong-stroke);
-  border-radius: 4px;
-  background: var(--control-fill-color-default);
-  transition: all var(--fast-duration) var(--fast-out-slow-in);
+.win-reb-border {
   overflow: hidden;
-}
-
-.win-richeditbox:hover:not(.is-disabled):not(.is-readonly) {
-  background: var(--control-fill-color-secondary);
-  border-color: var(--control-stroke-color-default);
-}
-
-.win-richeditbox.is-focused:not(.is-disabled):not(.is-readonly) {
-  background: var(--ctrl-fill-input-active);
-  border-color: var(--accent-fill-color-default);
-  border-width: 2px;
-  box-shadow: 0 0 0 1px var(--accent-fill-color-default);
-}
-
-.win-richeditbox.is-disabled {
-  background: var(--control-fill-color-disabled);
-  border-color: var(--ctrl-strong-stroke-disabled);
-}
-
-.win-richeditbox.is-readonly {
-  background: var(--ctrl-fill-input-disabled);
-}
-
-/* Toolbar */
-.richeditbox-toolbar {
-  display: flex;
-  gap: 2px;
-  padding: 4px;
-  border-bottom: 1px solid var(--divider-stroke);
-  background: var(--layer-fill-alt);
-  flex-wrap: wrap;
-}
-
-.toolbar-button {
-  min-width: 32px;
-  height: 32px;
-  padding: 4px 8px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-fill-color-primary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--fast-duration) var(--fast-out-slow-in);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.toolbar-button:hover:not(:disabled) {
-  background: var(--subtle-fill-color-secondary);
-}
-
-.toolbar-button:active:not(:disabled) {
-  background: var(--subtle-fill-tertiary);
-  transform: scale(0.98);
-}
-
-.toolbar-button.is-active {
-  background: var(--subtle-fill-color-secondary);
-  color: var(--accent-fill-color-default);
-}
-
-.toolbar-button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.toolbar-icon {
-  display: block;
-  line-height: 1;
-}
-
-/* Editor */
-.richeditbox-editor {
   min-height: 120px;
-  max-height: 400px;
-  padding: 11px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  background: var(--reb-background);
+  border: 1px solid var(--reb-border-top);
+  border-bottom-color: var(--reb-border-bottom);
+  border-radius: 4px;
+  transition: background 100ms, box-shadow 100ms;
+}
+
+.win-rich-edit-box:not(.is-disabled):not(.is-readonly) .win-reb-border:hover {
+  background: var(--reb-background-hover);
+}
+
+.win-rich-edit-box.is-focused:not(.is-disabled) .win-reb-border {
+  background: var(--reb-background-focused);
+  border-bottom-color: var(--reb-border-top);
+  box-shadow: inset 0 -2px 0 var(--reb-accent);
+}
+
+.win-reb-editor {
+  min-height: 118px;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  outline: 0;
+  overflow: auto;
+  color: var(--text-primary);
+  font-family: "Segoe UI", system-ui, sans-serif;
   font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-fill-color-primary);
-  outline: none;
-  word-wrap: break-word;
+  line-height: 20px;
 }
 
-.richeditbox-editor:empty:before {
+.win-reb-editor:empty::before {
   content: attr(data-placeholder);
-  color: var(--text-placeholder);
+  color: var(--text-tertiary);
   pointer-events: none;
-  display: block;
 }
 
-.is-disabled .richeditbox-editor {
-  color: var(--text-fill-color-disabled);
+.win-reb-editor::selection {
+  color: var(--accent-text, #fff);
+  background: var(--reb-selection-background, var(--accent-base));
 }
 
-/* Text alignment */
-.text-align-left .richeditbox-editor {
-  text-align: left;
+.win-rich-edit-box:not(.is-focused) .win-reb-editor::selection {
+  background: var(--reb-selection-background-blur, transparent);
 }
 
-.text-align-center .richeditbox-editor {
-  text-align: center;
-}
-
-.text-align-right .richeditbox-editor {
-  text-align: right;
-}
-
-.text-align-justify .richeditbox-editor {
-  text-align: justify;
-}
-
-/* Text wrapping */
-.text-wrap-nowrap .richeditbox-editor {
-  white-space: nowrap;
-  overflow-x: auto;
-}
-
-.text-wrap-wrap .richeditbox-editor {
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.text-wrap-wrapwholewords .richeditbox-editor {
-  white-space: pre-wrap;
-  word-break: keep-all;
-}
-
-/* Description */
-.richeditbox-description {
+.win-reb-description {
+  margin-top: 6px;
+  color: var(--text-secondary);
   font-size: 12px;
-  color: var(--text-fill-color-secondary);
-  margin-top: 4px;
+  line-height: 16px;
 }
 
-/* Scrollbar styling */
-.richeditbox-editor::-webkit-scrollbar {
-  width: 12px;
+.win-rich-edit-box.is-disabled {
+  pointer-events: none;
 }
 
-.richeditbox-editor::-webkit-scrollbar-track {
-  background: transparent;
+.win-rich-edit-box.is-disabled .win-reb-border {
+  background: var(--control-fill-color-disabled, var(--ctrl-fill-disabled));
 }
 
-.richeditbox-editor::-webkit-scrollbar-thumb {
-  background: var(--ctrl-strong-fill);
-  border-radius: 6px;
-  border: 3px solid transparent;
-  background-clip: content-box;
+.win-rich-edit-box.is-disabled .win-reb-editor,
+.win-rich-edit-box.is-disabled .win-reb-header,
+.win-rich-edit-box.is-disabled .win-reb-description {
+  color: var(--text-disabled);
 }
 
-.richeditbox-editor::-webkit-scrollbar-thumb:hover {
-  background: var(--ctrl-strong-fill-tertiary);
-  background-clip: content-box;
-}
-
-/* Content formatting */
-.richeditbox-editor :deep(strong),
-.richeditbox-editor :deep(b) {
-  font-weight: 600;
-}
-
-.richeditbox-editor :deep(em),
-.richeditbox-editor :deep(i) {
-  font-style: italic;
-}
-
-.richeditbox-editor :deep(u) {
-  text-decoration: underline;
-}
-
-.richeditbox-editor :deep(s),
-.richeditbox-editor :deep(strike) {
-  text-decoration: line-through;
-}
-
-.richeditbox-editor :deep(ul),
-.richeditbox-editor :deep(ol) {
-  margin: 0;
-  padding-left: 24px;
-}
-
-.richeditbox-editor :deep(li) {
-  margin: 4px 0;
-}
-
-.richeditbox-editor :deep(p) {
-  margin: 0 0 8px 0;
-}
-
-.richeditbox-editor :deep(p:last-child) {
-  margin-bottom: 0;
-}
 </style>

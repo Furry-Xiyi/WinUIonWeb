@@ -48,13 +48,21 @@ import CaptureElementPage from './pages/CaptureElementPage.vue';
 import ImagePage from './pages/ImagePage.vue';
 import MediaPlayerElementPage from './pages/MediaPlayerElementPage.vue';
 import PersonPicturePage from './pages/PersonPicturePage.vue';
+import CommandBarPage from './pages/CommandBarPage.vue';
 import ContentDialogPage from './pages/ContentDialogPage.vue';
+import CommandBarFlyoutPage from './pages/CommandBarFlyoutPage.vue';
 import FlyoutPage from './pages/FlyoutPage.vue';
+import MenuBarPage from './pages/MenuBarPage.vue';
+import MenuFlyoutPage from './pages/MenuFlyoutPage.vue';
 import PopupPage from './pages/PopupPage.vue';
 import TeachingTipPage from './pages/TeachingTipPage.vue';
 import SettingsPage from './pages/SettingsPage.vue';
 import TextBoxPage from './pages/TextBoxPage.vue';
 import TextBlockPage from './pages/TextBlockPage.vue';
+import AutoSuggestBoxPage from './pages/AutoSuggestBoxPage.vue';
+import NumberBoxPage from './pages/NumberBoxPage.vue';
+import PasswordBoxPage from './pages/PasswordBoxPage.vue';
+import RichEditBoxPage from './pages/RichEditBoxPage.vue';
 
 const pageMap = {
   home: HomePage,
@@ -89,10 +97,18 @@ const pageMap = {
   image: ImagePage,
   mediaplayerelement: MediaPlayerElementPage,
   personpicture: PersonPicturePage,
+  commandbar: CommandBarPage,
   contentdialog: ContentDialogPage,
+  commandbarflyout: CommandBarFlyoutPage,
   flyout: FlyoutPage,
+  menubar: MenuBarPage,
+  menuflyout: MenuFlyoutPage,
   popup: PopupPage,
   teachingtip: TeachingTipPage,
+  autosuggestbox: AutoSuggestBoxPage,
+  numberbox: NumberBoxPage,
+  passwordbox: PasswordBoxPage,
+  richeditbox: RichEditBoxPage,
   textbox: TextBoxPage,
   textblock: TextBlockPage,
   settings: SettingsPage
@@ -166,6 +182,12 @@ const navMenuItems = [
       { value: 'timepicker', icon: '\uE823', label: 'TimePicker' }
     ]
   },
+  { value: 'menusandtoolbars', icon: '\uE74E', label: 'Menus & toolbars', selectsOnInvoked: false, children: [
+    { value: 'commandbar', icon: '\uE76F', label: 'CommandBar' },
+    { value: 'commandbarflyout', icon: '\uF0E2', label: 'CommandBarFlyout' },
+    { value: 'menubar', icon: '\uE76F', label: 'MenuBar' },
+    { value: 'menuflyout', icon: '\uF0E2', label: 'MenuFlyout' }
+  ]},
   { value: 'dialogsandflyouts', icon: '\uE8BD', label: 'Dialogs and Flyouts', selectsOnInvoked: false, children: [
     { value: 'contentdialog', icon: '\uE8F2', label: 'ContentDialog' },
     { value: 'flyout', icon: '\uE8A8', label: 'Flyout' },
@@ -184,6 +206,10 @@ const navMenuItems = [
     { value: 'personpicture', icon: '\uE77B', label: 'PersonPicture' }
   ]},
   { value: 'text', icon: '\uE8D2', label: 'Text', selectsOnInvoked: false, children: [
+    { value: 'autosuggestbox', icon: '\uE721', label: 'AutoSuggestBox' },
+    { value: 'numberbox', icon: '\uF261', label: 'NumberBox' },
+    { value: 'passwordbox', icon: '\uE7B3', label: 'PasswordBox' },
+    { value: 'richeditbox', icon: '\uE8D3', label: 'RichEditBox' },
     { value: 'textbox', icon: '\uE8AC', label: 'TextBox' },
     { value: 'textblock', icon: '\uE8E4', label: 'TextBlock' }
   ]}

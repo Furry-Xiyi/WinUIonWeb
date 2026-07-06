@@ -11,13 +11,16 @@
             :class="chevronClass"
             @animationend="onChevronAnimEnd">&#xE70D;</span>
     </button>
-    <WinMenuFlyout :open="isOpen" :anchorRect="anchorRect" :items="flyoutItems" @close="isOpen = false" @select="onSelect" />
+    <WinMenuFlyout :open="isOpen" :anchorRect="anchorRect" :items="flyoutItems" :theme="theme" @close="isOpen = false" @select="onSelect" />
   </div>
 </template>
 <script setup>
 import { ref, computed } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
-const props = defineProps({ options: { type: Array, default: () => [] } });
+const props = defineProps({
+  options: { type: Array, default: () => [] },
+  theme: { type: String, default: '' }
+});
 const emit = defineEmits(['click', 'select']);
 const wrap = ref(null);
 const isOpen = ref(false);
@@ -27,6 +30,7 @@ let chevronPressed = false;
 let chevronPressDone = false;
 
 const flyoutItems = computed(() => props.options.map(item => ({ label: item, value: item })));
+const theme = computed(() => props.theme);
 
 const onChevronDown = () => {
   chevronPressed = true;

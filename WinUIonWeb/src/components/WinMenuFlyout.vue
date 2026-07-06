@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div v-if="visible" class="win-menu-flyout-overlay" @pointerdown="close"></div>
     <div v-if="visible" class="win-menu-flyout-wrap"
-         :class="[isClosing ? 'is-closing' : '', openDirection === 'up' ? 'from-bottom' : '', alignmentClass, shadowVisible ? 'shadow-visible' : '']"
+         :class="[themeClass, isClosing ? 'is-closing' : '', openDirection === 'up' ? 'from-bottom' : '', alignmentClass, shadowVisible ? 'shadow-visible' : '']"
          :style="posStyle">
       <div class="win-menu-flyout"
            @animationend="onAnimEnd">
@@ -11,7 +11,7 @@
             <div class="win-menu-flyout-item"
                  @click="onItemClick(item, i)">
               <span v-if="item.icon" class="icon win-menu-flyout-icon">{{ item.icon }}</span>
-              <span>{{ item.label || item }}</span>
+              <WinTextBlock :Text="item.label || item" />
             </div>
           </template>
           <slot></slot>
@@ -22,12 +22,14 @@
 </template>
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import WinTextBlock from './WinTextBlock.vue';
 const props = defineProps({
   open: Boolean,
   anchorRect: Object,
   items: { type: Array, default: () => [] },
   alignment: { type: String, default: 'center' },
-  minWidth: { type: [Number, String], default: 20 }
+  minWidth: { type: [Number, String], default: 20 },
+  theme: { type: String, default: '' }
 });
 const emit = defineEmits(['close', 'select']);
 const shadowVisible = ref(false);
@@ -37,6 +39,7 @@ const openDirection = ref('down');
 const windowHeight = ref(typeof window === 'undefined' ? 600 : window.innerHeight);
 
 const alignmentClass = computed(() => props.alignment === 'right' ? 'align-right' : '');
+const themeClass = computed(() => props.theme === 'light' || props.theme === 'dark' ? `win-theme-scope theme-${props.theme}` : '');
 
 const updateWindowHeight = () => {
   windowHeight.value = window.innerHeight;
