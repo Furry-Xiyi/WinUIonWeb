@@ -1,176 +1,238 @@
 <template>
-  <label class="win-checkbox" :class="{ 'is-disabled': disabled }">
-    <input type="checkbox"
-           :checked="isChecked"
-           :disabled="disabled"
-           :indeterminate.prop="isIndeterminate"
-           @change="handleChange"
-           ref="inputRef"
-           style="display:none">
-    <div class="checkbox-box" :class="{ 'is-indeterminate': isIndeterminate }"></div>
-    <slot></slot>
-  </label>
+  <div
+    class="win-checkbox"
+    :class="stateClasses"
+    :style="checkboxStyle"
+    :tabindex="isDisabled ? -1 : 0"
+    role="checkbox"
+    :aria-checked="ariaChecked"
+    :aria-disabled="isDisabled"
+    @click="toggle"
+    @keydown.space.prevent="toggle"
+    @keydown.enter.prevent="toggle">
+    <span class="checkbox-box" aria-hidden="true">
+      <span v-if="isIndeterminate" class="checkbox-glyph">{{ indeterminateGlyph }}</span>
+    </span>
+    <span class="checkbox-content">
+      <slot>{{ Content }}</slot>
+    </span>
+  </div>
 </template>
 
 <script setup>
-import { computed, watch, ref, onMounted } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
-  modelValue: { type: [Boolean, null], default: false },
-  isThreeState: { type: Boolean, default: false },  // 对齐官方命名：IsThreeState
-  indeterminate: Boolean,  // 外部控制的indeterminate状态
+  Content: { type: [String, Number], default: '' },
+  IsChecked: { type: [Boolean, null], default: undefined },
+  IsThreeState: { type: Boolean, default: undefined },
+  IsEnabled: { type: Boolean, default: true },
+  Margin: { type: String, default: '' },
+  modelValue: { type: [Boolean, null], default: undefined },
+  isThreeState: { type: Boolean, default: false },
+  indeterminate: { type: Boolean, default: undefined },
   disabled: Boolean
 });
 
-const emit = defineEmits(['update:modelValue', 'checked', 'unchecked', 'indeterminate']);
+const emit = defineEmits([
+  'update:modelValue',
+  'update:IsChecked',
+  'Checked',
+  'Unchecked',
+  'Indeterminate',
+  'checked',
+  'unchecked',
+  'indeterminate'
+]);
 
-const inputRef = ref(null);
+const localChecked = ref(false);
+const isControlled = computed(() => props.IsChecked !== undefined || props.modelValue !== undefined || props.indeterminate !== undefined);
+const isThreeState = computed(() => props.IsThreeState ?? props.isThreeState);
+const isDisabled = computed(() => props.disabled || props.IsEnabled === false);
 
-// 计算是否为中间态
-const isIndeterminate = computed(() => {
-  // 优先使用外部传入的indeterminate属性
-  if (props.indeterminate !== undefined) {
-    return props.indeterminate;
-  }
-  // IsThreeState模式下，null值表示indeterminate
-  if (props.isThreeState && props.modelValue === null) {
-    return true;
-  }
-  return false;
+const currentValue = computed(() => {
+  if (props.indeterminate === true) return null;
+  if (props.IsChecked !== undefined) return props.IsChecked;
+  if (props.modelValue !== undefined) return props.modelValue;
+  return localChecked.value;
 });
 
-// 计算是否选中
-const isChecked = computed(() => {
-  return props.modelValue === true;
-});
-
-// 同步indeterminate属性到DOM元素
-watch([isIndeterminate, inputRef], ([indeterminate, input]) => {
-  if (input) {
-    input.indeterminate = indeterminate;
-  }
+watch(() => props.modelValue, (value) => {
+  if (value !== undefined) localChecked.value = value;
 }, { immediate: true });
 
-onMounted(() => {
-  if (inputRef.value) {
-    inputRef.value.indeterminate = isIndeterminate.value;
-  }
-});
+const isChecked = computed(() => currentValue.value === true);
+const isIndeterminate = computed(() => isThreeState.value && currentValue.value === null);
+const indeterminateGlyph = '\uE73C';
+const ariaChecked = computed(() => isIndeterminate.value ? 'mixed' : String(isChecked.value));
 
-const handleChange = (e) => {
-  if (props.disabled) return;
+const stateClasses = computed(() => ({
+  'is-checked': isChecked.value,
+  'is-unchecked': !isChecked.value && !isIndeterminate.value,
+  'is-indeterminate': isIndeterminate.value,
+  'is-disabled': isDisabled.value
+}));
 
-  if (props.isThreeState) {
-    // 三段式切换: null (indeterminate) -> true (checked) -> false (unchecked) -> null
-    if (props.modelValue === null) {
-      emit('update:modelValue', true);
-      emit('checked', true);
-    } else if (props.modelValue === true) {
-      emit('update:modelValue', false);
-      emit('unchecked', false);
-    } else {
-      emit('update:modelValue', null);
-      emit('indeterminate', null);
-    }
+const cssLength = (value) => {
+  if (value === '' || value === undefined || value === null) return '';
+  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return `${Number(value.trim())}px`;
+  return typeof value === 'number' ? `${value}px` : value;
+};
+
+const xamlThickness = (value) => {
+  if (!value) return '';
+  const parts = String(value).split(',').map((part) => cssLength(Number.isNaN(Number(part.trim())) ? part.trim() : Number(part.trim())));
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
+  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
+  return value;
+};
+
+const checkboxStyle = computed(() => props.Margin ? { margin: xamlThickness(props.Margin) } : {});
+
+const emitState = (value) => {
+  if (!isControlled.value) localChecked.value = value;
+  emit('update:modelValue', value);
+  emit('update:IsChecked', value);
+
+  if (value === true) {
+    emit('Checked', value);
+    emit('checked', value);
+  } else if (value === null) {
+    emit('Indeterminate', value);
+    emit('indeterminate', value);
   } else {
-    // 二段式切换
-    const newValue = e.target.checked;
-    emit('update:modelValue', newValue);
-    if (newValue) {
-      emit('checked', newValue);
-    } else {
-      emit('unchecked', newValue);
-    }
+    emit('Unchecked', value);
+    emit('unchecked', value);
   }
+};
+
+const toggle = () => {
+  if (isDisabled.value) return;
+  if (isThreeState.value) {
+    if (currentValue.value === false) emitState(true);
+    else if (currentValue.value === true) emitState(null);
+    else emitState(false);
+    return;
+  }
+  emitState(!isChecked.value);
 };
 </script>
 
 <style>
-  .win-checkbox {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--text-primary);
-    user-select: none;
-  }
+.win-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0;
+  width: fit-content;
+  align-self: flex-start;
+  color: var(--CheckBoxForeground, var(--text-primary));
+  background: transparent;
+  border: 0;
+  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+}
 
-    .win-checkbox.is-disabled {
-      cursor: default;
-      color: var(--text-disabled);
-    }
+.win-checkbox:focus-visible {
+  outline: 2px solid var(--focus-stroke-outer, var(--text-primary));
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 
-  .checkbox-box {
-    width: 20px;
-    height: 20px;
-    border: 1px solid var(--ctrl-strong-stroke);
-    border-radius: 4px;
-    background: var(--ctrl-fill-default);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--fast-duration) var(--fast-out-slow-in);
-  }
+.checkbox-box {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  box-sizing: border-box;
+  border: 1px solid var(--CheckBoxCheckBackgroundStroke, var(--ctrl-strong-stroke));
+  border-radius: 4px;
+  background: var(--CheckBoxCheckBackgroundFill, var(--ctrl-fill-default));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .win-checkbox:not(.is-disabled):hover .checkbox-box {
-    background: var(--ctrl-fill-secondary);
-  }
+.checkbox-glyph {
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', 'WinUIOnWebIcons', sans-serif;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--CheckBoxCheckGlyphForeground, var(--accent-text));
+}
 
-  .win-checkbox:not(.is-disabled):active .checkbox-box {
-    background: var(--ctrl-fill-tertiary);
-    border-color: var(--ctrl-border-rest);
-  }
+.checkbox-content {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
 
-  .win-checkbox input:checked + .checkbox-box,
-  .checkbox-box.is-indeterminate {
-    background: var(--accent-base);
-    border-color: transparent;
-  }
+.win-checkbox.is-unchecked {
+  --CheckBoxCheckBackgroundFill: var(--ctrl-fill-default);
+  --CheckBoxCheckBackgroundStroke: var(--ctrl-strong-stroke);
+}
 
-  .win-checkbox:not(.is-disabled):hover input:checked + .checkbox-box,
-  .win-checkbox:not(.is-disabled):hover .checkbox-box.is-indeterminate {
-    background: var(--accent-hover);
-  }
+.win-checkbox.is-unchecked:hover {
+  --CheckBoxCheckBackgroundFill: var(--ctrl-fill-secondary);
+  --CheckBoxCheckBackgroundStroke: var(--ctrl-strong-stroke);
+}
 
-  .win-checkbox:not(.is-disabled):active input:checked + .checkbox-box,
-  .win-checkbox:not(.is-disabled):active .checkbox-box.is-indeterminate {
-    background: var(--accent-pressed);
-  }
+.win-checkbox.is-unchecked:active {
+  --CheckBoxCheckBackgroundFill: var(--ctrl-fill-tertiary);
+  --CheckBoxCheckBackgroundStroke: var(--ctrl-strong-stroke-disabled);
+}
 
-  .win-checkbox input:checked + .checkbox-box:not(.is-indeterminate):after {
-    content: "";
-    width: 9px;
-    height: 4px;
-    border-left: 1.5px solid var(--accent-text);
-    border-bottom: 1.5px solid var(--accent-text);
-    transform: translateY(-1px) rotate(-45deg);
-  }
+.win-checkbox.is-checked,
+.win-checkbox.is-indeterminate {
+  --CheckBoxCheckBackgroundFill: var(--accent-base);
+  --CheckBoxCheckBackgroundStroke: var(--accent-base);
+  --CheckBoxCheckGlyphForeground: var(--accent-text);
+}
 
-  .checkbox-box.is-indeterminate:after {
-    content: "\e73c";
-    font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-    font-size: 10px;
-    color: var(--accent-text);
-  }
+.win-checkbox.is-checked .checkbox-box::after {
+  content: "";
+  width: 9px;
+  height: 5px;
+  border-left: 1.6px solid var(--CheckBoxCheckGlyphForeground, var(--accent-text));
+  border-bottom: 1.6px solid var(--CheckBoxCheckGlyphForeground, var(--accent-text));
+  transform: translateY(-1px) rotate(-45deg);
+}
 
-  .win-checkbox:not(.is-disabled):active .checkbox-box:after {
-    opacity: 0.7;
-  }
+.win-checkbox.is-checked:hover,
+.win-checkbox.is-indeterminate:hover {
+  --CheckBoxCheckBackgroundFill: var(--accent-hover);
+  --CheckBoxCheckBackgroundStroke: var(--accent-hover);
+}
 
-  .win-checkbox.is-disabled .checkbox-box {
-    background: var(--ctrl-fill-disabled);
-    border-color: var(--ctrl-strong-stroke-disabled);
-  }
+.win-checkbox.is-checked:active,
+.win-checkbox.is-indeterminate:active {
+  --CheckBoxCheckBackgroundFill: var(--accent-pressed);
+  --CheckBoxCheckBackgroundStroke: var(--accent-pressed);
+  --CheckBoxCheckGlyphForeground: var(--accent-text-secondary);
+}
 
-    .win-checkbox.is-disabled input:checked + .checkbox-box,
-    .win-checkbox.is-disabled .checkbox-box.is-indeterminate {
-      background: var(--accent-fill-disabled);
-      border-color: transparent;
-    }
+.win-checkbox.is-disabled {
+  pointer-events: none;
+  cursor: default;
+  color: var(--text-disabled);
+}
 
-    .win-checkbox.is-disabled .checkbox-box:after {
-      border-color: var(--text-disabled) !important;
-      color: var(--text-disabled) !important;
-    }
+.win-checkbox.is-disabled .checkbox-box {
+  background: var(--ctrl-fill-disabled);
+  border-color: var(--ctrl-strong-stroke-disabled);
+}
+
+.win-checkbox.is-disabled.is-checked .checkbox-box,
+.win-checkbox.is-disabled.is-indeterminate .checkbox-box {
+  background: var(--accent-fill-disabled);
+  border-color: var(--accent-fill-disabled);
+}
+
+.win-checkbox.is-disabled .checkbox-glyph {
+  color: var(--text-disabled);
+}
 </style>

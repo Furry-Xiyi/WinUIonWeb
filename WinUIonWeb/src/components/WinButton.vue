@@ -4,7 +4,8 @@
     class="win-btn"
     :class="[styleClass, attrs.class]"
     :style="buttonStyle"
-    :disabled="isDisabled">
+    :disabled="isDisabled"
+    @click="onClick">
     <slot>{{ Content }}</slot>
   </button>
 </template>
@@ -41,6 +42,8 @@ const props = defineProps({
   FocusVisualMargin: { type: [String, Number], default: '' },
   CornerRadius: { type: [String, Number], default: '' }
 });
+
+const emit = defineEmits(['Click']);
 
 const attrs = useAttrs();
 
@@ -113,6 +116,11 @@ const buttonStyle = computed(() => {
 
   return [attrs.style, style];
 });
+
+const onClick = (event) => {
+  if (isDisabled.value) return;
+  emit('Click', event);
+};
 </script>
 <style>
   .win-btn {
@@ -269,7 +277,8 @@ const buttonStyle = computed(() => {
     white-space: nowrap;
   }
 
-  html.theme-dark .win-btn {
+  html.theme-dark .win-btn,
+  .example-theme-wrapper.theme-dark .win-btn {
     --ButtonBorderBrush: rgba(255, 255, 255, 0.05);
     --ButtonBorderBrushPointerOver: rgba(255, 255, 255, 0.05);
     --ButtonBorderBrushBottom: rgba(255, 255, 255, 0.0075);
@@ -277,7 +286,9 @@ const buttonStyle = computed(() => {
   }
 
   html.theme-dark .win-btn:active,
-  html.theme-dark .win-btn:disabled {
+  html.theme-dark .win-btn:disabled,
+  .example-theme-wrapper.theme-dark .win-btn:active,
+  .example-theme-wrapper.theme-dark .win-btn:disabled {
     --ButtonBorderBrushBottom: var(--ControlStrokeColorDefaultBrush);
   }
 

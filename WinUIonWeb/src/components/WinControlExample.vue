@@ -25,16 +25,25 @@
         :IsExpanded="false"
         :Header="t('text.source-code')"
         class="code-expander">
-        <div class="source-code-presenter">
+        <div class="source-code-presenter" :data-theme="theme">
           <WinSelectorBar
             v-if="codeTabItems.length > 1"
             :items="codeTabItems"
             :selectedIndex="selectedCodeTab"
             @selectionChanged="onCodeTabChanged" />
-          <WinTextBlock
-            class="code-block"
-            :Text="activeCode"
-            IsTextSelectionEnabled />
+          <div class="sample-code-presenter">
+            <div class="source-code-scroll">
+              <WinTextBlock
+                class="code-block"
+                :Text="activeCode"
+                IsTextSelectionEnabled />
+            </div>
+            <div class="copy-button-border">
+              <WinButton class="copy-code-button" :title="t('text.copy')" @Click="copyActiveCode">
+                <span class="icon"></span>
+              </WinButton>
+            </div>
+          </div>
         </div>
       </WinExpander>
     </div>
@@ -44,6 +53,7 @@
 <script setup>
 import { ref, computed, useSlots, watch } from 'vue';
 import WinExpander from './WinExpander.vue';
+import WinButton from './WinButton.vue';
 import WinSelectorBar from './WinSelectorBar.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import WinThemeWrapper from './WinThemeWrapper.vue';
@@ -131,6 +141,11 @@ const displayStyle = computed(() => ({
 const onCodeTabChanged = ({ selectedIndex }) => {
   selectedCodeTab.value = selectedIndex;
 };
+
+const copyActiveCode = async () => {
+  if (!activeCode.value) return;
+  await navigator.clipboard?.writeText(activeCode.value);
+};
 </script>
 
 <style scoped>
@@ -151,6 +166,7 @@ const onCodeTabChanged = ({ selectedIndex }) => {
 .control-example-frame {
   border-radius: 8px;
   overflow: hidden;
+  min-width: 0;
 }
 
 .example-container {
@@ -189,10 +205,17 @@ const onCodeTabChanged = ({ selectedIndex }) => {
   color: var(--text-primary);
 }
 
+:global(html.theme-light) .example-options,
+.example-display[data-theme="light"] + .example-options {
+  background: rgba(250, 250, 250, 0.96);
+  border-left-color: rgba(0, 0, 0, 0.12);
+}
+
 .code-expander {
   margin: 0;
   border-radius: 0 0 8px 8px;
   border-top: none;
+  min-width: 0;
 }
 
 .code-expander :deep(.win-expander-header) {
@@ -221,21 +244,86 @@ const onCodeTabChanged = ({ selectedIndex }) => {
 }
 
 .source-code-presenter {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: var(--card-bg-secondary);
+  position: relative;
+  display: grid;
+  row-gap: 16px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sample-code-presenter {
+  position: relative;
+  min-height: 30px;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.copy-button-border {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  z-index: 2;
+  border-radius: 4px;
+  background: var(--control-on-image-fill-color-default, rgba(243, 243, 243, 0.85));
+  color: var(--text-primary);
+}
+
+.copy-code-button {
+  width: 32px;
+  height: 32px;
+  min-width: 0;
+  padding: 6px;
+}
+
+.copy-code-button .icon {
+  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons", sans-serif;
+  font-size: 14px;
+}
+
+.source-code-scroll {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 0 0px 8px;
+  box-sizing: border-box;
+}
+
+:global(html.theme-light) .copy-button-border {
+  --control-on-image-fill-color-default: rgba(243, 243, 243, 0.85);
+}
+
+:global(html.theme-dark) .copy-button-border {
+  --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
+}
+
+.source-code-presenter[data-theme="light"] .copy-button-border {
+  --control-on-image-fill-color-default: rgba(243, 243, 243, 0.85);
+  --ctrl-fill-default: rgba(255, 255, 255, 0.70);
+  --ctrl-fill-secondary: rgba(249, 249, 249, 0.50);
+  --ctrl-fill-tertiary: rgba(249, 249, 249, 0.30);
+  --text-primary: rgba(0, 0, 0, 0.89);
+}
+
+.source-code-presenter[data-theme="dark"] .copy-button-border {
+  --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
+  --ctrl-fill-default: rgba(255, 255, 255, 0.0605);
+  --ctrl-fill-secondary: rgba(255, 255, 255, 0.0837);
+  --ctrl-fill-tertiary: rgba(255, 255, 255, 0.0326);
+  --text-primary: #ffffff;
 }
 
 .source-code-presenter :deep(.win-selector-bar) {
-  margin: 0;
+  margin: 0 0 0 4px;
 }
 
 .source-code-presenter :deep(.code-block) {
   display: block;
   margin: 0;
   padding: 0;
+  min-width: max-content;
   overflow: visible;
   color: var(--text-primary);
   background: transparent;

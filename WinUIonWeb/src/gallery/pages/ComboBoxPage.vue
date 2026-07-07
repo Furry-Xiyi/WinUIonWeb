@@ -1,79 +1,39 @@
 <template>
   <div>
-    <div style="position: relative;">
-      <h1 class="page-header">{{ $t('text.combobox') }}</h1>
-      <p class="page-description">
-        {{ $t('text.use-a-combobox-also-known-as-a-drop-down-list-to') }}
-      </p>
+    <div class="page-heading">
+      <WinTextBlock class="page-header" :Text="$t('text.combobox')" />
+      <WinTextBlock class="page-description" :Text="$t('text.use-a-combobox-also-known-as-a-drop-down-list-to')" TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon"></span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
     </div>
 
-    <p class="control-example-description">{{ $t('text.a-combobox-with-inline-items') }}</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.combobox.inline')" :theme="pageTheme" :vue="comboBoxInlineVue">
       <template #example>
-        <WinComboBox
-          :options="colors"
-          v-model="selectedColorIndex"
-          placeholder="Pick a color"
-          :header="$t('text.colors')"
-          style="width: 200px;" />
-      </template>
-      <template #options>
-        <div
-          v-if="selectedColorIndex !== null && selectedColorIndex >= 0"
-          class="color-preview"
-          :style="{ backgroundColor: colors[selectedColorIndex].value }">
+        <div class="vertical-stack">
+          <WinComboBox v-model:SelectedIndex="Combo1" Width="200" :Header="$t('text.colors')" :PlaceholderText="$t('sample.combobox.pick-a-color')" :ItemsSource="colors" @SelectionChanged="ColorComboBox_SelectionChanged" />
+          <div class="color-output" :style="{ backgroundColor: selectedColor }"></div>
         </div>
       </template>
     </WinControlExample>
 
-    <p class="control-example-description">A ComboBox with an ItemsSource.</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.combobox.itemssource')" :theme="pageTheme" :vue="comboBoxItemsSourceVue">
       <template #example>
-        <WinComboBox
-          :options="fonts"
-          v-model="selectedFontIndex"
-          header="Font"
-          style="min-width: 200px;" />
-      </template>
-      <template #options>
-        <div
-          v-if="selectedFontIndex !== null && selectedFontIndex >= 0"
-          class="output-text"
-          :style="{ fontFamily: fonts[selectedFontIndex].value }">
-          You can set the font used for this text.
+        <div class="vertical-stack">
+          <WinComboBox v-model:SelectedIndex="Combo2" MinWidth="200" :Header="$t('sample.combobox.font')" :ItemsSource="fonts" />
+          <WinTextBlock class="output-text" :FontFamily="fonts[Combo2]?.value" :Text="$t('sample.combobox.font-text')" />
         </div>
       </template>
     </WinControlExample>
 
-    <p class="control-example-description">An editable ComboBox.</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.combobox.editable')" :theme="pageTheme" :vue="comboBoxEditableVue">
       <template #example>
-        <WinComboBox
-          :options="fontSizes"
-          v-model="selectedFontSizeIndex"
-          :editable="true"
-          header="Font Size"
-          style="width: 200px;" />
-      </template>
-      <template #options>
-        <div
-          v-if="selectedFontSizeIndex !== null && selectedFontSizeIndex >= 0"
-          class="output-text"
-          :style="{ fontSize: fontSizes[selectedFontSizeIndex].value }">
-          You can set the font size used for this text.
+        <div class="vertical-stack">
+          <WinComboBox v-model:SelectedIndex="Combo3" Width="200" :Header="$t('sample.combobox.font-size')" IsEditable :ItemsSource="fontSizes" @TextSubmitted="Combo3_TextSubmitted" />
+          <WinTextBlock class="output-text" FontFamily="Segoe UI" :FontSize="fontSizes[Combo3]?.value" :Text="$t('sample.combobox.font-size-text')" />
         </div>
       </template>
     </WinControlExample>
@@ -81,31 +41,27 @@
 </template>
 
 <script setup>
-import { ref, inject, computed } from 'vue';
+import { computed, inject, ref } from 'vue';
+import WinButton from '../../components/WinButton.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
-import { createPageState } from '../../utils/pageState';
-
 import { useI18n } from '../../components/i18n/index';
+import { createPageState } from '../../utils/pageState';
 
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'combobox');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Color options
-const colors = [
-  { label: t('text.blue'), value: '#0078D4' },
-  { label: t('text.green'), value: '#10893E' },
-  { label: t('text.red'), value: '#D13438' },
-  { label: t('text.yellow'), value: '#FFB900' }
-];
-const selectedColorIndex = ref(null);
-
-// Font options
-const fonts = [
+const colors = computed(() => [
+  { label: t('text.blue'), value: 'Blue', color: '#0078D4' },
+  { label: t('text.green'), value: 'Green', color: '#10893E' },
+  { label: t('text.red'), value: 'Red', color: '#D13438' },
+  { label: t('text.yellow'), value: 'Yellow', color: '#FFB900' }
+]);
+const fonts = computed(() => [
   { label: t('text.arial'), value: 'Arial' },
   { label: t('text.comic-sans-ms'), value: 'Comic Sans MS' },
   { label: t('text.courier-new'), value: 'Courier New' },
@@ -114,73 +70,38 @@ const fonts = [
   { label: t('text.times-new-roman'), value: 'Times New Roman' },
   { label: t('text.trebuchet-ms'), value: 'Trebuchet MS' },
   { label: t('text.verdana'), value: 'Verdana' }
-];
-const selectedFontIndex = ref(4); // Default to Segoe UI
+]);
+const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36, 48, 72].map((size) => ({ label: String(size), value: size }));
 
-// Font size options
-const fontSizes = [
-  { label: '8', value: '8px' },
-  { label: '9', value: '9px' },
-  { label: '10', value: '10px' },
-  { label: '11', value: '11px' },
-  { label: '12', value: '12px' },
-  { label: '14', value: '14px' },
-  { label: '16', value: '16px' },
-  { label: '18', value: '18px' },
-  { label: '20', value: '20px' },
-  { label: '24', value: '24px' },
-  { label: '28', value: '28px' },
-  { label: '36', value: '36px' },
-  { label: '48', value: '48px' },
-  { label: '72', value: '72px' }
-];
-const selectedFontSizeIndex = ref(5); // Default to 14
+const Combo1 = ref(undefined);
+const Combo2 = ref(2);
+const Combo3 = ref(2);
+const selectedColor = ref('transparent');
+
+const ColorComboBox_SelectionChanged = ({ SelectedIndex }) => {
+  selectedColor.value = colors.value[SelectedIndex]?.color ?? 'transparent';
+};
+
+const Combo3_TextSubmitted = ({ Text }) => {
+  const value = Number(Text);
+  if (!Number.isFinite(value)) return;
+  const index = fontSizes.findIndex((item) => item.value === value);
+  if (index >= 0) Combo3.value = index;
+};
+
+const comboBoxInlineVue = `<WinComboBox Width="200" Header="Colors" PlaceholderText="Pick a color" :ItemsSource="colors" @SelectionChanged="ColorComboBox_SelectionChanged" />`;
+const comboBoxItemsSourceVue = `<WinComboBox MinWidth="200" Header="Font" SelectedIndex="2" :ItemsSource="fonts" />`;
+const comboBoxEditableVue = `<WinComboBox Width="200" Header="Font Size" IsEditable :ItemsSource="fontSizes" @TextSubmitted="Combo3_TextSubmitted" />`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
-
-.color-preview {
-  width: 100px;
-  height: 30px;
-  border-radius: 4px;
-  border: 1px solid var(--control-stroke-default);
-}
-
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
+.vertical-stack { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.color-output { width: 100px; height: 30px; border: 1px solid var(--ctrl-border); }
+.output-text { margin-top: 4px; }
 </style>
-
-
-
-

@@ -1,238 +1,141 @@
 <template>
   <div>
-    <div style="position: relative;">
-      <h1 class="page-header">{{ $t('text.slider') }}</h1>
-      <p class="page-description">
-        {{ $t('text.use-a-slider-to-let-users-set-a-value-by-moving') }}
-      </p>
+    <div class="page-heading">
+      <WinTextBlock class="page-header" :Text="$t('text.slider')" />
+      <WinTextBlock class="page-description" :Text="$t('text.use-a-slider-to-let-users-set-a-value-by-moving')" TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon"></span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
     </div>
 
-    <!-- Example 1: Simple Slider -->
-    <p class="control-example-description">{{ $t('text.a-simple-slider') }}</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-slider')" :theme="pageTheme" :vue="sliderSimpleVue">
       <template #example>
-        <WinSlider
-          v-model="sliderValue1"
-          style="width: 200px;" />
+        <WinSlider Width="200" :Value="slider1" @update:Value="slider1 = $event" />
       </template>
       <template #options>
-        <p class="output-text">{{ sliderValue1 }}</p>
+        <WinTextBlock :Text="String(slider1)" />
       </template>
     </WinControlExample>
 
-    <!-- Example 2: Slider with Range and Steps -->
-    <p class="control-example-description">A Slider with range and steps specified.</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.slider.range')" :theme="pageTheme" :vue="sliderRangeVue">
       <template #example>
         <WinSlider
-          v-model="sliderValue2"
-          :min="minimumValue"
-          :max="maximumValue"
-          :step="stepFrequencyValue"
-          header="Control header"
-          style="width: 200px;" />
+          Width="200"
+          Margin="0,0,10,0"
+          :Header="$t('sample.slider.control-header')"
+          :Maximum="maximumValue"
+          :Minimum="minimumValue"
+          :SmallChange="smallChangeValue"
+          :StepFrequency="stepFrequencyValue"
+          :Value="slider2"
+          @update:Value="slider2 = $event" />
       </template>
       <template #options>
-        <p class="output-text">{{ sliderValue2 }}</p>
-
-        <div class="options-grid">
-          <label class="option-label">Minimum:</label>
-          <input
-            type="number"
-            v-model.number="minimumValue"
-            class="number-input" />
-
-          <label class="option-label">Maximum:</label>
-          <input
-            type="number"
-            v-model.number="maximumValue"
-            class="number-input" />
-
-          <label class="option-label">StepFrequency:</label>
-          <input
-            type="number"
-            v-model.number="stepFrequencyValue"
-            :min="1"
-            class="number-input" />
-
-          <label class="option-label">SmallChange:</label>
-          <input
-            type="number"
-            v-model.number="smallChangeValue"
-            class="number-input" />
+        <div class="slider-options">
+          <WinTextBlock :Text="String(slider2)" />
+          <div class="options-grid">
+            <WinTextBlock Text="Minimum:" />
+            <WinNumberBox :Value="minimumValue" SpinButtonPlacementMode="Compact" @update:Value="minimumValue = $event" />
+            <WinTextBlock Text="Maximum:" />
+            <WinNumberBox :Value="maximumValue" SpinButtonPlacementMode="Compact" @update:Value="maximumValue = $event" />
+            <WinTextBlock Text="StepFrequency:" />
+            <WinNumberBox :Value="stepFrequencyValue" :Minimum="1" SpinButtonPlacementMode="Compact" @update:Value="stepFrequencyValue = $event" />
+            <WinTextBlock Text="SmallChange:" />
+            <WinNumberBox :Value="smallChangeValue" SpinButtonPlacementMode="Compact" @update:Value="smallChangeValue = $event" />
+          </div>
         </div>
       </template>
     </WinControlExample>
 
-    <!-- Example 3: Slider with Tick Marks -->
-    <p class="control-example-description">A Slider with tick marks.</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.slider.ticks')" :theme="pageTheme" :vue="sliderTicksVue">
       <template #example>
-        <WinSlider
-          v-model="sliderValue3"
-          :show-ticks="true"
-          :tick-frequency="20"
-          :snap-to-ticks="snapsToTicks"
-          style="width: 290px;" />
+        <WinSlider Width="290" TickFrequency="20" TickPlacement="Outside" :SnapsTo="snapsTo" :Value="slider3" @update:Value="slider3 = $event" />
       </template>
       <template #options>
-        <p class="output-text">{{ sliderValue3 }}</p>
-
-        <div class="radio-group">
-          <div class="radio-header">Snaps to:</div>
-          <WinRadioButton value="step" v-model="snapsToMode">
-            StepValues
-          </WinRadioButton>
-          <WinRadioButton value="ticks" v-model="snapsToMode">
-            Ticks
-          </WinRadioButton>
+        <div class="slider-options">
+          <WinTextBlock :Text="String(slider3)" />
+          <WinRadioButton
+            :Header="$t('sample.slider.snaps-to')"
+            :ItemsSource="snapItems"
+            :SelectedIndex="snapsToIndex"
+            @SelectionChanged="snapsToIndex = $event.SelectedIndex" />
         </div>
       </template>
     </WinControlExample>
 
-    <!-- Example 4: Vertical Slider -->
-    <p class="control-example-description">A vertical Slider.</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.slider.vertical')" :theme="pageTheme" :vue="sliderVerticalVue">
       <template #example>
-        <WinSlider
-          v-model="sliderValue4"
-          :min="-50"
-          :max="50"
-          :vertical="true"
-          :show-ticks="true"
-          :tick-frequency="10"
-          style="width: 100px; height: 100px;" />
+        <WinSlider Width="100" Height="100" :Maximum="50" :Minimum="-50" Orientation="Vertical" TickFrequency="10" TickPlacement="Outside" :Value="slider4" @update:Value="slider4 = $event" />
       </template>
       <template #options>
-        <p class="output-text">{{ sliderValue4 }}</p>
+        <WinTextBlock :Text="String(slider4)" />
       </template>
     </WinControlExample>
   </div>
 </template>
 
 <script setup>
-import { ref, inject, computed } from 'vue';
-import WinSlider from '../../components/WinSlider.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinNumberBox from '../../components/WinNumberBox.vue';
+import WinRadioButton from '../../components/WinRadioButton.vue';
+import WinSlider from '../../components/WinSlider.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'slider');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Example 1: Simple Slider
-const sliderValue1 = ref(0);
-
-// Example 2: Slider with Range and Steps
-const sliderValue2 = ref(800);
+const slider1 = ref(0);
+const slider2 = ref(800);
 const minimumValue = ref(500);
 const maximumValue = ref(1000);
 const stepFrequencyValue = ref(10);
 const smallChangeValue = ref(10);
+const slider3 = ref(0);
+const snapsToIndex = ref(0);
+const slider4 = ref(0);
 
-// Example 3: Slider with Tick Marks
-const sliderValue3 = ref(0);
-const snapsToMode = ref('step');
-const snapsToTicks = computed(() => snapsToMode.value === 'ticks');
+const snapItems = computed(() => [t('sample.step-values'), t('sample.ticks')]);
+const snapsTo = computed(() => snapsToIndex.value === 0 ? 'StepValues' : 'Ticks');
 
-// Example 4: Vertical Slider
-const sliderValue4 = ref(0);
+const sliderSimpleVue = `<WinSlider AutomationProperties.Name="simple slider" Width="200" />`;
+const sliderRangeVue = `<WinSlider
+  Width="200"
+  Header="Control header"
+  :Maximum="maximumValue"
+  :Minimum="minimumValue"
+  :SmallChange="smallChangeValue"
+  :StepFrequency="stepFrequencyValue"
+  :Value="800" />`;
+const sliderTicksVue = `<WinSlider AutomationProperties.Name="Slider with ticks" Width="290" TickFrequency="20" TickPlacement="Outside" />`;
+const sliderVerticalVue = `<WinSlider
+  AutomationProperties.Name="vertical slider"
+  Width="100"
+  Height="100"
+  :Maximum="50"
+  :Minimum="-50"
+  Orientation="Vertical"
+  TickFrequency="10"
+  TickPlacement="Outside" />`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
-
-.radio-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.radio-header {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 4px;
-  color: var(--text-primary);
-}
-
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.options-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 8px 12px;
-  align-items: center;
-}
-
-.option-label {
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-.number-input {
-  width: 100%;
-  padding: 4px 8px;
-  font-size: 14px;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  background: var(--ctrl-fill-default);
-  border: 1px solid var(--ctrl-border);
-  border-radius: 4px;
-  color: var(--text-primary);
-}
-
-.number-input:focus {
-  outline: 2px solid var(--accent-base);
-  outline-offset: -1px;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
+.slider-options { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.options-grid { display: grid; grid-template-columns: auto minmax(80px, auto); gap: 8px 10px; align-items: center; }
+.options-grid :deep(.win-number-box) { width: 92px; }
 </style>
-
-
-
-

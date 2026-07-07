@@ -143,6 +143,7 @@ const props = withDefaults(defineProps<{
   DesiredCandidateWindowAlignment?: string;
   IsColorFontEnabled?: boolean;
   PreventKeyboardDisplayOnProgrammaticFocus?: boolean;
+  ShowDeleteButton?: boolean;
 
   FontFamily?: string;
   FontSize?: number | string;
@@ -172,6 +173,7 @@ const props = withDefaults(defineProps<{
   DesiredCandidateWindowAlignment: 'Default',
   IsColorFontEnabled: true,
   PreventKeyboardDisplayOnProgrammaticFocus: false,
+  ShowDeleteButton: true,
   FontFamily: '',
   FontSize: '',
   FontStyle: 'Normal',
@@ -225,7 +227,7 @@ const currentText = computed(() => isTextControlled.value ? props.Text ?? '' : l
 const isDisabled = computed(() => !props.IsEnabled);
 const hasText = computed(() => currentText.value.length > 0);
 const showDeleteButton = computed(() =>
-  hasText.value && !props.AcceptsReturn && !props.IsReadOnly && props.IsEnabled && isFocused.value
+  props.ShowDeleteButton && hasText.value && !props.AcceptsReturn && !props.IsReadOnly && props.IsEnabled && isFocused.value
 );
 
 const inputMode = computed(() => {

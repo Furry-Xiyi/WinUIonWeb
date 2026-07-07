@@ -1,133 +1,77 @@
 <template>
   <div>
-    <div style="position: relative;">
-      <h1 class="page-header">{{ $t('text.repeatbutton') }}</h1>
-      <p class="page-description">
-        {{ $t('text.a-button-that-raises-its-click-event-repeatedly-ecf7f2') }}
-      </p>
+    <div class="page-heading">
+      <WinTextBlock class="page-header" :Text="$t('text.repeatbutton')" />
+      <WinTextBlock class="page-description" :Text="$t('text.a-button-that-raises-its-click-event-repeatedly-ecf7f2')" TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon"></span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
     </div>
 
-    <p class="control-example-description">{{ $t('text.a-simple-repeatbutton') }}</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.repeat.simple')" :theme="pageTheme" :vue="repeatButtonSimpleVue">
       <template #example>
-        <WinRepeatButton :disabled="disableControl1" @click="onRepeatClick">
-          {{ $t('text.click-and-hold') }}
-        </WinRepeatButton>
+        <div class="horizontal-stack">
+          <WinRepeatButton Content="Click and hold" :IsEnabled="DisableControl1 !== true" @Click="RepeatButton_Click" />
+          <WinTextBlock Margin="8,0,0,0" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" AutomationProperties.Name="Control output" :Text="Control1Output" />
+        </div>
       </template>
       <template #options>
-        <p class="output-text">Click count: {{ clickCount }}</p>
-
-        <WinCheckBox v-model="disableControl1">
-          Disable button
+        <WinCheckBox v-model="DisableControl1">
+          <WinTextBlock :Text="$t('sample.disable-repeatbutton')" />
         </WinCheckBox>
-      </template>
-    </WinControlExample>
-
-    <p class="control-example-description">RepeatButton with custom delay and interval</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
-      <template #example>
-        <div style="display: flex; gap: 16px; align-items: center;">
-          <WinRepeatButton
-            :delay="500"
-            :interval="100"
-            @click="decrementValue">
-            <span class="icon">&#xE74B;</span>
-          </WinRepeatButton>
-          <span style="font-size: 24px; font-weight: 600; min-width: 60px; text-align: center;">
-            {{ value }}
-          </span>
-          <WinRepeatButton
-            :delay="500"
-            :interval="100"
-            @click="incrementValue">
-            <span class="icon">&#xE74A;</span>
-          </WinRepeatButton>
-        </div>
       </template>
     </WinControlExample>
   </div>
 </template>
 
 <script setup>
-import { ref, inject, computed } from 'vue';
-import WinRepeatButton from '../../components/WinRepeatButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
+import WinCheckBox from '../../components/WinCheckBox.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinRepeatButton from '../../components/WinRepeatButton.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'repeatbutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const disableControl1 = ref(false);
-const clickCount = ref(0);
-const value = ref(0);
+const DisableControl1 = ref(false);
+const clicks = ref(0);
+const Control1Output = ref('');
 
-const onRepeatClick = () => {
-  clickCount.value++;
+const RepeatButton_Click = () => {
+  clicks.value += 1;
+  Control1Output.value = t('sample.number-of-clicks', { count: clicks.value });
 };
 
-const incrementValue = () => {
-  value.value++;
-};
-
-const decrementValue = () => {
-  value.value--;
-};
+const repeatButtonSimpleVue = `<div>
+  <WinRepeatButton
+    Content="Click and hold"
+    :IsEnabled="DisableControl1 !== true"
+    @Click="RepeatButton_Click" />
+  <WinTextBlock
+    Margin="8,0,0,0"
+    VerticalAlignment="Center"
+    AutomationProperties.LiveSetting="Polite"
+    AutomationProperties.Name="Control output"
+    :Text="Control1Output" />
+</div>`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.horizontal-stack { display: flex; align-items: center; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
 </style>
-
-
-
-

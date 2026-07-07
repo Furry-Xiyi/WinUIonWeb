@@ -1,57 +1,45 @@
 <template>
   <div>
-    <div style="position: relative;">
-      <h1 class="page-header">{{ $t('text.hyperlinkbutton') }}</h1>
-      <p class="page-description">{{ $t('text.a-button-that-appears-as-a-hyperlink') }}</p>
+    <div class="page-heading">
+      <WinTextBlock class="page-header" :Text="$t('text.hyperlinkbutton')" />
+      <WinTextBlock class="page-description" :Text="$t('text.a-button-that-appears-as-a-hyperlink')" TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon"></span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
     </div>
 
-    <p class="control-example-description">{{ $t('text.a-hyperlinkbutton-with-navigateuri') }}</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.hyperlink.navigate')" :theme="pageTheme" :vue="hyperlinkButtonNavigateVue">
       <template #example>
         <WinHyperlinkButton
-          navigateUri="https://www.microsoft.com"
-          :openInNewWindow="true"
-          :disabled="disableControl1">
-          {{ $t('text.microsoft-home-page') }}
-        </WinHyperlinkButton>
+          :Content="$t('text.microsoft-home-page')"
+          NavigateUri="https://www.microsoft.com"
+          :IsEnabled="DisableControl1 !== true" />
       </template>
       <template #options>
-        <WinCheckBox v-model="disableControl1">
-          Disable hyperlink button
+        <WinCheckBox v-model="DisableControl1">
+          <WinTextBlock :Text="$t('sample.disable-hyperlink-button')" />
         </WinCheckBox>
       </template>
     </WinControlExample>
 
-    <p class="control-example-description">A HyperlinkButton handling the Click event.</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.hyperlink.click')" :theme="pageTheme" :vue="hyperlinkButtonClickVue">
       <template #example>
-        <WinHyperlinkButton @click="goToToggleButton">
-          Go to ToggleButton
-        </WinHyperlinkButton>
+        <WinHyperlinkButton :Content="$t('sample.hyperlink.go-to-togglebutton')" @Click="GoToHyperlinkButton_Click" />
       </template>
     </WinControlExample>
   </div>
 </template>
 
 <script setup>
-import { ref, inject, computed } from 'vue';
-import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
+import WinCheckBox from '../../components/WinCheckBox.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
@@ -59,43 +47,24 @@ const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'hyperlinkbutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const disableControl1 = ref(false);
+const DisableControl1 = ref(false);
 
-const goToToggleButton = () => {
-  currentPage.value = 'togglebutton';
+const GoToHyperlinkButton_Click = () => {
+  if (currentPage) currentPage.value = 'togglebutton';
 };
+
+const hyperlinkButtonNavigateVue = `<WinHyperlinkButton
+  Content="Microsoft home page"
+  NavigateUri="https://www.microsoft.com"
+  :IsEnabled="DisableControl1 !== true" />`;
+const hyperlinkButtonClickVue = `<WinHyperlinkButton Content="Go to ToggleButton" @Click="GoToHyperlinkButton_Click" />`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
 </style>
-
-
-
-

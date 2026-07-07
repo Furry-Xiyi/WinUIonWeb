@@ -8,14 +8,16 @@
         TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          class="header-action"
+          @Click="toggleTheme"
+          >
           <span class="icon"></span>
         </WinButton>
         <WinToggleButton
           v-model:IsChecked="isFavoriteState"
+          class="header-action"
           @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+          >
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
@@ -25,8 +27,7 @@
       class="basic-input-example-theme"
       :theme="pageTheme"
       :vue="toggleButtonVue"
-      :xaml="toggleButtonXaml"
-      :cSharp="toggleButtonCSharp">
+      :headerText="$t('sample.togglebutton.simple')">
       <template #example>
         <WinToggleButton
           v-model:IsChecked="Toggle1"
@@ -39,7 +40,7 @@
       <template #options>
         <WinTextBlock class="output-text" :Text="Control1Output" />
         <WinCheckBox v-model="DisableToggle1">
-          Disable ToggleButton
+          <WinTextBlock :Text="$t('sample.disable-togglebutton')" />
         </WinCheckBox>
       </template>
     </WinControlExample>
@@ -78,33 +79,6 @@ const toggleButtonVue = `<WinToggleButton
   @Checked="ToggleButton_Checked"
   @Unchecked="ToggleButton_Unchecked" />`;
 
-const toggleButtonXaml = `<ToggleButton
-    x:Name="Toggle1"
-    Checked="ToggleButton_Checked"
-    Content="ToggleButton"
-    IsEnabled="{x:Bind DisableToggle1.IsChecked.Value.Equals(x:False), Mode=OneWay}"
-    Unchecked="ToggleButton_Unchecked" />`;
-
-const toggleButtonCSharp = `public sealed partial class ToggleButtonPage : Page
-{
-    public ToggleButtonPage()
-    {
-        this.InitializeComponent();
-
-        // Set initial output value.
-        Control1Output.Text = Toggle1.IsChecked is true ? "On" : "Off";
-    }
-
-    private void ToggleButton_Checked(object sender, RoutedEventArgs e)
-    {
-        Control1Output.Text = "On";
-    }
-
-    private void ToggleButton_Unchecked(object sender, RoutedEventArgs e)
-    {
-        Control1Output.Text = "Off";
-    }
-}`;
 </script>
 
 <style scoped>
@@ -129,6 +103,13 @@ const toggleButtonCSharp = `public sealed partial class ToggleButtonPage : Page
   display: flex;
   gap: 4px;
   align-items: center;
+}
+
+.header-action {
+  width: 32px;
+  height: 32px;
+  min-width: 0;
+  padding: 0;
 }
 
 .icon {

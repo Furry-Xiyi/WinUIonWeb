@@ -13,6 +13,7 @@
         :TextAlignment="TextAlignment"
         :SelectionHighlightColor="SelectionHighlightColor"
         :PreventKeyboardDisplayOnProgrammaticFocus="PreventKeyboardDisplayOnProgrammaticFocus"
+        :ShowDeleteButton="false"
         @update:Text="onTextInput"
         @GotFocus="onFocus"
         @LostFocus="onLostFocus"

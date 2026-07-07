@@ -56,6 +56,11 @@ const themeClass = computed(() => {
   --control-fill-color-input-active: var(--ctrl-fill-input-active);
   --control-fill-input-active: var(--ctrl-fill-input-active);
 
+  --ctrl-border-rest: rgba(0, 0, 0, 0.06);
+  --ctrl-border: rgba(0, 0, 0, 0.06);
+  --ctrl-border-accent: rgba(0, 0, 0, 0.16);
+  --ctrl-elevation-top: rgba(255, 255, 255, 0.08);
+  --ctrl-elevation-bottom: rgba(0, 0, 0, 0.16);
   --ctrl-stroke-default: rgba(0, 0, 0, 0.0578);
   --ctrl-strong-stroke: rgba(0, 0, 0, 0.6555);
   --ctrl-strong-stroke-disabled: rgba(0, 0, 0, 0.3665);
@@ -98,6 +103,11 @@ const themeClass = computed(() => {
   --control-fill-color-input-active: var(--ctrl-fill-input-active);
   --control-fill-input-active: var(--ctrl-fill-input-active);
 
+  --ctrl-border-rest: rgba(0, 0, 0, 0.07);
+  --ctrl-border: rgba(255, 255, 255, 0.07);
+  --ctrl-border-accent: rgba(255, 255, 255, 0.09);
+  --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
+  --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
   --ctrl-stroke-default: rgba(255, 255, 255, 0.0698);
   --ctrl-strong-stroke: rgba(255, 255, 255, 0.5442);
   --ctrl-strong-stroke-disabled: rgba(255, 255, 255, 0.1581);

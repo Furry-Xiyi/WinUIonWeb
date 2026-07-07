@@ -1,44 +1,55 @@
 <template>
   <div>
-    <div style="position: relative;">
-      <h1 class="page-header">{{ $t('text.ratingcontrol') }}</h1>
-      <p class="page-description">
-        {{ $t('text.the-ratingcontrol-allows-users-to-view-and-set-r') }}
-      </p>
+    <div class="page-heading">
+      <WinTextBlock class="page-header" :Text="$t('text.ratingcontrol')" />
+      <WinTextBlock class="page-description" :Text="$t('text.the-ratingcontrol-allows-users-to-view-and-set-r')" TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon"></span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>
     </div>
 
-    <!-- Example 1: A simple RatingControl -->
-    <p class="control-example-description">{{ $t('text.a-simple-ratingcontrol') }}</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-ratingcontrol')" :theme="pageTheme" :vue="ratingSimpleVue">
       <template #example>
-        <WinRating v-model="rating1" />
+        <WinRating
+          :Value="ratingValue"
+          :Caption="ratingCaption"
+          :IsClearEnabled="clearEnabled"
+          :IsReadOnly="readOnly"
+          @update:Value="ratingValue = $event"
+          @ValueChanged="onRatingValueChanged" />
       </template>
       <template #options>
-        <p class="output-text">Rating: {{ rating1 }}</p>
+        <div class="rating-options">
+          <WinTextBlock FontWeight="Bold" :Text="String(ratingValue)" />
+          <WinCheckBox v-model:IsChecked="clearEnabled"><WinTextBlock Text="IsClearEnabled" /></WinCheckBox>
+          <WinTextBlock :Text="$t('sample.rating.clear-note')" TextWrapping="WrapWholeWords" />
+          <WinCheckBox Margin="0,12,0,0" v-model:IsChecked="readOnly"><WinTextBlock Text="IsReadOnly" /></WinCheckBox>
+        </div>
       </template>
     </WinControlExample>
 
-    <!-- Example 2: A RatingControl with custom max value -->
-    <p class="control-example-description">A RatingControl with custom maximum</p>
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme">
+    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.rating.placeholder')" :theme="pageTheme" :vue="ratingPlaceholderVue">
       <template #example>
-        <WinRating v-model="rating2" :max="10" />
+        <WinRating :PlaceholderValue="placeholderValue" />
       </template>
       <template #options>
-        <p class="output-text">Rating: {{ rating2 }} / 10</p>
+        <div
+          class="rating-options"
+          @pointerdown="isPlaceholderSliderDragging = true"
+          @pointerup="commitPlaceholderSlider"
+          @pointercancel="commitPlaceholderSlider">
+          <WinSlider
+            :Header="$t('sample.placeholder-value')"
+            :Value="placeholderSliderValue"
+            :Minimum="0"
+            :Maximum="5"
+            :SmallChange="0.5"
+            :StepFrequency="0.5"
+            @update:Value="onPlaceholderSliderValueChanged" />
+        </div>
       </template>
     </WinControlExample>
   </div>
@@ -46,55 +57,62 @@
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinRating from '../../components/WinRating.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
+import WinCheckBox from '../../components/WinCheckBox.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinRating from '../../components/WinRating.vue';
+import WinSlider from '../../components/WinSlider.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'rating');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-const rating1 = ref(3);
-const rating2 = ref(5);
+const { t } = useI18n();
+
+const ratingValue = ref(-1);
+const clearEnabled = ref(false);
+const readOnly = ref(false);
+const placeholderSliderValue = ref(1);
+const isPlaceholderSliderDragging = ref(false);
+const placeholderValue = computed(() => Math.max(1, placeholderSliderValue.value));
+const ratingCaptionChanged = ref(false);
+const ratingCaption = ref(t('sample.rating.caption'));
+
+const onRatingValueChanged = () => {
+  ratingCaptionChanged.value = true;
+  ratingCaption.value = t('sample.rating.your-rating');
+};
+
+const onPlaceholderSliderValueChanged = (value) => {
+  placeholderSliderValue.value = !isPlaceholderSliderDragging.value && value < 1 ? 1 : value;
+};
+
+const commitPlaceholderSlider = () => {
+  isPlaceholderSliderDragging.value = false;
+  if (placeholderSliderValue.value < 1) placeholderSliderValue.value = 1;
+};
+
+const ratingSimpleVue = `<WinRating
+  AutomationProperties.Name="Simple RatingControl"
+  :Caption="ratingCaption"
+  :IsClearEnabled="clearEnabled"
+  :IsReadOnly="readOnly"
+  @ValueChanged="ratingCaption = 'Your rating'" />`;
+
+const ratingPlaceholderVue = `<WinRating AutomationProperties.Name="RatingControl with placeholder" :PlaceholderValue="placeholderValue" />
+
+<WinSlider Header="PlaceholderValue" :Minimum="0" :Maximum="5" :SmallChange="0.5" :StepFrequency="0.5" :Value="placeholderSliderValue" />`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
-
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
+.rating-options { width: 220px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 </style>
-
-
-

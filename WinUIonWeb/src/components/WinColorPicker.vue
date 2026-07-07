@@ -1,6 +1,6 @@
 <template>
-  <div class="win-color-picker" :class="{ 'cp-has-preview': isColorPreviewVisible }">
-    <div class="cp-main-row">
+  <div class="win-color-picker" :class="{ 'cp-has-preview': IsColorPreviewVisible, 'cp-no-preview': !IsColorPreviewVisible }">
+    <div class="cp-spectrum-grid">
       <div class="cp-spectrum-area" :class="{ 'cp-ring': isRing }">
         <canvas ref="spectrumCanvas" class="cp-spectrum"
                 :width="spectrumSize" :height="spectrumSize"
@@ -8,54 +8,90 @@
         <div class="cp-spectrum-thumb" :style="spectrumThumbStyle"></div>
       </div>
 
-      <div class="cp-preview-bar" v-if="isColorPreviewVisible">
+      <div class="cp-preview-bar" v-if="IsColorPreviewVisible">
         <div class="cp-preview-current" :style="{ background: currentHex }"></div>
         <div class="cp-preview-previous" v-if="previousColor" :style="{ background: previousColor }"></div>
       </div>
     </div>
 
-    <div class="cp-sliders" v-if="isColorSliderVisible">
+    <div class="cp-sliders" v-if="IsColorSliderVisible">
       <div class="cp-slider-row" @pointerdown="onValueDown">
         <div class="cp-value-track" ref="valueTrack" :style="{ background: valueGradient }">
           <div class="cp-slider-thumb" :style="{ left: hsv.v * 100 + '%' }"></div>
         </div>
       </div>
-      <div class="cp-slider-row" v-if="isAlphaEnabled && isAlphaSliderVisible" @pointerdown="onAlphaDown">
+      <div class="cp-slider-row" v-if="IsAlphaEnabled && IsAlphaSliderVisible" @pointerdown="onAlphaDown">
         <div class="cp-alpha-track" ref="alphaTrack" :style="{ '--alpha-color': hsvToRgbStr(hsv.h, hsv.s, 1) }">
           <div class="cp-slider-thumb" :style="{ left: alpha * 100 + '%' }"></div>
         </div>
       </div>
     </div>
 
-    <div class="cp-inputs" v-if="isColorChannelTextInputVisible">
-      <div class="cp-input-group">
-        <label>{{ t('text.r') }}</label>
-        <input type="number" min="0" max="255" :value="rgb.r" @change="onRgbInput('r', $event)">
-      </div>
-      <div class="cp-input-group">
-        <label>{{ t('text.g') }}</label>
-        <input type="number" min="0" max="255" :value="rgb.g" @change="onRgbInput('g', $event)">
-      </div>
-      <div class="cp-input-group">
-        <label>{{ t('text.b') }}</label>
-        <input type="number" min="0" max="255" :value="rgb.b" @change="onRgbInput('b', $event)">
-      </div>
+    <div v-if="IsMoreButtonVisible" class="cp-more-row">
+      <WinButton class="cp-more-button" Style="SubtleButtonStyle" @Click="moreExpanded = !moreExpanded">
+        <WinTextBlock class="cp-more-label" :Text="t('text.more')" />
+        <span class="icon">{{ moreGlyph }}</span>
+      </WinButton>
     </div>
 
-    <div class="cp-hex-row" v-if="isHexInputVisible">
-      <label class="cp-hex-label">#</label>
-      <input class="cp-hex-input" type="text" maxlength="8" :value="hexDisplay" @change="onHexInput">
+    <div v-if="detailsVisible" class="cp-details-grid">
+      <WinComboBox Width="120" :ItemsSource="colorModelItems" :SelectedIndex="selectedColorModelIndex" @SelectionChanged="onColorModelChanged" />
+      <WinTextBox
+        v-if="IsHexInputVisible"
+        class="cp-hex-box"
+        :Text="hexInputText"
+        :MaxWidth="132"
+        :MaxLength="IsAlphaEnabled ? 9 : 7"
+        @update:Text="onHexTextChanged" />
+
+      <template v-if="IsColorChannelTextInputVisible && selectedColorModel === 'RGB'">
+        <WinNumberBox Width="120" :Value="rgb.r" :Minimum="0" :Maximum="255" @update:Value="onRgbValueInput('r', $event)" />
+        <WinTextBlock :Text="t('text.red')" />
+        <WinNumberBox Width="120" :Value="rgb.g" :Minimum="0" :Maximum="255" @update:Value="onRgbValueInput('g', $event)" />
+        <WinTextBlock :Text="t('text.green')" />
+        <WinNumberBox Width="120" :Value="rgb.b" :Minimum="0" :Maximum="255" @update:Value="onRgbValueInput('b', $event)" />
+        <WinTextBlock :Text="t('text.blue')" />
+      </template>
+
+      <template v-if="IsColorChannelTextInputVisible && selectedColorModel === 'HSV'">
+        <WinNumberBox Width="120" :Value="hsvHue" :Minimum="0" :Maximum="359" @update:Value="onHsvValueInput('h', $event)" />
+        <WinTextBlock :Text="t('text.hue')" />
+        <WinNumberBox Width="120" :Value="hsvSaturation" :Minimum="0" :Maximum="100" @update:Value="onHsvValueInput('s', $event)" />
+        <WinTextBlock :Text="t('text.saturation')" />
+        <WinNumberBox Width="120" :Value="hsvValue" :Minimum="0" :Maximum="100" @update:Value="onHsvValueInput('v', $event)" />
+        <WinTextBlock :Text="t('text.value')" />
+      </template>
+
+      <template v-if="IsAlphaEnabled && IsAlphaTextInputVisible">
+        <WinNumberBox Width="120" :Value="opacityPercent" :Minimum="0" :Maximum="100" @update:Value="onOpacityInput" />
+        <WinTextBlock :Text="t('sample.opacity')" />
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import WinButton from './WinButton.vue';
+import WinComboBox from './WinComboBox.vue';
+import WinNumberBox from './WinNumberBox.vue';
+import WinTextBlock from './WinTextBlock.vue';
+import WinTextBox from './WinTextBox.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 
 const props = defineProps({
+  Color: { type: String, default: undefined },
+  ColorSpectrumShape: { type: String, default: undefined },
+  IsMoreButtonVisible: { type: Boolean, default: false },
+  IsColorPreviewVisible: { type: Boolean, default: undefined },
+  IsColorSliderVisible: { type: Boolean, default: undefined },
+  IsColorChannelTextInputVisible: { type: Boolean, default: undefined },
+  IsHexInputVisible: { type: Boolean, default: undefined },
+  IsAlphaEnabled: { type: Boolean, default: undefined },
+  IsAlphaSliderVisible: { type: Boolean, default: undefined },
+  IsAlphaTextInputVisible: { type: Boolean, default: undefined },
   modelValue: { type: String, default: '#0067C0' },
   isColorPreviewVisible: { type: Boolean, default: true },
   isColorSliderVisible: { type: Boolean, default: true },
@@ -67,7 +103,7 @@ const props = defineProps({
   colorSpectrumShape: { type: String, default: 'Box' }
 });
 
-const emit = defineEmits(['update:modelValue', 'colorChanged']);
+const emit = defineEmits(['update:modelValue', 'update:Color', 'ColorChanged', 'colorChanged']);
 
 const spectrumSize = 256;
 const spectrumCanvas = ref(null);
@@ -76,11 +112,26 @@ const alphaTrack = ref(null);
 
 const hsv = reactive({ h: 0, s: 1, v: 1 });
 const alpha = ref(1);
+const moreExpanded = ref(false);
+const hexInputText = ref('');
+const selectedColorModelIndex = ref(0);
 let draggingSpectrum = false;
 let draggingValue = false;
 let draggingAlpha = false;
 
-const isRing = computed(() => props.colorSpectrumShape === 'Ring');
+const ColorSpectrumShape = computed(() => props.ColorSpectrumShape ?? props.colorSpectrumShape);
+const IsColorPreviewVisible = computed(() => props.IsColorPreviewVisible ?? props.isColorPreviewVisible);
+const IsColorSliderVisible = computed(() => props.IsColorSliderVisible ?? props.isColorSliderVisible);
+const IsColorChannelTextInputVisible = computed(() => props.IsColorChannelTextInputVisible ?? props.isColorChannelTextInputVisible);
+const IsHexInputVisible = computed(() => props.IsHexInputVisible ?? props.isHexInputVisible);
+const IsAlphaEnabled = computed(() => props.IsAlphaEnabled ?? props.isAlphaEnabled);
+const IsAlphaSliderVisible = computed(() => props.IsAlphaSliderVisible ?? props.isAlphaSliderVisible);
+const IsAlphaTextInputVisible = computed(() => props.IsAlphaTextInputVisible ?? props.isAlphaTextInputVisible);
+const detailsVisible = computed(() => !props.IsMoreButtonVisible || moreExpanded.value);
+const colorModelItems = computed(() => ['RGB', 'HSV']);
+const selectedColorModel = computed(() => selectedColorModelIndex.value === 1 ? 'HSV' : 'RGB');
+const isRing = computed(() => ColorSpectrumShape.value === 'Ring');
+const moreGlyph = computed(() => moreExpanded.value ? '\uE70E' : '\uE70D');
 
 const rgb = computed(() => {
   const { r, g, b } = hsvToRgb(hsv.h, hsv.s, hsv.v);
@@ -90,13 +141,17 @@ const rgb = computed(() => {
 const currentHex = computed(() => {
   const { r, g, b } = rgb.value;
   const hex = '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
-  if (props.isAlphaEnabled && alpha.value < 1) {
+  if (IsAlphaEnabled.value && alpha.value < 1) {
     return hex + Math.round(alpha.value * 255).toString(16).padStart(2, '0');
   }
   return hex;
 });
 
-const hexDisplay = computed(() => currentHex.value.slice(1).toUpperCase());
+const hexDisplay = computed(() => currentHex.value.toUpperCase());
+const opacityPercent = computed(() => Math.round(alpha.value * 100));
+const hsvHue = computed(() => Math.round(hsv.h) % 360);
+const hsvSaturation = computed(() => Math.round(hsv.s * 100));
+const hsvValue = computed(() => Math.round(hsv.v * 100));
 
 const valueGradient = computed(() => {
   const black = 'rgb(0,0,0)';
@@ -236,8 +291,14 @@ function drawRingSpectrum(ctx, w, h) {
 
 function emitColor() {
   emit('update:modelValue', currentHex.value);
+  emit('update:Color', currentHex.value);
+  emit('ColorChanged', { Color: currentHex.value, color: currentHex.value, r: rgb.value.r, g: rgb.value.g, b: rgb.value.b, a: alpha.value });
   emit('colorChanged', { color: currentHex.value, r: rgb.value.r, g: rgb.value.g, b: rgb.value.b, a: alpha.value });
 }
+
+watch(hexDisplay, (value) => {
+  hexInputText.value = value;
+}, { immediate: true });
 
 function onSpectrumDown(e) {
   draggingSpectrum = true;
@@ -313,8 +374,8 @@ function updateAlphaFromEvent(e) {
   emitColor();
 }
 
-function onRgbInput(channel, e) {
-  let val = parseInt(e.target.value) || 0;
+function applyRgbValue(channel, value) {
+  let val = parseInt(value) || 0;
   val = Math.max(0, Math.min(255, val));
   const r = channel === 'r' ? val : rgb.value.r;
   const g = channel === 'g' ? val : rgb.value.g;
@@ -327,15 +388,45 @@ function onRgbInput(channel, e) {
   emitColor();
 }
 
-function onHexInput(e) {
-  let val = e.target.value.replace('#', '').trim();
+function onRgbValueInput(channel, value) {
+  applyRgbValue(channel, value);
+}
+
+function onHsvValueInput(channel, value) {
+  const numeric = Number(value) || 0;
+  if (channel === 'h') hsv.h = Math.max(0, Math.min(359, numeric));
+  if (channel === 's') hsv.s = Math.max(0, Math.min(100, numeric)) / 100;
+  if (channel === 'v') hsv.v = Math.max(0, Math.min(100, numeric)) / 100;
+  drawSpectrum();
+  emitColor();
+}
+
+function onColorModelChanged(args) {
+  selectedColorModelIndex.value = args.SelectedIndex ?? 0;
+}
+
+function onOpacityInput(value) {
+  const percent = Math.max(0, Math.min(100, Number(value) || 0));
+  alpha.value = percent / 100;
+  emitColor();
+}
+
+function onHexTextChanged(value) {
+  hexInputText.value = value;
+  if (value.replace('#', '').trim().length >= 6) {
+    onHexInput(value);
+  }
+}
+
+function onHexInput(source) {
+  let val = String(source).replace('#', '').trim();
   if (val.length >= 6) {
     const { r, g, b, a } = parseColor(val);
     const newHsv = rgbToHsv(r, g, b);
     hsv.h = newHsv.h;
     hsv.s = newHsv.s;
     hsv.v = newHsv.v;
-    if (props.isAlphaEnabled) alpha.value = a;
+    if (IsAlphaEnabled.value) alpha.value = a;
     drawSpectrum();
     emitColor();
   }
@@ -347,55 +438,58 @@ function syncFromProp(hex) {
   hsv.h = newHsv.h;
   hsv.s = newHsv.s;
   hsv.v = newHsv.v;
-  if (props.isAlphaEnabled) alpha.value = a;
+  if (IsAlphaEnabled.value) alpha.value = a;
   nextTick(() => drawSpectrum());
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.Color ?? props.modelValue, (val) => {
   if (val && val.toLowerCase() !== currentHex.value.toLowerCase()) {
     syncFromProp(val);
   }
 });
 
-watch(() => props.colorSpectrumShape, () => {
+watch(ColorSpectrumShape, () => {
   nextTick(() => drawSpectrum());
 });
 
 watch(() => hsv.v, () => {});
 
 onMounted(() => {
-  syncFromProp(props.modelValue);
+  syncFromProp(props.Color ?? props.modelValue);
 });
 </script>
 
 <style>
   .win-color-picker {
+    --cp-spectrum-size: 256px;
+    --cp-preview-width: 44px;
+    --cp-preview-gap: 12px;
+    --cp-total-width: calc(var(--cp-spectrum-size) + var(--cp-preview-gap) + var(--cp-preview-width));
     display: inline-flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 12px;
-    background: var(--flyout-bg);
-    border: 1px solid var(--stroke-surface-flyout);
-    border-radius: 8px;
+    gap: 0;
+    min-width: 312px;
+    max-width: 392px;
+    padding: 0 4px;
     user-select: none;
   }
 
-  .cp-main-row {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
+  .win-color-picker.cp-no-preview {
+    --cp-total-width: var(--cp-spectrum-size);
   }
 
-  .cp-left {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  .cp-spectrum-grid {
+    display: grid;
+    grid-template-columns: var(--cp-spectrum-size) auto;
+    column-gap: var(--cp-preview-gap);
+    width: var(--cp-total-width);
+    margin: 0 0 16px;
   }
 
   .cp-spectrum-area {
     position: relative;
-    width: 256px;
-    height: 256px;
+    width: var(--cp-spectrum-size);
+    height: var(--cp-spectrum-size);
     border-radius: 4px;
     overflow: hidden;
   }
@@ -406,8 +500,8 @@ onMounted(() => {
 
   .cp-spectrum {
     display: block;
-    width: 256px;
-    height: 256px;
+    width: var(--cp-spectrum-size);
+    height: var(--cp-spectrum-size);
     cursor: crosshair;
   }
 
@@ -437,8 +531,8 @@ onMounted(() => {
   .cp-preview-bar {
     display: flex;
     flex-direction: column;
-    width: 32px;
-    gap: 4px;
+    width: var(--cp-preview-width);
+    gap: 0;
     align-self: stretch;
   }
 
@@ -446,6 +540,7 @@ onMounted(() => {
     flex: 1;
     border-radius: 4px;
     border: 1px solid var(--card-stroke);
+    min-height: 44px;
   }
 
   .cp-preview-previous {
@@ -457,7 +552,9 @@ onMounted(() => {
   .cp-sliders {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 6px;
+    width: var(--cp-total-width);
+    margin: 0 0 16px;
   }
 
   .cp-slider-row {
@@ -514,67 +611,72 @@ onMounted(() => {
       transition: transform var(--fast-duration) var(--fast-out-slow-in);
     }
 
-  .cp-inputs {
-    display: flex;
-    gap: 6px;
-  }
-
-  .cp-input-group {
-    display: flex;
-    flex-direction: column;
+  .cp-details-grid {
+    width: var(--cp-total-width);
+    display: grid;
+    grid-template-columns: 120px 8px 1fr;
+    column-gap: 0;
+    row-gap: 12px;
     align-items: center;
-    gap: 2px;
-    flex: 1;
   }
 
-    .cp-input-group label {
-      font-size: 11px;
-      color: var(--text-secondary);
-    }
+  .cp-details-grid > .win-combo-box {
+    grid-column: 1;
+  }
 
-    .cp-input-group input {
-      width: 100%;
-      height: 28px;
-      border-radius: 4px;
-      border: 1px solid var(--ctrl-border-rest);
-      background: var(--ctrl-fill-default);
-      color: var(--text-primary);
-      text-align: center;
-      font-size: 12px;
-      outline: none;
-      transition: border-color var(--fast-duration);
-    }
+  .cp-details-grid > .win-number-box {
+    grid-column: 1;
+  }
 
-      .cp-input-group input:focus {
-        border-color: var(--accent-base);
-      }
+  .cp-details-grid > .win-text-block {
+    grid-column: 3;
+    align-self: center;
+  }
 
-  .cp-hex-row {
+  .cp-hex-box {
+    grid-column: 3;
+    justify-self: end;
+    width: 132px;
+  }
+
+  .cp-more-row {
+    width: var(--cp-total-width);
     display: flex;
-    align-items: center;
-    gap: 4px;
+    justify-content: flex-end;
+    margin: 0 0 12px;
   }
 
-  .cp-hex-label {
-    font-size: 14px;
-    color: var(--text-primary);
+  .cp-more-button {
+    min-width: 120px;
+    height: 32px;
+    padding: 0;
+    justify-content: flex-end;
+    gap: 0;
+    background: transparent;
+    border-color: transparent;
   }
 
-  .cp-hex-input {
-    flex: 1;
-    height: 28px;
-    border-radius: 4px;
-    border: 1px solid var(--ctrl-border-rest);
-    background: var(--ctrl-fill-default);
-    color: var(--text-primary);
-    padding: 0 8px;
+  .cp-more-button::after {
+    display: none;
+  }
+
+  .cp-more-button:hover {
+    background: transparent;
+    color: var(--text-secondary);
+  }
+
+  .cp-more-button:active {
+    background: transparent;
+    color: var(--text-tertiary);
+  }
+
+  .cp-more-label {
+    margin: 0 8px 0 0;
+    line-height: 20px;
+  }
+
+  .cp-more-button .icon {
+    font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
     font-size: 12px;
-    font-family: 'Cascadia Code', 'Consolas', monospace;
-    outline: none;
-    transition: border-color var(--fast-duration);
   }
-
-    .cp-hex-input:focus {
-      border-color: var(--accent-base);
-    }
 </style>

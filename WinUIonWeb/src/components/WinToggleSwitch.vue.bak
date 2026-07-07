@@ -6,9 +6,7 @@
          :class="{ 'is-on': isOnValue, 'dragging': isDragging, 'is-pressed': isPressed, 'is-disabled': !IsEnabledResolved }"
          @pointerdown.stop="onDown" @pointermove="onMove" @pointerup="onUp" @pointercancel="onUp">
       <div class="track"></div>
-      <div class="knob" :style="knobStyle">
-        <div class="thumb"></div>
-      </div>
+      <div class="thumb" :style="thumbStyle"></div>
     </div>
       <WinTextBlock v-if="$slots.default" class="win-switch-label"><slot></slot></WinTextBlock>
       <WinTextBlock v-else class="win-switch-label" :Text="isOnValue ? resolvedOnContent : resolvedOffContent" />
@@ -49,15 +47,12 @@ const cssLength = (value) => {
 };
 const rootStyle = computed(() => props.Width !== '' ? { width: cssLength(props.Width) } : {});
 let startX = 0, initialChecked = false, moved = false, didToggle = false;
-const minKnobTranslation = 0;
-const maxKnobTranslation = 20;
-const movementThreshold = 3;
 
 watch(isOnValue, v => {
-  if (!isDragging.value) currentTx.value = v ? maxKnobTranslation : minKnobTranslation;
+  if (!isDragging.value) currentTx.value = v ? 20 : 0;
 }, { immediate: true });
 
-const knobStyle = computed(() => {
+const thumbStyle = computed(() => {
   if (isDragging.value || isPressed.value) return { '--tx': currentTx.value + 'px' };
   return {};
 });
@@ -79,30 +74,21 @@ const onDown = (e) => {
   if (!IsEnabledResolved.value) return;
   isPressed.value = true; isDragging.value = true; moved = false; didToggle = false;
   startX = e.clientX; initialChecked = isOnValue.value;
-  currentTx.value = initialChecked ? maxKnobTranslation : minKnobTranslation;
+  currentTx.value = initialChecked ? 16 : 0;
   e.currentTarget.setPointerCapture(e.pointerId);
 };
 const onMove = (e) => {
   if (!isDragging.value) return;
+  moved = true;
   const delta = e.clientX - startX;
-  if (Math.abs(delta) > movementThreshold) moved = true;
-  const nextTranslation = initialChecked ? maxKnobTranslation + delta : minKnobTranslation + delta;
-  currentTx.value = Math.max(minKnobTranslation, Math.min(maxKnobTranslation, nextTranslation));
+  currentTx.value = Math.max(0, Math.min(16, initialChecked ? 16 + delta : delta));
 };
 const onUp = (e) => {
   if (!isDragging.value) return;
   isDragging.value = false; isPressed.value = false;
-  if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
-    e.currentTarget.releasePointerCapture(e.pointerId);
-  }
+  e.currentTarget.releasePointerCapture(e.pointerId);
   didToggle = true;
-  if (moved) {
-    const halfOfTranslationRange = (maxKnobTranslation - minKnobTranslation) / 2;
-    const shouldToggle = initialChecked
-      ? currentTx.value <= halfOfTranslationRange
-      : currentTx.value >= halfOfTranslationRange;
-    setIsOn(shouldToggle ? !initialChecked : initialChecked);
-  }
+  if (moved && Math.abs(e.clientX - startX) > 3) setIsOn(currentTx.value > 8);
   else setIsOn(!initialChecked);
 };
 </script>
@@ -122,7 +108,6 @@ const onUp = (e) => {
     position: relative;
     display: inline-flex;
     align-items: center;
-    --tx: 0px;
     width: 40px;
     height: 20px;
     border-radius: 10px;
@@ -136,19 +121,12 @@ const onUp = (e) => {
       inset: 0;
       border-radius: 10px;
       border: 1px solid var(--toggle-border);
-      background-color: var(--control-alt-fill-color-secondary, var(--subtle-secondary));
+      background-color: transparent;
       transition: all var(--fast-duration) var(--fast-out-slow-in);
     }
 
     .win-switch:hover .track {
       border-color: var(--text-primary);
-      background-color: var(--control-alt-fill-color-tertiary, var(--subtle-tertiary));
-    }
-
-    .win-switch.is-pressed:not(.is-on) .track,
-    .win-switch.dragging:not(.is-on) .track {
-      border-color: var(--toggle-border);
-      background-color: var(--control-alt-fill-color-quarternary, var(--subtle-pressed));
     }
 
     .win-switch.is-on .track {
@@ -160,77 +138,53 @@ const onUp = (e) => {
       background-color: var(--accent-hover);
     }
 
-    .win-switch.is-on.is-pressed .track,
-    .win-switch.is-on.dragging .track {
-      background-color: var(--accent-pressed);
-    }
-
-    .win-switch .knob {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 20px;
-      height: 20px;
-      transform: translateX(var(--tx));
-      transition: transform var(--fast-duration) var(--fast-out-slow-in);
-    }
-
-    .win-switch.is-on .knob {
-      --tx: 20px;
-    }
-
     .win-switch .thumb {
       position: absolute;
       top: 50%;
-      left: 50%;
+      left: 4px;
       width: 12px;
       height: 12px;
       border-radius: 6px;
       background-color: var(--toggle-thumb);
-      transform: translate(-50%, -50%) translateX(-0.5px);
-      transition: width var(--fast-duration) var(--fast-out-slow-in), height var(--fast-duration) var(--fast-out-slow-in), background-color var(--fast-duration);
+      transform: translateY(-50%) translateX(var(--tx, 0px)) scale(var(--scale, 1));
+      transition: background-color var(--fast-duration), transform 0.2s var(--fast-out-slow-in);
     }
 
     .win-switch.is-on .thumb {
+      --tx: 20px;
       background-color: var(--toggle-on-thumb);
-      transform: translate(-50%, -50%) translateX(-0.5px);
     }
 
     .win-switch:hover .thumb {
-      width: 14px;
-      height: 14px;
-      border-radius: 7px;
+      --scale: 1.167;
       background-color: var(--toggle-thumb-hover);
     }
 
     .win-switch:hover.is-on .thumb {
+      --tx: 20px;
+      --scale: 1.167;
       background-color: var(--toggle-on-thumb);
-    }
-
-    .win-switch.is-pressed .knob,
-    .win-switch.dragging .knob {
-      transition: none;
     }
 
     .win-switch.is-pressed:not(.is-on) .thumb,
     .win-switch.dragging:not(.is-on) .thumb {
+      --tx: 0px;
+      --scale: 1;
       width: 17px;
       height: 14px;
       border-radius: 7px;
       background-color: var(--toggle-thumb-hover);
-      /* WinUI Pressed: SwitchKnobOff is left-aligned inside the 20px knob with Margin="3,0,0,0". */
-      transform: translate(-50%, -50%) translateX(1.5px);
       transition: none;
     }
 
     .win-switch.is-pressed.is-on .thumb,
     .win-switch.dragging.is-on .thumb {
+      --tx: 16px;
+      --scale: 1;
       width: 17px;
       height: 14px;
       border-radius: 7px;
       background-color: var(--toggle-on-thumb);
-      /* WinUI Pressed: SwitchKnobOn is right-aligned inside the 20px knob with Margin="0,0,3,0". */
-      transform: translate(-50%, -50%) translateX(-1.5px);
       transition: none;
     }
 
@@ -249,9 +203,7 @@ const onUp = (e) => {
   }
 
   .win-switch-wrap:not(.is-disabled):hover .win-switch .thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 7px;
+    --scale: 1.167;
     background-color: var(--toggle-thumb-hover);
   }
 
@@ -260,24 +212,28 @@ const onUp = (e) => {
   }
 
   .win-switch-wrap:not(.is-disabled):hover .win-switch.is-on .thumb {
+    --tx: 20px;
+    --scale: 1.167;
     background-color: var(--toggle-on-thumb);
   }
 
   .win-switch-wrap:not(.is-disabled):active .win-switch:not(.is-on) .thumb {
+    --tx: 0px;
+    --scale: 1;
     width: 17px;
     height: 14px;
     border-radius: 7px;
     background-color: var(--toggle-thumb-hover);
-    transform: translate(-50%, -50%) translateX(1.5px);
     transition: none;
   }
 
   .win-switch-wrap:not(.is-disabled):active .win-switch.is-on .thumb {
+    --tx: 16px;
+    --scale: 1;
     width: 17px;
     height: 14px;
     border-radius: 7px;
     background-color: var(--toggle-on-thumb);
-    transform: translate(-50%, -50%) translateX(-1.5px);
     transition: none;
   }
 
@@ -329,9 +285,7 @@ const onUp = (e) => {
     }
 
     .win-switch.is-disabled:hover .thumb {
-      width: 12px;
-      height: 12px;
-      border-radius: 6px;
+      --scale: 1;
       background-color: var(--ctrl-strong-stroke-disabled);
     }
 
@@ -340,6 +294,7 @@ const onUp = (e) => {
     }
 
     .win-switch.is-disabled:hover.is-on .thumb {
+      --scale: 1;
       background-color: var(--text-disabled);
     }
 </style>

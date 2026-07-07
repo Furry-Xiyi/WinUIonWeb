@@ -28,12 +28,9 @@
       :vueCode="example1Vue">
       <template #example>
         <WinProgressRing
-          v-if="isActive"
-          :style="{ width: '60px', height: '60px', backgroundColor: backgroundColorValue1 }"
-        />
-        <div v-else style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 14px;">
-          Stopped
-        </div>
+          Width="60"
+          Height="60"
+          :IsActive="isActive" />
       </template>
       <template #options>
         <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -62,19 +59,7 @@
       :vueCode="example2Vue">
       <template #example>
         <div style="display: flex; align-items: center; gap: 60px;">
-          <div style="position: relative; width: 60px; height: 60px;">
-            <WinProgressRing
-              :style="{
-                width: '60px',
-                height: '60px',
-                backgroundColor: backgroundColorValue2,
-                opacity: progressValue / 100
-              }"
-            />
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; color: var(--text-primary); font-weight: 600;">
-              {{ Math.round(progressValue) }}%
-            </div>
-          </div>
+          <WinProgressRing Width="60" Height="60" />
           <div style="display: flex; flex-direction: column; gap: 8px; min-width: 120px;">
             <label style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Progress</label>
             <WinSlider
@@ -143,52 +128,21 @@ const backgroundOptions = [
 const isActive = ref(true);
 const selectedBackground1 = ref('transparent');
 
-const backgroundColorValue1 = computed(() => {
-  return selectedBackground1.value === 'lightgray' ? '#D3D3D3' : 'transparent';
-});
-
-const example1Template = `<WinProgressRing
-  v-if="isActive"
-  :style="{
-    width: '60px',
-    height: '60px',
-    backgroundColor: backgroundColor
-  }"
-/>`;
+const example1Template = `<WinProgressRing :IsActive="isActive" Width="60" Height="60" />`;
 
 const example1Vue = `const isActive = ref(true);
-const backgroundColor = ref('transparent');
 
-// Toggle isActive to start/stop the ring
-// Set backgroundColor to 'lightgray' or 'transparent'`;
+// Toggle isActive to start/stop the ring`;
 
 // Example 2: Determinate ProgressRing
 const progressValue = ref(0);
 const selectedBackground2 = ref('transparent');
 
-const backgroundColorValue2 = computed(() => {
-  return selectedBackground2.value === 'lightgray' ? '#D3D3D3' : 'transparent';
-});
-
-const example2Template = `<div style="position: relative; width: 60px; height: 60px;">
-  <WinProgressRing
-    :style="{
-      width: '60px',
-      height: '60px',
-      backgroundColor: backgroundColor,
-      opacity: progressValue / 100
-    }"
-  />
-  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-    {{ Math.round(progressValue) }}%
-  </div>
-</div>`;
+const example2Template = `<WinProgressRing Width="60" Height="60" />`;
 
 const example2Vue = `const progressValue = ref(0);
-const backgroundColor = ref('transparent');
 
-// Use WinSlider to control progressValue (0-100)
-// Opacity simulates determinate progress`;
+// Use WinSlider to control progressValue (0-100)`;
 </script>
 
 <style scoped>

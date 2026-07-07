@@ -1,6 +1,20 @@
 <template>
   <div class="win-combo-box" ref="comboRef">
+    <WinTextBlock v-if="Header" class="win-combo-header" :Text="Header" />
+    <input
+      v-if="IsEditable"
+      class="win-btn win-combo-btn win-combo-input"
+      :style="buttonStyle"
+      :value="editableText"
+      @focus="open"
+      @input="onEditableInput"
+      @keydown.enter="onTextSubmitted"
+      @mousedown="onChevronDown"
+      @mouseup="onChevronUp"
+      @mouseleave="onChevronLeave">
     <button class="win-btn win-combo-btn"
+            v-else
+            :style="buttonStyle"
             @click="toggle"
             @mousedown="onChevronDown"
             @mouseup="onChevronUp"
@@ -13,7 +27,7 @@
     <Teleport to="body">
       <div v-if="isOpen" class="win-combo-overlay" @click.stop="close" @contextmenu.prevent="close"></div>
       <div v-if="isOpen" class="win-combo-flyout" :style="flyoutStyle">
-        <div class="win-flyout-item" v-for="(opt, i) in options" :key="i" :class="{ selected: selectedIndex === i }" @click="select(i)">
+        <div class="win-flyout-item" v-for="(opt, i) in normalizedItems" :key="i" :class="{ selected: selectedIndex === i }" @click="select(i)">
           <div v-if="selectedIndex === i" class="flyout-indicator"></div>
           {{ opt.label }}
         </div>
@@ -21,15 +35,44 @@
     </Teleport>
   </div>
 </template>
-<script setup>import { ref, computed, nextTick } from 'vue';
+<script setup>
+import { ref, computed, nextTick, watch } from 'vue';
 import { useI18n } from './i18n/index';
+import WinTextBlock from './WinTextBlock.vue';
 
 const { t } = useI18n();
-const props = defineProps({ options: Array, modelValue: Number });
-const emit = defineEmits(['update:modelValue']);
+const props = defineProps({
+  ItemsSource: { type: Array, default: undefined },
+  Header: { type: String, default: '' },
+  PlaceholderText: { type: String, default: '' },
+  IsEditable: { type: Boolean, default: false },
+  SelectedIndex: { type: Number, default: undefined },
+  SelectedItem: { type: null, default: undefined },
+  Width: { type: [String, Number], default: '' },
+  MinWidth: { type: [String, Number], default: '' },
+  options: { type: Array, default: () => [] },
+  modelValue: { type: Number, default: undefined },
+  placeholder: { type: String, default: '' },
+  header: { type: String, default: '' },
+  editable: { type: Boolean, default: false }
+});
+const emit = defineEmits(['update:modelValue', 'update:SelectedIndex', 'SelectionChanged', 'TextSubmitted']);
 const isOpen = ref(false); const comboRef = ref(null); const flyoutStyle = ref({}); const flyoutOrigin = ref('center');
-const selectedIndex = computed({ get: () => props.modelValue, set: (val) => emit('update:modelValue', val) });
-const selectedLabel = computed(() => props.options[selectedIndex.value]?.label || t('text.select'));
+const selectedIndex = computed({
+  get: () => props.SelectedIndex ?? props.modelValue,
+  set: (val) => {
+    emit('update:modelValue', val);
+    emit('update:SelectedIndex', val);
+  }
+});
+const Header = computed(() => props.Header || props.header);
+const IsEditable = computed(() => props.IsEditable || props.editable);
+const normalizedItems = computed(() => (props.ItemsSource ?? props.options ?? []).map((item) => {
+  if (typeof item === 'string' || typeof item === 'number') return { label: String(item), value: item };
+  return { ...item, label: item.label ?? item.Text ?? item.Name ?? String(item), value: item.value ?? item.Value ?? item };
+}));
+const selectedLabel = computed(() => normalizedItems.value[selectedIndex.value]?.label || props.PlaceholderText || props.placeholder || t('text.select'));
+const editableText = ref('');
 const chevronClass = ref('');
 let chevronPressed = false;
 let chevronPressDone = false;
@@ -54,29 +97,65 @@ const onChevronAnimEnd = () => {
     chevronPressDone = false;
   }
 };
-const toggle = async () => {
-  isOpen.value = !isOpen.value;
+const cssLength = (value) => {
+  if (value === '' || value === undefined || value === null) return '';
+  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return `${Number(value.trim())}px`;
+  return typeof value === 'number' ? `${value}px` : value;
+};
+const buttonStyle = computed(() => {
+  const style = {};
+  if (props.Width !== '') style.width = cssLength(props.Width);
+  if (props.MinWidth !== '') style.minWidth = cssLength(props.MinWidth);
+  return style;
+});
+
+watch(selectedLabel, (label) => { editableText.value = label; }, { immediate: true });
+
+const positionFlyout = async () => {
   if (isOpen.value) {
     await nextTick();
     const rect = comboRef.value.getBoundingClientRect();
     const itemH = 34;
-    const topOffset = rect.top - (selectedIndex.value * itemH) - 4;
+    const index = selectedIndex.value ?? 0;
+    const topOffset = rect.top - (index * itemH) - 4;
     let origin = 'center center';
-    if (selectedIndex.value === 0) {
+    if (index === 0) {
       origin = 'top center';
-    } else if (selectedIndex.value === props.options.length - 1) {
+    } else if (index === normalizedItems.value.length - 1) {
       origin = 'bottom center';
     }
     flyoutOrigin.value = origin;
     flyoutStyle.value = { top: `${Math.max(10, topOffset)}px`, left: `${rect.left}px`, minWidth: `${rect.width}px`, transformOrigin: origin };
   }
 };
-const select = (idx) => { selectedIndex.value = idx; isOpen.value = false; };
-const close = () => { isOpen.value = false; };</script>
+const open = async () => { isOpen.value = true; await positionFlyout(); };
+const toggle = async () => {
+  isOpen.value = !isOpen.value;
+  await positionFlyout();
+};
+const select = (idx) => {
+  const oldItem = normalizedItems.value[selectedIndex.value];
+  selectedIndex.value = idx;
+  editableText.value = normalizedItems.value[idx]?.label ?? '';
+  emit('SelectionChanged', { SelectedIndex: idx, SelectedItem: normalizedItems.value[idx], AddedItems: [normalizedItems.value[idx]], RemovedItems: oldItem ? [oldItem] : [] });
+  isOpen.value = false;
+};
+const onEditableInput = (event) => {
+  editableText.value = event.target.value;
+};
+const onTextSubmitted = () => {
+  emit('TextSubmitted', { Text: editableText.value });
+};
+const close = () => { isOpen.value = false; };
+</script>
 <style>
   .win-combo-box {
     position: relative;
     display: inline-block;
+  }
+
+  .win-combo-header {
+    margin: 0 0 4px;
   }
 
   .win-combo-btn {
@@ -85,6 +164,11 @@ const close = () => { isOpen.value = false; };</script>
     justify-content: space-between;
     align-items: center;
     min-width: 120px;
+  }
+
+  .win-combo-input {
+    justify-content: flex-start;
+    text-align: left;
   }
 
   .win-combo-overlay {
