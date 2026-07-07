@@ -30,7 +30,7 @@
               @mouseup="pressedKey = ''"
               @mouseleave="pressedKey = ''"
               @click="scrollUp('month')">
-              <span class="icon">&#xEDDB;</span>
+              <span class="icon"></span>
             </button>
             <div class="picker-column" @wheel.prevent="onWheel($event, 'month')">
               <div v-for="(item, i) in monthDisplay" :key="'m' + i" class="picker-item" :class="{ active: item.active }">
@@ -45,7 +45,7 @@
               @mouseup="pressedKey = ''"
               @mouseleave="pressedKey = ''"
               @click="scrollDown('month')">
-              <span class="icon">&#xEDDC;</span>
+              <span class="icon"></span>
             </button>
           </div>
 
@@ -64,7 +64,7 @@
               @mouseup="pressedKey = ''"
               @mouseleave="pressedKey = ''"
               @click="scrollUp('day')">
-              <span class="icon">&#xEDDB;</span>
+              <span class="icon"></span>
             </button>
             <div class="picker-column" @wheel.prevent="onWheel($event, 'day')">
               <div v-for="(item, i) in dayDisplay" :key="'d' + i" class="picker-item" :class="{ active: item.active }">
@@ -79,7 +79,7 @@
               @mouseup="pressedKey = ''"
               @mouseleave="pressedKey = ''"
               @click="scrollDown('day')">
-              <span class="icon">&#xEDDC;</span>
+              <span class="icon"></span>
             </button>
           </div>
 
@@ -97,7 +97,7 @@
                 @mouseup="pressedKey = ''"
                 @mouseleave="pressedKey = ''"
                 @click="scrollUp('year')">
-                <span class="icon">&#xEDDB;</span>
+                <span class="icon"></span>
               </button>
               <div class="picker-column" @wheel.prevent="onWheel($event, 'year')">
                 <div v-for="(item, i) in yearDisplay" :key="'y' + i" class="picker-item" :class="{ active: item.active }">
@@ -112,7 +112,7 @@
                 @mouseup="pressedKey = ''"
                 @mouseleave="pressedKey = ''"
                 @click="scrollDown('year')">
-                <span class="icon">&#xEDDC;</span>
+                <span class="icon"></span>
               </button>
             </div>
           </template>

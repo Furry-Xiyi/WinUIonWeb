@@ -24,6 +24,9 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, useAttrs } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 defineOptions({
   inheritAttrs: false
@@ -69,11 +72,11 @@ const contextMenuItems = computed(() => {
   const items = [];
 
   if (contextSelection.value) {
-    items.push({ Text: 'Copy', Icon: '\uE8C8', Value: 'copy' });
+    items.push({ Text: t('text.copy'), Icon: '\uE8C8', Value: 'copy' });
   }
 
   if (hasText) {
-    items.push({ Text: 'Select all', Icon: '\uE8B3', Value: 'selectAll' });
+    items.push({ Text: t('text.select-all'), Icon: '\uE8B3', Value: 'selectAll' });
   }
 
   return items;

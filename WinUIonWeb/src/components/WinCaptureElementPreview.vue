@@ -1,13 +1,13 @@
 <template>
   <div class="win-capture-grid">
-    <div class="win-capture-title">{{ deviceName }}</div>
-    <div class="win-capture-title captured" :class="{ visible: snapshots.length }">Captured:</div>
+    <div class="win-capture-title">{{ effectiveDeviceName }}</div>
+    <div class="win-capture-title captured" :class="{ visible: snapshots.length }">{{ t('text.captured') }}</div>
     <div class="win-capture-preview" ref="previewRef" :class="{ mirrored }">
       <video ref="videoRef" class="win-capture-video" autoplay muted playsinline></video>
       <div v-if="!streamActive" class="win-capture-camera">
         <div class="win-capture-lens"></div>
         <div class="win-capture-scan"></div>
-        <span class="win-capture-message">{{ errorMessage || 'Requesting camera permission...' }}</span>
+        <span class="win-capture-message">{{ errorMessage || t('text.requesting-camera-permission') }}</span>
       </div>
     </div>
     <div class="win-capture-shots" ref="shotsRef">
@@ -19,11 +19,14 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref, nextTick } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, nextTick } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   mirrored: Boolean,
-  deviceName: { type: String, default: 'Integrated camera' }
+  deviceName: { type: String, default: '' }
 });
 
 const emit = defineEmits(['ready']);
@@ -35,6 +38,7 @@ const errorMessage = ref('');
 const previewRef = ref(null);
 const shotsRef = ref(null);
 let mediaStream = null;
+const effectiveDeviceName = computed(() => props.deviceName || t('text.integrated-camera'));
 
 const syncHeights = () => {
   if (previewRef.value && shotsRef.value) {
@@ -48,7 +52,7 @@ const start = async () => {
   emit('ready', false);
 
   if (!navigator.mediaDevices?.getUserMedia) {
-    errorMessage.value = 'Camera API is not available in this browser.';
+    errorMessage.value = t('text.camera-api-is-not-available-in-this-browser');
     emit('ready', false);
     return;
   }
@@ -74,8 +78,8 @@ const start = async () => {
     emit('ready', true);
   } catch (error) {
     errorMessage.value = error?.name === 'NotAllowedError'
-      ? 'Camera permission was denied.'
-      : 'Unable to start the camera.';
+      ? t('text.camera-permission-was-denied')
+      : t('text.unable-to-start-the-camera');
     streamActive.value = false;
     emit('ready', false);
   }

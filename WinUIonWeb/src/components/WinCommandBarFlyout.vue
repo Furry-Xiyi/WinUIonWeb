@@ -31,10 +31,10 @@
           v-if="secondaryCommands.length"
           class="win-cbf-more-button"
           type="button"
-          aria-label="More"
+          :aria-label="t('text.more')"
           :aria-expanded="secondaryOpen"
           @click="secondaryOpen = !secondaryOpen">
-          <span class="win-cbf-icon">&#xE712;</span>
+          <span class="win-cbf-icon"></span>
         </button>
       </div>
 
@@ -57,6 +57,9 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 import type { CSSProperties } from 'vue';
 
 type Placement =

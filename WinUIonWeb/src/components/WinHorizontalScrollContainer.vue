@@ -15,10 +15,10 @@
       ref="scrollBackButton"
       class="win-horizontal-scroll-button scroll-back"
       type="button"
-      aria-label="Scroll left"
-      title="Scroll left"
+      :aria-label="t('text.scroll-left')"
+      :title="t('text.scroll-left')"
       @click="scrollBack">
-      <span class="icon win-horizontal-scroll-arrow">&#xEDD9;</span>
+      <span class="icon win-horizontal-scroll-arrow"></span>
     </button>
 
     <button
@@ -26,16 +26,19 @@
       ref="scrollForwardButton"
       class="win-horizontal-scroll-button scroll-forward"
       type="button"
-      aria-label="Scroll right"
-      title="Scroll right"
+      :aria-label="t('text.scroll-right')"
+      :title="t('text.scroll-right')"
       @click="scrollForward">
-      <span class="icon win-horizontal-scroll-arrow">&#xEDDA;</span>
+      <span class="icon win-horizontal-scroll-arrow"></span>
     </button>
   </div>
 </template>
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 const scroller = ref(null);
 const scrollBackButton = ref(null);

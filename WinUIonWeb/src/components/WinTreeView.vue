@@ -19,7 +19,7 @@
 
         <span class="icon tree-chevron"
               :class="{ expanded: node.expanded, hidden: !hasChildren(node) }"
-              @click.stop="toggleExpand(node)">&#xE76C;</span>
+              @click.stop="toggleExpand(node)"></span>
 
         <div v-if="selectionMode === 'Multiple' || selectionMode === 'Extended'" class="tree-checkbox" @click.stop>
           <WinCheckBox :modelValue="getCheckValue(node) === true"

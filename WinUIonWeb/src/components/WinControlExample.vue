@@ -23,7 +23,7 @@
       <WinExpander
         v-if="showSourceCode"
         :isExpanded="false"
-        header="Source code"
+        :header="t('text.source-code')"
         class="code-expander">
         <div class="source-code-presenter">
           <WinSelectorBar
@@ -48,6 +48,9 @@ import WinSelectorBar from './WinSelectorBar.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import WinThemeWrapper from './WinThemeWrapper.vue';
 
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 const props = defineProps({
   headerText: { type: String, default: '' },
   exampleHeight: { type: [String, Number], default: 'auto' },
@@ -89,13 +92,13 @@ const normalizeCssLength = (value) => {
 const codeTabs = computed(() => {
   const tabs = [];
   if (props.vue) {
-    tabs.push({ text: 'Vue', code: props.vue });
+    tabs.push({ text: t('text.vue'), code: props.vue });
   }
   if (props.xaml || props.xamlSource) {
-    tabs.push({ text: 'XAML', code: props.xaml || props.xamlSource });
+    tabs.push({ text: t('text.xaml'), code: props.xaml || props.xamlSource });
   }
   if (props.cSharp || props.cSharpSource) {
-    tabs.push({ text: 'C#', code: props.cSharp || props.cSharpSource });
+    tabs.push({ text: t('text.c'), code: props.cSharp || props.cSharpSource });
   }
   return tabs;
 });

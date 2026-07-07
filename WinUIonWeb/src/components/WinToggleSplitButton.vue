@@ -11,7 +11,7 @@
             @mouseleave="onChevronLeave">
       <span class="icon chevron-animate"
             :class="chevronClass"
-            @animationend="onChevronAnimEnd">&#xE70D;</span>
+            @animationend="onChevronAnimEnd"></span>
     </button>
     <WinMenuFlyout :Open="isOpen" :AnchorRect="anchorRect" :Items="flyoutItems" @Close="isOpen = false" @Select="onSelect" />
   </div>

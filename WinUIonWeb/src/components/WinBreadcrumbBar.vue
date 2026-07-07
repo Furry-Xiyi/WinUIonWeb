@@ -1,5 +1,5 @@
 <template>
-  <nav class="win-breadcrumb-bar" role="navigation" aria-label="Breadcrumb">
+  <nav class="win-breadcrumb-bar" role="navigation" :aria-label="t('text.breadcrumb')">
     <ol class="win-breadcrumb-list">
       <li
         v-for="(item, index) in itemsSourceInternal"
@@ -49,6 +49,9 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   itemsSource: {

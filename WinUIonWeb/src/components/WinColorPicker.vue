@@ -29,15 +29,15 @@
 
     <div class="cp-inputs" v-if="isColorChannelTextInputVisible">
       <div class="cp-input-group">
-        <label>R</label>
+        <label>{{ t('text.r') }}</label>
         <input type="number" min="0" max="255" :value="rgb.r" @change="onRgbInput('r', $event)">
       </div>
       <div class="cp-input-group">
-        <label>G</label>
+        <label>{{ t('text.g') }}</label>
         <input type="number" min="0" max="255" :value="rgb.g" @change="onRgbInput('g', $event)">
       </div>
       <div class="cp-input-group">
-        <label>B</label>
+        <label>{{ t('text.b') }}</label>
         <input type="number" min="0" max="255" :value="rgb.b" @change="onRgbInput('b', $event)">
       </div>
     </div>
@@ -51,6 +51,9 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   modelValue: { type: String, default: '#0067C0' },

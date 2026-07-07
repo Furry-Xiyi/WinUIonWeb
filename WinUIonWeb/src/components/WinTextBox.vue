@@ -79,11 +79,11 @@
           v-if="showDeleteButton"
           class="win-textbox-delete-button"
           type="button"
-          aria-label="Clear text"
+          :aria-label="t('text.clear-text')"
           @pointerdown.prevent
           @click="clearText">
           <span class="win-textbox-delete-button-layout">
-            <span class="win-textbox-delete-glyph">&#xE894;</span>
+            <span class="win-textbox-delete-glyph"></span>
           </span>
         </button>
 
@@ -110,6 +110,9 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
 type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
@@ -303,24 +306,24 @@ const contextMenuItems = computed<TextBoxMenuItem[]>(() => {
   const canPaste = canEdit && clipboardText.value.length > 0;
 
   if (hasSelection) {
-    if (canEdit) items.push({ Text: 'Cut', Icon: '\uE8C6', Value: 'cut' });
-    items.push({ Text: 'Copy', Icon: '\uE8C8', Value: 'copy' });
+    if (canEdit) items.push({ Text: t('text.cut'), Icon: '\uE8C6', Value: 'cut' });
+    items.push({ Text: t('text.copy'), Icon: '\uE8C8', Value: 'copy' });
   }
 
   if (canPaste) {
-    items.push({ Text: 'Paste', Icon: '\uE77F', Value: 'paste' });
+    items.push({ Text: t('text.paste'), Icon: '\uE77F', Value: 'paste' });
   }
 
   if (canUndo.value) {
-    items.push({ Text: 'Undo', Icon: '\uE7A7', Value: 'undo' });
+    items.push({ Text: t('text.undo'), Icon: '\uE7A7', Value: 'undo' });
   }
 
   if (canRedo.value) {
-    items.push({ Text: 'Redo', Icon: '\uE7A6', Value: 'redo' });
+    items.push({ Text: t('text.redo'), Icon: '\uE7A6', Value: 'redo' });
   }
 
   if (hasText) {
-    items.push({ Text: 'Select all', Icon: '\uE8B3', Value: 'selectAll' });
+    items.push({ Text: t('text.select-all'), Icon: '\uE8B3', Value: 'selectAll' });
   }
 
   return items;

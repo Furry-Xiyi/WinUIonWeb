@@ -5,7 +5,7 @@
         <div class="win-nav-indicator" :style="indicatorStyle"></div>
       </div>
       <div v-if="showBackButtonResolved" class="win-nav-back-button" :class="{ 'is-disabled': !canGoBack }" role="button" :aria-disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave" ref="topBackButtonRef">
-        <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
+        <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd"></span>
       </div>
       <div class="win-nav-menu win-nav-top-primary-menu" ref="topPrimaryMenuRef">
         <template v-for="item in topVisibleMenuItems" :key="item.value">
@@ -17,11 +17,11 @@
             <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
               <span class="icon">{{ item.icon }}</span>
               <span class="label">{{ item.label }}</span>
-              <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
+              <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)"></span>
             </div>
           </div>
         </template>
-        <div v-if="topOverflowMenuItems.length" class="win-nav-item win-nav-more-button" aria-label="More" @click="toggleMoreFlyout" ref="moreButtonRef">
+        <div v-if="topOverflowMenuItems.length" class="win-nav-item win-nav-more-button" :aria-label="t('text.more')" @click="toggleMoreFlyout" ref="moreButtonRef">
           <span class="icon">&#xE712;</span>
         </div>
       </div>
@@ -35,7 +35,7 @@
         </template>
         <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
           <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
-          <span class="label">{{ settingsLabel }}</span>
+          <span class="label">{{ resolvedSettingsLabel }}</span>
         </div>
       </div>
       <div class="win-nav-top-measure" ref="topMeasureRef" aria-hidden="true">
@@ -101,7 +101,7 @@
         </template>
         <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
           <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
-          <span class="label">{{ settingsLabel }}</span>
+          <span class="label">{{ resolvedSettingsLabel }}</span>
         </div>
       </div>
     </nav>
@@ -142,6 +142,9 @@
 <script setup>
 import { ref, reactive, inject, provide, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   position: { type: String, default: 'Left' },
@@ -162,12 +165,13 @@ const props = defineProps({
   paneTitle: { type: String, default: '' },
   header: { type: String, default: '' },
   settingsValue: { type: String, default: 'settings' },
-  settingsLabel: { type: String, default: 'Settings' },
+  settingsLabel: { type: String, default: '' },
   settingsIcon: { type: String, default: '\uE713' }
 });
 
 const titleBarVisible = inject('winTitleBarVisible', ref(false));
 const hasTitlebar = computed(() => titleBarVisible.value);
+const resolvedSettingsLabel = computed(() => props.settingsLabel || t('text.settings'));
 const emit = defineEmits(['update:selectedValue', 'update:isPaneOpen', 'back']);
 const isCompact = ref(false);
 const shellRef = ref(null);

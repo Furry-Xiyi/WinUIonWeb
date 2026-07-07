@@ -25,7 +25,7 @@
               @mouseup="pressedKey = ''"
               @mouseleave="pressedKey = ''"
               @click="scrollUp('hour')">
-              <span class="icon">&#xEDDB;</span>
+              <span class="icon"></span>
             </button>
             <div class="picker-column" @wheel.prevent="onWheel($event, 'hour')">
               <div v-for="(item, i) in hourDisplay" :key="'h' + i" class="picker-item" :class="{ active: item.active }">
@@ -40,7 +40,7 @@
               @mouseup="pressedKey = ''"
               @mouseleave="pressedKey = ''"
               @click="scrollDown('hour')">
-              <span class="icon">&#xEDDC;</span>
+              <span class="icon"></span>
             </button>
           </div>
           <div class="picker-col-divider"></div>
@@ -53,7 +53,7 @@
               @mouseup="pressedKey = ''"
               @mouseleave="pressedKey = ''"
               @click="scrollUp('minute')">
-              <span class="icon">&#xEDDB;</span>
+              <span class="icon"></span>
             </button>
             <div class="picker-column" @wheel.prevent="onWheel($event, 'minute')">
               <div v-for="(item, i) in minuteDisplay" :key="'m' + i" class="picker-item" :class="{ active: item.active }">
@@ -68,7 +68,7 @@
               @mouseup="pressedKey = ''"
               @mouseleave="pressedKey = ''"
               @click="scrollDown('minute')">
-              <span class="icon">&#xEDDC;</span>
+              <span class="icon"></span>
             </button>
           </div>
           <template v-if="ClockIdentifier === '12HourClock'">
@@ -82,7 +82,7 @@
                 @mouseup="pressedKey = ''"
                 @mouseleave="pressedKey = ''"
                 @click="scrollUp('ampm')">
-                <span class="icon">&#xEDDB;</span>
+                <span class="icon"></span>
               </button>
               <div class="picker-column" @wheel.prevent="onWheel($event, 'ampm')">
                 <div v-for="(item, i) in ampmDisplay" :key="'ap' + i" class="picker-item" :class="{ active: item.active }">
@@ -97,7 +97,7 @@
                 @mouseup="pressedKey = ''"
                 @mouseleave="pressedKey = ''"
                 @click="scrollDown('ampm')">
-                <span class="icon">&#xEDDC;</span>
+                <span class="icon"></span>
               </button>
             </div>
           </template>

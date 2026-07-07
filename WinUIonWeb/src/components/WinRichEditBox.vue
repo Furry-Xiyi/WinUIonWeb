@@ -53,6 +53,9 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import WinCommandBarFlyout from './WinCommandBarFlyout.vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
 type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
@@ -169,9 +172,9 @@ const disabledFormatting = computed(() => props.DisabledFormattingAccelerators.t
 const commandBarPrimaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
   const commands: CommandBarFlyoutCommand[] = [];
   if (!props.ShowFormattingCommands) return commands;
-  if (!disabledFormatting.value.includes('bold')) commands.push({ Label: 'Bold', Icon: 'Bold', Command: 'bold', IsToggle: true, IsChecked: isCommandActive('bold') });
-  if (!disabledFormatting.value.includes('italic')) commands.push({ Label: 'Italic', Icon: 'Italic', Command: 'italic', IsToggle: true, IsChecked: isCommandActive('italic') });
-  if (!disabledFormatting.value.includes('underline')) commands.push({ Label: 'Underline', Icon: 'Underline', Command: 'underline', IsToggle: true, IsChecked: isCommandActive('underline') });
+  if (!disabledFormatting.value.includes('bold')) commands.push({ Label: t('text.bold'), Icon: 'Bold', Command: 'bold', IsToggle: true, IsChecked: isCommandActive('bold') });
+  if (!disabledFormatting.value.includes('italic')) commands.push({ Label: t('text.italic'), Icon: 'Italic', Command: 'italic', IsToggle: true, IsChecked: isCommandActive('italic') });
+  if (!disabledFormatting.value.includes('underline')) commands.push({ Label: t('text.underline'), Icon: 'Underline', Command: 'underline', IsToggle: true, IsChecked: isCommandActive('underline') });
   return commands;
 });
 
@@ -179,16 +182,16 @@ const commandBarSecondaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
   const selected = getSelectionText();
   const canEdit = !props.IsReadOnly && props.IsEnabled;
   const commands: CommandBarFlyoutCommand[] = [];
-  if (selected && canEdit) commands.push({ Label: 'Cut', Icon: 'Cut', Command: 'cut' });
-  if (selected) commands.push({ Label: 'Copy', Icon: 'Copy', Command: 'copy' });
-  if (canEdit) commands.push({ Label: 'Paste', Icon: 'Paste', Command: 'paste' });
-  commands.push({ Label: 'Undo', Icon: 'Undo', Command: 'undo' });
-  commands.push({ Label: 'Redo', Icon: 'Redo', Command: 'redo' });
-  commands.push({ Label: 'Select all', Icon: 'SelectAll', Command: 'selectAll' });
+  if (selected && canEdit) commands.push({ Label: t('text.cut'), Icon: 'Cut', Command: 'cut' });
+  if (selected) commands.push({ Label: t('text.copy'), Icon: 'Copy', Command: 'copy' });
+  if (canEdit) commands.push({ Label: t('text.paste'), Icon: 'Paste', Command: 'paste' });
+  commands.push({ Label: t('text.undo'), Icon: 'Undo', Command: 'undo' });
+  commands.push({ Label: t('text.redo'), Icon: 'Redo', Command: 'redo' });
+  commands.push({ Label: t('text.select-all'), Icon: 'SelectAll', Command: 'selectAll' });
   if (props.ShowFormattingCommands && canEdit) {
-    commands.push({ Label: 'Bullets', Icon: '\uE8FD', Command: 'insertUnorderedList' });
-    commands.push({ Label: 'Numbering', Icon: '\uE8EF', Command: 'insertOrderedList' });
-    commands.push({ Label: 'Clear formatting', Icon: '\uE894', Command: 'removeFormat' });
+    commands.push({ Label: t('text.bullets'), Icon: '\uE8FD', Command: 'insertUnorderedList' });
+    commands.push({ Label: t('text.numbering'), Icon: '\uE8EF', Command: 'insertOrderedList' });
+    commands.push({ Label: t('text.clear-formatting'), Icon: '\uE894', Command: 'removeFormat' });
   }
   return commands;
 });

@@ -22,12 +22,12 @@
           class="win-textbox-action-button win-password-reveal"
           type="button"
           :disabled="!IsEnabled"
-          aria-label="Reveal password"
+          :aria-label="t('text.reveal-password')"
           @pointerdown.prevent="peekPassword"
           @pointerup.prevent="hidePeek"
           @pointerleave="hidePeek"
           @click="toggleVisible">
-          <span>&#xF78D;</span>
+          <span></span>
         </button>
       </template>
     </WinTextBox>
@@ -36,6 +36,9 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 import type { CSSProperties } from 'vue';
 import WinTextBox from './WinTextBox.vue';
 

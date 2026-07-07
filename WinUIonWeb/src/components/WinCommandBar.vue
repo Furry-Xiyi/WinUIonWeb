@@ -3,7 +3,7 @@
     ref="commandBarRoot"
     :class="commandBarClasses"
     role="toolbar"
-    :aria-label="ariaLabel"
+    :aria-label="resolvedAriaLabel"
     :aria-expanded="isOpen"
     @keydown="handleKeyDown"
   >
@@ -27,7 +27,7 @@
         v-if="showOverflowButton"
         class="commandbar-overflow-button"
         :class="{ 'active': isOpen }"
-        :aria-label="isOpen ? 'Close overflow menu' : 'More options'"
+        :aria-label="isOpen ? t('text.close-overflow-menu') : t('text.more-options')"
         :aria-expanded="isOpen"
         @click="toggleOverflow"
       >
@@ -82,6 +82,9 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, useSlots } from 'vue'
+import { useI18n } from './i18n'
+
+const { t } = useI18n()
 
 export interface CommandBarCommand {
   component: any
@@ -108,7 +111,7 @@ const props = withDefaults(defineProps<CommandBarProps>(), {
   secondaryCommands: () => [],
   isDynamicOverflowEnabled: true,
   overflowButtonVisibility: 'Auto',
-  ariaLabel: 'Command bar'
+  ariaLabel: ''
 })
 
 const emit = defineEmits<{
@@ -121,6 +124,7 @@ const emit = defineEmits<{
 }>()
 
 const slots = useSlots()
+const resolvedAriaLabel = computed(() => props.ariaLabel || t('text.command-bar'))
 
 // Refs
 const commandBarRoot = ref<HTMLElement>()

@@ -4,7 +4,7 @@
        @click="onContentClick">
     <div class="split-view-pane" :style="paneStyle" @click.stop>
       <div class="split-view-pane-inner" :style="{ width: openPaneLength + 'px' }">
-        <div class="split-view-pane-title">NavigationView</div>
+        <div class="split-view-pane-title">{{ t('text.navigationview') }}</div>
         <div class="split-view-pane-list">
           <slot name="pane"></slot>
         </div>
@@ -18,6 +18,9 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   isPaneOpen: { type: Boolean, default: true },

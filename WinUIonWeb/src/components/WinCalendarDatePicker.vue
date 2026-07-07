@@ -3,7 +3,7 @@
     <div v-if="Header" class="picker-header">{{ Header }}</div>
     <button class="picker-btn" @click="toggleOpen">
       <span class="picker-text" :class="{ placeholder: !Date }">{{ displayText }}</span>
-      <span class="icon picker-icon">&#xE787;</span>
+      <span class="icon picker-icon"></span>
     </button>
     <div v-if="Description" class="picker-description">{{ Description }}</div>
 

@@ -27,7 +27,7 @@
             class="win-textbox-action-button win-textbox-action-query win-asb-query-button"
             type="button"
             :disabled="!IsEnabled"
-            aria-label="Submit query"
+            :aria-label="t('text.submit-query')"
             @pointerdown.prevent
             @click="submitQuery()">
             <span class="win-asb-icon">{{ resolvedQueryIcon }}</span>
@@ -70,6 +70,9 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 import type { CSSProperties } from 'vue';
 import WinTextBox from './WinTextBox.vue';
 

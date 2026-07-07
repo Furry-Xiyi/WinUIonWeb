@@ -2,7 +2,7 @@
   <div class="win-person-picture" :style="rootStyle" :title="displayName || initials">
     <img v-if="profilePicture" :src="profilePicture" alt="" />
     <span v-else-if="resolvedInitials" class="win-person-initials">{{ resolvedInitials }}</span>
-    <span v-else class="icon">&#xE77B;</span>
+    <span v-else class="icon"></span>
   </div>
 </template>
 

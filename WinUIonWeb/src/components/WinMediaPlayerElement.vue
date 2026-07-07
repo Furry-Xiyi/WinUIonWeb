@@ -24,7 +24,7 @@
         <div class="win-media-row command-row">
           <WinFlyout ref="volumeFlyout" direction="up" align="center">
             <template #trigger>
-              <button class="win-media-icon-button" @click.stop="volumeFlyout?.toggle()" :aria-label="mutedState ? 'Unmute' : 'Volume'">
+              <button class="win-media-icon-button" @click.stop="volumeFlyout?.toggle()" :aria-label="mutedState ? t('text.unmute') : t('text.volume')">
                 <span class="icon">{{ muteIcon }}</span>
               </button>
             </template>
@@ -35,10 +35,10 @@
               <WinSlider v-model="volumeValue" :min="0" :max="100" />
             </div>
           </WinFlyout>
-          <button class="win-media-icon-button play-button" @click="togglePlay" :aria-label="isPlaying ? 'Pause' : 'Play'">
+          <button class="win-media-icon-button play-button" @click="togglePlay" :aria-label="isPlaying ? t('text.pause') : t('text.play')">
             <span class="icon">{{ playIcon }}</span>
           </button>
-          <button class="win-media-icon-button" @click="showCastPanel" aria-label="Cast">
+          <button class="win-media-icon-button" @click="showCastPanel" :aria-label="t('text.cast')">
             <span class="icon">&#xEC16;</span>
           </button>
         </div>
@@ -52,6 +52,9 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import WinButton from './WinButton.vue';
 import WinFlyout from './WinFlyout.vue';
 import WinSlider from './WinSlider.vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   src: { type: String, required: true },

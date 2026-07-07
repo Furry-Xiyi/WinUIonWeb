@@ -9,8 +9,8 @@
         {{ labelText }}
       </button>
       <div class="calendar-nav">
-        <button class="icon-btn" @click="onNav(-1)">&#xF090;</button>
-        <button class="icon-btn" @click="onNav(1)">&#xF08E;</button>
+        <button class="icon-btn" @click="onNav(-1)"></button>
+        <button class="icon-btn" @click="onNav(1)"></button>
       </div>
     </div>
 

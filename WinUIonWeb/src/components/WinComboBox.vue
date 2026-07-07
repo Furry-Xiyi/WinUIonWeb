@@ -8,7 +8,7 @@
       <span>{{ selectedLabel }}</span>
       <span class="icon chevron chevron-animate"
             :class="chevronClass"
-            @animationend="onChevronAnimEnd">&#xE70D;</span>
+            @animationend="onChevronAnimEnd"></span>
     </button>
     <Teleport to="body">
       <div v-if="isOpen" class="win-combo-overlay" @click.stop="close" @contextmenu.prevent="close"></div>
@@ -22,11 +22,14 @@
   </div>
 </template>
 <script setup>import { ref, computed, nextTick } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 const props = defineProps({ options: Array, modelValue: Number });
 const emit = defineEmits(['update:modelValue']);
 const isOpen = ref(false); const comboRef = ref(null); const flyoutStyle = ref({}); const flyoutOrigin = ref('center');
 const selectedIndex = computed({ get: () => props.modelValue, set: (val) => emit('update:modelValue', val) });
-const selectedLabel = computed(() => props.options[selectedIndex.value]?.label || 'Select...');
+const selectedLabel = computed(() => props.options[selectedIndex.value]?.label || t('text.select'));
 const chevronClass = ref('');
 let chevronPressed = false;
 let chevronPressDone = false;

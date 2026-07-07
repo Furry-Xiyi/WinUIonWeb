@@ -7,21 +7,26 @@
       <div class="thumb" :style="thumbStyle"></div>
     </div>
     <span v-if="$slots.default" class="win-switch-label"><slot></slot></span>
-    <span v-else class="win-switch-label">{{ modelValue ? onContent : offContent }}</span>
+    <span v-else class="win-switch-label">{{ modelValue ? resolvedOnContent : resolvedOffContent }}</span>
   </div>
 </template>
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { useI18n } from './i18n';
+
+const { t } = useI18n();
 const props = defineProps({
   modelValue: Boolean,
-  onContent: { type: String, default: 'On' },
-  offContent: { type: String, default: 'Off' },
+  onContent: { type: String, default: '' },
+  offContent: { type: String, default: '' },
   disabled: Boolean
 });
 const emit = defineEmits(['update:modelValue']);
 const isDragging = ref(false);
 const isPressed = ref(false);
 const currentTx = ref(0);
+const resolvedOnContent = computed(() => props.onContent || t('text.on'));
+const resolvedOffContent = computed(() => props.offContent || t('text.off'));
 let startX = 0, initialChecked = false, moved = false, didToggle = false;
 
 watch(() => props.modelValue, v => {

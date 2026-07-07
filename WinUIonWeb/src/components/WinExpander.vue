@@ -9,7 +9,7 @@
         <WinTextBlock v-if="header" :Text="header" />
       </slot>
       <span class="win-expander-chevron">
-        <span class="icon win-expander-arrow">&#xE70D;</span>
+        <span class="icon win-expander-arrow"></span>
       </span>
     </button>
     <div class="win-expander-grid">
