@@ -122,7 +122,7 @@ import WinRadioButton from '../../components/WinRadioButton.vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 
-import { useI18n } from '../../components/i18n';
+import { useI18n } from '../../components/i18n/index';
 
 const { t } = useI18n();
 const items = ref(Array.from({ length: 4 }, (_, i) => ({ id: `single-${i}`, title: `Item ${i + 1}`, color: `hsl(${i * 45}, 60%, 50%)` })));

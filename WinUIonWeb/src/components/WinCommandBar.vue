@@ -82,7 +82,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, useSlots } from 'vue'
-import { useI18n } from './i18n'
+import { useI18n } from './i18n/index'
 
 const { t } = useI18n()
 

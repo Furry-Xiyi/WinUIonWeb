@@ -3,7 +3,7 @@ import App from './gallery/App.vue'
 import './styles/theme.css'
 import manifestTemplate from './manifest.json'
 import appIconUrl from './assets/AppIcon.ico?url'
-import { createI18n, i18nKey } from './components/i18n'
+import { createI18n, i18nKey } from './components/i18n/index'
 import galleryEnUS from './gallery/Strings/en-US/Resources'
 import galleryZhCN from './gallery/Strings/zh-CN/Resources'
 

@@ -18,13 +18,13 @@
             v-for="tile in headerTiles"
             :key="tile.Title"
             class="home-header-tile"
-            :header="tile.Title"
-            :description="tile.Description"
-            :headerIcon="tile.Icon"
-            :isClickEnabled="true"
+            :Header="tile.Title"
+            :Description="tile.Description"
+            :HeaderIcon="tile.Icon"
+            :IsClickEnabled="true"
             role="link"
             tabindex="0"
-            @click="openTile(tile)"
+            @Click="openTile(tile)"
             @keydown.enter="openTile(tile)"
             @keydown.space.prevent="openTile(tile)" />
         </div>
@@ -115,7 +115,7 @@ import splashDark from '../../assets/HomePage/Splash-Dark.png';
 import splashLight from '../../assets/HomePage/Splash-Light.png';
 import { favoritesStorageKey, getStoredFavorites } from '../../utils/pageState';
 
-import { useI18n } from '../../components/i18n';
+import { useI18n } from '../../components/i18n/index';
 
 const { t } = useI18n();
 const currentPage = inject('currentPage');

@@ -1,8 +1,9 @@
 <template>
   <h1 class="page-header">{{ $t('text.animatedvisualplayer') }}</h1>
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>Playback Lottie animation</template>
-    <template #description>Consumes an animation source and exposes playback commands.</template>
+  <WinSettingsCard
+    ContentAlignment="Vertical"
+    Header="Playback Lottie animation"
+    Description="Consumes an animation source and exposes playback commands.">
     <div class="media-center">
       <p class="media-copy">
         This AnimatedVisualPlayer consumes an animation created using Adobe AfterEffects and translated into composition objects using Lottie-Windows.

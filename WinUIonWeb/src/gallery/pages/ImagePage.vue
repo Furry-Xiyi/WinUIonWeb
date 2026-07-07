@@ -1,20 +1,21 @@
 <template>
   <h1 class="page-header">{{ $t('text.image') }}</h1>
-  <WinSettingsCard>
-    <template #header>Image from a local file</template>
-    <template #description>A basic Image element with a fixed height.</template>
+  <WinSettingsCard
+    Header="Image from a local file"
+    Description="A basic Image element with a fixed height.">
     <WinImage :src="media('treetops.jpg')" height="100px" alt="Treetops" />
   </WinSettingsCard>
 
-  <WinSettingsCard>
-    <template #header>Decoded rendering size</template>
-    <template #description>Render an image at a decoded target height.</template>
+  <WinSettingsCard
+    Header="Decoded rendering size"
+    Description="Render an image at a decoded target height.">
     <WinImage :src="media('treetops.jpg')" height="100px" alt="Decoded treetops" />
   </WinSettingsCard>
 
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>Image stretch mode</template>
-    <template #description>Change how the source is fitted into a 100 x 100 layout slot.</template>
+  <WinSettingsCard
+    ContentAlignment="Vertical"
+    Header="Image stretch mode"
+    Description="Change how the source is fitted into a 100 x 100 layout slot.">
     <div class="image-demo-row">
       <WinImage :src="media('valley.jpg')" width="100px" height="100px" :stretch="stretchMode" alt="Valley" />
       <div class="image-options">
@@ -27,9 +28,10 @@
     </div>
   </WinSettingsCard>
 
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>Nine-grid images</template>
-    <template #description>Compare normal stretching with nine-grid style slicing.</template>
+  <WinSettingsCard
+    ContentAlignment="Vertical"
+    Header="Nine-grid images"
+    Description="Compare normal stretching with nine-grid style slicing.">
     <div class="nine-grid-demo">
       <span>The normal image</span>
       <WinImage :src="media('ninegrid.gif')" height="82px" alt="Nine grid normal" />
@@ -40,15 +42,16 @@
     </div>
   </WinSettingsCard>
 
-  <WinSettingsCard>
-    <template #header>SVG image</template>
-    <template #description>Image can render SVG sources.</template>
+  <WinSettingsCard
+    Header="SVG image"
+    Description="Image can render SVG sources.">
     <WinImage :src="media('MirrorPCConsent.svg')" height="100px" alt="SVG" />
   </WinSettingsCard>
 
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>Animated GIF</template>
-    <template #description>Animated image playback can be automatic or controlled.</template>
+  <WinSettingsCard
+    ContentAlignment="Vertical"
+    Header="Animated GIF"
+    Description="Animated image playback can be automatic or controlled.">
     <div class="gif-demo">
       <span>An Image element automatically plays an animated GIF source.</span>
       <WinImage :src="media('animated.gif')" height="40px" alt="Animated" />

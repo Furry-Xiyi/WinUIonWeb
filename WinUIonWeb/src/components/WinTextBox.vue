@@ -110,7 +110,7 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
-import { useI18n } from './i18n';
+import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 

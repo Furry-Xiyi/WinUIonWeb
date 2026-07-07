@@ -1,12 +1,13 @@
 <template>
   <h1 class="page-header">{{ $t('text.capture-element-camera') }}</h1>
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>MediaCapture preview displayed via MediaPlayerElement</template>
-    <template #description>Preview a camera stream, mirror the preview, and capture photos.</template>
-    <template #headerAction>
+  <WinSettingsCard
+    ContentAlignment="Vertical"
+    Header="MediaCapture preview displayed via MediaPlayerElement"
+    Description="Preview a camera stream, mirror the preview, and capture photos.">
+    <div class="capture-actions">
       <WinToggleSwitch v-model="mirrored">Mirror preview</WinToggleSwitch>
       <WinButton @click="capture" :disabled="!cameraReady">Capture Photo</WinButton>
-    </template>
+    </div>
     <WinCaptureElementPreview ref="previewRef" :mirrored="mirrored" @ready="onCameraReady" />
   </WinSettingsCard>
 </template>
@@ -33,3 +34,12 @@ onMounted(() => {
   startCamera();
 });
 </script>
+
+<style scoped>
+.capture-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+</style>

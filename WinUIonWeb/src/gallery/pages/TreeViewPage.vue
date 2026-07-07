@@ -84,7 +84,7 @@ import { ref } from 'vue';
 import WinTreeView from '../../components/WinTreeView.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 
-import { useI18n } from '../../components/i18n';
+import { useI18n } from '../../components/i18n/index';
 
 const { t } = useI18n();
 // Example 1: Simple tree with drag and drop

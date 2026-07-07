@@ -24,7 +24,7 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, useAttrs } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
-import { useI18n } from './i18n';
+import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 

@@ -70,7 +70,7 @@ import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinSlider from '../../components/WinSlider.vue';
 
-import { useI18n } from '../../components/i18n';
+import { useI18n } from '../../components/i18n/index';
 
 const { t } = useI18n();
 const isPaneOpen = ref(true);

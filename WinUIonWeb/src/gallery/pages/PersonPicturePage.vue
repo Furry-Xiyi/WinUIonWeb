@@ -1,8 +1,9 @@
 <template>
   <h1 class="page-header">{{ $t('text.personpicture') }}</h1>
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>Select different looks for a person</template>
-    <template #description>Show a profile image, initials generated from a display name, or explicit initials.</template>
+  <WinSettingsCard
+    ContentAlignment="Vertical"
+    Header="Select different looks for a person"
+    Description="Show a profile image, initials generated from a display name, or explicit initials.">
     <div class="person-page-layout">
       <WinPersonPicture
         :profilePicture="profileType === 'image' ? profileImage : ''"

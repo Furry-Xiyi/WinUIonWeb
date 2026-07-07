@@ -88,7 +88,7 @@ import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import { useI18n } from '../../components/i18n';
+import { useI18n } from '../../components/i18n/index';
 
 const { t } = useI18n();
 const currentPage = inject('currentPage');

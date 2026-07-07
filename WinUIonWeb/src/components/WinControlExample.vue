@@ -22,8 +22,8 @@
 
       <WinExpander
         v-if="showSourceCode"
-        :isExpanded="false"
-        :header="t('text.source-code')"
+        :IsExpanded="false"
+        :Header="t('text.source-code')"
         class="code-expander">
         <div class="source-code-presenter">
           <WinSelectorBar
@@ -48,7 +48,7 @@ import WinSelectorBar from './WinSelectorBar.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import WinThemeWrapper from './WinThemeWrapper.vue';
 
-import { useI18n } from './i18n';
+import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 const props = defineProps({

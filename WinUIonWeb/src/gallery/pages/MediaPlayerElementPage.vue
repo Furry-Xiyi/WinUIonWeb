@@ -1,13 +1,14 @@
 <template>
   <h1 class="page-header">{{ $t('text.mediaplayerelement') }}</h1>
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>Transport controls</template>
-    <template #description>MediaPlayerElement with transport controls enabled.</template>
-    <template #headerAction>
+  <WinSettingsCard
+    ContentAlignment="Vertical"
+    Header="Transport controls"
+    Description="MediaPlayerElement with transport controls enabled.">
+    <div class="media-actions">
       <WinToggleSwitch v-model="controlsEnabled">Transport controls</WinToggleSwitch>
       <WinButton @click="openFile">Open a file</WinButton>
       <input ref="fileInput" class="media-file-input" type="file" accept="video/*" @change="onFileSelected" />
-    </template>
+    </div>
     <WinMediaPlayerElement
       :src="videoSource"
       :poster="poster"
@@ -18,13 +19,14 @@
       :maxWidth="400" />
   </WinSettingsCard>
 
-  <WinSettingsCard contentPlacement="bottom">
-    <template #header>AutoPlay video</template>
-    <template #description>MediaPlayerElement can start playback automatically when loaded.</template>
-    <template #headerAction>
+  <WinSettingsCard
+    ContentAlignment="Vertical"
+    Header="AutoPlay video"
+    Description="MediaPlayerElement can start playback automatically when loaded.">
+    <div class="media-actions">
       <WinToggleSwitch v-model="muted">Muted</WinToggleSwitch>
       <WinToggleSwitch v-model="loop">Loop</WinToggleSwitch>
-    </template>
+    </div>
     <WinMediaPlayerElement
       :src="videoSource"
       :poster="poster"
@@ -72,5 +74,12 @@ onBeforeUnmount(() => {
 <style>
   .media-file-input {
     display: none;
+  }
+
+  .media-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
   }
 </style>

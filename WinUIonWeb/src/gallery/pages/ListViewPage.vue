@@ -63,7 +63,7 @@ import WinControlExample from '../../components/WinControlExample.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
 
-import { useI18n } from '../../components/i18n';
+import { useI18n } from '../../components/i18n/index';
 
 const { t } = useI18n();
 const selModeOptions = [

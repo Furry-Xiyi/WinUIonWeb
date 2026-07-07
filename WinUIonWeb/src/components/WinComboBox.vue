@@ -22,7 +22,7 @@
   </div>
 </template>
 <script setup>import { ref, computed, nextTick } from 'vue';
-import { useI18n } from './i18n';
+import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 const props = defineProps({ options: Array, modelValue: Number });

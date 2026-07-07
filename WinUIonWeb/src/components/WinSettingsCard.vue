@@ -1,54 +1,94 @@
 <template>
-  <div
+  <component
+    :is="IsClickEnabled ? 'button' : 'div'"
     class="win-settings-card"
     :class="{
-      clickable: isClickEnabled,
-      'content-left': contentAlignment === 'Left',
-      'content-vertical': contentAlignment === 'Vertical'
+      clickable: IsClickEnabled,
+      'content-left': ContentAlignment === 'Left',
+      'content-vertical': ContentAlignment === 'Vertical',
+      'has-header-content': hasHeaderContent
     }"
     @click="handleClick"
-    role="group">
-    <div class="win-settings-card-header">
-      <span v-if="headerIcon" class="win-settings-card-icon icon" v-html="headerIcon"></span>
+    :type="IsClickEnabled ? 'button' : undefined"
+    :role="IsClickEnabled ? undefined : 'group'"
+    :title="ActionIconToolTip || undefined">
+    <div v-if="ContentAlignment !== 'Left'" class="win-settings-card-header">
+      <span v-if="hasHeaderIcon" class="win-settings-card-icon icon" aria-hidden="true">
+        <slot name="HeaderIcon">
+          <span v-if="isHeaderIconMarkup" v-html="HeaderIcon"></span>
+          <template v-else>{{ HeaderIcon }}</template>
+        </slot>
+      </span>
       <div class="win-settings-card-text">
-        <WinTextBlock v-if="header" class="win-settings-card-title" :Text="header" />
-        <WinTextBlock v-if="description" class="win-settings-card-desc" :Text="description" TextWrapping="Wrap" />
-        <div v-if="$slots.description" class="win-settings-card-desc-slot">
-          <slot name="description"></slot>
-        </div>
+        <slot name="Header">
+          <WinTextBlock
+            v-if="Header"
+            class="win-settings-card-title"
+            :Text="Header"
+            FontSize="14"
+            LineHeight="20"
+            TextWrapping="Wrap" />
+        </slot>
+        <slot name="Description">
+          <WinTextBlock
+            v-if="Description"
+            class="win-settings-card-desc"
+            :Text="Description"
+            FontSize="12"
+            LineHeight="16"
+            Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))"
+            TextWrapping="Wrap" />
+        </slot>
       </div>
     </div>
-    <div
-      class="win-settings-card-content"
-      :class="{ 'align-left': horizontalContentAlignment === 'Left' }">
+    <div class="win-settings-card-content">
       <slot></slot>
     </div>
-  </div>
+    <span
+      v-if="IsClickEnabled && IsActionIconVisible"
+      class="win-settings-card-action-icon icon"
+      aria-hidden="true">
+      <slot name="ActionIcon">
+        <span v-if="isActionIconMarkup" v-html="ActionIcon"></span>
+        <template v-else>{{ ActionIcon }}</template>
+      </slot>
+    </span>
+  </component>
 </template>
 
 <script setup>
+import { computed, useSlots } from 'vue';
 import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
-  header: String,
-  description: String,
-  headerIcon: String,
-  isClickEnabled: { type: Boolean, default: false },
-  contentAlignment: { type: String, default: 'Right' }, // 'Right', 'Left', 'Vertical'
-  horizontalContentAlignment: { type: String, default: 'Right' } // 'Right', 'Left'
+  Header: { type: [String, Number], default: '' },
+  Description: { type: [String, Number], default: '' },
+  HeaderIcon: { type: String, default: '' },
+  ActionIcon: { type: String, default: '\uE974' },
+  ActionIconToolTip: { type: String, default: '' },
+  IsClickEnabled: { type: Boolean, default: false },
+  ContentAlignment: { type: String, default: 'Right' },
+  IsActionIconVisible: { type: Boolean, default: true }
 });
 
-const emit = defineEmits(['click']);
+const emit = defineEmits(['Click']);
+
+const slots = useSlots();
+const hasHeaderIcon = computed(() => Boolean(props.HeaderIcon) || Boolean(slots.HeaderIcon));
+const hasHeaderContent = computed(() => Boolean(props.Header) || Boolean(props.Description) || hasHeaderIcon.value || Boolean(slots.Header) || Boolean(slots.Description));
+const isHeaderIconMarkup = computed(() => props.HeaderIcon.trim().startsWith('<'));
+const isActionIconMarkup = computed(() => props.ActionIcon.trim().startsWith('<'));
 
 const handleClick = (e) => {
-  if (props.isClickEnabled) {
-    emit('click', e);
+  if (props.IsClickEnabled) {
+    emit('Click', e);
   }
 };
 </script>
 
 <style>
   .win-settings-card {
+    width: 100%;
     background: var(--card-bg);
     border: 1px solid var(--card-stroke);
     border-radius: 4px;
@@ -59,6 +99,9 @@ const handleClick = (e) => {
     align-items: center;
     gap: 16px;
     min-height: 68px;
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
   }
 
   .win-settings-card.clickable {
@@ -76,12 +119,8 @@ const handleClick = (e) => {
   }
 
   .win-settings-card.content-left {
-    flex-direction: row;
+    justify-content: flex-start;
     align-items: center;
-  }
-
-  .win-settings-card.content-left .win-settings-card-header {
-    flex: 0 0 auto;
   }
 
   .win-settings-card.content-left .win-settings-card-content {
@@ -96,25 +135,37 @@ const handleClick = (e) => {
 
   .win-settings-card.content-vertical .win-settings-card-content {
     width: 100%;
+    justify-content: flex-start;
   }
 
   .win-settings-card-header {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 0;
     min-width: 0;
     flex: 1;
   }
 
   .win-settings-card-icon {
-    font-size: 16px;
-    color: var(--text-secondary);
+    width: 20px;
+    height: 20px;
+    max-width: 20px;
+    max-height: 20px;
+    margin: 0 20px 0 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--TextFillColorSecondaryBrush, var(--text-secondary));
     flex-shrink: 0;
+    font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+    font-size: 20px;
+    line-height: 20px;
   }
 
   .win-settings-card-text {
     display: flex;
     flex-direction: column;
+    gap: 0;
     min-width: 0;
   }
 
@@ -125,14 +176,10 @@ const handleClick = (e) => {
   }
 
   .win-settings-card-desc {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 2px;
+    font-size: var(--SettingsCardDescriptionFontSize, 12px);
+    color: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+    margin-top: 0;
     line-height: 16px;
-  }
-
-  .win-settings-card-desc-slot {
-    margin-top: 2px;
   }
 
   .win-settings-card-content {
@@ -142,7 +189,22 @@ const handleClick = (e) => {
     flex-shrink: 0;
   }
 
-  .win-settings-card-content.align-left {
-    justify-content: flex-start;
+  .win-settings-card-action-icon {
+    margin-left: -2px;
+    color: var(--text-secondary);
+    font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .win-settings-card.has-header-content:not(.content-left) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .win-settings-card.has-header-content:not(.content-left) .win-settings-card-content {
+      justify-content: flex-start;
+    }
   }
 </style>

@@ -142,7 +142,7 @@
 <script setup>
 import { ref, reactive, inject, provide, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
-import { useI18n } from './i18n';
+import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 

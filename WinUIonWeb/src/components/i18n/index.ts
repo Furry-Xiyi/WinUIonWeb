@@ -1,6 +1,6 @@
 import { inject } from 'vue';
-import enUS from './Strings/en-US/Resources';
-import zhCN from './Strings/zh-CN/Resources';
+import enUS from '../Strings/en-US/Resources';
+import zhCN from '../Strings/zh-CN/Resources';
 
 export type Locale = 'en-US' | 'zh-CN';
 export type I18nValues = Record<string, string | number | boolean | null | undefined>;

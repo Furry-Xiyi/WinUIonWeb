@@ -65,7 +65,7 @@ import NumberBoxPage from './pages/NumberBoxPage.vue';
 import PasswordBoxPage from './pages/PasswordBoxPage.vue';
 import RichEditBoxPage from './pages/RichEditBoxPage.vue';
 
-import { useI18n } from '../components/i18n';
+import { useI18n } from '../components/i18n/index';
 
 const { t } = useI18n();
 const pageMap = {

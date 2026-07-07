@@ -259,7 +259,7 @@
   color-scheme: light dark;
   --faster-duration: 0.083s;
   --fast-duration: 0.167s;
-  --normal-duration: 0.250s;
+  --normal-duration: 0.200s;
   --fast-out-slow-in: cubic-bezier(0, 0, 0, 1);
   --app-bg: #F3F3F3;
   --layer-default: rgba(255, 255, 255, 0.50);

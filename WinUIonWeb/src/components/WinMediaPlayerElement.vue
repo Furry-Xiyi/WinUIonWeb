@@ -52,7 +52,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import WinButton from './WinButton.vue';
 import WinFlyout from './WinFlyout.vue';
 import WinSlider from './WinSlider.vue';
-import { useI18n } from './i18n';
+import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 

@@ -12,7 +12,7 @@
 </template>
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { useI18n } from './i18n';
+import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 const props = defineProps({
