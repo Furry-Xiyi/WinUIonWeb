@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.repeat.simple')" :theme="pageTheme" :vue="repeatButtonSimpleVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.repeat.simple')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="repeatButtonSimpleVue">
       <template #example>
         <div class="horizontal-stack">
           <WinRepeatButton Content="Click and hold" :IsEnabled="DisableControl1 !== true" @Click="RepeatButton_Click" />

@@ -5,8 +5,8 @@
       {{ $t('text.the-flipview-lets-you-flip-through-a-collection') }}
     </p>
 
+    <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-flipview-with-items-declared-inline')" />
     <WinControlExample
-      :headerText="$t('text.a-simple-flipview-with-items-declared-inline')"
       exampleHeight="270px">
       <template #example>
         <WinFlipView :items="imageItems" orientation="horizontal" style="width: 100%; max-width: 400px; height: 270px;">
@@ -20,8 +20,8 @@
       </template>
     </WinControlExample>
 
+    <WinTextBlock class="control-example-description" Text="A FlipView showing data-bound content." />
     <WinControlExample
-      headerText="A FlipView showing data-bound content."
       exampleHeight="180px">
       <template #example>
         <WinFlipView :items="controlItems" orientation="horizontal" style="width: 100%; max-width: 400px; height: 180px;">
@@ -39,8 +39,8 @@
       </template>
     </WinControlExample>
 
+    <WinTextBlock class="control-example-description" Text="A vertical FlipView." />
     <WinControlExample
-      headerText="A vertical FlipView."
       exampleHeight="270px">
       <template #example>
         <WinFlipView :items="imageItems" orientation="vertical" style="width: 100%; max-width: 400px; height: 270px;">
@@ -59,6 +59,7 @@
 <script setup>
 import WinFlipView from '../../components/WinFlipView.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 
 // Image items for examples 1 and 3
 const imageItems = [

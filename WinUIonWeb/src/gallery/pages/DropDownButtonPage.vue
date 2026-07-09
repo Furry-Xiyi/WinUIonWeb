@@ -11,13 +11,17 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.dropdown.simple')" :theme="pageTheme" :vue="dropDownButtonSimpleVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.dropdown.simple')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="dropDownButtonSimpleVue">
       <template #example>
         <WinDropDownButton :Content="$t('text.email')" :Flyout="emailFlyout" />
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.dropdown.icons')" :theme="pageTheme" :vue="dropDownButtonIconVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.dropdown.icons')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="dropDownButtonIconVue">
       <template #example>
         <WinDropDownButton AutomationProperties.Name="Email" :Flyout="emailIconFlyout">
           <span class="icon">&#xE715;</span>

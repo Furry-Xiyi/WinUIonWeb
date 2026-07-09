@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-slider')" :theme="pageTheme" :vue="sliderSimpleVue">
+    <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-slider')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="sliderSimpleVue">
       <template #example>
         <WinSlider Width="200" :Value="slider1" @update:Value="slider1 = $event" />
       </template>
@@ -20,7 +22,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.slider.range')" :theme="pageTheme" :vue="sliderRangeVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.slider.range')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="sliderRangeVue">
       <template #example>
         <WinSlider
           Width="200"
@@ -50,7 +54,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.slider.ticks')" :theme="pageTheme" :vue="sliderTicksVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.slider.ticks')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="sliderTicksVue">
       <template #example>
         <WinSlider Width="290" TickFrequency="20" TickPlacement="Outside" :SnapsTo="snapsTo" :Value="slider3" @update:Value="slider3 = $event" />
       </template>
@@ -66,7 +72,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.slider.vertical')" :theme="pageTheme" :vue="sliderVerticalVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.slider.vertical')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="sliderVerticalVue">
       <template #example>
         <WinSlider Width="100" Height="100" :Maximum="50" :Minimum="-50" Orientation="Vertical" TickFrequency="10" TickPlacement="Outside" :Value="slider4" @update:Value="slider4 = $event" />
       </template>

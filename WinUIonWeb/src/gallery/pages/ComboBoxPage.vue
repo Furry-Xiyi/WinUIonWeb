@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.combobox.inline')" :theme="pageTheme" :vue="comboBoxInlineVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.combobox.inline')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxInlineVue">
       <template #example>
         <div class="vertical-stack">
           <WinComboBox v-model:SelectedIndex="Combo1" Width="200" :Header="$t('text.colors')" :PlaceholderText="$t('sample.combobox.pick-a-color')" :ItemsSource="colors" @SelectionChanged="ColorComboBox_SelectionChanged" />
@@ -20,7 +22,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.combobox.itemssource')" :theme="pageTheme" :vue="comboBoxItemsSourceVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.combobox.itemssource')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxItemsSourceVue">
       <template #example>
         <div class="vertical-stack">
           <WinComboBox v-model:SelectedIndex="Combo2" MinWidth="200" :Header="$t('sample.combobox.font')" :ItemsSource="fonts" />
@@ -29,7 +33,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.combobox.editable')" :theme="pageTheme" :vue="comboBoxEditableVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.combobox.editable')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxEditableVue">
       <template #example>
         <div class="vertical-stack">
           <WinComboBox v-model:SelectedIndex="Combo3" Width="200" :Header="$t('sample.combobox.font-size')" IsEditable :ItemsSource="fontSizes" @TextSubmitted="Combo3_TextSubmitted" />

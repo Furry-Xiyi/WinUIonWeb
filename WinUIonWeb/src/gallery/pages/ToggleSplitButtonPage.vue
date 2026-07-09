@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.togglesplitbutton.bullet-list')" :theme="pageTheme" :vue="toggleSplitButtonVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.togglesplitbutton.bullet-list')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="toggleSplitButtonVue">
       <template #example>
         <WinToggleSplitButton v-model:IsChecked="myListButton" VerticalAlignment="Top" AutomationProperties.Name="Bullets" @IsCheckedChanged="MyListButton_IsCheckedChanged">
           <span class="icon">{{ listIcon }}</span>

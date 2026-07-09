@@ -23,11 +23,11 @@
       </div>
     </div>
 
+    <WinTextBlock class="control-example-description" :Text="$t('sample.togglebutton.simple')" />
     <WinControlExample
       class="basic-input-example-theme"
       :theme="pageTheme"
-      :vue="toggleButtonVue"
-      :headerText="$t('sample.togglebutton.simple')">
+      :vue="toggleButtonVue">
       <template #example>
         <WinToggleButton
           v-model:IsChecked="Toggle1"

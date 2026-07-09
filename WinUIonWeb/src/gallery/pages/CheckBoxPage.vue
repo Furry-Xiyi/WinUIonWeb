@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.checkbox.two-state')" :theme="pageTheme" :vue="checkBoxTwoStateVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.checkbox.two-state')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="checkBoxTwoStateVue">
       <template #example>
         <WinCheckBox v-model:IsChecked="twoStateChecked" AutomationProperties.Name="Two-state" @Checked="TwoState_Checked" @Unchecked="TwoState_Unchecked">
           <WinTextBlock :Text="$t('sample.checkbox.two-state-content')" />
@@ -22,7 +24,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.checkbox.three-state')" :theme="pageTheme" :vue="checkBoxThreeStateVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.checkbox.three-state')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="checkBoxThreeStateVue">
       <template #example>
         <WinCheckBox v-model:IsChecked="threeStateChecked" AutomationProperties.Name="Three-state" IsThreeState @Checked="ThreeState_Checked" @Unchecked="ThreeState_Unchecked" @Indeterminate="ThreeState_Indeterminate">
           <WinTextBlock :Text="$t('sample.checkbox.three-state-content')" />
@@ -33,7 +37,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.checkbox.select-all')" :theme="pageTheme" :vue="checkBoxSelectAllVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.checkbox.select-all')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="checkBoxSelectAllVue">
       <template #example>
         <div class="vertical-stack">
           <WinCheckBox :IsChecked="OptionsAllCheckBox" IsThreeState @Checked="SelectAll_Checked" @Unchecked="SelectAll_Unchecked" @Indeterminate="SelectAll_Indeterminate">

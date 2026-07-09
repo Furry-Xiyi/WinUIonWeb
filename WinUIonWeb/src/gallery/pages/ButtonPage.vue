@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-button-with-text-content')" :theme="pageTheme" :vue="buttonSimpleVue">
+    <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-button-with-text-content')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="buttonSimpleVue">
       <template #example>
         <WinButton
           AutomationProperties.Name="Standard XAML"
@@ -27,7 +29,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.button.with-image')" :theme="pageTheme" :vue="buttonWithImageVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.button.with-image')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="buttonWithImageVue">
       <template #example>
         <WinButton Width="50" Height="50" AutomationProperties.Name="Pie" Padding="4" @Click="Button_Click('Button2')">
           <img class="pie-image" :src="pieSliceImageUrl" alt="Slice" />
@@ -38,7 +42,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.button.built-in-styles')" :theme="pageTheme" :vue="buttonBuiltInStylesVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.button.built-in-styles')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="buttonBuiltInStylesVue">
       <template #example>
         <div class="horizontal-stack">
           <WinButton AutomationProperties.Name="Accent style" :Content="$t('sample.button.accent-style')" Style="{StaticResource AccentButtonStyle}" />
@@ -47,7 +53,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.button.wrapping')" :theme="pageTheme" :vue="buttonWrappingVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.button.wrapping')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="buttonWrappingVue">
       <template #example>
         <div class="vertical-stack stretch-stack">
           <WinTextBlock Margin="0,0,0,8" :Text="$t('sample.button.wrapping-note-1')" TextWrapping="Wrap" />

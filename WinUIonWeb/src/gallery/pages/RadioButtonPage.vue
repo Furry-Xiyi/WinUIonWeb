@@ -21,8 +21,8 @@
     </div>
 
     <!-- Example 1: Basic RadioButton group -->
+    <WinTextBlock class="control-example-description" Text="RadioButton group" />
     <WinControlExample
-      headerText="RadioButton group"
       :theme="pageTheme"
       :templateCode="example1Template"
       :vueCode="example1Vue">
@@ -58,8 +58,8 @@
     </WinControlExample>
 
     <!-- Example 2: Styled RadioButton groups with visual output -->
+    <WinTextBlock class="control-example-description" Text="RadioButton groups with visual feedback" />
     <WinControlExample
-      headerText="RadioButton groups with visual feedback"
       :theme="pageTheme"
       :templateCode="example2Template"
       :vueCode="example2Vue">

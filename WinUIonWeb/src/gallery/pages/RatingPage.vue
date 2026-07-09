@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-ratingcontrol')" :theme="pageTheme" :vue="ratingSimpleVue">
+    <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-ratingcontrol')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="ratingSimpleVue">
       <template #example>
         <WinRating
           :Value="ratingValue"
@@ -31,7 +33,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.rating.placeholder')" :theme="pageTheme" :vue="ratingPlaceholderVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.rating.placeholder')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="ratingPlaceholderVue">
       <template #example>
         <WinRating :PlaceholderValue="placeholderValue" />
       </template>

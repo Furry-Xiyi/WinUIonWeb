@@ -5,7 +5,9 @@
       {{ $t('text.the-treeview-control-is-a-hierarchical-list-patt') }}
     </p>
 
-    <WinControlExample :headerText="$t('text.a-simple-treeview-with-drag-and-drop-enabled')">
+    <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-treeview-with-drag-and-drop-enabled')" />
+
+    <WinControlExample>
       <template #example>
         <WinTreeView
           v-model:items="simpleTree"
@@ -25,7 +27,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A TreeView with multiple selection enabled.">
+    <WinTextBlock class="control-example-description" Text="A TreeView with multiple selection enabled." />
+
+    <WinControlExample>
       <template #example>
         <WinTreeView
           v-model:items="multiSelectTree"
@@ -43,7 +47,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A TreeView using data binding with ItemsSource.">
+    <WinTextBlock class="control-example-description" Text="A TreeView using data binding with ItemsSource." />
+
+    <WinControlExample>
       <template #example>
         <WinTreeView
           v-model:items="dataSource"
@@ -56,7 +62,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample headerText="A TreeView using an ItemTemplateSelector.">
+    <WinTextBlock class="control-example-description" Text="A TreeView using an ItemTemplateSelector." />
+
+    <WinControlExample>
       <template #example>
         <WinTreeView
           v-model:items="fileTree"

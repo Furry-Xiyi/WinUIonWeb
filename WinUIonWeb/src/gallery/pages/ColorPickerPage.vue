@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.colorpicker.properties')" :theme="pageTheme" :vue="colorPickerPropertiesVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.colorpicker.properties')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="colorPickerPropertiesVue">
       <template #example>
         <WinColorPicker
           v-model:Color="color"

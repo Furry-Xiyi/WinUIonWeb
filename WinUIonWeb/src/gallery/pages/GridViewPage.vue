@@ -2,7 +2,9 @@
   <h1 class="page-header">{{ $t('text.gridview') }}</h1>
   <p class="page-description">{{ $t('text.the-gridview-lets-people-browse-and-select-from') }}</p>
 
-  <WinControlExample :headerText="$t('text.single-selection')">
+  <WinTextBlock class="control-example-description" :Text="$t('text.single-selection')" />
+
+  <WinControlExample>
     <template #example>
       <WinGridView :items="items" selectionMode="Single" isItemClickEnabled v-model:selectedItems="singleSel">
         <template #item="{ item }">
@@ -19,7 +21,9 @@
     </template>
   </WinControlExample>
 
-  <WinControlExample headerText="Multiple Selection">
+  <WinTextBlock class="control-example-description" Text="Multiple Selection" />
+
+  <WinControlExample>
     <template #example>
       <WinGridView :items="multiItems" selectionMode="Multiple" v-model:selectedItems="multiSel">
         <template #item="{ item }">
@@ -37,7 +41,9 @@
     </template>
   </WinControlExample>
 
-  <WinControlExample headerText="Customizable GridView">
+  <WinTextBlock class="control-example-description" Text="Customizable GridView" />
+
+  <WinControlExample>
     <template #example>
       <WinGridView :items="customItems"
                    :selectionMode="selMode"

@@ -11,13 +11,17 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-toggleswitch')" :theme="pageTheme" :vue="toggleSwitchSimpleVue">
+    <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-toggleswitch')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="toggleSwitchSimpleVue">
       <template #example>
         <WinToggleSwitch />
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.toggleswitch.custom')" :theme="pageTheme" :vue="toggleSwitchCustomVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.toggleswitch.custom')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="toggleSwitchCustomVue">
       <template #example>
         <div class="horizontal-stack">
           <WinToggleSwitch

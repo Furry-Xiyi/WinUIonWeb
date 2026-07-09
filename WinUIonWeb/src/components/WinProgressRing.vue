@@ -66,7 +66,7 @@ const customStyle = computed(() => {
   mask-size: auto var(--ring-size);
   mask-repeat: no-repeat;
   mask-position: 0 0;
-  animation: win-progress-ring-sprite 1.8s steps(120, end) infinite;
+  animation: win-progress-ring-sprite 2.0s steps(120, end) infinite;
   will-change: -webkit-mask-position, mask-position;
 }
 

@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.splitbutton.color-picker')" :theme="pageTheme" :vue="splitButtonColorPickerVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.splitbutton.color-picker')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonColorPickerVue">
       <template #example>
         <WinSplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" AutomationProperties.Name="Font color" @Click="applyCurrentColor">
           <div class="color-swatch current-swatch" :style="{ backgroundColor: currentColor }"></div>
@@ -29,7 +31,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.splitbutton.text')" :theme="pageTheme" :vue="splitButtonTextVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.splitbutton.text')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonTextVue">
       <template #example>
         <WinSplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" AutomationProperties.Name="Font color with text">
           <WinTextBlock :Text="$t('sample.choose-color')" />

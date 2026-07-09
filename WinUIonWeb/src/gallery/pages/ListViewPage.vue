@@ -2,7 +2,9 @@
   <h1 class="page-header">{{ $t('text.listview') }}</h1>
   <p class="page-description">{{ $t('text.a-listview-displays-data-in-a-vertical-list-with') }}</p>
 
-  <WinControlExample :headerText="$t('text.basic-listview-with-selection-modes')">
+  <WinTextBlock class="control-example-description" :Text="$t('text.basic-listview-with-selection-modes')" />
+
+  <WinControlExample>
     <template #example>
       <div class="listview-demo-scroll">
         <WinListView :items="contacts" :selectionMode="basicMode" v-model:selectedItems="singleSel">
@@ -20,7 +22,9 @@
     </template>
   </WinControlExample>
 
-  <WinControlExample headerText="Grouped Data with Sticky Headers">
+  <WinTextBlock class="control-example-description" Text="Grouped Data with Sticky Headers" />
+
+  <WinControlExample>
     <template #example>
       <div class="listview-demo-scroll">
         <WinListView :items="groups" isGrouped showHeader :stickyHeader="stickyOn" selectionMode="Single" v-model:selectedItems="groupSel">
@@ -43,7 +47,9 @@
     </template>
   </WinControlExample>
 
-  <WinControlExample headerText="Drag to Reorder">
+  <WinTextBlock class="control-example-description" Text="Drag to Reorder" />
+
+  <WinControlExample>
     <template #example>
       <div class="listview-demo-scroll">
         <WinListView v-model:items="dragList" selectionMode="Single" v-model:selectedItems="dragSel" canDragItems canReorderItems allowDrop>

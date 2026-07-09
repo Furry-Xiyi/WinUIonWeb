@@ -11,7 +11,9 @@
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.hyperlink.navigate')" :theme="pageTheme" :vue="hyperlinkButtonNavigateVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.hyperlink.navigate')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="hyperlinkButtonNavigateVue">
       <template #example>
         <WinHyperlinkButton
           :Content="$t('text.microsoft-home-page')"
@@ -25,7 +27,9 @@
       </template>
     </WinControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.hyperlink.click')" :theme="pageTheme" :vue="hyperlinkButtonClickVue">
+    <WinTextBlock class="control-example-description" :Text="$t('sample.hyperlink.click')" />
+
+    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="hyperlinkButtonClickVue">
       <template #example>
         <WinHyperlinkButton :Content="$t('sample.hyperlink.go-to-togglebutton')" @Click="GoToHyperlinkButton_Click" />
       </template>

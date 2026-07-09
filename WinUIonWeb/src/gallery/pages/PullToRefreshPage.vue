@@ -2,7 +2,9 @@
   <h1 class="page-header">{{ $t('text.pulltorefresh') }}</h1>
   <p class="page-description">{{ $t('text.a-container-that-allows-users-to-refresh-content') }}</p>
 
-  <WinControlExample :headerText="$t('text.default-style')">
+  <WinTextBlock class="control-example-description" :Text="$t('text.default-style')" />
+
+  <WinControlExample>
     <template #example>
       <WinPullToRefresh @refresh="onRefresh" style="width: 100%; height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
         <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
@@ -13,7 +15,9 @@
     </template>
   </WinControlExample>
 
-  <WinControlExample headerText="Custom Symbol">
+  <WinTextBlock class="control-example-description" Text="Custom Symbol" />
+
+  <WinControlExample>
     <template #example>
       <WinPullToRefresh icon="&#xE117" @refresh="onRefreshCustom" style="width: 100%; height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
         <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
