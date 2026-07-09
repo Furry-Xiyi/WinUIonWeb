@@ -9,7 +9,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import loadingRingGif from '../assets/LoadingRing/LoadingRing.gif';
+import loadingRingSprite from '../assets/LoadingRing/LoadingRingSprite.png';
 
 const props = defineProps({
   color: { type: String, default: '' },
@@ -24,10 +24,21 @@ const cssLength = (value) => {
   return typeof value === 'number' ? `${value}px` : value;
 };
 
+const cssNumber = (value) => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return Number(value.trim());
+  return undefined;
+};
+
 const customStyle = computed(() => {
+  const ringBase = props.Width || props.Height || 32;
+  const ringSize = cssLength(ringBase);
+  const numericRingSize = cssNumber(ringBase) ?? 32;
   const style = {
-    '--ring-mask': `url(${loadingRingGif})`,
-    '--ring-color': props.color || 'var(--accent-base)'
+    '--ring-mask': `url(${loadingRingSprite})`,
+    '--ring-color': props.color || 'var(--accent-base)',
+    '--ring-size': ringSize,
+    '--ring-offset-end': `${numericRingSize * -120}px`
   };
 
   if (props.Width !== '') style.width = cssLength(props.Width);
@@ -48,12 +59,25 @@ const customStyle = computed(() => {
   vertical-align: middle;
   background-color: var(--ring-color);
   -webkit-mask-image: var(--ring-mask);
-  -webkit-mask-size: contain;
+  -webkit-mask-size: auto var(--ring-size);
   -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
+  -webkit-mask-position: 0 0;
   mask-image: var(--ring-mask);
-  mask-size: contain;
+  mask-size: auto var(--ring-size);
   mask-repeat: no-repeat;
-  mask-position: center;
+  mask-position: 0 0;
+  animation: win-progress-ring-sprite 1.8s steps(120, end) infinite;
+  will-change: -webkit-mask-position, mask-position;
+}
+
+@keyframes win-progress-ring-sprite {
+  from {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+  to {
+    -webkit-mask-position: var(--ring-offset-end) 0;
+    mask-position: var(--ring-offset-end) 0;
+  }
 }
 </style>
