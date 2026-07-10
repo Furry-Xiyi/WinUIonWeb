@@ -27,7 +27,7 @@
   <WinControlExample>
     <template #example>
       <div class="listview-demo-scroll">
-        <WinListView :ItemsSource="groups" isGrouped showHeader :stickyHeader="stickyOn" SelectionMode="Single" v-model:SelectedItems="groupSel">
+        <WinListView :ItemsSource="groups" IsGrouped showHeader :stickyHeader="stickyOn" SelectionMode="Single" v-model:SelectedItems="groupSel">
           <template #header="{ group }">
             {{ group.key }}
           </template>
@@ -52,7 +52,7 @@
   <WinControlExample>
     <template #example>
       <div class="listview-demo-scroll">
-        <WinListView v-model:ItemsSource="dragList" SelectionMode="Single" v-model:SelectedItems="dragSel" CanDragItems CanReorderItems allowDrop>
+        <WinListView v-model:ItemsSource="dragList" SelectionMode="Single" v-model:SelectedItems="dragSel" CanDragItems CanReorderItems AllowDrop>
           <template #item="{ item }">
             <WinTextBlock :Text="`${item.firstName} ${item.lastName}`" />
           </template>

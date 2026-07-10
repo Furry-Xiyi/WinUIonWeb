@@ -2,250 +2,214 @@
   <WinTextBlock class="page-header" :Text="$t('text.gridview')" />
   <WinTextBlock class="page-description" :Text="$t('text.the-gridview-lets-people-browse-and-select-from')" TextWrapping="WrapWholeWords" />
 
-  <WinTextBlock class="control-example-description" :Text="$t('text.single-selection')" />
-
-  <WinControlExample>
+  <WinTextBlock class="control-example-description" Text="A basic GridView with an image data template." />
+  <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="basicGridViewVue">
     <template #example>
-      <WinGridView :ItemsSource="items" SelectionMode="Single" IsItemClickEnabled v-model:SelectedItems="singleSel">
-        <template #item="{ item }">
-          <div class="grid-sample-item">
-            <div class="grid-img" :style="{ background: item.color }"></div>
-          </div>
-        </template>
-      </WinGridView>
-    </template>
-    <template #options>
-      <WinTextBlock class="grid-output" :Text="`Selected: ${singleSel.length > 0 ? singleSel[0].title : 'None'}`" />
+      <div class="sample-stack">
+        <WinTextBlock Text="This is a basic GridView that has the full source code below. Other samples on this page display only the additional markup needed to customize the specific GridView." TextWrapping="WrapWholeWords" />
+        <WinGridView
+          class="basic-grid-view"
+          :ItemsSource="items"
+          IsItemClickEnabled
+          SelectionMode="Single"
+          v-model:SelectedItems="basicSelected"
+          @ItemClick="onBasicItemClick">
+          <template #item="{ item }">
+            <img class="image-template" :src="item.ImageLocation" :alt="item.Title" />
+          </template>
+        </WinGridView>
+        <WinTextBlock class="output-text" :Text="basicOutput" />
+      </div>
     </template>
   </WinControlExample>
 
-  <WinTextBlock class="control-example-description" Text="Multiple Selection" />
-
-  <WinControlExample>
+  <WinTextBlock class="control-example-description" Text="A GridView with layout customizations." />
+  <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="layoutGridViewVue">
     <template #example>
-      <WinGridView :ItemsSource="multiItems" SelectionMode="Multiple" v-model:SelectedItems="multiSel">
-        <template #item="{ item }">
-          <div class="grid-sample-item">
-            <div class="grid-img" :style="{ background: item.color }"></div>
-          </div>
-        </template>
-      </WinGridView>
-
+      <div class="sample-stack">
+        <WinTextBlock Text="Use the options on the right to control different layout customizations to the GridView below." TextWrapping="WrapWholeWords" />
+        <WinGridView
+          class="overlay-grid-view"
+          :ItemsSource="items"
+          SelectionMode="None"
+          :style="{ '--grid-column-gap': `${columnSpace}px`, '--grid-row-gap': `${rowSpace}px`, '--grid-max-columns': wrapItemCount }">
+          <template #item="{ item }">
+            <div class="overlay-template">
+              <img :src="item.ImageLocation" :alt="item.Title" />
+              <div class="overlay-caption">
+                <WinTextBlock :Text="item.Title" />
+                <WinTextBlock class="caption-text" :Text="`${item.Likes} Likes`" />
+              </div>
+            </div>
+          </template>
+        </WinGridView>
+      </div>
     </template>
     <template #options>
-      <WinTextBlock class="grid-output" :Text="`Selected: ${multiSel.length > 0 ? multiSel.map(s => s.title).join(', ') : 'None'}`" />
+      <div class="options-stack">
+        <WinNumberBox Header="Space between columns" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" v-model:Value="columnSpace" />
+        <WinNumberBox Header="Space between rows" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" v-model:Value="rowSpace" />
+        <WinNumberBox Header="Maximum number of items before wrapping" :Minimum="1" :Maximum="8" SpinButtonPlacementMode="Inline" v-model:Value="wrapItemCount" />
+      </div>
     </template>
   </WinControlExample>
 
-  <WinTextBlock class="control-example-description" Text="Customizable GridView" />
-
-  <WinControlExample>
+  <WinTextBlock class="control-example-description" Text="A GridView with content, drag, drop, reorder, and selection options." />
+  <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="contentGridViewVue">
     <template #example>
-      <WinGridView :ItemsSource="customItems"
-                   :SelectionMode="selMode"
-                   :IsItemClickEnabled="itemClick"
-                   :CanDragItems="canDrag"
-                   :CanReorderItems="canReorder"
-                   :AllowDrop="allowDropVal"
-                   v-model:SelectedItems="customSel"
-                   @reorder="v => customItems = v">
-
-        <template #item="{ item }">
-          <div class="grid-sample-item">
-            <template v-if="layout === 'Image'">
-              <div class="grid-img" :style="{ background: item.color }"></div>
-            </template>
-
-            <template v-else-if="layout === 'Icon/Text'">
-              <div class="layout-icon-text">
-                <div class="layout-icon-text-header">
-                  <span class="icon" style="font-size: 16px;">{{ item.icon }}</span>
-                  <WinTextBlock class="layout-icon-text-title" :Text="item.title" />
-                </div>
-                <WinTextBlock class="layout-icon-text-desc" :Text="item.desc" />
-              </div>
-            </template>
-
-            <template v-else-if="layout === 'Image/Text'">
-              <div class="grid-img" :style="{ background: item.color, height: '100px', flex: 'none' }"></div>
-              <div class="layout-imagetext-body">
-                <WinTextBlock style="font-weight: 600;" :Text="item.title" />
-                <WinTextBlock style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" :Text="item.desc" />
-              </div>
-            </template>
-
-            <template v-else-if="layout === 'Text'">
-              <div class="layout-text-body">
-                <WinTextBlock style="font-weight: 600;" :Text="item.title" />
-                <WinTextBlock style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;" :Text="item.desc" />
-              </div>
-            </template>
-          </div>
-        </template>
-      </WinGridView>
-
-      <div class="options-section">
-        <WinTextBlock class="options-label" Text="ItemTemplate" />
-        <div class="options-group">
-          <WinRadioButton name="layout" value="Image" v-model="layout">Image</WinRadioButton>
-          <WinRadioButton name="layout" value="Icon/Text" v-model="layout">Icon/Text</WinRadioButton>
-          <WinRadioButton name="layout" value="Image/Text" v-model="layout">Image/Text</WinRadioButton>
-          <WinRadioButton name="layout" value="Text" v-model="layout">Text</WinRadioButton>
-        </div>
+      <div class="sample-stack">
+        <WinGridView
+          class="content-grid-view"
+          :ItemsSource="contentItems"
+          :SelectionMode="selectionMode"
+          :IsItemClickEnabled="isItemClickEnabled"
+          :CanDragItems="canDragItems"
+          :CanReorderItems="canReorderItems"
+          :AllowDrop="allowDrop"
+          v-model:SelectedItems="contentSelected"
+          @ItemClick="onContentItemClick"
+          @SelectionChanged="onContentSelectionChanged"
+          @reorder="items => contentItems = items">
+          <template #item="{ item }">
+            <component :is="currentTemplate" :item="item" />
+          </template>
+        </WinGridView>
+        <WinTextBlock class="output-text" :Text="clickOutput" />
+        <WinTextBlock class="output-text" :Text="selectionOutput" />
       </div>
-
-      <div class="options-divider"></div>
-
-      <div class="options-section">
-        <WinTextBlock class="options-label" Text="Behaviors" />
-        <div class="options-group">
-          <WinCheckBox v-model="itemClick">IsItemClickEnabled</WinCheckBox>
-          <WinCheckBox v-model="canDrag">CanDragItems</WinCheckBox>
-          <WinCheckBox v-model="canReorder">CanReorderItems</WinCheckBox>
-          <WinCheckBox v-model="allowDropVal">AllowDrop</WinCheckBox>
+    </template>
+    <template #options>
+      <div class="options-stack">
+        <WinTextBlock Text="ItemTemplate" />
+        <div class="radio-stack">
+          <WinRadioButton name="template" value="Image" v-model="itemTemplate">Image</WinRadioButton>
+          <WinRadioButton name="template" value="IconText" v-model="itemTemplate">Icon/Text</WinRadioButton>
+          <WinRadioButton name="template" value="ImageText" v-model="itemTemplate">Image/Text</WinRadioButton>
+          <WinRadioButton name="template" value="Text" v-model="itemTemplate">Text</WinRadioButton>
         </div>
-      </div>
-
-      <div class="options-divider"></div>
-
-      <div class="options-section">
-        <WinTextBlock class="options-label" Text="SelectionMode" />
-        <WinComboBox :options="modeOptions" v-model="selModeIdx" style="width: 100%;" />
+        <WinToggleButton @Click="reverseFlowDirection">Reverse FlowDirection</WinToggleButton>
+        <WinTextBlock Text="GridView Properties" />
+        <WinTextBlock class="caption-text" Text="In order to drag, drop, and reorder items within the GridView, make sure the last three boxes are checked below." TextWrapping="WrapWholeWords" />
+        <WinTextBlock class="caption-text" Text="Turning on IsItemClickEnabled will allow the user to click on an item, regardless of selection mode." TextWrapping="WrapWholeWords" />
+        <WinCheckBox v-model="isItemClickEnabled">IsItemClickEnabled</WinCheckBox>
+        <WinCheckBox v-model="canDragItems">CanDragItems</WinCheckBox>
+        <WinCheckBox v-model="canReorderItems">CanReorderItems</WinCheckBox>
+        <WinCheckBox v-model="allowDrop">AllowDrop</WinCheckBox>
+        <WinComboBox Header="SelectionMode" :options="selectionModeOptions" v-model="selectionModeIndex" />
       </div>
     </template>
   </WinControlExample>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import WinGridView from '../../components/WinGridView.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
+import { computed, h, inject, ref } from 'vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinGridView from '../../components/WinGridView.vue';
+import WinNumberBox from '../../components/WinNumberBox.vue';
+import WinRadioButton from '../../components/WinRadioButton.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { createPageState } from '../../utils/pageState';
 
-import { useI18n } from '../../components/i18n/index';
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'gridview');
+const { pageTheme } = createPageState(pageKey.value);
 
-const { t } = useI18n();
-const items = ref(Array.from({ length: 4 }, (_, i) => ({ id: `single-${i}`, title: `Item ${i + 1}`, color: `hsl(${i * 45}, 60%, 50%)` })));
-const multiItems = ref(Array.from({ length: 4 }, (_, i) => ({ id: `multi-${i}`, title: `Item ${i + 1}`, color: `hsl(${i * 90 + 30}, 55%, 50%)` })));
-const singleSel = ref([]);
-const multiSel = ref([]);
+const media = (name) => `https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/${name}`;
 
-const icons = ['', '', '', '', '', ''];
-const customItems = ref(Array.from({length: 6}, (_, i) => ({
-  id: `custom-${i}`,
-  title: `Item ${i+1}`,
-  desc: `Description for item ${i+1}`,
-  color: `hsl(${i*60}, 55%, 55%)`,
-  icon: icons[i % icons.length]
-})));
-const customSel = ref([]);
+const items = ref([
+  { Title: 'Cliff', Description: 'A scenic cliff by the sea.', ImageLocation: media('cliff.jpg'), Likes: 12, Views: 461 },
+  { Title: 'Grapes', Description: 'Fresh grapes in sunlight.', ImageLocation: media('grapes.jpg'), Likes: 9, Views: 312 },
+  { Title: 'Rainier', Description: 'A mountain landscape.', ImageLocation: media('rainier.jpg'), Likes: 18, Views: 784 },
+  { Title: 'Sunset', Description: 'A warm sunset sky.', ImageLocation: media('sunset.jpg'), Likes: 23, Views: 921 },
+  { Title: 'Valley', Description: 'A green valley view.', ImageLocation: media('valley.jpg'), Likes: 14, Views: 538 }
+]);
 
-const layout = ref('Image');
-const itemClick = ref(true);
-const canDrag = ref(false);
-const canReorder = ref(false);
-const allowDropVal = ref(false);
+const basicSelected = ref([]);
+const basicOutput = ref('');
+const onBasicItemClick = ({ ClickedItem }) => { basicOutput.value = `You clicked ${ClickedItem.Title}.`; };
 
-const modeOptions = [
-  { label: t('text.none'), value: 'None' },
-  { label: t('text.single'), value: 'Single' },
-  { label: t('text.multiple'), value: 'Multiple' },
-  { label: t('text.extended'), value: 'Extended' }
-];
-const selModeIdx = ref(0);
-const selMode = computed(() => modeOptions[selModeIdx.value].value);
+const columnSpace = ref(5);
+const rowSpace = ref(5);
+const wrapItemCount = ref(3);
+
+const contentItems = ref([...items.value]);
+const contentSelected = ref([]);
+const itemTemplate = ref('Image');
+const isItemClickEnabled = ref(false);
+const canDragItems = ref(false);
+const canReorderItems = ref(false);
+const allowDrop = ref(false);
+const isReversed = ref(false);
+const clickOutput = ref('');
+const selectionOutput = ref('');
+const selectionModes = ['None', 'Single', 'Multiple', 'Extended'];
+const selectionModeIndex = ref(1);
+const selectionMode = computed(() => selectionModes[selectionModeIndex.value]);
+const selectionModeOptions = selectionModes.map(text => ({ text }));
+
+const imageTemplate = ({ item }) => h('img', { class: 'image-template', src: item.ImageLocation, alt: item.Title });
+const iconTextTemplate = ({ item }) => h('div', { class: 'icon-text-template' }, [
+  h('img', { src: item.ImageLocation, alt: '', 'aria-hidden': 'true' }),
+  h(WinTextBlock, { Text: item.Title }),
+  h(WinTextBlock, { class: 'caption-text', Text: item.Description, TextWrapping: 'WrapWholeWords' })
+]);
+const imageTextTemplate = ({ item }) => h('div', { class: 'image-text-template' }, [
+  h('img', { src: item.ImageLocation, alt: item.Title }),
+  h('div', {}, [
+    h(WinTextBlock, { style: 'font-weight: 600; margin-bottom: 8px;', Text: item.Title }),
+    h(WinTextBlock, { class: 'caption-text', Text: `${item.Views} Views` }),
+    h(WinTextBlock, { class: 'caption-text', Text: `${item.Likes} Likes` })
+  ])
+]);
+const textTemplate = ({ item }) => h('div', { class: 'text-template' }, [h(WinTextBlock, { Text: item.Title })]);
+const currentTemplate = computed(() => ({
+  Image: imageTemplate,
+  IconText: iconTextTemplate,
+  ImageText: imageTextTemplate,
+  Text: textTemplate
+}[itemTemplate.value]));
+
+const reverseFlowDirection = () => { isReversed.value = !isReversed.value; contentItems.value = [...contentItems.value].reverse(); };
+const onContentItemClick = ({ ClickedItem }) => { clickOutput.value = `Clicked: ${ClickedItem.Title}`; };
+const onContentSelectionChanged = ({ SelectedItems }) => {
+  selectionOutput.value = `Selected: ${SelectedItems?.map(item => item.Title).join(', ') || 'None'}`;
+};
+
+const basicGridViewVue = `<WinGridView ItemsSource="{items}" IsItemClickEnabled SelectionMode="Single" />`;
+const layoutGridViewVue = `<WinGridView ItemsSource="{items}">
+  <!-- Use NumberBox options to change row/column spacing and wrap count. -->
+</WinGridView>`;
+const contentGridViewVue = `<WinGridView
+  ItemsSource="{items}"
+  IsItemClickEnabled="{value}"
+  CanDragItems="{value}"
+  CanReorderItems="{value}"
+  AllowDrop="{value}"
+  SelectionMode="{value}" />`;
 </script>
 
 <style scoped>
-  .grid-sample-item {
-    width: 190px;
-    height: 160px;
-    background: var(--card-bg-secondary);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .grid-img {
-    width: 100%;
-    flex: 1;
-  }
-
-  .layout-icon-text {
-    display: flex;
-    flex-direction: column;
-    padding: 12px;
-    height: 100%;
-    box-sizing: border-box;
-  }
-
-  .layout-icon-text-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .layout-icon-text-title {
-    font-weight: 600;
-    font-size: 14px;
-  }
-
-  .layout-icon-text-desc {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 8px;
-    flex: 1;
-  }
-
-  .layout-imagetext-body {
-    padding: 8px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .layout-text-body {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
-    box-sizing: border-box;
-  }
-
-  .grid-output {
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-
-  .options-section {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .options-label {
-    font-weight: 600;
-    font-size: 14px;
-  }
-
-  .options-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .options-divider {
-    height: 1px;
-    background: var(--stroke-divider);
-    margin: 8px 0;
-  }
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
-}
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.control-example-description { margin: 16px 0 -4px 0; color: var(--text-primary); font-size: 14px; font-weight: 600; line-height: 20px; }
+.sample-stack { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+.basic-grid-view, .overlay-grid-view, .content-grid-view { max-width: 650px; }
+.overlay-grid-view :deep(.win-grid-view-inner) { gap: var(--grid-row-gap) var(--grid-column-gap); max-width: calc((100px + var(--grid-column-gap)) * var(--grid-max-columns)); }
+.image-template { width: 190px; height: 130px; object-fit: cover; display: block; }
+.overlay-template { position: relative; width: 100px; height: 100px; overflow: hidden; }
+.overlay-template img { width: 100%; height: 100%; object-fit: cover; }
+.overlay-caption { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; padding: 2px 5px; background: rgba(255,255,255,.75); color: #000; }
+.icon-text-template { width: 280px; min-height: 160px; padding: 4px 8px; display: grid; grid-template-columns: 18px 1fr; gap: 4px 8px; }
+.icon-text-template img { width: 18px; margin-top: 4px; }
+.icon-text-template .caption-text { grid-column: 1 / -1; }
+.image-text-template { width: 280px; display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+.image-text-template img { height: 100px; width: 150px; object-fit: cover; }
+.text-template { width: 240px; padding-left: 8px; }
+.caption-text { font-size: 12px; color: var(--text-secondary); }
+.output-text { color: var(--text-secondary); }
+.options-stack { display: flex; flex-direction: column; gap: 12px; width: 220px; }
+.radio-stack { display: flex; flex-direction: column; gap: 6px; }
 </style>

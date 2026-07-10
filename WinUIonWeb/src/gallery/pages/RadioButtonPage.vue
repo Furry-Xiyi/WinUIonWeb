@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div style="position: relative;">
+    <div class="page-heading">
       <WinTextBlock class="page-header" Text="RadioButton" />
       <WinTextBlock
         class="page-description"
@@ -24,9 +24,9 @@
     <!-- Example 1: Basic RadioButton group -->
     <WinTextBlock class="control-example-description" Text="RadioButton group" />
     <WinControlExample
+      class="basic-input-example-theme"
       :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
+      :vue="example1Template">
       <template #example>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <WinTextBlock style="font-weight: 600; margin-bottom: 4px;" Text="Options:" />
@@ -61,9 +61,9 @@
     <!-- Example 2: Styled RadioButton groups with visual output -->
     <WinTextBlock class="control-example-description" Text="RadioButton groups with visual feedback" />
     <WinControlExample
+      class="basic-input-example-theme"
       :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
+      :vue="example2Template">
       <template #example>
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -278,18 +278,20 @@ const borderColorValue = computed(() => colorMap[selectedBorder.value]);`;
 </script>
 
 <style scoped>
+.page-heading {
+  position: relative;
+}
+
 .page-header {
   font-size: 28px;
   font-weight: 600;
-  margin: 0 0 8px 0;
+  margin: 0 0 8px;
   color: var(--text-primary);
 }
 
 .page-description {
-  font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
+  margin: 0 72px 16px 0;
 }
 
 .page-header-actions {
@@ -298,7 +300,6 @@ const borderColorValue = computed(() => colorMap[selectedBorder.value]);`;
   right: 0;
   display: flex;
   gap: 4px;
-  align-items: center;
 }
 
 .icon {
@@ -321,7 +322,10 @@ const borderColorValue = computed(() => colorMap[selectedBorder.value]);`;
   border-radius: 4px;
 }
 .control-example-description {
-  margin-top: 16px;
+  margin: 16px 0 -4px 0;
+  color: var(--text-primary);
+  font-size: 14px;
   font-weight: 600;
+  line-height: 20px;
 }
 </style>
