@@ -1,22 +1,22 @@
 <template>
-  <h1 class="page-header">{{ $t('text.listview') }}</h1>
-  <p class="page-description">{{ $t('text.a-listview-displays-data-in-a-vertical-list-with') }}</p>
+  <WinTextBlock class="page-header" :Text="$t('text.listview')" />
+  <WinTextBlock class="page-description" :Text="$t('text.a-listview-displays-data-in-a-vertical-list-with')" TextWrapping="WrapWholeWords" />
 
   <WinTextBlock class="control-example-description" :Text="$t('text.basic-listview-with-selection-modes')" />
 
   <WinControlExample>
     <template #example>
       <div class="listview-demo-scroll">
-        <WinListView :items="contacts" :selectionMode="basicMode" v-model:selectedItems="singleSel">
+        <WinListView :ItemsSource="contacts" :SelectionMode="basicMode" v-model:SelectedItems="singleSel">
           <template #item="{ item }">
-            <span>{{ item.firstName }} {{ item.lastName }} — {{ item.company }}</span>
+            <WinTextBlock :Text="`${item.firstName} ${item.lastName} - ${item.company}`" />
           </template>
         </WinListView>
       </div>
     </template>
     <template #options>
       <div class="option-row">
-        <span class="option-label">Selection Mode:</span>
+        <WinTextBlock class="option-label" Text="Selection Mode:" />
         <WinComboBox :options="selModeOptions" v-model="basicModeIdx" style="width: 150px;" />
       </div>
     </template>
@@ -27,21 +27,21 @@
   <WinControlExample>
     <template #example>
       <div class="listview-demo-scroll">
-        <WinListView :items="groups" isGrouped showHeader :stickyHeader="stickyOn" selectionMode="Single" v-model:selectedItems="groupSel">
+        <WinListView :ItemsSource="groups" isGrouped showHeader :stickyHeader="stickyOn" SelectionMode="Single" v-model:SelectedItems="groupSel">
           <template #header="{ group }">
             {{ group.key }}
           </template>
           <template #item="{ item }">
             <div style="display: flex; flex-direction: column;">
-              <span>{{ item.firstName }} {{ item.lastName }}</span>
-              <span style="font-size: 12px; color: var(--text-secondary);">{{ item.company }}</span>
+              <WinTextBlock :Text="`${item.firstName} ${item.lastName}`" />
+              <WinTextBlock style="font-size: 12px; color: var(--text-secondary);" :Text="item.company" />
             </div>
           </template>
         </WinListView>
       </div>
 
       <div class="option-row">
-        <span class="option-label">Sticky Headers:</span>
+        <WinTextBlock class="option-label" Text="Sticky Headers:" />
         <WinToggleSwitch :modelValue="stickyOn" @update:modelValue="stickyOn = $event" onContent="On" offContent="Off" />
       </div>
     </template>
@@ -52,9 +52,9 @@
   <WinControlExample>
     <template #example>
       <div class="listview-demo-scroll">
-        <WinListView v-model:items="dragList" selectionMode="Single" v-model:selectedItems="dragSel" canDragItems canReorderItems allowDrop>
+        <WinListView v-model:ItemsSource="dragList" SelectionMode="Single" v-model:SelectedItems="dragSel" CanDragItems CanReorderItems allowDrop>
           <template #item="{ item }">
-            <span>{{ item.firstName }} {{ item.lastName }}</span>
+            <WinTextBlock :Text="`${item.firstName} ${item.lastName}`" />
           </template>
         </WinListView>
       </div>
@@ -66,6 +66,7 @@
 import { ref, computed, watch } from 'vue';
 import WinListView from '../../components/WinListView.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
 
@@ -144,5 +145,9 @@ const dragSel = ref([]);
   height: 100%;
   border-radius: 7px;
   padding: 0;
+}
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
 }
 </style>

@@ -144,4 +144,8 @@ const buttonWrappingVue = `<div>
 .vertical-stack { display: flex; flex-direction: column; }
 .stretch-stack { width: 100%; align-items: stretch; }
 .centered-stack { justify-content: center; gap: 8px; }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

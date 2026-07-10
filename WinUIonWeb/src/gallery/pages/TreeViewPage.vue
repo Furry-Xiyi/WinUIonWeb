@@ -1,26 +1,21 @@
 <template>
   <div>
-    <h1 class="page-header">{{ $t('text.treeview') }}</h1>
-    <p class="page-description">
-      {{ $t('text.the-treeview-control-is-a-hierarchical-list-patt') }}
-    </p>
+    <WinTextBlock class="page-header" :Text="$t('text.treeview')" />
+    <WinTextBlock class="page-description" :Text="$t('text.the-treeview-control-is-a-hierarchical-list-patt')" TextWrapping="WrapWholeWords" />
 
     <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-treeview-with-drag-and-drop-enabled')" />
 
     <WinControlExample>
       <template #example>
         <WinTreeView
-          v-model:items="simpleTree"
-          selectionMode="Single"
-          :canDragItems="true"
-          :allowDrop="true"
+          v-model:ItemsSource="simpleTree"
+          SelectionMode="Single"
+          :CanDragItems="true"
+          :AllowDrop="true"
           style="min-height: 280px;">
           <template #item="{ item }">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
-                {{ item.children?.length ? '' : '' }}
-              </span>
-              {{ item.label }}
+              <WinTextBlock :Text="item.label" />
             </div>
           </template>
         </WinTreeView>
@@ -32,15 +27,12 @@
     <WinControlExample>
       <template #example>
         <WinTreeView
-          v-model:items="multiSelectTree"
-          selectionMode="Multiple"
+          v-model:ItemsSource="multiSelectTree"
+          SelectionMode="Multiple"
           style="min-height: 280px;">
           <template #item="{ item }">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
-                {{ item.children?.length ? '' : '' }}
-              </span>
-              {{ item.label }}
+              <WinTextBlock :Text="item.label" />
             </div>
           </template>
         </WinTreeView>
@@ -52,11 +44,11 @@
     <WinControlExample>
       <template #example>
         <WinTreeView
-          v-model:items="dataSource"
-          selectionMode="Single"
+          v-model:ItemsSource="dataSource"
+          SelectionMode="Single"
           style="min-height: 200px;">
           <template #item="{ item }">
-            {{ item.name }}
+            <WinTextBlock :Text="item.name" />
           </template>
         </WinTreeView>
       </template>
@@ -67,8 +59,8 @@
     <WinControlExample>
       <template #example>
         <WinTreeView
-          v-model:items="fileTree"
-          selectionMode="Single"
+          v-model:ItemsSource="fileTree"
+          SelectionMode="Single"
           style="min-height: 200px;">
           <template #item="{ item }">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -78,7 +70,7 @@
               <span v-else style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';">
 
               </span>
-              {{ item.name }}
+              <WinTextBlock :Text="item.name" />
             </div>
           </template>
         </WinTreeView>
@@ -91,6 +83,7 @@
 import { ref } from 'vue';
 import WinTreeView from '../../components/WinTreeView.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 
 import { useI18n } from '../../components/i18n/index';
 
@@ -195,5 +188,9 @@ const fileTree = ref([
   color: var(--text-secondary);
   margin: 0 0 16px 0;
   line-height: 1.5;
+}
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
 }
 </style>

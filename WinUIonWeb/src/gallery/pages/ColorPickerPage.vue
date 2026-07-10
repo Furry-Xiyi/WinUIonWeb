@@ -99,4 +99,8 @@ const colorPickerPropertiesVue = `<WinColorPicker
 .radio-header { font-weight: 600; }
 .preview-section { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
 .preview-rect { height: 100px; border-radius: 4px; border: 1px solid var(--ctrl-border); }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

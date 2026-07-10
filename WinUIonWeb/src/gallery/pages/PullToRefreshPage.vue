@@ -1,15 +1,15 @@
 <template>
-  <h1 class="page-header">{{ $t('text.pulltorefresh') }}</h1>
-  <p class="page-description">{{ $t('text.a-container-that-allows-users-to-refresh-content') }}</p>
+  <WinTextBlock class="page-header" :Text="$t('text.pulltorefresh')" />
+  <WinTextBlock class="page-description" :Text="$t('text.a-container-that-allows-users-to-refresh-content')" TextWrapping="WrapWholeWords" />
 
   <WinTextBlock class="control-example-description" :Text="$t('text.default-style')" />
 
   <WinControlExample>
     <template #example>
-      <WinPullToRefresh @refresh="onRefresh" style="width: 100%; height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
+      <WinPullToRefresh @RefreshRequested="onRefresh" style="width: 100%; height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
         <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-          <p style="margin: 0;">{{ $t('text.pull-down-to-refresh') }}</p>
-          <p style="margin: 0; font-weight: 600; color: var(--accent-base);">Refresh count: {{ count }}</p>
+          <WinTextBlock :Text="$t('text.pull-down-to-refresh')" />
+          <WinTextBlock style="font-weight: 600; color: var(--accent-base);" :Text="`Refresh count: ${count}`" />
         </div>
       </WinPullToRefresh>
     </template>
@@ -19,10 +19,10 @@
 
   <WinControlExample>
     <template #example>
-      <WinPullToRefresh icon="&#xE117" @refresh="onRefreshCustom" style="width: 100%; height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
+      <WinPullToRefresh icon="&#xE117" @RefreshRequested="onRefreshCustom" style="width: 100%; height: 200px; background: var(--card-bg-secondary); border-radius: 4px; overflow: auto;">
         <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-          <p style="margin: 0;">Pull down to sync data</p>
-          <p style="margin: 0; font-weight: 600; color: var(--accent-base);">Sync count: {{ customCount }}</p>
+          <WinTextBlock Text="Pull down to sync data" />
+          <WinTextBlock style="font-weight: 600; color: var(--accent-base);" :Text="`Sync count: ${customCount}`" />
         </div>
       </WinPullToRefresh>
     </template>
@@ -33,16 +33,17 @@
 import { ref } from 'vue';
 import WinPullToRefresh from '../../components/WinPullToRefresh.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 
 const count = ref(0);
 const customCount = ref(0);
 
-const onRefresh = (done) => {
-  setTimeout(() => { count.value++; done(); }, 1500);
+const onRefresh = (event) => {
+  setTimeout(() => { count.value++; event.Complete(); }, 1500);
 };
 
-const onRefreshCustom = (done) => {
-  setTimeout(() => { customCount.value++; done(); }, 1500);
+const onRefreshCustom = (event) => {
+  setTimeout(() => { customCount.value++; event.Complete(); }, 1500);
 };
 </script>
 
@@ -59,5 +60,9 @@ const onRefreshCustom = (done) => {
   color: var(--text-secondary);
   margin: 0 0 24px 0;
   line-height: 20px;
+}
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
 }
 </style>

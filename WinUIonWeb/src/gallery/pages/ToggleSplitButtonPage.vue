@@ -87,4 +87,8 @@ const toggleSplitButtonVue = `<WinToggleSplitButton v-model:IsChecked="myListBut
 .bullet-flyout { display: flex; padding: 4px; }
 .sample-editor { width: 240px; min-height: 96px; padding: 8px; border: 1px solid var(--ctrl-border); border-radius: 4px; background: var(--ctrl-fill-default); color: var(--text-primary); font: 14px "Segoe UI", system-ui, sans-serif; resize: vertical; }
 .sample-editor.as-list { padding-left: 28px; }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

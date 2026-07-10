@@ -5,14 +5,14 @@
        @wheel.prevent="onWheel"
        @touchstart="onTouchStart" @touchend="onTouchEnd">
     <div class="flip-view-track" :style="trackStyle">
-      <div v-for="(item, index) in items" :key="index" class="flip-view-item">
+      <div v-for="(item, index) in items" :key="getItemKey(item, index)" class="flip-view-item">
         <slot name="item" :item="item"></slot>
       </div>
     </div>
-    <button v-show="hover && currentIndex > 0" class="flip-btn prev" @click="prev">
+    <button v-show="hover && selectedIndex > 0" class="flip-btn prev" @click="prev">
       <span class="icon flip-arrow">{{ orientation === 'vertical' ? '\uEDDB' : '\uEDD9' }}</span>
     </button>
-    <button v-show="hover && currentIndex < items.length - 1" class="flip-btn next" @click="next">
+    <button v-show="hover && selectedIndex < items.length - 1" class="flip-btn next" @click="next">
       <span class="icon flip-arrow">{{ orientation === 'vertical' ? '\uEDDC' : '\uEDDA' }}</span>
     </button>
   </div>
@@ -21,41 +21,67 @@
 import { ref, computed } from 'vue';
 
 const props = defineProps({
+  ItemsSource: { type: Array, default: null },
+  SelectedIndex: { type: Number, default: undefined },
+  SelectedItem: { type: [Object, String, Number, Boolean], default: undefined },
+  Orientation: { type: String, default: undefined },
+  IsEnabled: { type: Boolean, default: true },
   items: { type: Array, default: () => [] },
   orientation: { type: String, default: 'horizontal' }
 });
+const emit = defineEmits(['SelectionChanged', 'update:SelectedIndex', 'update:SelectedItem']);
 
 const hover = ref(false);
 const currentIndex = ref(0);
 let touchStart = 0;
 
-function prev() { if (currentIndex.value > 0) currentIndex.value--; }
-function next() { if (currentIndex.value < props.items.length - 1) currentIndex.value++; }
+const items = computed(() => props.ItemsSource ?? props.items);
+const orientation = computed(() => props.Orientation ?? props.orientation);
+const selectedIndex = computed(() => props.SelectedIndex ?? currentIndex.value);
+
+function getItemKey(item, index) { return item?.id ?? item?.title ?? item?.alt ?? index; }
+
+function setSelectedIndex(index) {
+  const bounded = Math.max(0, Math.min(items.value.length - 1, index));
+  if (bounded === selectedIndex.value) return;
+  const oldItem = items.value[selectedIndex.value];
+  const selectedItem = items.value[bounded];
+  currentIndex.value = bounded;
+  emit('update:SelectedIndex', bounded);
+  emit('update:SelectedItem', selectedItem);
+  emit('SelectionChanged', { AddedItems: selectedItem === undefined ? [] : [selectedItem], RemovedItems: oldItem === undefined ? [] : [oldItem], SelectedIndex: bounded, SelectedItem: selectedItem });
+}
+
+function prev() { if (props.IsEnabled && selectedIndex.value > 0) setSelectedIndex(selectedIndex.value - 1); }
+function next() { if (props.IsEnabled && selectedIndex.value < items.value.length - 1) setSelectedIndex(selectedIndex.value + 1); }
 
 function onWheel(e) {
-  const delta = props.orientation === 'vertical' ? e.deltaY : (e.deltaX || e.deltaY);
+  if (!props.IsEnabled) return;
+  const delta = orientation.value === 'vertical' ? e.deltaY : (e.deltaX || e.deltaY);
   if (delta > 0) next();
   else if (delta < 0) prev();
 }
 
 function onTouchStart(e) {
   const touch = e.touches[0];
-  touchStart = props.orientation === 'vertical' ? touch.clientY : touch.clientX;
+  if (!props.IsEnabled) return;
+  touchStart = orientation.value === 'vertical' ? touch.clientY : touch.clientX;
 }
 
 function onTouchEnd(e) {
   const touch = e.changedTouches[0];
-  const end = props.orientation === 'vertical' ? touch.clientY : touch.clientX;
+  if (!props.IsEnabled) return;
+  const end = orientation.value === 'vertical' ? touch.clientY : touch.clientX;
   const diff = touchStart - end;
   if (diff > 30) next();
   else if (diff < -30) prev();
 }
 
 const trackStyle = computed(() => {
-  if (props.orientation === 'vertical') {
-    return { transform: `translateY(-${currentIndex.value * 100}%)` };
+  if (orientation.value === 'vertical') {
+    return { transform: `translateY(-${selectedIndex.value * 100}%)` };
   }
-  return { transform: `translateX(-${currentIndex.value * 100}%)` };
+  return { transform: `translateX(-${selectedIndex.value * 100}%)` };
 });
 </script>
 <style>

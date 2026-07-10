@@ -137,4 +137,8 @@ const checkBoxSelectAllVue = `<div>
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
 .vertical-stack { display: flex; flex-direction: column; gap: 8px; }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

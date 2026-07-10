@@ -1,15 +1,13 @@
 <template>
   <div>
-    <h1 class="page-header">{{ $t('text.flipview') }}</h1>
-    <p class="page-description">
-      {{ $t('text.the-flipview-lets-you-flip-through-a-collection') }}
-    </p>
+    <WinTextBlock class="page-header" :Text="$t('text.flipview')" />
+    <WinTextBlock class="page-description" :Text="$t('text.the-flipview-lets-you-flip-through-a-collection')" TextWrapping="WrapWholeWords" />
 
     <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-flipview-with-items-declared-inline')" />
     <WinControlExample
       exampleHeight="270px">
       <template #example>
-        <WinFlipView :items="imageItems" orientation="horizontal" style="width: 100%; max-width: 400px; height: 270px;">
+        <WinFlipView :ItemsSource="imageItems" Orientation="horizontal" style="width: 100%; max-width: 400px; height: 270px;">
           <template #item="{ item }">
             <img
               :src="item.src"
@@ -24,14 +22,14 @@
     <WinControlExample
       exampleHeight="180px">
       <template #example>
-        <WinFlipView :items="controlItems" orientation="horizontal" style="width: 100%; max-width: 400px; height: 180px;">
+        <WinFlipView :ItemsSource="controlItems" Orientation="horizontal" style="width: 100%; max-width: 400px; height: 180px;">
           <template #item="{ item }">
             <div style="width: 100%; height: 100%; display: flex; flex-direction: column;">
               <div style="flex: 1; display: flex; align-items: center; justify-content: center; background: var(--card-background-secondary);">
-                <div style="font-size: 36px;">{{ item.icon }}</div>
+                <WinTextBlock style="font-size: 36px;" :Text="item.icon" />
               </div>
               <div style="height: 60px; background: rgba(165, 165, 165, 0.2); display: flex; align-items: center; justify-content: center;">
-                <div style="font-size: 20px; font-weight: 600;">{{ item.title }}</div>
+                <WinTextBlock style="font-size: 20px; font-weight: 600;" :Text="item.title" />
               </div>
             </div>
           </template>
@@ -43,7 +41,7 @@
     <WinControlExample
       exampleHeight="270px">
       <template #example>
-        <WinFlipView :items="imageItems" orientation="vertical" style="width: 100%; max-width: 400px; height: 270px;">
+        <WinFlipView :ItemsSource="imageItems" Orientation="vertical" style="width: 100%; max-width: 400px; height: 270px;">
           <template #item="{ item }">
             <img
               :src="item.src"
@@ -108,5 +106,9 @@ const controlItems = [
   color: var(--text-secondary);
   margin: 0 0 16px 0;
   line-height: 1.5;
+}
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
 }
 </style>

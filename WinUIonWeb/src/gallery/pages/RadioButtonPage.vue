@@ -1,10 +1,11 @@
 <template>
   <div>
     <div style="position: relative;">
-      <h1 class="page-header">RadioButton</h1>
-      <p class="page-description">
-        RadioButton controls let the user select one option from a set of mutually exclusive options. In contrast, CheckBox controls allow the user to select multiple options. Use RadioButton controls when there are 2-7 options, and ensure that only one option can be selected at a time.
-      </p>
+      <WinTextBlock class="page-header" Text="RadioButton" />
+      <WinTextBlock
+        class="page-description"
+        Text="RadioButton controls let the user select one option from a set of mutually exclusive options. In contrast, CheckBox controls allow the user to select multiple options. Use RadioButton controls when there are 2-7 options, and ensure that only one option can be selected at a time."
+        TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
         <WinButton
           @click="toggleTheme"
@@ -28,7 +29,7 @@
       :vueCode="example1Vue">
       <template #example>
         <div style="display: flex; flex-direction: column; gap: 8px;">
-          <label style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">Options:</label>
+          <WinTextBlock style="font-weight: 600; margin-bottom: 4px;" Text="Options:" />
           <WinRadioButton
             name="options"
             value="option1"
@@ -53,7 +54,7 @@
         </div>
       </template>
       <template #options>
-        <p class="output-text">{{ option1Output }}</p>
+        <WinTextBlock class="output-text" :Text="option1Output" />
       </template>
     </WinControlExample>
 
@@ -66,7 +67,7 @@
       <template #example>
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">Background</label>
+            <WinTextBlock style="font-weight: 600; margin-bottom: 4px;" Text="Background" />
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 400px;">
               <WinRadioButton
                 name="background"
@@ -93,7 +94,7 @@
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">Border</label>
+            <WinTextBlock style="font-weight: 600; margin-bottom: 4px;" Text="Border" />
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 400px;">
               <WinRadioButton
                 name="border"
@@ -136,6 +137,7 @@
 import { ref, computed, inject, watch } from 'vue';
 import WinRadioButton from '../../components/WinRadioButton.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useFavorites } from '../composables/useFavorites';
@@ -174,7 +176,7 @@ const onOptionChecked = () => {
 
 // 示例1代码
 const example1Template = `<div style="display: flex; flex-direction: column; gap: 8px;">
-  <label>Options:</label>
+  <WinTextBlock Text="Options:" />
   <WinRadioButton
     name="options"
     value="option1"
@@ -224,7 +226,7 @@ const updateBorderDisplay = () => {
 // 示例2代码
 const example2Template = `<div style="display: flex; flex-direction: column; gap: 16px;">
   <div>
-    <label>Background</label>
+    <WinTextBlock Text="Background" />
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
       <WinRadioButton name="bg" value="green" v-model="selectedBackground">
         Green
@@ -239,7 +241,7 @@ const example2Template = `<div style="display: flex; flex-direction: column; gap
   </div>
 
   <div>
-    <label>Border</label>
+    <WinTextBlock Text="Border" />
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
       <WinRadioButton name="border" value="green" v-model="selectedBorder">
         Green
@@ -317,5 +319,9 @@ const borderColorValue = computed(() => colorMap[selectedBorder.value]);`;
   border-width: 10px;
   border-style: solid;
   border-radius: 4px;
+}
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
 }
 </style>

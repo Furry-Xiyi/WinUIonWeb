@@ -43,6 +43,13 @@ import { ref, computed, nextTick } from 'vue';
 import WinCheckBox from './WinCheckBox.vue';
 
 const props = defineProps({
+  ItemsSource: { type: Array, default: null },
+  IsItemClickEnabled: { type: Boolean, default: undefined },
+  CanDragItems: { type: Boolean, default: undefined },
+  CanReorderItems: { type: Boolean, default: undefined },
+  AllowDrop: { type: Boolean, default: undefined },
+  SelectionMode: { type: String, default: undefined },
+  SelectedItems: { type: Array, default: null },
   items: { type: Array, default: () => [] },
   isItemClickEnabled: { type: Boolean, default: true },
   canDragItems: { type: Boolean, default: false },
@@ -52,7 +59,7 @@ const props = defineProps({
   selectedItems: { type: Array, default: () => [] }
 });
 
-const emit = defineEmits(['itemClick', 'selectionChanged', 'update:selectedItems', 'reorder']);
+const emit = defineEmits(['ItemClick', 'SelectionChanged', 'DragItemsStarting', 'DragItemsCompleted', 'itemClick', 'selectionChanged', 'update:SelectedItems', 'update:selectedItems', 'reorder']);
 
 const containerRef = ref(null);
 const innerRef = ref(null);
@@ -66,16 +73,26 @@ let anchorIndex = null;
 let lastSlotUpdateTime = 0;
 let cachedRects = [];
 
+const items = computed(() => props.ItemsSource ?? props.items);
+const isItemClickEnabled = computed(() => props.IsItemClickEnabled ?? props.isItemClickEnabled);
+const canDragItems = computed(() => props.CanDragItems ?? props.canDragItems);
+const canReorderItems = computed(() => props.CanReorderItems ?? props.canReorderItems);
+const allowDrop = computed(() => props.AllowDrop ?? props.allowDrop);
+const selectionMode = computed(() => props.SelectionMode ?? props.selectionMode);
+const selectedItems = computed(() => props.SelectedItems ?? props.selectedItems);
+
 const getItemKey = (item, index) => item.id || item.title || index;
-const isSelected = (item) => props.selectedItems.includes(item);
+const isSelected = (item) => selectedItems.value.includes(item);
 
 const emitSelection = (newSel) => {
+  emit('update:SelectedItems', newSel);
   emit('update:selectedItems', newSel);
+  emit('SelectionChanged', { AddedItems: newSel, RemovedItems: [], SelectedItems: newSel });
   emit('selectionChanged', newSel);
 };
 
 const onCheckboxToggle = (val, item) => {
-  let newSel = [...props.selectedItems];
+  let newSel = [...selectedItems.value];
   const pos = newSel.indexOf(item);
   if (val && pos === -1) newSel.push(item);
   else if (!val && pos > -1) newSel.splice(pos, 1);
@@ -83,27 +100,36 @@ const onCheckboxToggle = (val, item) => {
 };
 
 const onItemClick = (e, item, index) => {
-  if (props.selectionMode === 'None') {
-    if (props.isItemClickEnabled) emit('itemClick', item);
+  if (selectionMode.value === 'None') {
+    if (isItemClickEnabled.value) {
+      emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
+      emit('itemClick', item);
+    }
     return;
   }
-  if (props.selectionMode === 'Single') {
-    if (props.isItemClickEnabled) emit('itemClick', item);
+  if (selectionMode.value === 'Single') {
+    if (isItemClickEnabled.value) {
+      emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
+      emit('itemClick', item);
+    }
     emitSelection([item]);
     anchorIndex = index;
     return;
   }
-  if (props.selectionMode === 'Multiple') {
-    let newSel = [...props.selectedItems];
+  if (selectionMode.value === 'Multiple') {
+    let newSel = [...selectedItems.value];
     const pos = newSel.indexOf(item);
     if (pos > -1) newSel.splice(pos, 1);
     else newSel.push(item);
     emitSelection(newSel);
-    if (props.isItemClickEnabled) emit('itemClick', item);
+    if (isItemClickEnabled.value) {
+      emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
+      emit('itemClick', item);
+    }
     return;
   }
-  if (props.selectionMode === 'Extended') {
-    let newSel = [...props.selectedItems];
+  if (selectionMode.value === 'Extended') {
+    let newSel = [...selectedItems.value];
     if (e.ctrlKey) {
       const pos = newSel.indexOf(item);
       if (pos > -1) newSel.splice(pos, 1);
@@ -112,13 +138,16 @@ const onItemClick = (e, item, index) => {
     } else if (e.shiftKey && anchorIndex !== null) {
       const start = Math.min(anchorIndex, index);
       const end = Math.max(anchorIndex, index);
-      newSel = props.items.slice(start, end + 1);
+      newSel = items.value.slice(start, end + 1);
     } else {
       newSel = [item];
       anchorIndex = index;
     }
     emitSelection(newSel);
-    if (props.isItemClickEnabled) emit('itemClick', item);
+    if (isItemClickEnabled.value) {
+      emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
+      emit('itemClick', item);
+    }
   }
 };
 
@@ -127,7 +156,7 @@ const cacheNonDragRects = () => {
   if (!container) return;
   const els = Array.from(container.querySelectorAll('.win-grid-item:not(.dragging-source)'));
   const nonDragIndices = [];
-  for (let i = 0; i < props.items.length; i++) {
+  for (let i = 0; i < items.value.length; i++) {
     if (!dragIndices.value.includes(i)) nonDragIndices.push(i);
   }
   cachedRects = [];
@@ -177,14 +206,14 @@ const calcInsertSlot = (mouseX, mouseY) => {
     }
   }
 
-  return props.items.length;
+  return items.value.length;
 };
 
 const showPlaceholderBefore = (index) => {
   if (!isDragging.value || insertSlotIndex.value === -1) return false;
   if (dragIndices.value.includes(index)) return false;
 
-  if (insertSlotIndex.value >= props.items.length) return false;
+  if (insertSlotIndex.value >= items.value.length) return false;
 
   let nonDragPos = 0;
   for (let i = 0; i < index; i++) {
@@ -201,34 +230,35 @@ const showPlaceholderBefore = (index) => {
 
 const flatList = computed(() => {
   const list = [];
-  for (let i = 0; i < props.items.length; i++) {
+  for (let i = 0; i < items.value.length; i++) {
     if (showPlaceholderBefore(i)) {
       list.push({ type: 'placeholder', key: 'ph' });
     }
-    list.push({ type: 'item', key: 'item-' + getItemKey(props.items[i], i), item: props.items[i], index: i });
+    list.push({ type: 'item', key: 'item-' + getItemKey(items.value[i], i), item: items.value[i], index: i });
   }
-  if (isDragging.value && insertSlotIndex.value !== -1 && insertSlotIndex.value >= props.items.length) {
+  if (isDragging.value && insertSlotIndex.value !== -1 && insertSlotIndex.value >= items.value.length) {
     list.push({ type: 'placeholder', key: 'ph' });
   }
   return list;
 });
 
 const onDragStart = (e, index) => {
-  if (!props.canDragItems) return;
+  if (!canDragItems.value) return;
   const el = e.currentTarget;
   if (el) {
     dragItemWidth.value = el.offsetWidth;
     dragItemHeight.value = el.offsetHeight;
   }
-  if (isSelected(props.items[index]) && props.selectedItems.length > 1) {
-    dragIndices.value = props.items
-      .map((it, i) => props.selectedItems.includes(it) ? i : -1)
+  if (isSelected(items.value[index]) && selectedItems.value.length > 1) {
+    dragIndices.value = items.value
+      .map((it, i) => selectedItems.value.includes(it) ? i : -1)
       .filter(i => i !== -1);
   } else {
     dragIndices.value = [index];
   }
   dragOriginIndex.value = index;
   insertSlotIndex.value = -1;
+  emit('DragItemsStarting', { Items: dragIndices.value.map(i => items.value[i]) });
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', '');
 
@@ -241,7 +271,7 @@ const onDragStart = (e, index) => {
 };
 
 const onContainerDragOver = (e) => {
-  if (!props.canReorderItems || !props.allowDrop) return;
+  if (!canReorderItems.value || !allowDrop.value) return;
   e.dataTransfer.dropEffect = 'move';
 
   const now = Date.now();
@@ -275,7 +305,7 @@ const onContainerDragLeave = (e) => {
 };
 
 const onContainerDrop = (e) => {
-  if (!props.canReorderItems || !isDragging.value) return;
+  if (!canReorderItems.value || !isDragging.value) return;
   e.preventDefault();
   performReorder();
 };
@@ -286,14 +316,14 @@ const performReorder = () => {
     return;
   }
 
-  const draggedItems = dragIndices.value.map(i => props.items[i]);
-  const remaining = props.items.filter((_, i) => !dragIndices.value.includes(i));
+  const draggedItems = dragIndices.value.map(i => items.value[i]);
+  const remaining = items.value.filter((_, i) => !dragIndices.value.includes(i));
 
   let insertAt;
-  if (insertSlotIndex.value >= props.items.length) {
+  if (insertSlotIndex.value >= items.value.length) {
     insertAt = remaining.length;
   } else {
-    const targetItem = props.items[insertSlotIndex.value];
+    const targetItem = items.value[insertSlotIndex.value];
     insertAt = remaining.indexOf(targetItem);
     if (insertAt === -1) insertAt = remaining.length;
   }
@@ -302,6 +332,7 @@ const performReorder = () => {
   newItems.splice(insertAt, 0, ...draggedItems);
 
   resetDrag();
+  emit('DragItemsCompleted', { Items: draggedItems, DropResult: 'Move' });
   emit('reorder', newItems);
 };
 

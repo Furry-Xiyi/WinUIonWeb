@@ -68,4 +68,8 @@ const toggleSwitchCustomVue = `<div>
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
 .horizontal-stack { display: flex; align-items: center; gap: 0; }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

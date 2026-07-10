@@ -33,10 +33,10 @@
       </div>
 
       <div v-if="node.expanded && hasChildren(node)" class="tree-children">
-        <WinTreeView v-model:items="node.children"
-                     :selectionMode="selectionMode"
-                     :canDragItems="canDragItems"
-                     :allowDrop="allowDrop"
+        <WinTreeView v-model:ItemsSource="node.children"
+                     :SelectionMode="selectionMode"
+                     :CanDragItems="canDragItems"
+                     :AllowDrop="allowDrop"
                      :depth="depth + 1"
                      :rootItems="rootRef">
           <template #item="{ item }">
@@ -53,6 +53,12 @@ import { computed, ref, defineProps, defineEmits } from 'vue';
 import WinCheckBox from './WinCheckBox.vue';
 
 const props = defineProps({
+  ItemsSource: { type: Array, default: null },
+  SelectionMode: { type: String, default: undefined },
+  CanDragItems: { type: Boolean, default: undefined },
+  AllowDrop: { type: Boolean, default: undefined },
+  SelectedItem: { type: Object, default: null },
+  SelectedItems: { type: Array, default: null },
   items: { type: Array, default: () => [] },
   selectionMode: { type: String, default: 'Single' },
   canDragItems: { type: Boolean, default: false },
@@ -61,8 +67,12 @@ const props = defineProps({
   rootItems: { type: Array, default: null }
 });
 
-const emit = defineEmits(['update:items']);
-const rootRef = computed(() => props.rootItems || props.items);
+const emit = defineEmits(['update:ItemsSource', 'update:SelectedItem', 'update:SelectedItems', 'SelectionChanged', 'ItemInvoked', 'Expanding', 'Collapsed', 'update:items']);
+const items = computed(() => props.ItemsSource ?? props.items);
+const selectionMode = computed(() => props.SelectionMode ?? props.selectionMode);
+const canDragItems = computed(() => props.CanDragItems ?? props.canDragItems);
+const allowDrop = computed(() => props.AllowDrop ?? props.allowDrop);
+const rootRef = computed(() => props.rootItems || items.value);
 const hoverState = ref({ idx: -1, pos: null });
 
 /* --- 复选与多级联动逻辑 --- */
@@ -93,12 +103,13 @@ const setAll = (n, state) => {
 const onCheck = (node, val) => {
   if (getCheckValue(node) === null) setAll(node, false);
   else setAll(node, val);
-  emit('update:items', [...props.items]);
+  emit('update:ItemsSource', [...items.value]);
+  emit('update:items', [...items.value]);
 };
 
 /* --- 选中及点击逻辑 --- */
 const isNodeSelected = (node) => {
-  if (props.selectionMode === 'Multiple') return getCheckValue(node) === true;
+  if (selectionMode.value === 'Multiple') return getCheckValue(node) === true;
   return node.selected;
 };
 
@@ -110,30 +121,36 @@ const clearSelection = (itemsArray) => {
 };
 
 const toggleSelect = (node) => {
-  if (props.selectionMode === 'Single') {
+  if (selectionMode.value === 'Single') {
     clearSelection(rootRef.value);
     node.selected = true;
-  } else if (props.selectionMode === 'Multiple') {
+    emit('update:SelectedItem', node);
+  } else if (selectionMode.value === 'Multiple') {
     const current = getCheckValue(node);
     onCheck(node, current !== true);
   }
-  emit('update:items', [...props.items]);
+  emit('ItemInvoked', { InvokedItem: node });
+  emit('SelectionChanged', { SelectedItem: node, SelectedItems: rootRef.value.filter?.(item => item.selected) ?? [] });
+  emit('update:ItemsSource', [...items.value]);
+  emit('update:items', [...items.value]);
 };
 
 const toggleExpand = (node) => {
   node.expanded = !node.expanded;
-  emit('update:items', [...props.items]);
+  emit(node.expanded ? 'Expanding' : 'Collapsed', { Node: node, Item: node });
+  emit('update:ItemsSource', [...items.value]);
+  emit('update:items', [...items.value]);
 };
 
 /* --- 智能吸附与拖拽逻辑 --- */
 const onDragStart = (e, node, parentArr, idx) => {
-  if (!props.canDragItems) return;
+  if (!canDragItems.value) return;
   window.__treeDrag = { node, parentArr, idx };
   e.dataTransfer.effectAllowed = 'move';
 };
 
 const onDragOverNode = (e, idx) => {
-  if (!props.allowDrop) return;
+  if (!allowDrop.value) return;
   e.preventDefault();
   e.stopPropagation();
   e.dataTransfer.dropEffect = 'move';
@@ -170,7 +187,7 @@ const isDescendant = (parent, child) => {
 };
 
 const onDropNode = (e, targetNode, idx) => {
-  if (!props.allowDrop) return;
+  if (!allowDrop.value) return;
   e.stopPropagation();
   const pos = hoverState.value.pos || 'inside';
   hoverState.value = { idx: -1, pos: null };
@@ -179,13 +196,13 @@ const onDropNode = (e, targetNode, idx) => {
   if (!drag || drag.node === targetNode || isDescendant(drag.node, targetNode)) return;
 
   removeFromSource();
-  let newIdx = props.items.indexOf(targetNode);
+  let newIdx = items.value.indexOf(targetNode);
   if (newIdx === -1) newIdx = idx;
 
   if (pos === 'top') {
-    props.items.splice(newIdx, 0, drag.node);
+    items.value.splice(newIdx, 0, drag.node);
   } else if (pos === 'bottom') {
-    props.items.splice(newIdx + 1, 0, drag.node);
+    items.value.splice(newIdx + 1, 0, drag.node);
   } else {
     if (!targetNode.children) targetNode.children = [];
     targetNode.children.push(drag.node);
@@ -193,24 +210,26 @@ const onDropNode = (e, targetNode, idx) => {
   }
 
   window.__treeDrag = null;
-  emit('update:items', [...props.items]);
+  emit('update:ItemsSource', [...items.value]);
+  emit('update:items', [...items.value]);
 };
 
 const onDragOverRoot = (e) => {
-  if (!props.allowDrop) return;
+  if (!allowDrop.value) return;
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
 };
 
 const onDropRoot = (e) => {
-  if (!props.allowDrop) return;
+  if (!allowDrop.value) return;
   e.stopPropagation();
   const drag = window.__treeDrag;
   if (!drag) return;
   removeFromSource();
-  props.items.push(drag.node);
+  items.value.push(drag.node);
   window.__treeDrag = null;
-  emit('update:items', [...props.items]);
+  emit('update:ItemsSource', [...items.value]);
+  emit('update:items', [...items.value]);
 };
 </script>
 

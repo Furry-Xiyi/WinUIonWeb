@@ -146,4 +146,8 @@ const sliderVerticalVue = `<WinSlider
 .slider-options { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
 .options-grid { display: grid; grid-template-columns: auto minmax(80px, auto); gap: 8px 10px; align-items: center; }
 .options-grid :deep(.win-number-box) { width: 92px; }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

@@ -50,9 +50,17 @@
 </template>
 
 <script setup>
-import { ref, toRaw, nextTick, watch } from 'vue';
+import { computed, ref, toRaw, nextTick, watch } from 'vue';
 
 const props = defineProps({
+  ItemsSource: { type: Array, default: null },
+  IsGrouped: { type: Boolean, default: undefined },
+  IsItemClickEnabled: { type: Boolean, default: undefined },
+  CanDragItems: { type: Boolean, default: undefined },
+  CanReorderItems: { type: Boolean, default: undefined },
+  AllowDrop: { type: Boolean, default: undefined },
+  SelectionMode: { type: String, default: undefined },
+  SelectedItems: { type: Array, default: null },
   items: { type: Array, default: () => [] },
   isGrouped: { type: Boolean, default: false },
   showHeader: { type: Boolean, default: false },
@@ -65,11 +73,20 @@ const props = defineProps({
   selectedItems: { type: Array, default: () => [] }
 });
 
-const emit = defineEmits(['itemClick', 'selectionChanged', 'update:selectedItems', 'update:items']);
+const emit = defineEmits(['ItemClick', 'SelectionChanged', 'DragItemsStarting', 'DragItemsCompleted', 'itemClick', 'selectionChanged', 'update:SelectedItems', 'update:selectedItems', 'update:ItemsSource', 'update:items']);
 
-const internalItems = ref([...props.items]);
+const items = computed(() => props.ItemsSource ?? props.items);
+const isGrouped = computed(() => props.IsGrouped ?? props.isGrouped);
+const isItemClickEnabled = computed(() => props.IsItemClickEnabled ?? props.isItemClickEnabled);
+const canDragItems = computed(() => props.CanDragItems ?? props.canDragItems);
+const canReorderItems = computed(() => props.CanReorderItems ?? props.canReorderItems);
+const allowDrop = computed(() => props.AllowDrop ?? props.allowDrop);
+const selectionMode = computed(() => props.SelectionMode ?? props.selectionMode);
+const selectedItems = computed(() => props.SelectedItems ?? props.selectedItems);
 
-watch(() => props.items, (val) => {
+const internalItems = ref([...items.value]);
+
+watch(items, (val) => {
   if (!isDragging.value) internalItems.value = [...val];
 }, { deep: true });
 
@@ -86,29 +103,34 @@ let cachedMidpoints = [];
 
 const isSelected = (item) => {
   const rawTarget = toRaw(item);
-  return props.selectedItems.some(i => toRaw(i) === rawTarget);
+  return selectedItems.value.some(i => toRaw(i) === rawTarget);
 };
 
 const emitSelection = (newSel) => {
+  emit('update:SelectedItems', newSel);
   emit('update:selectedItems', newSel);
+  emit('SelectionChanged', { AddedItems: newSel, RemovedItems: [], SelectedItems: newSel });
   emit('selectionChanged', newSel);
 };
 
 const onItemClick = (event, item) => {
   if (isDragging.value) return;
   const rawTarget = toRaw(item);
-  if (props.isItemClickEnabled) emit('itemClick', item);
-  if (props.selectionMode === 'None') return;
+  if (isItemClickEnabled.value) {
+    emit('ItemClick', { ClickedItem: item, OriginalSource: event.target });
+    emit('itemClick', item);
+  }
+  if (selectionMode.value === 'None') return;
 
-  let newSel = [...props.selectedItems];
-  if (props.selectionMode === 'Single') {
+  let newSel = [...selectedItems.value];
+  if (selectionMode.value === 'Single') {
     newSel = [rawTarget];
     anchorIndex = internalItems.value.indexOf(item);
-  } else if (props.selectionMode === 'Multiple') {
+  } else if (selectionMode.value === 'Multiple') {
     const idx = newSel.findIndex(i => toRaw(i) === rawTarget);
     if (idx > -1) newSel.splice(idx, 1);
     else newSel.push(rawTarget);
-  } else if (props.selectionMode === 'Extended') {
+  } else if (selectionMode.value === 'Extended') {
     if (event.ctrlKey) {
       const idx = newSel.findIndex(i => toRaw(i) === rawTarget);
       if (idx > -1) newSel.splice(idx, 1);
@@ -143,8 +165,8 @@ const getItemStyle = (idx) => {
   }
 
   let insertNonDragPos;
-  if (insertBeforeIndex.value >= props.items.length) {
-    insertNonDragPos = props.items.length - dragIndices.value.length;
+  if (insertBeforeIndex.value >= items.value.length) {
+    insertNonDragPos = items.value.length - dragIndices.value.length;
   } else {
     insertNonDragPos = 0;
     for (let i = 0; i < insertBeforeIndex.value; i++) {
@@ -170,19 +192,20 @@ const cacheMidpoints = () => {
 };
 
 const onDragStart = (e, index) => {
-  if (!props.canDragItems || props.isGrouped) return;
+  if (!canDragItems.value || isGrouped.value) return;
 
   const el = e.currentTarget;
   if (el) dragItemHeight = el.offsetHeight;
 
-  if (isSelected(props.items[index]) && props.selectedItems.length > 1) {
-    dragIndices.value = props.items
-      .map((it, i) => props.selectedItems.some(s => toRaw(s) === toRaw(it)) ? i : -1)
+  if (isSelected(items.value[index]) && selectedItems.value.length > 1) {
+    dragIndices.value = items.value
+      .map((it, i) => selectedItems.value.some(s => toRaw(s) === toRaw(it)) ? i : -1)
       .filter(i => i !== -1);
   } else {
     dragIndices.value = [index];
   }
 
+  emit('DragItemsStarting', { Items: dragIndices.value.map(i => internalItems.value[i]) });
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', '');
 
@@ -193,13 +216,13 @@ const onDragStart = (e, index) => {
 };
 
 const onDragStartGrouped = (e, target) => {
-  if (!props.canDragItems) return;
+  if (!canDragItems.value) return;
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', '');
 };
 
 const onViewportDragOver = (e) => {
-  if (!props.canReorderItems || !props.allowDrop || !isDragging.value || props.isGrouped) return;
+  if (!canReorderItems.value || !allowDrop.value || !isDragging.value || isGrouped.value) return;
   e.dataTransfer.dropEffect = 'move';
 
   const now = Date.now();
@@ -211,7 +234,7 @@ const onViewportDragOver = (e) => {
   const nonDragMidpoints = cachedMidpoints.filter(m => !dragIndices.value.includes(m.index));
   if (nonDragMidpoints.length === 0) return;
 
-  let slot = props.items.length;
+  let slot = items.value.length;
   for (let k = 0; k < nonDragMidpoints.length; k++) {
     if (mouseY < nonDragMidpoints[k].midY) {
       slot = nonDragMidpoints[k].index;
@@ -242,7 +265,7 @@ const onViewportDragLeave = (e) => {
 };
 
 const onViewportDrop = () => {
-  if (!props.canReorderItems || !isDragging.value || insertBeforeIndex.value === -1) {
+  if (!canReorderItems.value || !isDragging.value || insertBeforeIndex.value === -1) {
     resetDrag();
     return;
   }
@@ -263,7 +286,9 @@ const onViewportDrop = () => {
   const newItems = [...remaining];
   newItems.splice(actualInsert, 0, ...draggedItems);
   internalItems.value = newItems;
+  emit('update:ItemsSource', newItems);
   emit('update:items', newItems);
+  emit('DragItemsCompleted', { Items: draggedItems, DropResult: 'Move' });
   resetDrag();
 };
 

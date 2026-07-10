@@ -136,4 +136,8 @@ const splitButtonTextVue = `<WinSplitButton MinWidth="0" MinHeight="0" Padding="
 .sample-editor :deep(.win-textbox-textarea) {
   min-height: 96px;
 }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

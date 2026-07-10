@@ -71,4 +71,8 @@ const hyperlinkButtonClickVue = `<WinHyperlinkButton Content="Go to ToggleButton
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

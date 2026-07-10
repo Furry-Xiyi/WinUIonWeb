@@ -123,4 +123,8 @@ const toggleButtonVue = `<WinToggleButton
   color: var(--text-primary);
   margin: 0;
 }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

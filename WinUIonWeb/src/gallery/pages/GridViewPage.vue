@@ -1,12 +1,12 @@
 <template>
-  <h1 class="page-header">{{ $t('text.gridview') }}</h1>
-  <p class="page-description">{{ $t('text.the-gridview-lets-people-browse-and-select-from') }}</p>
+  <WinTextBlock class="page-header" :Text="$t('text.gridview')" />
+  <WinTextBlock class="page-description" :Text="$t('text.the-gridview-lets-people-browse-and-select-from')" TextWrapping="WrapWholeWords" />
 
   <WinTextBlock class="control-example-description" :Text="$t('text.single-selection')" />
 
   <WinControlExample>
     <template #example>
-      <WinGridView :items="items" selectionMode="Single" isItemClickEnabled v-model:selectedItems="singleSel">
+      <WinGridView :ItemsSource="items" SelectionMode="Single" IsItemClickEnabled v-model:SelectedItems="singleSel">
         <template #item="{ item }">
           <div class="grid-sample-item">
             <div class="grid-img" :style="{ background: item.color }"></div>
@@ -15,9 +15,7 @@
       </WinGridView>
     </template>
     <template #options>
-      <div class="grid-output">
-        Selected: {{ singleSel.length > 0 ? singleSel[0].title : 'None' }}
-      </div>
+      <WinTextBlock class="grid-output" :Text="`Selected: ${singleSel.length > 0 ? singleSel[0].title : 'None'}`" />
     </template>
   </WinControlExample>
 
@@ -25,7 +23,7 @@
 
   <WinControlExample>
     <template #example>
-      <WinGridView :items="multiItems" selectionMode="Multiple" v-model:selectedItems="multiSel">
+      <WinGridView :ItemsSource="multiItems" SelectionMode="Multiple" v-model:SelectedItems="multiSel">
         <template #item="{ item }">
           <div class="grid-sample-item">
             <div class="grid-img" :style="{ background: item.color }"></div>
@@ -35,9 +33,7 @@
 
     </template>
     <template #options>
-      <div class="grid-output">
-        Selected: {{ multiSel.length > 0 ? multiSel.map(s => s.title).join(', ') : 'None' }}
-      </div>
+      <WinTextBlock class="grid-output" :Text="`Selected: ${multiSel.length > 0 ? multiSel.map(s => s.title).join(', ') : 'None'}`" />
     </template>
   </WinControlExample>
 
@@ -45,13 +41,13 @@
 
   <WinControlExample>
     <template #example>
-      <WinGridView :items="customItems"
-                   :selectionMode="selMode"
-                   :isItemClickEnabled="itemClick"
-                   :canDragItems="canDrag"
-                   :canReorderItems="canReorder"
-                   :allowDrop="allowDropVal"
-                   v-model:selectedItems="customSel"
+      <WinGridView :ItemsSource="customItems"
+                   :SelectionMode="selMode"
+                   :IsItemClickEnabled="itemClick"
+                   :CanDragItems="canDrag"
+                   :CanReorderItems="canReorder"
+                   :AllowDrop="allowDropVal"
+                   v-model:SelectedItems="customSel"
                    @reorder="v => customItems = v">
 
         <template #item="{ item }">
@@ -64,24 +60,24 @@
               <div class="layout-icon-text">
                 <div class="layout-icon-text-header">
                   <span class="icon" style="font-size: 16px;">{{ item.icon }}</span>
-                  <span class="layout-icon-text-title">{{ item.title }}</span>
+                  <WinTextBlock class="layout-icon-text-title" :Text="item.title" />
                 </div>
-                <div class="layout-icon-text-desc">{{ item.desc }}</div>
+                <WinTextBlock class="layout-icon-text-desc" :Text="item.desc" />
               </div>
             </template>
 
             <template v-else-if="layout === 'Image/Text'">
               <div class="grid-img" :style="{ background: item.color, height: '100px', flex: 'none' }"></div>
               <div class="layout-imagetext-body">
-                <div style="font-weight: 600;">{{ item.title }}</div>
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">{{ item.desc }}</div>
+                <WinTextBlock style="font-weight: 600;" :Text="item.title" />
+                <WinTextBlock style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" :Text="item.desc" />
               </div>
             </template>
 
             <template v-else-if="layout === 'Text'">
               <div class="layout-text-body">
-                <div style="font-weight: 600;">{{ item.title }}</div>
-                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">{{ item.desc }}</div>
+                <WinTextBlock style="font-weight: 600;" :Text="item.title" />
+                <WinTextBlock style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;" :Text="item.desc" />
               </div>
             </template>
           </div>
@@ -89,7 +85,7 @@
       </WinGridView>
 
       <div class="options-section">
-        <div class="options-label">ItemTemplate</div>
+        <WinTextBlock class="options-label" Text="ItemTemplate" />
         <div class="options-group">
           <WinRadioButton name="layout" value="Image" v-model="layout">Image</WinRadioButton>
           <WinRadioButton name="layout" value="Icon/Text" v-model="layout">Icon/Text</WinRadioButton>
@@ -101,7 +97,7 @@
       <div class="options-divider"></div>
 
       <div class="options-section">
-        <div class="options-label">Behaviors</div>
+        <WinTextBlock class="options-label" Text="Behaviors" />
         <div class="options-group">
           <WinCheckBox v-model="itemClick">IsItemClickEnabled</WinCheckBox>
           <WinCheckBox v-model="canDrag">CanDragItems</WinCheckBox>
@@ -113,7 +109,7 @@
       <div class="options-divider"></div>
 
       <div class="options-section">
-        <div class="options-label">SelectionMode</div>
+        <WinTextBlock class="options-label" Text="SelectionMode" />
         <WinComboBox :options="modeOptions" v-model="selModeIdx" style="width: 100%;" />
       </div>
     </template>
@@ -124,6 +120,7 @@
 import { ref, computed } from 'vue';
 import WinGridView from '../../components/WinGridView.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinRadioButton from '../../components/WinRadioButton.vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
@@ -247,4 +244,8 @@ const selMode = computed(() => modeOptions[selModeIdx.value].value);
     background: var(--stroke-divider);
     margin: 8px 0;
   }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

@@ -110,4 +110,8 @@ const comboBoxEditableVue = `<WinComboBox Width="200" Header="Font Size" IsEdita
 .vertical-stack { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .color-output { width: 100px; height: 30px; border: 1px solid var(--ctrl-border); }
 .output-text { margin-top: 4px; }
+.control-example-description {
+  margin-top: 16px;
+  font-weight: 600;
+}
 </style>

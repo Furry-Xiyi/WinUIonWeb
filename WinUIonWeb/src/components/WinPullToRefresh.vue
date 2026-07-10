@@ -16,6 +16,9 @@
 import { ref, computed } from 'vue';
 
 const props = defineProps({
+  RefreshVisualizer: { type: String, default: '' },
+  PullDirection: { type: String, default: 'TopToBottom' },
+  IsEnabled: { type: Boolean, default: true },
   icon: {
     type: String,
     // 使用 \u 前缀确保 JS 正确识别 Unicode 字符
@@ -23,7 +26,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['refresh']);
+const emit = defineEmits(['RefreshRequested', 'refresh']);
 const startY = ref(0);
 const currentY = ref(0);
 const isPulling = ref(false);
@@ -76,6 +79,7 @@ const iconStyle = computed(() => {
 });
 
 const onTouchStart = (e) => {
+  if (!props.IsEnabled) return;
   if (e.currentTarget.scrollTop === 0 && !isRefreshing.value) {
     startY.value = e.touches[0].clientY;
     currentY.value = startY.value;
@@ -84,6 +88,7 @@ const onTouchStart = (e) => {
 };
 
 const onTouchMove = (e) => {
+  if (!props.IsEnabled) return;
   if (isPulling.value) {
     currentY.value = e.touches[0].clientY;
     if (currentY.value > startY.value) e.preventDefault();
@@ -91,15 +96,18 @@ const onTouchMove = (e) => {
 };
 
 const onTouchEnd = () => {
+  if (!props.IsEnabled) return;
   if (isPulling.value) {
     isPulling.value = false;
     if (isReady.value) {
       isRefreshing.value = true;
-      emit('refresh', () => {
+      const complete = () => {
         isRefreshing.value = false;
         startY.value = 0;
         currentY.value = 0;
-      });
+      };
+      emit('RefreshRequested', { GetDeferral: () => ({ Complete: complete }), Complete: complete });
+      emit('refresh', complete);
     } else {
       startY.value = 0;
       currentY.value = 0;
