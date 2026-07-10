@@ -1,51 +1,53 @@
 <template>
-  <div class="page-container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1 class="page-title">Capture Element / Camera Preview</h1>
-      <div class="page-header-actions">
-        <WinButton @click="toggleTheme">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div class="page-header page-heading">
+          <h1 class="page-title">Capture Element / Camera Preview</h1>
+          <div class="page-header-actions">
+            <WinButton @click="toggleTheme">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Page Description -->
+            <div class="page-description">
+              <p>A MediaCapture preview displayed via a MediaPlayerElement.</p>
+            </div>
+
+            <!-- Example: Camera Preview with Capture -->
+            <WinControlExample headerText="Media capture preview displayed via a CaptureElement">
+              <template #example>
+                <WinCaptureElementPreview
+                  ref="captureRef"
+                  :mirrored="isMirrored"
+                  :deviceName="deviceName"
+                  @ready="onCameraReady"
+                />
+              </template>
+              <template #options>
+                <WinToggleSwitch
+                  v-model="isMirrored"
+                  header="Mirror preview"
+                  onContent="On"
+                  offContent="Off"
+                />
+                <WinButton
+                  :isEnabled="cameraReady"
+                  @click="capturePhoto"
+                  style="margin-top: 12px;"
+                >
+                  Capture Photo
+                </WinButton>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Page Description -->
-    <div class="page-description">
-      <p>A MediaCapture preview displayed via a MediaPlayerElement.</p>
-    </div>
-
-    <!-- Example: Camera Preview with Capture -->
-    <WinControlExample headerText="Media capture preview displayed via a CaptureElement">
-      <template #example>
-        <WinCaptureElementPreview
-          ref="captureRef"
-          :mirrored="isMirrored"
-          :deviceName="deviceName"
-          @ready="onCameraReady"
-        />
-      </template>
-      <template #options>
-        <WinToggleSwitch
-          v-model="isMirrored"
-          header="Mirror preview"
-          onContent="On"
-          offContent="Off"
-        />
-        <WinButton
-          :isEnabled="cameraReady"
-          @click="capturePhoto"
-          style="margin-top: 12px;"
-        >
-          Capture Photo
-        </WinButton>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -58,6 +60,7 @@ import WinControlExample from '../../components/WinControlExample.vue';
 import WinCaptureElementPreview from '../../components/WinCaptureElementPreview.vue';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 // Theme and Favorite
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'captureelementcamerapreview');

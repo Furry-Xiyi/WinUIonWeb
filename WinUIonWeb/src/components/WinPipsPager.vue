@@ -1,18 +1,18 @@
 <template>
   <div class="win-pips-pager" :class="[
-    `orientation-${orientation.toLowerCase()}`,
-    { 'is-disabled': disabled }
+    `orientation-${effectiveOrientation.toLowerCase()}`,
+    { 'is-disabled': effectiveDisabled }
   ]">
     <!-- Previous Button -->
     <button
       v-if="shouldShowPreviousButton"
       class="nav-button previous-button"
-      :class="{ 'pointer-over-only': previousButtonVisibility === 'VisibleOnPointerOver' }"
-      :disabled="disabled || selectedPageIndex <= 0"
+      :class="{ 'pointer-over-only': effectivePreviousButtonVisibility === 'VisibleOnPointerOver' }"
+      :disabled="effectiveDisabled || effectiveSelectedPageIndex <= 0"
       @click="previousPage"
       :aria-label="previousButtonLabel"
     >
-      <span class="icon" v-html="orientation === 'Horizontal' ? '&#xE76B;' : '&#xE70E;'"></span>
+      <span class="icon" v-html="effectiveOrientation === 'Horizontal' ? '&#xE76B;' : '&#xE70E;'"></span>
     </button>
 
     <!-- Pips Container -->
@@ -23,13 +23,13 @@
           :key="page.index"
           class="pip"
           :class="{
-            'is-selected': page.index === selectedPageIndex,
+            'is-selected': page.index === effectiveSelectedPageIndex,
             'is-compressed': page.isCompressed
           }"
-          :disabled="disabled"
+          :disabled="effectiveDisabled"
           @click="selectPage(page.index)"
           :aria-label="`Page ${page.index + 1}`"
-          :aria-current="page.index === selectedPageIndex ? 'page' : undefined"
+          :aria-current="page.index === effectiveSelectedPageIndex ? 'page' : undefined"
         >
           <span class="pip-dot"></span>
         </button>
@@ -40,12 +40,12 @@
     <button
       v-if="shouldShowNextButton"
       class="nav-button next-button"
-      :class="{ 'pointer-over-only': nextButtonVisibility === 'VisibleOnPointerOver' }"
-      :disabled="disabled || selectedPageIndex >= numberOfPages - 1"
+      :class="{ 'pointer-over-only': effectiveNextButtonVisibility === 'VisibleOnPointerOver' }"
+      :disabled="effectiveDisabled || effectiveSelectedPageIndex >= effectiveNumberOfPages - 1"
       @click="nextPage"
       :aria-label="nextButtonLabel"
     >
-      <span class="icon" v-html="orientation === 'Horizontal' ? '&#xE76C;' : '&#xE70D;'"></span>
+      <span class="icon" v-html="effectiveOrientation === 'Horizontal' ? '&#xE76C;' : '&#xE70D;'"></span>
     </button>
   </div>
 </template>
@@ -60,10 +60,19 @@ const props = defineProps({
     default: 0,
     validator: (value) => value >= 0
   },
+  NumberOfPages: {
+    type: Number,
+    default: undefined,
+    validator: (value) => value === undefined || value >= 0
+  },
   // 官方属性：SelectedPageIndex（双向绑定）
   selectedPageIndex: {
     type: Number,
     default: 0
+  },
+  SelectedPageIndex: {
+    type: Number,
+    default: undefined
   },
   // 官方属性：Orientation
   orientation: {
@@ -71,11 +80,21 @@ const props = defineProps({
     default: 'Horizontal',
     validator: (value) => ['Horizontal', 'Vertical'].includes(value)
   },
+  Orientation: {
+    type: String,
+    default: '',
+    validator: (value) => !value || ['Horizontal', 'Vertical'].includes(value)
+  },
   // 官方属性：PreviousButtonVisibility
   previousButtonVisibility: {
     type: String,
     default: 'Visible',
     validator: (value) => ['Visible', 'VisibleOnPointerOver', 'Collapsed'].includes(value)
+  },
+  PreviousButtonVisibility: {
+    type: String,
+    default: '',
+    validator: (value) => !value || ['Visible', 'VisibleOnPointerOver', 'Collapsed'].includes(value)
   },
   // 官方属性：NextButtonVisibility
   nextButtonVisibility: {
@@ -83,10 +102,19 @@ const props = defineProps({
     default: 'Visible',
     validator: (value) => ['Visible', 'VisibleOnPointerOver', 'Collapsed'].includes(value)
   },
+  NextButtonVisibility: {
+    type: String,
+    default: '',
+    validator: (value) => !value || ['Visible', 'VisibleOnPointerOver', 'Collapsed'].includes(value)
+  },
   // 附加属性
   disabled: {
     type: Boolean,
     default: false
+  },
+  IsEnabled: {
+    type: Boolean,
+    default: true
   },
   previousButtonLabel: {
     type: String,
@@ -104,24 +132,30 @@ const props = defineProps({
 });
 
 // 官方事件：SelectedIndexChanged
-const emit = defineEmits(['update:selectedPageIndex', 'selectedIndexChanged']);
+const emit = defineEmits(['update:selectedPageIndex', 'update:SelectedPageIndex', 'selectedIndexChanged', 'SelectedIndexChanged']);
 
 const pipsContainerRef = ref(null);
+const effectiveNumberOfPages = computed(() => props.NumberOfPages ?? props.numberOfPages);
+const effectiveSelectedPageIndex = computed(() => props.SelectedPageIndex ?? props.selectedPageIndex);
+const effectiveOrientation = computed(() => props.Orientation || props.orientation);
+const effectivePreviousButtonVisibility = computed(() => props.PreviousButtonVisibility || props.previousButtonVisibility);
+const effectiveNextButtonVisibility = computed(() => props.NextButtonVisibility || props.nextButtonVisibility);
+const effectiveDisabled = computed(() => props.disabled || props.IsEnabled === false);
 
 // 计算是否显示按钮
 const shouldShowPreviousButton = computed(() => {
-  return props.previousButtonVisibility !== 'Collapsed' && props.numberOfPages > 1;
+  return effectivePreviousButtonVisibility.value !== 'Collapsed' && effectiveNumberOfPages.value > 1;
 });
 
 const shouldShowNextButton = computed(() => {
-  return props.nextButtonVisibility !== 'Collapsed' && props.numberOfPages > 1;
+  return effectiveNextButtonVisibility.value !== 'Collapsed' && effectiveNumberOfPages.value > 1;
 });
 
 // 虚拟化滚动：计算可见的pips（当页数过多时压缩显示）
 const visiblePages = computed(() => {
-  if (props.numberOfPages <= props.maxVisiblePips) {
+  if (effectiveNumberOfPages.value <= props.maxVisiblePips) {
     // 页数较少，全部显示
-    return Array.from({ length: props.numberOfPages }, (_, i) => ({
+    return Array.from({ length: effectiveNumberOfPages.value }, (_, i) => ({
       index: i,
       isCompressed: false
     }));
@@ -129,8 +163,8 @@ const visiblePages = computed(() => {
 
   // 页数较多，使用压缩显示策略
   const result = [];
-  const current = props.selectedPageIndex;
-  const total = props.numberOfPages;
+  const current = effectiveSelectedPageIndex.value;
+  const total = effectiveNumberOfPages.value;
   const maxVisible = props.maxVisiblePips;
 
   // 策略：始终显示首尾页 + 当前页附近的页
@@ -188,40 +222,43 @@ const pipsTrackStyle = computed(() => {
 
 // 选择页面
 const selectPage = (index) => {
-  if (props.disabled || index < 0 || index >= props.numberOfPages || index === props.selectedPageIndex) {
+  if (effectiveDisabled.value || index < 0 || index >= effectiveNumberOfPages.value || index === effectiveSelectedPageIndex.value) {
     return;
   }
 
-  const oldIndex = props.selectedPageIndex;
+  const oldIndex = effectiveSelectedPageIndex.value;
 
   emit('update:selectedPageIndex', index);
+  emit('update:SelectedPageIndex', index);
 
   // 官方事件：SelectedIndexChanged，传递事件参数
-  emit('selectedIndexChanged', {
+  const args = {
     oldIndex,
     newIndex: index
-  });
+  };
+  emit('selectedIndexChanged', args);
+  emit('SelectedIndexChanged', args);
 };
 
 // 上一页
 const previousPage = () => {
-  if (props.selectedPageIndex > 0) {
-    selectPage(props.selectedPageIndex - 1);
+  if (effectiveSelectedPageIndex.value > 0) {
+    selectPage(effectiveSelectedPageIndex.value - 1);
   }
 };
 
 // 下一页
 const nextPage = () => {
-  if (props.selectedPageIndex < props.numberOfPages - 1) {
-    selectPage(props.selectedPageIndex + 1);
+  if (effectiveSelectedPageIndex.value < effectiveNumberOfPages.value - 1) {
+    selectPage(effectiveSelectedPageIndex.value + 1);
   }
 };
 
 // 键盘导航
 const handleKeyDown = (event) => {
-  if (props.disabled) return;
+  if (effectiveDisabled.value) return;
 
-  const isHorizontal = props.orientation === 'Horizontal';
+  const isHorizontal = effectiveOrientation.value === 'Horizontal';
 
   if ((isHorizontal && event.key === 'ArrowLeft') || (!isHorizontal && event.key === 'ArrowUp')) {
     event.preventDefault();
@@ -234,7 +271,7 @@ const handleKeyDown = (event) => {
     selectPage(0);
   } else if (event.key === 'End') {
     event.preventDefault();
-    selectPage(props.numberOfPages - 1);
+    selectPage(effectiveNumberOfPages.value - 1);
   }
 };
 
@@ -244,7 +281,7 @@ const touchStartY = ref(0);
 const MIN_SWIPE_DISTANCE = 50;
 
 const handleTouchStart = (event) => {
-  if (props.disabled) return;
+  if (effectiveDisabled.value) return;
 
   const touch = event.touches[0];
   touchStartX.value = touch.clientX;
@@ -252,13 +289,13 @@ const handleTouchStart = (event) => {
 };
 
 const handleTouchEnd = (event) => {
-  if (props.disabled) return;
+  if (effectiveDisabled.value) return;
 
   const touch = event.changedTouches[0];
   const deltaX = touch.clientX - touchStartX.value;
   const deltaY = touch.clientY - touchStartY.value;
 
-  const isHorizontal = props.orientation === 'Horizontal';
+  const isHorizontal = effectiveOrientation.value === 'Horizontal';
 
   if (isHorizontal) {
     if (Math.abs(deltaX) > MIN_SWIPE_DISTANCE && Math.abs(deltaX) > Math.abs(deltaY)) {

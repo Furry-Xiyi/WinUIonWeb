@@ -1,5 +1,5 @@
 <template>
-  <div class="win-avp" :class="{ 'is-playing': playing, 'is-reversed': reversed }">
+  <div class="win-avp" :class="{ 'is-playing': isPlaying, 'is-reversed': isReversed }">
     <div class="win-avp-logo" :style="{ animationDuration: duration + 'ms' }">
       <div class="win-avp-ring"></div>
       <div class="win-avp-ring small"></div>
@@ -11,11 +11,18 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
+  AutoPlay: { type: Boolean, default: false },
+  PlaybackRate: { type: Number, default: 1 },
   playing: Boolean,
   reversed: Boolean,
   duration: { type: Number, default: 1800 }
 });
+
+const isPlaying = computed(() => props.AutoPlay || props.playing);
+const isReversed = computed(() => props.PlaybackRate < 0 || props.reversed);
 </script>
 
 <style>

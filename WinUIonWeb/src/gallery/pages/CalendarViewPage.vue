@@ -1,63 +1,65 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <WinTextBlock class="page-header" :Text="$t('text.calendarview')" />
-      <WinTextBlock
-        class="page-description"
-        :Text="$t('text.the-calendarview-gives-a-standardized-way-to-let')"
-        TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon"></span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('text.a-basic-calendar-view')" />
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Vue" :xaml="example1Xaml">
-      <template #example>
-        <WinCalendarView
-          v-model:SelectedDates="SelectedDates"
-          :CalendarIdentifier="CalendarIdentifier"
-          :IsGroupLabelVisible="IsGroupLabelVisible"
-          :IsOutOfScopeEnabled="IsOutOfScopeEnabled"
-          :SelectionMode="SelectionMode"
-          :Language="Language" />
-      </template>
-
-      <template #options>
-        <div class="options-panel">
-          <WinCheckBox v-model="IsGroupLabelVisible">IsGroupLabelVisible</WinCheckBox>
-          <WinCheckBox v-model="IsOutOfScopeEnabled">IsOutOfScopeEnabled</WinCheckBox>
-
-          <div class="option-group">
-            <label class="option-label">SelectionMode</label>
-            <WinComboBox :options="selectionModes" v-model="selectionModeIndex" style="width: 220px;" />
-          </div>
-
-          <div class="option-group">
-            <label class="option-label">CalendarIdentifier</label>
-            <WinComboBox :options="calendarIdentifiers" v-model="calendarIdentifierIndex" style="width: 220px;" />
-          </div>
-
-          <div class="option-group">
-            <label class="option-label">Language</label>
-            <WinComboBox :options="languages" v-model="languageIndex" style="width: 220px;" />
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div style="position: relative;" class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.calendarview')" />
+          <WinTextBlock
+            class="page-description"
+            :Text="$t('text.the-calendarview-gives-a-standardized-way-to-let')"
+            TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon"></span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
           </div>
         </div>
-      </template>
-    </WinControlExample>
-  </div>
+      <div class="gallery-page-content">
+        <WinControlExample
+              class="basic-input-example-theme"
+              :headerText="$t('text.a-basic-calendar-view')"
+              :theme="pageTheme"
+              :vue="example1Vue">
+              <template #example>
+                <WinCalendarView
+                  :CalendarIdentifier="CalendarIdentifier"
+                  :IsGroupLabelVisible="IsGroupLabelVisible"
+                  :IsOutOfScopeEnabled="IsOutOfScopeEnabled"
+                  :SelectionMode="SelectionMode"
+                  :Language="Language" />
+              </template>
+
+              <template #options>
+                <div class="options-panel">
+                  <WinCheckBox v-model="IsGroupLabelVisible"><WinTextBlock Text="IsGroupLabelVisible" /></WinCheckBox>
+                  <WinCheckBox v-model="IsOutOfScopeEnabled"><WinTextBlock Text="IsOutOfScopeEnabled" /></WinCheckBox>
+
+                  <div class="option-group">
+                    <WinComboBox Header="SelectionMode" :ItemsSource="selectionModes" v-model="selectionModeIndex" style="width: 220px;" />
+                  </div>
+
+                  <div class="option-group">
+                    <WinComboBox Header="CalendarIdentifier" :ItemsSource="calendarIdentifiers" v-model="calendarIdentifierIndex" style="width: 220px;" />
+                  </div>
+
+                  <div class="option-group">
+                    <WinComboBox Header="Language" :ItemsSource="languages" v-model="languageIndex" style="width: 220px;" />
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { computed, inject, ref, watch } from 'vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
 import WinCalendarView from '../../components/WinCalendarView.vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
@@ -69,75 +71,136 @@ import { createPageState } from '../../utils/pageState';
 
 import { useI18n } from '../../components/i18n/index';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'calendarview');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const SelectedDates = ref([new Date()]);
 const IsGroupLabelVisible = ref(true);
 const IsOutOfScopeEnabled = ref(true);
 
 const selectionModes = [
-  { label: t('text.none') },
-  { label: t('text.single') },
-  { label: t('text.multiple') }
+  'None',
+  'Single',
+  'Multiple'
 ];
 const selectionModeIndex = ref(1);
-const SelectionMode = computed(() => selectionModes[selectionModeIndex.value].label);
+const SelectionMode = computed(() => selectionModes[selectionModeIndex.value]);
 
 const calendarIdentifiers = [
-  { label: t('text.gregoriancalendar') },
-  { label: t('text.hebrewcalendar') },
-  { label: t('text.hijricalendar') },
-  { label: t('text.japanesecalendar') },
-  { label: t('text.juliancalendar') },
-  { label: t('text.koreancalendar') },
-  { label: t('text.persiancalendar') },
-  { label: t('text.taiwancalendar') },
-  { label: t('text.thaicalendar') },
-  { label: t('text.umalquracalendar') }
+  { label: t('text.gregoriancalendar'), value: 'GregorianCalendar' },
+  { label: t('text.hebrewcalendar'), value: 'HebrewCalendar' },
+  { label: t('text.hijricalendar'), value: 'HijriCalendar' },
+  { label: t('text.japanesecalendar'), value: 'JapaneseCalendar' },
+  { label: t('text.juliancalendar'), value: 'JulianCalendar' },
+  { label: t('text.koreancalendar'), value: 'KoreanCalendar' },
+  { label: t('text.persiancalendar'), value: 'PersianCalendar' },
+  { label: t('text.taiwancalendar'), value: 'TaiwanCalendar' },
+  { label: t('text.thaicalendar'), value: 'ThaiCalendar' },
+  { label: t('text.umalquracalendar'), value: 'UmAlQuraCalendar' }
 ];
 const calendarIdentifierIndex = ref(0);
-const CalendarIdentifier = computed(() => calendarIdentifiers[calendarIdentifierIndex.value].label);
+const CalendarIdentifier = computed(() => calendarIdentifiers[calendarIdentifierIndex.value].value);
 
 const languages = [
-  { label: t('text.english-en-us'), value: 'en-US' },
-  { label: t('text.chinese-zh-cn'), value: 'zh-CN' },
-  { label: t('text.spanish-es-es'), value: 'es-ES' },
-  { label: t('text.french-fr-fr'), value: 'fr-FR' },
-  { label: t('text.german-de-de'), value: 'de-DE' },
-  { label: t('text.japanese-ja-jp'), value: 'ja-JP' },
-  { label: t('text.arabic-ar-sa'), value: 'ar-SA' },
-  { label: t('text.hebrew-he-il'), value: 'he-IL' }
+  { label: 'English', value: 'en' },
+  { label: 'Arabic', value: 'ar' },
+  { label: 'Afrikaans', value: 'af' },
+  { label: 'Albanian', value: 'sq' },
+  { label: 'Amharic', value: 'am' },
+  { label: 'Armenian', value: 'hy' },
+  { label: 'Assamese', value: 'as' },
+  { label: 'Azerbaijani', value: 'az' },
+  { label: 'Basque', value: 'eu' },
+  { label: 'Belarusian', value: 'be' },
+  { label: 'Bangla', value: 'bn' },
+  { label: 'Bosnian', value: 'bs' },
+  { label: 'Bulgarian', value: 'bg' },
+  { label: 'Catalan', value: 'ca' },
+  { label: 'Chinese (Simplified)', value: 'zh' },
+  { label: 'Croatian', value: 'hr' },
+  { label: 'Czech', value: 'cs' },
+  { label: 'Danish', value: 'da' },
+  { label: 'Dari', value: 'prs' },
+  { label: 'Dutch', value: 'nl' },
+  { label: 'Estonian', value: 'et' },
+  { label: 'Filipino', value: 'fil' },
+  { label: 'Finnish', value: 'fi' },
+  { label: 'French', value: 'fr' },
+  { label: 'Galician', value: 'gl' },
+  { label: 'Georgian', value: 'ka' },
+  { label: 'German', value: 'de' },
+  { label: 'Greek', value: 'el' },
+  { label: 'Gujarati', value: 'gu' },
+  { label: 'Hausa', value: 'ha' },
+  { label: 'Hebrew', value: 'he' },
+  { label: 'Hindi', value: 'hi' },
+  { label: 'Hungarian', value: 'hu' },
+  { label: 'Icelandic', value: 'is' },
+  { label: 'Indonesian', value: 'id' },
+  { label: 'Irish', value: 'ga' },
+  { label: 'isiXhosa', value: 'xh' },
+  { label: 'isiZulu', value: 'zu' },
+  { label: 'Italian', value: 'it' },
+  { label: 'Japanese', value: 'ja' },
+  { label: 'Kannada', value: 'kn' },
+  { label: 'Kazakh', value: 'kk' },
+  { label: 'Khmer', value: 'km' },
+  { label: 'Kinyarwanda', value: 'rw' },
+  { label: 'KiSwahili', value: 'sw' },
+  { label: 'Konkani', value: 'kok' },
+  { label: 'Korean', value: 'ko' },
+  { label: 'Lao', value: 'lo' },
+  { label: 'Latvian', value: 'lv' },
+  { label: 'Lithuanian', value: 'lt' },
+  { label: 'Luxembourgish', value: 'lb' },
+  { label: 'Macedonian', value: 'mk' },
+  { label: 'Malay', value: 'ms' },
+  { label: 'Malayalam', value: 'ml' },
+  { label: 'Maltese', value: 'mt' },
+  { label: 'Maori', value: 'mi' },
+  { label: 'Marathi', value: 'mr' },
+  { label: 'Nepali', value: 'ne' },
+  { label: 'Norwegian', value: 'nb' },
+  { label: 'Odia', value: 'or' },
+  { label: 'Persian', value: 'fa' },
+  { label: 'Polish', value: 'pl' },
+  { label: 'Portuguese', value: 'pt' },
+  { label: 'Punjabi', value: 'pa' },
+  { label: 'Quechua', value: 'quz' },
+  { label: 'Romanian', value: 'ro' },
+  { label: 'Russian', value: 'ru' },
+  { label: 'Serbian (Latin)', value: 'sr' },
+  { label: 'Sesotho sa Leboa', value: 'nso' },
+  { label: 'Setswana', value: 'tn' },
+  { label: 'Sinhala', value: 'si' },
+  { label: 'Slovak', value: 'sk' },
+  { label: 'Slovenian', value: 'sl' },
+  { label: 'Spanish', value: 'es' },
+  { label: 'Swedish', value: 'sv' },
+  { label: 'Tamil', value: 'ta' },
+  { label: 'Telugu', value: 'te' },
+  { label: 'Thai', value: 'th' },
+  { label: 'Tigrinya', value: 'ti' },
+  { label: 'Turkish', value: 'tr' },
+  { label: 'Ukrainian', value: 'uk' },
+  { label: 'Urdu', value: 'ur' },
+  { label: 'Uzbek (Latin)', value: 'uz' },
+  { label: 'Vietnamese', value: 'vi' },
+  { label: 'Welsh', value: 'cy' },
+  { label: 'Wolof', value: 'wo' }
 ];
 const languageIndex = ref(0);
 const Language = computed(() => languages[languageIndex.value].value);
 
-watch(selectionModeIndex, () => {
-  if (SelectionMode.value === 'None') {
-    SelectedDates.value = [];
-  } else if (SelectionMode.value === 'Single' && SelectedDates.value.length > 1) {
-    SelectedDates.value = [SelectedDates.value[0]];
-  } else if (SelectionMode.value !== 'None' && SelectedDates.value.length === 0) {
-    SelectedDates.value = [new Date()];
-  }
-});
-
 const example1Vue = `<WinCalendarView
-  v-model:SelectedDates="SelectedDates"
   :CalendarIdentifier="CalendarIdentifier"
   :IsGroupLabelVisible="IsGroupLabelVisible"
   :IsOutOfScopeEnabled="IsOutOfScopeEnabled"
   :SelectionMode="SelectionMode"
   :Language="Language" />`;
 
-const example1Xaml = `<CalendarView
-    SelectionMode="$(SelectionMode)"
-    IsGroupLabelVisible="$(IsGroupLabelVisible)"
-    IsOutOfScopeEnabled="$(IsOutOfScopeEnabled)"
-    Language="$(Language)"
-    CalendarIdentifier="$(CalendarIdentifier)" />`;
 </script>
 
 <style scoped>
@@ -164,14 +227,6 @@ const example1Xaml = `<CalendarView
   align-items: center;
 }
 
-.control-example-description {
-  margin: 12px 0;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
-}
-
 .options-panel {
   display: flex;
   flex-direction: column;
@@ -182,12 +237,6 @@ const example1Xaml = `<CalendarView
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.option-label {
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 600;
 }
 
 .icon {

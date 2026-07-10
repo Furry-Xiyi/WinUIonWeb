@@ -1,146 +1,135 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">Border</h1>
-      <p class="page-description">
-        A Border is a container control that draws a border, background, or both, around another object.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <!-- Example 1: A Border around a TextBlock -->
-    <WinControlExample
-      headerText="A Border around a TextBlock."
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div
-          :style="{
-            display: 'inline-block',
-            verticalAlign: 'top',
-            border: `${borderThickness}px solid ${borderBrushColor}`,
-            background: backgroundColor,
-            padding: '8px 5px'
-          }">
-          <span style="font-size: 18px; color: black;">Text inside a border</span>
-        </div>
-      </template>
-      <template #options>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <WinSlider
-            v-model="borderThickness"
-            header="BorderThickness"
-            :minimum="0"
-            :maximum="10"
-            :stepFrequency="1" />
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div>
-              <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Background</p>
-              <div style="display: flex; flex-direction: column; gap: 4px;">
-                <WinRadioButton
-                  v-model="selectedBackground"
-                  value="Green"
-                  name="bgColor">
-                  Green
-                </WinRadioButton>
-                <WinRadioButton
-                  v-model="selectedBackground"
-                  value="Yellow"
-                  name="bgColor">
-                  Yellow
-                </WinRadioButton>
-                <WinRadioButton
-                  v-model="selectedBackground"
-                  value="Blue"
-                  name="bgColor">
-                  Blue
-                </WinRadioButton>
-                <WinRadioButton
-                  v-model="selectedBackground"
-                  value="White"
-                  name="bgColor">
-                  White
-                </WinRadioButton>
-              </div>
-            </div>
-
-            <div>
-              <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">BorderBrush</p>
-              <div style="display: flex; flex-direction: column; gap: 4px;">
-                <WinRadioButton
-                  v-model="selectedBorderBrush"
-                  value="Green"
-                  name="borderBrush">
-                  Green
-                </WinRadioButton>
-                <WinRadioButton
-                  v-model="selectedBorderBrush"
-                  value="Yellow"
-                  name="borderBrush">
-                  Yellow
-                </WinRadioButton>
-                <WinRadioButton
-                  v-model="selectedBorderBrush"
-                  value="Blue"
-                  name="borderBrush">
-                  Blue
-                </WinRadioButton>
-                <WinRadioButton
-                  v-model="selectedBorderBrush"
-                  value="White"
-                  name="borderBrush">
-                  White
-                </WinRadioButton>
-              </div>
-            </div>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">Border</h1>
+          <p class="page-description">
+            A Border is a container control that draws a border, background, or both, around another object.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @Click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
           </div>
         </div>
-      </template>
-    </WinControlExample>
-  </div>
+      <div class="gallery-page-content">
+        <!-- Example 1: A Border around a TextBlock -->
+            <WinControlExample
+              headerText="A Border around a TextBlock."
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <div
+                  :style="{
+                    display: 'inline-block',
+                    verticalAlign: 'top',
+                    border: `${borderThickness}px solid ${borderBrushColor}`,
+                    background: backgroundColor,
+                    padding: '8px 5px'
+                  }">
+                  <span style="font-size: 18px; color: black;">Text inside a border</span>
+                </div>
+              </template>
+              <template #options>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <WinSlider
+                    v-model="borderThickness"
+                    header="BorderThickness"
+                    :minimum="0"
+                    :maximum="10"
+                    :stepFrequency="1" />
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                      <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Background</p>
+                      <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <WinRadioButton
+                          v-model="selectedBackground"
+                          value="Green"
+                          name="bgColor">
+                          Green
+                        </WinRadioButton>
+                        <WinRadioButton
+                          v-model="selectedBackground"
+                          value="Yellow"
+                          name="bgColor">
+                          Yellow
+                        </WinRadioButton>
+                        <WinRadioButton
+                          v-model="selectedBackground"
+                          value="Blue"
+                          name="bgColor">
+                          Blue
+                        </WinRadioButton>
+                        <WinRadioButton
+                          v-model="selectedBackground"
+                          value="White"
+                          name="bgColor">
+                          White
+                        </WinRadioButton>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">BorderBrush</p>
+                      <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <WinRadioButton
+                          v-model="selectedBorderBrush"
+                          value="Green"
+                          name="borderBrush">
+                          Green
+                        </WinRadioButton>
+                        <WinRadioButton
+                          v-model="selectedBorderBrush"
+                          value="Yellow"
+                          name="borderBrush">
+                          Yellow
+                        </WinRadioButton>
+                        <WinRadioButton
+                          v-model="selectedBorderBrush"
+                          value="Blue"
+                          name="borderBrush">
+                          Blue
+                        </WinRadioButton>
+                        <WinRadioButton
+                          v-model="selectedBorderBrush"
+                          value="White"
+                          name="borderBrush">
+                          White
+                        </WinRadioButton>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinSlider from '../../components/WinSlider.vue';
 import WinRadioButton from '../../components/WinRadioButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'border');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Border properties
 const borderThickness = ref(2);

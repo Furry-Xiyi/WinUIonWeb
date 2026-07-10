@@ -1,116 +1,119 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">Custom & User Controls</h1>
-      <p class="page-description">
-        Learn how to create reusable custom controls and UserControls in WinUI applications.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <!-- Custom Control Section -->
-    <div class="section-header">
-      <h2 class="subtitle">Custom (templated) control</h2>
-    </div>
-
-    <div class="description-section">
-      <p class="description-text">
-        A custom control is a reusable component that derives from the
-        <code class="inline-code">Control</code> class. It provides flexibility through
-        <strong>ControlTemplates</strong> and supports <strong>styling and theming.</strong>
-      </p>
-
-      <ul class="feature-list">
-        <li><strong>Encapsulation:</strong> custom controls encapsulate behavior and UI logic, making them reusable across different projects.</li>
-        <li><strong>Theming:</strong> they support light and dark themes through theme resources.</li>
-      </ul>
-
-      <div class="key-points">
-        <p class="key-points-title"><strong>Key points</strong></p>
-        <ul class="feature-list">
-          <li>Use <code class="inline-code">Generic.xaml</code> file or a new <code class="inline-code">ResourceDictionary</code> to define the default style of a custom control.</li>
-          <li>Override <code class="inline-code">OnApplyTemplate()</code> to interact with template parts.</li>
-          <li>Use <code class="inline-code">DependencyProperty</code> for properties that support data binding.</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Example 1: Counter Control with Increment/Decrement -->
-    <WinControlExample
-      headerText="Counter Control with Increment/Decrement Mode"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div style="display: flex; gap: 8px; align-items: flex-start;">
-          <CounterControl mode="increment" />
-          <CounterControl mode="decrement" />
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">Custom & User Controls</h1>
+          <p class="page-description">
+            Learn how to create reusable custom controls and UserControls in WinUI applications.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Custom Control Section -->
+            <div class="section-header">
+              <h2 class="subtitle">Custom (templated) control</h2>
+            </div>
 
-    <!-- Example 2: Validated Password Box -->
-    <WinControlExample
-      headerText="Basic Custom Password Box with Validation"
-      :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <div style="display: flex; flex-direction: column; gap: 8px; max-width: 300px;">
-          <ValidatedPasswordBox
-            ref="passwordInput"
-            header="Password"
-            placeholder="Enter password..."
-            :minLength="8"
-            v-model="passwordValue"
-            @validationChanged="onPasswordValidationChanged" />
-          <WinButton
-            primary
-            :disabled="!isPasswordValid"
-            @click="onSubmitPassword">
-            Submit
-          </WinButton>
-        </div>
-      </template>
-      <template #options>
-        <p class="output-text">{{ passwordOutput || 'Enter a valid password and click Submit' }}</p>
-      </template>
-    </WinControlExample>
+            <div class="description-section">
+              <p class="description-text">
+                A custom control is a reusable component that derives from the
+                <code class="inline-code">Control</code> class. It provides flexibility through
+                <strong>ControlTemplates</strong> and supports <strong>styling and theming.</strong>
+              </p>
 
-    <!-- UserControl Section -->
-    <div class="section-header" style="margin-top: 24px;">
-      <h2 class="subtitle">UserControl</h2>
-    </div>
+              <ul class="feature-list">
+                <li><strong>Encapsulation:</strong> custom controls encapsulate behavior and UI logic, making them reusable across different projects.</li>
+                <li><strong>Theming:</strong> they support light and dark themes through theme resources.</li>
+              </ul>
 
-    <div class="description-section">
-      <p class="description-text">
-        A UserControl is a reusable component that combines existing controls and logic into a cohesive unit.
-        It allows for encapsulation of functionality and a consistent design across multiple instances.
-      </p>
-    </div>
+              <div class="key-points">
+                <p class="key-points-title"><strong>Key points</strong></p>
+                <ul class="feature-list">
+                  <li>Use <code class="inline-code">Generic.xaml</code> file or a new <code class="inline-code">ResourceDictionary</code> to define the default style of a custom control.</li>
+                  <li>Override <code class="inline-code">OnApplyTemplate()</code> to interact with template parts.</li>
+                  <li>Use <code class="inline-code">DependencyProperty</code> for properties that support data binding.</li>
+                </ul>
+              </div>
+            </div>
 
-    <!-- Example 3: Temperature Converter UserControl -->
-    <WinControlExample
-      headerText="Temperature Converter UserControl example"
-      :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
-      <template #example>
-        <TemperatureConverter />
-      </template>
-    </WinControlExample>
+            <!-- Example 1: Counter Control with Increment/Decrement -->
+            <WinControlExample
+              headerText="Counter Control with Increment/Decrement Mode"
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <CounterControl mode="increment" />
+                  <CounterControl mode="decrement" />
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 2: Validated Password Box -->
+            <WinControlExample
+              headerText="Basic Custom Password Box with Validation"
+              :theme="pageTheme"
+              :templateCode="example2Template"
+              :vueCode="example2Vue">
+              <template #example>
+                <div style="display: flex; flex-direction: column; gap: 8px; max-width: 300px;">
+                  <ValidatedPasswordBox
+                    ref="passwordInput"
+                    header="Password"
+                    placeholder="Enter password..."
+                    :minLength="8"
+                    v-model="passwordValue"
+                    @validationChanged="onPasswordValidationChanged" />
+                  <WinButton
+                    primary
+                    :disabled="!isPasswordValid"
+                    @click="onSubmitPassword">
+                    Submit
+                  </WinButton>
+                </div>
+              </template>
+              <template #options>
+                <p class="output-text">{{ passwordOutput || 'Enter a valid password and click Submit' }}</p>
+              </template>
+            </WinControlExample>
+
+            <!-- UserControl Section -->
+            <div class="section-header" style="margin-top: 24px;">
+              <h2 class="subtitle">UserControl</h2>
+            </div>
+
+            <div class="description-section">
+              <p class="description-text">
+                A UserControl is a reusable component that combines existing controls and logic into a cohesive unit.
+                It allows for encapsulation of functionality and a consistent design across multiple instances.
+              </p>
+            </div>
+
+            <!-- Example 3: Temperature Converter UserControl -->
+            <WinControlExample
+              headerText="Temperature Converter UserControl example"
+              :theme="pageTheme"
+              :templateCode="example3Template"
+              :vueCode="example3Vue">
+              <template #example>
+                <TemperatureConverter />
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -125,6 +128,7 @@ import TemperatureConverter from '../../components/examples/TemperatureConverter
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'customusercontrols');
 

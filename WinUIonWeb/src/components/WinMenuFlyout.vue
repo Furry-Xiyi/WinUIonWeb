@@ -14,14 +14,20 @@
       @pointerenter="emit('PointerEnter')"
       @pointerleave="emit('PointerLeave')">
       <div :key="animationKey" class="win-menu-flyout" @animationend="onAnimEnd">
-        <div class="win-menu-flyout-scroll" :class="{ 'has-submenu': hasSubmenu }">
+        <WinScrollViewer
+          class="win-menu-flyout-scroll"
+          :class="{ 'has-submenu': hasSubmenu }"
+          VerticalScrollMode="Auto"
+          VerticalScrollBarVisibility="Auto"
+          HorizontalScrollMode="Disabled"
+          HorizontalScrollBarVisibility="Disabled">
           <MenuFlyoutItems
             :Items="Items"
             @Select="onItemSelect"
             @PointerEnter="emit('PointerEnter')"
             @PointerLeave="emit('PointerLeave')" />
           <slot></slot>
-        </div>
+        </WinScrollViewer>
       </div>
     </div>
   </Teleport>
@@ -29,6 +35,7 @@
 
 <script setup>
 import { Teleport, computed, defineComponent, h, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import WinScrollViewer from './WinScrollViewer.vue';
 import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
@@ -126,10 +133,12 @@ const MenuFlyoutItems = defineComponent({
         });
       }
 
-      if (kind === 'MenuFlyoutSubItem') {
+      if (kind === 'MenuFlyoutSubItem' || kind === 'SplitMenuFlyoutItem') {
+        const isSplit = kind === 'SplitMenuFlyoutItem';
         return h('div', {
           key: index,
           class: ['win-menu-flyout-item', 'win-menu-flyout-subitem', {
+            'win-menu-flyout-splititem': isSplit,
             'is-disabled': isItemDisabled(item),
             'is-open': openIndex.value === index
           }],
@@ -140,12 +149,22 @@ const MenuFlyoutItems = defineComponent({
           onPointerenter: (event) => openSubmenu(index, event),
           onClick: (event) => {
             event.stopPropagation();
-            openSubmenu(index, event);
+            if (isSplit) selectItem(item, index);
+            else openSubmenu(index, event);
           }
         }, [
           item.Icon ? h('span', { class: 'icon win-menu-flyout-icon' }, item.Icon) : null,
           h(WinTextBlock, { class: 'win-menu-flyout-label', Text: item.Text || String(item) }),
-          h('span', { class: 'icon win-menu-flyout-chevron' }, '\uE974')
+          isSplit ? h('span', { class: 'win-menu-flyout-split-divider', 'aria-hidden': true }) : null,
+          h('button', {
+            class: 'win-menu-flyout-chevron-button',
+            type: 'button',
+            tabindex: -1,
+            onClick: (event) => {
+              event.stopPropagation();
+              openSubmenu(index, event);
+            }
+          }, h('span', { class: 'icon win-menu-flyout-chevron' }, '\uE974'))
         ]);
       }
 
@@ -154,7 +173,9 @@ const MenuFlyoutItems = defineComponent({
         key: index,
         class: ['win-menu-flyout-item', {
           'is-disabled': isItemDisabled(item),
-          'is-checked': isItemChecked(item)
+          'is-checked': isItemChecked(item),
+          'is-toggle': kind === 'ToggleMenuFlyoutItem',
+          'is-radio': kind === 'RadioMenuFlyoutItem'
         }],
         type: 'button',
         role: 'menuitem',
@@ -163,7 +184,8 @@ const MenuFlyoutItems = defineComponent({
         onClick: () => selectItem(item, index)
       }, [
         item.Icon ? h('span', { class: 'icon win-menu-flyout-icon' }, item.Icon) : null,
-        !item.Icon && isItemChecked(item) ? h('span', { class: 'icon win-menu-flyout-check' }, '\uE73E') : null,
+        !item.Icon && isItemChecked(item) ? h('span', { class: 'icon win-menu-flyout-check' }, kind === 'RadioMenuFlyoutItem' ? '\uE915' : '\uE73E') : null,
+        !item.Icon && !isItemChecked(item) && (kind === 'ToggleMenuFlyoutItem' || kind === 'RadioMenuFlyoutItem') ? h('span', { class: 'win-menu-flyout-check-placeholder' }) : null,
         h(WinTextBlock, { class: 'win-menu-flyout-label', Text: item.Text || String(item) }),
         acceleratorText ? h(WinTextBlock, { class: 'win-menu-flyout-accelerator', Text: acceleratorText }) : null
       ]);
@@ -233,6 +255,7 @@ const close = () => {
 
 const onItemSelect = ({ item, index }) => {
   if (isItemDisabled(item)) return;
+  updateToggleItem(item);
   updateRadioGroup(item);
   emit('Select', item, index);
   emit('select', item, index);
@@ -297,6 +320,10 @@ const updateRadioGroup = (item) => {
   };
   update(props.Items);
 };
+const updateToggleItem = (item) => {
+  if (getItemKind(item) !== 'ToggleMenuFlyoutItem') return;
+  item.IsChecked = !item.IsChecked;
+};
 const estimateFlyoutHeight = (items) => {
   const itemCount = items.filter((item) => getItemKind(item) !== 'MenuFlyoutSeparator').length;
   const separatorCount = items.length - itemCount;
@@ -354,16 +381,16 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 .win-menu-flyout-scroll {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   max-height: var(--flyout-max-height, 70vh);
-  overflow-y: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--ctrl-strong-stroke) transparent;
-  animation: flyout-scroll-reveal 0ms 250ms forwards;
+}
+
+.win-menu-flyout-scroll :deep(.scroll-content) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .win-menu-flyout-scroll.has-submenu {
-  overflow: visible;
 }
 
 .win-menu-flyout-item {
@@ -390,6 +417,33 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 
 .win-menu-flyout-subitem {
   position: relative;
+}
+
+.win-menu-flyout-splititem {
+  padding-right: 0;
+}
+
+.win-menu-flyout-split-divider {
+  align-self: stretch;
+  width: 1px;
+  margin: -2px 0 -2px 12px;
+  background: var(--divider-stroke-default, var(--stroke-divider));
+}
+
+.win-menu-flyout-chevron-button {
+  width: 32px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.win-menu-flyout-chevron-button:hover {
+  background: var(--subtle-secondary);
 }
 
 .win-menu-flyout-subitem.is-open {
@@ -423,7 +477,8 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 }
 
 .win-menu-flyout-icon,
-.win-menu-flyout-check {
+.win-menu-flyout-check,
+.win-menu-flyout-check-placeholder {
   width: 16px;
   min-width: 16px;
   margin-right: 12px;
@@ -516,10 +571,6 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
     clip-path: inset(0 0 0 0);
     transform: translateY(0);
   }
-}
-
-@keyframes flyout-scroll-reveal {
-  to { overflow-y: auto; }
 }
 
 .win-menu-flyout-scroll.has-submenu {

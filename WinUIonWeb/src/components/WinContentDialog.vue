@@ -1,147 +1,297 @@
 <template>
   <Teleport to="body">
-    <Transition name="dialog">
-      <div v-if="visible" class="win-dialog-overlay" @click.self="onLightDismiss">
-        <div class="win-dialog" role="dialog" aria-modal="true">
-          <div class="win-dialog-body">
-            <div v-if="title" class="win-dialog-title">{{ title }}</div>
-            <div class="win-dialog-content">
+    <Transition name="win-content-dialog">
+      <div
+        v-if="effectiveIsOpen"
+        class="win-content-dialog-overlay"
+        @pointerdown.self="onOverlayPointerDown">
+        <section class="win-content-dialog" role="dialog" aria-modal="true" :aria-labelledby="Title ? titleId : undefined">
+          <WinScrollViewer
+            class="win-content-dialog-content"
+            VerticalScrollMode="Auto"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollMode="Disabled"
+            HorizontalScrollBarVisibility="Disabled">
+            <WinTextBlock
+              v-if="Title"
+              :id="titleId"
+              class="win-content-dialog-title"
+              :Text="Title"
+              TextWrapping="WrapWholeWords" />
+            <div class="win-content-dialog-body">
               <slot></slot>
             </div>
+          </WinScrollViewer>
+          <div v-if="hasCommandButtons" class="win-content-dialog-command-space" :class="commandSpaceClass">
+            <WinButton
+              v-if="PrimaryButtonText"
+              class="win-content-dialog-button win-content-dialog-primary"
+              :Style="DefaultButton === 'Primary' ? '{StaticResource AccentButtonStyle}' : '{StaticResource DefaultButtonStyle}'"
+              :IsEnabled="IsPrimaryButtonEnabled"
+              @Click="closeWithResult('Primary')">
+              <WinTextBlock :Text="PrimaryButtonText" />
+            </WinButton>
+            <WinButton
+              v-if="SecondaryButtonText"
+              class="win-content-dialog-button win-content-dialog-secondary"
+              :Style="DefaultButton === 'Secondary' ? '{StaticResource AccentButtonStyle}' : '{StaticResource DefaultButtonStyle}'"
+              :IsEnabled="IsSecondaryButtonEnabled"
+              @Click="closeWithResult('Secondary')">
+              <WinTextBlock :Text="SecondaryButtonText" />
+            </WinButton>
+            <WinButton
+              v-if="CloseButtonText"
+              class="win-content-dialog-button win-content-dialog-close"
+              :Style="DefaultButton === 'Close' ? '{StaticResource AccentButtonStyle}' : '{StaticResource DefaultButtonStyle}'"
+              @Click="closeWithResult('None')">
+              <WinTextBlock :Text="CloseButtonText" />
+            </WinButton>
           </div>
-          <div class="win-dialog-commands">
-            <WinButton v-if="primaryText" :Style="buttonStyle('primary')" @click="$emit('primary')">{{ primaryText }}</WinButton>
-            <WinButton v-if="secondaryText" :Style="buttonStyle('secondary')" @click="$emit('secondary')">{{ secondaryText }}</WinButton>
-            <WinButton v-if="closeText" :Style="buttonStyle('close')" @click="$emit('close')">{{ closeText }}</WinButton>
-          </div>
-        </div>
+        </section>
       </div>
     </Transition>
   </Teleport>
 </template>
 
 <script setup>
+import { computed, ref } from 'vue';
 import WinButton from './WinButton.vue';
+import WinScrollViewer from './WinScrollViewer.vue';
+import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
-  visible: Boolean,
-  title: String,
-  primaryText: String,
-  secondaryText: String,
-  closeText: String,
-  defaultButton: { type: String, default: '' }
+  IsOpen: { type: Boolean, default: undefined },
+  visible: { type: Boolean, default: undefined },
+  Title: { type: String, default: '' },
+  title: { type: String, default: '' },
+  Content: { type: [String, Number], default: '' },
+  PrimaryButtonText: { type: String, default: '' },
+  primaryText: { type: String, default: '' },
+  SecondaryButtonText: { type: String, default: '' },
+  secondaryText: { type: String, default: '' },
+  CloseButtonText: { type: String, default: '' },
+  closeText: { type: String, default: '' },
+  DefaultButton: { type: String, default: 'None' },
+  defaultButton: { type: String, default: '' },
+  IsPrimaryButtonEnabled: { type: Boolean, default: true },
+  IsSecondaryButtonEnabled: { type: Boolean, default: true },
+  FullSizeDesired: { type: Boolean, default: false },
+  IsLightDismissEnabled: { type: Boolean, default: false }
 });
 
-defineEmits(['primary', 'secondary', 'close']);
+const emit = defineEmits([
+  'update:IsOpen',
+  'update:visible',
+  'PrimaryButtonClick',
+  'SecondaryButtonClick',
+  'CloseButtonClick',
+  'Closed',
+  'Opened',
+  'primary',
+  'secondary',
+  'close'
+]);
 
-const onLightDismiss = () => {};
-const buttonStyle = (buttonName) => (
-  props.defaultButton === buttonName ? '{StaticResource AccentButtonStyle}' : ''
-);
+const localIsOpen = ref(false);
+const titleId = `content-dialog-title-${Math.random().toString(36).slice(2)}`;
+
+const effectiveIsOpen = computed(() => props.IsOpen ?? props.visible ?? localIsOpen.value);
+const Title = computed(() => props.Title || props.title);
+const PrimaryButtonText = computed(() => props.PrimaryButtonText || props.primaryText);
+const SecondaryButtonText = computed(() => props.SecondaryButtonText || props.secondaryText);
+const CloseButtonText = computed(() => props.CloseButtonText || props.closeText);
+const IsPrimaryButtonEnabled = computed(() => props.IsPrimaryButtonEnabled);
+const IsSecondaryButtonEnabled = computed(() => props.IsSecondaryButtonEnabled);
+const DefaultButton = computed(() => {
+  if (props.DefaultButton && props.DefaultButton !== 'None') return props.DefaultButton;
+  if (props.defaultButton === 'primary') return 'Primary';
+  if (props.defaultButton === 'secondary') return 'Secondary';
+  if (props.defaultButton === 'close') return 'Close';
+  return props.DefaultButton || 'None';
+});
+const hasPrimaryButton = computed(() => Boolean(PrimaryButtonText.value));
+const hasSecondaryButton = computed(() => Boolean(SecondaryButtonText.value));
+const hasCloseButton = computed(() => Boolean(CloseButtonText.value));
+const hasCommandButtons = computed(() => hasPrimaryButton.value || hasSecondaryButton.value || hasCloseButton.value);
+const commandSpaceClass = computed(() => ({
+  'all-visible': hasPrimaryButton.value && hasSecondaryButton.value && hasCloseButton.value,
+  'primary-visible': hasPrimaryButton.value && !hasSecondaryButton.value && !hasCloseButton.value,
+  'secondary-visible': !hasPrimaryButton.value && hasSecondaryButton.value && !hasCloseButton.value,
+  'close-visible': !hasPrimaryButton.value && !hasSecondaryButton.value && hasCloseButton.value,
+  'primary-secondary-visible': hasPrimaryButton.value && hasSecondaryButton.value && !hasCloseButton.value,
+  'primary-close-visible': hasPrimaryButton.value && !hasSecondaryButton.value && hasCloseButton.value,
+  'secondary-close-visible': !hasPrimaryButton.value && hasSecondaryButton.value && hasCloseButton.value
+}));
+
+const setOpen = (value) => {
+  localIsOpen.value = value;
+  emit('update:IsOpen', value);
+  emit('update:visible', value);
+  if (value) emit('Opened');
+};
+
+const showAsync = () => {
+  setOpen(true);
+  return new Promise((resolve) => {
+    pendingResolve = resolve;
+  });
+};
+
+let pendingResolve = null;
+
+const closeWithResult = (result) => {
+  if (result === 'Primary') {
+    emit('PrimaryButtonClick');
+    emit('primary');
+  } else if (result === 'Secondary') {
+    emit('SecondaryButtonClick');
+    emit('secondary');
+  } else {
+    emit('CloseButtonClick');
+    emit('close');
+  }
+  setOpen(false);
+  emit('Closed', result);
+  pendingResolve?.(result);
+  pendingResolve = null;
+};
+
+const onOverlayPointerDown = () => {
+  if (props.IsLightDismissEnabled) closeWithResult('None');
+};
+
+defineExpose({
+  ShowAsync: showAsync,
+  showAsync,
+  hide: () => closeWithResult('None')
+});
 </script>
 
 <style>
-.win-dialog-overlay {
+.win-content-dialog-overlay {
   position: fixed;
   inset: 0;
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.30);
+  padding: 24px;
+  background: var(--ContentDialogSmokeFill, rgba(0, 0, 0, 0.30));
 }
 
-  .win-dialog {
-    background: var(--flyout-bg);
-    border: 1px solid var(--flyout-border);
-    border-radius: 8px;
-    min-width: 320px;
-    max-width: 480px;
-    width: 100%;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-.win-dialog-body {
-  padding: 24px 24px 0 24px;
-  flex: 1;
-  background: var(--dialog-content-bg, rgba(255, 255, 255, 0.95));
-}
-
-.win-dialog-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 12px;
-}
-
-.win-dialog-content {
+.win-content-dialog {
+  width: min(100%, 548px);
+  min-width: min(100%, 320px);
+  min-height: 184px;
+  max-height: calc(100vh - 48px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  overflow: hidden;
+  color: var(--text-primary);
+  background: var(--ContentDialogBackground, var(--ctrl-solid-fill));
+  border: 1px solid var(--ContentDialogBorderBrush, var(--stroke-surface-flyout, var(--flyout-border)));
+  border-radius: 8px;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.28);
+}
+
+.win-content-dialog-content {
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 24px;
+  background: var(--ContentDialogTopOverlay, var(--layer-fill-color-alt, var(--layer-default)));
+  border-bottom: 1px solid var(--ContentDialogSeparatorBorderBrush, var(--card-stroke));
+}
+
+.win-content-dialog-title {
+  margin: 0 0 12px;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.win-content-dialog-body {
+  color: var(--text-primary);
   font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 24px;
+  line-height: 20px;
 }
 
-.win-dialog-content p {
-  margin: 0;
+.win-content-dialog-command-space {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 0 0 8px minmax(0, 1fr);
+  column-gap: 0;
+  padding: 24px;
+  background: var(--ContentDialogBackground, var(--ctrl-solid-fill));
 }
 
-  .win-dialog-commands {
-    display: flex;
-    gap: 8px;
-    padding: 16px 24px;
-    border-top: 1px solid var(--dialog-divider);
-    background: var(--dialog-button-bg);
-  }
-
-.win-dialog-commands .win-btn {
-  flex: 1;
+.win-content-dialog-command-space.all-visible {
+  grid-template-columns: minmax(0, 1fr) 8px minmax(0, 1fr) 8px minmax(0, 1fr);
 }
 
-.dialog-enter-active {
-  transition: opacity 0.167s ease;
+.win-content-dialog-button {
+  width: 100%;
+  min-width: 0;
 }
 
-.dialog-enter-active .win-dialog {
-  animation: dialog-scale-in 0.333s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+.win-content-dialog-primary {
+  grid-column: 1;
 }
 
-.dialog-leave-active {
-  transition: opacity 0.083s ease;
+.win-content-dialog-secondary {
+  grid-column: 1;
 }
 
-.dialog-leave-active .win-dialog {
-  animation: dialog-scale-out 0.083s ease both;
+.win-content-dialog-close {
+  grid-column: 5;
 }
 
-.dialog-enter-from,
-.dialog-leave-to {
+.win-content-dialog-command-space.all-visible .win-content-dialog-secondary {
+  grid-column: 3;
+}
+
+.win-content-dialog-command-space.primary-visible .win-content-dialog-primary,
+.win-content-dialog-command-space.secondary-visible .win-content-dialog-secondary,
+.win-content-dialog-command-space.primary-secondary-visible .win-content-dialog-secondary {
+  grid-column: 5;
+}
+
+.win-content-dialog-enter-active {
+  transition: opacity 83ms linear;
+}
+
+.win-content-dialog-leave-active {
+  transition: opacity 83ms linear;
+  pointer-events: none;
+}
+
+.win-content-dialog-enter-active .win-content-dialog {
+  animation: win-content-dialog-enter 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.win-content-dialog-leave-active .win-content-dialog {
+  animation: win-content-dialog-exit 167ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.win-content-dialog-enter-from,
+.win-content-dialog-leave-to {
   opacity: 0;
 }
 
-@keyframes dialog-scale-in {
+@keyframes win-content-dialog-enter {
   from {
     transform: scale(1.05);
-    opacity: 0;
   }
   to {
     transform: scale(1);
-    opacity: 1;
   }
 }
 
-@keyframes dialog-scale-out {
+@keyframes win-content-dialog-exit {
   from {
     transform: scale(1);
-    opacity: 1;
   }
   to {
     transform: scale(1.05);
-    opacity: 0;
   }
 }
 </style>

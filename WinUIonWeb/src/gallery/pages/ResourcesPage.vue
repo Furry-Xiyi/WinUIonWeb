@@ -1,131 +1,135 @@
 <template>
-  <div class="page-container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1 class="page-title">Resources</h1>
-      <div class="page-actions">
-        <WinButton @click="toggleTheme" class="theme-toggle-btn">
-          <span class="icon">{{ isDarkTheme ? '☀️' : '🌙' }}</span>
-        </WinButton>
-      </div>
-    </div>
-
-    <!-- Introduction Section -->
-    <div class="section-header">
-      <h2 class="section-title">Creating and using XAML resources</h2>
-    </div>
-
-    <div class="description-block">
-      <p>
-        XAML Resources are defined using the <code>ResourceDictionary</code> element. The important parts are
-        <strong>the resource's key</strong> (a unique identifier) and <strong>the value</strong> (like a color or brush).
-      </p>
-    </div>
-
-    <div class="description-block">
-      <ul class="feature-list">
-        <li><strong>App-level:</strong> Resources are defined globally, accessible throughout the application.</li>
-        <li><strong>Page-level:</strong> Resources are defined specific to a particular page.</li>
-        <li><strong>Control-level:</strong> Resources are defined local to a specific control, such as a Button or Grid.</li>
-      </ul>
-    </div>
-
-    <div class="description-block">
-      <p><strong>Tips</strong></p>
-      <ul class="feature-list">
-        <li><strong>Naming:</strong> descriptive keys should always be used for resources to make them easier to identify.</li>
-        <li><strong>Scope:</strong> Resources should be defined at the narrowest scope possible to improve maintainability.</li>
-        <li><strong>Access:</strong> <code>{StaticResource Key}</code> is used in XAML for most cases, and <code>Resources["Key"]</code> is used in C# for runtime access.</li>
-      </ul>
-    </div>
-
-    <!-- Example 1: Resource Hierarchy -->
-    <WinControlExample
-      headerText="Resource hierarchy example"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <!-- Application-level resource (simulated with inline style) -->
-        <div class="resource-demo primary-bg">
-          <div class="resource-text white-text large-text">Using application-level resources</div>
-
-          <!-- Page-level resource -->
-          <div class="resource-demo highlight-bg">
-            <div class="resource-text white-text medium-text">Using page-level resources</div>
-
-            <!-- Control-level resource -->
-            <div class="resource-demo">
-              <div class="resource-demo control-bg">
-                <div class="resource-text white-text small-text">Using control-level resources</div>
+  <div class="gallery-item-page">
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Page Header -->
+            <div class="page-header">
+              <h1 class="page-title">Resources</h1>
+              <div class="page-actions">
+                <WinButton @click="toggleTheme" class="theme-toggle-btn">
+                  <span class="icon">{{ isDarkTheme ? '☀️' : '🌙' }}</span>
+                </WinButton>
               </div>
             </div>
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
 
-    <!-- Theme Resources Section -->
-    <div class="section-header" style="margin-top: 32px;">
-      <h2 class="section-title">Theme resources</h2>
-    </div>
-
-    <div class="description-block">
-      <p>
-        WinUI 3 includes built-in theme resources for commonly used colors. See all brushes on the
-        <a href="#/colors" class="hyperlink">Color page</a>.
-      </p>
-    </div>
-
-    <div class="description-block">
-      <ul class="feature-list">
-        <li><strong>ThemeResource</strong> is used for dynamic theme-based updates.</li>
-        <li><strong>ThemeDictionaries</strong> are defined to provide different values for light and dark themes.</li>
-        <li>A fallback value should always be provided to ensure compatibility with undefined themes.</li>
-      </ul>
-    </div>
-
-    <!-- Example 2: StaticResource vs ThemeResource -->
-    <WinControlExample
-      headerText="StaticResource versus ThemeResource"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <div class="theme-comparison">
-          <p class="instruction-text">Toggle the theme using the theme switch button in the top right corner.</p>
-
-          <div class="static-resource-demo">
-            <div class="demo-text">
-              StaticResource uses the value defined when the app starts and does not update when the theme changes.
+            <!-- Introduction Section -->
+            <div class="section-header">
+              <h2 class="section-title">Creating and using XAML resources</h2>
             </div>
-          </div>
 
-          <div class="theme-resource-demo">
-            <div class="demo-text">
-              ThemeResource adapts automatically to the current theme. If the app switches from light to dark, the color defined by ThemeResource changes.
+            <div class="description-block">
+              <p>
+                XAML Resources are defined using the <code>ResourceDictionary</code> element. The important parts are
+                <strong>the resource's key</strong> (a unique identifier) and <strong>the value</strong> (like a color or brush).
+              </p>
             </div>
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
 
-    <!-- Example 3: Define Custom Theme Resources -->
-    <WinControlExample
-      headerText="Define a new theme resource"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
-      <template #example>
-        <div class="custom-theme-demo">
-          <p class="instruction-text">Toggle the theme using the theme switch button in the top right corner.</p>
-
-          <div class="themed-container" :class="{ 'dark-themed': isDarkTheme }">
-            <div class="theme-label">{{ isDarkTheme ? 'Dark theme' : 'Light theme' }}</div>
-            <div class="theme-image">
-              <img :src="themeImageUrl" alt="Theme illustration" class="responsive-image" />
+            <div class="description-block">
+              <ul class="feature-list">
+                <li><strong>App-level:</strong> Resources are defined globally, accessible throughout the application.</li>
+                <li><strong>Page-level:</strong> Resources are defined specific to a particular page.</li>
+                <li><strong>Control-level:</strong> Resources are defined local to a specific control, such as a Button or Grid.</li>
+              </ul>
             </div>
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
+
+            <div class="description-block">
+              <p><strong>Tips</strong></p>
+              <ul class="feature-list">
+                <li><strong>Naming:</strong> descriptive keys should always be used for resources to make them easier to identify.</li>
+                <li><strong>Scope:</strong> Resources should be defined at the narrowest scope possible to improve maintainability.</li>
+                <li><strong>Access:</strong> <code>{StaticResource Key}</code> is used in XAML for most cases, and <code>Resources["Key"]</code> is used in C# for runtime access.</li>
+              </ul>
+            </div>
+
+            <!-- Example 1: Resource Hierarchy -->
+            <WinControlExample
+              headerText="Resource hierarchy example"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <!-- Application-level resource (simulated with inline style) -->
+                <div class="resource-demo primary-bg">
+                  <div class="resource-text white-text large-text">Using application-level resources</div>
+
+                  <!-- Page-level resource -->
+                  <div class="resource-demo highlight-bg">
+                    <div class="resource-text white-text medium-text">Using page-level resources</div>
+
+                    <!-- Control-level resource -->
+                    <div class="resource-demo">
+                      <div class="resource-demo control-bg">
+                        <div class="resource-text white-text small-text">Using control-level resources</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Theme Resources Section -->
+            <div class="section-header" style="margin-top: 32px;">
+              <h2 class="section-title">Theme resources</h2>
+            </div>
+
+            <div class="description-block">
+              <p>
+                WinUI 3 includes built-in theme resources for commonly used colors. See all brushes on the
+                <a href="#/colors" class="hyperlink">Color page</a>.
+              </p>
+            </div>
+
+            <div class="description-block">
+              <ul class="feature-list">
+                <li><strong>ThemeResource</strong> is used for dynamic theme-based updates.</li>
+                <li><strong>ThemeDictionaries</strong> are defined to provide different values for light and dark themes.</li>
+                <li>A fallback value should always be provided to ensure compatibility with undefined themes.</li>
+              </ul>
+            </div>
+
+            <!-- Example 2: StaticResource vs ThemeResource -->
+            <WinControlExample
+              headerText="StaticResource versus ThemeResource"
+              :templateCode="example2Template"
+              :vueCode="example2Vue">
+              <template #example>
+                <div class="theme-comparison">
+                  <p class="instruction-text">Toggle the theme using the theme switch button in the top right corner.</p>
+
+                  <div class="static-resource-demo">
+                    <div class="demo-text">
+                      StaticResource uses the value defined when the app starts and does not update when the theme changes.
+                    </div>
+                  </div>
+
+                  <div class="theme-resource-demo">
+                    <div class="demo-text">
+                      ThemeResource adapts automatically to the current theme. If the app switches from light to dark, the color defined by ThemeResource changes.
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 3: Define Custom Theme Resources -->
+            <WinControlExample
+              headerText="Define a new theme resource"
+              :templateCode="example3Template"
+              :vueCode="example3Vue">
+              <template #example>
+                <div class="custom-theme-demo">
+                  <p class="instruction-text">Toggle the theme using the theme switch button in the top right corner.</p>
+
+                  <div class="themed-container" :class="{ 'dark-themed': isDarkTheme }">
+                    <div class="theme-label">{{ isDarkTheme ? 'Dark theme' : 'Light theme' }}</div>
+                    <div class="theme-image">
+                      <img :src="themeImageUrl" alt="Theme illustration" class="responsive-image" />
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -134,6 +138,7 @@ import { ref, computed } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const isDarkTheme = ref(false);
 
 const toggleTheme = () => {

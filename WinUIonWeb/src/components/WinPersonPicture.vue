@@ -1,6 +1,6 @@
 <template>
-  <div class="win-person-picture" :style="rootStyle" :title="displayName || initials">
-    <img v-if="profilePicture" :src="profilePicture" alt="" />
+  <div class="win-person-picture" :style="rootStyle" :title="DisplayName || Initials">
+    <img v-if="ProfilePicture" :src="ProfilePicture" alt="" />
     <span v-else-if="resolvedInitials" class="win-person-initials">{{ resolvedInitials }}</span>
     <span v-else class="icon"></span>
   </div>
@@ -10,16 +10,25 @@
 import { computed } from 'vue';
 
 const props = defineProps({
+  ProfilePicture: { type: String, default: '' },
+  DisplayName: { type: String, default: '' },
+  Initials: { type: String, default: '' },
+  Width: { type: [String, Number], default: '' },
+  Height: { type: [String, Number], default: '' },
   profilePicture: String,
   displayName: String,
   initials: String,
-  size: { type: Number, default: 300 }
+  size: { type: Number, default: 72 }
 });
 
+const ProfilePicture = computed(() => props.ProfilePicture || props.profilePicture || '');
+const DisplayName = computed(() => props.DisplayName || props.displayName || '');
+const Initials = computed(() => props.Initials || props.initials || '');
+
 const resolvedInitials = computed(() => {
-  if (props.initials) return props.initials.slice(0, 2).toUpperCase();
-  if (!props.displayName) return '';
-  return props.displayName
+  if (Initials.value) return Initials.value.slice(0, 2).toUpperCase();
+  if (!DisplayName.value) return '';
+  return DisplayName.value
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
@@ -29,10 +38,16 @@ const resolvedInitials = computed(() => {
 });
 
 const rootStyle = computed(() => ({
-  width: `${props.size}px`,
-  height: `${props.size}px`,
-  fontSize: `${Math.max(18, props.size * 0.34)}px`
+  width: cssLength(props.Width || props.Height || props.size),
+  height: cssLength(props.Height || props.size),
+  fontSize: `${Math.max(18, cssNumber(props.Height || props.Width || props.size) * 0.34)}px`
 }));
+
+const cssLength = (value) => typeof value === 'number' || String(value).match(/^\d+$/) ? `${value}px` : value;
+const cssNumber = (value) => {
+  const parsed = Number.parseFloat(String(value));
+  return Number.isFinite(parsed) ? parsed : props.size;
+};
 </script>
 
 <style>

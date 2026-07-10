@@ -1,34 +1,32 @@
 <template>
-  <div>
-    <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.dropdownbutton')" />
-      <WinTextBlock class="page-description" :Text="$t('text.a-dropdownbutton-is-a-button-that-displays-a-che')" TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.dropdownbutton')" />
+          <WinTextBlock class="page-description" :Text="$t('text.a-dropdownbutton-is-a-button-that-displays-a-che')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+      <div class="gallery-page-content">
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="dropDownButtonSimpleVue" :headerText="$t('sample.dropdown.simple')">
+              <template #example>
+                <WinDropDownButton :Content="$t('text.email')" :Flyout="emailFlyout" />
+              </template>
+            </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="dropDownButtonIconVue" :headerText="$t('sample.dropdown.icons')">
+              <template #example>
+                <WinDropDownButton AutomationProperties.Name="Email" :Flyout="emailIconFlyout">
+                  <span class="icon">&#xE715;</span>
+                </WinDropDownButton>
+              </template>
+            </WinControlExample>
       </div>
     </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.dropdown.simple')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="dropDownButtonSimpleVue">
-      <template #example>
-        <WinDropDownButton :Content="$t('text.email')" :Flyout="emailFlyout" />
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.dropdown.icons')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="dropDownButtonIconVue">
-      <template #example>
-        <WinDropDownButton AutomationProperties.Name="Email" :Flyout="emailIconFlyout">
-          <span class="icon">&#xE715;</span>
-        </WinDropDownButton>
-      </template>
-    </WinControlExample>
-  </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
@@ -41,6 +39,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'dropdownbutton');
@@ -91,8 +90,4 @@ const dropDownButtonIconVue = `<WinDropDownButton AutomationProperties.Name="Ema
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
-}
 </style>

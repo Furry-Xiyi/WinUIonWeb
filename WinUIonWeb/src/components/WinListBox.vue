@@ -1,16 +1,25 @@
 <!-- components/WinListBox.vue -->
 <template>
-  <div class="win-list-box">
-    <div v-for="(item, index) in items" :key="index"
-         class="win-list-box-item"
-         :class="{ selected: isSelected(item, index) }"
-         @click="select(index)">
-      <slot name="item" :item="item">{{ item }}</slot>
+  <WinScrollViewer
+    class="win-list-box"
+    VerticalScrollMode="Auto"
+    VerticalScrollBarVisibility="Auto"
+    HorizontalScrollMode="Disabled"
+    HorizontalScrollBarVisibility="Disabled">
+    <div class="win-list-box-items">
+      <div v-for="(item, index) in items" :key="index"
+           class="win-list-box-item"
+           :class="{ selected: isSelected(item, index) }"
+           @click="select(index)">
+        <slot name="item" :item="item"><WinTextBlock :Text="String(item)" /></slot>
+      </div>
     </div>
-  </div>
+  </WinScrollViewer>
 </template>
 <script setup>
 import { computed, ref, toRaw } from 'vue';
+import WinScrollViewer from './WinScrollViewer.vue';
+import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
   ItemsSource: { type: Array, default: null },
@@ -67,9 +76,11 @@ const select = (index) => {
     background: var(--card-bg);
     border: 1px solid var(--card-stroke);
     border-radius: 0;
+  }
+
+  .win-list-box-items {
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
   }
 
   .win-list-box-item {

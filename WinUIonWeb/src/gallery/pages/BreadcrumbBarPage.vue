@@ -1,57 +1,60 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">BreadcrumbBar</h1>
-      <p class="page-description">
-        The BreadcrumbBar control provides the direct path of pages or folders to the current location. It is often used for navigation in file systems, hierarchies, and nested structures.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">BreadcrumbBar</h1>
+          <p class="page-description">
+            The BreadcrumbBar control provides the direct path of pages or folders to the current location. It is often used for navigation in file systems, hierarchies, and nested structures.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example 1: A BreadcrumbBar control -->
+            <WinControlExample
+              headerText="A BreadcrumbBar control"
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <WinBreadcrumbBar :itemsSource="foldersString" />
+              </template>
+            </WinControlExample>
+
+            <!-- Example 2: BreadcrumbBar Control with Custom DataTemplate -->
+            <WinControlExample
+              headerText="BreadcrumbBar Control with Custom DataTemplate"
+              :theme="pageTheme"
+              :templateCode="example2Template"
+              :vueCode="example2Vue">
+              <template #example>
+                <WinBreadcrumbBar
+                  :itemsSource="folders"
+                  @itemClicked="onBreadcrumbItemClicked">
+                  <template #item="{ item }">
+                    <span>{{ item.name }}</span>
+                  </template>
+                </WinBreadcrumbBar>
+              </template>
+              <template #options>
+                <WinButton @click="resetSample">
+                  Reset sample
+                </WinButton>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example 1: A BreadcrumbBar control -->
-    <WinControlExample
-      headerText="A BreadcrumbBar control"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <WinBreadcrumbBar :itemsSource="foldersString" />
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: BreadcrumbBar Control with Custom DataTemplate -->
-    <WinControlExample
-      headerText="BreadcrumbBar Control with Custom DataTemplate"
-      :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <WinBreadcrumbBar
-          :itemsSource="folders"
-          @itemClicked="onBreadcrumbItemClicked">
-          <template #item="{ item }">
-            <span>{{ item.name }}</span>
-          </template>
-        </WinBreadcrumbBar>
-      </template>
-      <template #options>
-        <WinButton @click="resetSample">
-          Reset sample
-        </WinButton>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -64,6 +67,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'breadcrumbbar');
 

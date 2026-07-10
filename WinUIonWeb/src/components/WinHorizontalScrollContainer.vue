@@ -70,7 +70,7 @@ const updateScrollButtonsVisibility = () => {
   canScrollForward.value = scrollableWidth > edgeTolerance && horizontalOffset < scrollableWidth - edgeTolerance;
 };
 
-const changeView = (offset) => {
+const ChangeView = (offset) => {
   const el = scroller.value;
   if (!el) return;
 
@@ -97,7 +97,7 @@ const scrollBack = () => {
   const el = scroller.value;
   if (!el) return;
 
-  changeView(-el.clientWidth);
+  ChangeView(-el.clientWidth);
   nextTick(() => scrollForwardButton.value?.focus());
 };
 
@@ -105,7 +105,7 @@ const scrollForward = () => {
   const el = scroller.value;
   if (!el) return;
 
-  changeView(el.clientWidth);
+  ChangeView(el.clientWidth);
   nextTick(() => scrollBackButton.value?.focus());
 };
 

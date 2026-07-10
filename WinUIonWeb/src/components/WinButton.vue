@@ -222,20 +222,24 @@ const onClick = (event) => {
       --ButtonBorderBrushPointerOverBottom: var(--AccentButtonBorderBrushPointerOverBottom);
       --ButtonBorderBrushPressedBottom: var(--AccentButtonBorderBrushPressed);
       --ButtonBorderBrushDisabledBottom: var(--AccentButtonBorderBrushDisabled);
-      --AccentButtonBackground: var(--accent-base);
-      --AccentButtonBackgroundPointerOver: var(--accent-hover);
-      --AccentButtonBackgroundPressed: var(--accent-pressed);
-      --AccentButtonBackgroundDisabled: var(--accent-fill-disabled);
-      --AccentButtonForeground: var(--accent-text);
-      --AccentButtonForegroundPointerOver: var(--accent-text);
-      --AccentButtonForegroundPressed: var(--accent-text-secondary);
-      --AccentButtonForegroundDisabled: var(--text-disabled);
-      --AccentButtonBorderBrush: var(--accent-border);
-      --AccentButtonBorderBrushBottom: var(--accent-border-accent);
-      --AccentButtonBorderBrushPointerOver: var(--accent-border);
-      --AccentButtonBorderBrushPointerOverBottom: var(--accent-border-accent);
-      --AccentButtonBorderBrushPressed: transparent;
-      --AccentButtonBorderBrushDisabled: transparent;
+      --AccentButtonBackground: var(--AccentFillColorDefaultBrush, var(--accent-base));
+      --AccentButtonBackgroundPointerOver: var(--AccentFillColorSecondaryBrush, var(--accent-hover));
+      --AccentButtonBackgroundPressed: var(--AccentFillColorTertiaryBrush, var(--accent-pressed));
+      --AccentButtonBackgroundDisabled: var(--AccentFillColorDisabledBrush, var(--accent-fill-disabled));
+      --AccentButtonForeground: var(--TextOnAccentFillColorPrimaryBrush, var(--accent-text));
+      --AccentButtonForegroundPointerOver: var(--TextOnAccentFillColorPrimaryBrush, var(--accent-text));
+      --AccentButtonForegroundPressed: var(--TextOnAccentFillColorSecondaryBrush, var(--accent-text-secondary));
+      --AccentButtonForegroundDisabled: var(--TextOnAccentFillColorDisabledBrush, var(--text-disabled));
+      --AccentButtonBorderBrush: var(--AccentControlElevationBorderBrush, var(--accent-border));
+      --AccentButtonBorderBrushBottom: var(--AccentControlElevationBorderBottomBrush, var(--accent-border-accent));
+      --AccentButtonBorderBrushPointerOver: var(--AccentControlElevationBorderBrush, var(--accent-border));
+      --AccentButtonBorderBrushPointerOverBottom: var(--AccentControlElevationBorderBottomBrush, var(--accent-border-accent));
+      --AccentButtonBorderBrushPressed: var(--ControlFillColorTransparentBrush, transparent);
+      --AccentButtonBorderBrushDisabled: var(--ControlFillColorTransparentBrush, transparent);
+    }
+
+    .win-btn .win-text-block {
+      color: inherit;
     }
 
     .win-btn.SubtleButtonStyle {

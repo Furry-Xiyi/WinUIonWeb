@@ -1,323 +1,234 @@
 <template>
-  <div class="win-flyout-anchor" ref="anchorRef">
+  <span class="win-flyout-anchor" ref="anchorRef">
     <slot name="trigger"></slot>
     <Teleport to="body">
-      <Transition :name="transitionName">
-        <div v-if="visible" ref="flyoutRef" class="win-flyout" :class="flyoutClasses" :style="flyoutStyle">
+      <div v-if="effectiveIsOpen" class="win-flyout-dismiss-layer" @pointerdown="onLightDismiss"></div>
+      <div
+        v-if="effectiveIsOpen"
+        ref="flyoutRef"
+        class="win-flyout"
+        :class="[themeClass, openDirection === 'up' ? 'opens-up' : 'opens-down']"
+        :style="flyoutStyle"
+        @pointerdown.stop>
+        <WinScrollViewer
+          class="win-flyout-scroll"
+          VerticalScrollMode="Auto"
+          VerticalScrollBarVisibility="Auto"
+          HorizontalScrollMode="Disabled"
+          HorizontalScrollBarVisibility="Disabled">
           <slot></slot>
-        </div>
-      </Transition>
+        </WinScrollViewer>
+      </div>
     </Teleport>
-  </div>
+  </span>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import WinScrollViewer from './WinScrollViewer.vue';
 
 const props = defineProps({
-  placement: { type: String, default: 'bottom' }, // 保留向后兼容
-  direction: { type: String, default: 'auto' }, // 'down' | 'up' | 'auto'
-  align: { type: String, default: 'left' } // 'left' | 'center' | 'right'
+  IsOpen: { type: Boolean, default: undefined },
+  Placement: { type: String, default: 'Bottom' },
+  ShowMode: { type: String, default: 'Standard' },
+  IsLightDismissEnabled: { type: Boolean, default: true },
+  LightDismissOverlayMode: { type: String, default: 'Auto' },
+  Theme: { type: String, default: '' },
+  placement: { type: String, default: '' },
+  direction: { type: String, default: '' },
+  align: { type: String, default: '' }
 });
 
-const visible = ref(false);
+const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed', 'Opening', 'Closing']);
+
 const anchorRef = ref(null);
 const flyoutRef = ref(null);
-const actualDirection = ref('down');
-const position = ref({ top: 0, left: 0 });
+const localIsOpen = ref(false);
+const position = ref({ top: 0, left: 0, maxHeight: 0, minWidth: 0 });
+const openDirection = ref('down');
 
-const computeDirection = () => {
-  if (props.direction !== 'auto') {
-    actualDirection.value = props.direction;
-    return;
-  }
+const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
+const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
+const requestedPlacement = computed(() => props.Placement || props.placement || 'Bottom');
 
-  // Auto: 根据窗口剩余空间判断
-  if (!anchorRef.value) {
-    actualDirection.value = 'down';
-    return;
-  }
+const flyoutStyle = computed(() => ({
+  top: `${position.value.top}px`,
+  left: `${position.value.left}px`,
+  minWidth: position.value.minWidth ? `${position.value.minWidth}px` : undefined,
+  maxHeight: position.value.maxHeight ? `${position.value.maxHeight}px` : undefined
+}));
 
-  const rect = anchorRef.value.getBoundingClientRect();
-  const spaceBelow = window.innerHeight - rect.bottom;
-  const spaceAbove = rect.top;
-
-  // 如果下方空间不足300px且上方空间更大，则向上弹出
-  actualDirection.value = (spaceBelow < 300 && spaceAbove > spaceBelow) ? 'up' : 'down';
+const setOpen = (value) => {
+  if (value === effectiveIsOpen.value && props.IsOpen !== undefined) return;
+  localIsOpen.value = value;
+  emit('update:IsOpen', value);
+  if (value) emit('Opening');
+  else emit('Closing');
 };
 
-const computePosition = () => {
-  if (!anchorRef.value) return;
+const updatePosition = async () => {
+  const anchor = anchorRef.value;
+  if (!anchor) return;
+  const rect = anchor.getBoundingClientRect();
+  const margin = 8;
+  const gap = 6;
+  const placement = requestedPlacement.value;
+  const preferTop = placement.includes('Top') || props.direction === 'up';
+  const preferRight = placement.includes('Right');
+  const preferCenter = props.align === 'center';
+  const preferEnd = placement.includes('Right') || props.align === 'right';
 
-  const rect = anchorRef.value.getBoundingClientRect();
-  const scrollX = window.scrollX || window.pageXOffset;
-  const scrollY = window.scrollY || window.pageYOffset;
-
-  let top = 0;
-  let left = 0;
-
-  // 计算垂直位置
-  if (actualDirection.value === 'down') {
-    top = rect.bottom + scrollY + 8;
-  } else {
-    // 向上弹出时，需要等flyout渲染后才能获取高度
-    top = rect.top + scrollY - 8;
-  }
-
-  // 计算水平位置
-  if (props.align === 'left') {
-    left = rect.left + scrollX;
-  } else if (props.align === 'center') {
-    left = rect.left + scrollX + rect.width / 2;
-  } else if (props.align === 'right') {
-    left = rect.right + scrollX;
-  }
-
-  position.value = { top, left };
-};
-
-const flyoutClasses = computed(() => {
-  return [
-    'direction-' + actualDirection.value,
-    'align-' + props.align
-  ];
-});
-
-const flyoutStyle = computed(() => {
-  const style = {
-    top: position.value.top + 'px',
-    left: position.value.left + 'px'
+  let top = preferTop ? rect.top - gap : rect.bottom + gap;
+  let left = preferRight ? rect.right : rect.left;
+  position.value = {
+    top,
+    left,
+    maxHeight: Math.max(120, window.innerHeight - margin * 2),
+    minWidth: rect.width
   };
 
-  // 向上弹出时需要向上偏移自身高度
-  if (actualDirection.value === 'up' && flyoutRef.value) {
-    const height = flyoutRef.value.offsetHeight;
-    style.top = (position.value.top - height) + 'px';
-  }
+  await nextTick();
+  const flyout = flyoutRef.value;
+  if (!flyout) return;
+  const flyoutRect = flyout.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom - gap - margin;
+  const spaceAbove = rect.top - gap - margin;
+  const shouldOpenUp = preferTop || (spaceBelow < flyoutRect.height && spaceAbove > spaceBelow);
+  openDirection.value = shouldOpenUp ? 'up' : 'down';
 
-  return style;
-});
+  top = shouldOpenUp ? rect.top - gap - flyoutRect.height : rect.bottom + gap;
+  if (preferCenter) left = rect.left + rect.width / 2 - flyoutRect.width / 2;
+  else if (preferEnd) left = rect.right - flyoutRect.width;
+  else left = rect.left;
 
-const transitionName = computed(() => {
-  return 'flyout-anim-' + actualDirection.value;
-});
+  left = Math.max(margin, Math.min(window.innerWidth - flyoutRect.width - margin, left));
+  top = Math.max(margin, Math.min(window.innerHeight - flyoutRect.height - margin, top));
 
-const show = () => {
-  computeDirection();
-  computePosition();
-  visible.value = true;
-  nextTick(() => {
-    computePosition(); // 再次计算以处理向上弹出的高度
-  });
+  position.value = {
+    top,
+    left,
+    maxHeight: Math.max(120, shouldOpenUp ? spaceAbove : spaceBelow),
+    minWidth: rect.width
+  };
+};
+
+const show = async () => {
+  setOpen(true);
+  await nextTick();
+  await updatePosition();
+  emit('Opened');
 };
 
 const hide = () => {
-  visible.value = false;
+  if (!effectiveIsOpen.value) return;
+  setOpen(false);
+  emit('Closed');
 };
 
 const toggle = () => {
-  if (visible.value) hide();
-  else show();
+  if (effectiveIsOpen.value) hide();
+  else void show();
 };
 
-const onDocClick = (e) => {
-  if (!visible.value) return;
-  // 检查点击是否在anchor或flyout内部
-  const clickedInAnchor = anchorRef.value && anchorRef.value.contains(e.target);
-  const clickedInFlyout = flyoutRef.value && flyoutRef.value.contains(e.target);
-
-  if (!clickedInAnchor && !clickedInFlyout) {
-    hide();
-  }
+const onLightDismiss = () => {
+  if (props.IsLightDismissEnabled) hide();
 };
 
-const updatePosition = () => {
-  if (visible.value) {
-    computePosition();
-  }
-};
-
-watch(visible, (newVal) => {
-  if (newVal) {
-    window.addEventListener('scroll', updatePosition, true);
-    window.addEventListener('resize', updatePosition);
-  } else {
-    window.removeEventListener('scroll', updatePosition, true);
-    window.removeEventListener('resize', updatePosition);
+watch(() => props.IsOpen, async (value) => {
+  if (value) {
+    await nextTick();
+    await updatePosition();
+    emit('Opened');
   }
 });
 
-onMounted(() => document.addEventListener('pointerdown', onDocClick));
+const onViewportChanged = () => {
+  if (effectiveIsOpen.value) void updatePosition();
+};
+
+onMounted(() => {
+  window.addEventListener('resize', onViewportChanged);
+  window.addEventListener('scroll', onViewportChanged, true);
+});
+
 onBeforeUnmount(() => {
-  document.removeEventListener('pointerdown', onDocClick);
-  window.removeEventListener('scroll', updatePosition, true);
-  window.removeEventListener('resize', updatePosition);
+  window.removeEventListener('resize', onViewportChanged);
+  window.removeEventListener('scroll', onViewportChanged, true);
 });
 
-defineExpose({ show, hide, toggle, visible });
+defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
 </script>
 
 <style>
 .win-flyout-anchor {
-  position: relative;
   display: inline-flex;
 }
 
+.win-flyout-dismiss-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 989;
+}
+
 .win-flyout {
-  position: absolute;
-  z-index: 9000;
-  background: var(--flyout-bg);
+  position: fixed;
+  z-index: 990;
+  min-width: 20px;
+  max-width: min(420px, calc(100vw - 16px));
+  padding: 16px;
+  overflow: hidden;
+  color: var(--text-primary);
+  background: var(--flyout-background, var(--flyout-bg));
   background-image: var(--flyout-material-overlay);
+  border: 1px solid var(--surface-stroke-color-flyout, var(--flyout-border));
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
-  border: 1px solid var(--stroke-surface-flyout);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
-  min-width: 200px;
 }
 
-/* Align: Center */
-.win-flyout.align-center {
-  transform: translateX(-50%);
+.win-flyout-scroll {
+  width: 100%;
+  max-height: inherit;
 }
 
-/* Align: Right */
-.win-flyout.align-right {
-  transform: translateX(-100%);
+.win-flyout-scroll :deep(.win-scroll-viewer-viewport) {
+  height: auto;
+  max-height: inherit;
 }
 
-/* Transform origin for animations */
-.win-flyout.direction-down.align-left {
-  transform-origin: top left;
+.win-flyout.opens-down {
+  animation: win-flyout-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, win-flyout-opacity 83ms linear both;
 }
 
-.win-flyout.direction-down.align-center {
-  transform-origin: top center;
+.win-flyout.opens-up {
+  animation: win-flyout-open-up 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, win-flyout-opacity 83ms linear both;
 }
 
-.win-flyout.direction-down.align-right {
-  transform-origin: top right;
+@keyframes win-flyout-opacity {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.win-flyout.direction-up.align-left {
-  transform-origin: bottom left;
+@keyframes win-flyout-open-down {
+  from {
+    clip-path: inset(0 0 calc(100% - 1px) 0);
+    transform: translateY(-16px);
+  }
+  to {
+    clip-path: inset(0);
+    transform: translateY(0);
+  }
 }
 
-.win-flyout.direction-up.align-center {
-  transform-origin: bottom center;
-}
-
-.win-flyout.direction-up.align-right {
-  transform-origin: bottom right;
-}
-
-/* 向下弹出动画 */
-.flyout-anim-down-enter-active {
-  transition: opacity 0.250s cubic-bezier(0, 0, 0, 1), transform 0.250s cubic-bezier(0, 0, 0, 1);
-}
-
-.flyout-anim-down-leave-active {
-  transition: opacity 0.083s ease, transform 0.083s ease;
-}
-
-.flyout-anim-down-enter-from {
-  opacity: 0;
-}
-
-.flyout-anim-down-enter-from.align-left {
-  transform: scaleY(0.9) translateY(-4px);
-}
-
-.flyout-anim-down-enter-from.align-center {
-  transform: translateX(-50%) scaleY(0.9) translateY(-4px);
-}
-
-.flyout-anim-down-enter-from.align-right {
-  transform: translateX(-100%) scaleY(0.9) translateY(-4px);
-}
-
-.flyout-anim-down-leave-to {
-  opacity: 0;
-}
-
-.flyout-anim-down-leave-to.align-left {
-  transform: scaleY(0.9) translateY(-4px);
-}
-
-.flyout-anim-down-leave-to.align-center {
-  transform: translateX(-50%) scaleY(0.9) translateY(-4px);
-}
-
-.flyout-anim-down-leave-to.align-right {
-  transform: translateX(-100%) scaleY(0.9) translateY(-4px);
-}
-
-/* 向上弹出动画 */
-.flyout-anim-up-enter-active {
-  transition: opacity 0.250s cubic-bezier(0, 0, 0, 1), transform 0.250s cubic-bezier(0, 0, 0, 1);
-}
-
-.flyout-anim-up-leave-active {
-  transition: opacity 0.083s ease, transform 0.083s ease;
-}
-
-.flyout-anim-up-enter-from {
-  opacity: 0;
-}
-
-.flyout-anim-up-enter-from.align-left {
-  transform: scaleY(0.9) translateY(4px);
-}
-
-.flyout-anim-up-enter-from.align-center {
-  transform: translateX(-50%) scaleY(0.9) translateY(4px);
-}
-
-.flyout-anim-up-enter-from.align-right {
-  transform: translateX(-100%) scaleY(0.9) translateY(4px);
-}
-
-.flyout-anim-up-leave-to {
-  opacity: 0;
-}
-
-.flyout-anim-up-leave-to.align-left {
-  transform: scaleY(0.9) translateY(4px);
-}
-
-.flyout-anim-up-leave-to.align-center {
-  transform: translateX(-50%) scaleY(0.9) translateY(4px);
-}
-
-.flyout-anim-up-leave-to.align-right {
-  transform: translateX(-100%) scaleY(0.9) translateY(4px);
-}
-
-/* 保留旧的placement API用于向后兼容 */
-.win-flyout.placement-bottom {
-  transform-origin: top center;
-}
-
-.win-flyout.placement-top {
-  transform-origin: bottom center;
-}
-
-.flyout-anim-enter-active {
-  transition: opacity 0.250s cubic-bezier(0, 0, 0, 1), transform 0.250s cubic-bezier(0, 0, 0, 1);
-}
-
-.flyout-anim-leave-active {
-  transition: opacity 0.083s ease, transform 0.083s ease;
-}
-
-.flyout-anim-enter-from {
-  opacity: 0;
-  transform: scaleY(0.9) translateY(-4px);
-}
-
-.flyout-anim-leave-to {
-  opacity: 0;
-  transform: scaleY(0.9) translateY(-4px);
+@keyframes win-flyout-open-up {
+  from {
+    clip-path: inset(calc(100% - 1px) 0 0 0);
+    transform: translateY(16px);
+  }
+  to {
+    clip-path: inset(0);
+    transform: translateY(0);
+  }
 }
 </style>

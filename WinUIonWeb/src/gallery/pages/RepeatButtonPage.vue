@@ -1,32 +1,33 @@
 <template>
-  <div>
-    <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.repeatbutton')" />
-      <WinTextBlock class="page-description" :Text="$t('text.a-button-that-raises-its-click-event-repeatedly-ecf7f2')" TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.repeatbutton')" />
+          <WinTextBlock class="page-description" :Text="$t('text.a-button-that-raises-its-click-event-repeatedly-ecf7f2')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+      <div class="gallery-page-content">
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="repeatButtonSimpleVue" :headerText="$t('sample.repeat.simple')">
+              <template #example>
+                <div class="horizontal-stack">
+                  <WinRepeatButton Content="Click and hold" :IsEnabled="DisableControl1 !== true" @Click="RepeatButton_Click" />
+                  <WinTextBlock Margin="8,0,0,0" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" AutomationProperties.Name="Control output" :Text="Control1Output" />
+                </div>
+              </template>
+              <template #options>
+                <WinCheckBox v-model="DisableControl1">
+                  <WinTextBlock :Text="$t('sample.disable-repeatbutton')" />
+                </WinCheckBox>
+              </template>
+            </WinControlExample>
       </div>
     </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.repeat.simple')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="repeatButtonSimpleVue">
-      <template #example>
-        <div class="horizontal-stack">
-          <WinRepeatButton Content="Click and hold" :IsEnabled="DisableControl1 !== true" @Click="RepeatButton_Click" />
-          <WinTextBlock Margin="8,0,0,0" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" AutomationProperties.Name="Control output" :Text="Control1Output" />
-        </div>
-      </template>
-      <template #options>
-        <WinCheckBox v-model="DisableControl1">
-          <WinTextBlock :Text="$t('sample.disable-repeatbutton')" />
-        </WinCheckBox>
-      </template>
-    </WinControlExample>
-  </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
@@ -40,6 +41,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'repeatbutton');
@@ -76,8 +78,4 @@ const repeatButtonSimpleVue = `<div>
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .horizontal-stack { display: flex; align-items: center; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
-}
 </style>

@@ -42,39 +42,47 @@
         class="commandbar-secondary-overlay"
         @click.self="closeOverflow"
       >
-        <div
+        <WinScrollViewer
           class="commandbar-secondary"
-          ref="secondaryContainer"
           role="menu"
-          @click="handleSecondaryClick"
+          VerticalScrollMode="Auto"
+          VerticalScrollBarVisibility="Auto"
+          HorizontalScrollMode="Disabled"
+          HorizontalScrollBarVisibility="Disabled"
         >
-          <!-- Overflow Primary Commands (if dynamic overflow is enabled) -->
-          <template v-if="overflowPrimaryCommands.length > 0">
-            <component
-              v-for="(command, index) in overflowPrimaryCommands"
-              :key="command.key || `overflow-${index}`"
-              :is="command.component"
-              v-bind="command.props"
-              :is-compact="true"
-              label-position="Right"
-              @click="(e: MouseEvent) => handleCommandClick(command, e)"
-            />
-            <div v-if="hasSecondaryCommands" class="commandbar-separator"></div>
-          </template>
+          <div
+            class="commandbar-secondary-content"
+            ref="secondaryContainer"
+            @click="handleSecondaryClick"
+          >
+            <!-- Overflow Primary Commands (if dynamic overflow is enabled) -->
+            <template v-if="overflowPrimaryCommands.length > 0">
+              <component
+                v-for="(command, index) in overflowPrimaryCommands"
+                :key="command.key || `overflow-${index}`"
+                :is="command.component"
+                v-bind="command.props"
+                :is-compact="true"
+                label-position="Right"
+                @click="(e: MouseEvent) => handleCommandClick(command, e)"
+              />
+              <div v-if="hasSecondaryCommands" class="commandbar-separator"></div>
+            </template>
 
-          <!-- Secondary Commands -->
-          <slot name="secondary">
-            <component
-              v-for="(command, index) in secondaryCommandsList"
-              :key="command.key || `secondary-${index}`"
-              :is="command.component"
-              v-bind="command.props"
-              :is-compact="true"
-              label-position="Right"
-              @click="(e: MouseEvent) => handleCommandClick(command, e)"
-            />
-          </slot>
-        </div>
+            <!-- Secondary Commands -->
+            <slot name="secondary">
+              <component
+                v-for="(command, index) in secondaryCommandsList"
+                :key="command.key || `secondary-${index}`"
+                :is="command.component"
+                v-bind="command.props"
+                :is-compact="true"
+                label-position="Right"
+                @click="(e: MouseEvent) => handleCommandClick(command, e)"
+              />
+            </slot>
+          </div>
+        </WinScrollViewer>
       </div>
     </Transition>
   </div>
@@ -83,6 +91,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, useSlots } from 'vue'
 import { useI18n } from './i18n/index'
+import WinScrollViewer from './WinScrollViewer.vue'
 
 const { t } = useI18n()
 
@@ -472,10 +481,12 @@ defineExpose({
   border-radius: var(--muxc-overlay-corner-radius, 8px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   padding: 4px 0;
+  max-height: 60vh;
+}
+
+.commandbar-secondary-content {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  max-height: 60vh;
 }
 
 .commandbar-secondary :deep(.win-appbar-button) {

@@ -4,13 +4,13 @@
       <button
         class="win-btn subtle calendar-title-btn"
         @click="onLabelClick"
-        :disabled="viewMode === 2"
+        :disabled="!IsEnabled || viewMode === 2"
       >
-        {{ labelText }}
+        <span>{{ labelText }}</span>
       </button>
       <div class="calendar-nav">
-        <button class="icon-btn" @click="onNav(-1)"></button>
-        <button class="icon-btn" @click="onNav(1)"></button>
+        <button class="icon-btn" :disabled="!IsEnabled" @click="onNav(-1)">&#xEDDB;</button>
+        <button class="icon-btn" :disabled="!IsEnabled" @click="onNav(1)">&#xEDDC;</button>
       </div>
     </div>
 
@@ -27,11 +27,16 @@
         <!-- 日视图 (7列) -->
         <div v-if="viewMode === 0" key="day" class="calendar-panel">
           <div class="calendar-day-headers">
-            <div v-for="d in dayNames" :key="d" class="calendar-day-header">
-              {{ d }}
-            </div>
+            <div v-for="d in dayNames" :key="d" class="calendar-day-header">{{ d }}</div>
           </div>
-          <div class="calendar-scroll" ref="dayScrollEl" @scroll="onDayScroll">
+          <WinScrollViewer
+            class="calendar-scroll"
+            ref="dayScrollEl"
+            VerticalScrollMode="Auto"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollMode="Disabled"
+            HorizontalScrollBarVisibility="Disabled"
+            @ViewChanged="onDayScroll">
             <div :style="{ height: dayTotalHeight + 'px', position: 'relative' }">
               <div
                 :style="{
@@ -52,26 +57,32 @@
                       today: cell.isToday && IsTodayHighlighted,
                       selected: isSelected(cell),
                     }"
+                    :disabled="!IsEnabled"
                     @click="onSelectDay(cell)"
                   >
                     <span
                       v-if="cell.showLabel && IsGroupLabelVisible"
                       class="group-label"
                       :class="{ 'label-accent': isDayLabelAccent(cell) }"
-                    >
-                      {{ cell.labelText }}
-                    </span>
+                    >{{ cell.labelText }}</span>
                     <span class="day-text">{{ cell.date }}</span>
                   </button>
                 </div>
               </div>
             </div>
-          </div>
+          </WinScrollViewer>
         </div>
 
         <!-- 月视图 (4列) -->
         <div v-else-if="viewMode === 1" key="month" class="calendar-panel">
-          <div class="calendar-scroll large-scroll" ref="monthScrollEl" @scroll="onMonthScroll">
+          <WinScrollViewer
+            class="calendar-scroll large-scroll"
+            ref="monthScrollEl"
+            VerticalScrollMode="Auto"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollMode="Disabled"
+            HorizontalScrollBarVisibility="Disabled"
+            @ViewChanged="onMonthScroll">
             <div :style="{ height: monthTotalHeight + 'px', position: 'relative' }">
               <div
                 :style="{
@@ -91,26 +102,32 @@
                       current: item.isTodayMonth,
                       selected: isMonthSelected(item),
                     }"
+                    :disabled="!IsEnabled"
                     @click="onSelectMonth(item)"
                   >
                     <span
                       v-if="item.showLabel && IsGroupLabelVisible"
                       class="group-label"
                       :class="{ 'label-accent': isMonthLabelAccent(item) }"
-                    >
-                      {{ item.labelText }}
-                    </span>
-                    {{ item.text }}
+                    >{{ item.labelText }}</span>
+                    <span>{{ item.text }}</span>
                   </button>
                 </div>
               </div>
             </div>
-          </div>
+          </WinScrollViewer>
         </div>
 
         <!-- 年视图 (4列) -->
         <div v-else key="year" class="calendar-panel">
-          <div class="calendar-scroll large-scroll" ref="yearScrollEl" @scroll="onYearScroll">
+          <WinScrollViewer
+            class="calendar-scroll large-scroll"
+            ref="yearScrollEl"
+            VerticalScrollMode="Auto"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollMode="Disabled"
+            HorizontalScrollBarVisibility="Disabled"
+            @ViewChanged="onYearScroll">
             <div :style="{ height: yearTotalHeight + 'px', position: 'relative' }">
               <div
                 :style="{
@@ -129,14 +146,15 @@
                       'out-of-scope': item.outOfScope,
                       current: item.year === todayYear,
                     }"
+                    :disabled="!IsEnabled"
                     @click="onSelectYear(item)"
                   >
-                    {{ item.year }}
+                    <span>{{ item.year }}</span>
                   </button>
                 </div>
               </div>
             </div>
-          </div>
+          </WinScrollViewer>
         </div>
       </Transition>
     </div>
@@ -144,7 +162,8 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, onMounted } from "vue";
+import { ref, computed, nextTick, onMounted, watch } from "vue";
+import WinScrollViewer from "./WinScrollViewer.vue";
 
 const props = defineProps({
   CalendarIdentifier: { type: String, default: "GregorianCalendar" },
@@ -152,12 +171,13 @@ const props = defineProps({
   DisplayMode: { type: String, default: "Month" },
   FirstDayOfWeek: { type: String, default: "Sunday" },
   IsGroupLabelVisible: { type: Boolean, default: true },
+  IsEnabled: { type: Boolean, default: true },
   IsOutOfScopeEnabled: { type: Boolean, default: true },
   IsTodayHighlighted: { type: Boolean, default: true },
   MaxDate: { type: Date, default: () => new globalThis.Date(2120, 11, 31) },
   MinDate: { type: Date, default: () => new globalThis.Date(1920, 0, 1) },
   NumberOfWeeksInView: { type: Number, default: 6 },
-  SelectedDates: { type: Array, default: () => [] },
+  SelectedDates: { type: Array, default: null },
   SelectionMode: { type: String, default: "Single" },
   Language: { type: String, default: "en-US" },
 });
@@ -184,8 +204,31 @@ const yearScrollEl = ref(null);
 const headerMonth = ref(todayMonth);
 const headerYear = ref(todayYear);
 const headerDecade = ref(Math.floor(todayYear / 10) * 10);
+const localSelectedDates = ref([]);
+const selectedDates = computed(() => Array.isArray(props.SelectedDates) ? props.SelectedDates : localSelectedDates.value);
 
-const formatMonthName = (month, style) => new Intl.DateTimeFormat(props.Language, { month: style }).format(new Date(2024, month, 1));
+const calendarNames = {
+  GregorianCalendar: "gregory",
+  HebrewCalendar: "hebrew",
+  HijriCalendar: "islamic",
+  JapaneseCalendar: "japanese",
+  JulianCalendar: "gregory",
+  KoreanCalendar: "gregory",
+  PersianCalendar: "persian",
+  TaiwanCalendar: "roc",
+  ThaiCalendar: "buddhist",
+  UmAlQuraCalendar: "islamic-umalqura",
+};
+const calendarLocale = computed(() => {
+  const locale = `${props.Language}-u-ca-${calendarNames[props.CalendarIdentifier] ?? "gregory"}`;
+  try {
+    new Intl.DateTimeFormat(locale).format();
+    return locale;
+  } catch {
+    return props.Language;
+  }
+});
+const formatMonthName = (month, style) => new Intl.DateTimeFormat(calendarLocale.value, { month: style }).format(new Date(2024, month, 1));
 const shortMonths = computed(() => Array.from({ length: 12 }, (_, month) => formatMonthName(month, "short")));
 const monthNames = computed(() => Array.from({ length: 12 }, (_, month) => formatMonthName(month, "long")));
 const dayOfWeekIndexes = {
@@ -199,14 +242,16 @@ const dayOfWeekIndexes = {
 };
 const firstDayIndex = dayOfWeekIndexes[props.FirstDayOfWeek] ?? 0;
 const dayNames = computed(() => {
-  const formatter = new Intl.DateTimeFormat(props.Language, { weekday: "short" });
+  const formatter = new Intl.DateTimeFormat(calendarLocale.value, { weekday: "short" });
   const names = Array.from({ length: 7 }, (_, day) => formatter.format(new Date(2024, 0, 7 + day)).slice(0, 2));
   return [...names.slice(firstDayIndex), ...names.slice(0, firstDayIndex)];
 });
+const formatDayNumber = (date) => new Intl.NumberFormat(calendarLocale.value, { useGrouping: false }).format(date.getDate());
 
 const labelText = computed(() => {
-  if (viewMode.value === 0) return `${monthNames.value[headerMonth.value]} ${headerYear.value}`;
-  if (viewMode.value === 1) return `${headerYear.value}`;
+  const currentHeaderDate = new Date(headerYear.value, headerMonth.value, 1);
+  if (viewMode.value === 0) return new Intl.DateTimeFormat(calendarLocale.value, { month: "long", year: "numeric" }).format(currentHeaderDate);
+  if (viewMode.value === 1) return new Intl.DateTimeFormat(calendarLocale.value, { year: "numeric" }).format(currentHeaderDate);
   return `${headerDecade.value} - ${headerDecade.value + 9}`;
 });
 
@@ -309,7 +354,7 @@ const computeDayView = () => {
       const cd = fullDate.getDate();
       cells.push({
         key: `${row}-${c}`,
-        date: cd,
+        date: formatDayNumber(fullDate),
         month: cm,
         year: cy,
         outOfScope: cy !== scopeYear || cm !== scopeMonth,
@@ -385,8 +430,8 @@ const computeMonthView = () => {
 };
 
 const isMonthSelected = (item) => {
-  if (!props.SelectedDates.length) return false;
-  const dates = props.SelectedDates;
+  if (!selectedDates.value.length) return false;
+  const dates = selectedDates.value;
   return dates.some((d) => d && d.getFullYear() === item.year && d.getMonth() === item.month);
 };
 
@@ -454,9 +499,9 @@ const computeYearView = () => {
 };
 
 const isSelected = (cell) => {
-  if (!props.SelectedDates.length) return false;
+  if (!selectedDates.value.length) return false;
   const d = cell.fullDate;
-  return props.SelectedDates.some((v) => v.toDateString() === d.toDateString());
+  return selectedDates.value.some((v) => v.toDateString() === d.toDateString());
 };
 
 const isMonthLabelAccent = (item) => {
@@ -469,23 +514,29 @@ const isDayLabelAccent = (cell) => {
   return isSelected(cell);
 };
 
-const onDayScroll = () => {
-  if (dayScrollEl.value) {
-    dayScrollTop.value = dayScrollEl.value.scrollTop;
-    computeDayView();
-  }
+const onDayScroll = (args) => {
+  dayScrollTop.value = args?.verticalOffset ?? dayScrollEl.value?.scrollTop ?? 0;
+  computeDayView();
 };
-const onMonthScroll = () => {
-  if (monthScrollEl.value) {
-    monthScrollTop.value = monthScrollEl.value.scrollTop;
-    computeMonthView();
-  }
+const onMonthScroll = (args) => {
+  monthScrollTop.value = args?.verticalOffset ?? monthScrollEl.value?.scrollTop ?? 0;
+  computeMonthView();
 };
-const onYearScroll = () => {
-  if (yearScrollEl.value) {
-    yearScrollTop.value = yearScrollEl.value.scrollTop;
-    computeYearView();
+const onYearScroll = (args) => {
+  yearScrollTop.value = args?.verticalOffset ?? yearScrollEl.value?.scrollTop ?? 0;
+  computeYearView();
+};
+
+const scrollViewerElement = (viewer) => viewer?.scrollViewerRef?.value ?? viewer?.scrollViewerRef ?? null;
+
+const setViewerTop = (viewer, top, smooth = false) => {
+  const element = scrollViewerElement(viewer);
+  if (smooth && element?.scrollTo) {
+    element.scrollTo({ top, behavior: "smooth" });
+    return;
   }
+  if (viewer?.ChangeView) viewer.ChangeView(null, top, null, true);
+  else viewer?.ScrollTo?.(0, top);
 };
 
 const absMonthOf = (y, m) => (y - MIN_YEAR) * 12 + m;
@@ -497,9 +548,9 @@ const scrollDayTo = (y, m, smooth = false) => {
   const top = meta.startRow * ROW_H;
   nextTick(() => {
     if (!dayScrollEl.value) return;
-    if (smooth) dayScrollEl.value.scrollTo({ top, behavior: "smooth" });
+    if (smooth) setViewerTop(dayScrollEl.value, top, true);
     else {
-      dayScrollEl.value.scrollTop = top;
+      setViewerTop(dayScrollEl.value, top);
       dayScrollTop.value = top;
       computeDayView();
     }
@@ -511,9 +562,9 @@ const scrollMonthTo = (y, smooth = false) => {
   const top = pageIdx * MONTH_PAGE_H;
   nextTick(() => {
     if (!monthScrollEl.value) return;
-    if (smooth) monthScrollEl.value.scrollTo({ top, behavior: "smooth" });
+    if (smooth) setViewerTop(monthScrollEl.value, top, true);
     else {
-      monthScrollEl.value.scrollTop = top;
+      setViewerTop(monthScrollEl.value, top);
       monthScrollTop.value = top;
       computeMonthView();
     }
@@ -528,9 +579,9 @@ const scrollYearTo = (dec, smooth = false) => {
   const top = row * LARGE_ROW_H;
   nextTick(() => {
     if (!yearScrollEl.value) return;
-    if (smooth) yearScrollEl.value.scrollTo({ top, behavior: "smooth" });
+    if (smooth) setViewerTop(yearScrollEl.value, top, true);
     else {
-      yearScrollEl.value.scrollTop = top;
+      setViewerTop(yearScrollEl.value, top);
       yearScrollTop.value = top;
       computeYearView();
     }
@@ -538,6 +589,7 @@ const scrollYearTo = (dec, smooth = false) => {
 };
 
 const onNav = (dir) => {
+  transitionDir.value = dir > 0 ? "forward" : "backward";
   if (viewMode.value === 0) {
     let m = headerMonth.value + dir,
       y = headerYear.value;
@@ -579,16 +631,22 @@ const onSelectYear = (item) => {
 };
 
 const onSelectDay = (cell) => {
+  if (!props.IsEnabled) return;
   if (cell.outOfScope && !props.IsOutOfScopeEnabled) return;
   if (props.SelectionMode === "None") return;
 
-  const oldDates = [...props.SelectedDates];
+  const oldDates = [...selectedDates.value];
   if (props.SelectionMode === "Single") {
-    const newDates = [cell.fullDate];
+    const wasSelected = selectedDates.value.some((date) => date.toDateString() === cell.fullDate.toDateString());
+    const newDates = wasSelected ? [] : [cell.fullDate];
+    if (!Array.isArray(props.SelectedDates)) localSelectedDates.value = newDates;
     emit("update:SelectedDates", newDates);
-    emit("SelectedDatesChanged", { addedDates: newDates, removedDates: oldDates });
+    emit("SelectedDatesChanged", {
+      addedDates: wasSelected ? [] : newDates,
+      removedDates: wasSelected ? oldDates : oldDates.filter((date) => date.toDateString() !== cell.fullDate.toDateString())
+    });
   } else if (props.SelectionMode === "Multiple") {
-    const list = [...props.SelectedDates];
+    const list = [...selectedDates.value];
     const idx = list.findIndex((d) => d.toDateString() === cell.fullDate.toDateString());
     const addedDates = [];
     const removedDates = [];
@@ -598,6 +656,7 @@ const onSelectDay = (cell) => {
       addedDates.push(cell.fullDate);
     }
     emit("update:SelectedDates", list);
+    if (!Array.isArray(props.SelectedDates)) localSelectedDates.value = list;
     emit("SelectedDatesChanged", { addedDates, removedDates });
   }
 };
@@ -607,17 +666,25 @@ const onBeforeEnter = (el) => {
   el.style.inset = "0";
 };
 const onEnter = (el, done) => {
-  const cls =
-    transitionDir.value === "out" ? "page-transition-fade-reverse" : "page-transition-fade";
+  const cls = transitionDir.value === "forward"
+    ? "calendar-view-enter-forward"
+    : transitionDir.value === "backward"
+      ? "calendar-view-enter-backward"
+      : transitionDir.value === "out"
+      ? "calendar-view-enter-out"
+        : "calendar-view-enter-in";
   el.classList.add(cls);
+  let finished = false;
   const finish = () => {
+    if (finished) return;
+    finished = true;
     el.classList.remove(cls);
     el.style.position = "";
     el.style.inset = "";
     done();
   };
   el.addEventListener("animationend", finish, { once: true });
-  setTimeout(finish, 200);
+  setTimeout(finish, 333);
   nextTick(() => {
     if (viewMode.value === 0) scrollDayTo(headerYear.value, headerMonth.value);
     else if (viewMode.value === 1) scrollMonthTo(headerYear.value);
@@ -629,29 +696,47 @@ const onBeforeLeave = (el) => {
   el.style.inset = "0";
 };
 const onLeave = (el, done) => {
-  const cls =
-    transitionDir.value === "out" ? "page-transition-fade" : "page-transition-fade-reverse";
-  el.style.animationDirection = "reverse";
+  const cls = transitionDir.value === "forward"
+    ? "calendar-view-leave-forward"
+    : transitionDir.value === "backward"
+      ? "calendar-view-leave-backward"
+      : transitionDir.value === "out"
+        ? "calendar-view-leave-out"
+        : "calendar-view-leave-in";
   el.classList.add(cls);
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    el.classList.remove(cls);
+    done();
+  };
   el.addEventListener(
     "animationend",
-    () => {
-      el.classList.remove(cls);
-      el.style.animationDirection = "";
-      done();
-    },
+    finish,
     { once: true },
   );
+  setTimeout(finish, 333);
 };
 
 onMounted(() => {
   nextTick(() => nextTick(() => scrollDayTo(todayYear, todayMonth)));
 });
+
+watch([() => props.Language, () => props.CalendarIdentifier], () => {
+  nextTick(() => {
+    computeDayView();
+    computeMonthView();
+    computeYearView();
+  });
+});
 </script>
 
 <style scoped>
   .win-calendar-view {
-    width: 300px;
+    width: 304px;
+    min-width: 304px;
+    flex: 0 0 304px;
     background: var(--layer-default);
     background-image: var(--flyout-material-overlay);
     backdrop-filter: var(--flyout-backdrop);
@@ -705,6 +790,17 @@ onMounted(() => {
   background: var(--subtle-secondary);
 }
 
+.icon-btn:disabled,
+.calendar-title-btn:disabled {
+  color: var(--text-disabled, var(--text-secondary));
+  cursor: default;
+}
+
+.icon-btn:disabled:hover,
+.calendar-title-btn:disabled:hover {
+  background: transparent;
+}
+
 .calendar-divider {
   height: 1px;
   background: var(--ctrl-border-rest);
@@ -727,7 +823,8 @@ onMounted(() => {
 
 .calendar-day-headers {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(40px, 1fr));
+  min-width: 280px;
   flex-shrink: 0;
 }
 
@@ -743,12 +840,7 @@ onMounted(() => {
 
 .calendar-scroll {
   flex: 1;
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-
-.calendar-scroll::-webkit-scrollbar {
-  display: none;
+  min-height: 0;
 }
 
 .large-scroll {
@@ -758,7 +850,8 @@ onMounted(() => {
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(40px, 1fr));
+  min-width: 280px;
 }
 
 .calendar-large-grid {
@@ -769,7 +862,10 @@ onMounted(() => {
 }
 
 .calendar-day {
+  width: 40px;
+  min-width: 40px;
   height: 40px;
+  box-sizing: border-box;
   border-radius: 20px;
   background: transparent;
   border: 1px solid transparent;
@@ -802,6 +898,17 @@ onMounted(() => {
 .calendar-day:hover,
 .calendar-large-btn:hover {
   background: var(--subtle-secondary);
+}
+
+.calendar-day:disabled,
+.calendar-large-btn:disabled {
+  color: var(--text-disabled, var(--text-secondary));
+  cursor: default;
+}
+
+.calendar-day:disabled:hover,
+.calendar-large-btn:disabled:hover {
+  background: transparent;
 }
 
 .out-of-scope {
@@ -878,24 +985,71 @@ onMounted(() => {
   color: var(--accent-base) !important;
 }
 
-@keyframes page-transition-fade {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+@keyframes calendar-view-enter-forward {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-.page-transition-fade {
-  animation: page-transition-fade 0.15s ease-out forwards;
+@keyframes calendar-view-enter-backward {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-.page-transition-fade-reverse {
-  animation: page-transition-fade 0.15s ease-in forwards;
-  animation-direction: reverse;
+@keyframes calendar-view-leave-forward {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-16px); }
 }
+
+@keyframes calendar-view-leave-backward {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(16px); }
+}
+
+@keyframes calendar-view-enter-out {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes calendar-view-enter-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes calendar-view-leave-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-8px) scale(1.02); }
+}
+
+@keyframes calendar-view-leave-in {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(8px) scale(1.02); }
+}
+
+.calendar-view-enter-forward,
+.calendar-view-enter-backward,
+.calendar-view-enter-out,
+.calendar-view-enter-in {
+  animation-duration: 333ms;
+  animation-timing-function: cubic-bezier(0.1, 0.9, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+.calendar-view-enter-forward { animation-name: calendar-view-enter-forward; }
+.calendar-view-enter-backward { animation-name: calendar-view-enter-backward; }
+.calendar-view-enter-out { animation-name: calendar-view-enter-out; }
+.calendar-view-enter-in { animation-name: calendar-view-enter-in; }
+
+.calendar-view-leave-forward,
+.calendar-view-leave-backward,
+.calendar-view-leave-out,
+.calendar-view-leave-in {
+  animation-duration: 167ms;
+  animation-timing-function: cubic-bezier(0.7, 0, 1, 0.5);
+  animation-fill-mode: both;
+}
+
+.calendar-view-leave-forward { animation-name: calendar-view-leave-forward; }
+.calendar-view-leave-backward { animation-name: calendar-view-leave-backward; }
+.calendar-view-leave-out { animation-name: calendar-view-leave-out; }
+.calendar-view-leave-in { animation-name: calendar-view-leave-in; }
 </style>

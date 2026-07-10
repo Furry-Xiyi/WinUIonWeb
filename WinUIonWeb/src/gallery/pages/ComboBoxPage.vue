@@ -1,49 +1,44 @@
 <template>
-  <div>
-    <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.combobox')" />
-      <WinTextBlock class="page-description" :Text="$t('text.use-a-combobox-also-known-as-a-drop-down-list-to')" TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.combobox')" />
+          <WinTextBlock class="page-description" :Text="$t('text.use-a-combobox-also-known-as-a-drop-down-list-to')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+      <div class="gallery-page-content">
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxInlineVue" :headerText="$t('sample.combobox.inline')">
+              <template #example>
+                <div class="vertical-stack">
+                  <WinComboBox v-model:SelectedIndex="Combo1" Width="200" :Header="$t('text.colors')" :PlaceholderText="$t('sample.combobox.pick-a-color')" :ItemsSource="colors" @SelectionChanged="ColorComboBox_SelectionChanged" />
+                  <div class="color-output" :style="{ backgroundColor: selectedColor }"></div>
+                </div>
+              </template>
+            </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxItemsSourceVue" :headerText="$t('sample.combobox.itemssource')">
+              <template #example>
+                <div class="vertical-stack">
+                  <WinComboBox v-model:SelectedIndex="Combo2" MinWidth="200" :Header="$t('sample.combobox.font')" :ItemsSource="fonts" />
+                  <WinTextBlock class="output-text" :FontFamily="fonts[Combo2]?.value" :Text="$t('sample.combobox.font-text')" />
+                </div>
+              </template>
+            </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxEditableVue" :headerText="$t('sample.combobox.editable')">
+              <template #example>
+                <div class="vertical-stack">
+                  <WinComboBox v-model:SelectedIndex="Combo3" Width="200" :Header="$t('sample.combobox.font-size')" IsEditable :ItemsSource="fontSizes" @TextSubmitted="Combo3_TextSubmitted" />
+                  <WinTextBlock class="output-text" FontFamily="Segoe UI" :FontSize="fontSizes[Combo3]?.value" :Text="$t('sample.combobox.font-size-text')" />
+                </div>
+              </template>
+            </WinControlExample>
       </div>
     </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.combobox.inline')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxInlineVue">
-      <template #example>
-        <div class="vertical-stack">
-          <WinComboBox v-model:SelectedIndex="Combo1" Width="200" :Header="$t('text.colors')" :PlaceholderText="$t('sample.combobox.pick-a-color')" :ItemsSource="colors" @SelectionChanged="ColorComboBox_SelectionChanged" />
-          <div class="color-output" :style="{ backgroundColor: selectedColor }"></div>
-        </div>
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.combobox.itemssource')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxItemsSourceVue">
-      <template #example>
-        <div class="vertical-stack">
-          <WinComboBox v-model:SelectedIndex="Combo2" MinWidth="200" :Header="$t('sample.combobox.font')" :ItemsSource="fonts" />
-          <WinTextBlock class="output-text" :FontFamily="fonts[Combo2]?.value" :Text="$t('sample.combobox.font-text')" />
-        </div>
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.combobox.editable')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxEditableVue">
-      <template #example>
-        <div class="vertical-stack">
-          <WinComboBox v-model:SelectedIndex="Combo3" Width="200" :Header="$t('sample.combobox.font-size')" IsEditable :ItemsSource="fontSizes" @TextSubmitted="Combo3_TextSubmitted" />
-          <WinTextBlock class="output-text" FontFamily="Segoe UI" :FontSize="fontSizes[Combo3]?.value" :Text="$t('sample.combobox.font-size-text')" />
-        </div>
-      </template>
-    </WinControlExample>
-  </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
@@ -56,6 +51,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'combobox');
@@ -110,8 +106,4 @@ const comboBoxEditableVue = `<WinComboBox Width="200" Header="Font Size" IsEdita
 .vertical-stack { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .color-output { width: 100px; height: 30px; border: 1px solid var(--ctrl-border); }
 .output-text { margin-top: 4px; }
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
-}
 </style>

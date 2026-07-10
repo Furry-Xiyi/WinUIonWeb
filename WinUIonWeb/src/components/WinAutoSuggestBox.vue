@@ -48,21 +48,28 @@
         :class="openDirection === 'up' ? 'opens-up' : 'opens-down'"
         :style="popupStyle"
         role="listbox">
-        <button
-          v-for="(item, index) in suggestionItems"
-          :key="`${getItemText(item)}-${index}`"
-          class="win-asb-item"
-          :class="{ 'is-highlighted': highlightedIndex === index, 'is-disabled': isNoResultsItem(item) }"
-          type="button"
-          role="option"
-          :disabled="isNoResultsItem(item)"
-          :aria-selected="highlightedIndex === index"
-          @mouseenter="highlightedIndex = isNoResultsItem(item) ? highlightedIndex : index"
-          @pointerdown.prevent
-          @click="chooseSuggestion(index)">
-          <span class="win-asb-item-title">{{ getItemText(item) }}</span>
-          <span v-if="getItemSubtitle(item)" class="win-asb-item-subtitle">{{ getItemSubtitle(item) }}</span>
-        </button>
+        <WinScrollViewer
+          class="win-asb-popup-scroll"
+          VerticalScrollMode="Auto"
+          VerticalScrollBarVisibility="Auto"
+          HorizontalScrollMode="Disabled"
+          HorizontalScrollBarVisibility="Disabled">
+          <button
+            v-for="(item, index) in suggestionItems"
+            :key="`${getItemText(item)}-${index}`"
+            class="win-asb-item"
+            :class="{ 'is-highlighted': highlightedIndex === index, 'is-disabled': isNoResultsItem(item) }"
+            type="button"
+            role="option"
+            :disabled="isNoResultsItem(item)"
+            :aria-selected="highlightedIndex === index"
+            @mouseenter="highlightedIndex = isNoResultsItem(item) ? highlightedIndex : index"
+            @pointerdown.prevent
+            @click="chooseSuggestion(index)">
+            <span class="win-asb-item-title">{{ getItemText(item) }}</span>
+            <span v-if="getItemSubtitle(item)" class="win-asb-item-subtitle">{{ getItemSubtitle(item) }}</span>
+          </button>
+        </WinScrollViewer>
       </div>
     </Teleport>
   </div>
@@ -74,6 +81,7 @@ import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 import type { CSSProperties } from 'vue';
+import WinScrollViewer from './WinScrollViewer.vue';
 import WinTextBox from './WinTextBox.vue';
 
 type Suggestion = string | number | Record<string, unknown>;
@@ -383,7 +391,7 @@ onBeforeUnmount(() => {
 .win-asb-popup {
   position: fixed;
   z-index: 1000;
-  overflow: auto;
+  overflow: hidden;
   padding: 4px;
   box-sizing: border-box;
   background: var(--flyout-background, var(--layer-fill-color-default));
@@ -392,6 +400,21 @@ onBeforeUnmount(() => {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   backdrop-filter: var(--flyout-backdrop, blur(30px));
   animation: asb-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, asb-opacity 83ms linear both;
+}
+
+.win-asb-popup-scroll {
+  width: 100%;
+  max-height: inherit;
+}
+
+.win-asb-popup-scroll :deep(.win-scroll-viewer-viewport) {
+  height: auto;
+  max-height: inherit;
+}
+
+.win-asb-popup-scroll :deep(.scroll-content) {
+  display: flex;
+  flex-direction: column;
 }
 
 .win-asb-popup.opens-up {

@@ -1,26 +1,34 @@
 <template>
   <div class="win-capture-grid">
-    <div class="win-capture-title">{{ effectiveDeviceName }}</div>
-    <div class="win-capture-title captured" :class="{ visible: snapshots.length }">{{ t('text.captured') }}</div>
+    <WinTextBlock class="win-capture-title" :Text="effectiveDeviceName" />
+    <WinTextBlock class="win-capture-title captured" :class="{ visible: snapshots.length }" :Text="t('text.captured')" />
     <div class="win-capture-preview" ref="previewRef" :class="{ mirrored }">
       <video ref="videoRef" class="win-capture-video" autoplay muted playsinline></video>
       <div v-if="!streamActive" class="win-capture-camera">
         <div class="win-capture-lens"></div>
         <div class="win-capture-scan"></div>
-        <span class="win-capture-message">{{ errorMessage || t('text.requesting-camera-permission') }}</span>
+        <WinTextBlock class="win-capture-message" :Text="errorMessage || t('text.requesting-camera-permission')" TextWrapping="WrapWholeWords" />
       </div>
     </div>
-    <div class="win-capture-shots" ref="shotsRef">
+    <WinScrollViewer
+      class="win-capture-shots"
+      :style="shotsStyle"
+      VerticalScrollMode="Auto"
+      VerticalScrollBarVisibility="Auto"
+      HorizontalScrollMode="Disabled"
+      HorizontalScrollBarVisibility="Disabled">
       <div v-for="shot in snapshots" :key="shot.id" class="win-capture-shot" :style="{ backgroundImage: shot.image ? `url(${shot.image})` : shot.background }">
         <span>{{ shot.time }}</span>
       </div>
-    </div>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, nextTick } from 'vue';
 import { useI18n } from './i18n/index';
+import WinScrollViewer from './WinScrollViewer.vue';
+import WinTextBlock from './WinTextBlock.vue';
 
 const { t } = useI18n();
 
@@ -36,14 +44,14 @@ const videoRef = ref(null);
 const streamActive = ref(false);
 const errorMessage = ref('');
 const previewRef = ref(null);
-const shotsRef = ref(null);
+const shotsStyle = ref({});
 let mediaStream = null;
 const effectiveDeviceName = computed(() => props.deviceName || t('text.integrated-camera'));
 
 const syncHeights = () => {
-  if (previewRef.value && shotsRef.value) {
+  if (previewRef.value) {
     const previewHeight = previewRef.value.offsetHeight;
-    shotsRef.value.style.height = `${previewHeight}px`;
+    shotsStyle.value = { height: `${previewHeight}px` };
   }
 };
 
@@ -233,33 +241,13 @@ defineExpose({ start, stop, capture });
   .win-capture-shots {
     width: 100px;
     max-height: 450px;
-    overflow-y: auto;
-    overflow-x: hidden;
+  }
+
+  .win-capture-shots :deep(.scroll-content) {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ctrl-stroke) transparent;
   }
-
-  /* 注释掉 webkit-scrollbar 自定义样式，让 Edge FluentScrollBarStyle 完全接管 */
-  /*
-  .win-capture-shots::-webkit-scrollbar {
-  }
-
-  .win-capture-shots::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .win-capture-shots::-webkit-scrollbar-thumb {
-    background: var(--ctrl-stroke);
-    border-radius: 4px;
-  }
-
-  .win-capture-shots::-webkit-scrollbar-thumb:hover {
-    background: var(--ctrl-strong-stroke);
-  }
-  */
 
   .win-capture-shot {
     aspect-ratio: 16 / 9;

@@ -1,123 +1,127 @@
 <template>
-  <div class="iconography-page">
-    <WinPageHeader
-      title="Iconography"
-      :showFavoriteButton="true"
-      :showThemeButton="true"
-    />
+  <div class="gallery-item-page">
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinPageHeader
+              title="Iconography"
+              :showFavoriteButton="true"
+              :showThemeButton="true"
+            />
 
-    <div class="page-description">
-      <p>Browse and search the Fluent System Icons library. Click any icon to see usage details.</p>
-    </div>
+            <div class="page-description">
+              <p>Browse and search the Fluent System Icons library. Click any icon to see usage details.</p>
+            </div>
 
-    <div class="icon-gallery-container">
-      <WinAutoSuggestBox
-        v-model:Text="searchText"
-        PlaceholderText="Search icons by name, code, or tags"
-        queryIcon="🔍"
-        class="search-box"
-        @TextChanged="onSearchTextChanged"
-      />
+            <div class="icon-gallery-container">
+              <WinAutoSuggestBox
+                v-model:Text="searchText"
+                PlaceholderText="Search icons by name, code, or tags"
+                queryIcon="🔍"
+                class="search-box"
+                @TextChanged="onSearchTextChanged"
+              />
 
-      <div class="gallery-layout">
-        <div class="icons-grid-container">
-          <WinItemsView
-            :itemsSource="filteredIcons"
-            layout="Grid"
-            selectionMode="Single"
-            :selectedItems="selectedItems"
-            @update:selectedItems="onSelectionChanged"
-            class="icons-grid"
-          >
-            <template #item="{ item }">
-              <div class="icon-card">
-                <div class="icon-display">
-                  <span class="icon-glyph" v-html="item.textGlyph"></span>
+              <div class="gallery-layout">
+                <div class="icons-grid-container">
+                  <WinItemsView
+                    :itemsSource="filteredIcons"
+                    layout="Grid"
+                    selectionMode="Single"
+                    :selectedItems="selectedItems"
+                    @update:selectedItems="onSelectionChanged"
+                    class="icons-grid"
+                  >
+                    <template #item="{ item }">
+                      <div class="icon-card">
+                        <div class="icon-display">
+                          <span class="icon-glyph" v-html="item.textGlyph"></span>
+                        </div>
+                        <div class="icon-name">{{ item.name }}</div>
+                      </div>
+                    </template>
+                  </WinItemsView>
+
+                  <div v-if="filteredIcons.length === 0" class="no-results">
+                    <p>No icons found.</p>
+                  </div>
                 </div>
-                <div class="icon-name">{{ item.name }}</div>
+
+                <div v-if="selectedIcon" class="side-panel">
+                  <div class="icon-details">
+                    <div class="icon-preview-container">
+                      <div class="icon-preview">
+                        <span class="icon-preview-glyph" v-html="selectedIcon.textGlyph"></span>
+                      </div>
+                      <div v-if="selectedIcon.isSegoeFluentOnly" class="icon-warning">
+                        <span class="warning-icon">⚠️</span>
+                        <span class="warning-text">Only supported in Segoe Fluent Icons</span>
+                      </div>
+                    </div>
+
+                    <div class="detail-section">
+                      <div class="detail-label">Icon name</div>
+                      <div class="code-display">{{ selectedIcon.name }}</div>
+                    </div>
+
+                    <div class="detail-section">
+                      <div class="detail-label">Text glyph</div>
+                      <div class="code-display">{{ selectedIcon.textGlyph }}</div>
+                    </div>
+
+                    <div class="detail-section">
+                      <div class="detail-label">Code glyph</div>
+                      <div class="code-display">{{ selectedIcon.codeGlyph }}</div>
+                    </div>
+
+                    <div class="detail-section">
+                      <div class="detail-label">FontIcon XAML</div>
+                      <div class="code-display">&lt;FontIcon Glyph="{{ selectedIcon.textGlyph }}" /&gt;</div>
+                    </div>
+
+                    <div class="detail-section">
+                      <div class="detail-label">FontIcon C#</div>
+                      <div class="code-display code-multiline">
+                        FontIcon icon = new FontIcon();<br>
+                        icon.Glyph = "{{ selectedIcon.codeGlyph }}";
+                      </div>
+                    </div>
+
+                    <div v-if="selectedIcon.symbolName" class="detail-section">
+                      <div class="detail-label">SymbolIcon XAML</div>
+                      <div class="code-display">&lt;SymbolIcon Symbol="{{ selectedIcon.symbolName }}" /&gt;</div>
+                    </div>
+
+                    <div v-if="selectedIcon.symbolName" class="detail-section">
+                      <div class="detail-label">SymbolIcon C#</div>
+                      <div class="code-display code-multiline">
+                        SymbolIcon icon = new SymbolIcon();<br>
+                        icon.Symbol = Symbol.{{ selectedIcon.symbolName }};
+                      </div>
+                    </div>
+
+                    <div v-if="selectedIcon.tags && selectedIcon.tags.length > 0" class="detail-section">
+                      <div class="detail-label">Tags</div>
+                      <div class="tags-container">
+                        <button
+                          v-for="(tag, idx) in selectedIcon.tags"
+                          :key="idx"
+                          class="tag-chip"
+                          @click="onTagClick(tag)"
+                        >
+                          {{ tag }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div v-if="!selectedIcon.tags || selectedIcon.tags.length === 0" class="detail-section">
+                      <div class="no-tags">No tags available.</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </template>
-          </WinItemsView>
-
-          <div v-if="filteredIcons.length === 0" class="no-results">
-            <p>No icons found.</p>
-          </div>
-        </div>
-
-        <div v-if="selectedIcon" class="side-panel">
-          <div class="icon-details">
-            <div class="icon-preview-container">
-              <div class="icon-preview">
-                <span class="icon-preview-glyph" v-html="selectedIcon.textGlyph"></span>
-              </div>
-              <div v-if="selectedIcon.isSegoeFluentOnly" class="icon-warning">
-                <span class="warning-icon">⚠️</span>
-                <span class="warning-text">Only supported in Segoe Fluent Icons</span>
-              </div>
             </div>
-
-            <div class="detail-section">
-              <div class="detail-label">Icon name</div>
-              <div class="code-display">{{ selectedIcon.name }}</div>
-            </div>
-
-            <div class="detail-section">
-              <div class="detail-label">Text glyph</div>
-              <div class="code-display">{{ selectedIcon.textGlyph }}</div>
-            </div>
-
-            <div class="detail-section">
-              <div class="detail-label">Code glyph</div>
-              <div class="code-display">{{ selectedIcon.codeGlyph }}</div>
-            </div>
-
-            <div class="detail-section">
-              <div class="detail-label">FontIcon XAML</div>
-              <div class="code-display">&lt;FontIcon Glyph="{{ selectedIcon.textGlyph }}" /&gt;</div>
-            </div>
-
-            <div class="detail-section">
-              <div class="detail-label">FontIcon C#</div>
-              <div class="code-display code-multiline">
-                FontIcon icon = new FontIcon();<br>
-                icon.Glyph = "{{ selectedIcon.codeGlyph }}";
-              </div>
-            </div>
-
-            <div v-if="selectedIcon.symbolName" class="detail-section">
-              <div class="detail-label">SymbolIcon XAML</div>
-              <div class="code-display">&lt;SymbolIcon Symbol="{{ selectedIcon.symbolName }}" /&gt;</div>
-            </div>
-
-            <div v-if="selectedIcon.symbolName" class="detail-section">
-              <div class="detail-label">SymbolIcon C#</div>
-              <div class="code-display code-multiline">
-                SymbolIcon icon = new SymbolIcon();<br>
-                icon.Symbol = Symbol.{{ selectedIcon.symbolName }};
-              </div>
-            </div>
-
-            <div v-if="selectedIcon.tags && selectedIcon.tags.length > 0" class="detail-section">
-              <div class="detail-label">Tags</div>
-              <div class="tags-container">
-                <button
-                  v-for="(tag, idx) in selectedIcon.tags"
-                  :key="idx"
-                  class="tag-chip"
-                  @click="onTagClick(tag)"
-                >
-                  {{ tag }}
-                </button>
-              </div>
-            </div>
-
-            <div v-if="!selectedIcon.tags || selectedIcon.tags.length === 0" class="detail-section">
-              <div class="no-tags">No tags available.</div>
-            </div>
-          </div>
-        </div>
       </div>
-    </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -127,6 +131,7 @@ import WinPageHeader from '../../components/WinPageHeader.vue';
 import WinAutoSuggestBox from '../../components/WinAutoSuggestBox.vue';
 import WinItemsView from '../../components/WinItemsView.vue';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const searchText = ref('');
 const selectedItems = ref([]);
 const allIcons = ref([]);

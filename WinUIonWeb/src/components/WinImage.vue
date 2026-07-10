@@ -1,28 +1,40 @@
 <template>
-  <img class="win-image" :class="stretchClass" :src="src" :alt="alt" :style="imageStyle" />
+  <img class="win-image" :class="stretchClass" :src="resolvedSource" :alt="alt" :style="imageStyle" />
 </template>
 
 <script setup>
 import { computed } from 'vue';
 
 const props = defineProps({
-  src: { type: String, required: true },
+  Source: { type: String, default: '' },
+  UriSource: { type: String, default: '' },
+  src: { type: String, default: '' },
   alt: { type: String, default: '' },
-  width: [String, Number],
-  height: [String, Number],
+  Width: { type: [String, Number], default: '' },
+  Height: { type: [String, Number], default: '' },
+  Stretch: { type: String, default: '' },
+  NineGrid: { type: String, default: '' },
+  DecodePixelHeight: { type: [String, Number], default: '' },
+  AutoPlay: { type: Boolean, default: true },
+  HorizontalAlignment: { type: String, default: '' },
+  width: { type: [String, Number], default: '' },
+  height: { type: [String, Number], default: '' },
   stretch: { type: String, default: 'Uniform' },
   radius: { type: Number, default: 0 }
 });
 
 const toCssSize = value => typeof value === 'number' ? `${value}px` : value;
+const resolvedSource = computed(() => props.Source || props.UriSource || props.src);
+const resolvedStretch = computed(() => props.Stretch || props.stretch || 'Uniform');
 
 const imageStyle = computed(() => ({
-  width: toCssSize(props.width),
-  height: toCssSize(props.height),
-  borderRadius: `${props.radius}px`
+  width: toCssSize(props.Width || props.width),
+  height: toCssSize(props.Height || props.height),
+  borderRadius: `${props.radius}px`,
+  alignSelf: props.HorizontalAlignment ? props.HorizontalAlignment.toLowerCase() : undefined
 }));
 
-const stretchClass = computed(() => `stretch-${props.stretch.toLowerCase()}`);
+const stretchClass = computed(() => `stretch-${resolvedStretch.value.toLowerCase()}`);
 </script>
 
 <style>

@@ -22,18 +22,24 @@
     </div>
 
     <!-- Scrollable content -->
-    <div
+    <WinScrollViewer
       ref="contentRef"
       class="refresh-container-content"
       :style="contentStyle"
+      VerticalScrollMode="Auto"
+      VerticalScrollBarVisibility="Auto"
+      HorizontalScrollMode="Disabled"
+      HorizontalScrollBarVisibility="Disabled"
+      @ViewChanged="onContentViewChanged"
     >
       <slot></slot>
-    </div>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import WinScrollViewer from './WinScrollViewer.vue'
 import WinRefreshVisualizer from './WinRefreshVisualizer.vue'
 
 // Props - 对齐官方 RefreshContainer API
@@ -78,6 +84,7 @@ enum RefreshVisualizerState {
 // State
 const containerRef = ref<HTMLElement | null>(null)
 const contentRef = ref<HTMLElement | null>(null)
+const contentScrollTop = ref(0)
 const currentRefreshState = ref<RefreshVisualizerState>(RefreshVisualizerState.Idle)
 const isRefreshing = ref(false)
 const pullDistance = ref(0)
@@ -101,7 +108,7 @@ const contentStyle = computed(() => ({
 const handleTouchStart = (e: TouchEvent) => {
   if (isRefreshing.value) return
 
-  const scrollTop = contentRef.value?.scrollTop || 0
+  const scrollTop = contentScrollTop.value
   if (scrollTop === 0) {
     startY.value = e.touches[0].clientY
     isDragging.value = true
@@ -144,7 +151,7 @@ const handleTouchEnd = () => {
 const handleMouseDown = (e: MouseEvent) => {
   if (isRefreshing.value) return
 
-  const scrollTop = contentRef.value?.scrollTop || 0
+  const scrollTop = contentScrollTop.value
   if (scrollTop === 0) {
     startY.value = e.clientY
     isDragging.value = true
@@ -230,6 +237,10 @@ const resetPull = () => {
   currentRefreshState.value = RefreshVisualizerState.Idle
 }
 
+const onContentViewChanged = (args: { verticalOffset?: number }) => {
+  contentScrollTop.value = args.verticalOffset ?? 0
+}
+
 // RefreshStateChanged 事件处理
 interface RefreshStateChangedEventArgs {
   oldState: RefreshVisualizerState
@@ -286,8 +297,6 @@ defineExpose({
 .refresh-container-content {
   width: 100%;
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   will-change: transform;
 }
 

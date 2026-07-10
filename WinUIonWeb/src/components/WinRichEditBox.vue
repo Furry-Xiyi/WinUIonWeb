@@ -9,27 +9,35 @@
     </div>
 
     <div class="win-reb-border" @click="focus">
-      <div
-        ref="editorRef"
-        class="win-reb-editor"
-        :contenteditable="IsEnabled && !IsReadOnly"
-        :data-placeholder="PlaceholderText"
-        :spellcheck="IsSpellCheckEnabled"
-        :autocomplete="IsTextPredictionEnabled ? 'on' : 'off'"
-        :style="editorStyle"
-        role="textbox"
-        aria-multiline="true"
-        :aria-readonly="IsReadOnly"
-        @input="onInput"
-        @focus="onFocus"
-        @blur="onBlur"
-        @keydown="onKeydown"
-        @paste="onPaste"
-        @copy="onCopy"
-        @cut="onCut"
-        @contextmenu="onContextMenu"
-        @mouseup="onSelectionGesture"
-        @keyup="onSelectionGesture"></div>
+      <WinScrollViewer
+        class="win-reb-editor-scroll"
+        :style="editorScrollStyle"
+        VerticalScrollMode="Auto"
+        VerticalScrollBarVisibility="Auto"
+        HorizontalScrollMode="Auto"
+        HorizontalScrollBarVisibility="Auto">
+        <div
+          ref="editorRef"
+          class="win-reb-editor"
+          :contenteditable="IsEnabled && !IsReadOnly"
+          :data-placeholder="PlaceholderText"
+          :spellcheck="IsSpellCheckEnabled"
+          :autocomplete="IsTextPredictionEnabled ? 'on' : 'off'"
+          :style="editorStyle"
+          role="textbox"
+          aria-multiline="true"
+          :aria-readonly="IsReadOnly"
+          @input="onInput"
+          @focus="onFocus"
+          @blur="onBlur"
+          @keydown="onKeydown"
+          @paste="onPaste"
+          @copy="onCopy"
+          @cut="onCut"
+          @contextmenu="onContextMenu"
+          @mouseup="onSelectionGesture"
+          @keyup="onSelectionGesture"></div>
+      </WinScrollViewer>
     </div>
 
     <div v-if="Description || $slots.description" class="win-reb-description">
@@ -53,6 +61,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import WinCommandBarFlyout from './WinCommandBarFlyout.vue';
+import WinScrollViewer from './WinScrollViewer.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
@@ -203,8 +212,12 @@ const rootStyle = computed<CSSProperties & Record<string, string | undefined>>((
   '--reb-selection-background-blur': props.SelectionHighlightColorWhenNotFocused || undefined
 }));
 
-const editorStyle = computed<CSSProperties>(() => ({
+const editorScrollStyle = computed<CSSProperties>(() => ({
   height: cssSize(props.Height),
+  minHeight: '118px'
+}));
+
+const editorStyle = computed<CSSProperties>(() => ({
   textAlign: (props.TextAlignment || props.HorizontalTextAlignment || 'Left').toLowerCase() as CSSProperties['textAlign'],
   whiteSpace: props.TextWrapping === 'NoWrap' ? 'pre' : 'pre-wrap',
   overflowWrap: props.TextWrapping === 'WrapWholeWords' ? 'normal' : 'break-word',
@@ -515,12 +528,15 @@ defineExpose({
   box-shadow: inset 0 -2px 0 var(--reb-accent);
 }
 
+.win-reb-editor-scroll {
+  min-height: 118px;
+}
+
 .win-reb-editor {
   min-height: 118px;
   padding: 8px 10px;
   box-sizing: border-box;
   outline: 0;
-  overflow: auto;
   color: var(--text-primary);
   font-family: "Segoe UI", system-ui, sans-serif;
   font-size: 14px;

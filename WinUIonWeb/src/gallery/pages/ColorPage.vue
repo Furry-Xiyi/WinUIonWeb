@@ -1,37 +1,40 @@
 <template>
-  <div class="page-container">
-    <div class="page-header-section">
-      <h1 class="page-header">Color</h1>
-      <div class="page-header-actions">
-        <WinButton @click="toggleTheme">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div class="page-header-section page-heading">
+          <h1 class="page-header">Color</h1>
+          <div class="page-header-actions">
+            <WinButton @click="toggleTheme">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <div class="page-intro">
+              <p class="intro-text">
+                The brushes below are part of WinUI 3 and you can reference them in your app. For example:
+              </p>
+              <div class="code-sample">
+                <code>&lt;TextBlock Text="..." Foreground="{ThemeResource TextFillColorPrimaryBrush}" /&gt;</code>
+              </div>
+            </div>
+
+            <WinSelectorBar
+              :items="selectorItems"
+              :selectedIndex="selectedSection"
+              @selectionChanged="onSectionChanged"
+              class="section-selector" />
+
+            <div class="color-content">
+              <component :is="currentSectionComponent" />
+            </div>
       </div>
-    </div>
-
-    <div class="page-intro">
-      <p class="intro-text">
-        The brushes below are part of WinUI 3 and you can reference them in your app. For example:
-      </p>
-      <div class="code-sample">
-        <code>&lt;TextBlock Text="..." Foreground="{ThemeResource TextFillColorPrimaryBrush}" /&gt;</code>
-      </div>
-    </div>
-
-    <WinSelectorBar
-      :items="selectorItems"
-      :selectedIndex="selectedSection"
-      @selectionChanged="onSectionChanged"
-      class="section-selector" />
-
-    <div class="color-content">
-      <component :is="currentSectionComponent" />
-    </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -48,6 +51,7 @@ import SignalColorSection from '../../components/ColorSections/SignalColorSectio
 import HighContrastColorSection from '../../components/ColorSections/HighContrastColorSection.vue';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'color');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);

@@ -1,96 +1,99 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">SemanticZoom</h1>
-      <p class="page-description">
-        The SemanticZoom control lets the user zoom between two different semantic views of the same content. One view is the main view of the content. The second view is a way to quickly navigate that content. For example, when viewing an address book, the user could zoom out to quickly jump to a letter, and zoom in to see the names associated with that letter.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">SemanticZoom</h1>
+          <p class="page-description">
+            The SemanticZoom control lets the user zoom between two different semantic views of the same content. One view is the main view of the content. The second view is a way to quickly navigate that content. For example, when viewing an address book, the user could zoom out to quickly jump to a letter, and zoom in to see the names associated with that letter.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @Click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+      <div class="gallery-page-content">
+        <!-- Example 1: A simple SemanticZoom -->
+            <WinControlExample
+              headerText="A simple SemanticZoom"
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <WinSemanticZoom
+                  v-model:isZoomedInViewActive="isZoomedIn"
+                  :canChangeViews="canChangeViews"
+                  :isZoomOutButtonEnabled="true"
+                  @viewChangeStarted="onViewChangeStarted"
+                  @viewChangeCompleted="onViewChangeCompleted"
+                  style="height: 500px; border: 1px solid var(--stroke-divider); border-radius: 8px;">
 
-    <!-- Example 1: A simple SemanticZoom -->
-    <WinControlExample
-      headerText="A simple SemanticZoom"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <WinSemanticZoom
-          v-model:isZoomedInViewActive="isZoomedIn"
-          :canChangeViews="canChangeViews"
-          :isZoomOutButtonEnabled="true"
-          @viewChangeStarted="onViewChangeStarted"
-          @viewChangeCompleted="onViewChangeCompleted"
-          style="height: 500px; border: 1px solid var(--stroke-divider); border-radius: 8px;">
-
-          <!-- Zoomed In View - GridView with grouped items -->
-          <template #zoomedInView>
-            <div style="padding: 16px; height: 100%; overflow-y: auto;">
-              <div v-for="(group, gIdx) in groupedData" :key="gIdx" style="margin-bottom: 24px;">
-                <h3 class="group-header">{{ group.title }}</h3>
-                <WinGridView
-                  :items="group.items"
-                  :selectionMode="'None'"
-                  :isItemClickEnabled="true"
-                  @itemClick="onItemClick">
-                  <template #item="{ item }">
-                    <div class="grid-item-card">
-                      <div class="item-title">{{ item.title }}</div>
-                      <div class="item-subtitle">{{ item.subtitle }}</div>
+                  <!-- Zoomed In View - GridView with grouped items -->
+                  <template #zoomedInView>
+                    <div style="padding: 16px; height: 100%;">
+                      <div v-for="(group, gIdx) in groupedData" :key="gIdx" style="margin-bottom: 24px;">
+                        <h3 class="group-header">{{ group.title }}</h3>
+                        <WinGridView
+                          :items="group.items"
+                          :selectionMode="'None'"
+                          :isItemClickEnabled="true"
+                          @itemClick="onItemClick">
+                          <template #item="{ item }">
+                            <div class="grid-item-card">
+                              <div class="item-title">{{ item.title }}</div>
+                              <div class="item-subtitle">{{ item.subtitle }}</div>
+                            </div>
+                          </template>
+                        </WinGridView>
+                      </div>
                     </div>
                   </template>
-                </WinGridView>
-              </div>
-            </div>
-          </template>
 
-          <!-- Zoomed Out View - ListView with group headers -->
-          <template #zoomedOutView>
-            <div style="padding: 24px; height: 100%; overflow-y: auto;">
-              <WinListView
-                :items="groupHeaders"
-                :selectionMode="'None'"
-                :isItemClickEnabled="true"
-                @itemClick="onGroupClick">
-                <template #item="{ item }">
-                  <div class="group-item">
-                    <span class="group-icon">&#xE71D;</span>
-                    <span class="group-title">{{ item.title }}</span>
-                    <span class="group-count">{{ item.count }} items</span>
-                  </div>
-                </template>
-              </WinListView>
-            </div>
-          </template>
-        </WinSemanticZoom>
-      </template>
-      <template #options>
-        <p class="output-text">{{ outputText }}</p>
+                  <!-- Zoomed Out View - ListView with group headers -->
+                  <template #zoomedOutView>
+                    <div style="padding: 24px; height: 100%;">
+                      <WinListView
+                        :items="groupHeaders"
+                        :selectionMode="'None'"
+                        :isItemClickEnabled="true"
+                        @itemClick="onGroupClick">
+                        <template #item="{ item }">
+                          <div class="group-item">
+                            <span class="group-icon">&#xE71D;</span>
+                            <span class="group-title">{{ item.title }}</span>
+                            <span class="group-count">{{ item.count }} items</span>
+                          </div>
+                        </template>
+                      </WinListView>
+                    </div>
+                  </template>
+                </WinSemanticZoom>
+              </template>
+              <template #options>
+                <p class="output-text">{{ outputText }}</p>
 
-        <div class="options-container">
-          <WinCheckBox v-model="canChangeViews">
-            Can change views
-          </WinCheckBox>
-        </div>
-      </template>
-    </WinControlExample>
-  </div>
+                <div class="options-container">
+                  <WinCheckBox v-model="canChangeViews">
+                    Can change views
+                  </WinCheckBox>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinSemanticZoom from '../../components/WinSemanticZoom.vue';
 import WinGridView from '../../components/WinGridView.vue';
 import WinListView from '../../components/WinListView.vue';
@@ -98,26 +101,12 @@ import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'semanticzoom');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Example 1: Simple SemanticZoom
 const isZoomedIn = ref(true);

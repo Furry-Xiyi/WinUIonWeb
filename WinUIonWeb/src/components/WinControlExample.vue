@@ -1,6 +1,13 @@
 <template>
   <section class="control-example-root">
-    <WinTextBlock v-if="headerText" class="control-example-header" :Text="headerText" />
+    <WinTextBlock
+      v-if="headerText"
+      class="control-example-header"
+      :Text="headerText"
+      FontSize="14"
+      FontWeight="600"
+      LineHeight="20"
+      Margin="0,12" />
 
     <div class="control-example-frame">
       <div class="example-container">
@@ -32,12 +39,17 @@
             :selectedIndex="selectedCodeTab"
             @selectionChanged="onCodeTabChanged" />
           <div class="sample-code-presenter">
-            <div class="source-code-scroll">
+            <WinScrollViewer
+              class="source-code-scroll"
+              VerticalScrollMode="Auto"
+              VerticalScrollBarVisibility="Auto"
+              HorizontalScrollMode="Auto"
+              HorizontalScrollBarVisibility="Auto">
               <WinTextBlock
                 class="code-block"
                 :Text="activeCode"
                 IsTextSelectionEnabled />
-            </div>
+            </WinScrollViewer>
             <div class="copy-button-border">
               <WinButton class="copy-code-button" :title="t('text.copy')" @Click="copyActiveCode">
                 <span class="icon"></span>
@@ -55,6 +67,7 @@ import { ref, computed, useSlots, watch } from 'vue';
 import WinExpander from './WinExpander.vue';
 import WinButton from './WinButton.vue';
 import WinSelectorBar from './WinSelectorBar.vue';
+import WinScrollViewer from './WinScrollViewer.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import WinThemeWrapper from './WinThemeWrapper.vue';
 
@@ -130,6 +143,7 @@ watch(codeTabs, (tabs) => {
 });
 
 const displayStyle = computed(() => ({
+  height: normalizeCssLength(props.exampleHeight),
   justifyContent: {
     Left: 'flex-start',
     Center: 'center',
@@ -150,7 +164,7 @@ const copyActiveCode = async () => {
 
 <style scoped>
 .control-example-root {
-  margin-top: 16px;
+  margin: 16px 0 0;
   display: flex;
   flex-direction: column;
 }
@@ -188,7 +202,7 @@ const copyActiveCode = async () => {
   padding: 12px;
   display: flex;
   align-items: center;
-  background: var(--control-example-display-bg, var(--ctrl-solid-fill));
+  background: var(--control-example-display-bg, var(--SolidBackgroundFillColorBaseBrush, var(--ctrl-solid-fill)));
   color: var(--text-primary);
 }
 
@@ -203,12 +217,6 @@ const copyActiveCode = async () => {
   border-left: 1px solid var(--stroke-divider);
   border-radius: 0 8px 0 0;
   color: var(--text-primary);
-}
-
-:global(html.theme-light) .example-options,
-.example-display[data-theme="light"] + .example-options {
-  background: rgba(250, 250, 250, 0.96);
-  border-left-color: rgba(0, 0, 0, 0.12);
 }
 
 .code-expander {
@@ -285,8 +293,6 @@ const copyActiveCode = async () => {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  overflow-x: auto;
-  overflow-y: auto;
   padding: 0 0px 8px;
   box-sizing: border-box;
 }

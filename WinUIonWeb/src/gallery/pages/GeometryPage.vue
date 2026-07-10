@@ -1,170 +1,174 @@
 <template>
-  <div class="page-container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="page-title-section">
-        <h1 class="page-title">Geometry</h1>
-        <p class="page-description">
-          Geometry describes the shape, size and position of UI elements on screen.
-          These fundamental design elements help experiences feel coherent across the entire design system.
-          WinUI uses three levels of rounding depending on what UI component is being rounded and how that component is arranged relative to neighboring elements.
-        </p>
-        <p class="page-description">
-          You can reference built-in corner radii styles using:
-          <code class="inline-code">CornerRadius="{StaticResource ControlCornerRadius}"</code>.
-        </p>
-      </div>
-      <div class="page-actions">
-        <WinButton @click="toggleTheme" :title="themeButtonTitle">
-          <span class="icon">{{ themeIcon }}</span>
-        </WinButton>
-        <WinButton @click="toggleFavorite" :title="favoriteButtonTitle">
-          <span class="icon">{{ favoriteIcon }}</span>
-        </WinButton>
-      </div>
-    </div>
-
-    <!-- Main Example -->
-    <WinControlExample
-      headerText="Corner radius examples"
-      :templateCode="templateCode"
-      :vueCode="vueCode">
-      <template #example>
-        <div class="geometry-container">
-          <!-- Image Canvas with Interactive Hotspots -->
-          <div class="canvas-container">
-            <div class="canvas">
-              <img
-                :src="geometryImage"
-                alt="Geometry examples showing corner radius in context"
-                class="geometry-image" />
-
-              <!-- Overlay Teaching Tip Button (8px) -->
-              <WinButton
-                class="geometry-button"
-                style="left: 16px; top: 16px;"
-                @click="toggleTooltip1"
-                :title="'8px'">
-                <span class="icon">&#xE946;</span>
-              </WinButton>
-              <div
-                v-if="tooltip1Open"
-                class="teaching-tip"
-                style="left: 52px; top: 16px;">
-                <div class="teaching-tip-title">8px</div>
-                <div class="teaching-tip-subtitle">OverlayCornerRadius</div>
+  <div class="gallery-item-page">
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Page Header -->
+            <div class="page-header">
+              <div class="page-title-section">
+                <h1 class="page-title">Geometry</h1>
+                <p class="page-description">
+                  Geometry describes the shape, size and position of UI elements on screen.
+                  These fundamental design elements help experiences feel coherent across the entire design system.
+                  WinUI uses three levels of rounding depending on what UI component is being rounded and how that component is arranged relative to neighboring elements.
+                </p>
+                <p class="page-description">
+                  You can reference built-in corner radii styles using:
+                  <code class="inline-code">CornerRadius="{StaticResource ControlCornerRadius}"</code>.
+                </p>
               </div>
-
-              <!-- Body Teaching Tip Button (0px) -->
-              <WinButton
-                class="geometry-button"
-                style="left: 16px; top: 148px;"
-                @click="toggleTooltip2"
-                :title="'Body'">
-                <span class="icon">&#xE946;</span>
-              </WinButton>
-              <div
-                v-if="tooltip2Open"
-                class="teaching-tip"
-                style="left: 52px; top: 148px;">
-                <div class="teaching-tip-title">0px</div>
-              </div>
-
-              <!-- Control Teaching Tip Button (4px) -->
-              <WinButton
-                class="geometry-button"
-                style="left: 240px; top: 168px;"
-                @click="toggleTooltip3"
-                :title="'4px'">
-                <span class="icon">&#xE946;</span>
-              </WinButton>
-              <div
-                v-if="tooltip3Open"
-                class="teaching-tip"
-                style="left: 276px; top: 168px;">
-                <div class="teaching-tip-title">4px</div>
-                <div class="teaching-tip-subtitle">ControlCornerRadius</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Corner Radius Reference Table -->
-          <div class="radius-table">
-            <!-- Table Header -->
-            <div class="table-header">
-              <div class="header-cell radius-col">Corner radius</div>
-              <div class="header-cell usage-col">Usage</div>
-              <div class="header-cell style-col">Style</div>
-            </div>
-
-            <!-- 8px - OverlayCornerRadius -->
-            <div class="table-row light-row">
-              <div class="cell radius-col">
-                <div class="radius-visual">
-                  <div class="radius-sample" style="border-radius: 8px;"></div>
-                  <span>8px</span>
-                </div>
-              </div>
-              <div class="cell usage-col">
-                Top-level containers such as app windows, flyouts, cards and dialogs.
-              </div>
-              <div class="cell style-col">
-                <code class="code-text">OverlayCornerRadius</code>
-              </div>
-              <div class="cell copy-col">
-                <WinButton
-                  class="copy-button"
-                  @click="copyToClipboard('OverlayCornerRadius')"
-                  title="Copy to clipboard">
-                  <span class="icon">&#xE8C8;</span>
+              <div class="page-actions">
+                <WinButton @click="toggleTheme" :title="themeButtonTitle">
+                  <span class="icon">{{ themeIcon }}</span>
+                </WinButton>
+                <WinButton @click="toggleFavorite" :title="favoriteButtonTitle">
+                  <span class="icon">{{ favoriteIcon }}</span>
                 </WinButton>
               </div>
             </div>
 
-            <!-- 4px - ControlCornerRadius -->
-            <div class="table-row">
-              <div class="cell radius-col">
-                <div class="radius-visual">
-                  <div class="radius-sample" style="border-radius: 4px;"></div>
-                  <span>4px</span>
-                </div>
-              </div>
-              <div class="cell usage-col">
-                In-page elements such as controls and list backplates.
-              </div>
-              <div class="cell style-col">
-                <code class="code-text">ControlCornerRadius</code>
-              </div>
-              <div class="cell copy-col">
-                <WinButton
-                  class="copy-button"
-                  @click="copyToClipboard('ControlCornerRadius')"
-                  title="Copy to clipboard">
-                  <span class="icon">&#xE8C8;</span>
-                </WinButton>
-              </div>
-            </div>
+            <!-- Main Example -->
+            <WinControlExample
+              headerText="Corner radius examples"
+              :templateCode="templateCode"
+              :vueCode="vueCode">
+              <template #example>
+                <div class="geometry-container">
+                  <!-- Image Canvas with Interactive Hotspots -->
+                  <div class="canvas-container">
+                    <div class="canvas">
+                      <img
+                        :src="geometryImage"
+                        alt="Geometry examples showing corner radius in context"
+                        class="geometry-image" />
 
-            <!-- 0px - No rounding -->
-            <div class="table-row light-row">
-              <div class="cell radius-col">
-                <div class="radius-visual">
-                  <div class="radius-sample" style="border-radius: 0;"></div>
-                  <span>0px</span>
+                      <!-- Overlay Teaching Tip Button (8px) -->
+                      <WinButton
+                        class="geometry-button"
+                        style="left: 16px; top: 16px;"
+                        @click="toggleTooltip1"
+                        :title="'8px'">
+                        <span class="icon">&#xE946;</span>
+                      </WinButton>
+                      <div
+                        v-if="tooltip1Open"
+                        class="teaching-tip"
+                        style="left: 52px; top: 16px;">
+                        <div class="teaching-tip-title">8px</div>
+                        <div class="teaching-tip-subtitle">OverlayCornerRadius</div>
+                      </div>
+
+                      <!-- Body Teaching Tip Button (0px) -->
+                      <WinButton
+                        class="geometry-button"
+                        style="left: 16px; top: 148px;"
+                        @click="toggleTooltip2"
+                        :title="'Body'">
+                        <span class="icon">&#xE946;</span>
+                      </WinButton>
+                      <div
+                        v-if="tooltip2Open"
+                        class="teaching-tip"
+                        style="left: 52px; top: 148px;">
+                        <div class="teaching-tip-title">0px</div>
+                      </div>
+
+                      <!-- Control Teaching Tip Button (4px) -->
+                      <WinButton
+                        class="geometry-button"
+                        style="left: 240px; top: 168px;"
+                        @click="toggleTooltip3"
+                        :title="'4px'">
+                        <span class="icon">&#xE946;</span>
+                      </WinButton>
+                      <div
+                        v-if="tooltip3Open"
+                        class="teaching-tip"
+                        style="left: 276px; top: 168px;">
+                        <div class="teaching-tip-title">4px</div>
+                        <div class="teaching-tip-subtitle">ControlCornerRadius</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Corner Radius Reference Table -->
+                  <div class="radius-table">
+                    <!-- Table Header -->
+                    <div class="table-header">
+                      <div class="header-cell radius-col">Corner radius</div>
+                      <div class="header-cell usage-col">Usage</div>
+                      <div class="header-cell style-col">Style</div>
+                    </div>
+
+                    <!-- 8px - OverlayCornerRadius -->
+                    <div class="table-row light-row">
+                      <div class="cell radius-col">
+                        <div class="radius-visual">
+                          <div class="radius-sample" style="border-radius: 8px;"></div>
+                          <span>8px</span>
+                        </div>
+                      </div>
+                      <div class="cell usage-col">
+                        Top-level containers such as app windows, flyouts, cards and dialogs.
+                      </div>
+                      <div class="cell style-col">
+                        <code class="code-text">OverlayCornerRadius</code>
+                      </div>
+                      <div class="cell copy-col">
+                        <WinButton
+                          class="copy-button"
+                          @click="copyToClipboard('OverlayCornerRadius')"
+                          title="Copy to clipboard">
+                          <span class="icon">&#xE8C8;</span>
+                        </WinButton>
+                      </div>
+                    </div>
+
+                    <!-- 4px - ControlCornerRadius -->
+                    <div class="table-row">
+                      <div class="cell radius-col">
+                        <div class="radius-visual">
+                          <div class="radius-sample" style="border-radius: 4px;"></div>
+                          <span>4px</span>
+                        </div>
+                      </div>
+                      <div class="cell usage-col">
+                        In-page elements such as controls and list backplates.
+                      </div>
+                      <div class="cell style-col">
+                        <code class="code-text">ControlCornerRadius</code>
+                      </div>
+                      <div class="cell copy-col">
+                        <WinButton
+                          class="copy-button"
+                          @click="copyToClipboard('ControlCornerRadius')"
+                          title="Copy to clipboard">
+                          <span class="icon">&#xE8C8;</span>
+                        </WinButton>
+                      </div>
+                    </div>
+
+                    <!-- 0px - No rounding -->
+                    <div class="table-row light-row">
+                      <div class="cell radius-col">
+                        <div class="radius-visual">
+                          <div class="radius-sample" style="border-radius: 0;"></div>
+                          <span>0px</span>
+                        </div>
+                      </div>
+                      <div class="cell usage-col">
+                        Straight edges that intersect with other straight edges.
+                      </div>
+                      <div class="cell style-col">
+                        <code class="code-text">N/a</code>
+                      </div>
+                      <div class="cell copy-col"></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="cell usage-col">
-                Straight edges that intersect with other straight edges.
-              </div>
-              <div class="cell style-col">
-                <code class="code-text">N/a</code>
-              </div>
-              <div class="cell copy-col"></div>
-            </div>
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -173,6 +177,7 @@ import { ref, computed } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 // Theme management
 const currentTheme = ref('light');
 

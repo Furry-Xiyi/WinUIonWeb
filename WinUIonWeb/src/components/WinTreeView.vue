@@ -22,9 +22,9 @@
               @click.stop="toggleExpand(node)"></span>
 
         <div v-if="selectionMode === 'Multiple' || selectionMode === 'Extended'" class="tree-checkbox" @click.stop>
-          <WinCheckBox :modelValue="getCheckValue(node) === true"
-                       :indeterminate="getCheckValue(node) === null"
-                       @update:modelValue="onCheck(node, $event)" />
+          <WinCheckBox :IsThreeState="true"
+                       :IsChecked="getCheckValue(node)"
+                       @update:IsChecked="onCheck(node, $event)" />
         </div>
 
         <div class="tree-item-content">

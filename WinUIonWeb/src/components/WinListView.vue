@@ -1,56 +1,65 @@
 <!-- components/WinListView.vue -->
 <template>
   <div class="win-list-view" ref="containerRef">
-    <div class="win-list-viewport" ref="listRef"
-         @dragover.prevent="onViewportDragOver"
-         @drop.prevent="onViewportDrop"
-         @dragleave="onViewportDragLeave">
-      <template v-if="isGrouped">
-        <div v-for="(group, gIdx) in items" :key="gIdx" class="win-list-group">
-          <div v-if="showHeader" class="win-list-header" :class="{ sticky: stickyHeader }">
-            <slot name="header" :group="group">{{ group.key }}</slot>
+    <WinScrollViewer
+      class="win-list-viewport"
+      VerticalScrollMode="Auto"
+      VerticalScrollBarVisibility="Auto"
+      HorizontalScrollMode="Disabled"
+      HorizontalScrollBarVisibility="Disabled">
+      <div ref="listRef"
+           class="win-list-content"
+           @dragover.prevent="onViewportDragOver"
+           @drop.prevent="onViewportDrop"
+           @dragleave="onViewportDragLeave">
+        <template v-if="isGrouped">
+          <div v-for="(group, gIdx) in items" :key="gIdx" class="win-list-group">
+            <div v-if="showHeader" class="win-list-header" :class="{ sticky: stickyHeader }">
+              <slot name="header" :group="group">{{ group.key }}</slot>
+            </div>
+            <div v-for="(item, idx) in group.items" :key="idx"
+                 class="win-list-item"
+                 :class="{ selected: isSelected(item), clickEnabled: isItemClickEnabled }"
+                 :draggable="canDragItems"
+                 @click="onItemClick($event, item)"
+                 @dragstart="onDragStartGrouped($event, {gIdx, idx})"
+                 @dragover.prevent
+                 @drop.prevent>
+              <div class="list-indicator" :class="{ active: isSelected(item) }"></div>
+              <slot name="item" :item="item"></slot>
+            </div>
           </div>
-          <div v-for="(item, idx) in group.items" :key="idx"
+        </template>
+        <template v-else>
+          <div v-if="showHeader" class="win-list-header" :class="{ sticky: stickyHeader }">
+            <slot name="header"></slot>
+          </div>
+          <div v-for="(item, idx) in internalItems" :key="idx"
+               ref="itemEls"
                class="win-list-item"
-               :class="{ selected: isSelected(item), clickEnabled: isItemClickEnabled }"
+               :class="{
+         selected: isSelected(item),
+         clickEnabled: isItemClickEnabled && !isDragging,
+         'drag-shrink': isDragging && !dragIndices.includes(idx),
+         'dragging-source': isDragging && dragIndices.includes(idx)
+       }"
+               :style="getItemStyle(idx)"
                :draggable="canDragItems"
                @click="onItemClick($event, item)"
-               @dragstart="onDragStartGrouped($event, {gIdx, idx})"
-               @dragover.prevent
-               @drop.prevent>
+               @dragstart="onDragStart($event, idx)"
+               @dragend="onDragEnd">
             <div class="list-indicator" :class="{ active: isSelected(item) }"></div>
             <slot name="item" :item="item"></slot>
           </div>
-        </div>
-      </template>
-      <template v-else>
-        <div v-if="showHeader" class="win-list-header" :class="{ sticky: stickyHeader }">
-          <slot name="header"></slot>
-        </div>
-        <div v-for="(item, idx) in internalItems" :key="idx"
-             ref="itemEls"
-             class="win-list-item"
-             :class="{
-       selected: isSelected(item),
-       clickEnabled: isItemClickEnabled && !isDragging,
-       'drag-shrink': isDragging && !dragIndices.includes(idx),
-       'dragging-source': isDragging && dragIndices.includes(idx)
-     }"
-             :style="getItemStyle(idx)"
-             :draggable="canDragItems"
-             @click="onItemClick($event, item)"
-             @dragstart="onDragStart($event, idx)"
-             @dragend="onDragEnd">
-          <div class="list-indicator" :class="{ active: isSelected(item) }"></div>
-          <slot name="item" :item="item"></slot>
-        </div>
-      </template>
-    </div>
+        </template>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { computed, ref, toRaw, nextTick, watch } from 'vue';
+import WinScrollViewer from './WinScrollViewer.vue';
 
 const props = defineProps({
   ItemsSource: { type: Array, default: null },
@@ -59,6 +68,7 @@ const props = defineProps({
   CanDragItems: { type: Boolean, default: undefined },
   CanReorderItems: { type: Boolean, default: undefined },
   AllowDrop: { type: Boolean, default: undefined },
+  AreStickyGroupHeadersEnabled: { type: Boolean, default: undefined },
   SelectionMode: { type: String, default: undefined },
   SelectedItems: { type: Array, default: null },
   items: { type: Array, default: () => [] },
@@ -81,6 +91,8 @@ const isItemClickEnabled = computed(() => props.IsItemClickEnabled ?? props.isIt
 const canDragItems = computed(() => props.CanDragItems ?? props.canDragItems);
 const canReorderItems = computed(() => props.CanReorderItems ?? props.canReorderItems);
 const allowDrop = computed(() => props.AllowDrop ?? props.allowDrop);
+const showHeader = computed(() => props.showHeader || isGrouped.value);
+const stickyHeader = computed(() => props.AreStickyGroupHeadersEnabled ?? props.stickyHeader);
 const selectionMode = computed(() => props.SelectionMode ?? props.selectionMode);
 const selectedItems = computed(() => props.SelectedItems ?? props.selectedItems);
 
@@ -323,17 +335,14 @@ const onDragEnd = () => { resetDrag(); };
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    overflow-y: hidden;
-    overflow-x: clip;
-    scrollbar-width: thin;
     position: relative;
-    animation: win-list-scroll-reveal 0ms 300ms forwards;
   }
 
-  @keyframes win-list-scroll-reveal {
-    to {
-      overflow-y: auto;
-    }
+  .win-list-content {
+    width: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+    position: relative;
   }
 
   .win-list-group {

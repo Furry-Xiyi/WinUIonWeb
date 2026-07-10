@@ -1,26 +1,21 @@
 <template>
-  <div class="win-media-player" :class="{ 'controls-visible': controlsVisible }" :style="{ maxWidth: maxWidth + 'px' }" @mouseenter="showControls" @mouseleave="scheduleHideControls">
+  <div class="win-media-player" :class="{ 'controls-visible': controlsVisible }" :style="{ maxWidth: cssLength(MaxWidth) }" @mouseenter="showControls" @mouseleave="scheduleHideControls">
     <div class="win-media-surface">
       <video
         ref="videoRef"
-        :src="src"
-        :autoplay="autoPlay"
-        :loop="loop"
-        :muted="muted"
+        :src="Source"
+        :autoplay="AutoPlay"
+        :loop="Loop"
+        :muted="Muted"
         :controls="nativeControls"
-        :poster="poster"
+        :poster="Poster"
+        :disableRemotePlayback="false"
+        :style="{ objectFit: aspectMode }"
         @timeupdate="syncFromVideo"
         @loadedmetadata="syncFromVideo"
         @play="isPlaying = true"
         @pause="isPlaying = false"></video>
-      <div v-if="areTransportControlsEnabled && !nativeControls" class="win-media-controls" @mouseenter="showControls">
-        <div class="win-media-row seek-row">
-          <WinSlider class="win-media-seek" v-model="progressValue" :min="0" :max="duration || 100" />
-        </div>
-        <div class="win-media-row time-row">
-          <span>{{ elapsedTime }}</span>
-          <span>{{ remainingTime }}</span>
-        </div>
+      <div v-if="AreTransportControlsEnabled && !nativeControls" class="win-media-controls" @mouseenter="showControls">
         <div class="win-media-row command-row">
           <WinFlyout ref="volumeFlyout" direction="up" align="center">
             <template #trigger>
@@ -29,18 +24,28 @@
               </button>
             </template>
             <div class="win-media-volume-panel">
-              <WinButton Style="{StaticResource SubtleButtonStyle}" class="win-media-volume-subtle" @click="toggleMute">
+              <WinButton Style="SubtleButtonStyle" class="win-media-volume-subtle" @Click="toggleMute">
                 <span class="icon">{{ muteIcon }}</span>
               </WinButton>
-              <WinSlider v-model="volumeValue" :min="0" :max="100" />
+              <input class="win-media-range volume-range" type="range" min="0" max="100" step="1" :value="volumeValue" @input="setVolume" />
             </div>
           </WinFlyout>
           <button class="win-media-icon-button play-button" @click="togglePlay" :aria-label="isPlaying ? t('text.pause') : t('text.play')">
             <span class="icon">{{ playIcon }}</span>
           </button>
-          <button class="win-media-icon-button" @click="showCastPanel" :aria-label="t('text.cast')">
-            <span class="icon">&#xEC16;</span>
-          </button>
+          <div class="right-command-group">
+            <button class="win-media-icon-button" @click="toggleAspectMode" :aria-label="t('text.aspect-ratio')">
+              <span class="icon">&#xE9A6;</span>
+            </button>
+            <button class="win-media-icon-button" @click="showCastPanel" :aria-label="t('text.cast')">
+              <span class="icon">&#xEC16;</span>
+            </button>
+          </div>
+        </div>
+        <div class="win-media-row seek-row">
+          <span class="time-label">{{ elapsedTime }}</span>
+          <input class="win-media-range win-media-seek" type="range" min="0" :max="duration || 100" step="0.01" :value="currentTime" @input="seekTo" />
+          <span class="time-label">{{ remainingTime }}</span>
         </div>
       </div>
     </div>
@@ -51,18 +56,24 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import WinButton from './WinButton.vue';
 import WinFlyout from './WinFlyout.vue';
-import WinSlider from './WinSlider.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 
 const props = defineProps({
-  src: { type: String, required: true },
+  Source: { type: String, default: '' },
+  PosterSource: { type: String, default: '' },
+  AutoPlay: { type: Boolean, default: false },
+  Loop: { type: Boolean, default: false },
+  Muted: { type: Boolean, default: false },
+  AreTransportControlsEnabled: { type: Boolean, default: true },
+  MaxWidth: { type: [String, Number], default: 400 },
+  src: { type: String, default: '' },
   poster: String,
   autoPlay: Boolean,
   loop: Boolean,
   muted: Boolean,
-  areTransportControlsEnabled: { type: Boolean, default: true },
+  areTransportControlsEnabled: { type: Boolean, default: undefined },
   nativeControls: Boolean,
   maxWidth: { type: Number, default: 400 }
 });
@@ -75,7 +86,15 @@ const duration = ref(0);
 const volumeValue = ref(100);
 const volumeFlyout = ref(null);
 const controlsVisible = ref(true);
+const aspectMode = ref('contain');
 let hideTimer = null;
+const Source = computed(() => props.Source || props.src);
+const Poster = computed(() => props.PosterSource || props.poster);
+const AutoPlay = computed(() => props.AutoPlay || props.autoPlay);
+const Loop = computed(() => props.Loop || props.loop);
+const Muted = computed(() => props.Muted || props.muted);
+const AreTransportControlsEnabled = computed(() => props.AreTransportControlsEnabled ?? props.areTransportControlsEnabled ?? true);
+const MaxWidth = computed(() => props.MaxWidth || props.maxWidth);
 
 const syncFromVideo = () => {
   const video = videoRef.value;
@@ -126,51 +145,60 @@ const elapsedTime = computed(() => format(currentTime.value));
 const remainingTime = computed(() => format(Math.max(0, duration.value - currentTime.value)));
 const playIcon = computed(() => isPlaying.value ? '\uE769' : '\uE768');
 const muteIcon = computed(() => mutedState.value ? '\uE74F' : '\uE767');
-const progressValue = computed({
-  get: () => currentTime.value,
-  set: value => {
-    const video = videoRef.value;
-    if (!video) return;
-    video.currentTime = Number(value);
-    syncFromVideo();
-  }
-});
-
-const showCastPanel = () => {
+const seekTo = (event) => {
   const video = videoRef.value;
+  if (!video) return;
+  video.currentTime = Number(event.target.value);
+  syncFromVideo();
+};
+
+const setVolume = (event) => {
+  volumeValue.value = Number(event.target.value);
+};
+
+const toggleAspectMode = () => {
+  aspectMode.value = aspectMode.value === 'contain' ? 'cover' : 'contain';
+};
+
+const showCastPanel = async () => {
+  const video = videoRef.value;
+  if (typeof video?.webkitShowPlaybackTargetPicker === 'function') {
+    video.webkitShowPlaybackTargetPicker();
+    return;
+  }
+
   if (!video || !video.remote) {
-    alert('此浏览器不支持投放功能');
+    alert(t('text.browser-does-not-support-casting'));
     return;
   }
 
   if (typeof video.remote.prompt !== 'function') {
-    alert('投放功能不可用');
+    alert(t('text.casting-is-not-available'));
     return;
   }
 
   // 直接同步调用 prompt()
   video.remote.prompt().then(() => {
-    console.log('投放面板已打开或正在连接');
+    console.log(t('text.casting-panel-opened-or-connecting'));
   }).catch((err) => {
     if (err.name === 'NotFoundError') {
-      alert('未找到投放设备\n\n请确保投放设备（如 Chromecast、智能电视）已开机并连接到同一网络。');
+      alert(t('text.no-casting-devices-found'));
     } else if (err.name === 'NotAllowedError') {
-      // 本地开发环境可能因为证书问题而被阻止，部署到 HTTPS 环境后应该正常
-      console.log('投放权限被拒绝（本地开发环境下可能正常，请在 HTTPS 生产环境下测试）');
+      console.log(t('text.casting-permission-denied'));
     } else if (err.name === 'AbortError') {
-      console.log('用户取消了投放');
+      console.log(t('text.casting-cancelled'));
     }
   });
 };
 
-watch(() => props.muted, value => {
-  mutedState.value = value;
-  if (videoRef.value) videoRef.value.muted = value;
+watch(Muted, value => {
+  mutedState.value = Muted.value;
+  if (videoRef.value) videoRef.value.muted = Muted.value;
 });
 
 onMounted(() => {
   if (videoRef.value) {
-    videoRef.value.muted = props.muted;
+    videoRef.value.muted = Muted.value;
     volumeValue.value = Math.round((videoRef.value.volume ?? 1) * 100);
   }
 });
@@ -188,6 +216,11 @@ watch(volumeValue, value => {
   if (next === 0) video.muted = true;
   syncFromVideo();
 });
+
+function cssLength(value) {
+  if (value === '' || value === undefined || value === null) return undefined;
+  return typeof value === 'number' ? `${value}px` : String(value).trim().match(/^\d+$/) ? `${value}px` : value;
+}
 </script>
 
 <style>
@@ -197,11 +230,11 @@ watch(volumeValue, value => {
     overflow: visible;
   }
 
-  .win-media-surface {
+.win-media-surface {
     position: relative;
     width: 100%;
     background: #000;
-    border-radius: 8px;
+    border-radius: 0;
     overflow: hidden;
     border: 1px solid var(--card-stroke);
   }
@@ -213,25 +246,23 @@ watch(volumeValue, value => {
     background: #000;
   }
 
-  .win-media-controls {
+.win-media-controls {
     position: absolute;
-    left: 12px;
-    right: 12px;
-    bottom: 10px;
-    min-height: 112px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-height: 92px;
     padding: 10px 12px 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    background: color-mix(in srgb, #202020 88%, transparent);
-    backdrop-filter: blur(18px) saturate(1.25);
-    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    border-radius: 0;
+    border: 0;
+    background: rgba(0, 0, 0, 0.72);
     color: white;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.26);
+    box-shadow: none;
     opacity: 0;
     transform: translateY(18px);
     pointer-events: none;
@@ -253,13 +284,10 @@ watch(volumeValue, value => {
   }
 
   .seek-row {
-    height: 24px;
-  }
-
-  .time-row {
-    justify-content: space-between;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.82);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 12px;
+    height: 28px;
   }
 
   .command-row {
@@ -270,6 +298,12 @@ watch(volumeValue, value => {
 
   .command-row > :last-child {
     justify-self: end;
+  }
+
+  .right-command-group {
+    display: flex;
+    justify-self: end;
+    gap: 2px;
   }
 
   .win-media-icon-button {
@@ -298,11 +332,62 @@ watch(volumeValue, value => {
     min-width: 80px;
   }
 
+  .win-media-range {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    height: 20px;
+    background: transparent;
+    accent-color: var(--accent-base);
+    cursor: pointer;
+  }
+
+  .win-media-range::-webkit-slider-runnable-track {
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.38);
+  }
+
+  .win-media-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    margin-top: -4.5px;
+    border-radius: 50%;
+    background: #fff;
+    border: 0;
+  }
+
+  .win-media-range::-moz-range-track {
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.38);
+  }
+
+  .win-media-range::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    border: 0;
+  }
+
+  .time-label {
+    min-width: 54px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
   .win-media-volume-panel {
     display: flex;
     align-items: center;
     gap: 12px;
     min-width: 260px;
+  }
+
+  .volume-range {
+    min-width: 180px;
   }
 
   .win-media-volume-subtle {

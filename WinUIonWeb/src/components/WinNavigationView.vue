@@ -66,7 +66,15 @@
         <div v-if="paneTitle" class="win-nav-pane-title">{{ paneTitle }}</div>
         <div v-if="$slots.autoSuggestBox" class="win-nav-pane-search"><slot name="autoSuggestBox"></slot></div>
       </div>
-      <div class="win-nav-left-scrollable" ref="scrollArea" @scroll="onScroll" v-show="!isLeftMinimalMode || !isCompact">
+      <WinScrollViewer
+        class="win-nav-left-scrollable"
+        ref="scrollArea"
+        v-show="!isLeftMinimalMode || !isCompact"
+        VerticalScrollMode="Auto"
+        VerticalScrollBarVisibility="Auto"
+        HorizontalScrollMode="Disabled"
+        HorizontalScrollBarVisibility="Disabled"
+        @ViewChanged="onScroll">
         <div class="win-nav-menu">
           <template v-for="item in menuItems" :key="item.value">
             <div v-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
@@ -90,7 +98,7 @@
             </div>
           </template>
         </div>
-      </div>
+      </WinScrollViewer>
       <div class="win-nav-footer" v-show="!isLeftMinimalMode || !isCompact">
         <div v-if="$slots.paneFooter" class="win-nav-pane-footer"><slot name="paneFooter"></slot></div>
         <template v-for="item in footerItems" :key="item.value">
@@ -142,6 +150,7 @@
 <script setup>
 import { ref, reactive, inject, provide, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
+import WinScrollViewer from './WinScrollViewer.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
@@ -911,6 +920,8 @@ const onScroll = () => {
   }
 };
 
+const getScrollAreaElement = () => scrollArea.value?.scrollViewerRef?.value ?? scrollArea.value?.scrollViewerRef ?? scrollArea.value ?? null;
+
 const calcIndicator = () => {
   const sourceEl = prevSelectedEl && prevSelectedEl !== lastSelectedEl ? prevSelectedEl : null;
   prevSelectedEl = lastSelectedEl;
@@ -953,7 +964,7 @@ const calcIndicator = () => {
   };
 
   const getRegion = (el) => {
-    const scrollEl = scrollArea.value;
+    const scrollEl = getScrollAreaElement();
     if (isTopNavigation.value) {
       const value = getValueForElement(el);
       if (value) return isFooterValue(value) ? 'top-footer' : 'top-menu';
@@ -1068,7 +1079,7 @@ const calcIndicator = () => {
   } else {
     const newY = elRect.top - trackRect.top + elRect.height / 2 - 8;
 
-    const scrollEl = scrollArea.value;
+    const scrollEl = getScrollAreaElement();
     let visibleTop = 0;
     let visibleBottom = trackRect.height;
     if (scrollEl) {
@@ -1496,11 +1507,9 @@ watch(() => props.selectedValue, (val, oldVal) => {
     min-width: 0;
     min-height: 0;
     background: var(--layer-default);
-    overflow-y: auto;
+    overflow: hidden;
     overflow-x: hidden;
     transition: background var(--normal-duration) var(--fast-out-slow-in);
-    scrollbar-width: thin;
-    scrollbar-color: var(--ctrl-strong-stroke) transparent;
   }
 
   .win-nav-shell.is-left .win-nav-content {
@@ -1523,7 +1532,9 @@ watch(() => props.selectedValue, (val, oldVal) => {
   }
 
   .win-nav-content-inner {
-    padding: 24px 32px;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
   }
 
   .win-nav-page-header {
@@ -1538,7 +1549,7 @@ watch(() => props.selectedValue, (val, oldVal) => {
   }
 
     .win-nav-page-header + .win-nav-content-inner {
-      padding-top: 16px;
+      padding-top: 0;
     }
 
   .win-nav-left-panel {
@@ -1602,11 +1613,7 @@ watch(() => props.selectedValue, (val, oldVal) => {
     flex: 1;
     min-height: 0;
     margin-top: 2px;
-    overflow-y: overlay;
-    overflow-x: hidden;
     position: relative;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ctrl-strong-stroke) transparent;
   }
 
   .win-nav-footer {
@@ -2018,23 +2025,4 @@ watch(() => props.selectedValue, (val, oldVal) => {
     width: 100%;
   }
 
-  /* 注释掉 webkit-scrollbar 自定义样式，让 Edge FluentScrollBarStyle 完全接管 */
-  /*
-  .win-nav-content::-webkit-scrollbar,
-  .win-nav-left-scrollable::-webkit-scrollbar {
-  }
-
-  .win-nav-content::-webkit-scrollbar-thumb,
-  .win-nav-left-scrollable::-webkit-scrollbar-thumb {
-    background-color: color-mix(in srgb, var(--ctrl-strong-stroke) 58%, transparent);
-    border: 4px solid transparent;
-    border-radius: 8px;
-    background-clip: content-box;
-  }
-
-  .win-nav-content::-webkit-scrollbar-thumb:hover,
-  .win-nav-left-scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(in srgb, var(--ctrl-strong-stroke) 76%, transparent);
-  }
-  */
 </style>

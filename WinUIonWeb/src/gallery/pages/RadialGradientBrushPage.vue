@@ -1,102 +1,105 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">RadialGradientBrush</h1>
-      <p class="page-description">
-        Paints an area with a radial gradient. A center point defines the origin of the gradient, and an ellipse defines the outer bounds of the gradient.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">RadialGradientBrush</h1>
+          <p class="page-description">
+            Paints an area with a radial gradient. A center point defines the origin of the gradient, and an ellipse defines the outer bounds of the gradient.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example: RadialGradientBrush Sample -->
+            <WinControlExample
+              headerText="RadialGradientBrush Sample"
+              :theme="pageTheme"
+              :templateCode="exampleTemplate"
+              :vueCode="exampleVue">
+              <template #example>
+                <div class="gradient-container">
+                  <div
+                    class="gradient-rectangle"
+                    :style="gradientStyle"></div>
+                </div>
+              </template>
+              <template #options>
+                <div class="options-grid">
+                  <WinComboBox
+                    v-model="mappingMode"
+                    header="MappingMode"
+                    :options="mappingModeOptions"
+                    style="grid-column: span 2;" />
+
+                  <WinSlider
+                    v-model="centerX"
+                    header="Center.X"
+                    :minimum="0"
+                    :maximum="sliderMaximum"
+                    :stepFrequency="sliderStepFrequency"
+                    :smallChange="sliderSmallChange" />
+
+                  <WinSlider
+                    v-model="centerY"
+                    header="Center.Y"
+                    :minimum="0"
+                    :maximum="sliderMaximum"
+                    :stepFrequency="sliderStepFrequency"
+                    :smallChange="sliderSmallChange" />
+
+                  <WinSlider
+                    v-model="radiusX"
+                    header="RadiusX"
+                    :minimum="0"
+                    :maximum="sliderMaximum"
+                    :stepFrequency="sliderStepFrequency"
+                    :smallChange="sliderSmallChange" />
+
+                  <WinSlider
+                    v-model="radiusY"
+                    header="RadiusY"
+                    :minimum="0"
+                    :maximum="sliderMaximum"
+                    :stepFrequency="sliderStepFrequency"
+                    :smallChange="sliderSmallChange" />
+
+                  <WinSlider
+                    v-model="originX"
+                    header="GradientOrigin.X"
+                    :minimum="0"
+                    :maximum="sliderMaximum"
+                    :stepFrequency="sliderStepFrequency"
+                    :smallChange="sliderSmallChange" />
+
+                  <WinSlider
+                    v-model="originY"
+                    header="GradientOrigin.Y"
+                    :minimum="0"
+                    :maximum="sliderMaximum"
+                    :stepFrequency="sliderStepFrequency"
+                    :smallChange="sliderSmallChange" />
+
+                  <WinComboBox
+                    v-model="spreadMethod"
+                    header="SpreadMethod"
+                    :options="spreadMethodOptions"
+                    style="grid-column: span 2; margin-top: 10px;" />
+                </div>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example: RadialGradientBrush Sample -->
-    <WinControlExample
-      headerText="RadialGradientBrush Sample"
-      :theme="pageTheme"
-      :templateCode="exampleTemplate"
-      :vueCode="exampleVue">
-      <template #example>
-        <div class="gradient-container">
-          <div
-            class="gradient-rectangle"
-            :style="gradientStyle"></div>
-        </div>
-      </template>
-      <template #options>
-        <div class="options-grid">
-          <WinComboBox
-            v-model="mappingMode"
-            header="MappingMode"
-            :options="mappingModeOptions"
-            style="grid-column: span 2;" />
-
-          <WinSlider
-            v-model="centerX"
-            header="Center.X"
-            :minimum="0"
-            :maximum="sliderMaximum"
-            :stepFrequency="sliderStepFrequency"
-            :smallChange="sliderSmallChange" />
-
-          <WinSlider
-            v-model="centerY"
-            header="Center.Y"
-            :minimum="0"
-            :maximum="sliderMaximum"
-            :stepFrequency="sliderStepFrequency"
-            :smallChange="sliderSmallChange" />
-
-          <WinSlider
-            v-model="radiusX"
-            header="RadiusX"
-            :minimum="0"
-            :maximum="sliderMaximum"
-            :stepFrequency="sliderStepFrequency"
-            :smallChange="sliderSmallChange" />
-
-          <WinSlider
-            v-model="radiusY"
-            header="RadiusY"
-            :minimum="0"
-            :maximum="sliderMaximum"
-            :stepFrequency="sliderStepFrequency"
-            :smallChange="sliderSmallChange" />
-
-          <WinSlider
-            v-model="originX"
-            header="GradientOrigin.X"
-            :minimum="0"
-            :maximum="sliderMaximum"
-            :stepFrequency="sliderStepFrequency"
-            :smallChange="sliderSmallChange" />
-
-          <WinSlider
-            v-model="originY"
-            header="GradientOrigin.Y"
-            :minimum="0"
-            :maximum="sliderMaximum"
-            :stepFrequency="sliderStepFrequency"
-            :smallChange="sliderSmallChange" />
-
-          <WinComboBox
-            v-model="spreadMethod"
-            header="SpreadMethod"
-            :options="spreadMethodOptions"
-            style="grid-column: span 2; margin-top: 10px;" />
-        </div>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -110,6 +113,7 @@ import WinSlider from '../../components/WinSlider.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'radialgradientbrush');
 

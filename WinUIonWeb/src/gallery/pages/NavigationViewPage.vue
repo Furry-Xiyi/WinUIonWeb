@@ -1,219 +1,222 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">NavigationView</h1>
-      <p class="page-description">
-        The NavigationView control provides top-level navigation for your app. It adapts to a variety of screen sizes and supports both top and left navigation styles.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">NavigationView</h1>
+          <p class="page-description">
+            The NavigationView control provides top-level navigation for your app. It adapts to a variety of screen sizes and supports both top and left navigation styles.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example 1: Left Navigation (Default) -->
+            <WinControlExample
+              headerText="Default left navigation"
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <div class="nav-example-container">
+                  <WinNavigationView
+                    :selectedValue="leftSelectedValue"
+                    @update:selectedValue="leftSelectedValue = $event"
+                    :menuItems="leftMenuItems"
+                    header="This is Header Text"
+                    :isPaneOpen="leftPaneOpen"
+                    @update:isPaneOpen="leftPaneOpen = $event"
+                    paneDisplayMode="Left"
+                    style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
+                    <div style="padding: 24px; color: var(--text-primary);">
+                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ leftContentTitle }}</p>
+                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ leftSelectedValue }}.</p>
+                    </div>
+                  </WinNavigationView>
+                </div>
+              </template>
+              <template #options>
+                <p class="output-text">Selected: {{ leftSelectedValue }}</p>
+                <p class="output-text">Pane Open: {{ leftPaneOpen }}</p>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 2: Top Navigation -->
+            <WinControlExample
+              headerText="Top navigation"
+              :theme="pageTheme"
+              :templateCode="example2Template"
+              :vueCode="example2Vue">
+              <template #example>
+                <div class="nav-example-container">
+                  <WinNavigationView
+                    :selectedValue="topSelectedValue"
+                    @update:selectedValue="topSelectedValue = $event"
+                    :menuItems="topMenuItems"
+                    header="This is Header Text"
+                    paneDisplayMode="Top"
+                    style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
+                    <div style="padding: 24px; color: var(--text-primary);">
+                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ topContentTitle }}</p>
+                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ topSelectedValue }}.</p>
+                    </div>
+                  </WinNavigationView>
+                </div>
+
+                <p class="output-text">Selected: {{ topSelectedValue }}</p>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 3: Hierarchical Navigation -->
+            <WinControlExample
+              headerText="Hierarchical navigation"
+              :theme="pageTheme"
+              :templateCode="example3Template"
+              :vueCode="example3Vue">
+              <template #example>
+                <div class="nav-example-container">
+                  <WinNavigationView
+                    :selectedValue="hierarchicalSelectedValue"
+                    @update:selectedValue="hierarchicalSelectedValue = $event"
+                    :menuItems="hierarchicalMenuItems"
+                    header="Hierarchical Menu"
+                    paneDisplayMode="Left"
+                    style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
+                    <div style="padding: 24px; color: var(--text-primary);">
+                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ hierarchicalContentTitle }}</p>
+                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ hierarchicalSelectedValue }}.</p>
+                    </div>
+                  </WinNavigationView>
+                </div>
+
+                <p class="output-text">Selected: {{ hierarchicalSelectedValue }}</p>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 4: Footer Menu Items -->
+            <WinControlExample
+              headerText="Footer menu items"
+              :theme="pageTheme"
+              :templateCode="example4Template"
+              :vueCode="example4Vue">
+              <template #example>
+                <div class="nav-example-container">
+                  <WinNavigationView
+                    :selectedValue="footerSelectedValue"
+                    @update:selectedValue="footerSelectedValue = $event"
+                    :menuItems="footerMenuItems"
+                    :footerItems="footerBottomItems"
+                    header="This is Header Text"
+                    :paneDisplayMode="footerPaneMode"
+                    style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
+                    <div style="padding: 24px; color: var(--text-primary);">
+                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ footerContentTitle }}</p>
+                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ footerSelectedValue }}.</p>
+                    </div>
+                  </WinNavigationView>
+                </div>
+
+                <p class="output-text">Selected: {{ footerSelectedValue }}</p>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <p style="margin: 0; font-weight: 600; color: var(--text-primary);">Pane position:</p>
+                  <WinRadioButton
+                    :modelValue="footerPaneMode === 'Left'"
+                    @update:modelValue="footerPaneMode = 'Left'"
+                    name="footerPaneMode">
+                    Left mode
+                  </WinRadioButton>
+                  <WinRadioButton
+                    :modelValue="footerPaneMode === 'Top'"
+                    @update:modelValue="footerPaneMode = 'Top'"
+                    name="footerPaneMode">
+                    Top mode
+                  </WinRadioButton>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 5: API Control -->
+            <WinControlExample
+              headerText="NavigationView API"
+              :theme="pageTheme"
+              :templateCode="example5Template"
+              :vueCode="example5Vue">
+              <template #example>
+                <div class="nav-example-container">
+                  <WinNavigationView
+                    :selectedValue="apiSelectedValue"
+                    @update:selectedValue="apiSelectedValue = $event"
+                    :menuItems="apiMenuItems"
+                    :header="apiHeader"
+                    :paneTitle="apiPaneTitle"
+                    :isSettingsVisible="apiSettingsVisible"
+                    :isBackButtonVisible="apiBackVisible ? 'visible' : 'collapsed'"
+                    :paneDisplayMode="apiPaneMode"
+                    style="height: 540px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
+                    <div style="padding: 24px; color: var(--text-primary);">
+                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ apiContentTitle }}</p>
+                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ apiSelectedValue }}.</p>
+                    </div>
+                  </WinNavigationView>
+                </div>
+
+                <p class="output-text">Selected: {{ apiSelectedValue }}</p>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <WinCheckBox v-model="apiSettingsVisible">
+                    Settings item visible
+                  </WinCheckBox>
+                  <WinCheckBox v-model="apiBackVisible">
+                    Back button visible
+                  </WinCheckBox>
+
+                  <div style="margin-top: 8px;">
+                    <label style="display: block; margin-bottom: 4px; color: var(--text-primary); font-size: 14px;">Header:</label>
+                    <input
+                      type="text"
+                      v-model="apiHeader"
+                      style="width: 100%; padding: 6px 8px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px; background: var(--ctrl-bg-default); color: var(--text-primary);" />
+                  </div>
+
+                  <div>
+                    <label style="display: block; margin-bottom: 4px; color: var(--text-primary); font-size: 14px;">PaneTitle:</label>
+                    <input
+                      type="text"
+                      v-model="apiPaneTitle"
+                      style="width: 100%; padding: 6px 8px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px; background: var(--ctrl-bg-default); color: var(--text-primary);" />
+                  </div>
+
+                  <div style="margin-top: 8px;">
+                    <p style="margin: 0 0 4px 0; font-weight: 600; color: var(--text-primary);">PanePosition:</p>
+                    <WinRadioButton
+                      :modelValue="apiPaneMode === 'Left'"
+                      @update:modelValue="apiPaneMode = 'Left'"
+                      name="apiPaneMode">
+                      Left
+                    </WinRadioButton>
+                    <WinRadioButton
+                      :modelValue="apiPaneMode === 'Top'"
+                      @update:modelValue="apiPaneMode = 'Top'"
+                      name="apiPaneMode">
+                      Top
+                    </WinRadioButton>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example 1: Left Navigation (Default) -->
-    <WinControlExample
-      headerText="Default left navigation"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div class="nav-example-container">
-          <WinNavigationView
-            :selectedValue="leftSelectedValue"
-            @update:selectedValue="leftSelectedValue = $event"
-            :menuItems="leftMenuItems"
-            header="This is Header Text"
-            :isPaneOpen="leftPaneOpen"
-            @update:isPaneOpen="leftPaneOpen = $event"
-            paneDisplayMode="Left"
-            style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-            <div style="padding: 24px; color: var(--text-primary);">
-              <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ leftContentTitle }}</p>
-              <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ leftSelectedValue }}.</p>
-            </div>
-          </WinNavigationView>
-        </div>
-      </template>
-      <template #options>
-        <p class="output-text">Selected: {{ leftSelectedValue }}</p>
-        <p class="output-text">Pane Open: {{ leftPaneOpen }}</p>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: Top Navigation -->
-    <WinControlExample
-      headerText="Top navigation"
-      :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <div class="nav-example-container">
-          <WinNavigationView
-            :selectedValue="topSelectedValue"
-            @update:selectedValue="topSelectedValue = $event"
-            :menuItems="topMenuItems"
-            header="This is Header Text"
-            paneDisplayMode="Top"
-            style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-            <div style="padding: 24px; color: var(--text-primary);">
-              <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ topContentTitle }}</p>
-              <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ topSelectedValue }}.</p>
-            </div>
-          </WinNavigationView>
-        </div>
-
-        <p class="output-text">Selected: {{ topSelectedValue }}</p>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 3: Hierarchical Navigation -->
-    <WinControlExample
-      headerText="Hierarchical navigation"
-      :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
-      <template #example>
-        <div class="nav-example-container">
-          <WinNavigationView
-            :selectedValue="hierarchicalSelectedValue"
-            @update:selectedValue="hierarchicalSelectedValue = $event"
-            :menuItems="hierarchicalMenuItems"
-            header="Hierarchical Menu"
-            paneDisplayMode="Left"
-            style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-            <div style="padding: 24px; color: var(--text-primary);">
-              <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ hierarchicalContentTitle }}</p>
-              <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ hierarchicalSelectedValue }}.</p>
-            </div>
-          </WinNavigationView>
-        </div>
-
-        <p class="output-text">Selected: {{ hierarchicalSelectedValue }}</p>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 4: Footer Menu Items -->
-    <WinControlExample
-      headerText="Footer menu items"
-      :theme="pageTheme"
-      :templateCode="example4Template"
-      :vueCode="example4Vue">
-      <template #example>
-        <div class="nav-example-container">
-          <WinNavigationView
-            :selectedValue="footerSelectedValue"
-            @update:selectedValue="footerSelectedValue = $event"
-            :menuItems="footerMenuItems"
-            :footerItems="footerBottomItems"
-            header="This is Header Text"
-            :paneDisplayMode="footerPaneMode"
-            style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-            <div style="padding: 24px; color: var(--text-primary);">
-              <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ footerContentTitle }}</p>
-              <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ footerSelectedValue }}.</p>
-            </div>
-          </WinNavigationView>
-        </div>
-
-        <p class="output-text">Selected: {{ footerSelectedValue }}</p>
-
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <p style="margin: 0; font-weight: 600; color: var(--text-primary);">Pane position:</p>
-          <WinRadioButton
-            :modelValue="footerPaneMode === 'Left'"
-            @update:modelValue="footerPaneMode = 'Left'"
-            name="footerPaneMode">
-            Left mode
-          </WinRadioButton>
-          <WinRadioButton
-            :modelValue="footerPaneMode === 'Top'"
-            @update:modelValue="footerPaneMode = 'Top'"
-            name="footerPaneMode">
-            Top mode
-          </WinRadioButton>
-        </div>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 5: API Control -->
-    <WinControlExample
-      headerText="NavigationView API"
-      :theme="pageTheme"
-      :templateCode="example5Template"
-      :vueCode="example5Vue">
-      <template #example>
-        <div class="nav-example-container">
-          <WinNavigationView
-            :selectedValue="apiSelectedValue"
-            @update:selectedValue="apiSelectedValue = $event"
-            :menuItems="apiMenuItems"
-            :header="apiHeader"
-            :paneTitle="apiPaneTitle"
-            :isSettingsVisible="apiSettingsVisible"
-            :isBackButtonVisible="apiBackVisible ? 'visible' : 'collapsed'"
-            :paneDisplayMode="apiPaneMode"
-            style="height: 540px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-            <div style="padding: 24px; color: var(--text-primary);">
-              <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ apiContentTitle }}</p>
-              <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ apiSelectedValue }}.</p>
-            </div>
-          </WinNavigationView>
-        </div>
-
-        <p class="output-text">Selected: {{ apiSelectedValue }}</p>
-
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <WinCheckBox v-model="apiSettingsVisible">
-            Settings item visible
-          </WinCheckBox>
-          <WinCheckBox v-model="apiBackVisible">
-            Back button visible
-          </WinCheckBox>
-
-          <div style="margin-top: 8px;">
-            <label style="display: block; margin-bottom: 4px; color: var(--text-primary); font-size: 14px;">Header:</label>
-            <input
-              type="text"
-              v-model="apiHeader"
-              style="width: 100%; padding: 6px 8px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px; background: var(--ctrl-bg-default); color: var(--text-primary);" />
-          </div>
-
-          <div>
-            <label style="display: block; margin-bottom: 4px; color: var(--text-primary); font-size: 14px;">PaneTitle:</label>
-            <input
-              type="text"
-              v-model="apiPaneTitle"
-              style="width: 100%; padding: 6px 8px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px; background: var(--ctrl-bg-default); color: var(--text-primary);" />
-          </div>
-
-          <div style="margin-top: 8px;">
-            <p style="margin: 0 0 4px 0; font-weight: 600; color: var(--text-primary);">PanePosition:</p>
-            <WinRadioButton
-              :modelValue="apiPaneMode === 'Left'"
-              @update:modelValue="apiPaneMode = 'Left'"
-              name="apiPaneMode">
-              Left
-            </WinRadioButton>
-            <WinRadioButton
-              :modelValue="apiPaneMode === 'Top'"
-              @update:modelValue="apiPaneMode = 'Top'"
-              name="apiPaneMode">
-              Top
-            </WinRadioButton>
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -228,6 +231,7 @@ import WinRadioButton from '../../components/WinRadioButton.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'navigationview');
 

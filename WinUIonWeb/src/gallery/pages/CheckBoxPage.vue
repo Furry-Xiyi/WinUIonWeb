@@ -1,66 +1,61 @@
 <template>
-  <div>
-    <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.checkbox')" />
-      <WinTextBlock class="page-description" :Text="$t('text.checkbox-controls-let-the-user-select-a-combinat')" TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.checkbox')" />
+          <WinTextBlock class="page-description" :Text="$t('text.checkbox-controls-let-the-user-select-a-combinat')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+      <div class="gallery-page-content">
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="checkBoxTwoStateVue" :headerText="$t('sample.checkbox.two-state')">
+              <template #example>
+                <WinCheckBox v-model:IsChecked="twoStateChecked" AutomationProperties.Name="Two-state" @Checked="TwoState_Checked" @Unchecked="TwoState_Unchecked">
+                  <WinTextBlock :Text="$t('sample.checkbox.two-state-content')" />
+                </WinCheckBox>
+              </template>
+              <template #options>
+                <WinTextBlock AutomationProperties.AutomationId="Control1Output" :Text="TwoStateOutput" />
+              </template>
+            </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="checkBoxThreeStateVue" :headerText="$t('sample.checkbox.three-state')">
+              <template #example>
+                <WinCheckBox v-model:IsChecked="threeStateChecked" AutomationProperties.Name="Three-state" IsThreeState @Checked="ThreeState_Checked" @Unchecked="ThreeState_Unchecked" @Indeterminate="ThreeState_Indeterminate">
+                  <WinTextBlock :Text="$t('sample.checkbox.three-state-content')" />
+                </WinCheckBox>
+              </template>
+              <template #options>
+                <WinTextBlock AutomationProperties.AutomationId="Control2Output" :Text="ThreeStateOutput" />
+              </template>
+            </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="checkBoxSelectAllVue" :headerText="$t('sample.checkbox.select-all')">
+              <template #example>
+                <div class="vertical-stack">
+                  <WinCheckBox :IsChecked="OptionsAllCheckBox" IsThreeState @Checked="SelectAll_Checked" @Unchecked="SelectAll_Unchecked" @Indeterminate="SelectAll_Indeterminate">
+                    <WinTextBlock :Text="$t('sample.select-all')" />
+                  </WinCheckBox>
+                  <WinCheckBox v-model:IsChecked="Option1CheckBox" Margin="24,0,0,0" @Checked="Option_Checked" @Unchecked="Option_Unchecked">
+                    <WinTextBlock :Text="$t('text.option-1')" />
+                  </WinCheckBox>
+                  <WinCheckBox v-model:IsChecked="Option2CheckBox" Margin="24,0,0,0" @Checked="Option_Checked" @Unchecked="Option_Unchecked">
+                    <WinTextBlock :Text="$t('text.option-2')" />
+                  </WinCheckBox>
+                  <WinCheckBox v-model:IsChecked="Option3CheckBox" Margin="24,0,0,0" @Checked="Option_Checked" @Unchecked="Option_Unchecked">
+                    <WinTextBlock :Text="$t('text.option-3')" />
+                  </WinCheckBox>
+                </div>
+              </template>
+              <template #options>
+                <WinTextBlock :Text="selectAllOutput" />
+              </template>
+            </WinControlExample>
       </div>
     </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.checkbox.two-state')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="checkBoxTwoStateVue">
-      <template #example>
-        <WinCheckBox v-model:IsChecked="twoStateChecked" AutomationProperties.Name="Two-state" @Checked="TwoState_Checked" @Unchecked="TwoState_Unchecked">
-          <WinTextBlock :Text="$t('sample.checkbox.two-state-content')" />
-        </WinCheckBox>
-      </template>
-      <template #options>
-        <WinTextBlock AutomationProperties.AutomationId="Control1Output" :Text="TwoStateOutput" />
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.checkbox.three-state')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="checkBoxThreeStateVue">
-      <template #example>
-        <WinCheckBox v-model:IsChecked="threeStateChecked" AutomationProperties.Name="Three-state" IsThreeState @Checked="ThreeState_Checked" @Unchecked="ThreeState_Unchecked" @Indeterminate="ThreeState_Indeterminate">
-          <WinTextBlock :Text="$t('sample.checkbox.three-state-content')" />
-        </WinCheckBox>
-      </template>
-      <template #options>
-        <WinTextBlock AutomationProperties.AutomationId="Control2Output" :Text="ThreeStateOutput" />
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.checkbox.select-all')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="checkBoxSelectAllVue">
-      <template #example>
-        <div class="vertical-stack">
-          <WinCheckBox :IsChecked="OptionsAllCheckBox" IsThreeState @Checked="SelectAll_Checked" @Unchecked="SelectAll_Unchecked" @Indeterminate="SelectAll_Indeterminate">
-            <WinTextBlock :Text="$t('sample.select-all')" />
-          </WinCheckBox>
-          <WinCheckBox v-model:IsChecked="Option1CheckBox" Margin="24,0,0,0" @Checked="Option_Checked" @Unchecked="Option_Unchecked">
-            <WinTextBlock :Text="$t('text.option-1')" />
-          </WinCheckBox>
-          <WinCheckBox v-model:IsChecked="Option2CheckBox" Margin="24,0,0,0" @Checked="Option_Checked" @Unchecked="Option_Unchecked">
-            <WinTextBlock :Text="$t('text.option-2')" />
-          </WinCheckBox>
-          <WinCheckBox v-model:IsChecked="Option3CheckBox" Margin="24,0,0,0" @Checked="Option_Checked" @Unchecked="Option_Unchecked">
-            <WinTextBlock :Text="$t('text.option-3')" />
-          </WinCheckBox>
-        </div>
-      </template>
-      <template #options>
-        <WinTextBlock :Text="selectAllOutput" />
-      </template>
-    </WinControlExample>
-  </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
@@ -73,6 +68,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'checkbox');
@@ -137,8 +133,4 @@ const checkBoxSelectAllVue = `<div>
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
 .vertical-stack { display: flex; flex-direction: column; gap: 8px; }
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
-}
 </style>

@@ -1,40 +1,38 @@
 <template>
-  <div>
-    <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.hyperlinkbutton')" />
-      <WinTextBlock class="page-description" :Text="$t('text.a-button-that-appears-as-a-hyperlink')" TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.hyperlinkbutton')" />
+          <WinTextBlock class="page-description" :Text="$t('text.a-button-that-appears-as-a-hyperlink')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+      <div class="gallery-page-content">
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="hyperlinkButtonNavigateVue" :headerText="$t('sample.hyperlink.navigate')">
+              <template #example>
+                <WinHyperlinkButton
+                  :Content="$t('text.microsoft-home-page')"
+                  NavigateUri="https://www.microsoft.com"
+                  :IsEnabled="DisableControl1 !== true" />
+              </template>
+              <template #options>
+                <WinCheckBox v-model="DisableControl1">
+                  <WinTextBlock :Text="$t('sample.disable-hyperlink-button')" />
+                </WinCheckBox>
+              </template>
+            </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="hyperlinkButtonClickVue" :headerText="$t('sample.hyperlink.click')">
+              <template #example>
+                <WinHyperlinkButton :Content="$t('sample.hyperlink.go-to-togglebutton')" @Click="GoToHyperlinkButton_Click" />
+              </template>
+            </WinControlExample>
       </div>
     </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.hyperlink.navigate')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="hyperlinkButtonNavigateVue">
-      <template #example>
-        <WinHyperlinkButton
-          :Content="$t('text.microsoft-home-page')"
-          NavigateUri="https://www.microsoft.com"
-          :IsEnabled="DisableControl1 !== true" />
-      </template>
-      <template #options>
-        <WinCheckBox v-model="DisableControl1">
-          <WinTextBlock :Text="$t('sample.disable-hyperlink-button')" />
-        </WinCheckBox>
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.hyperlink.click')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="hyperlinkButtonClickVue">
-      <template #example>
-        <WinHyperlinkButton :Content="$t('sample.hyperlink.go-to-togglebutton')" @Click="GoToHyperlinkButton_Click" />
-      </template>
-    </WinControlExample>
-  </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
@@ -47,6 +45,7 @@ import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'hyperlinkbutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -71,8 +70,4 @@ const hyperlinkButtonClickVue = `<WinHyperlinkButton Content="Go to ToggleButton
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
-}
 </style>

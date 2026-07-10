@@ -1,47 +1,59 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <WinTextBlock class="page-header" :Text="$t('text.datepicker')" />
-      <WinTextBlock
-        class="page-description"
-        :Text="$t('text.use-a-datepicker-to-let-users-set-a-date-in-your')"
-        TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon"></span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div style="position: relative;" class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.datepicker')" />
+          <WinTextBlock
+            class="page-description"
+            :Text="$t('text.use-a-datepicker-to-let-users-set-a-date-in-your')"
+            TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon"></span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+      <div class="gallery-page-content">
+        <WinControlExample
+              class="basic-input-example-theme"
+              :headerText="$t('text.a-simple-datepicker-with-a-header')"
+              :theme="pageTheme"
+              :vue="example1Vue">
+              <template #example>
+                <WinDatePicker :Header="$t('text.pick-a-date')" />
+              </template>
+            </WinControlExample>
+
+            <WinControlExample
+              class="basic-input-example-theme"
+              :headerText="$t('sample.datepicker.day-formatted-year-hidden')"
+              :theme="pageTheme"
+              :vue="example2Vue">
+              <template #example>
+                <div class="horizontal-example">
+                  <WinDatePicker
+                    :Date="control2Date"
+                    DayFormat="{}{day.integer} ({dayofweek.abbreviated})"
+                    :YearVisible="false"
+                    :MinYear="control2MinYear"
+                    :MaxYear="control2MaxYear" />
+                  <WinTextBlock Text="" />
+                </div>
+              </template>
+            </WinControlExample>
       </div>
     </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-datepicker-with-a-header')" />
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Vue" :xaml="example1Xaml">
-      <template #example>
-        <WinDatePicker :Header="$t('text.pick-a-date')" />
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" Text="A DatePicker with day formatted and year hidden." />
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Vue" :xaml="example2Xaml">
-      <template #example>
-        <WinDatePicker
-          v-model:Date="control2Date"
-          DayFormat="{}{day.integer} ({dayofweek.abbreviated})"
-          :YearVisible="false"
-          :MinYear="control2MinYear"
-          :MaxYear="control2MaxYear" />
-      </template>
-    </WinControlExample>
-  </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue';
+import { computed, inject } from 'vue';
 import WinButton from '../../components/WinButton.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinDatePicker from '../../components/WinDatePicker.vue';
@@ -49,25 +61,23 @@ import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'datepicker');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const now = new Date();
-const control2Date = ref(new Date(now.getFullYear(), now.getMonth() + 2, now.getDate()));
+const control2Date = new Date(now.getFullYear(), now.getMonth() + 2, now.getDate());
 const control2MinYear = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 const control2MaxYear = new Date(now.getFullYear() + 5, now.getMonth(), now.getDate());
 
 const example1Vue = `<WinDatePicker Header="Pick a date" />`;
-const example1Xaml = `<DatePicker Header="Pick a date" />`;
 
 const example2Vue = `<WinDatePicker
-  v-model:Date="control2Date"
   DayFormat="{}{day.integer} ({dayofweek.abbreviated})"
   :YearVisible="false"
   :MinYear="control2MinYear"
   :MaxYear="control2MaxYear" />`;
-const example2Xaml = `<DatePicker DayFormat="{}{day.integer} ({dayofweek.abbreviated})" YearVisible="False" />`;
 </script>
 
 <style scoped>
@@ -94,12 +104,10 @@ const example2Xaml = `<DatePicker DayFormat="{}{day.integer} ({dayofweek.abbrevi
   align-items: center;
 }
 
-.control-example-description {
-  margin: 12px 0;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
+.horizontal-example {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .icon {

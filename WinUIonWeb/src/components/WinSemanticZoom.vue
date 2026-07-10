@@ -1,9 +1,9 @@
 <template>
   <div class="win-semantic-zoom"
-       :class="{ 'zoomed-out': !isZoomedInViewActive }"
+       :class="{ 'zoomed-out': !effectiveIsZoomedInViewActive }"
        ref="containerRef">
     <!-- Zoom Out Button -->
-    <button v-if="isZoomOutButtonEnabled && isZoomedInViewActive && canChangeViews"
+    <button v-if="effectiveIsZoomOutButtonEnabled && effectiveIsZoomedInViewActive && effectiveCanChangeViews"
             class="zoom-out-button"
             @click="toggleZoom"
             :aria-label="'Switch to zoomed out view'">
@@ -14,96 +14,119 @@
 
     <!-- Zoomed In View -->
     <Transition name="zoom-fade">
-      <div v-show="isZoomedInViewActive"
+      <WinScrollViewer v-show="effectiveIsZoomedInViewActive"
            class="zoom-view zoomed-in-view"
+           VerticalScrollMode="Auto"
+           VerticalScrollBarVisibility="Auto"
+           HorizontalScrollMode="Auto"
+           HorizontalScrollBarVisibility="Auto"
            @click="handleZoomedInClick"
            @wheel="handleWheel">
         <slot name="zoomedInView"></slot>
-      </div>
+      </WinScrollViewer>
     </Transition>
 
     <!-- Zoomed Out View -->
     <Transition name="zoom-fade">
-      <div v-show="!isZoomedInViewActive"
+      <WinScrollViewer v-show="!effectiveIsZoomedInViewActive"
            class="zoom-view zoomed-out-view"
+           VerticalScrollMode="Auto"
+           VerticalScrollBarVisibility="Auto"
+           HorizontalScrollMode="Auto"
+           HorizontalScrollBarVisibility="Auto"
            @click="handleZoomedOutClick">
         <slot name="zoomedOutView"></slot>
-      </div>
+      </WinScrollViewer>
     </Transition>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import WinScrollViewer from './WinScrollViewer.vue';
 
 // 对齐官方属性命名
 const props = defineProps({
   // IsZoomedInViewActive - 控制当前显示哪个视图
   isZoomedInViewActive: { type: Boolean, default: true },
+  IsZoomedInViewActive: { type: Boolean, default: undefined },
   // CanChangeViews - 是否允许切换视图
   canChangeViews: { type: Boolean, default: true },
+  CanChangeViews: { type: Boolean, default: undefined },
   // IsZoomOutButtonEnabled - 是否显示缩小按钮
-  isZoomOutButtonEnabled: { type: Boolean, default: true }
+  isZoomOutButtonEnabled: { type: Boolean, default: true },
+  IsZoomOutButtonEnabled: { type: Boolean, default: undefined }
 });
 
 // 对齐官方事件命名
 const emit = defineEmits([
   'update:isZoomedInViewActive',
+  'update:IsZoomedInViewActive',
   'viewChangeStarted',
-  'viewChangeCompleted'
+  'ViewChangeStarted',
+  'viewChangeCompleted',
+  'ViewChangeCompleted'
 ]);
 
 const containerRef = ref(null);
 const isAnimating = ref(false);
+const effectiveIsZoomedInViewActive = computed(() => props.IsZoomedInViewActive ?? props.isZoomedInViewActive);
+const effectiveCanChangeViews = computed(() => props.CanChangeViews ?? props.canChangeViews);
+const effectiveIsZoomOutButtonEnabled = computed(() => props.IsZoomOutButtonEnabled ?? props.isZoomOutButtonEnabled);
 
 // 切换缩放状态
 const toggleZoom = () => {
-  if (!props.canChangeViews || isAnimating.value) return;
+  if (!effectiveCanChangeViews.value || isAnimating.value) return;
 
-  const newState = !props.isZoomedInViewActive;
+  const newState = !effectiveIsZoomedInViewActive.value;
 
   // 触发ViewChangeStarted事件
-  emit('viewChangeStarted', {
-    sourceIsZoomedInView: props.isZoomedInViewActive,
+  const startedArgs = {
+    sourceIsZoomedInView: effectiveIsZoomedInViewActive.value,
     targetIsZoomedInView: newState
-  });
+  };
+  emit('viewChangeStarted', startedArgs);
+  emit('ViewChangeStarted', startedArgs);
 
   isAnimating.value = true;
   emit('update:isZoomedInViewActive', newState);
+  emit('update:IsZoomedInViewActive', newState);
 
   // 动画完成后触发ViewChangeCompleted事件
   setTimeout(() => {
     isAnimating.value = false;
-    emit('viewChangeCompleted', {
+    const completedArgs = {
       sourceIsZoomedInView: !newState,
       targetIsZoomedInView: newState
-    });
+    };
+    emit('viewChangeCompleted', completedArgs);
+    emit('ViewChangeCompleted', completedArgs);
   }, 300); // 与CSS transition时间匹配
 };
 
 // ZoomedInView点击处理（双击缩小）
 const handleZoomedInClick = (e) => {
   // 检测双击
-  if (e.detail === 2 && props.canChangeViews) {
+  if (e.detail === 2 && effectiveCanChangeViews.value) {
     toggleZoom();
   }
 };
 
 // ZoomedOutView点击处理（单击放大）
 const handleZoomedOutClick = () => {
-  if (props.canChangeViews && !isAnimating.value) {
+  if (effectiveCanChangeViews.value && !isAnimating.value) {
     toggleZoom();
   }
 };
 
 // 触控板/鼠标缩放手势支持（Ctrl+滚轮）
 const handleWheel = (e) => {
-  if (e.ctrlKey && props.canChangeViews && !isAnimating.value) {
+  if (e.ctrlKey && effectiveCanChangeViews.value && !isAnimating.value) {
     e.preventDefault();
     // 向上滚动（放大）或向下滚动（缩小）
-    if (e.deltaY < 0 && !props.isZoomedInViewActive) {
+    if (e.deltaY < 0 && !effectiveIsZoomedInViewActive.value) {
       toggleZoom(); // 放大
-    } else if (e.deltaY > 0 && props.isZoomedInViewActive) {
+    } else if (e.deltaY > 0 && effectiveIsZoomedInViewActive.value) {
       toggleZoom(); // 缩小
     }
   }
@@ -119,18 +142,18 @@ const handleTouchStart = (e) => {
 };
 
 const handleTouchMove = (e) => {
-  if (e.touches.length === 2 && props.canChangeViews && !isAnimating.value) {
+  if (e.touches.length === 2 && effectiveCanChangeViews.value && !isAnimating.value) {
     const currentDistance = getTouchDistance(e.touches);
     const distanceChange = currentDistance - lastTouchDistance;
 
     // 双指张开（放大）
-    if (distanceChange > 30 && !props.isZoomedInViewActive) {
+    if (distanceChange > 30 && !effectiveIsZoomedInViewActive.value) {
       e.preventDefault();
       toggleZoom();
       lastTouchDistance = currentDistance;
     }
     // 双指捏合（缩小）
-    else if (distanceChange < -30 && props.isZoomedInViewActive) {
+    else if (distanceChange < -30 && effectiveIsZoomedInViewActive.value) {
       e.preventDefault();
       toggleZoom();
       lastTouchDistance = currentDistance;
@@ -168,7 +191,6 @@ watch(containerRef, (el) => {
   left: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
 }
 
 .zoomed-in-view {
@@ -241,28 +263,6 @@ watch(containerRef, (el) => {
 .win-semantic-zoom.zoomed-out .zoomed-out-view.zoom-fade-leave-to {
   opacity: 0;
   transform: scale(1.15);
-}
-
-/* 滚动条样式 */
-.zoom-view::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-.zoom-view::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.zoom-view::-webkit-scrollbar-thumb {
-  background: var(--ctrl-strong-stroke);
-  border-radius: 6px;
-  border: 3px solid transparent;
-  background-clip: padding-box;
-}
-
-.zoom-view::-webkit-scrollbar-thumb:hover {
-  background: var(--text-fill-color-secondary);
-  background-clip: padding-box;
 }
 
 /* 禁用状态 */

@@ -1,56 +1,59 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">ThemeShadow</h1>
-      <p class="page-description">
-        ThemeShadow is a pre-configured shadow effect that can be applied to any XAML element to draw appropriate shadows based on x, y, z coordinates.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <!-- Example 1: ThemeShadow applied to a Border -->
-    <WinControlExample
-      headerText="ThemeShadow applied to a Border"
-      :theme="pageTheme"
-      exampleHeight="320px"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div class="shadow-container">
-          <div ref="shadowReceiver" class="shadow-receiver"></div>
-          <div
-            ref="shadowCaster"
-            class="shadow-caster"
-            :style="{
-              transform: `translateZ(${zTranslation}px)`,
-              boxShadow: computedShadow
-            }">
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">ThemeShadow</h1>
+          <p class="page-description">
+            ThemeShadow is a pre-configured shadow effect that can be applied to any XAML element to draw appropriate shadows based on x, y, z coordinates.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
           </div>
         </div>
-      </template>
-      <template #options>
-        <WinSlider
-          v-model="zTranslation"
-          header="Z-translation"
-          :min="0"
-          :max="64"
-          :stepFrequency="1"
-          style="width: 200px;"
-        />
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example 1: ThemeShadow applied to a Border -->
+            <WinControlExample
+              headerText="ThemeShadow applied to a Border"
+              :theme="pageTheme"
+              exampleHeight="320px"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <div class="shadow-container">
+                  <div ref="shadowReceiver" class="shadow-receiver"></div>
+                  <div
+                    ref="shadowCaster"
+                    class="shadow-caster"
+                    :style="{
+                      transform: `translateZ(${zTranslation}px)`,
+                      boxShadow: computedShadow
+                    }">
+                  </div>
+                </div>
+              </template>
+              <template #options>
+                <WinSlider
+                  v-model="zTranslation"
+                  header="Z-translation"
+                  :min="0"
+                  :max="64"
+                  :stepFrequency="1"
+                  style="width: 200px;"
+                />
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -61,6 +64,7 @@ import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinSlider from '../../components/WinSlider.vue';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 // Theme management
 const pageTheme = ref('system');
 const toggleTheme = () => {

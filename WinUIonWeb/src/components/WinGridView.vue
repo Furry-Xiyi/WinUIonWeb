@@ -103,14 +103,14 @@ const onItemClick = (e, item, index) => {
   if (selectionMode.value === 'None') {
     if (isItemClickEnabled.value) {
       emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
-      emit('itemClick', item);
+      emit('itemClick', { ClickedItem: item, OriginalSource: e.target });
     }
     return;
   }
   if (selectionMode.value === 'Single') {
     if (isItemClickEnabled.value) {
       emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
-      emit('itemClick', item);
+      emit('itemClick', { ClickedItem: item, OriginalSource: e.target });
     }
     emitSelection([item]);
     anchorIndex = index;
@@ -124,7 +124,7 @@ const onItemClick = (e, item, index) => {
     emitSelection(newSel);
     if (isItemClickEnabled.value) {
       emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
-      emit('itemClick', item);
+      emit('itemClick', { ClickedItem: item, OriginalSource: e.target });
     }
     return;
   }
@@ -146,7 +146,7 @@ const onItemClick = (e, item, index) => {
     emitSelection(newSel);
     if (isItemClickEnabled.value) {
       emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
-      emit('itemClick', item);
+      emit('itemClick', { ClickedItem: item, OriginalSource: e.target });
     }
   }
 };
