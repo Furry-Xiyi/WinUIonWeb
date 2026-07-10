@@ -59,6 +59,7 @@ const props = defineProps({
   CanDragItems: { type: Boolean, default: undefined },
   CanReorderItems: { type: Boolean, default: undefined },
   AllowDrop: { type: Boolean, default: undefined },
+  AreStickyGroupHeadersEnabled: { type: Boolean, default: undefined },
   SelectionMode: { type: String, default: undefined },
   SelectedItems: { type: Array, default: null },
   items: { type: Array, default: () => [] },
@@ -81,6 +82,8 @@ const isItemClickEnabled = computed(() => props.IsItemClickEnabled ?? props.isIt
 const canDragItems = computed(() => props.CanDragItems ?? props.canDragItems);
 const canReorderItems = computed(() => props.CanReorderItems ?? props.canReorderItems);
 const allowDrop = computed(() => props.AllowDrop ?? props.allowDrop);
+const showHeader = computed(() => props.showHeader || isGrouped.value);
+const stickyHeader = computed(() => props.AreStickyGroupHeadersEnabled ?? props.stickyHeader);
 const selectionMode = computed(() => props.SelectionMode ?? props.selectionMode);
 const selectedItems = computed(() => props.SelectedItems ?? props.selectedItems);
 

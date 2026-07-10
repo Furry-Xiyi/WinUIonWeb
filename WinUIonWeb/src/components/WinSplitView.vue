@@ -1,13 +1,11 @@
 <template>
   <div class="win-split-view"
-       :class="[displayModeClass, placement === 'Right' ? 'placement-right' : 'placement-left', { 'is-open': isPaneOpen }]"
+       :class="[displayModeClass, PanePlacement === 'Right' ? 'placement-right' : 'placement-left', { 'is-open': IsPaneOpen }]"
+       :style="rootStyle"
        @click="onContentClick">
     <div class="split-view-pane" :style="paneStyle" @click.stop>
-      <div class="split-view-pane-inner" :style="{ width: openPaneLength + 'px' }">
-        <div class="split-view-pane-title">{{ t('text.navigationview') }}</div>
-        <div class="split-view-pane-list">
-          <slot name="pane"></slot>
-        </div>
+      <div class="split-view-pane-inner" :style="{ width: OpenPaneLength + 'px' }">
+        <slot name="Pane"><slot name="pane"></slot></slot>
       </div>
     </div>
     <div class="split-view-content">
@@ -18,11 +16,18 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useI18n } from './i18n/index';
-
-const { t } = useI18n();
 
 const props = defineProps({
+  IsPaneOpen: { type: Boolean, default: undefined },
+  DisplayMode: { type: String, default: '' },
+  PanePlacement: { type: String, default: '' },
+  OpenPaneLength: { type: Number, default: undefined },
+  CompactPaneLength: { type: Number, default: undefined },
+  PaneBackground: { type: String, default: '' },
+  Width: { type: [String, Number], default: '' },
+  Height: { type: [String, Number], default: '' },
+  MaxWidth: { type: [String, Number], default: '' },
+  IsTabStop: { type: Boolean, default: false },
   isPaneOpen: { type: Boolean, default: true },
   displayMode: { type: String, default: 'Inline' },
   placement: { type: String, default: 'Left' },
@@ -31,21 +36,33 @@ const props = defineProps({
   paneBackground: { type: String, default: '' }
 });
 
-const emit = defineEmits(['update:isPaneOpen']);
+const emit = defineEmits(['update:IsPaneOpen', 'update:isPaneOpen']);
+
+const IsPaneOpen = computed(() => props.IsPaneOpen ?? props.isPaneOpen);
+const DisplayMode = computed(() => props.DisplayMode || props.displayMode);
+const PanePlacement = computed(() => props.PanePlacement || props.placement);
+const OpenPaneLength = computed(() => props.OpenPaneLength ?? props.openPaneLength);
+const CompactPaneLength = computed(() => props.CompactPaneLength ?? props.compactPaneLength);
+const PaneBackground = computed(() => props.PaneBackground || props.paneBackground);
+const cssLength = (value) => {
+  if (value === '' || value === undefined || value === null) return '';
+  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return `${Number(value.trim())}px`;
+  return typeof value === 'number' ? `${value}px` : value;
+};
 
 const displayModeClass = computed(() => ({
   Inline: 'mode-inline',
   CompactInline: 'mode-compact-inline',
   Overlay: 'mode-overlay',
   CompactOverlay: 'mode-compact-overlay'
-}[props.displayMode] || 'mode-inline'));
+}[DisplayMode.value] || 'mode-inline'));
 
 const paneWidth = computed(() => {
-  if (props.isPaneOpen) return props.openPaneLength;
-  switch (props.displayMode) {
+  if (IsPaneOpen.value) return OpenPaneLength.value;
+  switch (DisplayMode.value) {
     case 'CompactInline':
     case 'CompactOverlay':
-      return props.compactPaneLength;
+      return CompactPaneLength.value;
     default:
       return 0;
   }
@@ -53,15 +70,22 @@ const paneWidth = computed(() => {
 
 const paneStyle = computed(() => {
   const s = { width: paneWidth.value + 'px' };
-  if (props.paneBackground) s.background = props.paneBackground;
+  if (PaneBackground.value) s.background = PaneBackground.value;
   return s;
 });
 
+const rootStyle = computed(() => {
+  const style = {};
+  if (props.Width !== '') style.width = cssLength(props.Width);
+  if (props.Height !== '') style.height = cssLength(props.Height);
+  if (props.MaxWidth !== '') style.maxWidth = cssLength(props.MaxWidth);
+  return style;
+});
+
 const onContentClick = () => {
-  if (!props.isPaneOpen) return;
-  if (props.displayMode === 'Overlay') {
-    emit('update:isPaneOpen', false);
-  } else if (props.displayMode === 'CompactOverlay') {
+  if (!IsPaneOpen.value) return;
+  if (DisplayMode.value === 'Overlay' || DisplayMode.value === 'CompactOverlay') {
+    emit('update:IsPaneOpen', false);
     emit('update:isPaneOpen', false);
   }
 };
@@ -74,6 +98,7 @@ const onContentClick = () => {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    background: transparent;
   }
 
     .win-split-view.placement-right {
@@ -86,12 +111,15 @@ const onContentClick = () => {
     display: flex;
     justify-content: flex-start;
     overflow: hidden;
-    background: var(--app-bg);
-    transition: width var(--normal-duration) var(--fast-out-slow-in), background var(--normal-duration) var(--fast-out-slow-in);
+    background: var(--layer-default);
+    border-right: 1px solid var(--stroke-divider);
+    transition: width 200ms cubic-bezier(0.1, 0.9, 0.2, 1), background var(--normal-duration) var(--fast-out-slow-in);
   }
 
   .placement-right .split-view-pane {
     justify-content: flex-end;
+    border-right: 0;
+    border-left: 1px solid var(--stroke-divider);
   }
 
   .win-split-view.mode-overlay .split-view-pane,
@@ -100,7 +128,7 @@ const onContentClick = () => {
     top: 0;
     bottom: 0;
     z-index: 10;
-    box-shadow: 0 0 16px rgba(0, 0, 0, 0.14);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   }
 
   .win-split-view.mode-overlay:not(.is-open) .split-view-pane {
@@ -123,21 +151,6 @@ const onContentClick = () => {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-  }
-
-  .split-view-pane-title {
-    text-align: center;
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--text-primary);
-    padding: 12px 8px 8px;
-    white-space: nowrap;
-  }
-
-  .split-view-pane-list {
-    flex: 1;
-    overflow: hidden;
-    padding: 0 2px;
   }
 
   .split-view-content {

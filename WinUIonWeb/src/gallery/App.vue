@@ -19,6 +19,7 @@ import appManifest from '../manifest.json';
 
 import HomePage from './pages/HomePage.vue';
 import ButtonPage from './pages/ButtonPage.vue';
+import BorderPage from './pages/BorderPage.vue';
 import CalendarViewPage from './pages/CalendarViewPage.vue';
 import CalendarDatePickerPage from './pages/CalendarDatePickerPage.vue';
 import DatePickerPage from './pages/DatePickerPage.vue';
@@ -31,18 +32,31 @@ import ToggleSplitButtonPage from './pages/ToggleSplitButtonPage.vue';
 import CheckBoxPage from './pages/CheckBoxPage.vue';
 import ColorPickerPage from './pages/ColorPickerPage.vue';
 import ComboBoxPage from './pages/ComboBoxPage.vue';
-import RadioButtonsPage from './pages/RadioButtonsPage.vue';
+import RadioButtonPage from './pages/RadioButtonPage.vue';
 import RatingPage from './pages/RatingPage.vue';
 import SliderPage from './pages/SliderPage.vue';
 import ToggleSwitchPage from './pages/ToggleSwitchPage.vue';
+import CanvasPage from './pages/CanvasPage.vue';
 import ExpanderPage from './pages/ExpanderPage.vue';
+import GridPage from './pages/GridPage.vue';
+import ParallaxViewPage from './pages/ParallaxViewPage.vue';
+import RelativePanelPage from './pages/RelativePanelPage.vue';
+import ScrollViewPage from './pages/ScrollViewPage.vue';
+import ScrollViewerPage from './pages/ScrollViewerPage.vue';
 import SplitViewPage from './pages/SplitViewPage.vue';
+import StackPanelPage from './pages/StackPanelPage.vue';
+import VariableSizedWrapGridPage from './pages/VariableSizedWrapGridPage.vue';
+import ViewboxPage from './pages/ViewboxPage.vue';
 import FlipViewPage from './pages/FlipViewPage.vue';
 import GridViewPage from './pages/GridViewPage.vue';
+import ItemsRepeaterPage from './pages/ItemsRepeaterPage.vue';
+import ItemsViewPage from './pages/ItemsViewPage.vue';
 import ListBoxPage from './pages/ListBoxPage.vue';
 import ListViewPage from './pages/ListViewPage.vue';
 import PullToRefreshPage from './pages/PullToRefreshPage.vue';
 import TreeViewPage from './pages/TreeViewPage.vue';
+import PipsPagerPage from './pages/PipsPagerPage.vue';
+import SemanticZoomPage from './pages/SemanticZoomPage.vue';
 import TimePickerPage from './pages/TimePickerPage.vue';
 import AnimatedVisualPlayerPage from './pages/AnimatedVisualPlayerPage.vue';
 import CaptureElementPage from './pages/CaptureElementPage.vue';
@@ -83,19 +97,33 @@ const pageMap = {
   checkbox: CheckBoxPage,
   colorpicker: ColorPickerPage,
   combobox: ComboBoxPage,
-  radiobuttons: RadioButtonsPage,
+  radiobutton: RadioButtonPage,
   rating: RatingPage,
   slider: SliderPage,
   timepicker: TimePickerPage,
   toggleswitch: ToggleSwitchPage,
+  border: BorderPage,
+  canvas: CanvasPage,
   expander: ExpanderPage,
+  grid: GridPage,
+  parallaxview: ParallaxViewPage,
+  relativepanel: RelativePanelPage,
+  scrollview: ScrollViewPage,
+  scrollviewer: ScrollViewerPage,
   splitview: SplitViewPage,
+  stackpanel: StackPanelPage,
+  variablesizedwrapgrid: VariableSizedWrapGridPage,
+  viewbox: ViewboxPage,
   flipview: FlipViewPage,
   gridview: GridViewPage,
+  itemsrepeater: ItemsRepeaterPage,
+  itemsview: ItemsViewPage,
   listbox: ListBoxPage,
   listview: ListViewPage,
   pulltorefresh: PullToRefreshPage,
   treeview: TreeViewPage,
+  pipspager: PipsPagerPage,
+  semanticzoom: SemanticZoomPage,
   animatedvisualplayer: AnimatedVisualPlayerPage,
   captureelement: CaptureElementPage,
   image: ImagePage,
@@ -165,7 +193,7 @@ const navMenuItems = [
       { value: 'checkbox', icon: '\uE73D', label: t('text.checkbox') },
       { value: 'colorpicker', icon: '\uEF3C', label: t('text.colorpicker') },
       { value: 'combobox', icon: '\uE7FB', label: t('text.combobox') },
-      { value: 'radiobuttons', icon: '\uECCB', label: t('text.radiobuttons') },
+      { value: 'radiobutton', icon: '\uECCB', label: t('text.radiobuttons') },
       { value: 'rating', icon: '\uE734', label: t('text.ratingcontrol') },
       { value: 'slider', icon: '\uE9E9', label: t('text.slider') },
       { value: 'toggleswitch', icon: '\uF19F', label: t('text.toggleswitch') }
@@ -174,10 +202,17 @@ const navMenuItems = [
   { value: 'collections', icon: '\uE80A', label: t('text.collections'), selectsOnInvoked: false, children: [
     { value: 'flipview', icon: '\uF1CB', label: t('text.flipview') },
     { value: 'gridview', icon: '\uF0E2', label: t('text.gridview') },
-    { value: 'listbox', icon: '\uEA37', label: t('text.listbox') },
+    { value: 'itemsrepeater', icon: '\uE8FD', label: t('text.itemsrepeater') },
+    { value: 'itemsview', icon: '\uF0E2', label: t('text.itemsview') },
     { value: 'listview', icon: '\uE8FD', label: t('text.listview') },
     { value: 'pulltorefresh', icon: '\uE72C', label: t('text.pulltorefresh') },
     { value: 'treeview', icon: '\uED41', label: t('text.treeview') }
+  ]},
+  { value: 'scrolling', icon: '\uE7F4', label: t('text.scrolling'), selectsOnInvoked: false, children: [
+    { value: 'pipspager', icon: '\uE8A7', label: t('text.pipspager') },
+    { value: 'scrollview', icon: '\uE7F4', label: t('text.scrollview') },
+    { value: 'scrollviewer', icon: '\uE7F4', label: t('text.scrollviewer') },
+    { value: 'semanticzoom', icon: '\uE8A7', label: t('text.semanticzoom') }
   ]},
   {
     value: 'dateandtime', icon: '\uEC92', label: t('text.date-and-time'), selectsOnInvoked: false, children: [
@@ -194,8 +229,15 @@ const navMenuItems = [
     { value: 'teachingtip', icon: '\uEC42', label: t('text.teachingtip') }
   ]},
   { value: 'layout', icon: '\uE8A1', label: t('text.layout'), selectsOnInvoked: false, children: [
+    { value: 'border', icon: '\uE8A1', label: t('text.border') },
+    { value: 'canvas', icon: '\uE7C3', label: t('text.canvas') },
     { value: 'expander', icon: '\uE8C4', label: t('text.expander') },
-    { value: 'splitview', icon: '\uE8BC', label: t('text.splitview') }
+    { value: 'grid', icon: '\uECA5', label: t('text.grid') },
+    { value: 'relativepanel', icon: '\uE8A1', label: t('text.relativepanel') },
+    { value: 'splitview', icon: '\uE8BC', label: t('text.splitview') },
+    { value: 'stackpanel', icon: '\uE8FD', label: t('text.stackpanel') },
+    { value: 'variablesizedwrapgrid', icon: '\uE8A9', label: t('text.variablesizedwrapgrid') },
+    { value: 'viewbox', icon: '\uE8A7', label: t('text.viewbox') }
   ]},
   { value: 'media', icon: '\uE786', label: t('text.media'), selectsOnInvoked: false, children: [
     { value: 'animatedvisualplayer', icon: '\uF5B0', label: t('text.animatedvisualplayer') },
@@ -217,6 +259,9 @@ const navMenuItems = [
     { value: 'richeditbox', icon: '\uE8D3', label: t('text.richeditbox') },
     { value: 'textbox', icon: '\uE8AC', label: t('text.textbox') },
     { value: 'textblock', icon: '\uE8E4', label: t('text.textblock') }
+  ]},
+  { value: 'motion', icon: '\uE7F4', label: t('text.motion'), selectsOnInvoked: false, children: [
+    { value: 'parallaxview', icon: '\uE7F4', label: t('text.parallaxview') }
   ]}
 ];
 
@@ -342,6 +387,8 @@ watch(currentPage, (newVal, oldVal) => {
     --accent-base: #0067C0;
     --accent-hover: rgba(0, 103, 192, 0.90);
     --accent-pressed: rgba(0, 103, 192, 0.80);
+    --accent-aa-fill: #004E8C;
+    --accent-aa-text: #FFFFFF;
     --accent-fill-disabled: rgba(0, 0, 0, 0.22);
     --accent-text: #FFFFFF;
     --accent-text-secondary: rgba(255, 255, 255, 0.70);
@@ -412,6 +459,8 @@ watch(currentPage, (newVal, oldVal) => {
     --accent-base: #4CC2FF;
     --accent-hover: rgba(96, 205, 255, 0.90);
     --accent-pressed: rgba(96, 205, 255, 0.80);
+    --accent-aa-fill: #79D2FF;
+    --accent-aa-text: #000000;
     --accent-fill-disabled: rgba(255, 255, 255, 0.16);
     --accent-text: #000000;
     --accent-text-secondary: rgba(0, 0, 0, 0.50);

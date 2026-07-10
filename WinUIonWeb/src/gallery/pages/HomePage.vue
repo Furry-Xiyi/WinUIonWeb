@@ -1,106 +1,110 @@
 <template>
-  <div class="home-page">
-    <section class="home-page-header">
-      <div class="home-header-image-mask">
-        <div class="home-header-image-grid">
-          <img class="home-header-image" :src="heroImage" alt="" />
-        </div>
-      </div>
+  <div class="gallery-home-page">
+    <WinScrollViewer class="gallery-home-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+        <div class="home-page">
+          <section class="home-page-header">
+            <div class="home-header-image-mask">
+              <div class="home-header-image-grid">
+                <img class="home-header-image" :src="heroImage" alt="" />
+              </div>
+            </div>
 
-      <div class="home-header-copy">
-        <WinTextBlock class="home-header-subtitle" :Text="$t('app.version')" :FontSize="18" />
-        <WinTextBlock class="home-header-title" :Text="$t('app.title')" :FontSize="40" FontWeight="600" :LineHeight="52" />
-      </div>
+            <div class="home-header-copy">
+              <WinTextBlock class="home-header-subtitle" :Text="$t('app.version')" :FontSize="18" />
+              <WinTextBlock class="home-header-title" :Text="$t('app.title')" :FontSize="40" FontWeight="600" :LineHeight="52" />
+            </div>
 
-      <WinHorizontalScrollContainer class="home-header-tiles-scroll">
-        <div class="home-header-tiles">
-          <WinSettingsCard
-            v-for="tile in headerTiles"
-            :key="tile.Title"
-            class="home-header-tile"
-            :Header="tile.Title"
-            :Description="tile.Description"
-            :HeaderIcon="tile.Icon"
-            :IsClickEnabled="true"
-            role="link"
-            tabindex="0"
-            @Click="openTile(tile)"
-            @keydown.enter="openTile(tile)"
-            @keydown.space.prevent="openTile(tile)" />
-        </div>
-      </WinHorizontalScrollContainer>
-    </section>
-
-    <WinSelectorBar
-      class="filter-bar token-filter-bar"
-      :items="filterItems"
-      :selectedIndex="selectedFilterIndex"
-      @selectionChanged="OnFilterChanged" />
-
-    <main class="switch-presenter">
-      <section v-if="selectedFilter === 'Recent'" key="Recent" class="sample-panel page-transition-up">
-        <template v-if="RecentlyVisitedSamplesList.length > 0">
-          <WinTextBlock class="sample-panel-title" :Text="$t('text.recently-visited')" />
-            <WinHorizontalScrollContainer class="recently-visited-container">
-              <div class="single-row-grid-view">
-                <button
-                  v-for="item in RecentlyVisitedSamplesList"
-                :key="item.UniqueId"
-                class="control-item single-row"
-                type="button"
-                @click="OnItemGridViewItemClick(item)">
-                <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
-                <span class="control-item-text">
-                  <WinTextBlock class="control-item-title" :Text="item.Title" />
-                  <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
-                </span>
-                </button>
+            <WinHorizontalScrollContainer class="home-header-tiles-scroll">
+              <div class="home-header-tiles">
+                <WinSettingsCard
+                  v-for="tile in headerTiles"
+                  :key="tile.Title"
+                  class="home-header-tile"
+                  :Header="tile.Title"
+                  :Description="tile.Description"
+                  :HeaderIcon="tile.Icon"
+                  :IsClickEnabled="true"
+                  role="link"
+                  tabindex="0"
+                  @Click="openTile(tile)"
+                  @keydown.enter="openTile(tile)"
+                  @keydown.space.prevent="openTile(tile)" />
               </div>
             </WinHorizontalScrollContainer>
-        </template>
+          </section>
 
-        <WinTextBlock class="sample-panel-title recently-added-title" Text="Recently added or updated" />
-        <div class="grid-view">
-          <button
-            v-for="item in RecentlyAddedOrUpdatedSamplesList"
-            :key="item.UniqueId"
-            class="control-item"
-            type="button"
-            @click="OnItemGridViewItemClick(item)">
-            <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
-            <span class="control-item-text">
-              <WinTextBlock class="control-item-title" :Text="item.Title" />
-              <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
-            </span>
-          </button>
-        </div>
-      </section>
+          <WinSelectorBar
+            class="filter-bar token-filter-bar"
+            :items="filterItems"
+            :selectedIndex="selectedFilterIndex"
+            @selectionChanged="OnFilterChanged" />
 
-      <section v-else key="Favorites" class="sample-panel page-transition-up">
-        <div v-if="FavoriteSamplesList.length > 0" class="grid-view">
-          <button
-            v-for="item in FavoriteSamplesList"
-            :key="item.UniqueId"
-            class="control-item"
-            type="button"
-            @click="OnItemGridViewItemClick(item)">
-            <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
-            <span class="control-item-text">
-              <WinTextBlock class="control-item-title" :Text="item.Title" />
-              <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
-            </span>
-          </button>
+          <main class="switch-presenter">
+            <section v-if="selectedFilter === 'Recent'" key="Recent" class="sample-panel page-transition-up">
+              <template v-if="RecentlyVisitedSamplesList.length > 0">
+                <WinTextBlock class="sample-panel-title" :Text="$t('text.recently-visited')" />
+                  <WinHorizontalScrollContainer class="recently-visited-container">
+                    <div class="single-row-grid-view">
+                      <button
+                        v-for="item in RecentlyVisitedSamplesList"
+                      :key="item.UniqueId"
+                      class="control-item single-row"
+                      type="button"
+                      @click="OnItemGridViewItemClick(item)">
+                      <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
+                      <span class="control-item-text">
+                        <WinTextBlock class="control-item-title" :Text="item.Title" />
+                        <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                      </span>
+                      </button>
+                    </div>
+                  </WinHorizontalScrollContainer>
+              </template>
+
+              <WinTextBlock class="sample-panel-title recently-added-title" Text="Recently added or updated" />
+              <div class="grid-view">
+                <button
+                  v-for="item in RecentlyAddedOrUpdatedSamplesList"
+                  :key="item.UniqueId"
+                  class="control-item"
+                  type="button"
+                  @click="OnItemGridViewItemClick(item)">
+                  <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
+                  <span class="control-item-text">
+                    <WinTextBlock class="control-item-title" :Text="item.Title" />
+                    <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                  </span>
+                </button>
+              </div>
+            </section>
+
+            <section v-else key="Favorites" class="sample-panel page-transition-up">
+              <div v-if="FavoriteSamplesList.length > 0" class="grid-view">
+                <button
+                  v-for="item in FavoriteSamplesList"
+                  :key="item.UniqueId"
+                  class="control-item"
+                  type="button"
+                  @click="OnItemGridViewItemClick(item)">
+                  <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
+                  <span class="control-item-text">
+                    <WinTextBlock class="control-item-title" :Text="item.Title" />
+                    <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                  </span>
+                </button>
+              </div>
+              <div v-else class="favorite-samples-fallback-message">
+                <img class="favorite-samples-fallback-image" :src="controlImage('RatingControl')" alt="" />
+                <WinTextBlock class="favorite-samples-fallback-title" Text="No favorites yet" />
+                <WinTextBlock
+                  class="favorite-samples-fallback-description"
+                  Text="Favorite samples by clicking the star icon on the sample page."
+                  TextAlignment="Center" />
+              </div>
+            </section>
+          </main>
         </div>
-        <div v-else class="favorite-samples-fallback-message">
-          <img class="favorite-samples-fallback-image" :src="controlImage('RatingControl')" alt="" />
-          <WinTextBlock class="favorite-samples-fallback-title" Text="No favorites yet" />
-          <WinTextBlock
-            class="favorite-samples-fallback-description"
-            Text="Favorite samples by clicking the star icon on the sample page."
-            TextAlignment="Center" />
-        </div>
-      </section>
-    </main>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -117,6 +121,7 @@ import { favoritesStorageKey, getStoredFavorites } from '../../utils/pageState';
 
 import { useI18n } from '../../components/i18n/index';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const favorites = ref(getStoredFavorites());
@@ -187,13 +192,14 @@ const controlItems = [
   { UniqueId: 'checkbox', ImageName: 'CheckBox', Title: t('text.checkbox'), Subtitle: t('text.a-control-that-a-user-can-select-or-clear') },
   { UniqueId: 'colorpicker', ImageName: 'ColorPicker', Title: t('text.colorpicker'), Subtitle: t('text.lets-the-user-pick-a-color') },
   { UniqueId: 'combobox', ImageName: 'ComboBox', Title: t('text.combobox'), Subtitle: t('text.lets-users-pick-one-item-from-a-list') },
-  { UniqueId: 'radiobuttons', ImageName: 'RadioButton', Title: t('text.radiobuttons'), Subtitle: t('text.a-control-that-allows-a-user-to-select-a-single') },
+  { UniqueId: 'radiobutton', ImageName: 'RadioButton', Title: t('text.radiobuttons'), Subtitle: t('text.a-control-that-allows-a-user-to-select-a-single') },
   { UniqueId: 'rating', ImageName: 'RatingControl', Title: t('text.ratingcontrol'), Subtitle: t('text.allows-users-to-view-and-set-ratings') },
   { UniqueId: 'slider', ImageName: 'Slider', Title: t('text.slider'), Subtitle: t('text.lets-users-select-from-a-range-of-values') },
   { UniqueId: 'toggleswitch', ImageName: 'ToggleSwitch', Title: t('text.toggleswitch'), Subtitle: t('text.switch-that-can-be-toggled-between-two-states') },
   { UniqueId: 'flipview', ImageName: 'FlipView', Title: t('text.flipview'), Subtitle: t('text.lets-people-browse-images-or-other-items-one-at') },
   { UniqueId: 'gridview', ImageName: 'GridView', Title: t('text.gridview'), Subtitle: t('text.items-in-a-flexible-grid') },
-  { UniqueId: 'listbox', ImageName: 'ListView', Title: t('text.listbox'), Subtitle: t('text.a-control-that-presents-an-inline-list-of-select') },
+  { UniqueId: 'itemsrepeater', ImageName: 'ItemsRepeater', Title: t('text.itemsrepeater'), Subtitle: t('text.displays-repeating-data') },
+  { UniqueId: 'itemsview', ImageName: 'ItemsView', Title: t('text.itemsview'), Subtitle: t('text.displays-a-collection-of-data-items') },
   { UniqueId: 'listview', ImageName: 'ListView', Title: t('text.listview'), Subtitle: t('text.a-control-that-presents-a-collection-of-items-in') },
   { UniqueId: 'pulltorefresh', ImageName: 'PullToRefresh', Title: t('text.pulltorefresh'), Subtitle: t('text.refresh-content-with-a-pulling-gesture') },
   { UniqueId: 'treeview', ImageName: 'TreeView', Title: t('text.treeview'), Subtitle: t('text.display-hierarchical-data') },

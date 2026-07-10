@@ -1,48 +1,51 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">Pivot</h1>
-      <p class="page-description">
-        The Pivot control and related tabs pattern are used for navigating frequently accessed, distinct content categories. Pivots allow for navigation between two or more content panes and relies on text headers to articulate the different sections of content.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">Pivot</h1>
+          <p class="page-description">
+            The Pivot control and related tabs pattern are used for navigating frequently accessed, distinct content categories. Pivots allow for navigation between two or more content panes and relies on text headers to articulate the different sections of content.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example 1: A basic Pivot -->
+            <WinControlExample
+              headerText="A basic pivot."
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <WinPivot title="EMAIL" :minHeight="400">
+                  <WinPivotItem header="All">
+                    <p style="margin: 0; color: var(--text-primary);">all emails go here.</p>
+                  </WinPivotItem>
+                  <WinPivotItem header="Unread">
+                    <p style="margin: 0; color: var(--text-primary);">unread emails go here.</p>
+                  </WinPivotItem>
+                  <WinPivotItem header="Flagged">
+                    <p style="margin: 0; color: var(--text-primary);">flagged emails go here.</p>
+                  </WinPivotItem>
+                  <WinPivotItem header="Urgent">
+                    <p style="margin: 0; color: var(--text-primary);">urgent emails go here.</p>
+                  </WinPivotItem>
+                </WinPivot>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example 1: A basic Pivot -->
-    <WinControlExample
-      headerText="A basic pivot."
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <WinPivot title="EMAIL" :minHeight="400">
-          <WinPivotItem header="All">
-            <p style="margin: 0; color: var(--text-primary);">all emails go here.</p>
-          </WinPivotItem>
-          <WinPivotItem header="Unread">
-            <p style="margin: 0; color: var(--text-primary);">unread emails go here.</p>
-          </WinPivotItem>
-          <WinPivotItem header="Flagged">
-            <p style="margin: 0; color: var(--text-primary);">flagged emails go here.</p>
-          </WinPivotItem>
-          <WinPivotItem header="Urgent">
-            <p style="margin: 0; color: var(--text-primary);">urgent emails go here.</p>
-          </WinPivotItem>
-        </WinPivot>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -56,6 +59,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'pivot');
 

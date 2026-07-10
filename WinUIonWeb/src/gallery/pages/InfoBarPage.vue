@@ -1,128 +1,131 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">InfoBar</h1>
-      <p class="page-description">
-        Use an InfoBar control when a user should be informed of, acknowledge, or take action on a changed application state. By default the notification will remain in the content area until closed by the user but will not necessarily break user flow.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <!-- Example 1: Closable InfoBar with severity options -->
-    <WinControlExample
-      headerText="A closable InfoBar with severity options"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <WinInfoBar
-          :isOpen="example1IsOpen"
-          title="Title"
-          message="Essential app message for your users to be informed of, acknowledge, or take action on."
-          :severity="example1Severity"
-          @update:isOpen="example1IsOpen = $event" />
-      </template>
-      <template #options>
-        <div class="options-container">
-          <WinCheckBox
-            v-model="example1IsOpen">
-            Is Open
-          </WinCheckBox>
-          <WinComboBox
-            v-model="example1Severity"
-            :options="severityOptions"
-            header="Severity"
-            style="width: 100%;" />
-        </div>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: InfoBar with message length and action button options -->
-    <WinControlExample
-      headerText="InfoBar with configurable message and action button"
-      :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <WinInfoBar
-          :isOpen="example2IsOpen"
-          title="Title"
-          :message="example2Message"
-          @update:isOpen="example2IsOpen = $event">
-          <template v-if="example2ActionButton !== 'None'" #actionButton>
-            <WinButton v-if="example2ActionButton === 'Button'" @click="onActionButtonClick">
-              Action
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">InfoBar</h1>
+          <p class="page-description">
+            Use an InfoBar control when a user should be informed of, acknowledge, or take action on a changed application state. By default the notification will remain in the content area until closed by the user but will not necessarily break user flow.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
             </WinButton>
-            <WinHyperlinkButton
-              v-else-if="example2ActionButton === 'Hyperlink'"
-              navigateUri="http://www.microsoft.com/">
-              Informational link
-            </WinHyperlinkButton>
-          </template>
-        </WinInfoBar>
-
-        <div class="options-container">
-          <WinCheckBox
-            v-model="example2IsOpen">
-            Is Open
-          </WinCheckBox>
-          <WinComboBox
-            v-model="example2MessageLength"
-            :options="messageLengthOptions"
-            header="Message Length"
-            style="width: 100%;" />
-          <WinComboBox
-            v-model="example2ActionButton"
-            :options="actionButtonOptions"
-            header="Action Button"
-            style="width: 100%;" />
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example 1: Closable InfoBar with severity options -->
+            <WinControlExample
+              headerText="A closable InfoBar with severity options"
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <WinInfoBar
+                  :isOpen="example1IsOpen"
+                  title="Title"
+                  message="Essential app message for your users to be informed of, acknowledge, or take action on."
+                  :severity="example1Severity"
+                  @update:isOpen="example1IsOpen = $event" />
+              </template>
+              <template #options>
+                <div class="options-container">
+                  <WinCheckBox
+                    v-model="example1IsOpen">
+                    Is Open
+                  </WinCheckBox>
+                  <WinComboBox
+                    v-model="example1Severity"
+                    :options="severityOptions"
+                    header="Severity"
+                    style="width: 100%;" />
+                </div>
+              </template>
+            </WinControlExample>
 
-    <!-- Example 3: InfoBar with display options -->
-    <WinControlExample
-      headerText="InfoBar with display options"
-      :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
-      <template #example>
-        <WinInfoBar
-          :isOpen="example3IsOpen"
-          title="Title"
-          message="Essential app message for your users to be informed of, acknowledge, or take action on."
-          :isIconVisible="example3IsIconVisible"
-          :isClosable="example3IsClosable"
-          @update:isOpen="example3IsOpen = $event" />
+            <!-- Example 2: InfoBar with message length and action button options -->
+            <WinControlExample
+              headerText="InfoBar with configurable message and action button"
+              :theme="pageTheme"
+              :templateCode="example2Template"
+              :vueCode="example2Vue">
+              <template #example>
+                <WinInfoBar
+                  :isOpen="example2IsOpen"
+                  title="Title"
+                  :message="example2Message"
+                  @update:isOpen="example2IsOpen = $event">
+                  <template v-if="example2ActionButton !== 'None'" #actionButton>
+                    <WinButton v-if="example2ActionButton === 'Button'" @click="onActionButtonClick">
+                      Action
+                    </WinButton>
+                    <WinHyperlinkButton
+                      v-else-if="example2ActionButton === 'Hyperlink'"
+                      navigateUri="http://www.microsoft.com/">
+                      Informational link
+                    </WinHyperlinkButton>
+                  </template>
+                </WinInfoBar>
 
-        <div class="options-container">
-          <WinCheckBox
-            v-model="example3IsOpen">
-            Is Open
-          </WinCheckBox>
-          <WinCheckBox
-            v-model="example3IsIconVisible">
-            Is Icon Visible
-          </WinCheckBox>
-          <WinCheckBox
-            v-model="example3IsClosable">
-            Is Closable
-          </WinCheckBox>
-        </div>
-      </template>
-    </WinControlExample>
+                <div class="options-container">
+                  <WinCheckBox
+                    v-model="example2IsOpen">
+                    Is Open
+                  </WinCheckBox>
+                  <WinComboBox
+                    v-model="example2MessageLength"
+                    :options="messageLengthOptions"
+                    header="Message Length"
+                    style="width: 100%;" />
+                  <WinComboBox
+                    v-model="example2ActionButton"
+                    :options="actionButtonOptions"
+                    header="Action Button"
+                    style="width: 100%;" />
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 3: InfoBar with display options -->
+            <WinControlExample
+              headerText="InfoBar with display options"
+              :theme="pageTheme"
+              :templateCode="example3Template"
+              :vueCode="example3Vue">
+              <template #example>
+                <WinInfoBar
+                  :isOpen="example3IsOpen"
+                  title="Title"
+                  message="Essential app message for your users to be informed of, acknowledge, or take action on."
+                  :isIconVisible="example3IsIconVisible"
+                  :isClosable="example3IsClosable"
+                  @update:isOpen="example3IsOpen = $event" />
+
+                <div class="options-container">
+                  <WinCheckBox
+                    v-model="example3IsOpen">
+                    Is Open
+                  </WinCheckBox>
+                  <WinCheckBox
+                    v-model="example3IsIconVisible">
+                    Is Icon Visible
+                  </WinCheckBox>
+                  <WinCheckBox
+                    v-model="example3IsClosable">
+                    Is Closable
+                  </WinCheckBox>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -138,6 +141,7 @@ import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'infobar');
 

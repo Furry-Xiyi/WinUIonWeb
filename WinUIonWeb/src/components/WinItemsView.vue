@@ -1,285 +1,271 @@
-<!-- components/WinItemsView.vue -->
 <template>
-  <div class="win-items-view" ref="containerRef">
+  <div ref="rootRef" class="win-items-view" :class="layoutClass" :style="viewStyle" role="listbox">
     <div
-      class="win-items-viewport"
-      ref="viewportRef"
-      :class="{ 'layout-stack': layout === 'Stack', 'layout-grid': layout === 'Grid' }"
-    >
-      <div
-        v-for="(item, idx) in internalItems"
-        :key="getItemKey(item, idx)"
-        ref="itemEls"
-        class="win-items-container"
-        :class="{
-          selected: isSelected(item),
-          'can-invoke': isItemInvokedEnabled,
-          'pointer-over': hoverIndex === idx
-        }"
-        :style="getItemStyle(idx)"
-        @click="onItemClick($event, item, idx)"
-        @dblclick="onItemDoubleClick(item, idx)"
-        @mouseenter="hoverIndex = idx"
-        @mouseleave="hoverIndex = -1"
-        @keydown.enter="onItemEnterKey(item, idx)"
-        :tabindex="0"
-      >
-        <div v-if="(selectionMode === 'Multiple' || selectionMode === 'Extended') && layout === 'Grid'"
-             class="items-checkbox">
-          <WinCheckBox
-            :modelValue="isSelected(item)"
-            @update:modelValue="onCheckboxToggle($event, item, idx)"
-            @click.stop
-            @mousedown.stop
-          />
-        </div>
+      v-for="(item, index) in items"
+      :key="getItemKey(item, index)"
+      class="win-items-view-item"
+      :class="{ selected: isSelected(item), invokable: IsItemInvokedEnabled }"
+      :data-index="index"
+      :aria-selected="isSelected(item)"
+      :tabindex="0"
+      role="option"
+      @click="onItemClick($event, item, index)"
+      @dblclick="invokeItem($event, item, index)"
+      @keydown.enter.prevent="invokeItem($event, item, index)"
+      @keydown.space.prevent="onItemClick($event, item, index)">
+      <WinCheckBox
+        v-if="showsSelectionCheckBox"
+        class="selection-checkbox"
+        :IsChecked="isSelected(item)"
+        @update:IsChecked="onCheckBoxChanged($event, item, index)"
+        @click.stop
+        @keydown.stop />
 
-        <slot name="item" :item="item" :index="idx">
-          <div class="default-item-template">
-            {{ item }}
-          </div>
+      <slot name="item" :item="item" :index="index">
+        <slot :item="item" :index="index">
+          <WinTextBlock :Text="String(item)" />
         </slot>
-      </div>
+      </slot>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, toRaw } from 'vue';
+import { computed, ref, toRaw, watch } from 'vue';
 import WinCheckBox from './WinCheckBox.vue';
+import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
-  itemsSource: { type: Array, default: () => [] },
-  layout: { type: String, default: 'Stack' }, // 'Stack' | 'Grid'
-  selectionMode: { type: String, default: 'None' }, // 'None' | 'Single' | 'Multiple' | 'Extended'
-  isItemInvokedEnabled: { type: Boolean, default: false },
-  selectedItems: { type: Array, default: () => [] }
+  ItemsSource: { type: Array, default: () => [] },
+  ItemTemplate: { type: [String, Object, Function], default: undefined },
+  Layout: { type: [String, Object], default: 'StackLayout' },
+  SelectionMode: {
+    type: String,
+    default: 'None',
+    validator: (value) => ['None', 'Single', 'Multiple', 'Extended'].includes(value)
+  },
+  SelectedItem: { type: null, default: undefined },
+  SelectedItems: { type: Array, default: () => [] },
+  IsItemInvokedEnabled: { type: Boolean, default: false }
 });
 
 const emit = defineEmits([
-  'itemInvoked',
-  'selectionChanged',
-  'update:selectedItems'
+  'ItemInvoked',
+  'SelectionChanged',
+  'update:SelectedItem',
+  'update:SelectedItems'
 ]);
 
-const containerRef = ref(null);
-const viewportRef = ref(null);
-const itemEls = ref([]);
-const internalItems = ref([...props.itemsSource]);
-const hoverIndex = ref(-1);
-let anchorIndex = null;
+const rootRef = ref(null);
+const selectionAnchorIndex = ref(-1);
 
-watch(() => props.itemsSource, (val) => {
-  internalItems.value = [...val];
-}, { deep: true });
+const items = computed(() => props.ItemsSource ?? []);
+
+const normalizedLayout = computed(() => {
+  const layout = props.Layout;
+  const source = typeof layout === 'object' && layout !== null ? layout : { Type: layout };
+  const type = source.Type ?? source.type ?? 'StackLayout';
+
+  return {
+    Type: type,
+    Orientation: source.Orientation ?? source.orientation ?? 'Vertical',
+    Spacing: Number(source.Spacing ?? source.spacing ?? source.LineSpacing ?? source.lineSpacing ?? 0),
+    MinItemWidth: Number(source.MinItemWidth ?? source.minItemWidth ?? source.ItemWidth ?? source.itemWidth ?? 150),
+    MinItemHeight: Number(source.MinItemHeight ?? source.minItemHeight ?? source.ItemHeight ?? source.itemHeight ?? 80),
+    MinRowSpacing: Number(source.MinRowSpacing ?? source.minRowSpacing ?? source.LineSpacing ?? source.lineSpacing ?? 0),
+    MinColumnSpacing: Number(source.MinColumnSpacing ?? source.minColumnSpacing ?? source.MinItemSpacing ?? source.minItemSpacing ?? 0),
+    MaximumRowsOrColumns: Number(source.MaximumRowsOrColumns ?? source.maximumRowsOrColumns ?? 0),
+    LineHeight: Number(source.LineHeight ?? source.lineHeight ?? 160)
+  };
+});
+
+const layoutClass = computed(() => {
+  const layout = normalizedLayout.value;
+  return [
+    `layout-${layout.Type.toLowerCase()}`,
+    layout.Orientation === 'Horizontal' ? 'orientation-horizontal' : 'orientation-vertical'
+  ];
+});
+
+const viewStyle = computed(() => {
+  const layout = normalizedLayout.value;
+  const style = {
+    '--items-view-spacing': `${layout.Spacing}px`,
+    '--items-view-min-item-width': `${layout.MinItemWidth}px`,
+    '--items-view-min-item-height': `${layout.MinItemHeight}px`,
+    '--items-view-row-spacing': `${layout.MinRowSpacing}px`,
+    '--items-view-column-spacing': `${layout.MinColumnSpacing}px`,
+    '--items-view-line-height': `${layout.LineHeight}px`
+  };
+
+  if (layout.MaximumRowsOrColumns > 0) {
+    style['--items-view-grid-template'] = `repeat(${layout.MaximumRowsOrColumns}, max-content)`;
+  }
+
+  return style;
+});
+
+const selectedItemsValue = computed(() => {
+  if (props.SelectionMode === 'Single') {
+    return props.SelectedItem === undefined ? props.SelectedItems : [props.SelectedItem];
+  }
+  return props.SelectedItems;
+});
+
+const showsSelectionCheckBox = computed(() => props.SelectionMode === 'Multiple' || props.SelectionMode === 'Extended');
+
+const isSameItem = (left, right) => toRaw(left) === toRaw(right);
+const isSelected = (item) => selectedItemsValue.value.some((selected) => isSameItem(selected, item));
 
 const getItemKey = (item, index) => {
   if (item && typeof item === 'object') {
-    return item.id ?? item.key ?? item.name ?? index;
+    return item.Id ?? item.ID ?? item.id ?? item.Key ?? item.key ?? item.Title ?? item.title ?? index;
   }
   return index;
 };
 
-const isSelected = (item) => {
-  const rawTarget = toRaw(item);
-  return props.selectedItems.some(i => toRaw(i) === rawTarget);
+const setSelection = (newSelection, originalSource) => {
+  const oldSelection = selectedItemsValue.value;
+  const addedItems = newSelection.filter((item) => !oldSelection.some((oldItem) => isSameItem(oldItem, item)));
+  const removedItems = oldSelection.filter((item) => !newSelection.some((newItem) => isSameItem(newItem, item)));
+
+  emit('update:SelectedItems', newSelection);
+  emit('update:SelectedItem', newSelection[0] ?? null);
+  emit('SelectionChanged', { AddedItems: addedItems, RemovedItems: removedItems, SelectedItems: newSelection, OriginalSource: originalSource });
 };
 
-const emitSelection = (newSel) => {
-  emit('update:selectedItems', newSel);
-  emit('selectionChanged', newSel);
-};
+const selectItem = (event, item, index, checkedValue = undefined) => {
+  if (props.SelectionMode === 'None') return;
 
-const onCheckboxToggle = (val, item, idx) => {
-  let newSel = [...props.selectedItems];
-  const rawTarget = toRaw(item);
-  const pos = newSel.findIndex(i => toRaw(i) === rawTarget);
-  if (val && pos === -1) newSel.push(rawTarget);
-  else if (!val && pos > -1) newSel.splice(pos, 1);
-  anchorIndex = idx;
-  emitSelection(newSel);
-};
+  if (props.SelectionMode === 'Single') {
+    selectionAnchorIndex.value = index;
+    setSelection([item], event?.target);
+    return;
+  }
 
-const onItemClick = (event, item, idx) => {
-  if (props.selectionMode === 'None') return;
+  let newSelection = [...selectedItemsValue.value];
+  const selectedIndex = newSelection.findIndex((selected) => isSameItem(selected, item));
 
-  const rawTarget = toRaw(item);
-  let newSel = [...props.selectedItems];
-
-  if (props.selectionMode === 'Single') {
-    newSel = [rawTarget];
-    anchorIndex = idx;
-  } else if (props.selectionMode === 'Multiple') {
-    const pos = newSel.findIndex(i => toRaw(i) === rawTarget);
-    if (pos > -1) newSel.splice(pos, 1);
-    else newSel.push(rawTarget);
-    anchorIndex = idx;
-  } else if (props.selectionMode === 'Extended') {
-    if (event.ctrlKey) {
-      const pos = newSel.findIndex(i => toRaw(i) === rawTarget);
-      if (pos > -1) newSel.splice(pos, 1);
-      else newSel.push(rawTarget);
-      anchorIndex = idx;
-    } else if (event.shiftKey && anchorIndex !== null) {
-      const start = Math.min(anchorIndex, idx);
-      const end = Math.max(anchorIndex, idx);
-      newSel = internalItems.value.slice(start, end + 1).map(i => toRaw(i));
-    } else {
-      newSel = [rawTarget];
-      anchorIndex = idx;
+  if (props.SelectionMode === 'Multiple') {
+    if (checkedValue === true || (checkedValue === undefined && selectedIndex === -1)) {
+      if (selectedIndex === -1) newSelection.push(item);
+    } else if (selectedIndex !== -1) {
+      newSelection.splice(selectedIndex, 1);
     }
+    selectionAnchorIndex.value = index;
+    setSelection(newSelection, event?.target);
+    return;
   }
 
-  emitSelection(newSel);
-};
-
-const onItemDoubleClick = (item, idx) => {
-  if (props.isItemInvokedEnabled) {
-    emit('itemInvoked', { item, index: idx });
+  if (event?.shiftKey && selectionAnchorIndex.value !== -1) {
+    const start = Math.min(selectionAnchorIndex.value, index);
+    const end = Math.max(selectionAnchorIndex.value, index);
+    newSelection = items.value.slice(start, end + 1);
+  } else if (event?.ctrlKey || checkedValue !== undefined) {
+    if (checkedValue === true || (checkedValue === undefined && selectedIndex === -1)) {
+      if (selectedIndex === -1) newSelection.push(item);
+    } else if (selectedIndex !== -1) {
+      newSelection.splice(selectedIndex, 1);
+    }
+    selectionAnchorIndex.value = index;
+  } else {
+    newSelection = [item];
+    selectionAnchorIndex.value = index;
   }
+
+  setSelection(newSelection, event?.target);
 };
 
-const onItemEnterKey = (item, idx) => {
-  if (props.isItemInvokedEnabled) {
-    emit('itemInvoked', { item, index: idx });
-  }
+const onItemClick = (event, item, index) => selectItem(event, item, index);
+const onCheckBoxChanged = (checked, item, index) => selectItem({ target: rootRef.value }, item, index, checked === true);
+
+const invokeItem = (event, item, index) => {
+  if (!props.IsItemInvokedEnabled) return;
+  emit('ItemInvoked', { InvokedItem: item, OriginalSource: event?.target, Index: index });
 };
 
-const getItemStyle = (idx) => {
-  return undefined;
-};
+watch(() => props.SelectionMode, () => {
+  selectionAnchorIndex.value = -1;
+});
 </script>
 
 <style scoped>
 .win-items-view {
-  display: block;
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.win-items-viewport {
-  width: 100%;
-  height: 100%;
+  min-width: 0;
   box-sizing: border-box;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: auto;
+  color: var(--text-primary);
   scrollbar-width: thin;
-  position: relative;
 }
 
-.win-items-viewport.layout-stack {
+.win-items-view.layout-stacklayout {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--items-view-spacing);
 }
 
-.win-items-viewport.layout-grid {
+.win-items-view.layout-uniformgridlayout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 8px;
-  padding: 8px;
+  grid-template-columns: var(--items-view-grid-template, repeat(auto-fill, minmax(var(--items-view-min-item-width), 1fr)));
+  grid-auto-rows: minmax(var(--items-view-min-item-height), max-content);
+  column-gap: var(--items-view-column-spacing);
+  row-gap: var(--items-view-row-spacing);
 }
 
-.win-items-container {
+.win-items-view.layout-linedflowlayout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--items-view-min-item-width), 1fr));
+  grid-auto-rows: var(--items-view-line-height);
+  column-gap: var(--items-view-column-spacing);
+  row-gap: var(--items-view-row-spacing);
+}
+
+.win-items-view-item {
   position: relative;
+  min-width: 0;
   box-sizing: border-box;
   border-radius: 4px;
-  transition: background var(--fast-duration), border-color var(--fast-duration), transform 0.1s ease;
   outline: none;
-}
-
-.layout-stack .win-items-container {
-  padding: 8px 12px;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
+  color: var(--text-primary);
+  background: transparent;
   border: 1px solid transparent;
 }
 
-.layout-grid .win-items-container {
-  padding: 12px;
-  min-height: 100px;
-  border: 2px solid transparent;
-}
-
-.win-items-container.can-invoke {
+.win-items-view-item.invokable {
   cursor: pointer;
 }
 
-.win-items-container.pointer-over {
+.win-items-view-item:hover {
   background: var(--subtle-secondary);
 }
 
-.win-items-container.selected {
-  background: var(--subtle-secondary);
-}
-
-.layout-stack .win-items-container.selected {
-  border-left: 3px solid var(--accent-base);
-  padding-left: 9px;
-}
-
-.layout-grid .win-items-container.selected {
-  border-color: var(--accent-base);
-}
-
-.win-items-container:focus-visible {
-  outline: 2px solid var(--accent-base);
-  outline-offset: 1px;
-}
-
-.win-items-container.selected:hover {
+.win-items-view-item:active {
   background: var(--subtle-tertiary);
 }
 
-.items-checkbox {
+.win-items-view-item:focus-visible {
+  outline: 2px solid var(--focus-stroke-outer, var(--text-primary));
+  outline-offset: 1px;
+}
+
+.win-items-view-item.selected {
+  background: var(--subtle-secondary);
+  border-color: var(--accent-base);
+}
+
+.layout-stacklayout .win-items-view-item.selected {
+  border-left-width: 3px;
+}
+
+.selection-checkbox {
   position: absolute;
   top: 6px;
   right: 6px;
-  z-index: 2;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--layer-subtle, rgba(255, 255, 255, 0.8));
-  border-radius: 2px;
-  padding: 2px;
-}
-
-.default-item-template {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-/* Smooth scrolling */
-.win-items-viewport {
-  scroll-behavior: smooth;
-}
-
-/* Visual states */
-.win-items-container:active {
-  transform: scale(0.98);
-}
-
-.layout-grid .win-items-container:active {
-  transform: scale(0.97);
-}
-
-/* Disabled state */
-.win-items-container:disabled,
-.win-items-container[aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
+  z-index: 1;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
 }
 </style>
-
-
-
-

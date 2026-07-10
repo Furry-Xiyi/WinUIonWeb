@@ -1,61 +1,59 @@
 <template>
-  <div>
+  <div class="gallery-item-page">
     <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.ratingcontrol')" />
-      <WinTextBlock class="page-description" :Text="$t('text.the-ratingcontrol-allows-users-to-view-and-set-r')" TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+          <WinTextBlock class="page-header" :Text="$t('text.ratingcontrol')" />
+          <WinTextBlock class="page-description" :Text="$t('text.the-ratingcontrol-allows-users-to-view-and-set-r')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="ratingSimpleVue" :headerText="$t('text.a-simple-ratingcontrol')">
+              <template #example>
+                <WinRating
+                  :Value="ratingValue"
+                  :Caption="ratingCaption"
+                  :IsClearEnabled="clearEnabled"
+                  :IsReadOnly="readOnly"
+                  @update:Value="ratingValue = $event"
+                  @ValueChanged="onRatingValueChanged" />
+              </template>
+              <template #options>
+                <div class="rating-options">
+                  <WinTextBlock FontWeight="Bold" :Text="String(ratingValue)" />
+                  <WinCheckBox v-model:IsChecked="clearEnabled"><WinTextBlock Text="IsClearEnabled" /></WinCheckBox>
+                  <WinTextBlock :Text="$t('sample.rating.clear-note')" TextWrapping="WrapWholeWords" />
+                  <WinCheckBox Margin="0,12,0,0" v-model:IsChecked="readOnly"><WinTextBlock Text="IsReadOnly" /></WinCheckBox>
+                </div>
+              </template>
+            </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="ratingPlaceholderVue" :headerText="$t('sample.rating.placeholder')">
+              <template #example>
+                <WinRating :PlaceholderValue="placeholderValue" />
+              </template>
+              <template #options>
+                <div
+                  class="rating-options"
+                  @pointerdown="isPlaceholderSliderDragging = true"
+                  @pointerup="commitPlaceholderSlider"
+                  @pointercancel="commitPlaceholderSlider">
+                  <WinSlider
+                    :Header="$t('sample.placeholder-value')"
+                    :Value="placeholderSliderValue"
+                    :Minimum="0"
+                    :Maximum="5"
+                    :SmallChange="0.5"
+                    :StepFrequency="0.5"
+                    @update:Value="onPlaceholderSliderValueChanged" />
+                </div>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('text.a-simple-ratingcontrol')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="ratingSimpleVue">
-      <template #example>
-        <WinRating
-          :Value="ratingValue"
-          :Caption="ratingCaption"
-          :IsClearEnabled="clearEnabled"
-          :IsReadOnly="readOnly"
-          @update:Value="ratingValue = $event"
-          @ValueChanged="onRatingValueChanged" />
-      </template>
-      <template #options>
-        <div class="rating-options">
-          <WinTextBlock FontWeight="Bold" :Text="String(ratingValue)" />
-          <WinCheckBox v-model:IsChecked="clearEnabled"><WinTextBlock Text="IsClearEnabled" /></WinCheckBox>
-          <WinTextBlock :Text="$t('sample.rating.clear-note')" TextWrapping="WrapWholeWords" />
-          <WinCheckBox Margin="0,12,0,0" v-model:IsChecked="readOnly"><WinTextBlock Text="IsReadOnly" /></WinCheckBox>
-        </div>
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.rating.placeholder')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="ratingPlaceholderVue">
-      <template #example>
-        <WinRating :PlaceholderValue="placeholderValue" />
-      </template>
-      <template #options>
-        <div
-          class="rating-options"
-          @pointerdown="isPlaceholderSliderDragging = true"
-          @pointerup="commitPlaceholderSlider"
-          @pointercancel="commitPlaceholderSlider">
-          <WinSlider
-            :Header="$t('sample.placeholder-value')"
-            :Value="placeholderSliderValue"
-            :Minimum="0"
-            :Maximum="5"
-            :SmallChange="0.5"
-            :StepFrequency="0.5"
-            @update:Value="onPlaceholderSliderValueChanged" />
-        </div>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -71,6 +69,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'rating');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -119,8 +118,4 @@ const ratingPlaceholderVue = `<WinRating AutomationProperties.Name="RatingContro
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
 .rating-options { width: 220px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
-}
 </style>

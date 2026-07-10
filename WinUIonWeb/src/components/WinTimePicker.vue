@@ -1,16 +1,17 @@
 <template>
   <div class="win-time-picker" ref="containerRef">
-    <div v-if="Header" class="picker-header">{{ Header }}</div>
-    <button class="picker-btn" @click="toggleOpen">
+    <WinTextBlock v-if="Header" class="picker-header" :Text="Header" />
+    <WinButton class="picker-btn" :class="{ 'has-no-time': !hasSelectedTime }" Padding="0" MinHeight="32" :IsEnabled="IsEnabled" @Click="toggleOpen">
       <div class="picker-column-text">{{ hourText }}</div>
       <div class="picker-column-text">{{ minuteText }}</div>
       <div v-if="ClockIdentifier === '12HourClock'" class="picker-column-text">{{ amPmText }}</div>
-    </button>
+    </WinButton>
 
     <Teleport to="body">
       <div v-if="showFlyout" class="picker-overlay" @click="close(false)"></div>
       <div
         v-if="showFlyout"
+        ref="flyoutRef"
         class="picker-flyout"
         :class="flyoutAnimClass"
         :style="flyoutStyle"
@@ -21,26 +22,26 @@
               v-show="hoverCol === 'hour'"
               class="picker-arrow picker-arrow-up"
               :class="{ pressed: pressedKey === 'hour-up' }"
-              @mousedown="pressedKey = 'hour-up'"
-              @mouseup="pressedKey = ''"
-              @mouseleave="pressedKey = ''"
+              @pointerdown="startRepeating('hour', -1)"
+              @pointerup="stopRepeating"
+              @pointercancel="stopRepeating"
+              @pointerleave="stopRepeating"
               @click="scrollUp('hour')">
-              <span class="icon"></span>
+              <span class="icon" aria-hidden="true">&#xEDDB;</span>
             </button>
             <div class="picker-column" @wheel.prevent="onWheel($event, 'hour')">
-              <div v-for="(item, i) in hourDisplay" :key="'h' + i" class="picker-item" :class="{ active: item.active }">
-                {{ item.label }}
-              </div>
+              <div v-for="(item, i) in hourDisplay" :key="'h' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
             </div>
             <button
               v-show="hoverCol === 'hour'"
               class="picker-arrow picker-arrow-down"
               :class="{ pressed: pressedKey === 'hour-down' }"
-              @mousedown="pressedKey = 'hour-down'"
-              @mouseup="pressedKey = ''"
-              @mouseleave="pressedKey = ''"
+              @pointerdown="startRepeating('hour', 1)"
+              @pointerup="stopRepeating"
+              @pointercancel="stopRepeating"
+              @pointerleave="stopRepeating"
               @click="scrollDown('hour')">
-              <span class="icon"></span>
+              <span class="icon" aria-hidden="true">&#xEDDC;</span>
             </button>
           </div>
           <div class="picker-col-divider"></div>
@@ -49,26 +50,26 @@
               v-show="hoverCol === 'minute'"
               class="picker-arrow picker-arrow-up"
               :class="{ pressed: pressedKey === 'minute-up' }"
-              @mousedown="pressedKey = 'minute-up'"
-              @mouseup="pressedKey = ''"
-              @mouseleave="pressedKey = ''"
+              @pointerdown="startRepeating('minute', -1)"
+              @pointerup="stopRepeating"
+              @pointercancel="stopRepeating"
+              @pointerleave="stopRepeating"
               @click="scrollUp('minute')">
-              <span class="icon"></span>
+              <span class="icon" aria-hidden="true">&#xEDDB;</span>
             </button>
             <div class="picker-column" @wheel.prevent="onWheel($event, 'minute')">
-              <div v-for="(item, i) in minuteDisplay" :key="'m' + i" class="picker-item" :class="{ active: item.active }">
-                {{ item.label }}
-              </div>
+              <div v-for="(item, i) in minuteDisplay" :key="'m' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
             </div>
             <button
               v-show="hoverCol === 'minute'"
               class="picker-arrow picker-arrow-down"
               :class="{ pressed: pressedKey === 'minute-down' }"
-              @mousedown="pressedKey = 'minute-down'"
-              @mouseup="pressedKey = ''"
-              @mouseleave="pressedKey = ''"
+              @pointerdown="startRepeating('minute', 1)"
+              @pointerup="stopRepeating"
+              @pointercancel="stopRepeating"
+              @pointerleave="stopRepeating"
               @click="scrollDown('minute')">
-              <span class="icon"></span>
+              <span class="icon" aria-hidden="true">&#xEDDC;</span>
             </button>
           </div>
           <template v-if="ClockIdentifier === '12HourClock'">
@@ -78,34 +79,34 @@
                 v-show="hoverCol === 'ampm' && tempAmPm === 'PM'"
                 class="picker-arrow picker-arrow-up"
                 :class="{ pressed: pressedKey === 'ampm-up' }"
-                @mousedown="pressedKey = 'ampm-up'"
-                @mouseup="pressedKey = ''"
-                @mouseleave="pressedKey = ''"
+                @pointerdown="startRepeating('ampm', -1)"
+                @pointerup="stopRepeating"
+                @pointercancel="stopRepeating"
+                @pointerleave="stopRepeating"
                 @click="scrollUp('ampm')">
-                <span class="icon"></span>
+                <span class="icon" aria-hidden="true">&#xEDDB;</span>
               </button>
               <div class="picker-column" @wheel.prevent="onWheel($event, 'ampm')">
-                <div v-for="(item, i) in ampmDisplay" :key="'ap' + i" class="picker-item" :class="{ active: item.active }">
-                  {{ item.label }}
-                </div>
+                <div v-for="(item, i) in ampmDisplay" :key="'ap' + i" class="picker-item" :class="{ active: item.active, empty: !item.label }">{{ item.label }}</div>
               </div>
               <button
                 v-show="hoverCol === 'ampm' && tempAmPm === 'AM'"
                 class="picker-arrow picker-arrow-down"
                 :class="{ pressed: pressedKey === 'ampm-down' }"
-                @mousedown="pressedKey = 'ampm-down'"
-                @mouseup="pressedKey = ''"
-                @mouseleave="pressedKey = ''"
+                @pointerdown="startRepeating('ampm', 1)"
+                @pointerup="stopRepeating"
+                @pointercancel="stopRepeating"
+                @pointerleave="stopRepeating"
                 @click="scrollDown('ampm')">
-                <span class="icon"></span>
+                <span class="icon" aria-hidden="true">&#xEDDC;</span>
               </button>
             </div>
           </template>
           <div class="picker-highlight"></div>
         </div>
         <div class="picker-actions">
-          <button class="picker-action-btn" @click="close(true)"><span class="icon">&#xE8FB;</span></button>
-          <button class="picker-action-btn" @click="close(false)"><span class="icon">&#xE711;</span></button>
+          <button class="picker-action-btn" @click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></button>
+          <button class="picker-action-btn" @click="close(false)"><span class="icon" aria-hidden="true">&#xE711;</span></button>
         </div>
       </div>
     </Teleport>
@@ -114,41 +115,51 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue';
+import WinButton from './WinButton.vue';
+import WinTextBlock from './WinTextBlock.vue';
+import { useI18n } from './i18n/index';
 
 const props = defineProps({
   ClockIdentifier: { type: String, default: '12HourClock' },
   Header: { type: String, default: '' },
   HeaderPlacement: { type: String, default: 'Top' },
   HeaderTemplate: { type: Object, default: null },
+  IsEnabled: { type: Boolean, default: true },
+  Language: { type: String, default: '' },
   LightDismissOverlayMode: { type: String, default: 'Auto' },
   MinuteIncrement: { type: Number, default: 1 },
   SelectedTime: { type: Object, default: null },
   Time: {
     type: Object,
-    default: () => {
-      const now = new globalThis.Date();
-      return { hour: now.getHours(), minute: now.getMinutes() };
-    }
+    default: null
   }
 });
 
 const emit = defineEmits(['update:Time', 'update:SelectedTime', 'TimeChanged', 'SelectedTimeChanged']);
+const { t, locale } = useI18n();
 
 const showFlyout = ref(false);
 const isOpen = ref(false);
 const isClosing = ref(false);
 const containerRef = ref(null);
+const flyoutRef = ref(null);
 const flyoutStyle = ref({});
 const hoverCol = ref('');
 const pressedKey = ref('');
+let repeatDelayTimer = 0;
+let repeatTimer = 0;
 
 const tempHour = ref(0);
 const tempMinute = ref(0);
 const tempAmPm = ref('AM');
+const localTime = ref(null);
 
 const VISIBLE_ITEMS = 7;
 const ITEM_HEIGHT = 40;
 const COLUMNS_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT;
+const ACTIONS_HEIGHT = 41;
+const FLYOUT_BORDER_HEIGHT = 2;
+const FLYOUT_MARGIN = 8;
 const BAND_CENTER_FROM_TOP = 1 + COLUMNS_HEIGHT / 2;
 
 const normalizedMinuteIncrement = computed(() => {
@@ -156,7 +167,20 @@ const normalizedMinuteIncrement = computed(() => {
   return value > 0 && value <= 59 ? value : 1;
 });
 
-const timeValue = computed(() => normalizeTime(props.SelectedTime ?? props.Time));
+const pickerLocale = computed(() => props.Language || locale);
+const formatPeriod = (hour) => {
+  const parts = new Intl.DateTimeFormat(pickerLocale.value, { hour: 'numeric', hour12: true })
+    .formatToParts(new globalThis.Date(2024, 0, 1, hour));
+  return parts.find((part) => part.type === 'dayPeriod')?.value || (hour < 12 ? t('control.timepicker.am') : t('control.timepicker.pm'));
+};
+const amLabel = computed(() => formatPeriod(9));
+const pmLabel = computed(() => formatPeriod(15));
+const isTimeValue = (value) => Number.isFinite(value?.hour) && Number.isFinite(value?.minute);
+const hasSelectedTime = computed(() => isTimeValue(props.SelectedTime) || isTimeValue(props.Time) || isTimeValue(localTime.value));
+
+const timeValue = computed(() => {
+  return normalizeTime(props.SelectedTime ?? props.Time ?? localTime.value ?? { hour: 0, minute: 0 });
+});
 const hours = computed(() => {
   if (props.ClockIdentifier === '12HourClock') return Array.from({ length: 12 }, (_, i) => i + 1);
   return Array.from({ length: 24 }, (_, i) => i);
@@ -173,13 +197,14 @@ const flyoutAnimClass = computed(() => {
 });
 
 const hourText = computed(() => {
+  if (!hasSelectedTime.value) return t('control.timepicker.hour');
   const h = timeValue.value.hour;
   if (props.ClockIdentifier === '24HourClock') return String(h).padStart(2, '0');
   const h12 = h % 12;
   return h12 === 0 ? 12 : h12;
 });
-const minuteText = computed(() => String(timeValue.value.minute).padStart(2, '0'));
-const amPmText = computed(() => timeValue.value.hour >= 12 ? 'PM' : 'AM');
+const minuteText = computed(() => hasSelectedTime.value ? String(timeValue.value.minute).padStart(2, '0') : t('control.timepicker.minute'));
+const amPmText = computed(() => hasSelectedTime.value ? (timeValue.value.hour >= 12 ? pmLabel.value : amLabel.value) : amLabel.value);
 
 function normalizeTime(value) {
   const hour = Number.isFinite(value?.hour) ? value.hour : 0;
@@ -214,7 +239,7 @@ const minuteDisplay = computed(() => {
 });
 
 const ampmDisplay = computed(() => {
-  const items = ['AM', 'PM'];
+  const items = [amLabel.value, pmLabel.value];
   const idx = tempAmPm.value === 'PM' ? 1 : 0;
   const half = Math.floor(VISIBLE_ITEMS / 2);
   const result = [];
@@ -249,7 +274,30 @@ function scrollDown(type) {
   if (type === 'ampm' && tempAmPm.value === 'AM') tempAmPm.value = 'PM';
 }
 
+function repeatStep(type, direction) {
+  if (direction < 0) scrollUp(type);
+  else scrollDown(type);
+}
+
+function startRepeating(type, direction) {
+  stopRepeating();
+  pressedKey.value = `${type}-${direction < 0 ? 'up' : 'down'}`;
+  repeatDelayTimer = window.setTimeout(() => {
+    repeatStep(type, direction);
+    repeatTimer = window.setInterval(() => repeatStep(type, direction), 80);
+  }, 400);
+}
+
+function stopRepeating() {
+  window.clearTimeout(repeatDelayTimer);
+  window.clearInterval(repeatTimer);
+  repeatDelayTimer = 0;
+  repeatTimer = 0;
+  pressedKey.value = '';
+}
+
 const toggleOpen = async () => {
+  if (!props.IsEnabled) return;
   if (isOpen.value) {
     close(false);
     return;
@@ -269,12 +317,18 @@ const toggleOpen = async () => {
   await nextTick();
   const rect = containerRef.value.getBoundingClientRect();
   const buttonCenter = rect.top + rect.height / 2;
-  const top = buttonCenter - BAND_CENTER_FROM_TOP;
+  const flyoutRect = flyoutRef.value?.getBoundingClientRect();
+  const flyoutHeight = flyoutRect?.height || COLUMNS_HEIGHT + ACTIONS_HEIGHT + FLYOUT_BORDER_HEIGHT;
+  const flyoutWidth = flyoutRect?.width || rect.width;
+  const idealTop = buttonCenter - BAND_CENTER_FROM_TOP;
+  const maxTop = Math.max(FLYOUT_MARGIN, window.innerHeight - flyoutHeight - FLYOUT_MARGIN);
+  const top = Math.min(Math.max(FLYOUT_MARGIN, idealTop), maxTop);
+  const left = Math.min(Math.max(FLYOUT_MARGIN, rect.left), Math.max(FLYOUT_MARGIN, window.innerWidth - flyoutWidth - FLYOUT_MARGIN));
   flyoutStyle.value = {
     top: `${top}px`,
-    left: `${rect.left}px`,
+    left: `${left}px`,
     width: `${rect.width}px`,
-    transformOrigin: `center ${BAND_CENTER_FROM_TOP}px`
+    transformOrigin: `center ${buttonCenter - top}px`
   };
 };
 
@@ -287,6 +341,7 @@ const close = (accept) => {
       if (tempAmPm.value === 'AM' && finalHour === 12) finalHour = 0;
     }
     const newTime = { hour: finalHour, minute: tempMinute.value };
+    if (!props.SelectedTime && !props.Time) localTime.value = newTime;
     emit('update:Time', newTime);
     emit('update:SelectedTime', newTime);
     emit('TimeChanged', { oldTime, newTime });
@@ -323,34 +378,41 @@ function onWheel(event, type) {
 
   .picker-btn {
     display: flex;
-    width: 296px;
+    align-items: stretch;
+    justify-content: stretch;
+    width: 242px;
+    min-width: 242px;
     height: 32px;
-    background: var(--ctrl-fill-default);
-    border: 1px solid var(--ctrl-border-rest);
-    border-bottom-color: var(--ctrl-border-accent);
     border-radius: 4px;
-    padding: 0;
-    color: var(--text-primary);
-    font-family: inherit;
     font-size: 14px;
-    cursor: pointer;
+    gap: 0;
+    --ButtonBackground: var(--ctrl-fill-default);
+    --ButtonBackgroundPointerOver: var(--ctrl-fill-secondary);
+    --ButtonBackgroundPressed: var(--ctrl-fill-tertiary);
+    --ButtonBackgroundDisabled: var(--ctrl-fill-disabled, var(--ctrl-fill-tertiary));
+    --ButtonBorderBrush: var(--ctrl-border-rest);
+    --ButtonBorderBrushPointerOver: var(--ctrl-border-rest);
+    --ButtonBorderBrushPressed: var(--ctrl-border-rest);
+    --ButtonBorderBrushDisabled: var(--ctrl-border-disabled, var(--ctrl-border-rest));
+    --ButtonBorderBrushBottom: var(--ctrl-border-accent);
+    --ButtonBorderBrushPointerOverBottom: var(--ctrl-border-accent);
+    --ButtonBorderBrushPressedBottom: var(--ctrl-border-rest);
   }
 
-    .picker-btn:hover {
-      background: var(--ctrl-fill-secondary);
-    }
-
-    .picker-btn:active {
-      background: var(--ctrl-fill-tertiary);
-      color: var(--text-secondary);
-    }
+  .picker-btn.has-no-time {
+    --ButtonForeground: var(--text-secondary);
+    --ButtonForegroundPointerOver: var(--text-primary);
+    --ButtonForegroundPressed: var(--text-secondary);
+  }
 
   .picker-column-text {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 1px solid var(--ctrl-border-rest);
+    border-right: 1px solid var(--ctrl-border, var(--stroke-divider));
+    height: 100%;
+    box-sizing: border-box;
   }
 
     .picker-column-text:last-child {
@@ -376,12 +438,15 @@ function onWheel(event, type) {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    width: 242px;
+    max-height: 398px;
   }
 
   .picker-columns {
     position: relative;
     display: flex;
     height: 280px;
+    overflow: hidden;
   }
 
   .picker-col-wrapper {
@@ -403,28 +468,64 @@ function onWheel(event, type) {
 
   .picker-col-divider {
     width: 1px;
-    background: var(--stroke-divider);
-    z-index: 2;
+    align-self: stretch;
+    background: var(--divider-stroke-default, var(--stroke-divider));
+    pointer-events: none;
+    position: relative;
+    z-index: 3;
   }
 
   .picker-item {
     height: 40px;
     min-height: 40px;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     color: var(--text-secondary);
     width: 100%;
+    margin: 0;
+    padding: 3px 0 6px;
+    border-radius: 4px;
     position: relative;
     z-index: 1;
+    isolation: isolate;
     transition: color 0.1s, font-size 0.1s;
   }
 
+  .picker-item:hover {
+    color: var(--text-primary);
+  }
+
+  .picker-item::before {
+    content: '';
+    position: absolute;
+    inset: 2px 4px;
+    border-radius: 4px;
+    z-index: -1;
+  }
+
+  .picker-item:hover::before {
+    background: var(--subtle-secondary);
+  }
+
+  .picker-item.empty {
+    pointer-events: none;
+  }
+
+  .picker-item.empty::before {
+    display: none;
+  }
+
+  .picker-item.active::before {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
     .picker-item.active {
-      color: var(--accent-text);
+      color: var(--accent-text, var(--accent-aa-text));
       font-weight: 600;
-      font-size: 15px;
+      font-size: 14px;
     }
 
   .picker-highlight {
@@ -434,7 +535,7 @@ function onWheel(event, type) {
     top: 50%;
     transform: translateY(-50%);
     height: 40px;
-    background: var(--accent-base);
+    background: var(--accent-base, var(--accent-aa-fill));
     border-radius: 4px;
     pointer-events: none;
     z-index: 0;
@@ -444,17 +545,18 @@ function onWheel(event, type) {
     position: absolute;
     left: 0;
     right: 0;
-    height: 40px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--flyout-bg);
+    background: var(--ctrl-solid-fill);
     border: none;
     color: var(--text-secondary);
     font-size: 8px;
     cursor: pointer;
     z-index: 3;
-    transition: transform 0.083s ease-out;
+    border-radius: 0;
+    transition: color var(--fast-duration);
   }
 
   .picker-arrow-up {
@@ -466,11 +568,17 @@ function onWheel(event, type) {
   }
 
   .picker-arrow:hover {
-    color: var(--text-primary);
+    background: var(--ctrl-solid-fill);
+    color: var(--text-secondary);
   }
 
   .picker-arrow.pressed {
-    transform: scale(0.75);
+    background: var(--ctrl-solid-fill);
+  }
+
+  .picker-arrow.pressed .icon {
+    display: inline-flex;
+    transform: scale(0.875);
   }
 
   .picker-actions {

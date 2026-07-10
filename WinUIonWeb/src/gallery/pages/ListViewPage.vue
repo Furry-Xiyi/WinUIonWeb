@@ -1,153 +1,191 @@
 <template>
-  <WinTextBlock class="page-header" :Text="$t('text.listview')" />
-  <WinTextBlock class="page-description" :Text="$t('text.a-listview-displays-data-in-a-vertical-list-with')" TextWrapping="WrapWholeWords" />
+  <div class="gallery-item-page">
+    <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.listview')" />
+          <WinTextBlock class="page-description" :Text="$t('text.a-listview-displays-data-in-a-vertical-list-with')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.basic-simple-datatemplate')" :theme="pageTheme" :vue="basicListViewVue">
+              <template #example>
+                <div class="sample-stack">
+                  <WinTextBlock :Text="$t('sample.listview.basic-note')" TextWrapping="WrapWholeWords" />
+                  <div class="listview-demo-scroll narrow">
+                    <WinListView :ItemsSource="contacts" SelectionMode="Single">
+                      <template #item="{ item }">
+                        <WinTextBlock :Text="item.Name" />
+                      </template>
+                    </WinListView>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
 
-  <WinTextBlock class="control-example-description" :Text="$t('text.basic-listview-with-selection-modes')" />
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.selection-support')" :theme="pageTheme" :vue="selectionListViewVue">
+              <template #example>
+                <div class="sample-stack">
+                  <WinTextBlock
+                    :Text="$t('sample.listview.selection-note')"
+                    TextWrapping="WrapWholeWords" />
+                  <div class="listview-demo-scroll">
+                    <WinListView :ItemsSource="contacts" :SelectionMode="selectionMode" v-model:SelectedItems="selectionSelected">
+                      <template #item="{ item }">
+                        <div class="contact-template">
+                          <div class="contact-avatar" />
+                          <div>
+                            <WinTextBlock :Text="item.Name" />
+                            <WinTextBlock class="caption-text" :Text="item.Company" />
+                          </div>
+                        </div>
+                      </template>
+                    </WinListView>
+                  </div>
+                </div>
+              </template>
+              <template #options>
+                <WinComboBox Header="SelectionMode" :ItemsSource="selectionModeOptions" v-model:SelectedIndex="selectionModeIndex" />
+              </template>
+            </WinControlExample>
 
-  <WinControlExample>
-    <template #example>
-      <div class="listview-demo-scroll">
-        <WinListView :ItemsSource="contacts" :SelectionMode="basicMode" v-model:SelectedItems="singleSel">
-          <template #item="{ item }">
-            <WinTextBlock :Text="`${item.firstName} ${item.lastName} - ${item.company}`" />
-          </template>
-        </WinListView>
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.drag-drop-reordering')" :theme="pageTheme" :vue="dragDropListViewVue">
+              <template #example>
+                <div class="sample-stack">
+                  <WinTextBlock :Text="$t('sample.listview.drag-drop-note')" TextWrapping="WrapWholeWords" />
+                  <div class="listview-demo-scroll">
+                    <WinListView v-model:ItemsSource="dragList" SelectionMode="Single" v-model:SelectedItems="dragSel" CanDragItems CanReorderItems AllowDrop>
+                      <template #item="{ item }">
+                        <WinTextBlock :Text="item.Name" />
+                      </template>
+                    </WinListView>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.grouped-headers')" :theme="pageTheme" :vue="groupedListViewVue">
+              <template #example>
+                <div class="sample-stack">
+                  <WinTextBlock :Text="$t('sample.listview.grouped-note')" TextWrapping="WrapWholeWords" />
+                  <div class="listview-demo-scroll">
+                    <WinListView :ItemsSource="groups" IsGrouped :AreStickyGroupHeadersEnabled="stickyOn" SelectionMode="Single" v-model:SelectedItems="groupSel">
+                      <template #header="{ group }">
+                        <WinTextBlock class="group-header" :Text="group.key" />
+                      </template>
+                      <template #item="{ item }">
+                        <div class="contact-template">
+                          <div class="contact-avatar" />
+                          <div>
+                            <WinTextBlock :Text="item.Name" />
+                            <WinTextBlock class="caption-text" :Text="item.Company" />
+                          </div>
+                        </div>
+                      </template>
+                    </WinListView>
+                  </div>
+                </div>
+              </template>
+              <template #options>
+                <WinToggleSwitch :Header="$t('sample.sticky-headers')" v-model="stickyOn" />
+              </template>
+            </WinControlExample>
       </div>
-    </template>
-    <template #options>
-      <div class="option-row">
-        <WinTextBlock class="option-label" Text="Selection Mode:" />
-        <WinComboBox :options="selModeOptions" v-model="basicModeIdx" style="width: 150px;" />
-      </div>
-    </template>
-  </WinControlExample>
-
-  <WinTextBlock class="control-example-description" Text="Grouped Data with Sticky Headers" />
-
-  <WinControlExample>
-    <template #example>
-      <div class="listview-demo-scroll">
-        <WinListView :ItemsSource="groups" IsGrouped showHeader :stickyHeader="stickyOn" SelectionMode="Single" v-model:SelectedItems="groupSel">
-          <template #header="{ group }">
-            {{ group.key }}
-          </template>
-          <template #item="{ item }">
-            <div style="display: flex; flex-direction: column;">
-              <WinTextBlock :Text="`${item.firstName} ${item.lastName}`" />
-              <WinTextBlock style="font-size: 12px; color: var(--text-secondary);" :Text="item.company" />
-            </div>
-          </template>
-        </WinListView>
-      </div>
-
-      <div class="option-row">
-        <WinTextBlock class="option-label" Text="Sticky Headers:" />
-        <WinToggleSwitch :modelValue="stickyOn" @update:modelValue="stickyOn = $event" onContent="On" offContent="Off" />
-      </div>
-    </template>
-  </WinControlExample>
-
-  <WinTextBlock class="control-example-description" Text="Drag to Reorder" />
-
-  <WinControlExample>
-    <template #example>
-      <div class="listview-demo-scroll">
-        <WinListView v-model:ItemsSource="dragList" SelectionMode="Single" v-model:SelectedItems="dragSel" CanDragItems CanReorderItems AllowDrop>
-          <template #item="{ item }">
-            <WinTextBlock :Text="`${item.firstName} ${item.lastName}`" />
-          </template>
-        </WinListView>
-      </div>
-    </template>
-  </WinControlExample>
+    </WinScrollViewer>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import WinListView from '../../components/WinListView.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
+import { computed, inject, ref, watch } from 'vue';
+import WinButton from '../../components/WinButton.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinListView from '../../components/WinListView.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { createPageState } from '../../utils/pageState';
 
-import { useI18n } from '../../components/i18n/index';
-
-const { t } = useI18n();
-const selModeOptions = [
-  { label: t('text.single') },
-  { label: t('text.multiple') },
-  { label: t('text.extended') },
-  { label: t('text.none') }
-];
-const basicModeIdx = ref(0);
-const basicMode = computed(() => selModeOptions[basicModeIdx.value].label);
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'listview');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const selectionModeOptions = ['None', 'Single', 'Multiple', 'Extended'];
+const selectionModeIndex = ref(1);
+const selectionMode = computed(() => selectionModeOptions[selectionModeIndex.value]);
 const stickyOn = ref(false);
 
-watch(basicMode, () => { singleSel.value = []; });
-
 const contacts = [
-  { firstName: 'Adam', lastName: 'Smith', company: 'Microsoft' },
-  { firstName: 'Bill', lastName: 'Gates', company: 'TerraPower' },
-  { firstName: 'Clara', lastName: 'Oswald', company: 'UNIT' },
-  { firstName: 'David', lastName: 'Chen', company: 'Apple' },
-  { firstName: 'Eve', lastName: 'Torres', company: 'Google' },
-  { firstName: 'Frank', lastName: 'Wright', company: 'Adobe' },
-  { firstName: 'Grace', lastName: 'Hopper', company: 'Navy' },
-  { firstName: 'Henry', lastName: 'Ford', company: 'Ford' }
+  { FirstName: 'Adam', LastName: 'Smith', Company: 'Microsoft', Name: 'Adam Smith' },
+  { FirstName: 'Bill', LastName: 'Gates', Company: 'TerraPower', Name: 'Bill Gates' },
+  { FirstName: 'Clara', LastName: 'Oswald', Company: 'UNIT', Name: 'Clara Oswald' },
+  { FirstName: 'David', LastName: 'Chen', Company: 'Apple', Name: 'David Chen' },
+  { FirstName: 'Eve', LastName: 'Torres', Company: 'Google', Name: 'Eve Torres' },
+  { FirstName: 'Frank', LastName: 'Wright', Company: 'Adobe', Name: 'Frank Wright' },
+  { FirstName: 'Grace', LastName: 'Hopper', Company: 'Navy', Name: 'Grace Hopper' },
+  { FirstName: 'Henry', LastName: 'Ford', Company: 'Ford', Name: 'Henry Ford' }
 ];
 
 const groups = [
-  { key: 'A', items: [{ firstName: 'Adam', lastName: 'Smith', company: 'Microsoft' }, { firstName: 'Alfred', lastName: 'Nobel', company: 'Stockholm' }] },
-  { key: 'B', items: [{ firstName: 'Bill', lastName: 'Gates', company: 'TerraPower' }] },
-  { key: 'C', items: [{ firstName: 'Clara', lastName: 'Oswald', company: 'UNIT' }] },
-  { key: 'D', items: [{ firstName: 'David', lastName: 'Chen', company: 'Apple' }] },
-  { key: 'E', items: [{ firstName: 'Eve', lastName: 'Torres', company: 'Google' }] }
-];
+  { key: 'A', items: contacts.filter(item => item.LastName.startsWith('S')) },
+  { key: 'B', items: contacts.filter(item => item.LastName.startsWith('G')) },
+  { key: 'C', items: contacts.filter(item => item.LastName.startsWith('O') || item.LastName.startsWith('C')) },
+  { key: 'D', items: contacts.filter(item => item.LastName.startsWith('T') || item.LastName.startsWith('W')) },
+  { key: 'F', items: contacts.filter(item => item.LastName.startsWith('F') || item.LastName.startsWith('H')) }
+].filter(group => group.items.length > 0);
 
-const dragList = ref([
-  { firstName: 'Adam', lastName: 'Smith' },
-  { firstName: 'Bill', lastName: 'Gates' },
-  { firstName: 'Clara', lastName: 'Oswald' },
-  { firstName: 'David', lastName: 'Chen' },
-  { firstName: 'Eve', lastName: 'Torres' }
-]);
-
-const singleSel = ref([]);
+const dragList = ref(contacts.slice(0, 5));
+const selectionSelected = ref([]);
 const groupSel = ref([]);
 const dragSel = ref([]);
+
+watch(selectionMode, () => { selectionSelected.value = []; });
+
+const basicListViewVue = `<WinListView :ItemsSource="contacts" SelectionMode="Single">
+  <template #item="{ item }">
+    <WinTextBlock :Text="item.Name" />
+  </template>
+</WinListView>`;
+
+const selectionListViewVue = `<WinListView :ItemsSource="contacts" :SelectionMode="selectionMode" v-model:SelectedItems="selectionSelected">
+  <template #item="{ item }">
+    <WinTextBlock :Text="item.Name" />
+  </template>
+</WinListView>`;
+
+const dragDropListViewVue = `<WinListView v-model:ItemsSource="dragList" SelectionMode="Single" CanDragItems CanReorderItems AllowDrop>
+  <template #item="{ item }">
+    <WinTextBlock :Text="item.Name" />
+  </template>
+</WinListView>`;
+
+const groupedListViewVue = `<WinListView :ItemsSource="groups" IsGrouped :AreStickyGroupHeadersEnabled="stickyOn" SelectionMode="Single">
+  <template #header="{ group }">
+    <WinTextBlock :Text="group.key" />
+  </template>
+  <template #item="{ item }">
+    <WinTextBlock :Text="item.Name" />
+  </template>
+</WinListView>`;
 </script>
 
 <style scoped>
-.option-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.option-label {
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-.listview-demo-scroll {
-  width: 100%;
-  height: 300px;
-  border: 1px solid var(--card-stroke);
-  border-radius: 8px;
-  background: var(--card-bg);
-  display: block;
-  position: relative;
-  overflow: visible;
-}
-
-.listview-demo-scroll .win-list-view {
-  width: 100%;
-  height: 100%;
-  border-radius: 7px;
-  padding: 0;
-}
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.sample-stack { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+.listview-demo-scroll { width: 400px; max-width: 100%; height: 400px; border: 1px solid var(--card-stroke); background: var(--card-bg); }
+.listview-demo-scroll.narrow { width: 350px; }
+.listview-demo-scroll .win-list-view { width: 100%; height: 100%; }
+.contact-template { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px; min-width: 0; }
+.contact-avatar { width: 32px; height: 32px; margin: 6px; border-radius: 50%; background: var(--ctrl-strong-stroke-default); }
+.caption-text { color: var(--text-secondary); font-size: 12px; }
+.group-header { font-size: 20px; font-weight: 600; }
 </style>

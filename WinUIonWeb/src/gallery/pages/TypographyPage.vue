@@ -1,163 +1,167 @@
 <template>
-  <div class="page-container">
-    <div class="page-header">
-      <div class="header-left">
-        <h1 class="page-title">Typography</h1>
-      </div>
-      <div class="header-actions">
-        <button class="icon-button" @click="toggleTheme" aria-label="Toggle theme">
-          <span class="icon">&#xE793;</span>
-        </button>
-        <button class="icon-button" @click="toggleFavorite" aria-label="Toggle favorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="page-description">
-      <p>
-        Typography helps provide structure and hierarchy to UI. The default font for Windows is
-        <a href="https://learn.microsoft.com/windows/apps/design/downloads/#fonts" target="_blank" class="link">Segoe UI Variable</a>.
-        Best practice is to use Regular weight for most text, use Semibold for titles. The minimum values should be 12px Regular, 14px Semibold.
-      </p>
-    </div>
-
-    <p class="control-example-description">Type ramp</p>
-    <WinControlExample class="basic-input-example-theme"
-      :theme="pageTheme"
-      :xaml="xamlCode"
-      :cSharp="cSharpCode">
-      <template #example>
-        <div class="typography-demo">
-          <!-- Visual demonstration image area -->
-          <div class="hero-image-container">
-            <div class="hero-image" :class="{ 'dark-theme': isDarkTheme }">
-              <div class="typography-showcase">
-                <div class="showcase-item display-text">
-                  <span class="text-sample">Display</span>
-                  <button class="info-button" @click="showInfo('Display')" aria-label="Show Display info">
-                    <span class="icon">ℹ️</span>
-                  </button>
-                </div>
-                <div class="showcase-item title-text">
-                  <span class="text-sample">Title</span>
-                  <button class="info-button" @click="showInfo('Title')" aria-label="Show Title info">
-                    <span class="icon">ℹ️</span>
-                  </button>
-                </div>
-                <div class="showcase-item body-strong-text">
-                  <span class="text-sample">Body Strong</span>
-                  <button class="info-button" @click="showInfo('Body Strong')" aria-label="Show Body Strong info">
-                    <span class="icon">ℹ️</span>
-                  </button>
-                </div>
-                <div class="showcase-item body-text">
-                  <span class="text-sample">Body</span>
-                  <button class="info-button" @click="showInfo('Body')" aria-label="Show Body info">
-                    <span class="icon">ℹ️</span>
-                  </button>
-                </div>
-                <div class="showcase-item caption-text">
-                  <span class="text-sample">Caption</span>
-                  <button class="info-button" @click="showInfo('Caption')" aria-label="Show Caption info">
-                    <span class="icon">ℹ️</span>
-                  </button>
-                </div>
+  <div class="gallery-item-page">
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <div class="page-header">
+              <div class="header-left">
+                <h1 class="page-title">Typography</h1>
+              </div>
+              <div class="header-actions">
+                <button class="icon-button" @click="toggleTheme" aria-label="Toggle theme">
+                  <span class="icon">&#xE793;</span>
+                </button>
+                <button class="icon-button" @click="toggleFavorite" aria-label="Toggle favorite">
+                  <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+                </button>
               </div>
             </div>
-          </div>
 
-          <!-- Type ramp table -->
-          <div class="type-ramp-table">
-            <div class="table-header">
-              <div class="column example-column">Example</div>
-              <div class="column font-column">Variable Font</div>
-              <div class="column size-column">Size/Line height</div>
-              <div class="column style-column">Style</div>
+            <div class="page-description">
+              <p>
+                Typography helps provide structure and hierarchy to UI. The default font for Windows is
+                <a href="https://learn.microsoft.com/windows/apps/design/downloads/#fonts" target="_blank" class="link">Segoe UI Variable</a>.
+                Best practice is to use Regular weight for most text, use Semibold for titles. The minimum values should be 12px Regular, 14px Semibold.
+              </p>
             </div>
 
-            <TypographyRow
-              example="Caption"
-              variableFont="Small, Regular"
-              sizeLineHeight="12/16 epx"
-              resourceName="CaptionTextBlockStyle"
-              styleClass="caption"
-              :background="true" />
+            <p class="control-example-description">Type ramp</p>
+            <WinControlExample class="basic-input-example-theme"
+              :theme="pageTheme"
+              :xaml="xamlCode"
+              :cSharp="cSharpCode">
+              <template #example>
+                <div class="typography-demo">
+                  <!-- Visual demonstration image area -->
+                  <div class="hero-image-container">
+                    <div class="hero-image" :class="{ 'dark-theme': isDarkTheme }">
+                      <div class="typography-showcase">
+                        <div class="showcase-item display-text">
+                          <span class="text-sample">Display</span>
+                          <button class="info-button" @click="showInfo('Display')" aria-label="Show Display info">
+                            <span class="icon">ℹ️</span>
+                          </button>
+                        </div>
+                        <div class="showcase-item title-text">
+                          <span class="text-sample">Title</span>
+                          <button class="info-button" @click="showInfo('Title')" aria-label="Show Title info">
+                            <span class="icon">ℹ️</span>
+                          </button>
+                        </div>
+                        <div class="showcase-item body-strong-text">
+                          <span class="text-sample">Body Strong</span>
+                          <button class="info-button" @click="showInfo('Body Strong')" aria-label="Show Body Strong info">
+                            <span class="icon">ℹ️</span>
+                          </button>
+                        </div>
+                        <div class="showcase-item body-text">
+                          <span class="text-sample">Body</span>
+                          <button class="info-button" @click="showInfo('Body')" aria-label="Show Body info">
+                            <span class="icon">ℹ️</span>
+                          </button>
+                        </div>
+                        <div class="showcase-item caption-text">
+                          <span class="text-sample">Caption</span>
+                          <button class="info-button" @click="showInfo('Caption')" aria-label="Show Caption info">
+                            <span class="icon">ℹ️</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-            <TypographyRow
-              example="Body"
-              variableFont="Text, Regular"
-              sizeLineHeight="14/20 epx"
-              resourceName="BodyTextBlockStyle"
-              styleClass="body"
-              :background="false" />
+                  <!-- Type ramp table -->
+                  <div class="type-ramp-table">
+                    <div class="table-header">
+                      <div class="column example-column">Example</div>
+                      <div class="column font-column">Variable Font</div>
+                      <div class="column size-column">Size/Line height</div>
+                      <div class="column style-column">Style</div>
+                    </div>
 
-            <TypographyRow
-              example="Body Strong"
-              variableFont="Text, SemiBold"
-              sizeLineHeight="14/20 epx"
-              resourceName="BodyStrongTextBlockStyle"
-              styleClass="body-strong"
-              :background="true" />
+                    <TypographyRow
+                      example="Caption"
+                      variableFont="Small, Regular"
+                      sizeLineHeight="12/16 epx"
+                      resourceName="CaptionTextBlockStyle"
+                      styleClass="caption"
+                      :background="true" />
 
-            <TypographyRow
-              example="Body Large"
-              variableFont="Text, Regular"
-              sizeLineHeight="18/24 epx"
-              resourceName="BodyLargeTextBlockStyle"
-              styleClass="body-large"
-              :background="false" />
+                    <TypographyRow
+                      example="Body"
+                      variableFont="Text, Regular"
+                      sizeLineHeight="14/20 epx"
+                      resourceName="BodyTextBlockStyle"
+                      styleClass="body"
+                      :background="false" />
 
-            <TypographyRow
-              example="Body Large Strong"
-              variableFont="Text, SemiBold"
-              sizeLineHeight="18/24 epx"
-              resourceName="BodyLargeStrongTextBlockStyle"
-              styleClass="body-large-strong"
-              :background="true" />
+                    <TypographyRow
+                      example="Body Strong"
+                      variableFont="Text, SemiBold"
+                      sizeLineHeight="14/20 epx"
+                      resourceName="BodyStrongTextBlockStyle"
+                      styleClass="body-strong"
+                      :background="true" />
 
-            <TypographyRow
-              example="Subtitle"
-              variableFont="Display, SemiBold"
-              sizeLineHeight="20/28 epx"
-              resourceName="SubtitleTextBlockStyle"
-              styleClass="subtitle"
-              :background="false" />
+                    <TypographyRow
+                      example="Body Large"
+                      variableFont="Text, Regular"
+                      sizeLineHeight="18/24 epx"
+                      resourceName="BodyLargeTextBlockStyle"
+                      styleClass="body-large"
+                      :background="false" />
 
-            <TypographyRow
-              example="Title"
-              variableFont="Display, SemiBold"
-              sizeLineHeight="28/36 epx"
-              resourceName="TitleTextBlockStyle"
-              styleClass="title"
-              :background="true" />
+                    <TypographyRow
+                      example="Body Large Strong"
+                      variableFont="Text, SemiBold"
+                      sizeLineHeight="18/24 epx"
+                      resourceName="BodyLargeStrongTextBlockStyle"
+                      styleClass="body-large-strong"
+                      :background="true" />
 
-            <TypographyRow
-              example="Title Large"
-              variableFont="Display, SemiBold"
-              sizeLineHeight="40/52 epx"
-              resourceName="TitleLargeTextBlockStyle"
-              styleClass="title-large"
-              :background="false" />
+                    <TypographyRow
+                      example="Subtitle"
+                      variableFont="Display, SemiBold"
+                      sizeLineHeight="20/28 epx"
+                      resourceName="SubtitleTextBlockStyle"
+                      styleClass="subtitle"
+                      :background="false" />
 
-            <TypographyRow
-              example="Display"
-              variableFont="Display, SemiBold"
-              sizeLineHeight="68/92 epx"
-              resourceName="DisplayTextBlockStyle"
-              styleClass="display"
-              :background="true" />
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
+                    <TypographyRow
+                      example="Title"
+                      variableFont="Display, SemiBold"
+                      sizeLineHeight="28/36 epx"
+                      resourceName="TitleTextBlockStyle"
+                      styleClass="title"
+                      :background="true" />
 
-    <!-- Info tooltip -->
-    <div v-if="activeInfo" class="info-tooltip" :style="tooltipStyle">
-      <div class="tooltip-content">
-        <div class="tooltip-title">{{ activeInfo }}</div>
+                    <TypographyRow
+                      example="Title Large"
+                      variableFont="Display, SemiBold"
+                      sizeLineHeight="40/52 epx"
+                      resourceName="TitleLargeTextBlockStyle"
+                      styleClass="title-large"
+                      :background="false" />
+
+                    <TypographyRow
+                      example="Display"
+                      variableFont="Display, SemiBold"
+                      sizeLineHeight="68/92 epx"
+                      resourceName="DisplayTextBlockStyle"
+                      styleClass="display"
+                      :background="true" />
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Info tooltip -->
+            <div v-if="activeInfo" class="info-tooltip" :style="tooltipStyle">
+              <div class="tooltip-content">
+                <div class="tooltip-title">{{ activeInfo }}</div>
+              </div>
+            </div>
       </div>
-    </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -167,6 +171,7 @@ import WinControlExample from '../../components/WinControlExample.vue';
 import TypographyRow from '../../components/TypographyRow.vue';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'typography');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);

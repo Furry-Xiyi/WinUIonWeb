@@ -1,126 +1,141 @@
 <template>
-  <div>
-    <h1 class="page-header">{{ $t('text.contentdialog') }}</h1>
-    <p class="page-description">
-      {{ $t('text.use-a-contentdialog-to-show-relevant-information') }}
-    </p>
+  <div class="gallery-item-page">
+    <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.contentdialog')" />
+          <WinTextBlock class="page-description" :Text="$t('text.use-a-contentdialog-to-show-relevant-information')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-basic-content-dialog-with-content')" :theme="pageTheme" :vue="basicCode">
+              <template #example>
+                <div class="sample-row">
+                  <WinButton @Click="showDialog = true">
+                    <WinTextBlock :Text="$t('text.show-dialog')" />
+                  </WinButton>
+                  <WinTextBlock class="output-text" :Text="dialogResult" />
+                </div>
+              </template>
+            </WinControlExample>
 
-    <!-- Example 1: Basic ContentDialog -->
-    <WinControlExample :headerText="$t('text.a-basic-content-dialog-with-content')">
-      <template #example>
-        <WinButton @click="showDialog1 = true">{{ $t('text.show-dialog') }}</WinButton>
-      </template>
-      <template #options>
-        <div v-if="dialogResult1" class="output-text">Result: {{ dialogResult1 }}</div>
-        <div v-else class="output-text">Click the button to show the dialog.</div>
-      </template>
-    </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.contentdialog.no-default')" :theme="pageTheme" :vue="noDefaultCode">
+              <template #example>
+                <div class="sample-row">
+                  <WinButton @Click="showDialogNoDefault = true">
+                    <WinTextBlock :Text="$t('sample.contentdialog.show-no-default')" />
+                  </WinButton>
+                  <WinTextBlock class="output-text" :Text="dialogResultNoDefault" />
+                </div>
+              </template>
+            </WinControlExample>
 
-    <!-- Example 2: ContentDialog without default button -->
-    <WinControlExample headerText="A content dialog without a default button.">
-      <template #example>
-        <WinButton @click="showDialog2 = true">Show dialog without default button</WinButton>
+            <WinContentDialog
+              v-model:IsOpen="showDialog"
+              :Title="$t('sample.contentdialog.save-title')"
+              :PrimaryButtonText="$t('sample.contentdialog.save')"
+              :SecondaryButtonText="$t('sample.contentdialog.dont-save')"
+              :CloseButtonText="$t('sample.contentdialog.cancel')"
+              DefaultButton="Primary"
+              @PrimaryButtonClick="dialogResult = $t('sample.contentdialog.saved')"
+              @SecondaryButtonClick="dialogResult = $t('sample.contentdialog.not-saved')"
+              @CloseButtonClick="dialogResult = $t('sample.contentdialog.cancelled')">
+              <ContentDialogContent />
+            </WinContentDialog>
 
-        <div v-if="dialogResult2" class="output-text">Result: {{ dialogResult2 }}</div>
-        <div v-else class="output-text">Click the button to show the dialog.</div>
-      </template>
-    </WinControlExample>
-
-    <!-- Dialog 1 with default button -->
-    <WinContentDialog
-      :visible="showDialog1"
-      title="Save your work?"
-      primaryText="Save"
-      secondaryText="Don't Save"
-      closeText="Cancel"
-      defaultButton="primary"
-      @primary="handleDialog1Primary"
-      @secondary="handleDialog1Secondary"
-      @close="handleDialog1Close">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam porta sem malesuada magna mollis euismod.</p>
-      <WinCheckBox v-model="uploadToCloud1">Upload your content to the cloud.</WinCheckBox>
-    </WinContentDialog>
-
-    <!-- Dialog 2 without default button -->
-    <WinContentDialog
-      :visible="showDialog2"
-      title="Save your work?"
-      primaryText="Save"
-      secondaryText="Don't Save"
-      closeText="Cancel"
-      @primary="handleDialog2Primary"
-      @secondary="handleDialog2Secondary"
-      @close="handleDialog2Close">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam porta sem malesuada magna mollis euismod.</p>
-      <WinCheckBox v-model="uploadToCloud2">Upload your content to the cloud.</WinCheckBox>
-    </WinContentDialog>
+            <WinContentDialog
+              v-model:IsOpen="showDialogNoDefault"
+              :Title="$t('sample.contentdialog.replace-title')"
+              :PrimaryButtonText="$t('sample.contentdialog.replace')"
+              :SecondaryButtonText="$t('sample.contentdialog.keep')"
+              :CloseButtonText="$t('sample.contentdialog.cancel')"
+              DefaultButton="None"
+              @PrimaryButtonClick="dialogResultNoDefault = $t('sample.contentdialog.replaced')"
+              @SecondaryButtonClick="dialogResultNoDefault = $t('sample.contentdialog.kept')"
+              @CloseButtonClick="dialogResultNoDefault = $t('sample.contentdialog.cancelled')">
+              <ContentDialogContent />
+            </WinContentDialog>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import { computed, defineComponent, h, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
-import WinContentDialog from '../../components/WinContentDialog.vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
+import WinContentDialog from '../../components/WinContentDialog.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
+import { createPageState } from '../../utils/pageState';
 
-const showDialog1 = ref(false);
-const showDialog2 = ref(false);
-const uploadToCloud1 = ref(false);
-const uploadToCloud2 = ref(false);
-const dialogResult1 = ref('');
-const dialogResult2 = ref('');
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'contentdialog');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const handleDialog1Primary = () => {
-  dialogResult1.value = 'Primary button clicked';
-  showDialog1.value = false;
-};
+const showDialog = ref(false);
+const showDialogNoDefault = ref(false);
+const dialogResult = ref('');
+const dialogResultNoDefault = ref('');
 
-const handleDialog1Secondary = () => {
-  dialogResult1.value = 'Secondary button clicked';
-  showDialog1.value = false;
-};
+const ContentDialogContent = defineComponent({
+  setup() {
+    return () => h('div', { class: 'dialog-content-stack' }, [
+      h(WinTextBlock, { Text: t('sample.contentdialog.body'), TextWrapping: 'WrapWholeWords' }),
+      h(WinCheckBox, null, { default: () => h(WinTextBlock, { Text: t('sample.contentdialog.upload') }) })
+    ]);
+  }
+});
 
-const handleDialog1Close = () => {
-  dialogResult1.value = 'Close button clicked';
-  showDialog1.value = false;
-};
+const basicCode = computed(() => `<WinButton @Click="showDialog = true">
+  <WinTextBlock Text="${t('text.show-dialog')}" />
+</WinButton>
+<WinContentDialog
+  v-model:IsOpen="showDialog"
+  Title="${t('sample.contentdialog.save-title')}"
+  PrimaryButtonText="${t('sample.contentdialog.save')}"
+  SecondaryButtonText="${t('sample.contentdialog.dont-save')}"
+  CloseButtonText="${t('sample.contentdialog.cancel')}"
+  DefaultButton="Primary">
+  <WinTextBlock Text="${t('sample.contentdialog.body')}" TextWrapping="WrapWholeWords" />
+  <WinCheckBox>
+    <WinTextBlock Text="${t('sample.contentdialog.upload')}" />
+  </WinCheckBox>
+</WinContentDialog>`);
 
-const handleDialog2Primary = () => {
-  dialogResult2.value = 'Primary button clicked';
-  showDialog2.value = false;
-};
-
-const handleDialog2Secondary = () => {
-  dialogResult2.value = 'Secondary button clicked';
-  showDialog2.value = false;
-};
-
-const handleDialog2Close = () => {
-  dialogResult2.value = 'Close button clicked';
-  showDialog2.value = false;
-};
+const noDefaultCode = computed(() => `<WinButton @Click="showDialogNoDefault = true">
+  <WinTextBlock Text="${t('sample.contentdialog.show-no-default')}" />
+</WinButton>
+<WinContentDialog
+  v-model:IsOpen="showDialogNoDefault"
+  Title="${t('sample.contentdialog.replace-title')}"
+  PrimaryButtonText="${t('sample.contentdialog.replace')}"
+  SecondaryButtonText="${t('sample.contentdialog.keep')}"
+  CloseButtonText="${t('sample.contentdialog.cancel')}"
+  DefaultButton="None">
+  <WinTextBlock Text="${t('sample.contentdialog.body')}" TextWrapping="WrapWholeWords" />
+  <WinCheckBox>
+    <WinTextBlock Text="${t('sample.contentdialog.upload')}" />
+  </WinCheckBox>
+</WinContentDialog>`);
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.sample-row { display: flex; align-items: center; gap: 16px; }
+.output-text { color: var(--text-secondary); }
+:global(.dialog-content-stack) { display: flex; flex-direction: column; gap: 12px; }
 </style>

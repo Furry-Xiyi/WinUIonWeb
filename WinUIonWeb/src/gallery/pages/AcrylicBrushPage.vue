@@ -1,112 +1,114 @@
 <template>
-  <div class="page-container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1 class="page-title">AcrylicBrush</h1>
-      <div class="page-header-actions">
-        <WinButton @click="toggleTheme">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div class="page-header page-heading">
+          <h1 class="page-title">AcrylicBrush</h1>
+          <div class="page-header-actions">
+            <WinButton @click="toggleTheme">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Page Description -->
+            <div class="page-description">
+              <p>
+                Acrylic Brush might fall back to SolidColorbrush in certain scenarios.
+                If you can't see the Acrylic effect, please refer to
+                <WinHyperlinkButton navigateUri="https://learn.microsoft.com/windows/apps/design/style/acrylic#usability-and-adaptability">
+                  Acrylic brush adaptability documentation
+                </WinHyperlinkButton>.
+                Acrylic Brush uses in-app acrylic.
+              </p>
+            </div>
+
+            <!-- Example 1: Default Acrylic -->
+            <WinControlExample headerText="Default In-App Acrylic">
+              <template #example>
+                <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
+                  <div class="background-shapes">
+                    <div class="shape rect-aqua"></div>
+                    <div class="shape ellipse-magenta"></div>
+                    <div class="shape rect-yellow"></div>
+                  </div>
+                  <div class="acrylic-layer default-acrylic"></div>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 2: Custom Acrylic with Options -->
+            <WinControlExample headerText="Custom In-App Acrylic">
+              <template #example>
+                <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
+                  <div class="background-shapes">
+                    <div class="shape rect-aqua"></div>
+                    <div class="shape ellipse-magenta"></div>
+                    <div class="shape rect-yellow"></div>
+                  </div>
+                  <div
+                    class="acrylic-layer"
+                    :style="{
+                      '--tint-color': tintColor,
+                      '--tint-opacity': tintOpacity,
+                      '--fallback-color': fallbackColor,
+                    }"
+                  ></div>
+                </div>
+              </template>
+              <template #options>
+                <div class="options-group">
+                  <label class="option-label">Tint Opacity:</label>
+                  <WinSlider v-model="tintOpacity" :min="0" :max="1" />
+                  <span class="option-value">{{ tintOpacity.toFixed(3) }}</span>
+                </div>
+                <div class="options-group">
+                  <label class="option-label">Tint Color:</label>
+                  <WinComboBox v-model="tintColorIndex" :options="colorOptions" />
+                </div>
+                <div class="options-group">
+                  <label class="option-label">Fallback Color:</label>
+                  <WinComboBox v-model="fallbackColorIndex" :options="fallbackColorOptions" />
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 3: Luminosity Acrylic -->
+            <WinControlExample headerText="Luminosity In-App Acrylic">
+              <template #example>
+                <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
+                  <div class="background-shapes">
+                    <div class="shape rect-aqua"></div>
+                    <div class="shape ellipse-magenta"></div>
+                    <div class="shape rect-yellow"></div>
+                  </div>
+                  <div
+                    class="acrylic-layer luminosity-acrylic"
+                    :style="{
+                      '--tint-opacity': luminosityTintOpacity,
+                      '--luminosity-opacity': luminosityOpacity,
+                    }"
+                  ></div>
+                </div>
+
+                <div class="options-group">
+                  <label class="option-label">Tint Opacity:</label>
+                  <WinSlider v-model="luminosityTintOpacity" :min="0" :max="1" />
+                  <span class="option-value">{{ luminosityTintOpacity.toFixed(3) }}</span>
+                </div>
+                <div class="options-group">
+                  <label class="option-label">Tint Luminosity Opacity:</label>
+                  <WinSlider v-model="luminosityOpacity" :min="0" :max="1" />
+                  <span class="option-value">{{ luminosityOpacity.toFixed(3) }}</span>
+                </div>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Page Description -->
-    <div class="page-description">
-      <p>
-        Acrylic Brush might fall back to SolidColorbrush in certain scenarios.
-        If you can't see the Acrylic effect, please refer to
-        <WinHyperlinkButton navigateUri="https://learn.microsoft.com/windows/apps/design/style/acrylic#usability-and-adaptability">
-          Acrylic brush adaptability documentation
-        </WinHyperlinkButton>.
-        Acrylic Brush uses in-app acrylic.
-      </p>
-    </div>
-
-    <!-- Example 1: Default Acrylic -->
-    <WinControlExample headerText="Default In-App Acrylic">
-      <template #example>
-        <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
-          <div class="background-shapes">
-            <div class="shape rect-aqua"></div>
-            <div class="shape ellipse-magenta"></div>
-            <div class="shape rect-yellow"></div>
-          </div>
-          <div class="acrylic-layer default-acrylic"></div>
-        </div>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: Custom Acrylic with Options -->
-    <WinControlExample headerText="Custom In-App Acrylic">
-      <template #example>
-        <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
-          <div class="background-shapes">
-            <div class="shape rect-aqua"></div>
-            <div class="shape ellipse-magenta"></div>
-            <div class="shape rect-yellow"></div>
-          </div>
-          <div
-            class="acrylic-layer"
-            :style="{
-              '--tint-color': tintColor,
-              '--tint-opacity': tintOpacity,
-              '--fallback-color': fallbackColor,
-            }"
-          ></div>
-        </div>
-      </template>
-      <template #options>
-        <div class="options-group">
-          <label class="option-label">Tint Opacity:</label>
-          <WinSlider v-model="tintOpacity" :min="0" :max="1" />
-          <span class="option-value">{{ tintOpacity.toFixed(3) }}</span>
-        </div>
-        <div class="options-group">
-          <label class="option-label">Tint Color:</label>
-          <WinComboBox v-model="tintColorIndex" :options="colorOptions" />
-        </div>
-        <div class="options-group">
-          <label class="option-label">Fallback Color:</label>
-          <WinComboBox v-model="fallbackColorIndex" :options="fallbackColorOptions" />
-        </div>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 3: Luminosity Acrylic -->
-    <WinControlExample headerText="Luminosity In-App Acrylic">
-      <template #example>
-        <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
-          <div class="background-shapes">
-            <div class="shape rect-aqua"></div>
-            <div class="shape ellipse-magenta"></div>
-            <div class="shape rect-yellow"></div>
-          </div>
-          <div
-            class="acrylic-layer luminosity-acrylic"
-            :style="{
-              '--tint-opacity': luminosityTintOpacity,
-              '--luminosity-opacity': luminosityOpacity,
-            }"
-          ></div>
-        </div>
-
-        <div class="options-group">
-          <label class="option-label">Tint Opacity:</label>
-          <WinSlider v-model="luminosityTintOpacity" :min="0" :max="1" />
-          <span class="option-value">{{ luminosityTintOpacity.toFixed(3) }}</span>
-        </div>
-        <div class="options-group">
-          <label class="option-label">Tint Luminosity Opacity:</label>
-          <WinSlider v-model="luminosityOpacity" :min="0" :max="1" />
-          <span class="option-value">{{ luminosityOpacity.toFixed(3) }}</span>
-        </div>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -120,6 +122,7 @@ import WinSlider from '../../components/WinSlider.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 // Theme and Favorite
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'acrylicbrush');

@@ -1,84 +1,87 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">ToolTip</h1>
-      <p class="page-description">
-        A ToolTip shows more information about a UI element. You might show information about what the element does, or what the user should do. The ToolTip is shown when a user hovers over or presses and holds the UI element.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <!-- Example 1: A button with a simple ToolTip -->
-    <WinControlExample
-      headerText="A button with a simple ToolTip."
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <WinButton
-          tooltip="Simple ToolTip">
-          Button with a simple ToolTip.
-        </WinButton>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: A TextBlock with an offset ToolTip -->
-    <WinControlExample
-      headerText="A TextBlock with an offset ToolTip."
-      :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <span
-          class="textblock-with-tooltip"
-          :title="tooltipText"
-          @mouseenter="showOffsetTooltip"
-          @mouseleave="hideOffsetTooltip">
-          TextBlock with an offset ToolTip.
-        </span>
-        <div
-          v-if="showOffset"
-          class="offset-tooltip"
-          :style="{ top: offsetTop + 'px' }">
-          Offset ToolTip.
-        </div>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 3: An Image with a ToolTip using PlacementRect -->
-    <WinControlExample
-      headerText="An Image with a ToolTip using PlacementRect."
-      :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
-      <template #example>
-        <div style="position: relative; display: inline-block;">
-          <img
-            src="/assets/cliff.jpg"
-            alt="Cliff landscape"
-            style="width: 400px; height: 266px; display: block;"
-            @mouseenter="showImageTooltip = true"
-            @mouseleave="showImageTooltip = false">
-          <div
-            v-if="showImageTooltip"
-            class="placement-tooltip">
-            Non-occluding ToolTip.
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">ToolTip</h1>
+          <p class="page-description">
+            A ToolTip shows more information about a UI element. You might show information about what the element does, or what the user should do. The ToolTip is shown when a user hovers over or presses and holds the UI element.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
           </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example 1: A button with a simple ToolTip -->
+            <WinControlExample
+              headerText="A button with a simple ToolTip."
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <WinButton
+                  tooltip="Simple ToolTip">
+                  Button with a simple ToolTip.
+                </WinButton>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 2: A TextBlock with an offset ToolTip -->
+            <WinControlExample
+              headerText="A TextBlock with an offset ToolTip."
+              :theme="pageTheme"
+              :templateCode="example2Template"
+              :vueCode="example2Vue">
+              <template #example>
+                <span
+                  class="textblock-with-tooltip"
+                  :title="tooltipText"
+                  @mouseenter="showOffsetTooltip"
+                  @mouseleave="hideOffsetTooltip">
+                  TextBlock with an offset ToolTip.
+                </span>
+                <div
+                  v-if="showOffset"
+                  class="offset-tooltip"
+                  :style="{ top: offsetTop + 'px' }">
+                  Offset ToolTip.
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 3: An Image with a ToolTip using PlacementRect -->
+            <WinControlExample
+              headerText="An Image with a ToolTip using PlacementRect."
+              :theme="pageTheme"
+              :templateCode="example3Template"
+              :vueCode="example3Vue">
+              <template #example>
+                <div style="position: relative; display: inline-block;">
+                  <img
+                    src="/assets/cliff.jpg"
+                    alt="Cliff landscape"
+                    style="width: 400px; height: 266px; display: block;"
+                    @mouseenter="showImageTooltip = true"
+                    @mouseleave="showImageTooltip = false">
+                  <div
+                    v-if="showImageTooltip"
+                    class="placement-tooltip">
+                    Non-occluding ToolTip.
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -90,6 +93,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'tooltip');
 

@@ -1,331 +1,137 @@
 <template>
-  <div>
+  <div class="gallery-item-page">
     <div class="page-heading">
-      <WinTextBlock class="page-header" Text="RadioButton" />
-      <WinTextBlock
-        class="page-description"
-        Text="RadioButton controls let the user select one option from a set of mutually exclusive options. In contrast, CheckBox controls allow the user to select multiple options. Use RadioButton controls when there are 2-7 options, and ensure that only one option can be selected at a time."
-        TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+          <WinTextBlock class="page-header" :Text="$t('text.radiobuttons')" />
+          <WinTextBlock
+            class="page-description"
+            :Text="$t('text.radiobutton-description')"
+            TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample
+              class="basic-input-example-theme"
+              :headerText="$t('sample.radiobutton.group')"
+              :theme="pageTheme"
+              :vue="radioButtonGroupVue">
+              <template #example>
+                <WinRadioButtons :Header="$t('sample.options-colon')" @SelectionChanged="onOptionSelectionChanged">
+                  <WinRadioButton AutomationId="Option1RadioButton" :Content="$t('text.option-1')" />
+                  <WinRadioButton AutomationId="Option2RadioButton" :Content="$t('text.option-2')" />
+                  <WinRadioButton AutomationId="Option3RadioButton" :Content="$t('text.option-3')" />
+                </WinRadioButtons>
+              </template>
+              <template #options>
+                <WinTextBlock :Text="control1Output" />
+              </template>
+            </WinControlExample>
+
+            <WinControlExample
+              class="basic-input-example-theme"
+              :headerText="$t('sample.radiobutton.strings')"
+              :theme="pageTheme"
+              :vue="radioButtonStringsVue">
+              <template #example>
+                <div class="radio-stack">
+                  <WinRadioButtons
+                    :Header="$t('sample.background')"
+                    MaxColumns="3"
+                    :SelectedIndex="backgroundSelectedIndex"
+                    :ItemsSource="colorItems"
+                    @SelectionChanged="BackgroundColor_SelectionChanged" />
+                  <WinRadioButtons
+                    :Header="$t('sample.border')"
+                    MaxColumns="3"
+                    :SelectedIndex="borderSelectedIndex"
+                    :ItemsSource="colorItems"
+                    @SelectionChanged="BorderBrush_SelectionChanged" />
+                  <div
+                    class="control-output"
+                    :style="{
+                      backgroundColor: controlOutputBackground,
+                      borderColor: controlOutputBorder
+                    }" />
+                </div>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example 1: Basic RadioButton group -->
-    <WinTextBlock class="control-example-description" Text="RadioButton group" />
-    <WinControlExample
-      class="basic-input-example-theme"
-      :theme="pageTheme"
-      :vue="example1Template">
-      <template #example>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <WinTextBlock style="font-weight: 600; margin-bottom: 4px;" Text="Options:" />
-          <WinRadioButton
-            name="options"
-            value="option1"
-            v-model="selectedOption"
-            @checked="onOptionChecked">
-            Option 1
-          </WinRadioButton>
-          <WinRadioButton
-            name="options"
-            value="option2"
-            v-model="selectedOption"
-            @checked="onOptionChecked">
-            Option 2
-          </WinRadioButton>
-          <WinRadioButton
-            name="options"
-            value="option3"
-            v-model="selectedOption"
-            @checked="onOptionChecked">
-            Option 3
-          </WinRadioButton>
-        </div>
-      </template>
-      <template #options>
-        <WinTextBlock class="output-text" :Text="option1Output" />
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: Styled RadioButton groups with visual output -->
-    <WinTextBlock class="control-example-description" Text="RadioButton groups with visual feedback" />
-    <WinControlExample
-      class="basic-input-example-theme"
-      :theme="pageTheme"
-      :vue="example2Template">
-      <template #example>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <WinTextBlock style="font-weight: 600; margin-bottom: 4px;" Text="Background" />
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 400px;">
-              <WinRadioButton
-                name="background"
-                value="green"
-                v-model="selectedBackground"
-                @checked="updateBorderDisplay">
-                Green
-              </WinRadioButton>
-              <WinRadioButton
-                name="background"
-                value="yellow"
-                v-model="selectedBackground"
-                @checked="updateBorderDisplay">
-                Yellow
-              </WinRadioButton>
-              <WinRadioButton
-                name="background"
-                value="white"
-                v-model="selectedBackground"
-                @checked="updateBorderDisplay">
-                White
-              </WinRadioButton>
-            </div>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <WinTextBlock style="font-weight: 600; margin-bottom: 4px;" Text="Border" />
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 400px;">
-              <WinRadioButton
-                name="border"
-                value="green"
-                v-model="selectedBorder"
-                @checked="updateBorderDisplay">
-                Green
-              </WinRadioButton>
-              <WinRadioButton
-                name="border"
-                value="yellow"
-                v-model="selectedBorder"
-                @checked="updateBorderDisplay">
-                Yellow
-              </WinRadioButton>
-              <WinRadioButton
-                name="border"
-                value="white"
-                v-model="selectedBorder"
-                @checked="updateBorderDisplay">
-                White
-              </WinRadioButton>
-            </div>
-          </div>
-
-          <div
-            class="border-preview"
-            :style="{
-              backgroundColor: backgroundColorValue,
-              borderColor: borderColorValue
-            }">
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinRadioButton from '../../components/WinRadioButton.vue';
+import WinRadioButtons from '../../components/WinRadioButtons.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'radiobutton');
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
+const control1Output = ref('Select an option.');
+const colorItems = ['Green', 'Yellow', 'White'];
+const backgroundSelectedIndex = ref(0);
+const borderSelectedIndex = ref(1);
+const controlOutputBackground = ref('#FFFFFFFF');
+const controlOutputBorder = ref('#FFFFD700');
 
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
+const colors = {
+  Green: '#008000',
+  Yellow: '#FFFF00',
+  White: '#FFFFFF',
+  Gold: '#FFD700',
+  DarkGreen: '#006400'
 };
 
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
-
-// Example 1: Basic RadioButton group
-const selectedOption = ref('option1');
-const option1Output = ref('Select an option.');
-
-const onOptionChecked = () => {
-  const optionMap = {
-    'option1': 'You selected Option 1',
-    'option2': 'You selected Option 2',
-    'option3': 'You selected Option 3'
-  };
-  option1Output.value = optionMap[selectedOption.value] || 'Select an option.';
+const onOptionSelectionChanged = ({ SelectedIndex }) => {
+  control1Output.value = `You selected Option ${SelectedIndex + 1}.`;
 };
 
-// 示例1代码
-const example1Template = `<div style="display: flex; flex-direction: column; gap: 8px;">
-  <WinTextBlock Text="Options:" />
-  <WinRadioButton
-    name="options"
-    value="option1"
-    v-model="selectedOption"
-    @checked="onOptionChecked">
-    Option 1
-  </WinRadioButton>
-  <WinRadioButton
-    name="options"
-    value="option2"
-    v-model="selectedOption"
-    @checked="onOptionChecked">
-    Option 2
-  </WinRadioButton>
-  <WinRadioButton
-    name="options"
-    value="option3"
-    v-model="selectedOption"
-    @checked="onOptionChecked">
-    Option 3
-  </WinRadioButton>
-</div>`;
-
-const example1Vue = `const selectedOption = ref('option1');
-
-const onOptionChecked = () => {
-  console.log('Selected:', selectedOption.value);
-};`;
-
-// Example 2: Styled groups with visual output
-const selectedBackground = ref('green');
-const selectedBorder = ref('yellow');
-
-const colorMap = {
-  'green': '#FF00FF00',
-  'yellow': '#FFFFD700',
-  'white': '#FFFFFFFF'
+const BackgroundColor_SelectionChanged = ({ SelectedIndex, SelectedItem }) => {
+  backgroundSelectedIndex.value = SelectedIndex;
+  controlOutputBackground.value = colors[SelectedItem] ?? colors.White;
 };
 
-const backgroundColorValue = computed(() => colorMap[selectedBackground.value]);
-const borderColorValue = computed(() => colorMap[selectedBorder.value]);
-
-const updateBorderDisplay = () => {
-  // Computed properties handle the update automatically
+const BorderBrush_SelectionChanged = ({ SelectedIndex, SelectedItem }) => {
+  borderSelectedIndex.value = SelectedIndex;
+  if (SelectedItem === 'Yellow') controlOutputBorder.value = colors.Gold;
+  else if (SelectedItem === 'Green') controlOutputBorder.value = colors.DarkGreen;
+  else controlOutputBorder.value = colors.White;
 };
 
-// 示例2代码
-const example2Template = `<div style="display: flex; flex-direction: column; gap: 16px;">
-  <div>
-    <WinTextBlock Text="Background" />
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-      <WinRadioButton name="bg" value="green" v-model="selectedBackground">
-        Green
-      </WinRadioButton>
-      <WinRadioButton name="bg" value="yellow" v-model="selectedBackground">
-        Yellow
-      </WinRadioButton>
-      <WinRadioButton name="bg" value="white" v-model="selectedBackground">
-        White
-      </WinRadioButton>
-    </div>
-  </div>
+const radioButtonGroupVue = `<WinRadioButtons Header="Options:">
+  <WinRadioButton Content="Option 1" />
+  <WinRadioButton Content="Option 2" />
+  <WinRadioButton Content="Option 3" />
+</WinRadioButtons>`;
 
-  <div>
-    <WinTextBlock Text="Border" />
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-      <WinRadioButton name="border" value="green" v-model="selectedBorder">
-        Green
-      </WinRadioButton>
-      <WinRadioButton name="border" value="yellow" v-model="selectedBorder">
-        Yellow
-      </WinRadioButton>
-      <WinRadioButton name="border" value="white" v-model="selectedBorder">
-        White
-      </WinRadioButton>
-    </div>
-  </div>
+const radioButtonStringsVue = `<WinRadioButtons Header="Background" MaxColumns="3" :SelectedIndex="0" :ItemsSource="['Green', 'Yellow', 'White']" />
+<WinRadioButtons Header="Border" MaxColumns="3" :SelectedIndex="1" :ItemsSource="['Green', 'Yellow', 'White']" />
 
-  <div
-    style="height: 50px; border-width: 10px; border-style: solid;"
-    :style="{
-      backgroundColor: backgroundColorValue,
-      borderColor: borderColorValue
-    }">
-  </div>
-</div>`;
-
-const example2Vue = `const selectedBackground = ref('green');
-const selectedBorder = ref('yellow');
-
-const colorMap = {
-  'green': '#FF00FF00',
-  'yellow': '#FFFFD700',
-  'white': '#FFFFFFFF'
-};
-
-const backgroundColorValue = computed(() => colorMap[selectedBackground.value]);
-const borderColorValue = computed(() => colorMap[selectedBorder.value]);`;
+<div
+  style="height: 50px; margin: 10px 0; border: 10px solid #FFD700; background: #FFFFFF;" />`;
 </script>
 
 <style scoped>
-.page-heading {
-  position: relative;
-}
-
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px;
-  color: var(--text-primary);
-}
-
-.page-description {
-  color: var(--text-secondary);
-  margin: 0 72px 16px 0;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
-
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.border-preview {
-  height: 50px;
-  margin: 10px 0;
-  border-width: 10px;
-  border-style: solid;
-  border-radius: 4px;
-}
-.control-example-description {
-  margin: 16px 0 -4px 0;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-size: 16px; font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; }
+.radio-stack { display: flex; flex-direction: column; gap: 12px; }
+.control-output { height: 50px; margin: 10px 0; border-width: 10px; border-style: solid; box-sizing: border-box; }
 </style>

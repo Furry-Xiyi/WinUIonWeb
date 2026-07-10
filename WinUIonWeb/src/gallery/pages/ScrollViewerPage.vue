@@ -1,286 +1,113 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">ScrollViewer</h1>
-      <p class="page-description">
-        Content inside of a ScrollViewer.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <!-- Example 1: Content inside ScrollViewer -->
-    <WinControlExample
-      headerText="Content inside of a ScrollViewer"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <WinScrollViewer
-          ref="scrollViewerControl"
-          :width="400"
-          :height="266"
-          horizontalAlignment="Left"
-          verticalAlignment="Top"
-          :isTabStop="true"
-          :isVerticalScrollChainingEnabled="true"
-          :zoomMode="zoomMode"
-          :horizontalScrollMode="horizontalScrollMode"
-          :verticalScrollMode="verticalScrollMode"
-          :horizontalScrollBarVisibility="horizontalScrollBarVisibility"
-          :verticalScrollBarVisibility="verticalScrollBarVisibility"
-          :minZoomFactor="minZoomFactor"
-          :maxZoomFactor="maxZoomFactor"
-          :zoomFactor="currentZoomFactor"
-          @viewChanged="onViewChanged">
-          <img
-            src="/assets/cliff.jpg"
-            alt="cliff"
-            style="display: block; object-fit: none; object-position: left top;" />
-        </WinScrollViewer>
-      </template>
-
-      <template #options>
-        <div class="options-grid">
-          <label class="option-label">ZoomMode</label>
-          <WinComboBox
-            v-model="zoomModeIndex"
-            :options="zoomModeOptions"
-            style="width: 100%;" />
-
-          <div class="slider-container">
-            <label class="slider-label">Zoom</label>
-            <WinSlider
-              v-model="currentZoomFactor"
-              :min="minZoomFactor"
-              :max="maxZoomFactor"
-              :disabled="zoomMode === 'Disabled'"
-              style="width: 100%;" />
+  <div class="gallery-item-page">
+    <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.scrollviewer')" />
+          <WinTextBlock class="page-description" :Text="$t('text.scrollviewer-description')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
           </div>
-
-          <div class="section-header">ScrollMode</div>
-
-          <label class="option-label">Horizontal</label>
-          <WinComboBox
-            v-model="horizontalScrollModeIndex"
-            :options="scrollModeOptions"
-            style="width: 100%;" />
-
-          <label class="option-label" style="margin-top: 8px;">Vertical</label>
-          <WinComboBox
-            v-model="verticalScrollModeIndex"
-            :options="scrollModeOptions"
-            style="width: 100%; margin-top: 8px;" />
-
-          <div class="section-header" style="margin-top: 20px;">ScrollbarVisibility</div>
-
-          <label class="option-label">Horizontal</label>
-          <WinComboBox
-            v-model="horizontalScrollBarVisibilityIndex"
-            :options="scrollBarVisibilityOptions"
-            style="width: 100%;" />
-
-          <label class="option-label" style="margin-top: 8px;">Vertical</label>
-          <WinComboBox
-            v-model="verticalScrollBarVisibilityIndex"
-            :options="scrollBarVisibilityOptions"
-            style="width: 100%; margin-top: 8px;" />
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.scrollviewer.content')" :theme="pageTheme" :vue="scrollViewerCode">
+              <template #example>
+                <WinScrollViewer
+                  ref="scrollViewerRef"
+                  Width="400"
+                  Height="266"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  :IsTabStop="true"
+                  :IsVerticalScrollChainingEnabled="true"
+                  :ZoomMode="zoomMode"
+                  :ZoomFactor="zoomFactor"
+                  :HorizontalScrollMode="horizontalScrollMode"
+                  :VerticalScrollMode="verticalScrollMode"
+                  :HorizontalScrollBarVisibility="horizontalScrollBarVisibility"
+                  :VerticalScrollBarVisibility="verticalScrollBarVisibility">
+                  <img class="cliff-image-none" :src="cliffImage" alt="" />
+                </WinScrollViewer>
+              </template>
+              <template #options>
+                <WinGrid MinWidth="200" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                  <WinTextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="ZoomMode" style="grid-column: 1; grid-row: 1;" />
+                  <WinComboBox v-model:SelectedIndex="zoomModeIndex" Width="130" :ItemsSource="scrollViewerZoomModeItems" style="grid-column: 2; grid-row: 1;" />
+                  <WinSlider v-model:Value="zoomFactor" Header="Zoom" :IsEnabled="zoomMode !== 'Disabled'" :Maximum="10" :Minimum="0.1" Margin="0,10,0,0" style="grid-column: 1 / span 2; grid-row: 2;" />
+                  <WinTextBlock HorizontalTextAlignment="Center" Margin="0,12" Text="ScrollMode" style="grid-column: 1 / span 2; grid-row: 3;" />
+                  <WinTextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="Horizontal" style="grid-column: 1; grid-row: 4;" />
+                  <WinComboBox v-model:SelectedIndex="horizontalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" style="grid-column: 2; grid-row: 4;" />
+                  <WinTextBlock Margin="0,8,10,0" VerticalAlignment="Center" Text="Vertical" style="grid-column: 1; grid-row: 5;" />
+                  <WinComboBox v-model:SelectedIndex="verticalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" style="grid-column: 2; grid-row: 5; margin-top: 8px;" />
+                  <WinTextBlock HorizontalTextAlignment="Center" Margin="0,20,0,12" Text="ScrollbarVisibility" style="grid-column: 1 / span 2; grid-row: 6;" />
+                  <WinTextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="Horizontal" style="grid-column: 1; grid-row: 7;" />
+                  <WinComboBox v-model:SelectedIndex="horizontalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewerScrollBarVisibilityItems" style="grid-column: 2; grid-row: 7;" />
+                  <WinTextBlock Margin="0,8,10,0" VerticalAlignment="Center" Text="Vertical" style="grid-column: 1; grid-row: 8;" />
+                  <WinComboBox v-model:SelectedIndex="verticalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewerScrollBarVisibilityItems" style="grid-column: 2; grid-row: 8; margin-top: 8px;" />
+                </WinGrid>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinGrid from '../../components/WinGrid.vue';
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 import WinSlider from '../../components/WinSlider.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { createPageState } from '../../utils/pageState';
 
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'scrollviewer');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
+const cliffImage = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg';
+const scrollViewerZoomModeItems = [{ Text: 'Disabled' }, { Text: 'Enabled' }];
+const scrollModeItems = [{ Text: 'Disabled' }, { Text: 'Enabled' }, { Text: 'Auto' }];
+const scrollViewerScrollBarVisibilityItems = [{ Text: 'Disabled' }, { Text: 'Auto' }, { Text: 'Hidden' }, { Text: 'Visible' }];
+const zoomModeIndex = ref(1);
+const zoomFactor = ref(4);
+const horizontalScrollModeIndex = ref(1);
+const verticalScrollModeIndex = ref(1);
+const horizontalScrollBarVisibilityIndex = ref(1);
+const verticalScrollBarVisibilityIndex = ref(1);
+const zoomMode = computed(() => scrollViewerZoomModeItems[zoomModeIndex.value]?.Text || 'Enabled');
+const horizontalScrollMode = computed(() => scrollModeItems[horizontalScrollModeIndex.value]?.Text || 'Enabled');
+const verticalScrollMode = computed(() => scrollModeItems[verticalScrollModeIndex.value]?.Text || 'Enabled');
+const horizontalScrollBarVisibility = computed(() => scrollViewerScrollBarVisibilityItems[horizontalScrollBarVisibilityIndex.value]?.Text || 'Auto');
+const verticalScrollBarVisibility = computed(() => scrollViewerScrollBarVisibilityItems[verticalScrollBarVisibilityIndex.value]?.Text || 'Auto');
 
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
-
-// ScrollViewer ref
-const scrollViewerControl = ref(null);
-
-// Zoom options
-const zoomModeOptions = [
-  { label: 'Disabled' },
-  { label: 'Enabled' }
-];
-const zoomModeIndex = ref(1); // Default: Enabled
-const zoomMode = computed(() => zoomModeOptions[zoomModeIndex.value].label);
-
-const minZoomFactor = ref(0.1);
-const maxZoomFactor = ref(10.0);
-const currentZoomFactor = ref(4.0);
-
-// Scroll mode options
-const scrollModeOptions = [
-  { label: 'Disabled' },
-  { label: 'Enabled' },
-  { label: 'Auto' }
-];
-
-const horizontalScrollModeIndex = ref(1); // Default: Enabled
-const verticalScrollModeIndex = ref(1); // Default: Enabled
-
-const horizontalScrollMode = computed(() => scrollModeOptions[horizontalScrollModeIndex.value].label);
-const verticalScrollMode = computed(() => scrollModeOptions[verticalScrollModeIndex.value].label);
-
-// ScrollBar visibility options
-const scrollBarVisibilityOptions = [
-  { label: 'Disabled' },
-  { label: 'Auto' },
-  { label: 'Hidden' },
-  { label: 'Visible' }
-];
-
-const horizontalScrollBarVisibilityIndex = ref(1); // Default: Auto
-const verticalScrollBarVisibilityIndex = ref(1); // Default: Auto
-
-const horizontalScrollBarVisibility = computed(() => scrollBarVisibilityOptions[horizontalScrollBarVisibilityIndex.value].label);
-const verticalScrollBarVisibility = computed(() => scrollBarVisibilityOptions[verticalScrollBarVisibilityIndex.value].label);
-
-// ViewChanged event handler
-const onViewChanged = (args) => {
-  // Handle view changed event
-  // args contains: { isIntermediate, horizontalOffset, verticalOffset, zoomFactor }
-  console.log('View changed:', args);
-};
-
-// Watch zoom mode changes to reset zoom factor if disabled
-watch(zoomMode, (newMode) => {
-  if (newMode === 'Disabled') {
-    currentZoomFactor.value = 1.0;
-  }
-});
-
-// Code examples
-const example1Template = `<WinScrollViewer
-  :width="400"
-  :height="266"
-  horizontalAlignment="Left"
-  verticalAlignment="Top"
-  :isTabStop="true"
-  :isVerticalScrollChainingEnabled="true"
-  :zoomMode="zoomMode"
-  :horizontalScrollMode="horizontalScrollMode"
-  :verticalScrollMode="verticalScrollMode"
-  :horizontalScrollBarVisibility="horizontalScrollBarVisibility"
-  :verticalScrollBarVisibility="verticalScrollBarVisibility"
-  @viewChanged="onViewChanged">
-  <img src="/assets/cliff.jpg" alt="cliff" />
-</WinScrollViewer>`;
-
-const example1Vue = `const zoomMode = ref('Enabled');
-const horizontalScrollMode = ref('Enabled');
-const verticalScrollMode = ref('Enabled');
-const horizontalScrollBarVisibility = ref('Auto');
-const verticalScrollBarVisibility = ref('Auto');
-
-const onViewChanged = (args) => {
-  console.log('Horizontal offset:', args.horizontalOffset);
-  console.log('Vertical offset:', args.verticalOffset);
-  console.log('Zoom factor:', args.zoomFactor);
-  console.log('Is intermediate:', args.isIntermediate);
-};`;
+const scrollViewerCode = computed(() => `<WinScrollViewer
+  Width="400"
+  Height="266"
+  HorizontalAlignment="Left"
+  VerticalAlignment="Top"
+  IsTabStop="True"
+  IsVerticalScrollChainingEnabled="True"
+  ZoomMode="${zoomMode.value}"
+  HorizontalScrollMode="${horizontalScrollMode.value}"
+  HorizontalScrollBarVisibility="${horizontalScrollBarVisibility.value}"
+  VerticalScrollMode="${verticalScrollMode.value}"
+  VerticalScrollBarVisibility="${verticalScrollBarVisibility.value}">
+  <Image Source="${cliffImage}" Stretch="None" AutomationProperties.Name="cliff" />
+</WinScrollViewer>`);
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
-
-.options-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 8px 10px;
-  align-items: center;
-  min-width: 200px;
-}
-
-.option-label {
-  font-size: 14px;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-.slider-container {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.slider-label {
-  font-size: 14px;
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.section-header {
-  grid-column: 1 / -1;
-  font-size: 14px;
-  color: var(--text-primary);
-  font-weight: 600;
-  text-align: center;
-  margin: 12px 0;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.cliff-image-none { display: block; width: auto; height: auto; max-width: none; }
 </style>

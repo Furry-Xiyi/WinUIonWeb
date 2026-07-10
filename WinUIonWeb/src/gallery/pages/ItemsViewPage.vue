@@ -1,673 +1,295 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">ItemsView</h1>
-      <p class="page-description">
-        The ItemsView control displays a data collection with customizable layout and selection behavior. It supports different layout types including StackLayout, UniformGridLayout, and LinedFlowLayout.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.itemsview')" />
+          <WinTextBlock class="page-description" :Text="$t('text.itemsview-description')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsview.basic')" :theme="pageTheme" :vue="basicItemsViewVue">
+              <template #example>
+                <div class="sample-stack">
+                  <WinTextBlock Margin="0,0,0,15" :Text="$t('sample.itemsview.basic-note')" TextWrapping="WrapWholeWords" />
+                  <WinItemsView
+                    class="basic-items-view"
+                    :ItemsSource="items"
+                    :IsItemInvokedEnabled="true"
+                    @ItemInvoked="BasicItemsView_ItemInvoked">
+                    <template #item="{ item }">
+                      <div class="image-template" :aria-label="item.Title">
+                        <img :src="item.ImageLocation" :alt="item.Title" />
+                      </div>
+                    </template>
+                  </WinItemsView>
+                  <WinTextBlock class="output-text" :Text="basicInvokeOutput" />
+                </div>
+              </template>
+            </WinControlExample>
+
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsview.swappable-layouts')" :theme="pageTheme" :vue="swappableLayoutsVue">
+              <template #example>
+                <div class="sample-stack">
+                  <WinTextBlock Margin="0,0,0,15" :Text="$t('sample.itemsview.layout-note')" TextWrapping="WrapWholeWords" />
+                  <WinItemsView
+                    class="swappable-items-view"
+                    :class="layoutClass"
+                    :ItemsSource="items"
+                    :Layout="itemsViewLayout">
+                    <template #item="{ item }">
+                      <div class="layout-template" :class="layoutClass" :aria-label="item.Title">
+                        <img :src="item.ImageLocation" :alt="item.Title" />
+                        <div class="item-overlay">
+                          <WinTextBlock class="overlay-title" :Text="item.Title" />
+                          <div class="overlay-row">
+                            <WinTextBlock class="overlay-caption" :Text="String(item.Likes)" />
+                            <WinTextBlock class="overlay-caption" :Text="$t('sample.likes-suffix')" />
+                          </div>
+                        </div>
+                        <div class="stack-text">
+                          <WinTextBlock class="stack-title" :Text="item.Title" />
+                          <WinTextBlock class="stack-description" :Text="item.Description" TextWrapping="WrapWholeWords" />
+                        </div>
+                      </div>
+                    </template>
+                  </WinItemsView>
+                </div>
+              </template>
+              <template #options>
+                <div class="options-stack">
+                  <WinRadioButtons :Header="$t('sample.layout')" :ItemsSource="layoutOptions" :SelectedIndex="layoutSelectedIndex" @SelectionChanged="RbLayout_Checked" />
+
+                  <div v-if="layoutSelection === 'LinedFlowLayout'" class="options-stack">
+                    <WinTextBlock class="options-heading" :Text="$t('sample.itemsview.linedflow-settings')" />
+                    <WinNumberBox v-model:Value="lineSpacing" :Header="$t('sample.space-between-lines')" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" />
+                    <WinNumberBox v-model:Value="minItemSpacing" :Header="$t('sample.minimum-space-between-items-on-line')" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" />
+                    <WinRadioButtons :Header="$t('sample.line-height')" :ItemsSource="lineHeightOptions" :SelectedIndex="lineHeightSelectedIndex" @SelectionChanged="RbLineHeight_Checked" />
+                  </div>
+
+                  <div v-else-if="layoutSelection === 'StackLayout'" class="options-stack">
+                    <WinTextBlock class="options-heading" :Text="$t('sample.itemsview.stack-settings')" />
+                    <WinNumberBox v-model:Value="stackSpacing" :Header="$t('sample.space-between-rows')" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" />
+                  </div>
+
+                  <div v-else class="options-stack">
+                    <WinTextBlock class="options-heading" :Text="$t('sample.itemsview.uniformgrid-settings')" />
+                    <WinNumberBox v-model:Value="minColumnSpacing" :Header="$t('sample.minimum-space-between-columns')" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" />
+                    <WinNumberBox v-model:Value="minRowSpacing" :Header="$t('sample.minimum-space-between-rows')" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" />
+                    <WinNumberBox v-model:Value="maximumRowsOrColumns" :Header="$t('sample.maximum-items-per-row-before-wrapping')" :Minimum="1" :Maximum="8" SpinButtonPlacementMode="Inline" />
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsview.item-invocation-selection')" :theme="pageTheme" :vue="selectionItemsViewVue">
+              <template #example>
+                <div class="sample-stack">
+                  <div class="selection-note">
+                    <WinTextBlock :Text="$t('sample.itemsview.selection-note-1')" TextWrapping="WrapWholeWords" />
+                    <WinTextBlock :Text="$t('sample.itemsview.selection-note-none')" TextWrapping="WrapWholeWords" />
+                    <WinTextBlock :Text="$t('sample.itemsview.selection-note-single')" TextWrapping="WrapWholeWords" />
+                    <WinTextBlock :Text="$t('sample.itemsview.selection-note-multiple')" TextWrapping="WrapWholeWords" />
+                    <WinTextBlock :Text="$t('sample.itemsview.selection-note-extended')" TextWrapping="WrapWholeWords" />
+                  </div>
+                  <WinItemsView
+                    class="selection-items-view"
+                    :ItemsSource="items"
+                    :Layout="selectionLayout"
+                    :SelectionMode="selectionMode"
+                    :IsItemInvokedEnabled="isItemInvokedEnabled"
+                    v-model:SelectedItems="selectedItems"
+                    @ItemInvoked="SwappableSelectionModesItemsView_ItemInvoked"
+                    @SelectionChanged="SwappableSelectionModesItemsView_SelectionChanged">
+                    <template #item="{ item }">
+                      <div class="layout-template uniform-grid-layout" :aria-label="item.Title">
+                        <img :src="item.ImageLocation" :alt="item.Title" />
+                        <div class="item-overlay">
+                          <WinTextBlock class="overlay-title" :Text="item.Title" />
+                          <div class="overlay-row">
+                            <WinTextBlock class="overlay-caption" :Text="String(item.Likes)" />
+                            <WinTextBlock class="overlay-caption" :Text="$t('sample.likes-suffix')" />
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </WinItemsView>
+                  <WinTextBlock class="output-text" :Text="invocationOutput" />
+                  <WinTextBlock class="output-text" :Text="selectionOutput" />
+                </div>
+              </template>
+              <template #options>
+                <div class="selection-options">
+                  <WinTextBlock :Text="$t('sample.selection-mode')" />
+                  <WinComboBox :ItemsSource="selectionModeOptions" v-model:SelectedIndex="selectionModeSelectedIndex" />
+                  <WinTextBlock :Text="$t('sample.is-item-invoked-enabled')" />
+                  <WinCheckBox v-model:IsChecked="isItemInvokedEnabled" />
+                </div>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example 1: Basic ItemsView -->
-    <WinControlExample
-      headerText="Basic ItemsView"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div>
-          <p style="margin: 0 0 15px 0; font-size: 14px; color: var(--text-secondary);">
-            This is a basic ItemsView which uses its default StackLayout layout and a simple ItemTemplate.<br />
-            Hit the Enter key, double-click or double-tap an item to invoke it.
-          </p>
-          <div class="items-view-container basic-view">
-            <div
-              v-for="item in basicItems"
-              :key="item.id"
-              class="item-card basic-item"
-              tabindex="0"
-              @click="onBasicItemInvoked(item)"
-              @dblclick="onBasicItemInvoked(item)"
-              @keydown.enter="onBasicItemInvoked(item)">
-              <img :src="item.imageSrc" :alt="item.title" class="item-image" />
-            </div>
-          </div>
-        </div>
-      </template>
-      <template #options>
-        <p class="output-text">{{ basicInvokeOutput }}</p>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: ItemsView with Swappable Layouts -->
-    <WinControlExample
-      headerText="ItemsView with swappable layouts"
-      :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <div>
-          <p style="margin: 0 0 15px 0; font-size: 14px; color: var(--text-secondary);">
-            Use the options on the right to control different layout customizations to the ItemsView below.
-          </p>
-          <div
-            class="items-view-container swappable-view"
-            :class="layoutType">
-            <div
-              v-for="item in layoutItems"
-              :key="item.id"
-              class="item-card layout-item"
-              :class="layoutType"
-              tabindex="0">
-              <img :src="item.imageSrc" :alt="item.title" class="item-image" />
-              <div class="item-overlay">
-                <div class="item-title">{{ item.title }}</div>
-                <div class="item-likes">{{ item.likes }} Likes</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="min-width: 300px;">
-          <div style="margin-bottom: 16px;">
-            <div style="font-weight: 600; margin-bottom: 8px; font-size: 14px;">Layout</div>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input
-                  type="radio"
-                  value="linedflow"
-                  v-model="layoutType"
-                  @change="onLayoutChanged"
-                  style="margin: 0;" />
-                <span style="font-size: 13px;">LinedFlowLayout</span>
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input
-                  type="radio"
-                  value="uniformgrid"
-                  v-model="layoutType"
-                  @change="onLayoutChanged"
-                  style="margin: 0;" />
-                <span style="font-size: 13px;">UniformGridLayout</span>
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input
-                  type="radio"
-                  value="stack"
-                  v-model="layoutType"
-                  @change="onLayoutChanged"
-                  style="margin: 0;" />
-                <span style="font-size: 13px;">StackLayout</span>
-              </label>
-            </div>
-          </div>
-
-          <div v-if="layoutType === 'linedflow'" style="min-height: 300px;">
-            <div style="font-weight: 600; margin: 15px 0 10px 0; font-size: 14px;">LinedFlowLayout settings</div>
-            <WinNumberBox
-              v-model="lineSpacing"
-              header="Space between lines"
-              :minimum="0"
-              :maximum="100"
-              :smallChange="1"
-              style="margin-bottom: 16px;" />
-            <WinNumberBox
-              v-model="minItemSpacing"
-              header="Minimum space between items on a line"
-              :minimum="0"
-              :maximum="100"
-              :smallChange="1"
-              style="margin-bottom: 16px;" />
-            <div style="margin-bottom: 8px;">
-              <div style="font-size: 13px; margin-bottom: 8px;">Line height</div>
-              <div style="display: flex; flex-direction: column; gap: 8px;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                  <input
-                    type="radio"
-                    value="small"
-                    v-model="lineHeight"
-                    style="margin: 0;" />
-                  <span style="font-size: 13px;">Small</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                  <input
-                    type="radio"
-                    value="large"
-                    v-model="lineHeight"
-                    style="margin: 0;" />
-                  <span style="font-size: 13px;">Large</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="layoutType === 'stack'" style="min-height: 300px;">
-            <div style="font-weight: 600; margin: 15px 0 10px 0; font-size: 14px;">StackLayout settings</div>
-            <WinNumberBox
-              v-model="stackSpacing"
-              header="Space between rows"
-              :minimum="0"
-              :maximum="100"
-              :smallChange="1"
-              style="margin-bottom: 16px;" />
-          </div>
-
-          <div v-if="layoutType === 'uniformgrid'" style="min-height: 300px;">
-            <div style="font-weight: 600; margin: 15px 0 10px 0; font-size: 14px;">UniformGridLayout settings</div>
-            <WinNumberBox
-              v-model="minColumnSpacing"
-              header="Minimum space between columns"
-              :minimum="0"
-              :maximum="100"
-              :smallChange="1"
-              style="margin-bottom: 16px;" />
-            <WinNumberBox
-              v-model="minRowSpacing"
-              header="Minimum space between rows"
-              :minimum="0"
-              :maximum="100"
-              :smallChange="1"
-              style="margin-bottom: 16px;" />
-            <WinNumberBox
-              v-model="maximumRowsOrColumns"
-              header="Maximum number of items per row before wrapping"
-              :minimum="1"
-              :maximum="8"
-              :smallChange="1"
-              style="margin-bottom: 16px;" />
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 3: Selection and Invocation -->
-    <WinControlExample
-      headerText="Item invocation and selection"
-      :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
-      <template #example>
-        <div>
-          <div style="margin: 0 0 15px 0; font-size: 14px; color: var(--text-secondary); line-height: 1.6;">
-            <p style="margin: 0 0 8px 0;">You can enable four different selection modes on the right.</p>
-            <p style="margin: 0 0 8px 0;"><strong>None</strong> disables selection all together.</p>
-            <p style="margin: 0 0 8px 0;"><strong>Single</strong> allows for only one item to be selected in the collection.</p>
-            <p style="margin: 0 0 8px 0;"><strong>Multiple</strong> causes checkboxes to appear within the items, so that multiple items can be chosen from the collection.</p>
-            <p style="margin: 0 0 8px 0;"><strong>Extended</strong> allows the user to select multiple items by using Ctrl+Click to select the individual items they want, or Shift+Click to select a range of contiguous items.</p>
-          </div>
-          <div
-            class="items-view-container selection-view"
-            :class="{ 'multiple-mode': selectionMode === 'Multiple' }">
-            <div
-              v-for="(item, index) in selectionItems"
-              :key="item.id"
-              class="item-card selection-item"
-              :class="{
-                selected: selectedIndices.includes(index),
-                'show-checkbox': selectionMode === 'Multiple'
-              }"
-              tabindex="0"
-              @click="onSelectionItemClick(index, $event)"
-              @dblclick="onSelectionItemInvoked(item)"
-              @keydown.enter="onSelectionItemInvoked(item)">
-              <div v-if="selectionMode === 'Multiple'" class="item-checkbox">
-                <WinCheckBox :modelValue="selectedIndices.includes(index)" @click.stop />
-              </div>
-              <img :src="item.imageSrc" :alt="item.title" class="item-image" />
-              <div class="item-overlay">
-                <div class="item-title">{{ item.title }}</div>
-                <div class="item-likes">{{ item.likes }} Likes</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <p class="output-text">{{ invocationOutput }}</p>
-        <p class="output-text">{{ selectionOutput }}</p>
-
-        <div style="min-width: 200px; display: flex; flex-direction: column; gap: 16px;">
-          <div>
-            <div style="font-size: 13px; margin-bottom: 8px;">SelectionMode</div>
-            <WinComboBox
-              v-model="selectionMode"
-              :options="selectionModeOptions"
-              style="width: 100%;" />
-          </div>
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-size: 13px; margin-right: 10px;">IsItemInvokedEnabled</span>
-            <WinCheckBox
-              v-model="isItemInvokedEnabled"
-              @checked="onInvokedEnabledChanged"
-              @unchecked="onInvokedEnabledChanged" />
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import { computed, inject, ref, watch } from 'vue';
 import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinItemsView from '../../components/WinItemsView.vue';
 import WinNumberBox from '../../components/WinNumberBox.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import WinRadioButtons from '../../components/WinRadioButtons.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { createPageState } from '../../utils/pageState';
+import { useI18n } from '../../components/i18n/index';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'itemsview');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
+const mediaBase = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia';
+const items = [
+  { Title: 'Cliff', ImageLocation: `${mediaBase}/cliff.jpg`, Likes: 12, Description: 'A cliff by the sea.' },
+  { Title: 'Grapes', ImageLocation: `${mediaBase}/grapes.jpg`, Likes: 18, Description: 'A bunch of grapes.' },
+  { Title: 'Rainier', ImageLocation: `${mediaBase}/rainier.jpg`, Likes: 27, Description: 'Mount Rainier.' },
+  { Title: 'Sunset', ImageLocation: `${mediaBase}/sunset.jpg`, Likes: 31, Description: 'A sunset over water.' },
+  { Title: 'Valley', ImageLocation: `${mediaBase}/valley.jpg`, Likes: 44, Description: 'A green valley.' },
+  { Title: 'Cliff 2', ImageLocation: `${mediaBase}/cliff.jpg`, Likes: 52, Description: 'Another cliff.' },
+  { Title: 'Grapes 2', ImageLocation: `${mediaBase}/grapes.jpg`, Likes: 67, Description: 'More grapes.' },
+  { Title: 'Rainier 2', ImageLocation: `${mediaBase}/rainier.jpg`, Likes: 73, Description: 'Another mountain view.' }
+];
 
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
-
-// Sample data
-const generateItems = (count, prefix = 'Item') => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    title: `${prefix} ${i + 1}`,
-    imageSrc: `https://picsum.photos/seed/${prefix}${i + 1}/300/200`,
-    likes: Math.floor(Math.random() * 1000),
-    description: `Description for ${prefix} ${i + 1}`
-  }));
-};
-
-// Example 1: Basic ItemsView
-const basicItems = ref(generateItems(8, 'Photo'));
 const basicInvokeOutput = ref('');
-
-const onBasicItemInvoked = (item) => {
-  basicInvokeOutput.value = `You invoked ${item.title}`;
+const BasicItemsView_ItemInvoked = ({ InvokedItem }) => {
+  basicInvokeOutput.value = t('sample.itemsview.invoked-output', { item: InvokedItem.Title });
 };
 
-const example1Template = `<div class="items-view-container">
-  <div
-    v-for="item in items"
-    :key="item.id"
-    class="item-card"
-    @click="onItemInvoked(item)">
-    <img :src="item.imageSrc" :alt="item.title" />
-  </div>
-</div>`;
-
-const example1Vue = `const items = ref(generateItems(8));
-const invokeOutput = ref('');
-
-const onItemInvoked = (item) => {
-  invokeOutput.value = \`You invoked \${item.title}\`;
-};`;
-
-// Example 2: Swappable Layouts
-const layoutItems = ref(generateItems(12, 'Image'));
-const layoutType = ref('linedflow');
+const layoutOptions = computed(() => [
+  { Text: 'LinedFlowLayout', Value: 'LinedFlowLayout' },
+  { Text: 'UniformGridLayout', Value: 'UniformGridLayout' },
+  { Text: 'StackLayout', Value: 'StackLayout' }
+]);
+const layoutValues = ['LinedFlowLayout', 'UniformGridLayout', 'StackLayout'];
+const layoutSelectedIndex = ref(0);
+const layoutSelection = computed(() => layoutValues[layoutSelectedIndex.value]);
+const layoutClass = computed(() => layoutSelection.value.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase());
 const lineSpacing = ref(5);
 const minItemSpacing = ref(5);
-const lineHeight = ref('large');
+const lineHeightOptions = computed(() => [
+  { Text: t('sample.small'), Value: 'Small' },
+  { Text: t('sample.large'), Value: 'Large' }
+]);
+const lineHeightSelectedIndex = ref(1);
 const stackSpacing = ref(5);
 const minColumnSpacing = ref(5);
 const minRowSpacing = ref(5);
 const maximumRowsOrColumns = ref(3);
+const itemsViewLayout = computed(() => {
+  if (layoutSelection.value === 'LinedFlowLayout') {
+    return { Type: 'LinedFlowLayout', MinItemWidth: 70, LineHeight: lineHeightSelectedIndex.value === 0 ? 80 : 160, LineSpacing: lineSpacing.value, MinItemSpacing: minItemSpacing.value };
+  }
+  if (layoutSelection.value === 'StackLayout') {
+    return { Type: 'StackLayout', Spacing: stackSpacing.value };
+  }
+  return { Type: 'UniformGridLayout', MinItemWidth: 150, MinItemHeight: 150, MinColumnSpacing: minColumnSpacing.value, MinRowSpacing: minRowSpacing.value, MaximumRowsOrColumns: maximumRowsOrColumns.value };
+});
+const RbLayout_Checked = ({ SelectedIndex }) => { layoutSelectedIndex.value = SelectedIndex; };
+const RbLineHeight_Checked = ({ SelectedIndex }) => { lineHeightSelectedIndex.value = SelectedIndex; };
 
-const onLayoutChanged = () => {
-  // Layout change handled by reactive class binding
-};
-
-const example2Template = `<div class="items-view-container" :class="layoutType">
-  <div
-    v-for="item in items"
-    :key="item.id"
-    class="item-card">
-    <img :src="item.imageSrc" :alt="item.title" />
-    <div class="item-overlay">
-      <div class="item-title">{{ item.title }}</div>
-      <div class="item-likes">{{ item.likes }} Likes</div>
-    </div>
-  </div>
-</div>`;
-
-const example2Vue = `const layoutType = ref('linedflow');
-const lineSpacing = ref(5);
-const minItemSpacing = ref(5);
-const lineHeight = ref('large');
-
-// Layout parameters dynamically control CSS grid/flex properties`;
-
-// Example 3: Selection and Invocation
-const selectionItems = ref(generateItems(12, 'Photo'));
-const selectionMode = ref('Multiple');
-const selectionModeOptions = ref(['None', 'Single', 'Multiple', 'Extended']);
+const selectionModeOptions = computed(() => [
+  { Text: t('text.none'), Value: 'None' },
+  { Text: t('text.single'), Value: 'Single' },
+  { Text: t('text.multiple'), Value: 'Multiple' },
+  { Text: t('text.extended'), Value: 'Extended' }
+]);
+const selectionModeValues = ['None', 'Single', 'Multiple', 'Extended'];
+const selectionModeSelectedIndex = ref(2);
+const selectionMode = computed(() => selectionModeValues[selectionModeSelectedIndex.value]);
+const selectionLayout = { Type: 'UniformGridLayout', MinItemWidth: 150, MinItemHeight: 150, MaximumRowsOrColumns: 3, MinColumnSpacing: 5, MinRowSpacing: 5 };
 const isItemInvokedEnabled = ref(false);
-const selectedIndices = ref([]);
+const selectedItems = ref([]);
 const invocationOutput = ref('');
 const selectionOutput = ref('');
-
-const onSelectionItemClick = (index, event) => {
-  if (selectionMode.value === 'None') return;
-
-  if (selectionMode.value === 'Single') {
-    selectedIndices.value = [index];
-    updateSelectionOutput();
-  } else if (selectionMode.value === 'Multiple') {
-    const idx = selectedIndices.value.indexOf(index);
-    if (idx > -1) {
-      selectedIndices.value.splice(idx, 1);
-    } else {
-      selectedIndices.value.push(index);
-    }
-    updateSelectionOutput();
-  } else if (selectionMode.value === 'Extended') {
-    if (event.ctrlKey) {
-      const idx = selectedIndices.value.indexOf(index);
-      if (idx > -1) {
-        selectedIndices.value.splice(idx, 1);
-      } else {
-        selectedIndices.value.push(index);
-      }
-    } else if (event.shiftKey && selectedIndices.value.length > 0) {
-      const lastIndex = selectedIndices.value[selectedIndices.value.length - 1];
-      const start = Math.min(lastIndex, index);
-      const end = Math.max(lastIndex, index);
-      selectedIndices.value = Array.from({ length: end - start + 1 }, (_, i) => start + i);
-    } else {
-      selectedIndices.value = [index];
-    }
-    updateSelectionOutput();
-  }
+const SwappableSelectionModesItemsView_ItemInvoked = ({ InvokedItem }) => {
+  invocationOutput.value = t('sample.itemsview.invoked-output', { item: InvokedItem.Title });
 };
-
-const onSelectionItemInvoked = (item) => {
-  if (isItemInvokedEnabled.value) {
-    invocationOutput.value = `You invoked ${item.title}`;
-  }
+const SwappableSelectionModesItemsView_SelectionChanged = () => {
+  selectionOutput.value = t('sample.itemsview.selection-output', { count: selectedItems.value.length });
 };
-
-const onInvokedEnabledChanged = () => {
-  // Checkbox state automatically updates isItemInvokedEnabled
-};
-
-const updateSelectionOutput = () => {
-  if (selectedIndices.value.length === 0) {
-    selectionOutput.value = 'No items selected';
-  } else if (selectedIndices.value.length === 1) {
-    const item = selectionItems.value[selectedIndices.value[0]];
-    selectionOutput.value = `Selected: ${item.title}`;
-  } else {
-    selectionOutput.value = `${selectedIndices.value.length} items selected`;
-  }
-};
-
-watch(selectionMode, () => {
-  selectedIndices.value = [];
+watch(selectionModeSelectedIndex, () => {
+  selectedItems.value = [];
   selectionOutput.value = '';
   invocationOutput.value = '';
 });
 
-const example3Template = `<div class="items-view-container">
-  <div
-    v-for="(item, index) in items"
-    :key="item.id"
-    class="item-card"
-    :class="{ selected: selectedIndices.includes(index) }"
-    @click="onItemClick(index, $event)">
-    <div v-if="selectionMode === 'Multiple'" class="item-checkbox">
-      <WinCheckBox :modelValue="selectedIndices.includes(index)" />
-    </div>
-    <img :src="item.imageSrc" :alt="item.title" />
-  </div>
-</div>`;
+const basicItemsViewVue = `<WinItemsView
+  :ItemsSource="items"
+  :IsItemInvokedEnabled="true"
+  @ItemInvoked="BasicItemsView_ItemInvoked">
+  <template #item="{ item }">
+    <img :src="item.ImageLocation" :alt="item.Title" />
+  </template>
+</WinItemsView>`;
 
-const example3Vue = `const selectionMode = ref('Multiple');
-const isItemInvokedEnabled = ref(false);
-const selectedIndices = ref([]);
+const swappableLayoutsVue = `<WinItemsView :ItemsSource="items" :Layout="itemsViewLayout">
+  <template #item="{ item }">
+    <img :src="item.ImageLocation" :alt="item.Title" />
+    <WinTextBlock :Text="item.Title" />
+  </template>
+</WinItemsView>`;
 
-const onItemClick = (index, event) => {
-  if (selectionMode.value === 'Single') {
-    selectedIndices.value = [index];
-  } else if (selectionMode.value === 'Multiple') {
-    const idx = selectedIndices.value.indexOf(index);
-    if (idx > -1) {
-      selectedIndices.value.splice(idx, 1);
-    } else {
-      selectedIndices.value.push(index);
-    }
-  } else if (selectionMode.value === 'Extended') {
-    if (event.ctrlKey) {
-      // Toggle selection
-    } else if (event.shiftKey) {
-      // Range selection
-    } else {
-      selectedIndices.value = [index];
-    }
-  }
-};`;
+const selectionItemsViewVue = `<WinItemsView
+  :ItemsSource="items"
+  :Layout="{ Type: 'UniformGridLayout', MaximumRowsOrColumns: 3 }"
+  :SelectionMode="selectionMode"
+  :IsItemInvokedEnabled="isItemInvokedEnabled"
+  v-model:SelectedItems="selectedItems">
+  <template #item="{ item }">
+    <img :src="item.ImageLocation" :alt="item.Title" />
+    <WinTextBlock :Text="item.Title" />
+  </template>
+</WinItemsView>`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
-
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0 0 4px 0;
-}
-
-.items-view-container {
-  width: 500px;
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid var(--control-border);
-  border-radius: 4px;
-  padding: 8px;
-  background: var(--control-fill-secondary);
-}
-
-.items-view-container.basic-view {
-  width: 220px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.items-view-container.swappable-view {
-  display: grid;
-  gap: 5px;
-}
-
-.items-view-container.swappable-view.linedflow {
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  grid-auto-rows: 160px;
-}
-
-.items-view-container.swappable-view.uniformgrid {
-  grid-template-columns: repeat(v-bind(maximumRowsOrColumns), 1fr);
-  column-gap: v-bind(minColumnSpacing + 'px');
-  row-gap: v-bind(minRowSpacing + 'px');
-}
-
-.items-view-container.swappable-view.stack {
-  display: flex;
-  flex-direction: column;
-  gap: v-bind(stackSpacing + 'px');
-}
-
-.items-view-container.selection-view {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
-}
-
-.item-card {
-  position: relative;
-  background: var(--control-fill-default);
-  border: 1px solid var(--control-border);
-  border-radius: 4px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.item-card:hover {
-  background: var(--control-fill-secondary);
-  border-color: var(--control-stroke-default);
-  transform: translateY(-1px);
-}
-
-.item-card:focus {
-  outline: 2px solid var(--accent-default);
-  outline-offset: 2px;
-}
-
-.item-card.basic-item {
-  width: 200px;
-  height: 140px;
-}
-
-.item-card.layout-item {
-  position: relative;
-}
-
-.item-card.layout-item.stack {
-  width: 480px;
-  min-height: 80px;
-  max-height: 100px;
-  display: flex;
-  align-items: center;
-  padding: 8px;
-}
-
-.item-card.layout-item.stack .item-image {
-  width: 24px;
-  height: 16px;
-  flex-shrink: 0;
-  margin-right: 8px;
-}
-
-.item-card.layout-item.stack .item-overlay {
-  position: static;
-  background: transparent;
-  opacity: 1;
-  padding: 0;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.item-card.layout-item.stack .item-title {
-  font-size: 14px;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-}
-
-.item-card.layout-item.stack .item-likes {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.item-card.selection-item {
-  aspect-ratio: 3/2;
-}
-
-.item-card.selected {
-  border-color: var(--accent-default);
-  box-shadow: 0 0 0 1px var(--accent-default);
-}
-
-.item-checkbox {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 4px;
-  padding: 4px;
-}
-
-.item-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.item-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 8px;
-  height: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.item-title {
-  font-size: 13px;
-  color: #ffffff;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.item-likes {
-  font-size: 11px;
-  color: #e0e0e0;
-  margin-top: 2px;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-size: 16px; font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; }
+.sample-stack { display: flex; flex-direction: column; min-width: 0; }
+.basic-items-view { width: 220px; height: 400px; }
+.swappable-items-view,
+.selection-items-view { width: 500px; height: 400px; max-width: 100%; }
+.image-template { width: 200px; height: 140px; padding: 4px; box-sizing: border-box; }
+.image-template img,
+.layout-template img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.layout-template { position: relative; overflow: hidden; min-height: 100%; background: var(--ctrl-fill-default); }
+.layout-template.uniform-grid-layout { width: 150px; height: 150px; }
+.layout-template.stack-layout { width: 480px; min-height: 80px; max-height: 100px; display: grid; grid-template-columns: 24px 1fr; grid-template-rows: auto 1fr; column-gap: 8px; padding: 0; box-sizing: border-box; }
+.layout-template.stack-layout img { width: 24px; height: 16px; margin-top: 4px; align-self: start; }
+.stack-text { display: none; }
+.stack-layout .stack-text { display: flex; flex-direction: column; min-width: 0; }
+.stack-title { font-size: 14px; }
+.stack-description { grid-column: 1 / -1; margin: 4px 8px 4px 0; color: var(--text-secondary); font-size: 12px; line-height: 16px; }
+.item-overlay { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; padding: 1px 5px; box-sizing: border-box; background: rgba(0, 0, 0, 0.55); }
+.stack-layout .item-overlay { display: none; }
+.overlay-title { color: #fff; font-size: 14px; line-height: 18px; }
+.overlay-row { display: flex; align-items: center; height: 16px; }
+.overlay-caption { color: #fff; font-size: 12px; line-height: 14px; }
+.output-text { min-height: 20px; margin-top: 8px; }
+.options-stack { display: flex; flex-direction: column; gap: 12px; min-width: 260px; }
+.options-heading { margin-top: 4px; font-weight: 600; }
+.selection-note { display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px; }
+.selection-options { min-width: 220px; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px; }
 </style>

@@ -1,94 +1,97 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">SelectorBar</h1>
-      <p class="page-description">
-        The SelectorBar control provides a simple way to navigate between items or views in your app. It is often used as a tab bar pattern to navigate between pages or change the active content of a view.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">SelectorBar</h1>
+          <p class="page-description">
+            The SelectorBar control provides a simple way to navigate between items or views in your app. It is often used as a tab bar pattern to navigate between pages or change the active content of a view.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example 1: A Basic SelectorBar -->
+            <WinControlExample
+              headerText="A Basic SelectorBar"
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <WinSelectorBar
+                  :items="example1Items"
+                  v-model:selectedIndex="selectedIndex1"
+                  @selectionChanged="onExample1SelectionChanged" />
+              </template>
+              <template #options>
+                <p class="output-text">Selected: {{ example1Items[selectedIndex1]?.text || 'None' }}</p>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 2: SelectorBar with Frame Slide Transitions -->
+            <WinControlExample
+              headerText="SelectorBar with Frame Slide Transitions"
+              :theme="pageTheme"
+              :templateCode="example2Template"
+              :vueCode="example2Vue">
+              <template #example>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <WinSelectorBar
+                    :items="example2Items"
+                    v-model:selectedIndex="selectedIndex2"
+                    @selectionChanged="onExample2SelectionChanged" />
+
+                  <div class="content-frame" :key="currentPageExample2">
+                    <div class="page-content" :style="{ animation: slideAnimation }">
+                      <h3>{{ currentPageExample2 }}</h3>
+                      <p>This is the content for {{ currentPageExample2 }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="output-text">Current page: {{ currentPageExample2 }}</p>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 3: SelectorBar Displaying Different Collections -->
+            <WinControlExample
+              headerText="SelectorBar Displaying Different Collections Using ItemsView"
+              :theme="pageTheme"
+              :templateCode="example3Template"
+              :vueCode="example3Vue">
+              <template #example>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <WinSelectorBar v-model="selectedItem3" @selectionChanged="onExample3SelectionChanged">
+                    <WinSelectorBarItem text="Pink" :isSelected="true" />
+                    <WinSelectorBarItem text="Plum" />
+                    <WinSelectorBarItem text="PowderBlue" />
+                  </WinSelectorBar>
+
+                  <div class="color-grid">
+                    <div
+                      v-for="(color, index) in currentColors"
+                      :key="index"
+                      class="color-item"
+                      :style="{ backgroundColor: color }">
+                    </div>
+                  </div>
+                </div>
+
+                <p class="output-text">Selected collection: {{ selectedItem3?.text || 'None' }}</p>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example 1: A Basic SelectorBar -->
-    <WinControlExample
-      headerText="A Basic SelectorBar"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <WinSelectorBar
-          :items="example1Items"
-          v-model:selectedIndex="selectedIndex1"
-          @selectionChanged="onExample1SelectionChanged" />
-      </template>
-      <template #options>
-        <p class="output-text">Selected: {{ example1Items[selectedIndex1]?.text || 'None' }}</p>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: SelectorBar with Frame Slide Transitions -->
-    <WinControlExample
-      headerText="SelectorBar with Frame Slide Transitions"
-      :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <WinSelectorBar
-            :items="example2Items"
-            v-model:selectedIndex="selectedIndex2"
-            @selectionChanged="onExample2SelectionChanged" />
-
-          <div class="content-frame" :key="currentPageExample2">
-            <div class="page-content" :style="{ animation: slideAnimation }">
-              <h3>{{ currentPageExample2 }}</h3>
-              <p>This is the content for {{ currentPageExample2 }}</p>
-            </div>
-          </div>
-        </div>
-
-        <p class="output-text">Current page: {{ currentPageExample2 }}</p>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 3: SelectorBar Displaying Different Collections -->
-    <WinControlExample
-      headerText="SelectorBar Displaying Different Collections Using ItemsView"
-      :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
-      <template #example>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <WinSelectorBar v-model="selectedItem3" @selectionChanged="onExample3SelectionChanged">
-            <WinSelectorBarItem text="Pink" :isSelected="true" />
-            <WinSelectorBarItem text="Plum" />
-            <WinSelectorBarItem text="PowderBlue" />
-          </WinSelectorBar>
-
-          <div class="color-grid">
-            <div
-              v-for="(color, index) in currentColors"
-              :key="index"
-              class="color-item"
-              :style="{ backgroundColor: color }">
-            </div>
-          </div>
-        </div>
-
-        <p class="output-text">Selected collection: {{ selectedItem3?.text || 'None' }}</p>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -101,6 +104,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'selectorbar');
 

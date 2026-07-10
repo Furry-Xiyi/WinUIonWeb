@@ -1,13 +1,13 @@
 <template>
   <div class="win-capture-grid">
-    <div class="win-capture-title">{{ effectiveDeviceName }}</div>
-    <div class="win-capture-title captured" :class="{ visible: snapshots.length }">{{ t('text.captured') }}</div>
+    <WinTextBlock class="win-capture-title" :Text="effectiveDeviceName" />
+    <WinTextBlock class="win-capture-title captured" :class="{ visible: snapshots.length }" :Text="t('text.captured')" />
     <div class="win-capture-preview" ref="previewRef" :class="{ mirrored }">
       <video ref="videoRef" class="win-capture-video" autoplay muted playsinline></video>
       <div v-if="!streamActive" class="win-capture-camera">
         <div class="win-capture-lens"></div>
         <div class="win-capture-scan"></div>
-        <span class="win-capture-message">{{ errorMessage || t('text.requesting-camera-permission') }}</span>
+        <WinTextBlock class="win-capture-message" :Text="errorMessage || t('text.requesting-camera-permission')" TextWrapping="WrapWholeWords" />
       </div>
     </div>
     <div class="win-capture-shots" ref="shotsRef">
@@ -21,6 +21,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, nextTick } from 'vue';
 import { useI18n } from './i18n/index';
+import WinTextBlock from './WinTextBlock.vue';
 
 const { t } = useI18n();
 

@@ -1,56 +1,57 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <WinTextBlock class="page-header" :Text="$t('text.autosuggestbox')" />
-      <WinTextBlock
-        class="page-description"
-        :Text="$t('text.use-an-autosuggestbox-to-provide-a-list-of-sugge')" />
-      <div class="page-header-actions">
-        <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
-      </div>
-    </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('text.a-basic-autosuggestbox')" />
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template">
-      <template #example>
-        <div class="horizontal-example">
-          <WinAutoSuggestBox
-            v-model:Text="catText"
-            :ItemsSource="catSuggestions"
-            :Width="300"
-            @TextChanged="onCatTextChanged"
-            @SuggestionChosen="onCatSuggestionChosen" />
-          <WinTextBlock class="output-text" :Text="chosenCat" />
-        </div>
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" Text="AutoSuggestBox provides a search experience" />
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template">
-      <template #example>
-        <div class="search-example">
-          <WinAutoSuggestBox
-            v-model:Text="controlText"
-            :ItemsSource="controlSuggestions"
-            TextMemberPath="title"
-            PlaceholderText="Type a control name"
-            QueryIcon="Find"
-            :Width="300"
-            @TextChanged="onControlTextChanged"
-            @SuggestionChosen="onControlSuggestionChosen"
-            @QuerySubmitted="onControlQuerySubmitted" />
-
-          <div v-if="selectedControl" class="control-details">
-            <div class="control-preview">{{ selectedControl.title.slice(0, 1) }}</div>
-            <div>
-              <WinTextBlock class="control-title" :Text="selectedControl.title" />
-              <WinTextBlock class="control-subtitle" :Text="selectedControl.subtitle" TextWrapping="WrapWholeWords" />
-            </div>
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.autosuggestbox')" />
+          <WinTextBlock
+            class="page-description"
+            :Text="$t('text.use-an-autosuggestbox-to-provide-a-list-of-sugge')" />
+          <div class="page-header-actions">
+            <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
           </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template" :headerText="$t('text.a-basic-autosuggestbox')">
+              <template #example>
+                <div class="horizontal-example">
+                  <WinAutoSuggestBox
+                    v-model:Text="catText"
+                    :ItemsSource="catSuggestions"
+                    :Width="300"
+                    @TextChanged="onCatTextChanged"
+                    @SuggestionChosen="onCatSuggestionChosen" />
+                  <WinTextBlock class="output-text" :Text="chosenCat" />
+                </div>
+              </template>
+            </WinControlExample>
+
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.autosuggestbox.search-experience')">
+              <template #example>
+                <div class="search-example">
+                  <WinAutoSuggestBox
+                    v-model:Text="controlText"
+                    :ItemsSource="controlSuggestions"
+                    TextMemberPath="title"
+                    PlaceholderText="Type a control name"
+                    QueryIcon="Find"
+                    :Width="300"
+                    @TextChanged="onControlTextChanged"
+                    @SuggestionChosen="onControlSuggestionChosen"
+                    @QuerySubmitted="onControlQuerySubmitted" />
+
+                  <div v-if="selectedControl" class="control-details">
+                    <div class="control-preview">{{ selectedControl.title.slice(0, 1) }}</div>
+                    <div>
+                      <WinTextBlock class="control-title" :Text="selectedControl.title" />
+                      <WinTextBlock class="control-subtitle" :Text="selectedControl.subtitle" TextWrapping="WrapWholeWords" />
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -63,6 +64,7 @@ import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'autosuggestbox');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);

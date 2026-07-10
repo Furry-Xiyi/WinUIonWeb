@@ -1,245 +1,91 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">Grid</h1>
-      <p class="page-description">
-        The Grid is a layout panel that supports arranging child elements in rows and columns.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.grid')" />
+          <WinTextBlock class="page-description" :Text="$t('text.grid-description')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.grid.3x3')" :theme="pageTheme" :vue="gridCode">
+              <template #example>
+                <WinGrid
+                  Width="240"
+                  Height="160"
+                  Background="Gray"
+                  ColumnDefinitions="50, 50, 50"
+                  RowDefinitions="50, 50, 50"
+                  :ColumnSpacing="columnSpacing"
+                  :RowSpacing="rowSpacing">
+                  <div class="grid-rectangle red" :style="{ gridColumn: redBlockColumn + 1, gridRow: redBlockRow + 1 }" />
+                  <div class="grid-rectangle blue" style="grid-column: 1; grid-row: 2;" />
+                  <div class="grid-rectangle green" style="grid-column: 2; grid-row: 1;" />
+                  <div class="grid-rectangle yellow" style="grid-column: 2; grid-row: 2;" />
+                </WinGrid>
+              </template>
+              <template #options>
+                <WinGrid MinWidth="200" ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                  <WinTextBlock Text="Grid" style="grid-column: 1; grid-row: 1;" />
+                  <WinSlider v-model:Value="columnSpacing" Width="100" Margin="16,0,0,0" Header="ColumnSpacing" :Maximum="16" :Minimum="0" :StepFrequency="1" :TickFrequency="1" TickPlacement="Outside" SnapsTo="Ticks" style="grid-column: 1; grid-row: 2;" />
+                  <WinSlider v-model:Value="rowSpacing" Height="100" Header="RowSpacing" Orientation="Vertical" :Maximum="16" :Minimum="0" :StepFrequency="1" :TickFrequency="1" TickPlacement="Outside" SnapsTo="Ticks" style="grid-column: 2; grid-row: 2; align-self: start;" />
+                  <WinTextBlock Text="Red block" style="grid-column: 1; grid-row: 3;" />
+                  <WinSlider v-model:Value="redBlockColumn" Width="100" Margin="16,0,0,0" Header="Grid.Column" :Maximum="2" :Minimum="0" :StepFrequency="1" :TickFrequency="1" TickPlacement="Outside" SnapsTo="Ticks" style="grid-column: 1; grid-row: 4;" />
+                  <WinSlider v-model:Value="redBlockRow" Height="100" Header="Grid.Row" Orientation="Vertical" :Maximum="2" :Minimum="0" :StepFrequency="1" :TickFrequency="1" TickPlacement="Outside" SnapsTo="Ticks" style="grid-column: 2; grid-row: 4; align-self: start;" />
+                </WinGrid>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example 1: A 3x3 Grid control -->
-    <WinControlExample
-      headerText="A 3x3 Grid control"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div
-          :style="{
-            width: '240px',
-            height: '160px',
-            display: 'grid',
-            gridTemplateColumns: '50px 50px 50px',
-            gridTemplateRows: '50px 50px 50px',
-            columnGap: `${columnSpacing}px`,
-            rowGap: `${rowSpacing}px`,
-            backgroundColor: 'gray',
-            padding: '0'
-          }">
-          <div
-            :style="{
-              gridColumn: `${redBlockColumn + 1}`,
-              gridRow: `${redBlockRow + 1}`,
-              width: '50px',
-              height: '50px',
-              backgroundColor: 'red'
-            }">
-          </div>
-          <div
-            :style="{
-              gridColumn: '1',
-              gridRow: '2',
-              width: '50px',
-              height: '50px',
-              backgroundColor: 'blue'
-            }">
-          </div>
-          <div
-            :style="{
-              gridColumn: '2',
-              gridRow: '1',
-              width: '50px',
-              height: '50px',
-              backgroundColor: 'green'
-            }">
-          </div>
-          <div
-            :style="{
-              gridColumn: '2',
-              gridRow: '2',
-              width: '50px',
-              height: '50px',
-              backgroundColor: 'yellow'
-            }">
-          </div>
-        </div>
-      </template>
-      <template #options>
-        <div style="display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto auto auto; column-gap: 12px; row-gap: 12px;">
-          <div style="grid-column: 1; grid-row: 1;">
-            <p style="margin: 0; font-weight: 600;">Grid</p>
-          </div>
-          <WinSlider
-            v-model="columnSpacing"
-            header="ColumnSpacing"
-            :minimum="0"
-            :maximum="16"
-            :stepFrequency="1"
-            :tickFrequency="1"
-            snapsTo="Ticks"
-            style="grid-column: 1; grid-row: 2; margin-left: 16px;" />
-          <WinSlider
-            v-model="rowSpacing"
-            header="RowSpacing"
-            :minimum="0"
-            :maximum="16"
-            :stepFrequency="1"
-            :tickFrequency="1"
-            snapsTo="Ticks"
-            orientation="Vertical"
-            :isDirectionReversed="true"
-            style="grid-column: 2; grid-row: 2; height: 100px; align-self: start;" />
-          <div style="grid-column: 1; grid-row: 3;">
-            <p style="margin: 0; font-weight: 600;">Red block</p>
-          </div>
-          <WinSlider
-            v-model="redBlockColumn"
-            header="Grid.Column"
-            :minimum="0"
-            :maximum="2"
-            :stepFrequency="1"
-            :tickFrequency="1"
-            snapsTo="Ticks"
-            style="grid-column: 1; grid-row: 4; margin-left: 16px;" />
-          <WinSlider
-            v-model="redBlockRow"
-            header="Grid.Row"
-            :minimum="0"
-            :maximum="2"
-            :stepFrequency="1"
-            :tickFrequency="1"
-            snapsTo="Ticks"
-            orientation="Vertical"
-            :isDirectionReversed="true"
-            style="grid-column: 2; grid-row: 4; height: 100px; align-self: start;" />
-        </div>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import WinButton from '../../components/WinButton.vue'
-import WinToggleButton from '../../components/WinToggleButton.vue'
-import WinControlExample from '../../components/WinControlExample.vue'
-import WinSlider from '../../components/WinSlider.vue'
+import { computed, inject, ref } from 'vue';
+import WinButton from '../../components/WinButton.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinGrid from '../../components/WinGrid.vue';
+import WinSlider from '../../components/WinSlider.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { createPageState } from '../../utils/pageState';
 
-// Theme management
-const pageTheme = ref('light')
-const toggleTheme = () => {
-  pageTheme.value = pageTheme.value === 'light' ? 'dark' : 'light'
-}
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'grid');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Favorite management
-const isFavoriteState = ref(false)
-const toggleFavorite = (value) => {
-  console.log('Favorite toggled:', value)
-}
+const columnSpacing = ref(8);
+const rowSpacing = ref(8);
+const redBlockColumn = ref(0);
+const redBlockRow = ref(0);
 
-// Example 1: 3x3 Grid
-const columnSpacing = ref(8)
-const rowSpacing = ref(8)
-const redBlockColumn = ref(0)
-const redBlockRow = ref(0)
-
-// Code examples
-const example1Template = `<div
-  :style="{
-    width: '240px',
-    height: '160px',
-    display: 'grid',
-    gridTemplateColumns: '50px 50px 50px',
-    gridTemplateRows: '50px 50px 50px',
-    columnGap: '${columnSpacing}px',
-    rowGap: '${rowSpacing}px',
-    backgroundColor: 'gray'
-  }">
-  <div
-    :style="{
-      gridColumn: '${redBlockColumn + 1}',
-      gridRow: '${redBlockRow + 1}',
-      width: '50px',
-      height: '50px',
-      backgroundColor: 'red'
-    }">
-  </div>
-  <div
-    :style="{
-      gridColumn: '1',
-      gridRow: '2',
-      width: '50px',
-      height: '50px',
-      backgroundColor: 'blue'
-    }">
-  </div>
-  <div
-    :style="{
-      gridColumn: '2',
-      gridRow: '1',
-      width: '50px',
-      height: '50px',
-      backgroundColor: 'green'
-    }">
-  </div>
-  <div
-    :style="{
-      gridColumn: '2',
-      gridRow: '2',
-      width: '50px',
-      height: '50px',
-      backgroundColor: 'yellow'
-    }">
-  </div>
-</div>`
-
-const example1Vue = `<script setup>
-import { ref } from 'vue'
-
-const columnSpacing = ref(8)
-const rowSpacing = ref(8)
-const redBlockColumn = ref(0)
-const redBlockRow = ref(0)
-<\/script>`
+const gridCode = computed(() => `<WinGrid Width="240" Height="120" Background="Gray"
+  ColumnDefinitions="50, 50, 50"
+  RowDefinitions="50, 50, 50"
+  ColumnSpacing="${columnSpacing.value}"
+  RowSpacing="${rowSpacing.value}">
+  <Rectangle Fill="Red" Grid.Column="${redBlockColumn.value}" Grid.Row="${redBlockRow.value}" />
+  <Rectangle Fill="Blue" Grid.Row="1" />
+  <Rectangle Fill="Green" Grid.Column="1" />
+  <Rectangle Fill="Yellow" Grid.Column="1" Grid.Row="1" />
+</WinGrid>`);
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-}
-
-.page-description {
-  font-size: 14px;
-  color: #605e5c;
-  margin: 0 0 24px 0;
-  line-height: 20px;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 8px;
-}
-
-.icon {
-  font-family: 'Segoe MDL2 Assets';
-  font-size: 16px;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.grid-rectangle { width: 50px; height: 50px; }
+.red { background: Red; }
+.blue { background: Blue; }
+.green { background: Green; }
+.yellow { background: Yellow; }
 </style>

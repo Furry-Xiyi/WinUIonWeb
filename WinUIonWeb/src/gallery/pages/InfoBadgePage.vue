@@ -1,133 +1,136 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">InfoBadge</h1>
-      <p class="page-description">
-        Badging is a non-intrusive and intuitive way to display notifications or bring focus to an area within an app - whether that be for notifications, indicating new content, or showing an alert. An InfoBadge is a small piece of UI that can be added into an app and customized to display a number, icon, or a simple dot.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <!-- Example 1: InfoBadge embedded in NavigationView -->
-    <WinControlExample
-      headerText="An InfoBadge embedded in a NavigationView"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div style="width: 100%; height: 300px;">
-          <WinNavigationView
-            :menuItems="navigationMenuItems"
-            selectedValue="inbox"
-            paneDisplayMode="Left"
-            :isSettingsVisible="false"
-            :isPaneToggleButtonVisible="false">
-          </WinNavigationView>
-        </div>
-      </template>
-      <template #options>
-        <div style="display: flex; flex-direction: column; gap: 12px; width: 160px;">
-          <WinToggleSwitch
-            v-model="infoBadgeVisible"
-            header="InfoBadge Opacity">
-          </WinToggleSwitch>
-          <WinComboBox
-            v-model="displayModeValue"
-            header="Display Mode"
-            :options="displayModeOptions">
-          </WinComboBox>
-        </div>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: Different InfoBadge styles -->
-    <WinControlExample
-      headerText="Different InfoBadge styles"
-      :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <div style="display: flex; gap: 20px; align-items: center; justify-content: center; height: 100px;">
-          <WinInfoBadge
-            :styleVariant="badgeStyle"
-            iconSource="E7BA">
-          </WinInfoBadge>
-          <WinInfoBadge
-            :styleVariant="badgeStyle"
-            :value="10">
-          </WinInfoBadge>
-          <WinInfoBadge
-            :styleVariant="badgeStyle"
-            :value="-1">
-          </WinInfoBadge>
-        </div>
-
-        <div style="width: 160px;">
-          <WinComboBox
-            v-model="badgeStyle"
-            header="Styles"
-            :options="styleOptions">
-          </WinComboBox>
-        </div>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 3: InfoBadge placed inside a Button -->
-    <WinControlExample
-      headerText="An InfoBadge placed inside a Button"
-      :theme="pageTheme"
-      :templateCode="example3Template"
-      :vueCode="example3Vue">
-      <template #example>
-        <WinButton
-          style="width: 200px; height: 60px; position: relative;"
-          aria-label="Refresh required">
-          <span class="icon" style="font-size: 20px;">&#xE72C;</span>
-          <WinInfoBadge
-            iconSource="E7BA"
-            background="#C42B1C"
-            style="position: absolute; top: 4px; right: 4px;">
-          </WinInfoBadge>
-        </WinButton>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 4: InfoBadge with dynamic value -->
-    <WinControlExample
-      headerText="An InfoBadge with a dynamic integer value"
-      :theme="pageTheme"
-      :templateCode="example4Template"
-      :vueCode="example4Vue">
-      <template #example>
-        <div style="display: flex; justify-content: center; align-items: center; height: 80px;">
-          <WinInfoBadge :value="dynamicValue"></WinInfoBadge>
-        </div>
-
-        <div style="width: 160px;">
-          <div class="number-input-container">
-            <label class="number-input-label">InfoBadge Value</label>
-            <input
-              type="number"
-              v-model.number="dynamicValue"
-              :min="-1"
-              class="number-input"
-            />
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">InfoBadge</h1>
+          <p class="page-description">
+            Badging is a non-intrusive and intuitive way to display notifications or bring focus to an area within an app - whether that be for notifications, indicating new content, or showing an alert. An InfoBadge is a small piece of UI that can be added into an app and customized to display a number, icon, or a simple dot.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
           </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example 1: InfoBadge embedded in NavigationView -->
+            <WinControlExample
+              headerText="An InfoBadge embedded in a NavigationView"
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <div style="width: 100%; height: 300px;">
+                  <WinNavigationView
+                    :menuItems="navigationMenuItems"
+                    selectedValue="inbox"
+                    paneDisplayMode="Left"
+                    :isSettingsVisible="false"
+                    :isPaneToggleButtonVisible="false">
+                  </WinNavigationView>
+                </div>
+              </template>
+              <template #options>
+                <div style="display: flex; flex-direction: column; gap: 12px; width: 160px;">
+                  <WinToggleSwitch
+                    v-model="infoBadgeVisible"
+                    header="InfoBadge Opacity">
+                  </WinToggleSwitch>
+                  <WinComboBox
+                    v-model="displayModeValue"
+                    header="Display Mode"
+                    :options="displayModeOptions">
+                  </WinComboBox>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 2: Different InfoBadge styles -->
+            <WinControlExample
+              headerText="Different InfoBadge styles"
+              :theme="pageTheme"
+              :templateCode="example2Template"
+              :vueCode="example2Vue">
+              <template #example>
+                <div style="display: flex; gap: 20px; align-items: center; justify-content: center; height: 100px;">
+                  <WinInfoBadge
+                    :styleVariant="badgeStyle"
+                    iconSource="E7BA">
+                  </WinInfoBadge>
+                  <WinInfoBadge
+                    :styleVariant="badgeStyle"
+                    :value="10">
+                  </WinInfoBadge>
+                  <WinInfoBadge
+                    :styleVariant="badgeStyle"
+                    :value="-1">
+                  </WinInfoBadge>
+                </div>
+
+                <div style="width: 160px;">
+                  <WinComboBox
+                    v-model="badgeStyle"
+                    header="Styles"
+                    :options="styleOptions">
+                  </WinComboBox>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 3: InfoBadge placed inside a Button -->
+            <WinControlExample
+              headerText="An InfoBadge placed inside a Button"
+              :theme="pageTheme"
+              :templateCode="example3Template"
+              :vueCode="example3Vue">
+              <template #example>
+                <WinButton
+                  style="width: 200px; height: 60px; position: relative;"
+                  aria-label="Refresh required">
+                  <span class="icon" style="font-size: 20px;">&#xE72C;</span>
+                  <WinInfoBadge
+                    iconSource="E7BA"
+                    background="#C42B1C"
+                    style="position: absolute; top: 4px; right: 4px;">
+                  </WinInfoBadge>
+                </WinButton>
+              </template>
+            </WinControlExample>
+
+            <!-- Example 4: InfoBadge with dynamic value -->
+            <WinControlExample
+              headerText="An InfoBadge with a dynamic integer value"
+              :theme="pageTheme"
+              :templateCode="example4Template"
+              :vueCode="example4Vue">
+              <template #example>
+                <div style="display: flex; justify-content: center; align-items: center; height: 80px;">
+                  <WinInfoBadge :value="dynamicValue"></WinInfoBadge>
+                </div>
+
+                <div style="width: 160px;">
+                  <div class="number-input-container">
+                    <label class="number-input-label">InfoBadge Value</label>
+                    <input
+                      type="number"
+                      v-model.number="dynamicValue"
+                      :min="-1"
+                      class="number-input"
+                    />
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -143,6 +146,7 @@ import WinComboBox from '../../components/WinComboBox.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'infobadge');
 

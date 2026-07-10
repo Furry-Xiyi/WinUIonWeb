@@ -1,112 +1,140 @@
 <template>
-  <div>
-    <h1 class="page-header">{{ $t('text.teachingtip') }}</h1>
-    <p class="page-description">
-      {{ $t('text.a-teaching-tip-is-a-notification-flyout-used-to') }}
-    </p>
-
-    <!-- Example 1: Targeted TeachingTip -->
-    <WinControlExample :headerText="$t('text.show-a-targeted-teachingtip-on-a-button')">
-      <template #example>
-        <div class="tip-container">
-          <WinButton ref="targetButton1" @click="showTip1 = !showTip1">
-            {{ $t('text.show-teachingtip') }}
-          </WinButton>
-          <WinTeachingTip
-            :visible="showTip1"
-            :target="targetButton1"
-            :title="$t('text.this-is-the-title')"
-            subtitle="And this is the subtitle"
-            @close="showTip1 = false">
-            <template #icon>
-              <span style="font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets'; font-size: 16px;"></span>
-            </template>
-          </WinTeachingTip>
+  <div class="gallery-item-page">
+    <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.teachingtip')" />
+          <WinTextBlock class="page-description" :Text="$t('text.a-teaching-tip-is-a-notification-flyout-used-to')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.teachingtip.targeted')" :theme="pageTheme" :vue="targetedCode">
+              <template #example>
+                <WinButton ref="testButton1" @Click="testButton1TeachingTipOpen = true">
+                  <WinTextBlock :Text="$t('text.show-teachingtip')" />
+                </WinButton>
+                <WinTeachingTip
+                  v-model:IsOpen="testButton1TeachingTipOpen"
+                  :Title="$t('sample.teachingtip.title')"
+                  :Subtitle="$t('sample.teachingtip.subtitle')"
+                  :Target="testButton1"
+                  IconSource="Refresh" />
+              </template>
+            </WinControlExample>
 
-    <!-- Example 2: Non-targeted TeachingTip -->
-    <WinControlExample headerText="Show a non-targeted TeachingTip with buttons.">
-      <template #example>
-        <WinButton @click="showTip2 = !showTip2">
-          Show TeachingTip
-        </WinButton>
-        <WinTeachingTip
-          :visible="showTip2"
-          :isTargeted="false"
-          title="This is the title"
-          subtitle="And this is the subtitle"
-          actionButtonText="Action button"
-          closeButtonText="Close button"
-          :isLightDismissEnabled="true"
-          @action="showTip2 = false"
-          @close="showTip2 = false" />
-      </template>
-    </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.teachingtip.non-targeted')" :theme="pageTheme" :vue="nonTargetedCode">
+              <template #example>
+                <WinButton @Click="testButton2TeachingTipOpen = true">
+                  <WinTextBlock :Text="$t('text.show-teachingtip')" />
+                </WinButton>
+                <WinTeachingTip
+                  v-model:IsOpen="testButton2TeachingTipOpen"
+                  :Title="$t('sample.teachingtip.title')"
+                  :Subtitle="$t('sample.teachingtip.subtitle')"
+                  :ActionButtonContent="$t('sample.teachingtip.action-button')"
+                  :CloseButtonContent="$t('sample.teachingtip.close-button')"
+                  :IsLightDismissEnabled="true"
+                  :PlacementMargin="20"
+                  PreferredPlacement="Auto" />
+              </template>
+            </WinControlExample>
 
-    <!-- Example 3: TeachingTip with Hero Content -->
-    <WinControlExample headerText="Show a targeted TeachingTip with hero content on a button.">
-      <template #example>
-        <div class="tip-container">
-          <WinButton ref="targetButton3" @click="showTip3 = !showTip3">
-            Show TeachingTip
-          </WinButton>
-          <WinTeachingTip
-            :visible="showTip3"
-            :target="targetButton3"
-            title="This is the title"
-            subtitle="And this is the subtitle"
-            preferredPlacement="Bottom"
-            @close="showTip3 = false">
-            <template #hero>
-              <img
-                src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/sunset.jpg"
-                alt="Sunset"
-                style="width: 100%; height: 100%; object-fit: cover;" />
-            </template>
-            <template #default>
-              <p style="margin: 16px 0 0; font-size: 14px; line-height: 1.5;">
-                Description can go here
-              </p>
-            </template>
-          </WinTeachingTip>
-        </div>
-      </template>
-    </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.teachingtip.hero')" :theme="pageTheme" :vue="heroCode">
+              <template #example>
+                <WinButton ref="testButton3" @Click="testButton3TeachingTipOpen = true">
+                  <WinTextBlock :Text="$t('text.show-teachingtip')" />
+                </WinButton>
+                <WinTeachingTip
+                  v-model:IsOpen="testButton3TeachingTipOpen"
+                  :Title="$t('sample.teachingtip.title')"
+                  :Subtitle="$t('sample.teachingtip.subtitle')"
+                  :Target="testButton3"
+                  PreferredPlacement="Bottom">
+                  <template #HeroContent>
+                    <img class="hero-image" :src="sunsetImageUrl" :alt="$t('text.sunset')" />
+                  </template>
+                  <WinTextBlock class="tip-description" :Text="$t('sample.teachingtip.description')" TextWrapping="WrapWholeWords" />
+                </WinTeachingTip>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
 import WinTeachingTip from '../../components/WinTeachingTip.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
+import { createPageState } from '../../utils/pageState';
 
-const targetButton1 = ref(null);
-const targetButton3 = ref(null);
-const showTip1 = ref(false);
-const showTip2 = ref(false);
-const showTip3 = ref(false);
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'teachingtip');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+
+const testButton1 = ref(null);
+const testButton3 = ref(null);
+const testButton1TeachingTipOpen = ref(false);
+const testButton2TeachingTipOpen = ref(false);
+const testButton3TeachingTipOpen = ref(false);
+const sunsetImageUrl = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/sunset.jpg';
+
+const targetedCode = computed(() => `<WinButton ref="testButton1" @Click="testButton1TeachingTipOpen = true">
+  <WinTextBlock Text="${t('text.show-teachingtip')}" />
+</WinButton>
+<WinTeachingTip
+  v-model:IsOpen="testButton1TeachingTipOpen"
+  Title="${t('sample.teachingtip.title')}"
+  Subtitle="${t('sample.teachingtip.subtitle')}"
+  :Target="testButton1"
+  IconSource="Refresh" />`);
+
+const nonTargetedCode = computed(() => `<WinButton @Click="testButton2TeachingTipOpen = true">
+  <WinTextBlock Text="${t('text.show-teachingtip')}" />
+</WinButton>
+<WinTeachingTip
+  v-model:IsOpen="testButton2TeachingTipOpen"
+  Title="${t('sample.teachingtip.title')}"
+  Subtitle="${t('sample.teachingtip.subtitle')}"
+  ActionButtonContent="${t('sample.teachingtip.action-button')}"
+  CloseButtonContent="${t('sample.teachingtip.close-button')}"
+  :IsLightDismissEnabled="true"
+  :PlacementMargin="20"
+  PreferredPlacement="Auto" />`);
+
+const heroCode = computed(() => `<WinButton ref="testButton3" @Click="testButton3TeachingTipOpen = true">
+  <WinTextBlock Text="${t('text.show-teachingtip')}" />
+</WinButton>
+<WinTeachingTip
+  v-model:IsOpen="testButton3TeachingTipOpen"
+  Title="${t('sample.teachingtip.title')}"
+  Subtitle="${t('sample.teachingtip.subtitle')}"
+  :Target="testButton3"
+  PreferredPlacement="Bottom">
+  <template #HeroContent>
+    <img src="${sunsetImageUrl}" alt="${t('text.sunset')}" />
+  </template>
+  <WinTextBlock Text="${t('sample.teachingtip.description')}" TextWrapping="WrapWholeWords" />
+</WinTeachingTip>`);
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.tip-container {
-  position: relative;
-  display: inline-block;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.hero-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tip-description { margin-top: 16px; }
 </style>

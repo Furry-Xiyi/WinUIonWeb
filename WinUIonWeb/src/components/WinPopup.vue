@@ -1,85 +1,119 @@
 <template>
-  <div class="win-popup-anchor" ref="anchorRef">
+  <span class="win-popup-anchor" ref="anchorRef">
     <slot name="trigger"></slot>
-    <Transition name="popup-anim" @before-enter="onBeforeEnter" @enter="onEnter">
-      <div v-if="visible" class="win-popup" ref="popupRef">
-        <slot></slot>
-      </div>
-    </Transition>
-  </div>
+    <Teleport to="body">
+      <div v-if="effectiveIsOpen && IsLightDismissEnabled" class="win-popup-dismiss-layer" @pointerdown="close"></div>
+      <Transition name="win-popup">
+        <div
+          v-if="effectiveIsOpen"
+          ref="popupRef"
+          class="win-popup"
+          :style="popupStyle"
+          @pointerdown.stop>
+          <slot></slot>
+        </div>
+      </Transition>
+    </Teleport>
+  </span>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 const props = defineProps({
-  visible: Boolean,
+  IsOpen: { type: Boolean, default: undefined },
+  visible: { type: Boolean, default: undefined },
+  HorizontalOffset: { type: Number, default: undefined },
+  VerticalOffset: { type: Number, default: undefined },
+  IsLightDismissEnabled: { type: Boolean, default: true },
   horizontalOffset: { type: Number, default: 0 },
   verticalOffset: { type: Number, default: 0 },
   lightDismiss: { type: Boolean, default: true }
 });
 
-const emit = defineEmits(['update:visible']);
+const emit = defineEmits(['update:IsOpen', 'update:visible', 'Opened', 'Closed']);
 
 const anchorRef = ref(null);
 const popupRef = ref(null);
+const localIsOpen = ref(false);
+const position = ref({ top: 0, left: 0 });
 
-const onBeforeEnter = (el) => {
-  el.style.visibility = 'hidden';
+const effectiveIsOpen = computed(() => props.IsOpen ?? props.visible ?? localIsOpen.value);
+const HorizontalOffset = computed(() => props.HorizontalOffset ?? props.horizontalOffset);
+const VerticalOffset = computed(() => props.VerticalOffset ?? props.verticalOffset);
+const IsLightDismissEnabled = computed(() => props.IsLightDismissEnabled ?? props.lightDismiss);
+const popupStyle = computed(() => ({
+  top: `${position.value.top}px`,
+  left: `${position.value.left}px`
+}));
+
+const setOpen = (value) => {
+  localIsOpen.value = value;
+  emit('update:IsOpen', value);
+  emit('update:visible', value);
+  emit(value ? 'Opened' : 'Closed');
 };
 
-const onEnter = (el) => {
-  const anchor = anchorRef.value.querySelector('[data-popup-trigger]') || anchorRef.value.children[0];
-  if (!anchor) { el.style.visibility = ''; return; }
-  const anchorRect = anchor.getBoundingClientRect();
-  const anchorParent = anchorRef.value.getBoundingClientRect();
-  const top = (anchorRect.bottom - anchorParent.top) + 4 + props.verticalOffset;
-  const left = (anchorRect.left - anchorParent.left) + props.horizontalOffset;
-  el.style.top = top + 'px';
-  el.style.left = left + 'px';
-  el.style.visibility = '';
+const updatePosition = async () => {
+  await nextTick();
+  const anchor = anchorRef.value;
+  const popup = popupRef.value;
+  if (!anchor || !popup) return;
+  const trigger = anchor.querySelector('[data-popup-trigger]') || anchor.firstElementChild || anchor;
+  const rect = trigger.getBoundingClientRect();
+  const popupRect = popup.getBoundingClientRect();
+  const margin = 8;
+  const left = Math.max(margin, Math.min(window.innerWidth - popupRect.width - margin, rect.left + HorizontalOffset.value));
+  const top = Math.max(margin, Math.min(window.innerHeight - popupRect.height - margin, rect.top + VerticalOffset.value));
+  position.value = { top, left };
 };
 
-const onDocClick = (e) => {
-  if (!props.visible || !props.lightDismiss) return;
-  if (anchorRef.value && !anchorRef.value.contains(e.target)) {
-    emit('update:visible', false);
-  }
+const open = async () => {
+  setOpen(true);
+  await updatePosition();
 };
 
-onMounted(() => document.addEventListener('pointerdown', onDocClick));
-onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocClick));
+const close = () => {
+  if (effectiveIsOpen.value) setOpen(false);
+};
+
+watch(effectiveIsOpen, (value) => {
+  if (value) void updatePosition();
+});
+
+watch([HorizontalOffset, VerticalOffset], () => {
+  if (effectiveIsOpen.value) void updatePosition();
+});
+
+defineExpose({ open, close });
 </script>
 
 <style>
 .win-popup-anchor {
-  position: relative;
   display: inline-flex;
 }
 
-  .win-popup {
-    position: absolute;
-    z-index: 9500;
-    background: var(--flyout-bg);
-    background-image: var(--flyout-material-overlay);
-    backdrop-filter: var(--flyout-backdrop);
-    -webkit-backdrop-filter: var(--flyout-backdrop);
-    border: 1px solid var(--flyout-border);
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-    min-width: 240px;
-  }
-
-.popup-anim-enter-active {
-  animation: popup-fade-in 0.250s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+.win-popup-dismiss-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 949;
 }
 
-.popup-anim-leave-active {
-  animation: popup-fade-out 0.167s cubic-bezier(0.7, 0, 1, 0.5) both;
+.win-popup {
+  position: fixed;
+  z-index: 950;
+  color: var(--text-primary);
 }
 
-@keyframes popup-fade-in {
+.win-popup-enter-active {
+  animation: win-popup-enter 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.win-popup-leave-active {
+  animation: win-popup-exit 167ms cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+@keyframes win-popup-enter {
   from {
     opacity: 0;
     transform: translateY(-8px);
@@ -90,12 +124,8 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocClick));
   }
 }
 
-@keyframes popup-fade-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
+@keyframes win-popup-exit {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 </style>

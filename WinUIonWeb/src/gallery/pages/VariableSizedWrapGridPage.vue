@@ -1,178 +1,75 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">VariableSizedWrapGrid</h1>
-      <p class="page-description">
-        Positions child elements in sequential position from left to right, breaking content to the next line at the edge of the containing box. Subsequent ordering happens sequentially from top to bottom or from right to left, depending on the value of the Orientation property. Use the attached properties VariableSizedWrapGrid.ColumnSpan and VariableSizedWrapGrid.RowSpan on child elements to span multiple rows or columns.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.variablesizedwrapgrid')" />
+          <WinTextBlock class="page-description" :Text="$t('text.variablesizedwrapgrid-description')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.variablesizedwrapgrid.control')" :theme="pageTheme" :vue="wrapGridCode">
+              <template #example>
+                <WinVariableSizedWrapGrid Width="400" ItemHeight="44" ItemWidth="44" MaximumRowsOrColumns="3" :Orientation="orientation">
+                  <div class="grid-item red" />
+                  <div class="grid-item blue" style="grid-row: span 2;" />
+                  <div class="grid-item green" style="grid-column: span 2;" />
+                  <div class="grid-item yellow" style="grid-column: span 2; grid-row: span 2;" />
+                </WinVariableSizedWrapGrid>
+              </template>
+              <template #options>
+                <WinRadioButtons Header="Orientation" :ItemsSource="orientationItems" :SelectedIndex="orientationIndex" @SelectionChanged="onOrientationChanged" />
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example 1: VariableSizedWrapGrid with spanning items -->
-    <WinControlExample
-      headerText="VariableSizedWrapGrid"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div class="variable-sized-wrap-grid" :class="orientationClass">
-          <div class="grid-item" style="background: #E81123;"></div>
-          <div class="grid-item" :class="item2SpanClass" style="background: #0078D7;"></div>
-          <div class="grid-item" :class="item3SpanClass" style="background: #107C10;"></div>
-          <div class="grid-item" :class="item4SpanClass" style="background: #FFB900;"></div>
-        </div>
-      </template>
-      <template #options>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">Orientation</div>
-          <WinRadioButton v-model="orientation" value="horizontal">
-            Horizontal
-          </WinRadioButton>
-          <WinRadioButton v-model="orientation" value="vertical">
-            Vertical
-          </WinRadioButton>
-        </div>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
+import WinRadioButtons from '../../components/WinRadioButtons.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import WinVariableSizedWrapGrid from '../../components/WinVariableSizedWrapGrid.vue';
+import { createPageState } from '../../utils/pageState';
 
-// Page theme management
-const pageTheme = ref('system');
-const isFavoriteState = ref(false);
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'variablesizedwrapgrid');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const toggleTheme = () => {
-  const themes = ['system', 'light', 'dark'];
-  const currentIndex = themes.indexOf(pageTheme.value);
-  pageTheme.value = themes[(currentIndex + 1) % themes.length];
+const orientationItems = [{ Text: 'Horizontal' }, { Text: 'Vertical' }];
+const orientationIndex = ref(1);
+const orientation = computed(() => orientationItems[orientationIndex.value]?.Text || 'Vertical');
+const onOrientationChanged = ({ SelectedIndex }) => {
+  orientationIndex.value = SelectedIndex;
 };
 
-const toggleFavorite = (value) => {
-  console.log('Favorite:', value);
-};
-
-// Example 1: VariableSizedWrapGrid
-const orientation = ref('vertical');
-
-const orientationClass = computed(() => {
-  return orientation.value === 'horizontal' ? 'orientation-horizontal' : 'orientation-vertical';
-});
-
-const item2SpanClass = computed(() => {
-  return orientation.value === 'horizontal' ? 'col-span-2' : 'row-span-2';
-});
-
-const item3SpanClass = computed(() => {
-  return orientation.value === 'horizontal' ? 'row-span-2' : 'col-span-2';
-});
-
-const item4SpanClass = computed(() => {
-  return orientation.value === 'horizontal' ? 'col-span-2 row-span-2' : 'col-span-2 row-span-2';
-});
-
-// Code examples
-const example1Template = `<div class="variable-sized-wrap-grid" :class="orientationClass">
-  <div class="grid-item" style="background: #E81123;"></div>
-  <div class="grid-item" :class="item2SpanClass" style="background: #0078D7;"></div>
-  <div class="grid-item" :class="item3SpanClass" style="background: #107C10;"></div>
-  <div class="grid-item" :class="item4SpanClass" style="background: #FFB900;"></div>
-</div>`;
-
-const example1Vue = `const orientation = ref('vertical');
-
-const orientationClass = computed(() => {
-  return orientation.value === 'horizontal' ? 'orientation-horizontal' : 'orientation-vertical';
-});
-
-const item2SpanClass = computed(() => {
-  return orientation.value === 'horizontal' ? 'col-span-2' : 'row-span-2';
-});
-
-const item3SpanClass = computed(() => {
-  return orientation.value === 'horizontal' ? 'row-span-2' : 'col-span-2';
-});
-
-const item4SpanClass = computed(() => {
-  return orientation.value === 'horizontal' ? 'col-span-2 row-span-2' : 'col-span-2 row-span-2';
-});`;
+const wrapGridCode = computed(() => `<WinVariableSizedWrapGrid Width="400" ItemHeight="44" ItemWidth="44" MaximumRowsOrColumns="3" Orientation="${orientation.value}">
+  <Rectangle Fill="Red" />
+  <Rectangle Fill="Blue" VariableSizedWrapGrid.RowSpan="2" />
+  <Rectangle Fill="Green" VariableSizedWrapGrid.ColumnSpan="2" />
+  <Rectangle Fill="Yellow" VariableSizedWrapGrid.ColumnSpan="2" VariableSizedWrapGrid.RowSpan="2" />
+</WinVariableSizedWrapGrid>`);
 </script>
 
 <style scoped>
-.page-header {
-  margin: 0 0 8px 0;
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.page-description {
-  margin: 0 0 24px 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--text-secondary);
-  max-width: 800px;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 8px;
-}
-
-.icon {
-  font-family: 'Segoe MDL2 Assets', 'Segoe Fluent Icons', 'Segoe UI Symbol';
-  font-size: 16px;
-}
-
-/* VariableSizedWrapGrid styles */
-.variable-sized-wrap-grid {
-  width: 400px;
-  display: grid;
-  gap: 4px;
-}
-
-.variable-sized-wrap-grid.orientation-vertical {
-  grid-template-columns: repeat(3, 44px);
-  grid-auto-rows: 44px;
-  grid-auto-flow: row;
-}
-
-.variable-sized-wrap-grid.orientation-horizontal {
-  grid-template-rows: repeat(3, 44px);
-  grid-auto-columns: 44px;
-  grid-auto-flow: column;
-}
-
-.grid-item {
-  border-radius: 4px;
-}
-
-.row-span-2 {
-  grid-row: span 2;
-}
-
-.col-span-2 {
-  grid-column: span 2;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.grid-item { min-width: 44px; min-height: 44px; }
+.red { background: Red; }
+.blue { background: Blue; }
+.green { background: Green; }
+.yellow { background: Yellow; }
 </style>

@@ -1,49 +1,52 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <WinTextBlock class="page-header" :Text="$t('text.togglebutton')" />
-      <WinTextBlock
-        class="page-description"
-        :Text="$t('text.a-togglebutton-looks-like-a-button-but-works-lik')"
-        TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton
-          class="header-action"
-          @Click="toggleTheme"
-          >
-          <span class="icon"></span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          class="header-action"
-          @update:IsChecked="toggleFavorite"
-          >
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.togglebutton')" />
+          <WinTextBlock
+            class="page-description"
+            :Text="$t('text.a-togglebutton-looks-like-a-button-but-works-lik')"
+            TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton
+              class="header-action"
+              @Click="toggleTheme"
+              >
+              <span class="icon"></span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              class="header-action"
+              @update:IsChecked="toggleFavorite"
+              >
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample
+              class="basic-input-example-theme"
+              :headerText="$t('sample.togglebutton.simple')"
+              :theme="pageTheme"
+              :vue="toggleButtonVue">
+              <template #example>
+                <WinToggleButton
+                  v-model:IsChecked="Toggle1"
+                  :Content="$t('text.togglebutton')"
+                  :IsEnabled="DisableToggle1 !== true"
+                  @Checked="ToggleButton_Checked"
+                  @Unchecked="ToggleButton_Unchecked" />
+              </template>
+
+              <template #options>
+                <WinTextBlock class="output-text" :Text="Control1Output" />
+                <WinCheckBox v-model="DisableToggle1">
+                  <WinTextBlock :Text="$t('sample.disable-togglebutton')" />
+                </WinCheckBox>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.togglebutton.simple')" />
-    <WinControlExample
-      class="basic-input-example-theme"
-      :theme="pageTheme"
-      :vue="toggleButtonVue">
-      <template #example>
-        <WinToggleButton
-          v-model:IsChecked="Toggle1"
-          :Content="$t('text.togglebutton')"
-          :IsEnabled="DisableToggle1 !== true"
-          @Checked="ToggleButton_Checked"
-          @Unchecked="ToggleButton_Unchecked" />
-      </template>
-
-      <template #options>
-        <WinTextBlock class="output-text" :Text="Control1Output" />
-        <WinCheckBox v-model="DisableToggle1">
-          <WinTextBlock :Text="$t('sample.disable-togglebutton')" />
-        </WinCheckBox>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -56,6 +59,7 @@ import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'togglebutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -122,9 +126,5 @@ const toggleButtonVue = `<WinToggleButton
   font-size: 14px;
   color: var(--text-primary);
   margin: 0;
-}
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
 }
 </style>

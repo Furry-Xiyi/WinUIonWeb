@@ -1,52 +1,53 @@
 <template>
-  <div>
+  <div class="gallery-item-page">
     <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.colorpicker')" />
-      <WinTextBlock class="page-description" :Text="$t('text.a-control-that-lets-users-pick-a-color-from-a-sp')" TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.colorpicker.properties')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="colorPickerPropertiesVue">
-      <template #example>
-        <WinColorPicker
-          v-model:Color="color"
-          :ColorSpectrumShape="ColorSpectrumShape"
-          :IsMoreButtonVisible="IsMoreButtonVisible"
-          :IsColorSliderVisible="IsColorSliderVisible"
-          :IsColorChannelTextInputVisible="IsColorChannelTextInputVisible"
-          :IsHexInputVisible="IsHexInputVisible"
-          :IsAlphaEnabled="IsAlphaEnabled"
-          :IsAlphaSliderVisible="IsAlphaSliderVisible"
-          :IsAlphaTextInputVisible="IsAlphaTextInputVisible" />
-      </template>
-      <template #options>
-        <div class="options-panel">
-          <WinCheckBox v-model:IsChecked="IsMoreButtonVisible"><WinTextBlock Text="IsMoreButtonVisible" /></WinCheckBox>
-          <WinCheckBox v-model:IsChecked="IsColorSliderVisible"><WinTextBlock Text="IsColorSliderVisible" /></WinCheckBox>
-          <WinCheckBox v-model:IsChecked="IsColorChannelTextInputVisible"><WinTextBlock Text="IsColorChannelTextInputVisible" /></WinCheckBox>
-          <WinCheckBox v-model:IsChecked="IsHexInputVisible"><WinTextBlock Text="IsHexInputVisible" /></WinCheckBox>
-          <WinCheckBox v-model:IsChecked="IsAlphaEnabled"><WinTextBlock :Text="$t('sample.alpha-enabled')" /></WinCheckBox>
-          <WinCheckBox v-model:IsChecked="IsAlphaSliderVisible" :IsEnabled="IsAlphaEnabled"><WinTextBlock Text="IsAlphaSliderVisible" /></WinCheckBox>
-          <WinCheckBox v-model:IsChecked="IsAlphaTextInputVisible" :IsEnabled="IsAlphaEnabled"><WinTextBlock Text="IsAlphaTextInputVisible" /></WinCheckBox>
-          <div class="radio-group">
-            <WinTextBlock class="radio-header" :Text="$t('sample.colorspectrum-shape')" />
-            <WinRadioButton v-model="ColorSpectrumShape" value="Box"><WinTextBlock :Text="$t('sample.box')" /></WinRadioButton>
-            <WinRadioButton v-model="ColorSpectrumShape" value="Ring"><WinTextBlock :Text="$t('sample.ring')" /></WinRadioButton>
-          </div>
-          <div class="preview-section">
-            <WinTextBlock :Text="$t('sample.colorpicker.applied-rectangle')" />
-            <div class="preview-rect" :style="{ background: color }"></div>
+          <WinTextBlock class="page-header" :Text="$t('text.colorpicker')" />
+          <WinTextBlock class="page-description" :Text="$t('text.a-control-that-lets-users-pick-a-color-from-a-sp')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
           </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="colorPickerPropertiesVue" :headerText="$t('sample.colorpicker.properties')">
+              <template #example>
+                <WinColorPicker
+                  v-model:Color="color"
+                  :ColorSpectrumShape="ColorSpectrumShape"
+                  :IsMoreButtonVisible="IsMoreButtonVisible"
+                  :IsColorSliderVisible="IsColorSliderVisible"
+                  :IsColorChannelTextInputVisible="IsColorChannelTextInputVisible"
+                  :IsHexInputVisible="IsHexInputVisible"
+                  :IsAlphaEnabled="IsAlphaEnabled"
+                  :IsAlphaSliderVisible="IsAlphaSliderVisible"
+                  :IsAlphaTextInputVisible="IsAlphaTextInputVisible" />
+              </template>
+              <template #options>
+                <div class="options-panel">
+                  <WinCheckBox v-model:IsChecked="IsMoreButtonVisible"><WinTextBlock Text="IsMoreButtonVisible" /></WinCheckBox>
+                  <WinCheckBox v-model:IsChecked="IsColorSliderVisible"><WinTextBlock Text="IsColorSliderVisible" /></WinCheckBox>
+                  <WinCheckBox v-model:IsChecked="IsColorChannelTextInputVisible"><WinTextBlock Text="IsColorChannelTextInputVisible" /></WinCheckBox>
+                  <WinCheckBox v-model:IsChecked="IsHexInputVisible"><WinTextBlock Text="IsHexInputVisible" /></WinCheckBox>
+                  <WinCheckBox v-model:IsChecked="IsAlphaEnabled"><WinTextBlock :Text="$t('sample.alpha-enabled')" /></WinCheckBox>
+                  <WinCheckBox v-model:IsChecked="IsAlphaSliderVisible" :IsEnabled="IsAlphaEnabled"><WinTextBlock Text="IsAlphaSliderVisible" /></WinCheckBox>
+                  <WinCheckBox v-model:IsChecked="IsAlphaTextInputVisible" :IsEnabled="IsAlphaEnabled"><WinTextBlock Text="IsAlphaTextInputVisible" /></WinCheckBox>
+                  <div class="radio-group">
+                    <WinTextBlock class="radio-header" :Text="$t('sample.colorspectrum-shape')" />
+                    <WinRadioButton v-model="ColorSpectrumShape" value="Box"><WinTextBlock :Text="$t('sample.box')" /></WinRadioButton>
+                    <WinRadioButton v-model="ColorSpectrumShape" value="Ring"><WinTextBlock :Text="$t('sample.ring')" /></WinRadioButton>
+                  </div>
+                  <div class="preview-section">
+                    <WinTextBlock :Text="$t('sample.colorpicker.applied-rectangle')" />
+                    <div class="preview-rect" :style="{ background: color }"></div>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -61,6 +62,7 @@ import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'colorpicker');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -99,8 +101,4 @@ const colorPickerPropertiesVue = `<WinColorPicker
 .radio-header { font-weight: 600; }
 .preview-section { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
 .preview-rect { height: 100px; border-radius: 4px; border: 1px solid var(--ctrl-border); }
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
-}
 </style>

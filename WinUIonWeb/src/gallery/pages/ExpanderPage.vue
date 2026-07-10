@@ -1,78 +1,44 @@
 <template>
-  <div>
+  <div class="gallery-item-page">
     <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.expander')" />
-      <WinTextBlock
-        class="page-description"
-        :Text="$t('text.the-expander-control-lets-you-show-or-hide-less')"
-        TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <WinTextBlock
-      class="control-example-description"
-      Text="An Expander with text in the header and content areas" />
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template">
-      <template #example>
-        <WinExpander
-          v-model:IsExpanded="expander1Expanded"
-          Header="This text is in the header"
-          Description="This is in the description"
-          :ExpandDirection="expandDirection"
-          VerticalAlignment="Top">
-          <WinTextBlock Text="This is in the content" />
-        </WinExpander>
-      </template>
-      <template #options>
-        <div class="options-panel">
-          <WinTextBlock class="option-label" Text="ExpandDirection" />
-          <WinComboBox
-            :options="expandDirections"
-            v-model="expandDirectionIndex"
-            style="width: 100%;" />
+          <WinTextBlock class="page-header" :Text="$t('text.expander')" />
+          <WinTextBlock class="page-description" :Text="$t('text.the-expander-control-lets-you-show-or-hide-less')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.expander.text-header-content')" :theme="pageTheme" :vue="example1Code">
+              <template #example>
+                <WinExpander
+                  v-model:IsExpanded="expander1Expanded"
+                  :ExpandDirection="expandDirection"
+                  :Header="$t('sample.expander.header-text')"
+                  VerticalAlignment="Top">
+                  <WinTextBlock :Text="$t('sample.expander.content-text')" />
+                </WinExpander>
+              </template>
+              <template #options>
+                <WinComboBox v-model:SelectedIndex="expandDirectionIndex" Header="ExpandDirection" Width="196" :ItemsSource="expandDirectionItems" />
+              </template>
+            </WinControlExample>
 
-    <WinTextBlock
-      class="control-example-description"
-      Text="Modifying Expanders content alignment" />
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template">
-      <template #example>
-        <WinExpander
-          Width="500"
-          MaxWidth="100%"
-          Padding="0"
-          HorizontalContentAlignment="Left">
-          <template #Header>
-            <WinTextBlock
-              class="centered-header-text"
-              HorizontalTextAlignment="Center"
-              Text="This text is centered" />
-          </template>
-          <WinTextBlock Margin="4" Text="And this text is left aligned" />
-        </WinExpander>
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock
-      class="control-example-description"
-      Text="An Expander with a HeaderIcon slot" />
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template">
-      <template #example>
-        <WinExpander
-          Header="Network settings"
-          Description="Manage wireless, proxy, and metered connection options."
-          HeaderIcon="&#xE968;">
-          <WinTextBlock Text="Network options are shown here." />
-        </WinExpander>
-      </template>
-    </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.expander.content-alignment')" :theme="pageTheme" :vue="example2Code">
+              <template #example>
+                <WinExpander Width="500" MaxWidth="100%" Padding="0" HorizontalContentAlignment="Left">
+                  <template #Header>
+                    <WinTextBlock class="centered-header-text" HorizontalTextAlignment="Center" :Text="$t('sample.expander.centered-header')" />
+                  </template>
+                  <WinTextBlock Margin="4" :Text="$t('sample.expander.left-aligned-content')" />
+                </WinExpander>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -84,53 +50,42 @@ import WinControlExample from '../../components/WinControlExample.vue';
 import WinExpander from '../../components/WinExpander.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'expander');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+
 const expander1Expanded = ref(false);
-
-const expandDirections = [
-  { label: 'Down', value: 'Down' },
-  { label: 'Up', value: 'Up' }
-];
+const expandDirectionItems = [{ Text: 'Down' }, { Text: 'Up' }];
 const expandDirectionIndex = ref(0);
-const expandDirection = computed(() => expandDirections[expandDirectionIndex.value].value);
+const expandDirection = computed(() => expandDirectionItems[expandDirectionIndex.value]?.Text || 'Down');
 
-const example1Template = `<WinExpander
-  IsExpanded="False"
-  ExpandDirection="Down"
-  Header="This text is in the header"
-  Description="This is in the description">
-  <WinTextBlock Text="This is in the content" />
-</WinExpander>`;
+const example1Code = computed(() => `<WinExpander
+  IsExpanded="${expander1Expanded.value ? 'True' : 'False'}"
+  ExpandDirection="${expandDirection.value}"
+  Header="${t('sample.expander.header-text')}"
+  VerticalAlignment="Top">
+  <WinTextBlock Text="${t('sample.expander.content-text')}" />
+</WinExpander>`);
 
-const example2Template = `<WinExpander Width="500" HorizontalContentAlignment="Left" Padding="0">
+const example2Code = computed(() => `<WinExpander Width="500" Padding="0" HorizontalContentAlignment="Left">
   <template #Header>
-    <WinTextBlock HorizontalTextAlignment="Center" Text="This text is centered" />
+    <WinTextBlock HorizontalTextAlignment="Center" Text="${t('sample.expander.centered-header')}" />
   </template>
-  <WinTextBlock Margin="4" Text="And this text is left aligned" />
-</WinExpander>`;
-
-const example3Template = `<WinExpander
-  Header="Network settings"
-  Description="Manage wireless, proxy, and metered connection options."
-  HeaderIcon="&#xE968;">
-  <WinTextBlock Text="Network options are shown here." />
-</WinExpander>`;
+  <WinTextBlock Margin="4" Text="${t('sample.expander.left-aligned-content')}" />
+</WinExpander>`);
 </script>
 
 <style scoped>
 .page-heading { position: relative; }
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
-.control-example-description { margin-top: 16px; }
-.options-panel { display: flex; flex-direction: column; gap: 8px; }
-.option-label { font-size: 14px; font-weight: 600; }
 .centered-header-text { width: 100%; }
-.slot-icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 20px; line-height: 20px; }
 </style>

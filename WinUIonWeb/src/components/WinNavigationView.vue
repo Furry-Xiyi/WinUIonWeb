@@ -1496,11 +1496,9 @@ watch(() => props.selectedValue, (val, oldVal) => {
     min-width: 0;
     min-height: 0;
     background: var(--layer-default);
-    overflow-y: auto;
+    overflow: hidden;
     overflow-x: hidden;
     transition: background var(--normal-duration) var(--fast-out-slow-in);
-    scrollbar-width: thin;
-    scrollbar-color: var(--ctrl-strong-stroke) transparent;
   }
 
   .win-nav-shell.is-left .win-nav-content {
@@ -1523,7 +1521,9 @@ watch(() => props.selectedValue, (val, oldVal) => {
   }
 
   .win-nav-content-inner {
-    padding: 24px 32px;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
   }
 
   .win-nav-page-header {
@@ -1538,7 +1538,7 @@ watch(() => props.selectedValue, (val, oldVal) => {
   }
 
     .win-nav-page-header + .win-nav-content-inner {
-      padding-top: 16px;
+      padding-top: 0;
     }
 
   .win-nav-left-panel {

@@ -1,106 +1,109 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">StandardUICommand</h1>
-      <p class="page-description">
-        StandardUICommand allows the sharing of the UX associated with a command across multiple controls.
-        It provides a consistent icon, label, keyboard shortcut, and description for common commands like Delete, Copy, Paste, etc.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <!-- Example: Exposing a command in multiple controls -->
-    <WinControlExample
-      headerText="Exposing a command in multiple controls using StandardUICommand"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div class="example-container">
-          <div class="description-text">
-            StandardUICommand allows the sharing of the UX associated with a command.
-            In this instance we are using a StandardUICommand to quickly place
-            the delete command in multiple controls. The StandardUICommand contains the icon, label,
-            keyboard shortcut, and a description.
-          </div>
-
-          <!-- Menu Bar -->
-          <div class="menu-bar">
-            <div class="menu-bar-item">
-              <button class="menu-button" @click="toggleFileMenu">File</button>
-              <div v-if="fileMenuOpen" class="menu-flyout">
-                <div class="menu-item">New</div>
-                <div class="menu-item">Open...</div>
-                <div class="menu-item">Save</div>
-                <div class="menu-item">Exit</div>
-              </div>
-            </div>
-            <div class="menu-bar-item">
-              <button class="menu-button" @click="toggleEditMenu">Edit</button>
-              <div v-if="editMenuOpen" class="menu-flyout">
-                <div class="menu-item" @click="executeDeleteCommand()">
-                  <span class="icon">&#xE74D;</span>
-                  Delete
-                  <span class="accelerator">Delete</span>
-                </div>
-              </div>
-            </div>
-            <div class="menu-bar-item">
-              <button class="menu-button" @click="toggleHelpMenu">Help</button>
-              <div v-if="helpMenuOpen" class="menu-flyout">
-                <div class="menu-item">About</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- List View -->
-          <div class="list-view">
-            <div
-              v-for="(item, index) in listItems"
-              :key="index"
-              class="list-item"
-              :class="{ 'selected': selectedIndex === index }"
-              @click="selectedIndex = index"
-              @contextmenu.prevent="showContextMenu($event, index)"
-              @mouseenter="hoveredIndex = index"
-              @mouseleave="hoveredIndex = -1">
-              <span class="list-item-text">{{ item }}</span>
-              <WinButton
-                v-if="hoveredIndex === index"
-                class="hover-delete-button"
-                @click.stop="executeDeleteCommand(item)">
-                <span class="icon">&#xE74D;</span>
-              </WinButton>
-            </div>
-          </div>
-
-          <!-- Context Menu -->
-          <div
-            v-if="contextMenuVisible"
-            class="context-menu"
-            :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }"
-            @click="hideContextMenu">
-            <div class="menu-item" @click="executeDeleteCommand(contextMenuItem)">
-              <span class="icon">&#xE74D;</span>
-              Delete
-              <span class="accelerator">Delete</span>
-            </div>
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">StandardUICommand</h1>
+          <p class="page-description">
+            StandardUICommand allows the sharing of the UX associated with a command across multiple controls.
+            It provides a consistent icon, label, keyboard shortcut, and description for common commands like Delete, Copy, Paste, etc.
+          </p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
           </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example: Exposing a command in multiple controls -->
+            <WinControlExample
+              headerText="Exposing a command in multiple controls using StandardUICommand"
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <div class="example-container">
+                  <div class="description-text">
+                    StandardUICommand allows the sharing of the UX associated with a command.
+                    In this instance we are using a StandardUICommand to quickly place
+                    the delete command in multiple controls. The StandardUICommand contains the icon, label,
+                    keyboard shortcut, and a description.
+                  </div>
+
+                  <!-- Menu Bar -->
+                  <div class="menu-bar">
+                    <div class="menu-bar-item">
+                      <button class="menu-button" @click="toggleFileMenu">File</button>
+                      <div v-if="fileMenuOpen" class="menu-flyout">
+                        <div class="menu-item">New</div>
+                        <div class="menu-item">Open...</div>
+                        <div class="menu-item">Save</div>
+                        <div class="menu-item">Exit</div>
+                      </div>
+                    </div>
+                    <div class="menu-bar-item">
+                      <button class="menu-button" @click="toggleEditMenu">Edit</button>
+                      <div v-if="editMenuOpen" class="menu-flyout">
+                        <div class="menu-item" @click="executeDeleteCommand()">
+                          <span class="icon">&#xE74D;</span>
+                          Delete
+                          <span class="accelerator">Delete</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="menu-bar-item">
+                      <button class="menu-button" @click="toggleHelpMenu">Help</button>
+                      <div v-if="helpMenuOpen" class="menu-flyout">
+                        <div class="menu-item">About</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- List View -->
+                  <div class="list-view">
+                    <div
+                      v-for="(item, index) in listItems"
+                      :key="index"
+                      class="list-item"
+                      :class="{ 'selected': selectedIndex === index }"
+                      @click="selectedIndex = index"
+                      @contextmenu.prevent="showContextMenu($event, index)"
+                      @mouseenter="hoveredIndex = index"
+                      @mouseleave="hoveredIndex = -1">
+                      <span class="list-item-text">{{ item }}</span>
+                      <WinButton
+                        v-if="hoveredIndex === index"
+                        class="hover-delete-button"
+                        @click.stop="executeDeleteCommand(item)">
+                        <span class="icon">&#xE74D;</span>
+                      </WinButton>
+                    </div>
+                  </div>
+
+                  <!-- Context Menu -->
+                  <div
+                    v-if="contextMenuVisible"
+                    class="context-menu"
+                    :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }"
+                    @click="hideContextMenu">
+                    <div class="menu-item" @click="executeDeleteCommand(contextMenuItem)">
+                      <span class="icon">&#xE74D;</span>
+                      Delete
+                      <span class="accelerator">Delete</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -112,6 +115,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'standarduicommand');
 

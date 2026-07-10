@@ -5,12 +5,13 @@
          class="win-list-box-item"
          :class="{ selected: isSelected(item, index) }"
          @click="select(index)">
-      <slot name="item" :item="item">{{ item }}</slot>
+      <slot name="item" :item="item"><WinTextBlock :Text="String(item)" /></slot>
     </div>
   </div>
 </template>
 <script setup>
 import { computed, ref, toRaw } from 'vue';
+import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
   ItemsSource: { type: Array, default: null },

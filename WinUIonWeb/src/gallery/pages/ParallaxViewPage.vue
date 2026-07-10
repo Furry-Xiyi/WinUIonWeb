@@ -1,262 +1,120 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">ParallaxView</h1>
-      <p class="page-description">
-        The ParallaxView control lets you create a visual effect where an item closer to the viewer moves faster than an item in the background. This creates a feeling of depth and parallax.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+  <div class="gallery-item-page">
+    <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.parallaxview')" />
+          <WinTextBlock class="page-description" :Text="$t('text.parallaxview-description')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme parallax-example" :exampleHeight="750" :headerText="$t('sample.parallaxview.listview')" :theme="pageTheme" :vue="listViewCode">
+              <template #example>
+                <div class="parallax-host">
+                  <WinParallaxView :VerticalShift="500">
+                    <template #child>
+                      <img class="parallax-image" :src="cliffImage" alt="" />
+                    </template>
+                    <div class="parallax-list">
+                      <WinTextBlock class="parallax-heading" :Text="$t('sample.parallaxview.list-heading')" TextWrapping="WrapWholeWords" />
+                      <div v-for="item in sampleItems" :key="item" class="parallax-list-item">
+                        <WinTextBlock Foreground="White" :Text="item" />
+                      </div>
+                    </div>
+                  </WinParallaxView>
+                </div>
+              </template>
+            </WinControlExample>
+
+            <WinControlExample class="basic-input-example-theme parallax-example" :exampleHeight="750" :headerText="$t('sample.parallaxview.scrollview')" :theme="pageTheme" :vue="scrollViewCode">
+              <template #example>
+                <div class="parallax-host">
+                  <WinParallaxView :VerticalShift="500">
+                    <template #child>
+                      <img class="parallax-image" :src="cliffImage" alt="" />
+                    </template>
+                    <div class="parallax-scroll-example">
+                      <WinTextBlock class="parallax-heading top-heading" :Text="$t('sample.parallaxview.rectangles-heading')" TextWrapping="WrapWholeWords" />
+                      <WinScrollViewer Width="150" Height="750" HorizontalAlignment="Left">
+                        <WinStackPanel>
+                          <div v-for="color in rectangleColors" :key="color" class="color-rectangle" :style="{ background: color }" />
+                        </WinStackPanel>
+                      </WinScrollViewer>
+                    </div>
+                  </WinParallaxView>
+                </div>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <!-- Example 1: Parallax with colored rectangles -->
-    <WinControlExample
-      headerText="Parallax with a scrollable list"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue"
-      style="margin-bottom: 32px;">
-      <template #example>
-        <div style="height: 500px; width: 100%; position: relative; background: #1a1a1a; border-radius: 8px; overflow: hidden;">
-          <WinParallaxView :verticalShift="400">
-            <template #child>
-              <img
-                src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg"
-                alt="Cliff background"
-                style="width: 100%; height: 100%; object-fit: cover;" />
-            </template>
-            <div style="width: 100%; height: 100%; overflow-y: auto; background: rgba(0, 0, 0, 0.4);">
-              <div style="max-width: 280px; margin: 0 auto; padding: 24px 0; text-align: center;">
-                <p style="color: white; font-size: 24px; font-weight: 600; margin: 0;">
-                  Scroll to see parallaxing of image
-                </p>
-              </div>
-              <div style="padding: 0 24px;">
-                <div v-for="(item, index) in scrollItems" :key="index"
-                     style="padding: 16px; margin-bottom: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px;">
-                  <p style="color: white; margin: 0; font-size: 14px;">{{ item.title }}</p>
-                </div>
-              </div>
-            </div>
-          </WinParallaxView>
-        </div>
-      </template>
-    </WinControlExample>
-
-    <!-- Example 2: Parallax with colored rectangles in narrow column -->
-    <WinControlExample
-      headerText="Parallax with a ScrollView"
-      :theme="pageTheme"
-      :templateCode="example2Template"
-      :vueCode="example2Vue">
-      <template #example>
-        <div style="height: 500px; width: 100%; position: relative; background: #1a1a1a; border-radius: 8px; overflow: hidden;">
-          <WinParallaxView :verticalShift="400">
-            <template #child>
-              <img
-                src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg"
-                alt="Cliff background"
-                style="width: 100%; height: 100%; object-fit: cover;" />
-            </template>
-            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start;">
-              <div style="max-width: 280px; margin: 0 auto; padding: 24px 0; text-align: center; z-index: 10;">
-                <p style="color: white; font-size: 24px; font-weight: 600; margin: 0;">
-                  Scroll the rectangles to see parallaxing of image
-                </p>
-              </div>
-              <div style="width: 150px; height: 100%; overflow-y: auto; padding: 0 24px;">
-                <div v-for="color in coloredRectangles" :key="color"
-                     :style="{
-                       height: '150px',
-                       background: color,
-                       marginBottom: '8px',
-                       borderRadius: '4px'
-                     }">
-                </div>
-              </div>
-            </div>
-          </WinParallaxView>
-        </div>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, inject } from 'vue';
 import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinParallaxView from '../../components/WinParallaxView.vue';
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import WinStackPanel from '../../components/WinStackPanel.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
+import { createPageState } from '../../utils/pageState';
 
-// Page state
-const pageTheme = ref('light');
-const isFavoriteState = ref(false);
+const { t } = useI18n();
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'parallaxview');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Example 1: List items
-const scrollItems = ref([
-  { title: 'AppBarButton' },
-  { title: 'AppBarSeparator' },
-  { title: 'AppBarToggleButton' },
-  { title: 'AutoSuggestBox' },
-  { title: 'Button' },
-  { title: 'CalendarDatePicker' },
-  { title: 'CheckBox' },
-  { title: 'ComboBox' },
-  { title: 'CommandBar' },
-  { title: 'DatePicker' },
-  { title: 'DropDownButton' },
-  { title: 'FlipView' },
-  { title: 'GridView' },
-  { title: 'HyperlinkButton' },
-  { title: 'ListView' },
-  { title: 'MenuBar' },
-  { title: 'NavigationView' },
-  { title: 'PasswordBox' },
-  { title: 'ProgressBar' },
-  { title: 'ProgressRing' },
-  { title: 'RadioButton' },
-  { title: 'Slider' },
-  { title: 'SplitButton' },
-  { title: 'TextBox' },
-  { title: 'TimePicker' },
-  { title: 'ToggleButton' },
-  { title: 'ToggleSwitch' }
-]);
+const cliffImage = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg';
+const sampleItems = ['AppBarButton', 'AppBarSeparator', 'AppBarToggleButton', 'AutoSuggestBox', 'Button', 'CalendarDatePicker', 'CheckBox', 'ComboBox', 'CommandBar', 'DatePicker', 'DropDownButton', 'FlipView', 'GridView', 'HyperlinkButton', 'ListView', 'MenuBar', 'NavigationView', 'PasswordBox', 'ProgressBar', 'ProgressRing', 'RadioButton', 'Slider', 'SplitButton', 'TextBox', 'TimePicker', 'ToggleButton', 'ToggleSwitch'];
+const rectangleColors = ['AliceBlue', 'AntiqueWhite', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'BlanchedAlmond', 'BlueViolet', 'Brown', 'BurlyWood', 'CadetBlue', 'Chartreuse', 'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan'];
 
-// Example 2: Colored rectangles
-const coloredRectangles = ref([
-  'AliceBlue',
-  'AntiqueWhite',
-  'Aqua',
-  'Aquamarine',
-  'Azure',
-  'Beige',
-  'Bisque',
-  'BlanchedAlmond',
-  'BlueViolet',
-  'Brown',
-  'BurlyWood',
-  'CadetBlue',
-  'Chartreuse',
-  'Chocolate',
-  'Coral',
-  'CornflowerBlue',
-  'Cornsilk',
-  'Crimson',
-  'Cyan'
-]);
-
-// Page actions
-const toggleTheme = () => {
-  pageTheme.value = pageTheme.value === 'light' ? 'dark' : 'light';
-};
-
-const toggleFavorite = (value) => {
-  console.log('Favorite toggled:', value);
-};
-
-// Code examples
-const example1Template = `<Grid>
-  <ParallaxView Source="{Binding ElementName=listView}" VerticalShift="500">
-    <Image Source="ms-appx:///Assets/SampleMedia/cliff.jpg" />
-  </ParallaxView>
-  <ListView x:Name="listView" ItemsSource="{x:Bind Items}"
-            Background="#80000000">
+const listViewCode = computed(() => `<WinParallaxView VerticalShift="500">
+  <template #child>
+    <Image Source="${cliffImage}" />
+  </template>
+  <ListView Background="#80000000" ItemsSource="Items">
     <ListView.Header>
-      <TextBlock Text="Scroll the list to see parallaxing of image"
-                 Foreground="White" FontSize="28" />
+      <WinTextBlock Text="${t('sample.parallaxview.list-heading')}" Foreground="White" FontSize="28" TextWrapping="WrapWholeWords" />
     </ListView.Header>
   </ListView>
-</Grid>`;
+</WinParallaxView>`);
 
-const example1Vue = `<WinParallaxView :verticalShift="400">
+const scrollViewCode = computed(() => `<WinParallaxView VerticalShift="500">
   <template #child>
-    <img src="cliff.jpg" style="width: 100%; height: 100%; object-fit: cover;" />
+    <Image Source="${cliffImage}" />
   </template>
-  <div style="overflow-y: auto; background: rgba(0, 0, 0, 0.4);">
-    <div style="text-align: center; padding: 24px;">
-      <p style="color: white; font-size: 24px;">
-        Scroll to see parallaxing of image
-      </p>
-    </div>
-    <div v-for="item in items" :key="item">
-      <p style="color: white;">{{ item.title }}</p>
-    </div>
-  </div>
-</WinParallaxView>`;
-
-const example2Template = `<Grid>
-  <ParallaxView Source="{Binding ElementName=scrollView}" VerticalShift="500">
-    <Image Source="ms-appx:///Assets/SampleMedia/cliff.jpg"/>
-  </ParallaxView>
-  <TextBlock Text="Scroll the rectangles to see parallaxing of image"
-             Foreground="White" FontSize="28"/>
-  <ScrollView x:Name="scrollView" Width="150">
-    <StackPanel>
-      <Rectangle Fill="AliceBlue" Height="150"/>
-      <!-- ... -->
-      <Rectangle Fill="Cyan" Height="150"/>
-    </StackPanel>
-  </ScrollView>
-</Grid>`;
-
-const example2Vue = `<WinParallaxView :verticalShift="400">
-  <template #child>
-    <img src="cliff.jpg" style="width: 100%; height: 100%; object-fit: cover;" />
-  </template>
-  <div style="display: flex; flex-direction: column;">
-    <div style="text-align: center; padding: 24px;">
-      <p style="color: white; font-size: 24px;">
-        Scroll the rectangles to see parallaxing of image
-      </p>
-    </div>
-    <div style="width: 150px; overflow-y: auto;">
-      <div v-for="color in colors"
-           :style="{ height: '150px', background: color }">
-      </div>
-    </div>
-  </div>
-</WinParallaxView>`;
+  <WinTextBlock Text="${t('sample.parallaxview.rectangles-heading')}" Foreground="White" FontSize="28" TextWrapping="WrapWholeWords" />
+  <WinScrollViewer Width="150">
+    <WinStackPanel>
+      <Rectangle Height="150" Fill="AliceBlue" />
+      <Rectangle Height="150" Fill="AntiqueWhite" />
+      <Rectangle Height="150" Fill="Aqua" />
+    </WinStackPanel>
+  </WinScrollViewer>
+</WinParallaxView>`);
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 32px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 32px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 8px;
-}
-
-.icon {
-  font-family: 'Segoe MDL2 Assets', 'Segoe UI Symbol';
-  font-size: 16px;
-  display: inline-block;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.parallax-example :deep(.example-display) { padding: 0; align-items: stretch; }
+.parallax-host { width: 100%; height: 100%; overflow: hidden; position: relative; }
+.parallax-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+.parallax-list { width: 100%; height: 100%; overflow-y: auto; background: rgba(0, 0, 0, 0.50); }
+.parallax-heading { max-width: 280px; margin: 24px auto; color: White; font-size: 28px; line-height: 36px; text-align: center; }
+.parallax-list-item { min-height: 40px; padding: 10px 16px; }
+.parallax-scroll-example { width: 100%; height: 100%; position: relative; }
+.top-heading { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 2; margin-top: 24px; }
+.color-rectangle { width: 150px; height: 150px; }
 </style>

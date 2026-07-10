@@ -1,6 +1,6 @@
 <!-- components/WinFlipView.vue -->
 <template>
-  <div class="win-flip-view" :class="orientation"
+  <div class="win-flip-view" :class="orientationClass"
        @mouseenter="hover = true" @mouseleave="hover = false"
        @wheel.prevent="onWheel"
        @touchstart="onTouchStart" @touchend="onTouchEnd">
@@ -10,10 +10,10 @@
       </div>
     </div>
     <button v-show="hover && selectedIndex > 0" class="flip-btn prev" @click="prev">
-      <span class="icon flip-arrow">{{ orientation === 'vertical' ? '\uEDDB' : '\uEDD9' }}</span>
+      <span class="icon flip-arrow">{{ orientationClass === 'vertical' ? '\uEDDB' : '\uEDD9' }}</span>
     </button>
     <button v-show="hover && selectedIndex < items.length - 1" class="flip-btn next" @click="next">
-      <span class="icon flip-arrow">{{ orientation === 'vertical' ? '\uEDDC' : '\uEDDA' }}</span>
+      <span class="icon flip-arrow">{{ orientationClass === 'vertical' ? '\uEDDC' : '\uEDDA' }}</span>
     </button>
   </div>
 </template>
@@ -37,6 +37,7 @@ let touchStart = 0;
 
 const items = computed(() => props.ItemsSource ?? props.items);
 const orientation = computed(() => props.Orientation ?? props.orientation);
+const orientationClass = computed(() => String(orientation.value).toLowerCase());
 const selectedIndex = computed(() => props.SelectedIndex ?? currentIndex.value);
 
 function getItemKey(item, index) { return item?.id ?? item?.title ?? item?.alt ?? index; }
@@ -57,7 +58,7 @@ function next() { if (props.IsEnabled && selectedIndex.value < items.value.lengt
 
 function onWheel(e) {
   if (!props.IsEnabled) return;
-  const delta = orientation.value === 'vertical' ? e.deltaY : (e.deltaX || e.deltaY);
+  const delta = orientationClass.value === 'vertical' ? e.deltaY : (e.deltaX || e.deltaY);
   if (delta > 0) next();
   else if (delta < 0) prev();
 }
@@ -65,20 +66,20 @@ function onWheel(e) {
 function onTouchStart(e) {
   const touch = e.touches[0];
   if (!props.IsEnabled) return;
-  touchStart = orientation.value === 'vertical' ? touch.clientY : touch.clientX;
+  touchStart = orientationClass.value === 'vertical' ? touch.clientY : touch.clientX;
 }
 
 function onTouchEnd(e) {
   const touch = e.changedTouches[0];
   if (!props.IsEnabled) return;
-  const end = orientation.value === 'vertical' ? touch.clientY : touch.clientX;
+  const end = orientationClass.value === 'vertical' ? touch.clientY : touch.clientX;
   const diff = touchStart - end;
   if (diff > 30) next();
   else if (diff < -30) prev();
 }
 
 const trackStyle = computed(() => {
-  if (orientation.value === 'vertical') {
+  if (orientationClass.value === 'vertical') {
     return { transform: `translateY(-${selectedIndex.value * 100}%)` };
   }
   return { transform: `translateX(-${selectedIndex.value * 100}%)` };

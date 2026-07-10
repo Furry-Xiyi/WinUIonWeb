@@ -1,50 +1,44 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <WinTextBlock class="page-header" :Text="$t('text.commandbarflyout')" />
-      <WinTextBlock
-        class="page-description"
-        :Text="$t('text.the-commandbarflyout-lets-you-provide-users-with')"
-        TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+  <div class="gallery-item-page">
+    <div class="page-heading">
+          <WinTextBlock class="page-header" :Text="$t('text.commandbarflyout')" />
+          <WinTextBlock class="page-description" :Text="$t('text.the-commandbarflyout-lets-you-provide-users-with')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.commandbarflyout.object')" :theme="pageTheme" :vue="commandBarFlyoutCode">
+              <template #example>
+                <div class="commandbarflyout-stack">
+                  <WinTextBlock :Text="$t('sample.commandbarflyout.open-hint')" TextWrapping="WrapWholeWords" />
+                  <button
+                    ref="myImageButton"
+                    class="image-button"
+                    type="button"
+                    :aria-label="$t('sample.mountain')"
+                    @click="myImageButtonClick"
+                    @contextmenu.prevent="myImageButtonContextRequested">
+                    <img ref="image1" class="sample-image" :src="rainierImageUrl" :alt="$t('sample.mountain')" />
+                  </button>
+                  <WinTextBlock :Text="selectedOptionText" />
+                </div>
+              </template>
+            </WinControlExample>
+
+            <WinCommandBarFlyout
+              ref="commandBarFlyout1"
+              :PrimaryCommands="primaryCommands"
+              :SecondaryCommands="secondaryCommands"
+              Placement="Right"
+              :Theme="pageTheme"
+              @Command="onElementClicked" />
       </div>
-    </div>
-
-    <WinControlExample
-      class="basic-input-example-theme"
-      :theme="pageTheme"
-      :vue="exampleTemplate">
-      <template #example>
-        <div class="commandbarflyout-sample">
-          <button
-            ref="myImageButton"
-            class="image-button"
-            type="button"
-            :aria-label="$t('text.mountain')"
-            @click="myImageButtonClick"
-            @contextmenu.prevent="myImageButtonContextRequested">
-            <img ref="image1" class="sample-image" :src="rainierImageUrl" :alt="$t('text.mountain')" />
-          </button>
-        </div>
-      </template>
-      <template #options>
-        <div class="options-stack">
-          <WinTextBlock Text="Click or right click the image to open a CommandBarFlyout" TextWrapping="WrapWholeWords" />
-          <WinTextBlock :Text="selectedOptionText || 'You clicked:'" TextWrapping="WrapWholeWords" />
-        </div>
-      </template>
-    </WinControlExample>
-
-    <WinCommandBarFlyout
-      ref="commandBarFlyout1"
-      :PrimaryCommands="primaryCommands"
-      :SecondaryCommands="secondaryCommands"
-      Placement="Right"
-      :ShowPrimaryLabels="true"
-      :Theme="pageTheme"
-      @Command="onElementClicked" />
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -55,10 +49,10 @@ import WinCommandBarFlyout from '../../components/WinCommandBarFlyout.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import { useI18n } from '../../components/i18n/index';
-
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'commandbarflyout');
@@ -68,21 +62,21 @@ const commandBarFlyout1 = ref(null);
 const image1 = ref(null);
 const myImageButton = ref(null);
 const selectedOptionText = ref('');
-const rainierImageUrl = 'https://raw.githubusercontent.com/Furry-Xiyi/WinUIonWeb/master/WinUI-Gallery/WinUIGallery/Assets/SampleMedia/rainier.jpg';
+const rainierImageUrl = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/rainier.jpg';
 
-const primaryCommands = [
-  { Icon: 'Share', Label: 'Share', ToolTipServiceToolTip: t('text.share') },
-  { Icon: 'Save', Label: 'Save', ToolTipServiceToolTip: t('text.save') },
-  { Icon: 'Delete', Label: 'Delete', ToolTipServiceToolTip: t('text.delete') }
-];
+const primaryCommands = computed(() => [
+  { Icon: 'Share', Label: t('sample.share'), ToolTipServiceToolTip: t('sample.share') },
+  { Icon: 'Save', Label: t('sample.save'), ToolTipServiceToolTip: t('sample.save') },
+  { Icon: 'Delete', Label: t('sample.delete'), ToolTipServiceToolTip: t('sample.delete') }
+]);
 
-const secondaryCommands = [
-  { Label: 'Resize' },
-  { Label: 'Move' }
-];
+const secondaryCommands = computed(() => [
+  { Label: t('sample.resize') },
+  { Label: t('sample.move') }
+]);
 
 const onElementClicked = (command) => {
-  selectedOptionText.value = `You clicked: ${command.Label}`;
+  selectedOptionText.value = t('sample.you-clicked', { name: command.Label });
 };
 
 const showMenu = (isTransient) => {
@@ -102,7 +96,7 @@ const myImageButtonClick = () => {
   showMenu(true);
 };
 
-const exampleTemplate = `<WinCommandBarFlyout
+const commandBarFlyoutCode = `<WinCommandBarFlyout
   :PrimaryCommands="[
     { Icon: 'Share', Label: 'Share', ToolTipServiceToolTip: 'Share' },
     { Icon: 'Save', Label: 'Save', ToolTipServiceToolTip: 'Save' },
@@ -112,21 +106,21 @@ const exampleTemplate = `<WinCommandBarFlyout
     { Label: 'Resize' },
     { Label: 'Move' }
   ]"
-  Placement="Right"
-  :ShowPrimaryLabels="true" />
+  Placement="Right" />
 
-<WinButton Padding="0" AutomationProperties.Name="mountain">
-  <img Height="300" src="${rainierImageUrl}" />
-</WinButton>`;
+<button @click="showMenu(true)" @contextmenu.prevent="showMenu(false)">
+  <img src="${rainierImageUrl}" height="300" />
+</button>`;
 </script>
 
 <style scoped>
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-primary); }
-.page-description { font-size: 14px; color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.5; }
-.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; align-items: center; }
-.icon { font-size: 16px; font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets'; }
-.commandbarflyout-sample { display: flex; flex-direction: column; align-items: flex-start; color: var(--text-primary); }
-.image-button { margin: 12px 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.commandbarflyout-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.image-button { padding: 0; border: 0; background: transparent; cursor: pointer; }
 .sample-image { height: 300px; display: block; }
-.options-stack { display: flex; flex-direction: column; gap: 8px; }
 </style>

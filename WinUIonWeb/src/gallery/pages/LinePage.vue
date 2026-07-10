@@ -1,189 +1,193 @@
 <template>
-  <div class="line-page">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="page-title-section">
-        <h1 class="page-title">Line</h1>
-        <p class="page-description">
-          Line, Polyline, Path, and GeometryGroup allow you to draw shapes and curves on the screen.
-        </p>
+  <div class="gallery-item-page">
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- 页面头部 -->
+            <div class="page-header">
+              <div class="page-title-section">
+                <h1 class="page-title">Line</h1>
+                <p class="page-description">
+                  Line, Polyline, Path, and GeometryGroup allow you to draw shapes and curves on the screen.
+                </p>
+              </div>
+              <div class="page-actions">
+                <button class="icon-button" @click="toggleTheme" title="Toggle theme">
+                  <span class="icon">🌓</span>
+                </button>
+                <button class="icon-button" @click="toggleFavorite" title="Add to favorites">
+                  <span class="icon">{{ isFavorite ? '★' : '☆' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Line 示例 -->
+            <WinControlExample
+              headerText="Line"
+              :templateCode="lineTemplateCode"
+              :vueCode="lineVueCode">
+              <template #example>
+                <svg width="320" height="200" style="background: transparent;">
+                  <line
+                    :x1="lineX1"
+                    :y1="lineY1"
+                    :x2="lineX2"
+                    :y2="lineY2"
+                    :stroke-width="lineThickness"
+                    stroke="SteelBlue"
+                    :transform="`translate(0, 50)`" />
+                </svg>
+              </template>
+
+              <template #options>
+                <WinSlider
+                  v-model="lineX1"
+                  header="Start point X"
+                  :minimum="0"
+                  :maximum="100"
+                  :stepFrequency="0.5" />
+                <WinSlider
+                  v-model="lineY1"
+                  header="Start point Y"
+                  :minimum="0"
+                  :maximum="100"
+                  :stepFrequency="0.5" />
+                <WinSlider
+                  v-model="lineX2"
+                  header="End point X"
+                  :minimum="200"
+                  :maximum="300"
+                  :stepFrequency="0.5" />
+                <WinSlider
+                  v-model="lineY2"
+                  header="End point Y"
+                  :minimum="0"
+                  :maximum="100"
+                  :stepFrequency="0.5" />
+                <WinSlider
+                  v-model="lineThickness"
+                  header="Stroke Thickness"
+                  :minimum="5"
+                  :maximum="10"
+                  :stepFrequency="0.5" />
+              </template>
+            </WinControlExample>
+
+            <!-- Polyline 示例 -->
+            <WinControlExample
+              headerText="Polyline"
+              :templateCode="polylineTemplateCode"
+              :vueCode="polylineVueCode">
+              <template #example>
+                <div style="position: relative; width: 320px; height: 170px;">
+                  <p style="margin: 0 0 10px 0; color: var(--text-primary);">
+                    Draws a series of connected straight lines.
+                  </p>
+                  <svg width="320" height="170" style="position: absolute; top: 20px; left: 0;">
+                    <polyline
+                      points="10,100 60,40 200,40 250,100"
+                      fill="none"
+                      stroke="black"
+                      :stroke-width="polylineThickness" />
+                    <text v-if="showPolylinePoints" x="0" y="140" font-size="12" fill="var(--text-primary)">Point #1: (10,100)</text>
+                    <text v-if="showPolylinePoints" x="50" y="40" font-size="12" fill="var(--text-primary)">Point #2: (60,40)</text>
+                    <text v-if="showPolylinePoints" x="200" y="40" font-size="12" fill="var(--text-primary)">Point #3: (200,40)</text>
+                    <text v-if="showPolylinePoints" x="240" y="140" font-size="12" fill="var(--text-primary)">Point #4: (250,100)</text>
+                  </svg>
+                </div>
+
+                <WinToggleSwitch
+                  v-model="showPolylinePoints"
+                  header="Show points" />
+                <WinSlider
+                  v-model="polylineThickness"
+                  header="Stroke Thickness"
+                  :minimum="2"
+                  :maximum="10"
+                  :stepFrequency="0.5" />
+              </template>
+            </WinControlExample>
+
+            <!-- Path 示例 -->
+            <WinControlExample
+              headerText="Path"
+              :templateCode="pathTemplateCode"
+              :vueCode="pathVueCode">
+              <template #example>
+                <div style="position: relative; width: 320px; height: 200px;">
+                  <p style="margin: 0 0 10px 0; color: var(--text-primary);">
+                    Draws a series of connected lines and curves.
+                  </p>
+                  <svg width="420" height="200" style="position: absolute; top: 20px; left: 0;">
+                    <path
+                      d="M 10,100 C 100,25 300,250 400,75 H 200"
+                      fill="none"
+                      stroke="DarkGoldenRod"
+                      :stroke-width="pathThickness" />
+                    <text v-if="showPathPoints" x="0" y="130" font-size="12" fill="var(--text-primary)">Point #1: (10,100)</text>
+                    <text v-if="showPathPoints" x="40" y="75" font-size="12" fill="var(--text-primary)">Point #2: (100,25)</text>
+                    <text v-if="showPathPoints" x="280" y="175" font-size="12" fill="var(--text-primary)">Point #3: (300,250)</text>
+                    <text v-if="showPathPoints" x="360" y="60" font-size="12" fill="var(--text-primary)">Point #4: (400,75)</text>
+                    <text v-if="showPathPoints" x="170" y="60" font-size="12" fill="var(--text-primary)">Point #5: (200,75)</text>
+                  </svg>
+                </div>
+
+                <WinToggleSwitch
+                  v-model="showPathPoints"
+                  header="Show points" />
+                <WinSlider
+                  v-model="pathThickness"
+                  header="Stroke Thickness"
+                  :minimum="2"
+                  :maximum="10"
+                  :stepFrequency="0.5" />
+              </template>
+            </WinControlExample>
+
+            <!-- GeometryGroup 示例 -->
+            <WinControlExample
+              headerText="GeometryGroup"
+              :templateCode="geometryTemplateCode"
+              :vueCode="geometryVueCode">
+              <template #example>
+                <div style="width: 200px; height: 170px;">
+                  <p style="margin: 0 0 15px 0; color: var(--text-primary);">
+                    Composite geometry objects can be created using a GeometryGroup.
+                  </p>
+                  <svg width="200" height="150">
+                    <defs>
+                      <g id="compositeShape">
+                        <line x1="10" y1="10" x2="50" y2="30" stroke="black" stroke-width="4" />
+                        <ellipse
+                          cx="40"
+                          cy="70"
+                          :rx="ellipseRadiusX"
+                          :ry="ellipseRadiusY"
+                          fill="#CCCCFF"
+                          stroke="black"
+                          stroke-width="4" />
+                        <rect x="30" y="55" width="100" height="30" fill="#CCCCFF" stroke="black" stroke-width="4" />
+                      </g>
+                    </defs>
+                    <use href="#compositeShape" />
+                  </svg>
+                </div>
+
+                <WinSlider
+                  v-model="ellipseRadiusX"
+                  header="RadiusX"
+                  :minimum="30"
+                  :maximum="40"
+                  :stepFrequency="0.5" />
+                <WinSlider
+                  v-model="ellipseRadiusY"
+                  header="RadiusY"
+                  :minimum="30"
+                  :maximum="50"
+                  :stepFrequency="0.5" />
+              </template>
+            </WinControlExample>
       </div>
-      <div class="page-actions">
-        <button class="icon-button" @click="toggleTheme" title="Toggle theme">
-          <span class="icon">🌓</span>
-        </button>
-        <button class="icon-button" @click="toggleFavorite" title="Add to favorites">
-          <span class="icon">{{ isFavorite ? '★' : '☆' }}</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Line 示例 -->
-    <WinControlExample
-      headerText="Line"
-      :templateCode="lineTemplateCode"
-      :vueCode="lineVueCode">
-      <template #example>
-        <svg width="320" height="200" style="background: transparent;">
-          <line
-            :x1="lineX1"
-            :y1="lineY1"
-            :x2="lineX2"
-            :y2="lineY2"
-            :stroke-width="lineThickness"
-            stroke="SteelBlue"
-            :transform="`translate(0, 50)`" />
-        </svg>
-      </template>
-
-      <template #options>
-        <WinSlider
-          v-model="lineX1"
-          header="Start point X"
-          :minimum="0"
-          :maximum="100"
-          :stepFrequency="0.5" />
-        <WinSlider
-          v-model="lineY1"
-          header="Start point Y"
-          :minimum="0"
-          :maximum="100"
-          :stepFrequency="0.5" />
-        <WinSlider
-          v-model="lineX2"
-          header="End point X"
-          :minimum="200"
-          :maximum="300"
-          :stepFrequency="0.5" />
-        <WinSlider
-          v-model="lineY2"
-          header="End point Y"
-          :minimum="0"
-          :maximum="100"
-          :stepFrequency="0.5" />
-        <WinSlider
-          v-model="lineThickness"
-          header="Stroke Thickness"
-          :minimum="5"
-          :maximum="10"
-          :stepFrequency="0.5" />
-      </template>
-    </WinControlExample>
-
-    <!-- Polyline 示例 -->
-    <WinControlExample
-      headerText="Polyline"
-      :templateCode="polylineTemplateCode"
-      :vueCode="polylineVueCode">
-      <template #example>
-        <div style="position: relative; width: 320px; height: 170px;">
-          <p style="margin: 0 0 10px 0; color: var(--text-primary);">
-            Draws a series of connected straight lines.
-          </p>
-          <svg width="320" height="170" style="position: absolute; top: 20px; left: 0;">
-            <polyline
-              points="10,100 60,40 200,40 250,100"
-              fill="none"
-              stroke="black"
-              :stroke-width="polylineThickness" />
-            <text v-if="showPolylinePoints" x="0" y="140" font-size="12" fill="var(--text-primary)">Point #1: (10,100)</text>
-            <text v-if="showPolylinePoints" x="50" y="40" font-size="12" fill="var(--text-primary)">Point #2: (60,40)</text>
-            <text v-if="showPolylinePoints" x="200" y="40" font-size="12" fill="var(--text-primary)">Point #3: (200,40)</text>
-            <text v-if="showPolylinePoints" x="240" y="140" font-size="12" fill="var(--text-primary)">Point #4: (250,100)</text>
-          </svg>
-        </div>
-
-        <WinToggleSwitch
-          v-model="showPolylinePoints"
-          header="Show points" />
-        <WinSlider
-          v-model="polylineThickness"
-          header="Stroke Thickness"
-          :minimum="2"
-          :maximum="10"
-          :stepFrequency="0.5" />
-      </template>
-    </WinControlExample>
-
-    <!-- Path 示例 -->
-    <WinControlExample
-      headerText="Path"
-      :templateCode="pathTemplateCode"
-      :vueCode="pathVueCode">
-      <template #example>
-        <div style="position: relative; width: 320px; height: 200px;">
-          <p style="margin: 0 0 10px 0; color: var(--text-primary);">
-            Draws a series of connected lines and curves.
-          </p>
-          <svg width="420" height="200" style="position: absolute; top: 20px; left: 0;">
-            <path
-              d="M 10,100 C 100,25 300,250 400,75 H 200"
-              fill="none"
-              stroke="DarkGoldenRod"
-              :stroke-width="pathThickness" />
-            <text v-if="showPathPoints" x="0" y="130" font-size="12" fill="var(--text-primary)">Point #1: (10,100)</text>
-            <text v-if="showPathPoints" x="40" y="75" font-size="12" fill="var(--text-primary)">Point #2: (100,25)</text>
-            <text v-if="showPathPoints" x="280" y="175" font-size="12" fill="var(--text-primary)">Point #3: (300,250)</text>
-            <text v-if="showPathPoints" x="360" y="60" font-size="12" fill="var(--text-primary)">Point #4: (400,75)</text>
-            <text v-if="showPathPoints" x="170" y="60" font-size="12" fill="var(--text-primary)">Point #5: (200,75)</text>
-          </svg>
-        </div>
-
-        <WinToggleSwitch
-          v-model="showPathPoints"
-          header="Show points" />
-        <WinSlider
-          v-model="pathThickness"
-          header="Stroke Thickness"
-          :minimum="2"
-          :maximum="10"
-          :stepFrequency="0.5" />
-      </template>
-    </WinControlExample>
-
-    <!-- GeometryGroup 示例 -->
-    <WinControlExample
-      headerText="GeometryGroup"
-      :templateCode="geometryTemplateCode"
-      :vueCode="geometryVueCode">
-      <template #example>
-        <div style="width: 200px; height: 170px;">
-          <p style="margin: 0 0 15px 0; color: var(--text-primary);">
-            Composite geometry objects can be created using a GeometryGroup.
-          </p>
-          <svg width="200" height="150">
-            <defs>
-              <g id="compositeShape">
-                <line x1="10" y1="10" x2="50" y2="30" stroke="black" stroke-width="4" />
-                <ellipse
-                  cx="40"
-                  cy="70"
-                  :rx="ellipseRadiusX"
-                  :ry="ellipseRadiusY"
-                  fill="#CCCCFF"
-                  stroke="black"
-                  stroke-width="4" />
-                <rect x="30" y="55" width="100" height="30" fill="#CCCCFF" stroke="black" stroke-width="4" />
-              </g>
-            </defs>
-            <use href="#compositeShape" />
-          </svg>
-        </div>
-
-        <WinSlider
-          v-model="ellipseRadiusX"
-          header="RadiusX"
-          :minimum="30"
-          :maximum="40"
-          :stepFrequency="0.5" />
-        <WinSlider
-          v-model="ellipseRadiusY"
-          header="RadiusY"
-          :minimum="30"
-          :maximum="50"
-          :stepFrequency="0.5" />
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -299,6 +303,7 @@ const geometryTemplateCode = `<svg width="200" height="150">
 const geometryVueCode = `<script setup>
 import { ref } from 'vue';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const ellipseRadiusX = ref(30);
 const ellipseRadiusY = ref(30);
 <\/script>`;

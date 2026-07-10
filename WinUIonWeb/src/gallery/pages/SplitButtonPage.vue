@@ -1,52 +1,50 @@
 <template>
-  <div>
+  <div class="gallery-item-page">
     <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.splitbutton')" />
-      <WinTextBlock class="page-description" :Text="$t('text.the-splitbutton-is-a-dropdown-button-but-with-an')" TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+          <WinTextBlock class="page-header" :Text="$t('text.splitbutton')" />
+          <WinTextBlock class="page-description" :Text="$t('text.the-splitbutton-is-a-dropdown-button-but-with-an')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonColorPickerVue" :headerText="$t('sample.splitbutton.color-picker')">
+              <template #example>
+                <WinSplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" AutomationProperties.Name="Font color" @Click="applyCurrentColor">
+                  <div class="color-swatch current-swatch" :style="{ backgroundColor: currentColor }"></div>
+                  <template #flyout="{ close }">
+                    <div class="swatch-grid">
+                      <WinButton v-for="color in colorOptions" :key="color.value" Padding="0" MinWidth="0" MinHeight="0" Margin="6" :AutomationProperties.Name="color.text" @Click="selectColor(color.value, close)">
+                        <span class="color-swatch" :style="{ backgroundColor: color.value }"></span>
+                      </WinButton>
+                    </div>
+                  </template>
+                </WinSplitButton>
+              </template>
+              <template #options>
+                <WinTextBox v-model:Text="richText" class="sample-editor" AcceptsReturn TextWrapping="Wrap" :PlaceholderText="$t('sample.type-something-here')" :Foreground="appliedColor" />
+              </template>
+            </WinControlExample>
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonTextVue" :headerText="$t('sample.splitbutton.text')">
+              <template #example>
+                <WinSplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" AutomationProperties.Name="Font color with text">
+                  <WinTextBlock :Text="$t('sample.choose-color')" />
+                  <template #flyout="{ close }">
+                    <div class="swatch-grid">
+                      <WinButton v-for="color in textColorOptions" :key="color.value" Padding="0" MinWidth="0" MinHeight="0" Margin="6" :AutomationProperties.Name="color.text" @Click="selectTextColor(color.value, close)">
+                        <span class="color-swatch" :style="{ backgroundColor: color.value }"></span>
+                      </WinButton>
+                    </div>
+                  </template>
+                </WinSplitButton>
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.splitbutton.color-picker')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonColorPickerVue">
-      <template #example>
-        <WinSplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" AutomationProperties.Name="Font color" @Click="applyCurrentColor">
-          <div class="color-swatch current-swatch" :style="{ backgroundColor: currentColor }"></div>
-          <template #flyout="{ close }">
-            <div class="swatch-grid">
-              <WinButton v-for="color in colorOptions" :key="color.value" Padding="0" MinWidth="0" MinHeight="0" Margin="6" :AutomationProperties.Name="color.text" @Click="selectColor(color.value, close)">
-                <span class="color-swatch" :style="{ backgroundColor: color.value }"></span>
-              </WinButton>
-            </div>
-          </template>
-        </WinSplitButton>
-      </template>
-      <template #options>
-        <WinTextBox v-model:Text="richText" class="sample-editor" AcceptsReturn TextWrapping="Wrap" :PlaceholderText="$t('sample.type-something-here')" :Foreground="appliedColor" />
-      </template>
-    </WinControlExample>
-
-    <WinTextBlock class="control-example-description" :Text="$t('sample.splitbutton.text')" />
-
-    <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonTextVue">
-      <template #example>
-        <WinSplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" AutomationProperties.Name="Font color with text">
-          <WinTextBlock :Text="$t('sample.choose-color')" />
-          <template #flyout="{ close }">
-            <div class="swatch-grid">
-              <WinButton v-for="color in textColorOptions" :key="color.value" Padding="0" MinWidth="0" MinHeight="0" Margin="6" :AutomationProperties.Name="color.text" @Click="selectTextColor(color.value, close)">
-                <span class="color-swatch" :style="{ backgroundColor: color.value }"></span>
-              </WinButton>
-            </div>
-          </template>
-        </WinSplitButton>
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -61,6 +59,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'splitbutton');
@@ -135,9 +134,5 @@ const splitButtonTextVue = `<WinSplitButton MinWidth="0" MinHeight="0" Padding="
 
 .sample-editor :deep(.win-textbox-textarea) {
   min-height: 96px;
-}
-.control-example-description {
-  margin-top: 16px;
-  font-weight: 600;
 }
 </style>

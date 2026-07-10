@@ -1,48 +1,51 @@
 <template>
-  <div>
+  <div class="gallery-item-page">
     <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.menubar')" />
-      <WinTextBlock class="page-description" :Text="$t('text.the-menubar-simplifies-the-creation-of-basic-men')" TextWrapping="WrapWholeWords" />
-      <div class="page-header-actions">
-        <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+          <WinTextBlock class="page-header" :Text="$t('text.menubar')" />
+          <WinTextBlock class="page-description" :Text="$t('text.the-menubar-simplifies-the-creation-of-basic-men')" TextWrapping="WrapWholeWords" />
+          <div class="page-header-actions">
+            <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
+          </div>
+        </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-menubar')" :theme="pageTheme" :vue="simpleCode">
+              <template #example>
+                <div class="sample-stack">
+                  <WinMenuBar :Items="simpleItems" :Theme="pageTheme" @ItemClick="simpleOutput = `You clicked: ${$event.Item.Text}`" />
+                </div>
+              </template>
+              <template #options>
+                <WinTextBlock :Text="simpleOutput" TextWrapping="WrapWholeWords" />
+              </template>
+            </WinControlExample>
+
+            <WinControlExample class="basic-input-example-theme" headerText="A MenuBar with keyboard accelerators" :theme="pageTheme" :vue="acceleratorCode">
+              <template #example>
+                <div class="sample-stack">
+                  <WinMenuBar :Items="acceleratorItems" :Theme="pageTheme" @ItemClick="acceleratorOutput = `You clicked: ${$event.Item.Text}`" />
+                </div>
+              </template>
+              <template #options>
+                <WinTextBlock :Text="acceleratorOutput" TextWrapping="WrapWholeWords" />
+              </template>
+            </WinControlExample>
+
+            <WinControlExample class="basic-input-example-theme" headerText="A MenuBar with submenus, separators, and radio menu items" :theme="pageTheme" :vue="submenuCode">
+              <template #example>
+                <div class="sample-stack">
+                  <WinMenuBar :Items="submenuItems" :Theme="pageTheme" @ItemClick="submenuOutput = `You clicked: ${$event.Item.Text}`" />
+                </div>
+              </template>
+              <template #options>
+                <WinTextBlock :Text="submenuOutput" TextWrapping="WrapWholeWords" />
+              </template>
+            </WinControlExample>
       </div>
-    </div>
-
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-menubar')" :theme="pageTheme" :vue="simpleCode">
-      <template #example>
-        <div class="sample-stack">
-          <WinMenuBar :Items="simpleItems" :Theme="pageTheme" @ItemClick="simpleOutput = `You clicked: ${$event.Item.Text}`" />
-        </div>
-      </template>
-      <template #options>
-        <WinTextBlock :Text="simpleOutput" TextWrapping="WrapWholeWords" />
-      </template>
-    </WinControlExample>
-
-    <WinControlExample class="basic-input-example-theme" headerText="A MenuBar with keyboard accelerators" :theme="pageTheme" :vue="acceleratorCode">
-      <template #example>
-        <div class="sample-stack">
-          <WinMenuBar :Items="acceleratorItems" :Theme="pageTheme" @ItemClick="acceleratorOutput = `You clicked: ${$event.Item.Text}`" />
-        </div>
-      </template>
-      <template #options>
-        <WinTextBlock :Text="acceleratorOutput" TextWrapping="WrapWholeWords" />
-      </template>
-    </WinControlExample>
-
-    <WinControlExample class="basic-input-example-theme" headerText="A MenuBar with submenus, separators, and radio menu items" :theme="pageTheme" :vue="submenuCode">
-      <template #example>
-        <div class="sample-stack">
-          <WinMenuBar :Items="submenuItems" :Theme="pageTheme" @ItemClick="submenuOutput = `You clicked: ${$event.Item.Text}`" />
-        </div>
-      </template>
-      <template #options>
-        <WinTextBlock :Text="submenuOutput" TextWrapping="WrapWholeWords" />
-      </template>
-    </WinControlExample>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -57,6 +60,7 @@ import { createPageState } from '../../utils/pageState';
 
 import { useI18n } from '../../components/i18n/index';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'menubar');

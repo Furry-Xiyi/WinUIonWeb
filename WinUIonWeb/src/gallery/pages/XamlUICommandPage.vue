@@ -1,51 +1,54 @@
 <template>
-  <div>
-    <div style="position: relative;">
-      <h1 class="page-header">XamlUICommand</h1>
-      <p class="page-description">
-        XamlUICommand allows the sharing of the UX associated with a command. Define a command once with label, icon, keyboard accelerators, and description, then use it across multiple controls without repeating those properties.
-      </p>
-      <div class="page-header-actions">
-        <WinButton
-          @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
-          @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
-      </div>
-    </div>
-
-    <!-- Example: Creating a reusable command with XamlUICommand -->
-    <WinControlExample
-      headerText="Creating a reusable command with XamlUICommand"
-      :theme="pageTheme"
-      :templateCode="example1Template"
-      :vueCode="example1Vue">
-      <template #example>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <p style="margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.5;">
-            XamlUICommand allows the sharing of the UX associated with a command.
-            In this instance we create a simple Custom Command with a label, icon, shortcut, and description.
-            It's defined as a resource and could be used in many controls, like this AppBarButton.
-            The button (and other controls) automatically gets all these UI properties, without the need to define the properties again.
+  <div class="gallery-item-page">
+    <div style="position: relative;" class="page-heading">
+          <h1 class="page-header">XamlUICommand</h1>
+          <p class="page-description">
+            XamlUICommand allows the sharing of the UX associated with a command. Define a command once with label, icon, keyboard accelerators, and description, then use it across multiple controls without repeating those properties.
           </p>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <WinAppBarButton
-              icon="Favorite"
-              label="Custom XamlUICommand"
-              :tooltip="commandTooltip"
-              @click="executeCustomCommand"
-            />
-            <p class="output-text">{{ commandOutput }}</p>
+          <div class="page-header-actions">
+            <WinButton
+              @click="toggleTheme"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">&#xE793;</span>
+            </WinButton>
+            <WinToggleButton
+              v-model:IsChecked="isFavoriteState"
+              @update:IsChecked="toggleFavorite"
+              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            </WinToggleButton>
           </div>
         </div>
-      </template>
-    </WinControlExample>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- Example: Creating a reusable command with XamlUICommand -->
+            <WinControlExample
+              headerText="Creating a reusable command with XamlUICommand"
+              :theme="pageTheme"
+              :templateCode="example1Template"
+              :vueCode="example1Vue">
+              <template #example>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <p style="margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.5;">
+                    XamlUICommand allows the sharing of the UX associated with a command.
+                    In this instance we create a simple Custom Command with a label, icon, shortcut, and description.
+                    It's defined as a resource and could be used in many controls, like this AppBarButton.
+                    The button (and other controls) automatically gets all these UI properties, without the need to define the properties again.
+                  </p>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <WinAppBarButton
+                      icon="Favorite"
+                      label="Custom XamlUICommand"
+                      :tooltip="commandTooltip"
+                      @click="executeCustomCommand"
+                    />
+                    <p class="output-text">{{ commandOutput }}</p>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -58,6 +61,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useFavorites } from '../composables/useFavorites';
 import { usePageTheme } from '../composables/usePageTheme';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'xamluicommand');
 

@@ -1,97 +1,101 @@
 <template>
-  <div class="page-container">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">Compact Sizing</h1>
-        <p class="page-description">
-          Controls can be displayed in a more compact density to enable more content to be shown in limited space.
-        </p>
-      </div>
-      <div class="header-actions">
-        <WinButton class="icon-button" @click="toggleTheme" :title="`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`">
-          <span class="icon">{{ theme === 'light' ? '🌙' : '☀️' }}</span>
-        </WinButton>
-        <WinButton class="icon-button" @click="toggleFavorite" :title="isFavorite ? 'Remove from favorites' : 'Add to favorites'">
-          <span class="icon">{{ isFavorite ? '★' : '☆' }}</span>
-        </WinButton>
-      </div>
-    </div>
+  <div class="gallery-item-page">
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <div class="gallery-page-content">
+            <!-- 页面头部 -->
+            <div class="page-header">
+              <div class="header-content">
+                <h1 class="page-title">Compact Sizing</h1>
+                <p class="page-description">
+                  Controls can be displayed in a more compact density to enable more content to be shown in limited space.
+                </p>
+              </div>
+              <div class="header-actions">
+                <WinButton class="icon-button" @click="toggleTheme" :title="`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`">
+                  <span class="icon">{{ theme === 'light' ? '🌙' : '☀️' }}</span>
+                </WinButton>
+                <WinButton class="icon-button" @click="toggleFavorite" :title="isFavorite ? 'Remove from favorites' : 'Add to favorites'">
+                  <span class="icon">{{ isFavorite ? '★' : '☆' }}</span>
+                </WinButton>
+              </div>
+            </div>
 
-    <!-- 支持的控件列表 -->
-    <div class="supported-controls">
-      <p class="controls-title"><strong>Controls that support compact styling:</strong></p>
-      <ul class="controls-list">
-        <li>ListView</li>
-        <li>TextBox</li>
-        <li>PasswordBox</li>
-        <li>AutoSuggestBox</li>
-        <li>ComboBox</li>
-        <li>DatePicker</li>
-        <li>TimePicker</li>
-        <li>TreeView</li>
-        <li>NavigationView</li>
-        <li>MenuBar</li>
-      </ul>
-    </div>
+            <!-- 支持的控件列表 -->
+            <div class="supported-controls">
+              <p class="controls-title"><strong>Controls that support compact styling:</strong></p>
+              <ul class="controls-list">
+                <li>ListView</li>
+                <li>TextBox</li>
+                <li>PasswordBox</li>
+                <li>AutoSuggestBox</li>
+                <li>ComboBox</li>
+                <li>DatePicker</li>
+                <li>TimePicker</li>
+                <li>TreeView</li>
+                <li>NavigationView</li>
+                <li>MenuBar</li>
+              </ul>
+            </div>
 
-    <!-- 示例 -->
-    <WinControlExample
-      headerText="Compact Sizing for controls"
-      :templateCode="templateCode"
-      :vueCode="vueCode">
-      <template #example>
-        <div class="sizing-demo" :class="{ 'compact-mode': isCompact }">
-          <div class="demo-form">
-            <p class="demo-header">{{ isCompact ? 'Compact Size' : 'Standard Size' }}</p>
-            <WinTextBox
-              v-model:Text="firstName"
-              Header="First Name:"
-              PlaceholderText="Enter first name" />
-            <WinTextBox
-              v-model:Text="lastName"
-              Header="Last Name:"
-              PlaceholderText="Enter last name" />
-            <WinPasswordBox
-              v-model="password"
-              Header="Password:"
-              placeholder="Enter password" />
-            <WinPasswordBox
-              v-model="confirmPassword"
-              Header="Confirm Password:"
-              placeholder="Confirm password" />
-            <WinDatePicker
-              v-model:Date="chosenDate"
-              Header="Pick a date" />
-          </div>
-        </div>
-      </template>
-      <template #options>
-        <div class="options-group">
-          <p class="options-header">Fluent Standard and Compact Sizing</p>
-          <div class="radio-group">
-            <label class="radio-option">
-              <input
-                type="radio"
-                name="sizing"
-                value="standard"
-                v-model="sizingMode"
-                @change="onSizingChanged" />
-              <span>Standard</span>
-            </label>
-            <label class="radio-option">
-              <input
-                type="radio"
-                name="sizing"
-                value="compact"
-                v-model="sizingMode"
-                @change="onSizingChanged" />
-              <span>Compact</span>
-            </label>
-          </div>
-        </div>
-      </template>
-    </WinControlExample>
+            <!-- 示例 -->
+            <WinControlExample
+              headerText="Compact Sizing for controls"
+              :templateCode="templateCode"
+              :vueCode="vueCode">
+              <template #example>
+                <div class="sizing-demo" :class="{ 'compact-mode': isCompact }">
+                  <div class="demo-form">
+                    <p class="demo-header">{{ isCompact ? 'Compact Size' : 'Standard Size' }}</p>
+                    <WinTextBox
+                      v-model:Text="firstName"
+                      Header="First Name:"
+                      PlaceholderText="Enter first name" />
+                    <WinTextBox
+                      v-model:Text="lastName"
+                      Header="Last Name:"
+                      PlaceholderText="Enter last name" />
+                    <WinPasswordBox
+                      v-model="password"
+                      Header="Password:"
+                      placeholder="Enter password" />
+                    <WinPasswordBox
+                      v-model="confirmPassword"
+                      Header="Confirm Password:"
+                      placeholder="Confirm password" />
+                    <WinDatePicker
+                      v-model:Date="chosenDate"
+                      Header="Pick a date" />
+                  </div>
+                </div>
+              </template>
+              <template #options>
+                <div class="options-group">
+                  <p class="options-header">Fluent Standard and Compact Sizing</p>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="sizing"
+                        value="standard"
+                        v-model="sizingMode"
+                        @change="onSizingChanged" />
+                      <span>Standard</span>
+                    </label>
+                    <label class="radio-option">
+                      <input
+                        type="radio"
+                        name="sizing"
+                        value="compact"
+                        v-model="sizingMode"
+                        @change="onSizingChanged" />
+                      <span>Compact</span>
+                    </label>
+                  </div>
+                </div>
+              </template>
+            </WinControlExample>
+      </div>
+    </WinScrollViewer>
   </div>
 </template>
 
@@ -157,6 +161,7 @@ import WinTextBox from '../../components/WinTextBox.vue';
 import WinPasswordBox from '../../components/WinPasswordBox.vue';
 import WinDatePicker from '../../components/WinDatePicker.vue';
 
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const sizingMode = ref('standard');
 const isCompact = computed(() => sizingMode.value === 'compact');
 
