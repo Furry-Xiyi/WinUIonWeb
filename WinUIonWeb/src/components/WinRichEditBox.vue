@@ -490,15 +490,14 @@ defineExpose({
   --reb-background-focused: var(--control-fill-color-input-active, var(--ctrl-fill-input-active));
   --reb-border-top: var(--control-stroke-color-default, var(--ctrl-border-rest));
   --reb-border-bottom: var(--control-strong-stroke-color-default, var(--ctrl-strong-stroke));
-  --reb-accent: var(--system-accent-color-dark-1, var(--accent-base));
+  --reb-accent: var(--accent-base);
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
-:global(html.theme-dark) .win-rich-edit-box,
 :global(.example-theme-wrapper.theme-dark) .win-rich-edit-box {
-  --reb-accent: var(--system-accent-color-light-2, var(--accent-base));
+  --reb-accent: var(--accent-hover);
 }
 
 .win-reb-header {

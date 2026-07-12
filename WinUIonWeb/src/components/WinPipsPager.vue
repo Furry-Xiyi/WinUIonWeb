@@ -454,7 +454,7 @@ defineExpose({
 .pip.is-selected .pip-dot {
   width: 12px;
   height: 12px;
-  background: var(--accent-fill-color-default);
+  background: var(--accent-base);
 }
 
 .orientation-vertical .pip.is-selected .pip-dot {
@@ -499,13 +499,13 @@ defineExpose({
 
 /* 焦点样式 */
 .pip:focus-visible {
-  outline: 2px solid var(--accent-fill-color-default);
+  outline: 2px solid var(--accent-base);
   outline-offset: 2px;
   border-radius: 50%;
 }
 
 .nav-button:focus-visible {
-  outline: 2px solid var(--accent-fill-color-default);
+  outline: 2px solid var(--accent-base);
   outline-offset: 2px;
 }
 

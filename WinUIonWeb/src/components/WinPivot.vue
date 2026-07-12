@@ -399,7 +399,7 @@ defineExpose({
   bottom: -1px;
   left: 0;
   height: 2px;
-  background: var(--accent-fill-color-default);
+  background: var(--accent-base);
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
               width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;

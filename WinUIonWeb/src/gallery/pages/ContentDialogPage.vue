@@ -36,6 +36,7 @@
 
             <WinContentDialog
               v-model:IsOpen="showDialog"
+              :Theme="pageTheme"
               :Title="$t('sample.contentdialog.save-title')"
               :PrimaryButtonText="$t('sample.contentdialog.save')"
               :SecondaryButtonText="$t('sample.contentdialog.dont-save')"
@@ -49,13 +50,14 @@
 
             <WinContentDialog
               v-model:IsOpen="showDialogNoDefault"
+              :Theme="pageTheme"
               :Title="$t('sample.contentdialog.replace-title')"
-              :PrimaryButtonText="$t('sample.contentdialog.replace')"
-              :SecondaryButtonText="$t('sample.contentdialog.keep')"
+              :PrimaryButtonText="$t('sample.contentdialog.save')"
+              :SecondaryButtonText="$t('sample.contentdialog.dont-save')"
               :CloseButtonText="$t('sample.contentdialog.cancel')"
               DefaultButton="None"
-              @PrimaryButtonClick="dialogResultNoDefault = $t('sample.contentdialog.replaced')"
-              @SecondaryButtonClick="dialogResultNoDefault = $t('sample.contentdialog.kept')"
+              @PrimaryButtonClick="dialogResultNoDefault = $t('sample.contentdialog.saved')"
+              @SecondaryButtonClick="dialogResultNoDefault = $t('sample.contentdialog.not-saved')"
               @CloseButtonClick="dialogResultNoDefault = $t('sample.contentdialog.cancelled')">
               <ContentDialogContent />
             </WinContentDialog>
@@ -89,8 +91,8 @@ const dialogResultNoDefault = ref('');
 const ContentDialogContent = defineComponent({
   setup() {
     return () => h('div', { class: 'dialog-content-stack' }, [
-      h(WinTextBlock, { Text: t('sample.contentdialog.body'), TextWrapping: 'WrapWholeWords' }),
-      h(WinCheckBox, null, { default: () => h(WinTextBlock, { Text: t('sample.contentdialog.upload') }) })
+      h(WinTextBlock, { Text: t('sample.contentdialog.body'), FontSize: 14, FontWeight: 400, TextWrapping: 'WrapWholeWords' }),
+      h(WinCheckBox, null, { default: () => h(WinTextBlock, { Text: t('sample.contentdialog.upload'), FontSize: 14, FontWeight: 400 }) })
     ]);
   }
 });
@@ -117,8 +119,8 @@ const noDefaultCode = computed(() => `<WinButton @Click="showDialogNoDefault = t
 <WinContentDialog
   v-model:IsOpen="showDialogNoDefault"
   Title="${t('sample.contentdialog.replace-title')}"
-  PrimaryButtonText="${t('sample.contentdialog.replace')}"
-  SecondaryButtonText="${t('sample.contentdialog.keep')}"
+  PrimaryButtonText="${t('sample.contentdialog.save')}"
+  SecondaryButtonText="${t('sample.contentdialog.dont-save')}"
   CloseButtonText="${t('sample.contentdialog.cancel')}"
   DefaultButton="None">
   <WinTextBlock Text="${t('sample.contentdialog.body')}" TextWrapping="WrapWholeWords" />

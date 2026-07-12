@@ -102,8 +102,8 @@ const handleClose = () => {
 
 /* Severity-based colors */
 .severity-informational {
-  border-color: var(--accent-fill-color-default);
-  background: var(--accent-fill-secondary);
+  border-color: var(--accent-base);
+  background: var(--accent-hover);
 }
 
 .severity-success {
@@ -141,7 +141,7 @@ const handleClose = () => {
 }
 
 .icon-informational {
-  color: var(--accent-fill-color-default);
+  color: var(--accent-base);
 }
 
 .icon-informational::before {

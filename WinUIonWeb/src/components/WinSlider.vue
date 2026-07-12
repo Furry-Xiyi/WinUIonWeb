@@ -358,7 +358,6 @@ const onPointerDown = (event) => {
   transform: translateX(-50%);
 }
 
-html.theme-light .win-slider,
 .example-theme-wrapper.theme-light .win-slider,
 .win-theme-scope.theme-light .win-slider {
   --SliderOuterThumbBackground: #ffffff;
@@ -366,20 +365,11 @@ html.theme-light .win-slider,
   --SliderThumbBorderBrushTop: rgba(255, 255, 255, 0.65);
 }
 
-html.theme-dark .win-slider,
 .example-theme-wrapper.theme-dark .win-slider,
 .win-theme-scope.theme-dark .win-slider {
   --SliderOuterThumbBackground: #454545;
   --SliderThumbBorderBrush: rgba(0, 0, 0, 0.35);
   --SliderThumbBorderBrushTop: rgba(255, 255, 255, 0.10);
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not(.theme-light) .win-slider {
-    --SliderOuterThumbBackground: #454545;
-    --SliderThumbBorderBrush: rgba(0, 0, 0, 0.35);
-    --SliderThumbBorderBrushTop: rgba(255, 255, 255, 0.10);
-  }
 }
 
 .win-slider-root.is-disabled {

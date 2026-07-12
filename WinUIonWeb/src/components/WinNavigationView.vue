@@ -4,72 +4,83 @@
       <div class="win-nav-indicator-track" ref="indicatorTrack">
         <div class="win-nav-indicator" :style="indicatorStyle"></div>
       </div>
-      <div v-if="showBackButtonResolved" class="win-nav-back-button" :class="{ 'is-disabled': !canGoBack }" role="button" :aria-disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave" ref="topBackButtonRef">
+      <button v-if="showBackButtonResolved" class="win-nav-back-button" :disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave" ref="topBackButtonRef">
         <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd"></span>
-      </div>
+      </button>
       <div class="win-nav-menu win-nav-top-primary-menu" ref="topPrimaryMenuRef">
         <template v-for="item in topVisibleMenuItems" :key="item.value">
-          <div v-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+          <div v-if="item.type === 'Header'" class="win-nav-item-header">
+            <WinTextBlock :Text="item.label" />
+          </div>
+          <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
+          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
-            <span class="label">{{ item.label }}</span>
+            <WinTextBlock class="label" :Text="item.label" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-child-selected': isChildOfGroup(item) }">
             <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
               <span class="icon">{{ item.icon }}</span>
-              <span class="label">{{ item.label }}</span>
+              <WinTextBlock class="label" :Text="item.label" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)"></span>
             </div>
           </div>
         </template>
         <div v-if="topOverflowMenuItems.length" class="win-nav-item win-nav-more-button" :aria-label="t('text.more')" @click="toggleMoreFlyout" ref="moreButtonRef">
           <span class="icon">&#xE712;</span>
+          <WinTextBlock v-if="officialProps.OverflowLabelMode === 'MoreLabel'" class="label" :Text="t('text.more')" />
         </div>
       </div>
       <div style="flex:1"></div>
       <div class="win-nav-menu win-nav-top-footer-menu" ref="topFooterMenuRef">
         <template v-for="item in footerItems" :key="item.value">
-          <div class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+          <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
+          <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
+          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
-            <span class="label">{{ item.label }}</span>
+            <WinTextBlock class="label" :Text="item.label" />
           </div>
         </template>
         <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
           <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
-          <span class="label">{{ resolvedSettingsLabel }}</span>
+          <WinTextBlock class="label" :Text="resolvedSettingsLabel" />
         </div>
       </div>
       <div class="win-nav-top-measure" ref="topMeasureRef" aria-hidden="true">
         <template v-for="item in menuItems" :key="item.value">
-          <div class="win-nav-item" :data-value="item.value">
+          <div v-if="item.type === 'Header'" class="win-nav-item-header" :data-value="item.value"><WinTextBlock :Text="item.label" /></div>
+          <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator" :data-value="item.value"></div>
+          <div v-else class="win-nav-item" :data-value="item.value">
             <span class="icon">{{ item.icon }}</span>
-            <span class="label">{{ item.label }}</span>
+            <WinTextBlock class="label" :Text="item.label" />
             <span v-if="item.children" class="icon win-nav-group-chevron">&#xE70D;</span>
           </div>
         </template>
         <div class="win-nav-item win-nav-more-button" data-value="__more">
           <span class="icon">&#xE712;</span>
+          <WinTextBlock v-if="officialProps.OverflowLabelMode === 'MoreLabel'" class="label" :Text="t('text.more')" />
         </div>
       </div>
     </nav>
-    <nav v-else class="win-nav-left-panel" :class="{ 'is-compact': isCompact, 'is-minimal': isLeftMinimalMode }" :style="paneStyle" ref="navRef">
-      <div class="win-nav-indicator-track" ref="indicatorTrack" v-show="!isLeftMinimalMode || !isCompact">
+    <nav v-else class="win-nav-left-panel" :class="['win-nav-left-panel', { 'is-compact': isCompact, 'is-minimal': isLeftMinimalMode }, paneTransition ? `is-pane-${paneTransition}` : '']" :style="paneStyle" ref="navRef">
+      <div class="win-nav-indicator-track" ref="indicatorTrack" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'">
         <div class="win-nav-indicator" :class="{ 'is-child': indicatorIsChild }" :style="indicatorStyle"></div>
       </div>
-      <div v-if="showBackButtonInLeftNav" class="win-nav-back-button" :class="{ 'is-disabled': !canGoBack }" role="button" :aria-disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
+      <button v-if="showBackButtonInLeftNav" class="win-nav-back-button" :disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
         <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
-      </div>
-      <div v-if="isPaneToggleButtonVisible" class="win-nav-hamburger" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
+      </button>
+      <button v-if="isPaneToggleButtonVisible" class="win-nav-hamburger" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
         <span class="icon animated-icon animated-icon-hamburger" :class="hamburgerClass" @animationend="onHamburgerAnimEnd">&#xE700;</span>
+      </button>
+      <div v-if="$slots.PaneHeader || paneTitle || $slots.AutoSuggestBox" class="win-nav-pane-top" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'">
+        <div v-if="$slots.PaneHeader" class="win-nav-pane-header"><slot name="PaneHeader"></slot></div>
+        <WinTextBlock v-if="paneTitle" class="win-nav-pane-title" :Text="paneTitle" />
+        <div v-if="$slots.AutoSuggestBox" class="win-nav-pane-search"><slot name="AutoSuggestBox"></slot></div>
       </div>
-      <div v-if="$slots.paneHeader || paneTitle || $slots.autoSuggestBox" class="win-nav-pane-top" v-show="!isLeftMinimalMode || !isCompact">
-        <div v-if="$slots.paneHeader" class="win-nav-pane-header"><slot name="paneHeader"></slot></div>
-        <div v-if="paneTitle" class="win-nav-pane-title">{{ paneTitle }}</div>
-        <div v-if="$slots.autoSuggestBox" class="win-nav-pane-search"><slot name="autoSuggestBox"></slot></div>
-      </div>
+      <div v-if="$slots.PaneCustomContent" class="win-nav-pane-custom-content" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'"><slot name="PaneCustomContent"></slot></div>
       <WinScrollViewer
         class="win-nav-left-scrollable"
         ref="scrollArea"
-        v-show="!isLeftMinimalMode || !isCompact"
+        v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'"
         VerticalScrollMode="Auto"
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Disabled"
@@ -77,21 +88,25 @@
         @ViewChanged="onScroll">
         <div class="win-nav-menu">
           <template v-for="item in menuItems" :key="item.value">
-            <div v-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+            <div v-if="item.type === 'Header'" class="win-nav-item-header">
+              <WinTextBlock :Text="item.label" />
+            </div>
+            <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
+            <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
               <span class="icon">{{ item.icon }}</span>
-              <span class="label">{{ item.label }}</span>
+              <WinTextBlock class="label" :Text="item.label" />
             </div>
             <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
               <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
                 <span class="icon">{{ item.icon }}</span>
-                <span class="label">{{ item.label }}</span>
+                <WinTextBlock class="label" :Text="item.label" />
                 <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
               </div>
               <div v-if="!isCompact" class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? (groupHeights[item.value] || 0) + 'px' : '0px' }">
                 <div class="win-nav-group-children-inner" :ref="el => setChildrenRef(item.value, el)">
                   <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value }" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
                     <span class="icon">{{ child.icon }}</span>
-                    <span class="label">{{ child.label }}</span>
+                    <WinTextBlock class="label" :Text="child.label" />
                   </div>
                 </div>
               </div>
@@ -99,45 +114,50 @@
           </template>
         </div>
       </WinScrollViewer>
-      <div class="win-nav-footer" v-show="!isLeftMinimalMode || !isCompact">
-        <div v-if="$slots.paneFooter" class="win-nav-pane-footer"><slot name="paneFooter"></slot></div>
+      <div class="win-nav-footer" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'">
+        <div v-if="$slots.PaneFooter" class="win-nav-pane-footer"><slot name="PaneFooter"></slot></div>
         <template v-for="item in footerItems" :key="item.value">
-          <div class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+          <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
+          <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
+          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
-            <span class="label">{{ item.label }}</span>
+            <WinTextBlock class="label" :Text="item.label" />
           </div>
         </template>
         <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
           <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
-          <span class="label">{{ resolvedSettingsLabel }}</span>
+          <WinTextBlock class="label" :Text="resolvedSettingsLabel" />
         </div>
       </div>
     </nav>
     <main class="win-nav-content">
-      <div v-if="$slots.header || header" class="win-nav-page-header">
-        <slot name="header">{{ header }}</slot>
+      <div v-if="shouldShowHeader" class="win-nav-page-header">
+        <slot name="Header"><WinTextBlock :Text="header" /></slot>
       </div>
       <div class="win-nav-content-inner"><slot></slot></div>
+      <div v-if="$slots.ContentOverlay" class="win-nav-content-overlay"><slot name="ContentOverlay"></slot></div>
     </main>
-    <WinMenuFlyout :Open="flyoutOpen" :AnchorRect="flyoutAnchor" :Items="flyoutItems" @Close="closeFlyout" @Select="onFlyoutSelect" />
+    <WinMenuFlyout :Open="flyoutOpen" :AnchorRect="flyoutAnchor" :Items="flyoutItems" :Placement="flyoutPlacement" @Close="closeFlyout" @Select="onFlyoutSelect" />
     <WinMenuFlyout :Open="moreFlyoutOpen" :AnchorRect="moreFlyoutAnchor" :Items="[]" Placement="BottomEdgeAlignedRight" @Close="closeMoreFlyout">
       <div class="win-nav-more-panel">
         <template v-for="item in topOverflowMenuItems" :key="item.value">
-          <div v-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" @click="onMoreItemClick(item)">
+          <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
+          <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
+          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onMoreItemClick(item)">
             <span class="icon">{{ item.icon }}</span>
-            <span class="label">{{ item.label }}</span>
+            <WinTextBlock class="label" :Text="item.label" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
             <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" @click="onMoreGroupHeaderClick(item)">
               <span class="icon">{{ item.icon }}</span>
-              <span class="label">{{ item.label }}</span>
+              <WinTextBlock class="label" :Text="item.label" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
             </div>
             <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 38 + 2) + 'px' : '0px' }">
               <div class="win-nav-group-children-inner">
                 <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value }" @click="onMoreChildClick(item, child)">
                   <span class="icon">{{ child.icon }}</span>
-                  <span class="label">{{ child.label }}</span>
+                  <WinTextBlock class="label" :Text="child.label" />
                 </div>
               </div>
             </div>
@@ -148,41 +168,125 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, inject, provide, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import { ref, reactive, inject, computed, onMounted, onBeforeUnmount, watch, nextTick, useSlots } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
 import WinScrollViewer from './WinScrollViewer.vue';
+import WinTextBlock from './WinTextBlock.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
+const slots = useSlots();
 
-const props = defineProps({
-  position: { type: String, default: 'Left' },
-  paneDisplayMode: String,
-  selectedValue: String,
-  menuItems: { type: Array, default: () => [] },
-  footerItems: { type: Array, default: () => [] },
-  showBackButton: { type: Boolean, default: false },
-  isBackButtonVisible: { type: [Boolean, String], default: 'auto' },
-  backTarget: { type: [String, Function], default: null },
-  isSettingsVisible: { type: Boolean, default: true },
-  isPaneToggleButtonVisible: { type: Boolean, default: true },
-  isPaneOpen: { type: Boolean, default: undefined },
-  openPaneLength: { type: Number, default: 320 },
-  compactPaneLength: { type: Number, default: 48 },
-  compactModeThresholdWidth: { type: Number, default: 641 },
-  expandedModeThresholdWidth: { type: Number, default: 1008 },
-  paneTitle: { type: String, default: '' },
-  header: { type: String, default: '' },
-  settingsValue: { type: String, default: 'settings' },
-  settingsLabel: { type: String, default: '' },
-  settingsIcon: { type: String, default: '\uE713' }
+const officialProps = defineProps({
+  PaneDisplayMode: { type: String, default: 'Auto' },
+  SelectedItem: { type: [Object, String, Number], default: null },
+  MenuItems: { type: Array, default: () => [] },
+  MenuItemsSource: { type: [Array, Object], default: null },
+  FooterMenuItems: { type: Array, default: () => [] },
+  FooterMenuItemsSource: { type: [Array, Object], default: null },
+  IsBackButtonVisible: { type: String, default: 'Auto' },
+  IsBackEnabled: { type: Boolean, default: false },
+  IsSettingsVisible: { type: Boolean, default: true },
+  IsPaneToggleButtonVisible: { type: Boolean, default: true },
+  IsPaneOpen: { type: Boolean, default: true },
+  IsPaneVisible: { type: Boolean, default: true },
+  OpenPaneLength: { type: Number, default: 320 },
+  CompactPaneLength: { type: Number, default: 48 },
+  CompactModeThresholdWidth: { type: Number, default: 641 },
+  ExpandedModeThresholdWidth: { type: Number, default: 1008 },
+  PaneTitle: { type: String, default: '' },
+  Header: { type: [String, Number, Object], default: '' },
+  HeaderTemplate: { type: [Object, Function], default: null },
+  PaneToggleButtonStyle: { type: [Object, String], default: null },
+  MenuItemTemplate: { type: [Object, Function], default: null },
+  MenuItemTemplateSelector: { type: [Object, Function], default: null },
+  MenuItemContainerStyle: { type: [Object, String], default: null },
+  MenuItemContainerStyleSelector: { type: [Object, Function], default: null },
+  AutoSuggestBox: { type: Object, default: null },
+  PaneFooter: { type: Object, default: null },
+  PaneHeader: { type: Object, default: null },
+  PaneCustomContent: { type: Object, default: null },
+  ContentOverlay: { type: Object, default: null },
+  AlwaysShowHeader: { type: Boolean, default: true },
+  SelectionFollowsFocus: { type: String, default: 'Disabled' },
+  ShoulderNavigationEnabled: { type: String, default: 'Never' },
+  OverflowLabelMode: { type: String, default: 'MoreLabel' },
+  IsTitleBarAutoPaddingEnabled: { type: Boolean, default: true }
 });
+
+const getItemTag = item => item && typeof item === 'object'
+  ? (item.Tag ?? item.Value ?? item.Name ?? item.value)
+  : item;
+const normalizeItem = (item, fallbackKey = 'item') => {
+  const declaredType = item?.Type ?? item?.type ?? (item?.IsHeader ? 'Header' : item?.IsSeparator ? 'Separator' : 'Item');
+  const type = declaredType === 'NavigationViewItemHeader'
+    ? 'Header'
+    : declaredType === 'NavigationViewItemSeparator'
+      ? 'Separator'
+      : declaredType;
+  const children = item?.MenuItems ?? item?.children;
+  return {
+    value: getItemTag(item) ?? `__${String(type).toLowerCase()}-${fallbackKey}`,
+    label: item?.Content ?? item?.Name ?? item?.Text ?? item?.label ?? '',
+    icon: item?.Icon ?? item?.Glyph ?? item?.icon ?? '',
+    tooltip: item?.ToolTip ?? item?.Tooltip ?? item?.tooltip ?? '',
+    type,
+    children: Array.isArray(children)
+      ? children.map((child, index) => normalizeItem(child, `${fallbackKey}-${index}`))
+      : null,
+    selectsOnInvoked: (item?.SelectsOnInvoked ?? item?.selectsOnInvoked) !== false,
+    source: item
+  };
+};
+
+const resolveItems = (items, source) => Array.isArray(items) && items.length ? items : (Array.isArray(source) ? source : []);
+const menuItems = computed(() => resolveItems(officialProps.MenuItems, officialProps.MenuItemsSource)
+  .map((item, index) => normalizeItem(item, `menu-${index}`)));
+const footerItems = computed(() => resolveItems(officialProps.FooterMenuItems, officialProps.FooterMenuItemsSource)
+  .map((item, index) => normalizeItem(item, `footer-${index}`)));
+const internalSelectedItem = ref(officialProps.SelectedItem);
+const selectedValue = computed(() => getItemTag(internalSelectedItem.value));
+
+// Internal aliases keep the rendering code focused on layout while the public surface mirrors WinUI.
+const props = {
+  get paneDisplayMode() { return officialProps.PaneDisplayMode; },
+  get selectedValue() { return selectedValue.value; },
+  get menuItems() { return menuItems.value; },
+  get footerItems() { return footerItems.value; },
+  get isBackButtonVisible() { return officialProps.IsBackButtonVisible; },
+  get isSettingsVisible() { return officialProps.IsSettingsVisible; },
+  get isPaneToggleButtonVisible() { return officialProps.IsPaneToggleButtonVisible; },
+  get isPaneOpen() { return officialProps.IsPaneOpen; },
+  get openPaneLength() { return officialProps.OpenPaneLength; },
+  get compactPaneLength() { return officialProps.CompactPaneLength; },
+  get compactModeThresholdWidth() { return officialProps.CompactModeThresholdWidth; },
+  get expandedModeThresholdWidth() { return officialProps.ExpandedModeThresholdWidth; },
+  get paneTitle() { return officialProps.PaneTitle; },
+  get header() { return officialProps.Header; },
+  get settingsValue() { return 'settings'; },
+  get settingsLabel() { return t('text.settings'); },
+  get settingsIcon() { return '\uE713'; }
+};
 
 const titleBarVisible = inject('winTitleBarVisible', ref(false));
 const hasTitlebar = computed(() => titleBarVisible.value);
-const resolvedSettingsLabel = computed(() => props.settingsLabel || t('text.settings'));
-const emit = defineEmits(['update:selectedValue', 'update:isPaneOpen', 'back']);
-const isCompact = ref(false);
+const resolvedSettingsLabel = computed(() => props.settingsLabel);
+const emit = defineEmits([
+  'update:SelectedItem',
+  'update:IsPaneOpen',
+  'SelectionChanged',
+  'ItemInvoked',
+  'DisplayModeChanged',
+  'BackRequested',
+  'PaneOpening',
+  'PaneOpened',
+  'PaneClosing',
+  'PaneClosed',
+  'Expanding',
+  'Collapsed'
+]);
+const isCompact = ref(!officialProps.IsPaneOpen || officialProps.PaneDisplayMode === 'LeftMinimal');
+const paneTransition = ref('');
 const shellRef = ref(null);
 const navRef = ref(null);
 const indicatorTrack = ref(null);
@@ -208,7 +312,7 @@ const topItemWidths = ref({});
 const topMoreButtonWidth = ref(72);
 const containerWidth = ref(typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
 
-const normalizedPaneDisplayMode = computed(() => props.paneDisplayMode || props.position);
+const normalizedPaneDisplayMode = computed(() => props.paneDisplayMode);
 const resolvedPaneDisplayMode = computed(() => {
   if (normalizedPaneDisplayMode.value !== 'Auto') return normalizedPaneDisplayMode.value;
   const width = containerWidth.value || (typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
@@ -217,33 +321,50 @@ const resolvedPaneDisplayMode = computed(() => {
   return 'LeftMinimal';
 });
 const isTopNavigation = computed(() => resolvedPaneDisplayMode.value === 'Top');
+const flyoutPlacement = computed(() => isTopNavigation.value ? 'Bottom' : 'RightEdgeAlignedTop');
 const isLeftMinimalMode = computed(() => resolvedPaneDisplayMode.value === 'LeftMinimal');
 const isLeftCompactMode = computed(() => resolvedPaneDisplayMode.value === 'LeftCompact');
 const isLeftOverlayMode = computed(() => isLeftMinimalMode.value || isLeftCompactMode.value);
+const displayMode = computed(() => {
+  if (isTopNavigation.value || isLeftMinimalMode.value) return 'Minimal';
+  if (isLeftCompactMode.value) return 'Compact';
+  return 'Expanded';
+});
 const isSettingsVisible = computed(() => props.isSettingsVisible);
 const isPaneToggleButtonVisible = computed(() => props.isPaneToggleButtonVisible);
 const paneTitle = computed(() => props.paneTitle);
 const header = computed(() => props.header);
+const shouldShowHeader = computed(() => (
+  !!(header.value || slots.Header) &&
+  (officialProps.AlwaysShowHeader || displayMode.value === 'Expanded')
+));
 const settingsValue = computed(() => props.settingsValue);
 const settingsLabel = computed(() => props.settingsLabel);
 const settingsIcon = computed(() => props.settingsIcon);
 const showBackButtonResolved = computed(() => {
-  if (props.isBackButtonVisible === 'visible') return true;
-  if (props.isBackButtonVisible === 'collapsed') return false;
-  if (typeof props.isBackButtonVisible === 'boolean') return props.isBackButtonVisible;
-  return props.showBackButton;
+  if (props.isBackButtonVisible === 'Visible') return true;
+  if (props.isBackButtonVisible === 'Collapsed') return false;
+  return !isTopNavigation.value && displayMode.value === 'Minimal';
 });
 const showBackButtonInLeftNav = computed(() => showBackButtonResolved.value && !isTopNavigation.value);
+const paneTransitionDurationMs = compact => isLeftOverlayMode.value
+  ? (compact ? 120 : 350)
+  : 200;
 const paneStyle = computed(() => ({
   '--win-nav-open-pane-length': `${props.openPaneLength}px`,
-  '--win-nav-compact-pane-length': `${props.compactPaneLength}px`
+  '--win-nav-compact-pane-length': `${props.compactPaneLength}px`,
+  '--win-nav-pane-duration': `${paneTransitionDurationMs(isCompact.value)}ms`,
+  '--win-nav-pane-easing': isLeftOverlayMode.value
+    ? 'cubic-bezier(0.1, 0.9, 0.2, 1)'
+    : 'cubic-bezier(0, 0.35, 0.15, 1)'
 }));
 const shellClasses = computed(() => [
   isTopNavigation.value ? 'is-top' : 'is-left',
   isLeftOverlayMode.value ? 'is-overlay-left' : '',
   isLeftMinimalMode.value ? 'is-left-minimal' : '',
   isLeftCompactMode.value ? 'is-left-compact' : '',
-  hasTitlebar.value ? 'has-titlebar' : ''
+  hasTitlebar.value && officialProps.IsTitleBarAutoPaddingEnabled ? 'has-titlebar' : '',
+  officialProps.IsPaneVisible ? '' : 'is-pane-hidden'
 ]);
 
 let itemRefs = {};
@@ -257,8 +378,9 @@ let ro = null;
 let skipTransition = false;
 let indicatorAnimationId = 0;
 let compactTransitionTimer = null;
+let paneTransitionTimer = null;
+let responsiveCollapsePending = false;
 let suppressNextTopChildWatcherMove = false;
-let suppressNextHistoryRecord = false;
 
 const gearClass = ref('');
 const hamburgerClass = ref('');
@@ -270,16 +392,7 @@ let hamburgerPressDone = false;
 let backPressed = false;
 let backPressDone = false;
 
-const selectionHistory = ref([]);
-const backHandlers = new Set();
-const backHandlerCount = ref(0);
-const injectedBackTarget = ref(null);
-const canGoBack = computed(() => (
-  selectionHistory.value.length > 0 ||
-  !!props.backTarget ||
-  !!injectedBackTarget.value ||
-  backHandlerCount.value > 0
-));
+const canGoBack = computed(() => officialProps.IsBackEnabled);
 
 const INDICATOR_SIZE = 16;
 const TOP_INDICATOR_MAX_STRETCH = INDICATOR_SIZE * 2.75;
@@ -415,6 +528,50 @@ const findParentGroup = (val) => {
   return props.menuItems.find(item => item.children && item.children.some(c => c.value === val));
 };
 
+const findNormalizedItem = (value) => {
+  for (const item of [...props.menuItems, ...props.footerItems]) {
+    if (item.value === value) return item;
+    const child = item.children?.find(entry => entry.value === value);
+    if (child) return child;
+  }
+  return null;
+};
+
+const createSettingsItem = () => ({
+  Content: resolvedSettingsLabel.value,
+  Tag: props.settingsValue,
+  Icon: props.settingsIcon,
+  IsSettingsItem: true
+});
+
+const commitNavigationValue = (value, { invoked = true, isSettings = false } = {}) => {
+  const normalizedItem = isSettings ? null : findNormalizedItem(value);
+  const item = isSettings ? createSettingsItem() : normalizedItem?.source;
+  if (!item) return false;
+
+  if (invoked) {
+    emit('ItemInvoked', {
+      InvokedItem: item.Content ?? item.label,
+      IsSettingsInvoked: isSettings,
+      InvokedItemContainer: item,
+      RecommendedNavigationTransitionInfo: { Type: 'EntranceNavigationTransitionInfo' }
+    });
+  }
+
+  if (!isSettings && (item.SelectsOnInvoked ?? item.selectsOnInvoked) === false) return false;
+  if (getItemTag(internalSelectedItem.value) === value) return true;
+
+  internalSelectedItem.value = item;
+  emit('update:SelectedItem', typeof officialProps.SelectedItem === 'object' ? item : getItemTag(item));
+  emit('SelectionChanged', {
+    SelectedItem: item,
+    IsSettingsSelected: isSettings,
+    SelectedItemContainer: item,
+    RecommendedNavigationTransitionInfo: { Type: 'EntranceNavigationTransitionInfo' }
+  });
+  return true;
+};
+
 const isFooterValue = (value) => {
   return value === settingsValue.value || props.footerItems.some(item => item.value === value);
 };
@@ -441,6 +598,39 @@ const setChildrenRef = (value, el) => {
     delete childrenRefs[value];
   }
 };
+
+const Expand = (item) => {
+  const value = getItemTag(item);
+  const normalizedItem = findNormalizedItem(value);
+  if (!normalizedItem?.children || groupExpanded[value]) return;
+  emit('Expanding', { ExpandingItemContainer: normalizedItem.source, ExpandingItem: normalizedItem.source });
+  groupExpanded[value] = true;
+  nextTick(() => measureGroup(value));
+};
+
+const Collapse = (item) => {
+  const value = getItemTag(item);
+  const normalizedItem = findNormalizedItem(value);
+  if (!normalizedItem?.children || !groupExpanded[value]) return;
+  groupExpanded[value] = false;
+  emit('Collapsed', { CollapsedItemContainer: normalizedItem.source, CollapsedItem: normalizedItem.source });
+};
+
+const MenuItemFromContainer = container => {
+  const value = getValueForElement(container);
+  return value === props.settingsValue ? createSettingsItem() : findNormalizedItem(value)?.source ?? null;
+};
+
+const ContainerFromMenuItem = item => itemRefs[getItemTag(item)] ?? null;
+
+defineExpose({
+  DisplayMode: displayMode,
+  SettingsItem: computed(createSettingsItem),
+  MenuItemFromContainer,
+  ContainerFromMenuItem,
+  Expand,
+  Collapse
+});
 
 const groupChevronClass = (value) => {
   return groupChevrons[value] || '';
@@ -490,7 +680,7 @@ const prepareSelectionTarget = (value) => {
 };
 
 const selectNavigationValue = (value, isChild = null) => {
-  emit('update:selectedValue', value);
+  if (!commitNavigationValue(value)) return;
   prepareSelectionTarget(value);
   nextTick(() => {
     updateTopNavigationLayout();
@@ -578,7 +768,8 @@ const onMoreGroupHeaderClick = (item) => {
     return;
   }
 
-  groupExpanded[item.value] = !groupExpanded[item.value];
+  if (item.selectsOnInvoked === false) commitNavigationValue(item.value);
+  if (groupExpanded[item.value]) Collapse(item.source); else Expand(item.source);
   groupChevrons[item.value] = groupExpanded[item.value] ? 'chevron-open' : 'chevron-close';
 };
 
@@ -598,6 +789,11 @@ const onGroupHeaderClick = (item) => {
       }
       flyoutItems.value = items;
       flyoutOpen.value = !flyoutOpen.value;
+      if (flyoutOpen.value) {
+        emit('Expanding', { ExpandingItemContainer: item.source, ExpandingItem: item.source });
+      } else {
+        emit('Collapsed', { CollapsedItemContainer: item.source, CollapsedItem: item.source });
+      }
       groupChevrons[item.value] = flyoutOpen.value ? 'chevron-open' : 'chevron-close';
     }
     return;
@@ -605,8 +801,19 @@ const onGroupHeaderClick = (item) => {
   if (isCompact.value) {
     const el = itemRefs[item.value];
     if (el) {
-      const rect = el.getBoundingClientRect();
-      flyoutAnchor.value = { left: rect.right, top: rect.top, bottom: rect.bottom, width: 0, height: rect.height };
+      const itemRect = el.getBoundingClientRect();
+      const paneRect = navRef.value?.getBoundingClientRect();
+      const paneRight = paneRect
+        ? paneRect.left + props.compactPaneLength
+        : itemRect.right;
+      flyoutAnchor.value = {
+        left: paneRight,
+        right: paneRight,
+        top: itemRect.top,
+        bottom: itemRect.bottom,
+        width: 0,
+        height: itemRect.height
+      };
       flyoutGroupValue.value = item.value;
       const items = [];
       if (item.selectsOnInvoked !== false) {
@@ -617,15 +824,18 @@ const onGroupHeaderClick = (item) => {
       }
       flyoutItems.value = items;
       flyoutOpen.value = true;
+      emit('Expanding', { ExpandingItemContainer: item.source, ExpandingItem: item.source });
       groupChevrons[item.value] = 'chevron-open';
     }
     return;
   }
   if (item.selectsOnInvoked !== false && !isChildOfGroup(item)) {
     selectNavigationValue(item.value, false);
+  } else if (item.selectsOnInvoked === false) {
+    commitNavigationValue(item.value);
   }
   const wasExpanded = groupExpanded[item.value];
-  groupExpanded[item.value] = !wasExpanded;
+  if (wasExpanded) Collapse(item.source); else Expand(item.source);
   nextTick(() => measureGroup(item.value));
   if (wasExpanded && isChildOfGroup(item)) {
     const header = itemRefs[item.value];
@@ -702,7 +912,7 @@ const onFlyoutSelect = (item) => {
   const movesTopChildToGroup = isTopNavigation.value && flyoutGroupValue.value && !isHeader;
   if (movesTopChildToGroup) suppressNextTopChildWatcherMove = true;
 
-  emit('update:selectedValue', itemValue);
+  if (!commitNavigationValue(itemValue)) return;
   flyoutOpen.value = false;
   if (flyoutGroupValue.value) {
     groupChevrons[flyoutGroupValue.value] = 'chevron-close';
@@ -741,113 +951,9 @@ const moveIndicatorToEl = (el, isChild) => {
   calcIndicator();
 };
 
-const runBackHandlers = () => {
-  const context = {
-    selectedValue: props.selectedValue,
-    history: [...selectionHistory.value],
-    menuItems: props.menuItems,
-    footerItems: props.footerItems
-  };
-
-  for (const handler of Array.from(backHandlers).reverse()) {
-    const result = handler(context);
-    if (result === false) return { handled: true };
-    if (typeof result === 'string') return { value: result };
-    if (result && typeof result === 'object') {
-      if (result.handled) return { handled: true };
-      if (typeof result.value === 'string') return { value: result.value };
-    }
-  }
-
-  return null;
-};
-
-const resolveBackTarget = () => {
-  const handlerResult = runBackHandlers();
-  if (handlerResult) return handlerResult;
-
-  if (props.backTarget) {
-    const value = typeof props.backTarget === 'function'
-      ? props.backTarget({
-        selectedValue: props.selectedValue,
-        history: [...selectionHistory.value],
-        menuItems: props.menuItems,
-        footerItems: props.footerItems
-      })
-      : props.backTarget;
-    if (typeof value === 'string') return { value };
-    if (value === false) return { handled: true };
-  }
-
-  if (injectedBackTarget.value) {
-    const value = typeof injectedBackTarget.value === 'function'
-      ? injectedBackTarget.value({
-        selectedValue: props.selectedValue,
-        history: [...selectionHistory.value],
-        menuItems: props.menuItems,
-        footerItems: props.footerItems
-      })
-      : injectedBackTarget.value;
-    if (typeof value === 'string') return { value };
-    if (value === false) return { handled: true };
-  }
-
-  const value = selectionHistory.value.pop();
-  return typeof value === 'string' ? { value } : null;
-};
-
 const goBack = () => {
-  emit('back', {
-    selectedValue: props.selectedValue,
-    history: [...selectionHistory.value]
-  });
-
-  const target = resolveBackTarget();
-  if (!target || target.handled || target.value === props.selectedValue) return;
-
-  suppressNextHistoryRecord = true;
-  emit('update:selectedValue', target.value);
-  prepareSelectionTarget(target.value);
-  nextTick(() => {
-    moveIndicatorForValue(target.value);
-    collapseOverlayAfterNavigation();
-    requestAnimationFrame(() => {
-      suppressNextHistoryRecord = false;
-    });
-  });
+  if (canGoBack.value) emit('BackRequested', {});
 };
-
-const registerBackHandler = (handler) => {
-  if (typeof handler !== 'function') return () => {};
-  backHandlers.add(handler);
-  backHandlerCount.value = backHandlers.size;
-  return () => {
-    backHandlers.delete(handler);
-    backHandlerCount.value = backHandlers.size;
-  };
-};
-
-const setBackTarget = (target) => {
-  injectedBackTarget.value = target;
-  return () => {
-    if (injectedBackTarget.value === target) {
-      injectedBackTarget.value = null;
-    }
-  };
-};
-
-provide('winNavigationBack', {
-  goBack,
-  registerBackHandler,
-  setBackTarget,
-  history: selectionHistory
-});
-
-defineExpose({
-  goBack,
-  registerBackHandler,
-  setBackTarget
-});
 
 const onBackClick = () => {
   if (!canGoBack.value) return;
@@ -856,7 +962,11 @@ const onBackClick = () => {
 
 const selectSettings = () => {
   if (!isSettingsVisible.value) return;
-  selectNavigationValue(settingsValue.value, false);
+  if (!commitNavigationValue(settingsValue.value, { isSettings: true })) return;
+  nextTick(() => {
+    moveIndicatorTo(settingsValue.value, false);
+    collapseOverlayAfterNavigation();
+  });
 };
 
 const toggleCompact = () => {
@@ -864,12 +974,43 @@ const toggleCompact = () => {
 };
 
 const setCompact = (compact) => {
+  if (compact === isCompact.value) return;
+  if (compact) {
+    const args = { Cancel: false };
+    emit('PaneClosing', args);
+    if (args.Cancel) return;
+  } else {
+    emit('PaneOpening', {});
+  }
+  paneTransition.value = compact ? 'closing' : 'opening';
+  if (paneTransitionTimer) clearTimeout(paneTransitionTimer);
+  const transitionDuration = paneTransitionDurationMs(compact);
+  paneTransitionTimer = setTimeout(() => {
+    paneTransition.value = '';
+    paneTransitionTimer = null;
+    emit(compact ? 'PaneClosed' : 'PaneOpened', {});
+    nextTick(() => restoreIndicatorAfterPaneLayout());
+  }, transitionDuration);
   isCompact.value = compact;
-  emit('update:isPaneOpen', !compact);
+  emit('update:IsPaneOpen', !compact);
 };
 
 const syncDisplayMode = () => {
-  if (typeof props.isPaneOpen === 'boolean') {
+  const automaticMode = normalizedPaneDisplayMode.value === 'Auto';
+  if (automaticMode && isLeftOverlayMode.value) {
+    // Auto owns the compact/minimal transition. Keep the pane folded when the
+    // host crosses a responsive breakpoint instead of reopening from IsPaneOpen.
+    if (!isCompact.value && !responsiveCollapsePending) {
+      responsiveCollapsePending = true;
+      nextTick(() => {
+        responsiveCollapsePending = false;
+        if (normalizedPaneDisplayMode.value === 'Auto' && isLeftOverlayMode.value) setCompact(true);
+      });
+    }
+    return;
+  } else if (isLeftMinimalMode.value) {
+    isCompact.value = true;
+  } else if (typeof props.isPaneOpen === 'boolean') {
     isCompact.value = !props.isPaneOpen;
     return;
   }
@@ -1138,7 +1279,7 @@ const calcIndicator = () => {
     if (crossLevel) {
       indicatorStyle.value = { transform: `translateY(${oldY}px)`, height: '16px', opacity: '1', transition: 'none' };
       const movingDown = newY > oldY;
-      const collapseDur = 350; const expandDur = 350;
+      const collapseDur = 300; const expandDur = 300;
       let collapseKf, expandKf;
       if (movingDown) {
         collapseKf = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateY(${oldY + 16}px)`, height: '0px', offset: 1 }];
@@ -1163,8 +1304,10 @@ const calcIndicator = () => {
     const sourceRegion = sourceEl ? getRegion(sourceEl) : getRegion(lastSelectedEl);
     const targetRegion = getRegion(lastSelectedEl);
     const forceMove = sourceRegion !== targetRegion;
-    const useStretchMove = forceMove || dist <= 160;
-    const dur = forceMove ? 350 : 300;
+    // A long-distance collapse/expand is reserved for crossing the menu/footer
+    // boundary. Items within the same region use the continuous stretch motion.
+    const useStretchMove = !forceMove;
+    const dur = 600;
     let keyframes;
 
     if (!useStretchMove) {
@@ -1174,10 +1317,10 @@ const calcIndicator = () => {
       const expandKf = movingDown
         ? [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }]
         : [{ transform: `translateY(${newY + 16}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-      const collapseAnim = indicatorEl.animate(collapseKf, { duration: 350, fill: 'forwards' });
+      const collapseAnim = indicatorEl.animate(collapseKf, { duration: 300, fill: 'forwards' });
       collapseAnim.onfinish = () => {
         if (animationId !== indicatorAnimationId) return;
-        const expandAnim = indicatorEl.animate(expandKf, { duration: 350, fill: 'forwards' });
+        const expandAnim = indicatorEl.animate(expandKf, { duration: 300, fill: 'forwards' });
         expandAnim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateY(${newY}px)`, 'y', '16px'); };
       };
       return;
@@ -1192,6 +1335,31 @@ const calcIndicator = () => {
     const anim = indicatorEl.animate(keyframes, { duration: dur, fill: 'forwards' });
     anim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateY(${newY}px)`, 'y', '16px'); };
   }
+};
+
+const restoreIndicatorAfterPaneLayout = () => {
+  // Minimal mode intentionally hides the indicator while closed. It must be
+  // recalculated after the pane becomes visible again.
+  if (isLeftMinimalMode.value && isCompact.value) return;
+  const value = props.selectedValue;
+  if (!value || !navRef.value) return;
+  const parentGroup = findParentGroup(value);
+  const target = parentGroup && isCompact.value
+    ? itemRefs[parentGroup.value]
+    : itemRefs[value] || (value === settingsValue.value ? itemRefs[settingsValue.value] : null);
+  const indicatorEl = indicatorTrack.value?.querySelector('.win-nav-indicator');
+  if (!target || !indicatorEl) return;
+  const targetIsMissing = !navRef.value.contains(lastSelectedEl);
+  const indicatorHidden = indicatorStyle.value.opacity !== '1';
+  const minimalPaneRevealed = isLeftMinimalMode.value && paneTransition.value === 'opening';
+  if (!targetIsMissing && !indicatorHidden && !minimalPaneRevealed) return;
+  lastSelectedEl = target;
+  lastIsChild = !!parentGroup && !isCompact.value;
+  indicatorIsChild.value = lastIsChild;
+  skipTransition = true;
+  nextIndicatorAnimation(indicatorEl);
+  calcIndicator();
+  requestAnimationFrame(() => { skipTransition = false; });
 };
 
 let resizeTimer = null;
@@ -1312,13 +1480,9 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (ro) ro.disconnect();
+  if (paneTransitionTimer) clearTimeout(paneTransitionTimer);
   window.removeEventListener('resize', onResize);
   document.removeEventListener('pointerdown', onDocumentPointerDown, true);
-});
-
-watch(() => props.position, () => {
-  syncDisplayMode();
-  refreshAfterPositionChange();
 });
 
 watch(() => props.paneDisplayMode, () => {
@@ -1326,15 +1490,18 @@ watch(() => props.paneDisplayMode, () => {
   refreshAfterPositionChange();
 });
 
-watch(resolvedPaneDisplayMode, () => {
+watch(resolvedPaneDisplayMode, (value, oldValue) => {
   syncDisplayMode();
   refreshAfterPositionChange();
+  if (value !== oldValue) emit('DisplayModeChanged', { DisplayMode: displayMode.value });
 });
 
 watch(() => props.isPaneOpen, (value) => {
-  if (typeof value === 'boolean') {
-    isCompact.value = !value;
-  }
+  isCompact.value = !value;
+});
+
+watch(() => officialProps.SelectedItem, (item) => {
+  internalSelectedItem.value = item;
 });
 
 watch(isSettingsVisible, (visible) => {
@@ -1449,19 +1616,12 @@ watch(isCompact, (compact) => {
   }
 });
 
-watch(() => props.selectedValue, (val, oldVal) => {
-  if (!val) return;
-  if (oldVal && oldVal !== val) {
-    if (suppressNextHistoryRecord) {
-      suppressNextHistoryRecord = false;
-    } else {
-      const history = selectionHistory.value;
-      if (history[history.length - 1] !== oldVal) {
-        history.push(oldVal);
-      }
-    }
-  }
+watch(isCompact, () => {
+  requestAnimationFrame(() => restoreIndicatorAfterPaneLayout());
+});
 
+watch(() => props.selectedValue, (val) => {
+  if (!val) return;
   const parentGroup = findParentGroup(val);
   if (isTopNavigation.value) {
     updateTopNavigationLayout();
@@ -1503,13 +1663,14 @@ watch(() => props.selectedValue, (val, oldVal) => {
     }
 
   .win-nav-content {
+    position: relative;
     flex: 1;
     min-width: 0;
     min-height: 0;
     background: var(--layer-default);
     overflow: hidden;
     overflow-x: hidden;
-    transition: background var(--normal-duration) var(--fast-out-slow-in);
+    transition: margin-left var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)), background var(--normal-duration) var(--fast-out-slow-in);
   }
 
   .win-nav-shell.is-left .win-nav-content {
@@ -1526,6 +1687,11 @@ watch(() => props.selectedValue, (val, oldVal) => {
     margin-left: var(--win-nav-compact-pane-length, 48px);
   }
 
+  .win-nav-shell.is-left-minimal .win-nav-content {
+    border-left: 0;
+    border-radius: 0;
+  }
+
   .win-nav-shell.is-top .win-nav-content {
     border-top: 1px solid var(--ctrl-border-rest);
     border-radius: 0;
@@ -1535,6 +1701,22 @@ watch(() => props.selectedValue, (val, oldVal) => {
     height: 100%;
     min-height: 0;
     padding: 0;
+  }
+
+  .win-nav-content-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .win-nav-shell.is-pane-hidden .win-nav-left-panel,
+  .win-nav-shell.is-pane-hidden .win-nav-top-bar {
+    display: none;
+  }
+
+  .win-nav-shell.is-pane-hidden.is-left-compact .win-nav-content {
+    margin-left: 0;
   }
 
   .win-nav-page-header {
@@ -1554,11 +1736,14 @@ watch(() => props.selectedValue, (val, oldVal) => {
 
   .win-nav-left-panel {
     position: relative;
+    box-sizing: border-box;
     width: var(--win-nav-open-pane-length, 320px);
     display: flex;
     flex-direction: column;
     padding: 4px 4px;
-    transition: width var(--normal-duration) var(--fast-out-slow-in), background var(--normal-duration) var(--fast-out-slow-in);
+    margin-right: 0;
+    clip-path: inset(0 0 0 0);
+    transition: clip-path var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)), background var(--normal-duration) var(--fast-out-slow-in);
     flex-shrink: 0;
     overflow: hidden;
   }
@@ -1574,6 +1759,9 @@ watch(() => props.selectedValue, (val, oldVal) => {
       backdrop-filter: var(--flyout-backdrop);
       -webkit-backdrop-filter: var(--flyout-backdrop);
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+      width: var(--win-nav-open-pane-length, 320px);
+      clip-path: inset(0 0 0 0);
+      transition: clip-path var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)), background var(--normal-duration) var(--fast-out-slow-in), box-shadow var(--win-nav-pane-duration, 350ms) linear;
     }
 
     html.winui-webview-host .win-nav-shell.is-overlay-left .win-nav-left-panel:not(.is-compact) {
@@ -1584,18 +1772,38 @@ watch(() => props.selectedValue, (val, oldVal) => {
     }
 
     .win-nav-shell.is-overlay-left .win-nav-left-panel.is-compact {
+      width: var(--win-nav-open-pane-length, 320px);
+      clip-path: inset(0 calc(var(--win-nav-open-pane-length, 320px) - var(--win-nav-compact-pane-length, 48px)) 0 0);
       box-shadow: none;
     }
 
-    .win-nav-left-panel.is-compact {
-      width: var(--win-nav-compact-pane-length, 48px);
+    .win-nav-shell:not(.is-overlay-left) .win-nav-left-panel.is-compact {
+      width: var(--win-nav-open-pane-length, 320px);
+      margin-right: calc(var(--win-nav-compact-pane-length, 48px) - var(--win-nav-open-pane-length, 320px));
+      clip-path: inset(0 calc(var(--win-nav-open-pane-length, 320px) - var(--win-nav-compact-pane-length, 48px)) 0 0);
     }
 
     .win-nav-shell.is-left-minimal .win-nav-left-panel.is-compact {
-      width: var(--win-nav-compact-pane-length, 48px);
       background: transparent;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
+    }
+
+    .win-nav-shell.is-left-minimal .win-nav-left-panel.is-compact.is-pane-closing {
+      background: var(--host-nav-pane-bg);
+      background-image: var(--flyout-material-overlay);
+      backdrop-filter: var(--flyout-backdrop);
+      -webkit-backdrop-filter: var(--flyout-backdrop);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+    }
+
+    .win-nav-left-panel > .win-nav-pane-top,
+    .win-nav-left-panel > .win-nav-pane-custom-content,
+    .win-nav-left-panel > .win-nav-left-scrollable,
+    .win-nav-left-panel > .win-nav-footer,
+    .win-nav-left-panel .win-nav-menu {
+      box-sizing: border-box;
+      width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
     }
 
     .win-nav-left-panel .win-nav-indicator-track {
@@ -1608,6 +1816,24 @@ watch(() => props.selectedValue, (val, oldVal) => {
       overflow: visible;
       z-index: 3;
     }
+
+  .win-nav-shell:not(.is-overlay-left) .win-nav-left-panel.is-pane-opening + .win-nav-content {
+    animation: win-nav-inline-content-opening var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
+  }
+
+  .win-nav-shell:not(.is-overlay-left) .win-nav-left-panel.is-pane-closing + .win-nav-content {
+    animation: win-nav-inline-content-closing var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
+  }
+
+  @keyframes win-nav-inline-content-opening {
+    from { transform: translateX(calc(var(--win-nav-compact-pane-length, 48px) - var(--win-nav-open-pane-length, 320px))); }
+    to { transform: translateX(0); }
+  }
+
+  @keyframes win-nav-inline-content-closing {
+    from { transform: translateX(calc(var(--win-nav-open-pane-length, 320px) - var(--win-nav-compact-pane-length, 48px))); }
+    to { transform: translateX(0); }
+  }
 
   .win-nav-left-scrollable {
     flex: 1;
@@ -1638,7 +1864,8 @@ watch(() => props.selectedValue, (val, oldVal) => {
   }
 
   .win-nav-pane-header,
-  .win-nav-pane-footer {
+  .win-nav-pane-footer,
+  .win-nav-pane-custom-content {
     min-height: 32px;
     display: flex;
     align-items: center;
@@ -1669,6 +1896,10 @@ watch(() => props.selectedValue, (val, oldVal) => {
 
   .win-nav-back-button,
   .win-nav-hamburger {
+    padding: 0;
+    border: 0;
+    color: var(--text-primary);
+    font: inherit;
     width: 40px;
     height: 36px;
     margin: 2px 0;
@@ -1703,10 +1934,9 @@ watch(() => props.selectedValue, (val, oldVal) => {
     font-size: 11px;
   }
 
-    .win-nav-back-button.is-disabled {
+    .win-nav-back-button:disabled {
       color: var(--text-disabled);
       cursor: default;
-      pointer-events: none;
       opacity: 0.65;
     }
 
@@ -1809,6 +2039,36 @@ watch(() => props.selectedValue, (val, oldVal) => {
     position: relative;
   }
 
+  .win-nav-item .label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 20px;
+    color: inherit;
+  }
+
+  .win-nav-item-header {
+    min-height: 32px;
+    padding: 8px 16px 4px;
+    display: flex;
+    align-items: flex-end;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 16px;
+    user-select: none;
+  }
+
+  .win-nav-item-header .win-text-block {
+    color: inherit;
+  }
+
+  .win-nav-item-separator {
+    height: 1px;
+    margin: 4px 12px;
+    background: var(--stroke-divider);
+  }
+
   .win-nav-item.win-nav-settings-item .icon.animated-icon-gear {
     font-size: 14px;
   }
@@ -1818,15 +2078,23 @@ watch(() => props.selectedValue, (val, oldVal) => {
     pointer-events: none;
   }
 
+  .win-nav-left-panel.is-compact.is-pane-closing .win-nav-item .label {
+    opacity: 1;
+  }
+
   .win-nav-left-panel.is-compact .win-nav-group-chevron {
     opacity: 0;
     pointer-events: none;
   }
 
+  .win-nav-left-panel.is-compact.is-pane-closing .win-nav-group-chevron {
+    opacity: 1;
+  }
+
   .win-nav-indicator {
     position: absolute;
     background: var(--accent-base);
-    border-radius: 3px;
+    border-radius: 2px;
     pointer-events: none;
     z-index: 10;
   }
@@ -1857,12 +2125,17 @@ watch(() => props.selectedValue, (val, oldVal) => {
 
     .win-nav-top-bar .win-nav-more-button,
     .win-nav-top-measure .win-nav-more-button {
-      width: 40px;
-      padding: 0;
+      min-width: 40px;
+      padding: 0 12px;
     }
 
       .win-nav-top-bar .win-nav-more-button .icon,
       .win-nav-top-measure .win-nav-more-button .icon {
+        margin-right: 8px;
+      }
+
+      .win-nav-top-bar .win-nav-more-button .icon:only-child,
+      .win-nav-top-measure .win-nav-more-button .icon:only-child {
         margin-right: 0;
       }
 
@@ -1917,6 +2190,11 @@ watch(() => props.selectedValue, (val, oldVal) => {
   .win-nav-shell.has-titlebar.is-overlay-left .win-nav-content {
     margin-top: env(titlebar-area-height, 32px);
     border-radius: 8px 0 0 0;
+  }
+
+  .win-nav-shell.has-titlebar.is-left-minimal .win-nav-content {
+    border-left: 0;
+    border-radius: 0;
   }
 
   .win-nav-shell.has-titlebar.is-top {
@@ -2023,6 +2301,16 @@ watch(() => props.selectedValue, (val, oldVal) => {
 
   .win-nav-more-panel .win-nav-item {
     width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .win-nav-left-panel,
+    .win-nav-content,
+    .win-nav-group-children,
+    .win-nav-group-chevron {
+      transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
+    }
   }
 
 </style>

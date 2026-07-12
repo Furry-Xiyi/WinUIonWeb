@@ -1,248 +1,121 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">ToolTip</h1>
-          <p class="page-description">
-            A ToolTip shows more information about a UI element. You might show information about what the element does, or what the user should do. The ToolTip is shown when a user hovers over or presses and holds the UI element.
-          </p>
-          <div class="page-header-actions">
-            <WinButton
-              @click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-              <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+        <WinTextBlock class="page-header" :Text="$t('text.tooltip')" />
+        <WinTextBlock class="page-description" :Text="$t('text.tooltip-description')" TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <WinToolTip :Content="$t('text.theme')" :Theme="pageTheme">
+            <WinButton class="header-action" @Click="toggleTheme"><WinTextBlock class="icon" Text="&#xE793;" /></WinButton>
+          </WinToolTip>
+          <WinToolTip :Content="$t('text.favorites')" :Theme="pageTheme">
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+              <WinTextBlock class="icon" :Text="isFavoriteState ? '&#xE735;' : '&#xE734;'" />
             </WinToggleButton>
-          </div>
+          </WinToolTip>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example 1: A button with a simple ToolTip -->
-            <WinControlExample
-              headerText="A button with a simple ToolTip."
-              :theme="pageTheme"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <WinButton
-                  tooltip="Simple ToolTip">
-                  Button with a simple ToolTip.
-                </WinButton>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 2: A TextBlock with an offset ToolTip -->
-            <WinControlExample
-              headerText="A TextBlock with an offset ToolTip."
-              :theme="pageTheme"
-              :templateCode="example2Template"
-              :vueCode="example2Vue">
-              <template #example>
-                <span
-                  class="textblock-with-tooltip"
-                  :title="tooltipText"
-                  @mouseenter="showOffsetTooltip"
-                  @mouseleave="hideOffsetTooltip">
-                  TextBlock with an offset ToolTip.
-                </span>
-                <div
-                  v-if="showOffset"
-                  class="offset-tooltip"
-                  :style="{ top: offsetTop + 'px' }">
-                  Offset ToolTip.
-                </div>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 3: An Image with a ToolTip using PlacementRect -->
-            <WinControlExample
-              headerText="An Image with a ToolTip using PlacementRect."
-              :theme="pageTheme"
-              :templateCode="example3Template"
-              :vueCode="example3Vue">
-              <template #example>
-                <div style="position: relative; display: inline-block;">
-                  <img
-                    src="/assets/cliff.jpg"
-                    alt="Cliff landscape"
-                    style="width: 400px; height: 266px; display: block;"
-                    @mouseenter="showImageTooltip = true"
-                    @mouseleave="showImageTooltip = false">
-                  <div
-                    v-if="showImageTooltip"
-                    class="placement-tooltip">
-                    Non-occluding ToolTip.
-                  </div>
-                </div>
-              </template>
-            </WinControlExample>
       </div>
-    </WinScrollViewer>
-  </div>
+
+      <div class="gallery-page-content">
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="simpleToolTipCode" :headerText="$t('sample.tooltip.simple')">
+          <template #example>
+            <WinButton ToolTipService.ToolTip="Simple ToolTip">
+              <WinTextBlock :Text="$t('sample.tooltip.button-content')" />
+            </WinButton>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="serviceToolTipCode" :headerText="$t('sample.tooltip.attached')">
+          <template #example>
+            <WinToolTip
+              :Content="$t('sample.tooltip.service-content')"
+              VerticalOffset="-80"
+              :Theme="pageTheme">
+              <WinTextBlock class="sample-text" :Text="$t('sample.tooltip.textblock-target')" TextWrapping="WrapWholeWords" />
+            </WinToolTip>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="imageToolTipCode" :headerText="$t('sample.tooltip.image')">
+          <template #example>
+            <div class="image-example-shell">
+              <WinToolTip
+                :Content="$t('sample.tooltip.image-content')"
+                Placement="Right"
+                PlacementRect="0,0,400,266"
+                :Theme="pageTheme">
+                <WinImage
+                  :Source="cliffImage"
+                  Width="400"
+                  Height="266"
+                  Stretch="UniformToFill"
+                  :alt="$t('sample.tooltip.image-alt')" />
+              </WinToolTip>
+            </div>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="controlledToolTipCode" :headerText="$t('sample.tooltip.controlled')">
+          <template #example>
+            <div class="controlled-tooltip-sample">
+              <WinButton @Click="isControlledToolTipOpen = !isControlledToolTipOpen">
+                <WinTextBlock :Text="$t('sample.tooltip.toggle-open')" />
+              </WinButton>
+              <WinToolTip v-model:IsOpen="isControlledToolTipOpen" Placement="Bottom" :Content="$t('sample.tooltip.controlled-content')" :Theme="pageTheme">
+                <WinTextBlock class="controlled-target" :Text="$t('sample.tooltip.controlled-target')" />
+              </WinToolTip>
+            </div>
+          </template>
+        </WinControlExample>
+      </div>
+    </div>
+  </WinScrollViewer>
 </template>
 
-<script setup>
-import { ref, computed, inject, watch } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+<script setup lang="ts">
+import { computed, inject, ref } from 'vue';
+import type { Ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
-
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinImage from '../../components/WinImage.vue';
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
-const currentPage = inject('currentPage');
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import WinToolTip from '../../components/WinToolTip.vue';
+import cliffImage from '../../assets/SampleMedia/cliff.jpg';
+import { createPageState } from '../../utils/pageState';
+
+const currentPage = inject<Ref<string>>('currentPage');
 const pageKey = computed(() => currentPage?.value || 'tooltip');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const isControlledToolTipOpen = ref(false);
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
-
-// Example 1: Simple ToolTip
-const example1Template = `<WinButton tooltip="Simple ToolTip">
-  Button with a simple ToolTip.
+const simpleToolTipCode = `<WinButton ToolTipService.ToolTip="Simple ToolTip">
+  <WinTextBlock Text="Button with a simple ToolTip." />
 </WinButton>`;
 
-const example1Vue = `// ToolTip is set via the tooltip prop
-// The button automatically shows the tooltip on hover`;
+const serviceToolTipCode = `<WinToolTip Content="Offset ToolTip." VerticalOffset="-80">
+  <WinTextBlock Text="TextBlock with an offset ToolTip." />
+</WinToolTip>`;
 
-// Example 2: Offset ToolTip
-const tooltipText = ref('Offset ToolTip.');
-const showOffset = ref(false);
-const offsetTop = ref(-80);
+const imageToolTipCode = `<WinToolTip Content="Non-occluding ToolTip." Placement="Right" PlacementRect="0,0,400,266">
+  <WinImage Source="/Assets/SampleMedia/cliff.jpg" Width="400" Height="266" />
+</WinToolTip>`;
 
-const showOffsetTooltip = () => {
-  showOffset.value = true;
-};
-
-const hideOffsetTooltip = () => {
-  showOffset.value = false;
-};
-
-const example2Template = `<span
-  class="textblock-with-tooltip"
-  @mouseenter="showOffsetTooltip"
-  @mouseleave="hideOffsetTooltip">
-  TextBlock with an offset ToolTip.
-</span>
-<div
-  v-if="showOffset"
-  class="offset-tooltip"
-  :style="{ top: offsetTop + 'px' }">
-  Offset ToolTip.
-</div>`;
-
-const example2Vue = `const showOffset = ref(false);
-const offsetTop = ref(-80);
-
-const showOffsetTooltip = () => {
-  showOffset.value = true;
-};
-
-const hideOffsetTooltip = () => {
-  showOffset.value = false;
-};`;
-
-// Example 3: PlacementRect ToolTip
-const showImageTooltip = ref(false);
-
-const example3Template = `<div style="position: relative; display: inline-block;">
-  <img
-    src="/assets/cliff.jpg"
-    alt="Cliff landscape"
-    style="width: 400px; height: 266px;"
-    @mouseenter="showImageTooltip = true"
-    @mouseleave="showImageTooltip = false">
-  <div
-    v-if="showImageTooltip"
-    class="placement-tooltip">
-    Non-occluding ToolTip.
-  </div>
-</div>`;
-
-const example3Vue = `const showImageTooltip = ref(false);
-
-// The tooltip is positioned to the right of the image
-// using absolute positioning within a relative container`;
+const controlledToolTipCode = `<WinToolTip v-model:IsOpen="isToolTipOpen" Placement="Bottom" Content="This ToolTip is controlled by IsOpen.">
+  <WinTextBlock Text="Controlled placement target" />
+</WinToolTip>`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-}
-
-.textblock-with-tooltip {
-  cursor: default;
-  color: var(--text-primary);
-  font-size: 14px;
-}
-
-.offset-tooltip {
-  position: absolute;
-  background: var(--flyout-background);
-  border: 1px solid var(--control-stroke-default);
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--text-primary);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  pointer-events: none;
-  z-index: 1000;
-  white-space: nowrap;
-}
-
-.placement-tooltip {
-  position: absolute;
-  top: 0;
-  left: 100%;
-  margin-left: 8px;
-  background: var(--flyout-background);
-  border: 1px solid var(--control-stroke-default);
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--text-primary);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  pointer-events: none;
-  z-index: 1000;
-  white-space: nowrap;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
+.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.sample-text { max-width: 280px; color: var(--text-primary); }
+.image-example-shell { max-width: 100%; padding: 8px; overflow-x: auto; }
+.controlled-tooltip-sample { display: flex; align-items: center; gap: 16px; min-height: 48px; }
+.controlled-target { padding: 6px 10px; color: var(--text-primary); border: 1px solid var(--card-stroke); border-radius: 4px; }
 </style>

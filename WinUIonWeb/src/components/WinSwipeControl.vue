@@ -527,13 +527,7 @@ defineExpose({
 }
 
 /* Dark theme adjustments */
-html.theme-dark .swipe-item {
+.example-theme-wrapper.theme-dark .swipe-item {
   border-color: rgba(255, 255, 255, 0.08);
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not(.theme-light) .swipe-item {
-    border-color: rgba(255, 255, 255, 0.08);
-  }
 }
 </style>

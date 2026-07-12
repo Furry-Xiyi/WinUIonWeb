@@ -1,10 +1,14 @@
 <template>
   <WinTitleBar :title="appTitle" :theme="themeSetting" />
-  <WinNavigationView v-model:selectedValue="currentPage"
-                     :paneDisplayMode="navPosition"
-                     :menuItems="navMenuItems"
-                     :footerItems="[]"
-                     :showBackButton="true">
+  <WinToolTipService />
+  <WinNavigationView :SelectedItem="selectedNavigationItem"
+                     :PaneDisplayMode="navPosition"
+                     :MenuItems="navMenuItems"
+                     :FooterMenuItems="[]"
+                     IsBackButtonVisible="Visible"
+                     :IsBackEnabled="isBackEnabled"
+                     @ItemInvoked="onNavigationItemInvoked"
+                     @BackRequested="onBackRequested">
     <div v-if="pageComponent" :key="currentPage" :class="['page-view active', pageTransition]">
       <component :is="pageComponent" />
     </div>
@@ -15,6 +19,7 @@
 import { ref, watch, provide, computed, onMounted } from 'vue';
 import WinTitleBar from '../components/WinTitleBar.vue';
 import WinNavigationView from '../components/WinNavigationView.vue';
+import WinToolTipService from '../components/WinToolTipService.vue';
 import appManifest from '../manifest.json';
 
 import HomePage from './pages/HomePage.vue';
@@ -69,8 +74,20 @@ import CommandBarFlyoutPage from './pages/CommandBarFlyoutPage.vue';
 import FlyoutPage from './pages/FlyoutPage.vue';
 import MenuBarPage from './pages/MenuBarPage.vue';
 import MenuFlyoutPage from './pages/MenuFlyoutPage.vue';
+import SwipeControlPage from './pages/SwipeControlPage.vue';
+import StandardUICommandPage from './pages/StandardUICommandPage.vue';
+import XamlUICommandPage from './pages/XamlUICommandPage.vue';
 import PopupPage from './pages/PopupPage.vue';
 import TeachingTipPage from './pages/TeachingTipPage.vue';
+import ToolTipPage from './pages/ToolTipPage.vue';
+import InfoBadgePage from './pages/InfoBadgePage.vue';
+import InfoBarPage from './pages/InfoBarPage.vue';
+import ProgressBarPage from './pages/ProgressBarPage.vue';
+import ProgressRingPage from './pages/ProgressRingPage.vue';
+import BreadcrumbBarPage from './pages/BreadcrumbBarPage.vue';
+import NavigationViewPage from './pages/NavigationViewPage.vue';
+import PivotPage from './pages/PivotPage.vue';
+import SelectorBarPage from './pages/SelectorBarPage.vue';
 import SettingsPage from './pages/SettingsPage.vue';
 import TextBoxPage from './pages/TextBoxPage.vue';
 import TextBlockPage from './pages/TextBlockPage.vue';
@@ -78,6 +95,7 @@ import AutoSuggestBoxPage from './pages/AutoSuggestBoxPage.vue';
 import NumberBoxPage from './pages/NumberBoxPage.vue';
 import PasswordBoxPage from './pages/PasswordBoxPage.vue';
 import RichEditBoxPage from './pages/RichEditBoxPage.vue';
+import RichTextBlockPage from './pages/RichTextBlockPage.vue';
 
 import { useI18n } from '../components/i18n/index';
 
@@ -135,12 +153,25 @@ const pageMap = {
   flyout: FlyoutPage,
   menubar: MenuBarPage,
   menuflyout: MenuFlyoutPage,
+  swipecontrol: SwipeControlPage,
+  standarduicommand: StandardUICommandPage,
+  xamluicommand: XamlUICommandPage,
   popup: PopupPage,
   teachingtip: TeachingTipPage,
+  tooltip: ToolTipPage,
+  infobadge: InfoBadgePage,
+  infobar: InfoBarPage,
+  progressbar: ProgressBarPage,
+  progressring: ProgressRingPage,
+  breadcrumbbar: BreadcrumbBarPage,
+  navigationview: NavigationViewPage,
+  pivot: PivotPage,
+  selectorbar: SelectorBarPage,
   autosuggestbox: AutoSuggestBoxPage,
   numberbox: NumberBoxPage,
   passwordbox: PasswordBoxPage,
   richeditbox: RichEditBoxPage,
+  richtextblock: RichTextBlockPage,
   textbox: TextBoxPage,
   textblock: TextBlockPage,
   settings: SettingsPage
@@ -161,8 +192,7 @@ const persistSetting = (key, source) => {
 };
 
 const currentPage = ref('home');
-const navPosition = ref(readStoredSetting('winui-nav-position', 'Auto', ['Auto', 'Top', 'Left']));
-if (navPosition.value === 'Left') navPosition.value = 'Auto';
+const navPosition = ref(readStoredSetting('winui-nav-position', 'Auto', ['Auto', 'Top', 'Left', 'LeftCompact', 'LeftMinimal']));
 const themeSetting = ref(readStoredSetting('winui-theme-setting', 'system', ['system', 'light', 'dark']));
 const materialSetting = ref(readStoredSetting('winui-material-setting', 'mica', ['mica', 'acrylic']));
 const animSetting = ref(readStoredSetting('winui-animation-setting', 'entrance', ['entrance', 'drill', 'fade']));
@@ -180,90 +210,142 @@ const pageComponent = computed(() => pageMap[currentPage.value] || HomePage);
 const appTitle = computed(() => t(appManifest.resources?.title ?? 'app.title'));
 
 const navMenuItems = [
-  { value: 'home', icon: '\uE80F', label: t('text.home') },
-  {
-    value: 'buttons', icon: '\uE73A', label: t('text.basic-input'), selectsOnInvoked: false, children: [
-      { value: 'button', icon: '\uE71A', label: t('text.button') },
-      { value: 'dropdownbutton', icon: '\uE70D', label: t('text.dropdownbutton') },
-      { value: 'hyperlinkbutton', icon: '\uE71B', label: t('text.hyperlinkbutton') },
-      { value: 'repeatbutton', icon: '\uE8AB', label: t('text.repeatbutton') },
-      { value: 'togglebutton', icon: '\uEF1F', label: t('text.togglebutton') },
-      { value: 'splitbutton', icon: '\uE90D', label: t('text.splitbutton') },
-      { value: 'togglesplitbutton', icon: '\uE90D', label: t('text.togglesplitbutton') },
-      { value: 'checkbox', icon: '\uE73D', label: t('text.checkbox') },
-      { value: 'colorpicker', icon: '\uEF3C', label: t('text.colorpicker') },
-      { value: 'combobox', icon: '\uE7FB', label: t('text.combobox') },
-      { value: 'radiobutton', icon: '\uECCB', label: t('text.radiobuttons') },
-      { value: 'rating', icon: '\uE734', label: t('text.ratingcontrol') },
-      { value: 'slider', icon: '\uE9E9', label: t('text.slider') },
-      { value: 'toggleswitch', icon: '\uF19F', label: t('text.toggleswitch') }
-    ]
-  },
-  { value: 'collections', icon: '\uE80A', label: t('text.collections'), selectsOnInvoked: false, children: [
-    { value: 'flipview', icon: '\uF1CB', label: t('text.flipview') },
-    { value: 'gridview', icon: '\uF0E2', label: t('text.gridview') },
-    { value: 'itemsrepeater', icon: '\uE8FD', label: t('text.itemsrepeater') },
-    { value: 'itemsview', icon: '\uF0E2', label: t('text.itemsview') },
-    { value: 'listview', icon: '\uE8FD', label: t('text.listview') },
-    { value: 'pulltorefresh', icon: '\uE72C', label: t('text.pulltorefresh') },
-    { value: 'treeview', icon: '\uED41', label: t('text.treeview') }
+  { Tag: 'home', Icon: '\uE80F', Content: t('text.home') },
+  { Tag: 'menusandtoolbars', Icon: '\uE74E', Content: t('text.menus-and-toolbars'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'commandbar', Icon: '\uE76F', Content: t('text.commandbar') },
+    { Tag: 'commandbarflyout', Icon: '\uF0E2', Content: t('text.commandbarflyout') },
+    { Tag: 'menubar', Icon: '\uE76F', Content: t('text.menubar') },
+    { Tag: 'menuflyout', Icon: '\uF0E2', Content: t('text.menuflyout') },
+    { Tag: 'swipecontrol', Icon: '\uE8D7', Content: t('text.swipecontrol') },
+    { Tag: 'standarduicommand', Icon: '\uE8A5', Content: t('text.standarduicommand') },
+    { Tag: 'xamluicommand', Icon: '\uE8A5', Content: t('text.xamluicommand') }
   ]},
-  { value: 'scrolling', icon: '\uE7F4', label: t('text.scrolling'), selectsOnInvoked: false, children: [
-    { value: 'pipspager', icon: '\uE8A7', label: t('text.pipspager') },
-    { value: 'scrollview', icon: '\uE7F4', label: t('text.scrollview') },
-    { value: 'scrollviewer', icon: '\uE7F4', label: t('text.scrollviewer') },
-    { value: 'semanticzoom', icon: '\uE8A7', label: t('text.semanticzoom') }
+  { Tag: 'collections', Icon: '\uE80A', Content: t('text.collections'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'flipview', Icon: '\uF1CB', Content: t('text.flipview') },
+    { Tag: 'gridview', Icon: '\uF0E2', Content: t('text.gridview') },
+    { Tag: 'itemsrepeater', Icon: '\uE8FD', Content: t('text.itemsrepeater') },
+    { Tag: 'itemsview', Icon: '\uF0E2', Content: t('text.itemsview') },
+    { Tag: 'listview', Icon: '\uE8FD', Content: t('text.listview') },
+    { Tag: 'pulltorefresh', Icon: '\uE72C', Content: t('text.pulltorefresh') },
+    { Tag: 'treeview', Icon: '\uED41', Content: t('text.treeview') }
   ]},
   {
-    value: 'dateandtime', icon: '\uEC92', label: t('text.date-and-time'), selectsOnInvoked: false, children: [
-      { value: 'calendardatepicker', icon: '\uE787', label: t('text.calendardatepicker') },
-      { value: 'calendarview', icon: '\uF763', label: t('text.calendarview') },
-      { value: 'datepicker', icon: '\uE8BF', label: t('text.datepicker') },
-      { value: 'timepicker', icon: '\uE823', label: t('text.timepicker') }
+    Tag: 'dateandtime', Icon: '\uEC92', Content: t('text.date-and-time'), SelectsOnInvoked: false, MenuItems: [
+      { Tag: 'calendardatepicker', Icon: '\uE787', Content: t('text.calendardatepicker') },
+      { Tag: 'calendarview', Icon: '\uF763', Content: t('text.calendarview') },
+      { Tag: 'datepicker', Icon: '\uE8BF', Content: t('text.datepicker') },
+      { Tag: 'timepicker', Icon: '\uE823', Content: t('text.timepicker') }
     ]
   },
-  { value: 'dialogsandflyouts', icon: '\uE8BD', label: t('text.dialogs-and-flyouts'), selectsOnInvoked: false, children: [
-    { value: 'contentdialog', icon: '\uE8F2', label: t('text.contentdialog') },
-    { value: 'flyout', icon: '\uE8A8', label: t('text.flyout') },
-    { value: 'popup', icon: '\uE7C4', label: t('text.popup') },
-    { value: 'teachingtip', icon: '\uEC42', label: t('text.teachingtip') }
+  {
+    Tag: 'buttons', Icon: '\uE73A', Content: t('text.basic-input'), SelectsOnInvoked: false, MenuItems: [
+      { Tag: 'button', Icon: '\uE71A', Content: t('text.button') },
+      { Tag: 'dropdownbutton', Icon: '\uE70D', Content: t('text.dropdownbutton') },
+      { Tag: 'hyperlinkbutton', Icon: '\uE71B', Content: t('text.hyperlinkbutton') },
+      { Tag: 'repeatbutton', Icon: '\uE8AB', Content: t('text.repeatbutton') },
+      { Tag: 'togglebutton', Icon: '\uEF1F', Content: t('text.togglebutton') },
+      { Tag: 'splitbutton', Icon: '\uE90D', Content: t('text.splitbutton') },
+      { Tag: 'togglesplitbutton', Icon: '\uE90D', Content: t('text.togglesplitbutton') },
+      { Tag: 'checkbox', Icon: '\uE73D', Content: t('text.checkbox') },
+      { Tag: 'colorpicker', Icon: '\uEF3C', Content: t('text.colorpicker') },
+      { Tag: 'combobox', Icon: '\uE7FB', Content: t('text.combobox') },
+      { Tag: 'radiobutton', Icon: '\uECCB', Content: t('text.radiobuttons') },
+      { Tag: 'rating', Icon: '\uE734', Content: t('text.ratingcontrol') },
+      { Tag: 'slider', Icon: '\uE9E9', Content: t('text.slider') },
+      { Tag: 'toggleswitch', Icon: '\uF19F', Content: t('text.toggleswitch') }
+    ]
+  },
+  { Tag: 'statusandinfo', Icon: '\uE8F2', Content: t('text.status-and-info'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'infobadge', Icon: '\uF4AA', Content: t('text.infobadge') },
+    { Tag: 'infobar', Icon: '\uE946', Content: t('text.infobar') },
+    { Tag: 'progressbar', Icon: '\uE895', Content: t('text.progressbar') },
+    { Tag: 'progressring', Icon: '\uE895', Content: t('text.progressring') },
+    { Tag: 'tooltip', Icon: '\uE946', Content: t('text.tooltip') }
   ]},
-  { value: 'layout', icon: '\uE8A1', label: t('text.layout'), selectsOnInvoked: false, children: [
-    { value: 'border', icon: '\uE8A1', label: t('text.border') },
-    { value: 'canvas', icon: '\uE7C3', label: t('text.canvas') },
-    { value: 'expander', icon: '\uE8C4', label: t('text.expander') },
-    { value: 'grid', icon: '\uECA5', label: t('text.grid') },
-    { value: 'relativepanel', icon: '\uE8A1', label: t('text.relativepanel') },
-    { value: 'splitview', icon: '\uE8BC', label: t('text.splitview') },
-    { value: 'stackpanel', icon: '\uE8FD', label: t('text.stackpanel') },
-    { value: 'variablesizedwrapgrid', icon: '\uE8A9', label: t('text.variablesizedwrapgrid') },
-    { value: 'viewbox', icon: '\uE8A7', label: t('text.viewbox') }
+  { Tag: 'dialogsandflyouts', Icon: '\uE15F', Content: t('text.dialogs-and-flyouts'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'contentdialog', Icon: '\uE8F2', Content: t('text.contentdialog') },
+    { Tag: 'flyout', Icon: '\uE8A8', Content: t('text.flyout') },
+    { Tag: 'popup', Icon: '\uE7C4', Content: t('text.popup') },
+    { Tag: 'teachingtip', Icon: '\uEC42', Content: t('text.teachingtip') }
   ]},
-  { value: 'media', icon: '\uE786', label: t('text.media'), selectsOnInvoked: false, children: [
-    { value: 'animatedvisualplayer', icon: '\uF5B0', label: t('text.animatedvisualplayer') },
-    { value: 'captureelement', icon: '\uE722', label: t('text.capture-element-camera') },
-    { value: 'image', icon: '\uE8B9', label: t('text.image') },
-    { value: 'mediaplayerelement', icon: '\uE714', label: t('text.mediaplayerelement') },
-    { value: 'personpicture', icon: '\uE77B', label: t('text.personpicture') }
+  { Tag: 'scrolling', Icon: '\uE174', Content: t('text.scrolling'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'pipspager', Icon: '\uE8A7', Content: t('text.pipspager') },
+    { Tag: 'scrollview', Icon: '\uE7F4', Content: t('text.scrollview') },
+    { Tag: 'scrollviewer', Icon: '\uE7F4', Content: t('text.scrollviewer') },
+    { Tag: 'semanticzoom', Icon: '\uE8A7', Content: t('text.semanticzoom') }
   ]},
-  { value: 'menusandtoolbars', icon: '\uE74E', label: t('text.menus-and-toolbars'), selectsOnInvoked: false, children: [
-    { value: 'commandbar', icon: '\uE76F', label: t('text.commandbar') },
-    { value: 'commandbarflyout', icon: '\uF0E2', label: t('text.commandbarflyout') },
-    { value: 'menubar', icon: '\uE76F', label: t('text.menubar') },
-    { value: 'menuflyout', icon: '\uF0E2', label: t('text.menuflyout') }
+  { Tag: 'layout', Icon: '\uE8A1', Content: t('text.layout'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'border', Icon: '\uE8A1', Content: t('text.border') },
+    { Tag: 'canvas', Icon: '\uE7C3', Content: t('text.canvas') },
+    { Tag: 'expander', Icon: '\uE8C4', Content: t('text.expander') },
+    { Tag: 'grid', Icon: '\uECA5', Content: t('text.grid') },
+    { Tag: 'relativepanel', Icon: '\uE8A1', Content: t('text.relativepanel') },
+    { Tag: 'splitview', Icon: '\uE8BC', Content: t('text.splitview') },
+    { Tag: 'stackpanel', Icon: '\uE8FD', Content: t('text.stackpanel') },
+    { Tag: 'variablesizedwrapgrid', Icon: '\uE8A9', Content: t('text.variablesizedwrapgrid') },
+    { Tag: 'viewbox', Icon: '\uE8A7', Content: t('text.viewbox') }
   ]},
-  { value: 'text', icon: '\uE8D2', label: t('text.text'), selectsOnInvoked: false, children: [
-    { value: 'autosuggestbox', icon: '\uE721', label: t('text.autosuggestbox') },
-    { value: 'numberbox', icon: '\uF261', label: t('text.numberbox') },
-    { value: 'passwordbox', icon: '\uE7B3', label: t('text.passwordbox') },
-    { value: 'richeditbox', icon: '\uE8D3', label: t('text.richeditbox') },
-    { value: 'textbox', icon: '\uE8AC', label: t('text.textbox') },
-    { value: 'textblock', icon: '\uE8E4', label: t('text.textblock') }
+  { Tag: 'navigation', Icon: '\uE700', Content: t('text.navigation'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'breadcrumbbar', Icon: '\uE76B', Content: t('text.breadcrumbbar') },
+    { Tag: 'navigationview', Icon: '\uE700', Content: t('text.navigationview') },
+    { Tag: 'pivot', Icon: '\uE7C4', Content: t('text.pivot') },
+    { Tag: 'selectorbar', Icon: '\uE762', Content: t('text.selectorbar') }
   ]},
-  { value: 'motion', icon: '\uE7F4', label: t('text.motion'), selectsOnInvoked: false, children: [
-    { value: 'parallaxview', icon: '\uE7F4', label: t('text.parallaxview') }
+  { Tag: 'media', Icon: '\uE173', Content: t('text.media'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'animatedvisualplayer', Icon: '\uF5B0', Content: t('text.animatedvisualplayer') },
+    { Tag: 'captureelement', Icon: '\uE722', Content: t('text.capture-element-camera') },
+    { Tag: 'image', Icon: '\uE8B9', Content: t('text.image') },
+    { Tag: 'mediaplayerelement', Icon: '\uE714', Content: t('text.mediaplayerelement') },
+    { Tag: 'personpicture', Icon: '\uE77B', Content: t('text.personpicture') }
+  ]},
+  { Tag: 'text', Icon: '\uE8D2', Content: t('text.text'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'autosuggestbox', Icon: '\uE721', Content: t('text.autosuggestbox') },
+    { Tag: 'numberbox', Icon: '\uF261', Content: t('text.numberbox') },
+    { Tag: 'passwordbox', Icon: '\uE7B3', Content: t('text.passwordbox') },
+    { Tag: 'richeditbox', Icon: '\uE8D3', Content: t('text.richeditbox') },
+    { Tag: 'richtextblock', Icon: '\uE8D2', Content: t('text.richtextblock') },
+    { Tag: 'textblock', Icon: '\uE8E4', Content: t('text.textblock') },
+    { Tag: 'textbox', Icon: '\uE8AC', Content: t('text.textbox') }
+  ]},
+  { Tag: 'motion', Icon: '\uE945', Content: t('text.motion'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'parallaxview', Icon: '\uE7F4', Content: t('text.parallaxview') }
   ]}
 ];
+
+const selectedNavigationItem = computed({
+  get: () => {
+    if (currentPage.value === 'settings') return { Tag: 'settings', Content: t('text.settings'), Icon: '\uE713' };
+    const find = items => {
+      for (const item of items) {
+        if (item.Tag === currentPage.value) return item;
+        const child = item.MenuItems?.find(entry => entry.Tag === currentPage.value);
+        if (child) return child;
+      }
+      return items[0] ?? null;
+    };
+    return find(navMenuItems);
+  },
+  set: item => {
+    if (item?.Tag) currentPage.value = item.Tag;
+  }
+});
+
+const navigationHistory = ref([]);
+const isBackEnabled = computed(() => navigationHistory.value.length > 0);
+const suppressHistoryPush = ref(false);
+const onNavigationItemInvoked = args => {
+  const item = args?.InvokedItemContainer;
+  if (!item || item.SelectsOnInvoked === false) return;
+  const tag = item.Tag;
+  if (tag) currentPage.value = tag;
+};
+const onBackRequested = () => {
+  const previousPage = navigationHistory.value.pop();
+  if (previousPage) {
+    suppressHistoryPush.value = true;
+    currentPage.value = previousPage;
+  }
+};
 
 const allPages = Object.keys(pageMap);
 
@@ -300,6 +382,11 @@ watch(themeSetting, (value) => postUwpSetting('theme', value));
 watch(materialSetting, (value) => postUwpSetting('material', value));
 
 watch(currentPage, (newVal, oldVal) => {
+  if (suppressHistoryPush.value) {
+    suppressHistoryPush.value = false;
+  } else if (oldVal && oldVal !== newVal && navigationHistory.value[navigationHistory.value.length - 1] !== oldVal) {
+    navigationHistory.value.push(oldVal);
+  }
   const ni = allPages.indexOf(newVal);
   const oi = allPages.indexOf(oldVal);
   if (animSetting.value === 'entrance') {

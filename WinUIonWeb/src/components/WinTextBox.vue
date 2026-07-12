@@ -678,27 +678,20 @@ defineExpose({
   --textbox-background-disabled: var(--control-fill-color-disabled, var(--ctrl-fill-disabled));
   --textbox-border-top: var(--control-stroke-color-default, var(--ctrl-border-rest));
   --textbox-border-bottom: var(--control-strong-stroke-color-default, var(--ctrl-strong-stroke));
-  --textbox-border-focused: var(--system-accent-color-dark-1, var(--accent-base, var(--accent-default)));
+  --textbox-border-focused: var(--accent-base);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
-:global(html.theme-dark) .win-textbox,
 :global(.example-theme-wrapper.theme-dark) .win-textbox {
-  --textbox-border-focused: var(--system-accent-color-light-2, var(--accent-base, var(--accent-default)));
+  --textbox-border-focused: var(--accent-hover);
 }
 
 :global(html.theme-light) .win-textbox,
 :global(.example-theme-wrapper.theme-light) .win-textbox {
-  --textbox-border-focused: var(--system-accent-color-dark-1, var(--accent-base, var(--accent-default)));
-}
-
-@media (prefers-color-scheme: dark) {
-  .win-textbox {
-    --textbox-border-focused: var(--system-accent-color-light-2, var(--accent-base, var(--accent-default)));
-  }
+  --textbox-border-focused: var(--accent-base);
 }
 
 .win-textbox-header {

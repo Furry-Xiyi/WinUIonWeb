@@ -182,6 +182,7 @@ const isDraggingVertical = ref(false)
 const isDraggingHorizontal = ref(false)
 const verticalInteractionToken = ref(0)
 const horizontalInteractionToken = ref(0)
+const lastNonMouseScrollBarPointerTime = ref(0)
 const activeVerticalDragPointerId = ref<number | null>(null)
 const activeHorizontalDragPointerId = ref<number | null>(null)
 const activeLineScroll = ref<{ orientation: 'vertical' | 'horizontal', direction: number, lastTime: number } | null>(null)
@@ -503,8 +504,47 @@ function expandScrollBarNow(orientation: 'vertical' | 'horizontal') {
   return token
 }
 
+function markNonMouseScrollBarPointer(event: PointerEvent) {
+  if (event.pointerType !== 'mouse') {
+    lastNonMouseScrollBarPointerTime.value = performance.now()
+  }
+}
+
+function isSyntheticHoverAfterTouch() {
+  return performance.now() - lastNonMouseScrollBarPointerTime.value < 800
+}
+
+function triggerScrollBarHapticFeedback(event: PointerEvent) {
+  if (event.pointerType === 'mouse') return
+  try {
+    navigator.vibrate?.(12)
+  } catch {
+    // Some browsers expose vibrate but reject it silently outside supported hardware.
+  }
+}
+
+function getScrollBarPointerLineDirection(orientation: 'vertical' | 'horizontal', event: PointerEvent) {
+  const target = event.currentTarget as HTMLElement | null
+  const rect = target?.getBoundingClientRect()
+  if (!rect) return 0
+
+  const buttonExtent = 12
+  if (orientation === 'vertical') {
+    const y = event.clientY - rect.top
+    if (y <= buttonExtent) return -1
+    if (y >= rect.height - buttonExtent) return 1
+    return 0
+  }
+
+  const x = event.clientX - rect.left
+  if (x <= buttonExtent) return -1
+  if (x >= rect.width - buttonExtent) return 1
+  return 0
+}
+
 function handleScrollBarPointerEnter(orientation: 'vertical' | 'horizontal', event: PointerEvent) {
   if (event.pointerType !== 'mouse') return
+  if (isSyntheticHoverAfterTouch()) return
   if (orientation === 'vertical') {
     isVerticalPointerOver.value = true
   } else {
@@ -517,8 +557,17 @@ function handleScrollBarPointerEnter(orientation: 'vertical' | 'horizontal', eve
 
 function handleScrollBarPointerDown(orientation: 'vertical' | 'horizontal', event: PointerEvent) {
   if (event.pointerType === 'mouse') return
+  markNonMouseScrollBarPointer(event)
   if ((event.target as HTMLElement | null)?.closest('.scrollbar-thumb, .scrollbar-button')) return
+  triggerScrollBarHapticFeedback(event)
+  const direction = getScrollBarPointerLineDirection(orientation, event)
+  if (direction !== 0) {
+    event.preventDefault()
+    startLineScroll(orientation, direction, event)
+    return
+  }
   expandScrollBarNow(orientation)
+  event.preventDefault()
 }
 
 function handleScrollBarPointerLeave(orientation: 'vertical' | 'horizontal') {
@@ -597,6 +646,8 @@ function scrollLine(orientation: 'vertical' | 'horizontal', direction: number, d
 
 function startLineScroll(orientation: 'vertical' | 'horizontal', direction: number, event: PointerEvent) {
   if (!scrollViewerRef.value) return
+  markNonMouseScrollBarPointer(event)
+  triggerScrollBarHapticFeedback(event)
   expandScrollBarNow(orientation)
 
   ;(event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId)
@@ -1024,6 +1075,8 @@ function AddScrollVelocity(
 // Custom scrollbar dragging
 function startVerticalDrag(event: PointerEvent) {
   cancelPendingAnimatedScrollForDirectInput()
+  markNonMouseScrollBarPointer(event)
+  triggerScrollBarHapticFeedback(event)
   expandScrollBarNow('vertical')
   isDraggingVertical.value = true
   activeVerticalDragPointerId.value = event.pointerId
@@ -1066,6 +1119,8 @@ function stopVerticalDrag(event?: PointerEvent) {
 
 function startHorizontalDrag(event: PointerEvent) {
   cancelPendingAnimatedScrollForDirectInput()
+  markNonMouseScrollBarPointer(event)
+  triggerScrollBarHapticFeedback(event)
   expandScrollBarNow('horizontal')
   isDraggingHorizontal.value = true
   activeHorizontalDragPointerId.value = event.pointerId
@@ -1196,7 +1251,7 @@ onBeforeUnmount(() => {
 }
 
 .win-scroll-viewer-viewport:focus-visible {
-  outline: 2px solid var(--accent-fill-color-default, #0078d4);
+  outline: 2px solid var(--accent-base);
   outline-offset: -2px;
 }
 
@@ -1458,7 +1513,7 @@ onBeforeUnmount(() => {
   transform: scale(0.875);
 }
 
-@media (hover: none) and (pointer: coarse) {
+@media (hover: none) and (pointer: coarse), (any-pointer: coarse) {
   .scrollbar-button {
     pointer-events: auto;
   }

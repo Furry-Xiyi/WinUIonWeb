@@ -30,11 +30,11 @@
               <template #example>
                 <div style="width: 100%; height: 300px;">
                   <WinNavigationView
-                    :menuItems="navigationMenuItems"
-                    selectedValue="inbox"
-                    paneDisplayMode="Left"
-                    :isSettingsVisible="false"
-                    :isPaneToggleButtonVisible="false">
+                    :MenuItems="navigationMenuItems"
+                    SelectedItem="inbox"
+                    PaneDisplayMode="Left"
+                    :IsSettingsVisible="false"
+                    :IsPaneToggleButtonVisible="false">
                   </WinNavigationView>
                 </div>
               </template>
@@ -135,7 +135,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinInfoBadge from '../../components/WinInfoBadge.vue';
 import WinNavigationView from '../../components/WinNavigationView.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
@@ -143,27 +143,12 @@ import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'infobadge');
-
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Example 1: NavigationView with InfoBadge
 const infoBadgeVisible = ref(true);
@@ -197,9 +182,9 @@ const navigationMenuItems = computed(() => [
 ]);
 
 const example1Template = `<WinNavigationView
-  :menuItems="menuItems"
-  selectedValue="inbox"
-  paneDisplayMode="Left">
+  :MenuItems="menuItems"
+  SelectedItem="inbox"
+  PaneDisplayMode="Left">
   <!-- NavigationViewItem with InfoBadge -->
 </WinNavigationView>`;
 

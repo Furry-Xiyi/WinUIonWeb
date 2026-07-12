@@ -145,7 +145,7 @@ const handleItemClick = (index) => {
 }
 
 .win-breadcrumb-button:focus-visible {
-  outline: 2px solid var(--accent-fill-color-default);
+  outline: 2px solid var(--accent-base);
   outline-offset: 2px;
 }
 

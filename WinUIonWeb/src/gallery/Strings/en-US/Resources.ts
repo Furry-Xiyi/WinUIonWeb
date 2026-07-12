@@ -87,6 +87,7 @@ export default {
   "text.autosuggestbox": "AutoSuggestBox",
   "text.basic-input": "Basic Input",
   "text.border": "Border",
+  "text.breadcrumbbar": "BreadcrumbBar",
   "text.basic-listview-with-selection-modes": "Basic ListView with Selection Modes",
   "text.blue": "Blue",
   "text.button": "Button",
@@ -170,6 +171,8 @@ export default {
   "text.hyperlinkbutton": "HyperlinkButton",
   "text.i-am-a-textblock": "I am a TextBlock.",
   "text.image": "Image",
+  "text.infobadge": "InfoBadge",
+  "text.infobar": "InfoBar",
   "text.inline": "Inline",
   "text.items-in-a-flexible-grid": "Items in a flexible grid.",
   "text.japanese-ja-jp": "Japanese (ja-JP)",
@@ -199,6 +202,8 @@ export default {
   "text.microsoft-home-page": "Microsoft home page",
   "text.mountain": "mountain",
   "text.multiple": "Multiple",
+  "text.navigation": "Navigation",
+  "text.navigationview": "NavigationView",
   "text.navigation-pane-position": "Navigation pane position",
   "text.none": "None",
   "text.numberbox": "NumberBox",
@@ -217,7 +222,10 @@ export default {
   "text.plays-media-content": "Plays media content.",
   "text.popup": "Popup",
   "text.pipspager": "PipsPager",
+  "text.pivot": "Pivot",
   "text.popup-with-offset-positioning": "Popup with offset positioning.",
+  "text.progressbar": "ProgressBar",
+  "text.progressring": "ProgressRing",
   "text.pull-down-to-refresh": "Pull down to refresh",
   "text.pulltorefresh": "PullToRefresh",
   "text.itemsrepeater-description": "The ItemsRepeater is a light-weight control for displaying repeating data. It's highly customizable through flexible layout options and supports virtualizing layout. Use ItemsRepeater when you need more control over layout than what you get from a ListView or GridView.",
@@ -234,13 +242,16 @@ export default {
   "text.reply": "Reply",
   "text.reply-all": "Reply All",
   "text.richeditbox": "RichEditBox",
+  "text.richtextblock": "RichTextBlock",
   "text.save": "Save",
   "text.segoe-ui": "Segoe UI",
   "text.select-the-navigation-bar-position": "Select the navigation bar position",
   "text.send": "Send",
   "text.settings": "Settings",
+  "text.status-and-info": "Status & info",
   "text.scrolling": "Scrolling",
   "text.semanticzoom": "SemanticZoom",
+  "text.selectorbar": "SelectorBar",
   "text.share": "Share",
   "text.show-a-targeted-teachingtip-on-a-button": "Show a targeted TeachingTip on a button.",
   "text.show-dialog": "Show dialog",
@@ -255,11 +266,14 @@ export default {
   "text.splitbutton": "SplitButton",
   "text.splitview": "SplitView",
   "text.standard-xaml-button": "Standard XAML button",
+  "text.standarduicommand": "StandardUICommand",
   "text.sue": "Sue",
+  "text.swipecontrol": "SwipeControl",
   "text.switch-that-can-be-toggled-between-two-states": "Switch that can be toggled between two states.",
   "text.systembackground": "SystemBackground",
   "text.taiwancalendar": "TaiwanCalendar",
   "text.teachingtip": "TeachingTip",
+  "text.tooltip": "ToolTip",
   "text.text": "Text",
   "text.textblock": "TextBlock",
   "text.textbox": "TextBox",
@@ -277,6 +291,7 @@ export default {
   "text.the-richeditbox-control-lets-a-user-enter-format": "The RichEditBox control lets a user enter formatted text such as bold, italic, and underlined. RichEditBox can also display and edit Rich Text Format (.rtf) files.",
   "text.the-splitbutton-is-a-dropdown-button-but-with-an": "The SplitButton is a dropdown button, but with an addition execution hit target. It's used for scenarios where you want a user to be able to invoke a command or make a choice.",
   "text.the-textblock-control-provides-flexible-text-dis": "The TextBlock control provides flexible text display options for scenarios that don't require interactivity. It supports rich text formatting, inline elements like Bold and Italic, and text selection.",
+  "text.tooltip-description": "A ToolTip shows more information about a UI element. You might show information about what the element does, or what the user should do. The ToolTip is shown when a user hovers over or presses and holds the UI element.",
   "text.the-treeview-control-is-a-hierarchical-list-patt": "The TreeView control is a hierarchical list pattern with expanding and collapsing nodes that contain nested items. It can be used to illustrate a folder structure or nested relationships in your UI.",
   "text.theme": "Theme",
   "text.motion": "Motion",
@@ -312,6 +327,7 @@ export default {
   "text.view": "View",
   "text.winui-on-web-on-github": "WinUI on Web on GitHub",
   "text.workgroup": "Workgroup",
+  "text.xamluicommand": "XamlUICommand",
   "text.white": "White",
   "text.yellow": "Yellow"
   ,"sample.alpha-enabled": "Alpha Enabled"
@@ -588,6 +604,19 @@ export default {
   ,"sample.teachingtip.action-button": "Action button"
   ,"sample.teachingtip.close-button": "Close button"
   ,"sample.teachingtip.description": "Description can go here"
+  ,"sample.tooltip.simple": "Button with a simple ToolTip."
+  ,"sample.tooltip.simple-content": "Simple ToolTip"
+  ,"sample.tooltip.button-content": "Button with a simple ToolTip."
+  ,"sample.tooltip.attached": "TextBlock with an offset ToolTip."
+  ,"sample.tooltip.service-content": "Offset ToolTip."
+  ,"sample.tooltip.textblock-target": "TextBlock with an offset ToolTip."
+  ,"sample.tooltip.image": "An Image with a ToolTip using PlacementRect."
+  ,"sample.tooltip.image-content": "Non-occluding ToolTip."
+  ,"sample.tooltip.image-alt": "Cliff landscape"
+  ,"sample.tooltip.controlled": "A ToolTip opened with IsOpen."
+  ,"sample.tooltip.toggle-open": "Toggle ToolTip"
+  ,"sample.tooltip.controlled-target": "Controlled placement target"
+  ,"sample.tooltip.controlled-content": "This ToolTip is controlled by IsOpen."
   ,"text.sunset": "Sunset"
   ,"text.play": "Play"
   ,"text.pause": "Pause"

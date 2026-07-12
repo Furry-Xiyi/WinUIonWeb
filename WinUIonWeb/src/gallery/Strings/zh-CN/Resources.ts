@@ -87,6 +87,7 @@ export default {
   "text.autosuggestbox": "自动建议框",
   "text.basic-input": "基本输入",
   "text.border": "边框",
+  "text.breadcrumbbar": "面包屑导航栏",
   "text.basic-listview-with-selection-modes": "带选择模式的基本列表视图",
   "text.blue": "蓝色",
   "text.button": "按钮",
@@ -170,6 +171,8 @@ export default {
   "text.hyperlinkbutton": "超链接按钮",
   "text.i-am-a-textblock": "我是一个文本块。",
   "text.image": "图像",
+  "text.infobadge": "信息徽章",
+  "text.infobar": "信息栏",
   "text.inline": "内联",
   "text.items-in-a-flexible-grid": "灵活网格中的项目。",
   "text.japanese-ja-jp": "日语（ja-JP）",
@@ -199,6 +202,8 @@ export default {
   "text.microsoft-home-page": "Microsoft 主页",
   "text.mountain": "山",
   "text.multiple": "多选",
+  "text.navigation": "导航",
+  "text.navigationview": "导航视图",
   "text.navigation-pane-position": "导航窗格位置",
   "text.none": "无",
   "text.numberbox": "数字框",
@@ -217,7 +222,10 @@ export default {
   "text.plays-media-content": "播放媒体内容。",
   "text.popup": "弹出控件",
   "text.pipspager": "分页点控件",
+  "text.pivot": "透视视图",
   "text.popup-with-offset-positioning": "带偏移定位的弹出控件。",
+  "text.progressbar": "进度条",
+  "text.progressring": "进度环",
   "text.pull-down-to-refresh": "下拉刷新",
   "text.pulltorefresh": "下拉刷新",
   "text.itemsrepeater-description": "ItemsRepeater 是用于显示重复数据的轻量控件。它可通过灵活的布局选项高度自定义，并支持虚拟化布局。当你需要比 ListView 或 GridView 更强的布局控制时，可以使用 ItemsRepeater。",
@@ -234,13 +242,16 @@ export default {
   "text.reply": "回复",
   "text.reply-all": "全部回复",
   "text.richeditbox": "富文本编辑框",
+  "text.richtextblock": "富文本块",
   "text.save": "保存",
   "text.segoe-ui": "Segoe UI",
   "text.select-the-navigation-bar-position": "选择导航栏位置",
   "text.send": "发送",
   "text.settings": "设置",
+  "text.status-and-info": "状态和信息",
   "text.scrolling": "滚动",
   "text.semanticzoom": "语义缩放",
+  "text.selectorbar": "选择器栏",
   "text.share": "共享",
   "text.show-a-targeted-teachingtip-on-a-button": "在按钮上显示定向教学提示。",
   "text.show-dialog": "显示对话框",
@@ -255,11 +266,14 @@ export default {
   "text.splitbutton": "拆分按钮",
   "text.splitview": "拆分视图",
   "text.standard-xaml-button": "标准 XAML 按钮",
+  "text.standarduicommand": "标准界面命令",
   "text.sue": "苏",
+  "text.swipecontrol": "轻扫控件",
   "text.switch-that-can-be-toggled-between-two-states": "可在两种状态之间切换的开关。",
   "text.systembackground": "系统背景",
   "text.taiwancalendar": "台湾历",
   "text.teachingtip": "教学提示",
+  "text.tooltip": "工具提示",
   "text.text": "文本",
   "text.textblock": "文本块",
   "text.textbox": "文本框",
@@ -277,6 +291,7 @@ export default {
   "text.the-richeditbox-control-lets-a-user-enter-format": "富文本编辑框控件允许用户输入加粗、斜体和下划线等格式化文本。富文本编辑框还可以显示和编辑富文本格式（.rtf）文件。",
   "text.the-splitbutton-is-a-dropdown-button-but-with-an": "拆分按钮类似下拉按钮，但额外提供一个执行点击区域。它适用于希望用户既能调用命令又能作出选择的场景。",
   "text.the-textblock-control-provides-flexible-text-dis": "文本块控件为不需要交互的场景提供灵活的文本显示选项。它支持富文本格式、加粗和斜体等内联元素，以及文本选择。",
+  "text.tooltip-description": "ToolTip 显示有关界面元素的更多信息。它可以说明元素的功能或用户应执行的操作。当用户将鼠标悬停在界面元素上或长按该元素时，会显示 ToolTip。",
   "text.the-treeview-control-is-a-hierarchical-list-patt": "树视图控件是一种分层列表模式，包含可展开和折叠的嵌套节点。它可用于展示文件夹结构或界面中的嵌套关系。",
   "text.theme": "主题",
   "text.motion": "运动",
@@ -312,6 +327,7 @@ export default {
   "text.view": "视图",
   "text.winui-on-web-on-github": "GitHub 上的 WinUI on Web",
   "text.workgroup": "工作组",
+  "text.xamluicommand": "XAML 界面命令",
   "text.white": "白色",
   "text.yellow": "黄色"
   ,"sample.alpha-enabled": "启用 Alpha"
@@ -510,7 +526,7 @@ export default {
   ,"sample.contentdialog.no-default": "没有默认按钮的内容对话框。"
   ,"sample.contentdialog.save-title": "保存你的工作？"
   ,"sample.contentdialog.replace-title": "替换文件？"
-  ,"sample.contentdialog.body": "Lorem ipsum dolor sit amet, adipisicing elit."
+  ,"sample.contentdialog.body": "这是内容对话框中的示例文本。"
   ,"sample.contentdialog.upload": "将你的内容上传到云。"
   ,"sample.contentdialog.save": "保存"
   ,"sample.contentdialog.dont-save": "不保存"
@@ -588,6 +604,19 @@ export default {
   ,"sample.teachingtip.action-button": "操作按钮"
   ,"sample.teachingtip.close-button": "关闭按钮"
   ,"sample.teachingtip.description": "描述可以放在这里"
+  ,"sample.tooltip.simple": "带简单 ToolTip 的按钮。"
+  ,"sample.tooltip.simple-content": "简单 ToolTip"
+  ,"sample.tooltip.button-content": "带简单 ToolTip 的按钮。"
+  ,"sample.tooltip.attached": "带偏移 ToolTip 的 TextBlock。"
+  ,"sample.tooltip.service-content": "偏移 ToolTip。"
+  ,"sample.tooltip.textblock-target": "带偏移 ToolTip 的 TextBlock。"
+  ,"sample.tooltip.image": "使用 PlacementRect 的带 ToolTip 图像。"
+  ,"sample.tooltip.image-content": "不遮挡内容的 ToolTip。"
+  ,"sample.tooltip.image-alt": "悬崖景观"
+  ,"sample.tooltip.controlled": "通过 IsOpen 打开的 ToolTip。"
+  ,"sample.tooltip.toggle-open": "切换 ToolTip"
+  ,"sample.tooltip.controlled-target": "受控定位目标"
+  ,"sample.tooltip.controlled-content": "此 ToolTip 由 IsOpen 控制。"
   ,"text.sunset": "日落"
   ,"text.play": "播放"
   ,"text.pause": "暂停"

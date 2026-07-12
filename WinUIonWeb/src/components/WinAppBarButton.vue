@@ -266,19 +266,19 @@ const handleClick = (event: MouseEvent) => {
 
 /* Dark theme support */
 @media (prefers-color-scheme: dark) {
-  .win-appbar-button {
+  :global(.example-theme-wrapper.theme-dark) .win-appbar-button {
     color: var(--text-fill-color-primary, rgba(255, 255, 255, 1));
   }
 
-  .win-appbar-button.pointer-over {
+  :global(.example-theme-wrapper.theme-dark) .win-appbar-button.pointer-over {
     background: var(--muxc-subtle-fill-secondary, rgba(255, 255, 255, 0.0605));
   }
 
-  .win-appbar-button.pressed {
+  :global(.example-theme-wrapper.theme-dark) .win-appbar-button.pressed {
     background: var(--muxc-subtle-fill-tertiary, rgba(255, 255, 255, 0.0419));
   }
 
-  .appbar-button-flyout {
+  :global(.example-theme-wrapper.theme-dark) .appbar-button-flyout {
     background: var(--muxc-layer-fill-default, #2C2C2C);
     border: 1px solid var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
   }

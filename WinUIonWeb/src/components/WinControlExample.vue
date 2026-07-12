@@ -301,10 +301,6 @@ const copyActiveCode = async () => {
   --control-on-image-fill-color-default: rgba(243, 243, 243, 0.85);
 }
 
-:global(html.theme-dark) .copy-button-border {
-  --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
-}
-
 .source-code-presenter[data-theme="light"] .copy-button-border {
   --control-on-image-fill-color-default: rgba(243, 243, 243, 0.85);
   --ctrl-fill-default: rgba(255, 255, 255, 0.70);

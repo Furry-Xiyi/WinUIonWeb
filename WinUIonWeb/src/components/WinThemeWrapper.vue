@@ -48,6 +48,15 @@ const themeClass = computed(() => {
   --text-tertiary: rgba(0, 0, 0, 0.4458);
   --text-disabled: rgba(0, 0, 0, 0.3614);
 
+  --accent-base: #0067C0;
+  --accent-hover: rgba(0, 103, 192, 0.90);
+  --accent-pressed: rgba(0, 103, 192, 0.80);
+  --accent-fill-disabled: rgba(0, 0, 0, 0.22);
+  --accent-aa-fill: #004E8C;
+  --accent-aa-text: #FFFFFF;
+  --accent-text: #FFFFFF;
+  --accent-text-secondary: rgba(255, 255, 255, 0.70);
+
   --ctrl-fill-default: rgba(255, 255, 255, 0.7);
   --ctrl-fill-secondary: rgba(249, 249, 249, 0.5);
   --ctrl-fill-tertiary: rgba(249, 249, 249, 0.3);
@@ -59,6 +68,8 @@ const themeClass = computed(() => {
   --ctrl-border-rest: rgba(0, 0, 0, 0.06);
   --ctrl-border: rgba(0, 0, 0, 0.06);
   --ctrl-border-accent: rgba(0, 0, 0, 0.16);
+  --accent-border: rgba(255, 255, 255, 0.08);
+  --accent-border-accent: rgba(0, 0, 0, 0.40);
   --ctrl-elevation-top: rgba(255, 255, 255, 0.08);
   --ctrl-elevation-bottom: rgba(0, 0, 0, 0.16);
   --ctrl-stroke-default: rgba(0, 0, 0, 0.0578);
@@ -95,6 +106,15 @@ const themeClass = computed(() => {
   --text-tertiary: rgba(255, 255, 255, 0.5442);
   --text-disabled: rgba(255, 255, 255, 0.3628);
 
+  --accent-base: #4CC2FF;
+  --accent-hover: rgba(96, 205, 255, 0.90);
+  --accent-pressed: rgba(96, 205, 255, 0.80);
+  --accent-fill-disabled: rgba(255, 255, 255, 0.16);
+  --accent-aa-fill: #79D2FF;
+  --accent-aa-text: #000000;
+  --accent-text: #000000;
+  --accent-text-secondary: rgba(0, 0, 0, 0.50);
+
   --ctrl-fill-default: rgba(255, 255, 255, 0.0605);
   --ctrl-fill-secondary: rgba(255, 255, 255, 0.0837);
   --ctrl-fill-tertiary: rgba(255, 255, 255, 0.0326);
@@ -106,6 +126,8 @@ const themeClass = computed(() => {
   --ctrl-border-rest: rgba(0, 0, 0, 0.07);
   --ctrl-border: rgba(255, 255, 255, 0.07);
   --ctrl-border-accent: rgba(255, 255, 255, 0.09);
+  --accent-border: rgba(0, 0, 0, 0.14);
+  --accent-border-accent: rgba(255, 255, 255, 0.08);
   --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
   --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
   --ctrl-stroke-default: rgba(255, 255, 255, 0.0698);

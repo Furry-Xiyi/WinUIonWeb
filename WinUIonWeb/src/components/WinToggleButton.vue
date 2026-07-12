@@ -183,10 +183,10 @@ const onClick = (event: MouseEvent) => {
   --ToggleButtonBackgroundPointerOver: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
   --ToggleButtonBackgroundPressed: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary));
   --ToggleButtonBackgroundDisabled: var(--control-fill-color-disabled, var(--ctrl-fill-disabled));
-  --ToggleButtonBackgroundChecked: var(--accent-fill-color-default, var(--accent-base));
-  --ToggleButtonBackgroundCheckedPointerOver: var(--accent-fill-color-secondary, var(--accent-hover));
-  --ToggleButtonBackgroundCheckedPressed: var(--accent-fill-color-tertiary, var(--accent-pressed));
-  --ToggleButtonBackgroundCheckedDisabled: var(--accent-fill-color-disabled, var(--accent-fill-disabled));
+  --ToggleButtonBackgroundChecked: var(--accent-base);
+  --ToggleButtonBackgroundCheckedPointerOver: var(--accent-hover);
+  --ToggleButtonBackgroundCheckedPressed: var(--accent-pressed);
+  --ToggleButtonBackgroundCheckedDisabled: var(--accent-fill-disabled);
   --ToggleButtonBackgroundIndeterminate: var(--control-fill-color-default, var(--ctrl-fill-default));
   --ToggleButtonBackgroundIndeterminatePointerOver: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
   --ToggleButtonBackgroundIndeterminatePressed: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary));
@@ -195,29 +195,29 @@ const onClick = (event: MouseEvent) => {
   --ToggleButtonForegroundPointerOver: var(--text-fill-color-primary, var(--text-primary));
   --ToggleButtonForegroundPressed: var(--text-fill-color-secondary, var(--text-secondary));
   --ToggleButtonForegroundDisabled: var(--text-fill-color-disabled, var(--text-disabled));
-  --ToggleButtonForegroundChecked: var(--text-on-accent-fill-color-primary, var(--accent-text));
-  --ToggleButtonForegroundCheckedPointerOver: var(--text-on-accent-fill-color-primary, var(--accent-text));
-  --ToggleButtonForegroundCheckedPressed: var(--text-on-accent-fill-color-secondary, var(--accent-text-secondary));
-  --ToggleButtonForegroundCheckedDisabled: var(--text-on-accent-fill-color-disabled, var(--text-disabled));
+  --ToggleButtonForegroundChecked: var(--accent-text);
+  --ToggleButtonForegroundCheckedPointerOver: var(--accent-text);
+  --ToggleButtonForegroundCheckedPressed: var(--accent-text-secondary);
+  --ToggleButtonForegroundCheckedDisabled: var(--text-disabled);
   --ToggleButtonForegroundIndeterminate: var(--text-fill-color-primary, var(--text-primary));
   --ToggleButtonForegroundIndeterminatePointerOver: var(--text-fill-color-primary, var(--text-primary));
   --ToggleButtonForegroundIndeterminatePressed: var(--text-fill-color-secondary, var(--text-secondary));
   --ToggleButtonForegroundIndeterminateDisabled: var(--text-fill-color-disabled, var(--text-disabled));
   --ToggleButtonBorderBrush: var(--control-elevation-border-brush, var(--ctrl-border));
   --ToggleButtonBorderBrushPointerOver: var(--control-elevation-border-brush, var(--ctrl-border));
-  --ToggleButtonBorderBrushPressed: var(--control-stroke-color-default, var(--ctrl-border));
-  --ToggleButtonBorderBrushDisabled: var(--control-stroke-color-default, var(--ctrl-border));
-  --ToggleButtonBorderBrushChecked: var(--accent-control-elevation-border-brush, var(--accent-border));
-  --ToggleButtonBorderBrushCheckedPointerOver: var(--accent-control-elevation-border-brush, var(--accent-border));
+  --ToggleButtonBorderBrushPressed: var(--ctrl-border);
+  --ToggleButtonBorderBrushDisabled: var(--ctrl-border);
+  --ToggleButtonBorderBrushChecked: var(--accent-border);
+  --ToggleButtonBorderBrushCheckedPointerOver: var(--accent-border);
   --ToggleButtonBorderBrushCheckedPressed: transparent;
   --ToggleButtonBorderBrushCheckedDisabled: transparent;
   --ToggleButtonBorderBrushIndeterminate: var(--control-elevation-border-brush, var(--ctrl-border));
   --ToggleButtonBorderBrushIndeterminatePointerOver: var(--control-elevation-border-brush, var(--ctrl-border));
-  --ToggleButtonBorderBrushIndeterminatePressed: var(--control-stroke-color-default, var(--ctrl-border));
-  --ToggleButtonBorderBrushIndeterminateDisabled: var(--control-stroke-color-default, var(--ctrl-border));
+  --ToggleButtonBorderBrushIndeterminatePressed: var(--ctrl-border);
+  --ToggleButtonBorderBrushIndeterminateDisabled: var(--ctrl-border);
   --ToggleButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
   --ToggleButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
-  --ToggleButtonBorderBrushPressedBottom: var(--control-stroke-color-default, var(--ctrl-border));
+  --ToggleButtonBorderBrushPressedBottom: var(--ctrl-border);
   --ToggleButtonBorderBrushCheckedBottom: var(--accent-border-accent);
   --ToggleButtonBorderBrushCheckedPointerOverBottom: var(--accent-border-accent);
   appearance: none;
@@ -369,7 +369,6 @@ const onClick = (event: MouseEvent) => {
   outline-offset: 2px;
 }
 
-:global(html.theme-dark) .win-toggle-button,
 :global(.example-theme-wrapper.theme-dark) .win-toggle-button {
   --ToggleButtonBorderBrush: rgba(255, 255, 255, 0.05);
   --ToggleButtonBorderBrushPointerOver: rgba(255, 255, 255, 0.05);
@@ -377,12 +376,4 @@ const onClick = (event: MouseEvent) => {
   --ToggleButtonBorderBrushPointerOverBottom: rgba(255, 255, 255, 0.0075);
 }
 
-@media (prefers-color-scheme: dark) {
-  :global(html:not(.theme-light)) .win-toggle-button {
-    --ToggleButtonBorderBrush: rgba(255, 255, 255, 0.05);
-    --ToggleButtonBorderBrushPointerOver: rgba(255, 255, 255, 0.05);
-    --ToggleButtonBorderBrushBottom: rgba(255, 255, 255, 0.0075);
-    --ToggleButtonBorderBrushPointerOverBottom: rgba(255, 255, 255, 0.0075);
-  }
-}
 </style>

@@ -257,20 +257,20 @@ const getSymbolIcon = (icon: string): string => {
 
 /* Visual States - Checked */
 .win-appbar-toggle-button.is-checked {
-  background-color: var(--accent-fill-color-default, #0078D4);
-  color: var(--text-on-accent-primary, #FFFFFF);
-  border-color: var(--accent-fill-color-default, #0078D4);
+  background-color: var(--accent-base);
+  color: var(--accent-text);
+  border-color: var(--accent-base);
 }
 
 .win-appbar-toggle-button.is-checked:hover {
-  background-color: var(--accent-fill-secondary, #106EBE);
-  border-color: var(--accent-fill-secondary, #106EBE);
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 .win-appbar-toggle-button.is-checked:active {
-  background-color: var(--accent-fill-tertiary, #005A9E);
-  border-color: var(--accent-fill-tertiary, #005A9E);
-  color: var(--text-on-accent-secondary, rgba(255, 255, 255, 0.7));
+  background-color: var(--accent-pressed);
+  border-color: var(--accent-pressed);
+  color: var(--accent-text-secondary);
 }
 
 /* Visual States - Indeterminate (three-state mode) */
@@ -344,25 +344,25 @@ const getSymbolIcon = (icon: string): string => {
 
 /* Dark theme */
 @media (prefers-color-scheme: dark) {
-  .win-appbar-toggle-button {
+  :global(.example-theme-wrapper.theme-dark) .win-appbar-toggle-button {
     color: var(--text-fill-color-primary, rgba(255, 255, 255, 0.9));
   }
 
-  .win-appbar-toggle-button:hover {
+  :global(.example-theme-wrapper.theme-dark) .win-appbar-toggle-button:hover {
     background-color: var(--control-fill-secondary, rgba(255, 255, 255, 0.0837));
   }
 
-  .win-appbar-toggle-button:active {
+  :global(.example-theme-wrapper.theme-dark) .win-appbar-toggle-button:active {
     background-color: var(--control-fill-tertiary, rgba(255, 255, 255, 0.0326));
     color: var(--text-fill-color-secondary, rgba(255, 255, 255, 0.6));
   }
 
-  .win-appbar-toggle-button.is-indeterminate {
+  :global(.example-theme-wrapper.theme-dark) .win-appbar-toggle-button.is-indeterminate {
     background-color: var(--control-fill-secondary, rgba(255, 255, 255, 0.0837));
     border-color: var(--control-stroke-default, rgba(255, 255, 255, 0.0837));
   }
 
-  .win-appbar-toggle-button:disabled {
+  :global(.example-theme-wrapper.theme-dark) .win-appbar-toggle-button:disabled {
     color: var(--text-disabled, rgba(255, 255, 255, 0.3628));
   }
 }

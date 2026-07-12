@@ -529,67 +529,31 @@ defineExpose({
   opacity: 0;
 }
 
-/* Dark Theme */
-html.theme-dark .win-commandbar {
+:global(.example-theme-wrapper.theme-dark) .win-commandbar {
   background: var(--muxc-layer-fill-default, #2C2C2C);
   border-bottom-color: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
 }
 
-@media (prefers-color-scheme: dark) {
-  html:not(.theme-light) .win-commandbar {
-    background: var(--muxc-layer-fill-default, #2C2C2C);
-    border-bottom-color: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
-  }
-
-  html:not(.theme-light) .commandbar-overflow-button {
-    color: var(--text-fill-color-primary, rgba(255, 255, 255, 1));
-  }
-
-  html:not(.theme-light) .commandbar-overflow-button:hover {
-    background: var(--muxc-subtle-fill-secondary, rgba(255, 255, 255, 0.0605));
-  }
-
-  html:not(.theme-light) .commandbar-overflow-button:active,
-  html:not(.theme-light) .commandbar-overflow-button.active {
-    background: var(--muxc-subtle-fill-tertiary, rgba(255, 255, 255, 0.0419));
-  }
-
-  html:not(.theme-light) .commandbar-secondary {
-    background: var(--muxc-layer-fill-default, #2C2C2C);
-    border-color: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-  }
-
-  html:not(.theme-light) .commandbar-separator {
-    background: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
-  }
-}
-
-html.theme-dark .win-commandbar {
-  background: var(--muxc-layer-fill-default, #2C2C2C);
-  border-bottom-color: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
-}
-
-html.theme-dark .commandbar-overflow-button {
+:global(.example-theme-wrapper.theme-dark) .commandbar-overflow-button {
   color: var(--text-fill-color-primary, rgba(255, 255, 255, 1));
 }
 
-html.theme-dark .commandbar-overflow-button:hover {
+:global(.example-theme-wrapper.theme-dark) .commandbar-overflow-button:hover {
   background: var(--muxc-subtle-fill-secondary, rgba(255, 255, 255, 0.0605));
 }
 
-html.theme-dark .commandbar-overflow-button:active,
-html.theme-dark .commandbar-overflow-button.active {
+:global(.example-theme-wrapper.theme-dark) .commandbar-overflow-button:active,
+:global(.example-theme-wrapper.theme-dark) .commandbar-overflow-button.active {
   background: var(--muxc-subtle-fill-tertiary, rgba(255, 255, 255, 0.0419));
 }
 
-html.theme-dark .commandbar-secondary {
+:global(.example-theme-wrapper.theme-dark) .commandbar-secondary {
   background: var(--muxc-layer-fill-default, #2C2C2C);
   border-color: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
-html.theme-dark .commandbar-separator {
+:global(.example-theme-wrapper.theme-dark) .commandbar-separator {
   background: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
 }
 

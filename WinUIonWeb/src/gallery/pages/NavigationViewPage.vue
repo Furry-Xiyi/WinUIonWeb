@@ -1,499 +1,690 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">NavigationView</h1>
-          <p class="page-description">
-            The NavigationView control provides top-level navigation for your app. It adapts to a variety of screen sizes and supports both top and left navigation styles.
-          </p>
-          <div class="page-header-actions">
-            <WinButton
-              @click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-              <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
-          </div>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+        <WinTextBlock class="page-header" :Text="$t('text.navigationview')" />
+        <WinTextBlock
+          class="page-description"
+          :Text="$t('text.navigationview-description')"
+          TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <WinButton
+            class="header-action"
+            :title="$t('sample.navigationview.change-theme')"
+            :aria-label="$t('sample.navigationview.change-theme')"
+            @Click="toggleTheme">
+            <WinTextBlock class="icon" Text="" />
+          </WinButton>
+          <WinToggleButton
+            v-model:IsChecked="isFavoriteState"
+            class="header-action"
+            :title="favoriteActionLabel"
+            :aria-label="favoriteActionLabel"
+            @update:IsChecked="toggleFavorite">
+            <WinTextBlock class="icon" :Text="isFavoriteState ? '' : ''" />
+          </WinToggleButton>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example 1: Left Navigation (Default) -->
-            <WinControlExample
-              headerText="Default left navigation"
-              :theme="pageTheme"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <div class="nav-example-container">
-                  <WinNavigationView
-                    :selectedValue="leftSelectedValue"
-                    @update:selectedValue="leftSelectedValue = $event"
-                    :menuItems="leftMenuItems"
-                    header="This is Header Text"
-                    :isPaneOpen="leftPaneOpen"
-                    @update:isPaneOpen="leftPaneOpen = $event"
-                    paneDisplayMode="Left"
-                    style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-                    <div style="padding: 24px; color: var(--text-primary);">
-                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ leftContentTitle }}</p>
-                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ leftSelectedValue }}.</p>
-                    </div>
-                  </WinNavigationView>
-                </div>
-              </template>
-              <template #options>
-                <p class="output-text">Selected: {{ leftSelectedValue }}</p>
-                <p class="output-text">Pane Open: {{ leftPaneOpen }}</p>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 2: Top Navigation -->
-            <WinControlExample
-              headerText="Top navigation"
-              :theme="pageTheme"
-              :templateCode="example2Template"
-              :vueCode="example2Vue">
-              <template #example>
-                <div class="nav-example-container">
-                  <WinNavigationView
-                    :selectedValue="topSelectedValue"
-                    @update:selectedValue="topSelectedValue = $event"
-                    :menuItems="topMenuItems"
-                    header="This is Header Text"
-                    paneDisplayMode="Top"
-                    style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-                    <div style="padding: 24px; color: var(--text-primary);">
-                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ topContentTitle }}</p>
-                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ topSelectedValue }}.</p>
-                    </div>
-                  </WinNavigationView>
-                </div>
-
-                <p class="output-text">Selected: {{ topSelectedValue }}</p>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 3: Hierarchical Navigation -->
-            <WinControlExample
-              headerText="Hierarchical navigation"
-              :theme="pageTheme"
-              :templateCode="example3Template"
-              :vueCode="example3Vue">
-              <template #example>
-                <div class="nav-example-container">
-                  <WinNavigationView
-                    :selectedValue="hierarchicalSelectedValue"
-                    @update:selectedValue="hierarchicalSelectedValue = $event"
-                    :menuItems="hierarchicalMenuItems"
-                    header="Hierarchical Menu"
-                    paneDisplayMode="Left"
-                    style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-                    <div style="padding: 24px; color: var(--text-primary);">
-                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ hierarchicalContentTitle }}</p>
-                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ hierarchicalSelectedValue }}.</p>
-                    </div>
-                  </WinNavigationView>
-                </div>
-
-                <p class="output-text">Selected: {{ hierarchicalSelectedValue }}</p>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 4: Footer Menu Items -->
-            <WinControlExample
-              headerText="Footer menu items"
-              :theme="pageTheme"
-              :templateCode="example4Template"
-              :vueCode="example4Vue">
-              <template #example>
-                <div class="nav-example-container">
-                  <WinNavigationView
-                    :selectedValue="footerSelectedValue"
-                    @update:selectedValue="footerSelectedValue = $event"
-                    :menuItems="footerMenuItems"
-                    :footerItems="footerBottomItems"
-                    header="This is Header Text"
-                    :paneDisplayMode="footerPaneMode"
-                    style="height: 460px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-                    <div style="padding: 24px; color: var(--text-primary);">
-                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ footerContentTitle }}</p>
-                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ footerSelectedValue }}.</p>
-                    </div>
-                  </WinNavigationView>
-                </div>
-
-                <p class="output-text">Selected: {{ footerSelectedValue }}</p>
-
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                  <p style="margin: 0; font-weight: 600; color: var(--text-primary);">Pane position:</p>
-                  <WinRadioButton
-                    :modelValue="footerPaneMode === 'Left'"
-                    @update:modelValue="footerPaneMode = 'Left'"
-                    name="footerPaneMode">
-                    Left mode
-                  </WinRadioButton>
-                  <WinRadioButton
-                    :modelValue="footerPaneMode === 'Top'"
-                    @update:modelValue="footerPaneMode = 'Top'"
-                    name="footerPaneMode">
-                    Top mode
-                  </WinRadioButton>
-                </div>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 5: API Control -->
-            <WinControlExample
-              headerText="NavigationView API"
-              :theme="pageTheme"
-              :templateCode="example5Template"
-              :vueCode="example5Vue">
-              <template #example>
-                <div class="nav-example-container">
-                  <WinNavigationView
-                    :selectedValue="apiSelectedValue"
-                    @update:selectedValue="apiSelectedValue = $event"
-                    :menuItems="apiMenuItems"
-                    :header="apiHeader"
-                    :paneTitle="apiPaneTitle"
-                    :isSettingsVisible="apiSettingsVisible"
-                    :isBackButtonVisible="apiBackVisible ? 'visible' : 'collapsed'"
-                    :paneDisplayMode="apiPaneMode"
-                    style="height: 540px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px;">
-                    <div style="padding: 24px; color: var(--text-primary);">
-                      <p style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">{{ apiContentTitle }}</p>
-                      <p style="margin: 0; color: var(--text-secondary);">This is the content area for {{ apiSelectedValue }}.</p>
-                    </div>
-                  </WinNavigationView>
-                </div>
-
-                <p class="output-text">Selected: {{ apiSelectedValue }}</p>
-
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                  <WinCheckBox v-model="apiSettingsVisible">
-                    Settings item visible
-                  </WinCheckBox>
-                  <WinCheckBox v-model="apiBackVisible">
-                    Back button visible
-                  </WinCheckBox>
-
-                  <div style="margin-top: 8px;">
-                    <label style="display: block; margin-bottom: 4px; color: var(--text-primary); font-size: 14px;">Header:</label>
-                    <input
-                      type="text"
-                      v-model="apiHeader"
-                      style="width: 100%; padding: 6px 8px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px; background: var(--ctrl-bg-default); color: var(--text-primary);" />
-                  </div>
-
-                  <div>
-                    <label style="display: block; margin-bottom: 4px; color: var(--text-primary); font-size: 14px;">PaneTitle:</label>
-                    <input
-                      type="text"
-                      v-model="apiPaneTitle"
-                      style="width: 100%; padding: 6px 8px; border: 1px solid var(--ctrl-border-rest); border-radius: 4px; background: var(--ctrl-bg-default); color: var(--text-primary);" />
-                  </div>
-
-                  <div style="margin-top: 8px;">
-                    <p style="margin: 0 0 4px 0; font-weight: 600; color: var(--text-primary);">PanePosition:</p>
-                    <WinRadioButton
-                      :modelValue="apiPaneMode === 'Left'"
-                      @update:modelValue="apiPaneMode = 'Left'"
-                      name="apiPaneMode">
-                      Left
-                    </WinRadioButton>
-                    <WinRadioButton
-                      :modelValue="apiPaneMode === 'Top'"
-                      @update:modelValue="apiPaneMode = 'Top'"
-                      name="apiPaneMode">
-                      Top
-                    </WinRadioButton>
-                  </div>
-                </div>
-              </template>
-            </WinControlExample>
       </div>
-    </WinScrollViewer>
-  </div>
+
+      <WinStackPanel class="gallery-page-content">
+        <WinControlExample
+          :headerText="$t('sample.navigationview.default-header')"
+          :theme="pageTheme"
+          :vue="example1Code"
+          horizontalContentAlignment="Stretch"
+          :webViewHeight="250">
+          <template #example>
+            <WinStackPanel class="sample-layout" Spacing="12">
+              <WinTextBlock
+                class="sample-description"
+                :Text="$t('sample.navigationview.default-description')"
+                TextWrapping="WrapWholeWords" />
+              <WinNavigationView
+                class="nav-view-sample"
+                :SelectedItem="defaultSelectedItem"
+                :MenuItems="defaultMenuItems"
+                :Header="defaultContentTitle"
+                PaneDisplayMode="Auto"
+                @SelectionChanged="defaultSelectedItem = $event.SelectedItem">
+                <WinStackPanel class="nav-frame-content" Padding="24">
+                  <WinTextBlock class="nav-content-title" :Text="defaultContentTitle" />
+                </WinStackPanel>
+              </WinNavigationView>
+            </WinStackPanel>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          :headerText="$t('sample.navigationview.top-header')"
+          :theme="pageTheme"
+          :vue="example2Code"
+          horizontalContentAlignment="Stretch"
+          :webViewHeight="200">
+          <template #example>
+            <WinStackPanel class="sample-layout" Spacing="12">
+              <WinTextBlock
+                class="sample-description"
+                :Text="$t('sample.navigationview.top-description')"
+                TextWrapping="WrapWholeWords" />
+              <WinNavigationView
+                class="nav-view-sample"
+                :SelectedItem="topSelectedItem"
+                :MenuItems="topMenuItems"
+                :Header="$t('sample.navigationview.header-text')"
+                PaneDisplayMode="Top"
+                @SelectionChanged="topSelectedItem = $event.SelectedItem">
+                <WinStackPanel class="nav-frame-content" Padding="24">
+                  <WinTextBlock class="nav-content-title" :Text="topContentTitle" />
+                </WinStackPanel>
+              </WinNavigationView>
+            </WinStackPanel>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          :headerText="$t('sample.navigationview.adaptive-header')"
+          :theme="pageTheme"
+          :vue="example3Code"
+          horizontalContentAlignment="Stretch"
+          :webViewHeight="450">
+          <template #example>
+            <WinStackPanel ref="adaptiveHostRef" class="sample-layout" Spacing="12">
+              <WinTextBlock
+                class="sample-description"
+                :Text="$t('sample.navigationview.adaptive-description')"
+                TextWrapping="WrapWholeWords" />
+              <WinNavigationView
+                class="nav-view-sample"
+                :SelectedItem="adaptiveSelectedItem"
+                :MenuItems="adaptiveMenuItems"
+                :PaneDisplayMode="adaptivePaneMode"
+                :IsPaneOpen="false"
+                @SelectionChanged="adaptiveSelectedItem = $event.SelectedItem">
+                <WinStackPanel class="nav-frame-content" Padding="24">
+                  <WinTextBlock class="nav-content-title" :Text="adaptiveContentTitle" />
+                </WinStackPanel>
+              </WinNavigationView>
+            </WinStackPanel>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          :headerText="$t('sample.navigationview.tabs-header')"
+          :theme="pageTheme"
+          :vue="example4Code"
+          horizontalContentAlignment="Stretch"
+          :webViewHeight="800">
+          <template #example>
+            <WinStackPanel class="sample-layout" Spacing="12">
+              <WinTextBlock
+                class="sample-description"
+                :Text="$t('sample.navigationview.tabs-description')"
+                TextWrapping="WrapWholeWords" />
+              <WinNavigationView
+                class="nav-view-sample"
+                :SelectedItem="tabsSelectedItem"
+                :MenuItems="tabsMenuItems"
+                PaneDisplayMode="Top"
+                IsBackButtonVisible="Collapsed"
+                SelectionFollowsFocus="Enabled"
+                @SelectionChanged="tabsSelectedItem = $event.SelectedItem">
+                <WinStackPanel class="nav-frame-content" Padding="24">
+                  <WinTextBlock class="nav-content-title" :Text="tabsContentTitle" />
+                </WinStackPanel>
+              </WinNavigationView>
+            </WinStackPanel>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          :headerText="$t('sample.navigationview.data-binding-header')"
+          :theme="pageTheme"
+          :vue="example5Code"
+          horizontalContentAlignment="Stretch"
+          :webViewHeight="950">
+          <template #example>
+            <WinStackPanel class="sample-layout" Spacing="12">
+              <WinTextBlock
+                class="sample-description"
+                :Text="$t('sample.navigationview.data-binding-description')"
+                TextWrapping="WrapWholeWords" />
+              <WinNavigationView
+                class="nav-view-sample"
+                :SelectedItem="dataSelectedItem"
+                :MenuItemsSource="categories"
+                :Header="dataContentTitle"
+                @SelectionChanged="dataSelectedItem = $event.SelectedItem">
+                <WinStackPanel class="nav-frame-content" Padding="24">
+                  <WinTextBlock class="nav-content-title" :Text="dataContentTitle" />
+                </WinStackPanel>
+              </WinNavigationView>
+            </WinStackPanel>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          :headerText="$t('sample.navigationview.footer-header')"
+          :theme="pageTheme"
+          :vue="example6Code"
+          horizontalContentAlignment="Stretch">
+          <template #example>
+            <WinStackPanel class="sample-layout" Spacing="12">
+              <WinTextBlock
+                class="sample-description"
+                :Text="$t('sample.navigationview.footer-description')"
+                TextWrapping="WrapWholeWords" />
+              <WinNavigationView
+                class="nav-view-sample"
+                :SelectedItem="footerSelectedItem"
+                :MenuItems="footerMenuItems"
+                :FooterMenuItems="footerBottomItems"
+                :Header="$t('sample.navigationview.header-text')"
+                :PaneDisplayMode="footerPaneMode"
+                :IsSettingsVisible="false"
+                @SelectionChanged="footerSelectedItem = $event.SelectedItem">
+                <WinStackPanel class="nav-frame-content" Padding="24">
+                  <WinTextBlock class="nav-content-title" :Text="footerContentTitle" />
+                </WinStackPanel>
+              </WinNavigationView>
+            </WinStackPanel>
+          </template>
+          <template #options>
+            <WinRadioButtons
+              :Header="$t('sample.navigationview.pane-position')"
+              :ItemsSource="footerPaneOptions"
+              v-model:SelectedIndex="footerPaneIndex" />
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          :headerText="$t('sample.navigationview.hierarchical-header')"
+          :theme="pageTheme"
+          :vue="example7Code"
+          horizontalContentAlignment="Stretch">
+          <template #example>
+            <WinStackPanel class="sample-layout" Spacing="12">
+              <WinStackPanel Spacing="8">
+                <WinTextBlock
+                  :Text="$t('sample.navigationview.hierarchy-description-1')"
+                  TextWrapping="WrapWholeWords" />
+                <WinTextBlock
+                  :Text="$t('sample.navigationview.hierarchy-description-2')"
+                  TextWrapping="WrapWholeWords" />
+                <WinTextBlock
+                  :Text="$t('sample.navigationview.hierarchy-description-3')"
+                  TextWrapping="WrapWholeWords" />
+                <WinTextBlock
+                  :Text="$t('sample.navigationview.hierarchy-description-4')"
+                  TextWrapping="WrapWholeWords" />
+              </WinStackPanel>
+              <WinNavigationView
+                class="nav-view-sample"
+                :SelectedItem="hierarchicalSelectedItem"
+                :MenuItems="hierarchicalMenuItems"
+                :Header="hierarchicalContentTitle"
+                :PaneDisplayMode="hierarchicalPaneMode"
+                :IsPaneOpen="hierarchicalPaneMode === 'Left'"
+                @SelectionChanged="hierarchicalSelectedItem = $event.SelectedItem">
+                <WinStackPanel class="nav-frame-content" Padding="24">
+                  <WinTextBlock class="nav-content-title" :Text="hierarchicalContentTitle" />
+                </WinStackPanel>
+              </WinNavigationView>
+            </WinStackPanel>
+          </template>
+          <template #options>
+            <WinRadioButtons
+              :Header="$t('sample.navigationview.pane-position')"
+              :ItemsSource="hierarchicalPaneOptions"
+              v-model:SelectedIndex="hierarchicalPaneIndex" />
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          :headerText="$t('sample.navigationview.api-header')"
+          :theme="pageTheme"
+          :vue="example8Code"
+          horizontalContentAlignment="Stretch"
+          :webViewHeight="250">
+          <template #example>
+            <WinNavigationView
+              class="nav-view-sample nav-view-api"
+              :SelectedItem="apiSelectedItem"
+              :MenuItems="apiMenuItems"
+              :Header="apiHeader"
+              :PaneTitle="apiPaneTitle"
+              :IsSettingsVisible="apiSettingsVisible"
+              :IsBackButtonVisible="apiBackVisible ? 'Visible' : 'Collapsed'"
+              :IsBackEnabled="apiBackEnabled"
+              :AlwaysShowHeader="apiAlwaysShowHeader"
+              :PaneDisplayMode="apiPaneMode"
+              :IsPaneOpen="apiPaneMode === 'Left'"
+              :SelectionFollowsFocus="apiSelectionFollowsFocus ? 'Enabled' : 'Disabled'"
+              :ExpandedModeThresholdWidth="500"
+              @SelectionChanged="onApiSelectionChanged">
+              <template v-if="apiAutoSuggestVisible" #AutoSuggestBox>
+                <WinAutoSuggestBox
+                  QueryIcon="Find"
+                  :PlaceholderText="$t('sample.navigationview.search')" />
+              </template>
+              <template v-if="apiPaneCustomVisible" #PaneCustomContent>
+                <WinHyperlinkButton Margin="12,0">
+                  <WinTextBlock :Text="$t('sample.navigationview.more-info')" />
+                </WinHyperlinkButton>
+              </template>
+              <template v-if="apiPaneFooterVisible" #PaneFooter>
+                <WinStackPanel
+                  class="api-pane-footer"
+                  :Orientation="apiPaneMode === 'Top' ? 'Horizontal' : 'Vertical'"
+                  Spacing="4">
+                  <WinButton
+                    class="pane-footer-action"
+                    Style="{StaticResource SubtleButtonStyle}"
+                    :title="$t('sample.navigationview.download')"
+                    :aria-label="$t('sample.navigationview.download')">
+                    <WinTextBlock class="icon" Text="" />
+                  </WinButton>
+                  <WinButton
+                    class="pane-footer-action"
+                    Style="{StaticResource SubtleButtonStyle}"
+                    :title="$t('sample.navigationview.favorite')"
+                    :aria-label="$t('sample.navigationview.favorite')">
+                    <WinTextBlock class="icon" Text="" />
+                  </WinButton>
+                </WinStackPanel>
+              </template>
+              <WinStackPanel class="nav-frame-content" Padding="24">
+                <WinTextBlock class="nav-content-title" :Text="apiContentTitle" />
+              </WinStackPanel>
+            </WinNavigationView>
+          </template>
+          <template #options>
+            <WinStackPanel class="api-options" Spacing="8">
+              <WinCheckBox v-model:IsChecked="apiSettingsVisible">
+                <WinTextBlock :Text="$t('sample.navigationview.settings-visible')" />
+              </WinCheckBox>
+              <WinCheckBox v-model:IsChecked="apiBackVisible">
+                <WinTextBlock :Text="$t('sample.navigationview.back-visible')" />
+              </WinCheckBox>
+              <WinCheckBox v-model:IsChecked="apiBackEnabled">
+                <WinTextBlock :Text="$t('sample.navigationview.back-enabled')" />
+              </WinCheckBox>
+              <WinCheckBox v-model:IsChecked="apiAutoSuggestVisible">
+                <WinTextBlock :Text="$t('sample.navigationview.autosuggest-visible')" />
+              </WinCheckBox>
+
+              <WinTextBox v-model:Text="apiHeader" Margin="0,4,0,0">
+                <template #header>
+                  <WinTextBlock :Text="$t('sample.navigationview.header-label')" />
+                </template>
+              </WinTextBox>
+              <WinCheckBox v-model:IsChecked="apiAlwaysShowHeader">
+                <WinTextBlock :Text="$t('sample.navigationview.always-show-header')" />
+              </WinCheckBox>
+
+              <WinTextBox v-model:Text="apiPaneTitle" Margin="0,4,0,0">
+                <template #header>
+                  <WinTextBlock :Text="$t('sample.navigationview.pane-title-label')" />
+                </template>
+              </WinTextBox>
+              <WinCheckBox v-model:IsChecked="apiPaneCustomVisible">
+                <WinTextBlock :Text="$t('sample.navigationview.pane-custom-visible')" />
+              </WinCheckBox>
+              <WinCheckBox v-model:IsChecked="apiPaneFooterVisible">
+                <WinTextBlock :Text="$t('sample.navigationview.pane-footer-visible')" />
+              </WinCheckBox>
+
+              <WinRadioButtons
+                Margin="0,4,0,0"
+                :Header="$t('sample.navigationview.pane-position')"
+                :ItemsSource="apiPaneOptions"
+                v-model:SelectedIndex="apiPaneIndex" />
+
+              <WinCheckBox v-model:IsChecked="apiSelectionFollowsFocus">
+                <WinTextBlock :Text="$t('sample.navigationview.keyboard-selection-follows-focus')" />
+              </WinCheckBox>
+              <WinCheckBox v-model:IsChecked="apiSuppressMenuItem2">
+                <WinTextBlock :Text="$t('sample.navigationview.suppress-menu-item-2')" />
+              </WinCheckBox>
+            </WinStackPanel>
+          </template>
+        </WinControlExample>
+      </WinStackPanel>
+    </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
-import WinNavigationView from '../../components/WinNavigationView.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import WinAutoSuggestBox from '../../components/WinAutoSuggestBox.vue';
 import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
-
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
+import WinNavigationView from '../../components/WinNavigationView.vue';
+import WinRadioButtons from '../../components/WinRadioButtons.vue';
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import WinStackPanel from '../../components/WinStackPanel.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinTextBox from '../../components/WinTextBox.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
+import { createPageState } from '../../utils/pageState';
+
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'navigationview');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const favoriteActionLabel = computed(() => t(
+  isFavoriteState.value
+    ? 'sample.navigationview.remove-favorite'
+    : 'sample.navigationview.add-favorite'
+));
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
+const menuItem = (number, icon = '') => ({
+  Content: t(`sample.navigationview.menu-item-${number}`),
+  Icon: icon,
+  Tag: `SamplePage${number}`
 });
 
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
+const baseMenuItems = (withIcons = true) => [
+  menuItem(1, withIcons ? '\uE768' : ''),
+  menuItem(2, withIcons ? '\uE74E' : ''),
+  menuItem(3, withIcons ? '\uE72C' : ''),
+  menuItem(4, withIcons ? '\uE896' : '')
+];
+
+const selectedPageTitle = (selectedItem) => {
+  if (selectedItem?.IsSettingsItem || selectedItem?.Tag === 'settings') {
+    return t('text.settings');
+  }
+  const identity = selectedItem?.Tag ?? selectedItem?.Name ?? '';
+  const pageNumber = String(identity).match(/(\d+)$/)?.[1];
+  return pageNumber
+    ? t('sample.navigationview.sample-page', { number: pageNumber })
+    : (selectedItem?.Content ?? selectedItem?.Name ?? '');
 };
 
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const contentTitleFor = selectedItem => computed(() => selectedPageTitle(selectedItem.value));
 
-// Example 1: Left Navigation
-const leftSelectedValue = ref('item1');
-const leftPaneOpen = ref(true);
-const leftMenuItems = [
-  { value: 'item1', label: 'Menu Item1', icon: '' },
-  { value: 'item2', label: 'Menu Item2', icon: '' },
-  { value: 'item3', label: 'Menu Item3', icon: '' },
-  { value: 'item4', label: 'Menu Item4', icon: '' }
-];
+const defaultMenuItems = baseMenuItems(true);
+const defaultSelectedItem = ref(defaultMenuItems[0]);
+const defaultContentTitle = contentTitleFor(defaultSelectedItem);
 
-const leftContentTitle = computed(() => {
-  const item = leftMenuItems.find(i => i.value === leftSelectedValue.value);
-  return item ? item.label : 'Content';
+const topMenuItems = baseMenuItems(false);
+const topSelectedItem = ref(topMenuItems[0]);
+const topContentTitle = contentTitleFor(topSelectedItem);
+
+const adaptiveMenuItems = baseMenuItems(false);
+const adaptiveSelectedItem = ref(adaptiveMenuItems[0]);
+const adaptiveContentTitle = contentTitleFor(adaptiveSelectedItem);
+const adaptivePaneMode = ref('LeftMinimal');
+const adaptiveHostRef = ref(null);
+let adaptiveObserver = null;
+
+const updateAdaptivePaneMode = (width) => {
+  adaptivePaneMode.value = width >= 641 ? 'Top' : 'LeftMinimal';
+};
+
+onMounted(() => {
+  const host = adaptiveHostRef.value?.$el ?? adaptiveHostRef.value;
+  if (!host) return;
+  updateAdaptivePaneMode(host.getBoundingClientRect().width);
+  if (typeof ResizeObserver === 'undefined') return;
+  adaptiveObserver = new ResizeObserver(([entry]) => {
+    updateAdaptivePaneMode(entry.contentRect.width);
+  });
+  adaptiveObserver.observe(host);
 });
 
-const example1Template = `<WinNavigationView
-  :selectedValue="leftSelectedValue"
-  @update:selectedValue="leftSelectedValue = $event"
-  :menuItems="leftMenuItems"
-  header="This is Header Text"
-  paneDisplayMode="Left"
-  style="height: 460px;">
-  <div style="padding: 24px;">
-    <p>Content for {{ leftSelectedValue }}</p>
-  </div>
-</WinNavigationView>`;
-
-const example1Vue = `const leftSelectedValue = ref('item1');
-const leftMenuItems = [
-  { value: 'item1', label: 'Menu Item1', icon: '\\uE768' },
-  { value: 'item2', label: 'Menu Item2', icon: '\\uE74E' },
-  { value: 'item3', label: 'Menu Item3', icon: '\\uE72C' },
-  { value: 'item4', label: 'Menu Item4', icon: '\\uE896' }
-];`;
-
-// Example 2: Top Navigation
-const topSelectedValue = ref('top1');
-const topMenuItems = [
-  { value: 'top1', label: 'Menu Item1', icon: '' },
-  { value: 'top2', label: 'Menu Item2', icon: '' },
-  { value: 'top3', label: 'Menu Item3', icon: '' },
-  { value: 'top4', label: 'Menu Item4', icon: '' }
-];
-
-const topContentTitle = computed(() => {
-  const item = topMenuItems.find(i => i.value === topSelectedValue.value);
-  return item ? item.label : 'Content';
+onBeforeUnmount(() => {
+  adaptiveObserver?.disconnect();
 });
 
-const example2Template = `<WinNavigationView
-  :selectedValue="topSelectedValue"
-  @update:selectedValue="topSelectedValue = $event"
-  :menuItems="topMenuItems"
-  header="This is Header Text"
-  paneDisplayMode="Top"
-  style="height: 460px;">
-  <div style="padding: 24px;">
-    <p>Content for {{ topSelectedValue }}</p>
-  </div>
-</WinNavigationView>`;
+const tabsMenuItems = [1, 2, 3, 4].map(number => ({
+  Content: t(`sample.navigationview.item-${number}`),
+  Tag: `SamplePage${number}`
+}));
+const tabsSelectedItem = ref(tabsMenuItems[0]);
+const tabsContentTitle = contentTitleFor(tabsSelectedItem);
 
-const example2Vue = `const topSelectedValue = ref('top1');
-const topMenuItems = [
-  { value: 'top1', label: 'Menu Item1' },
-  { value: 'top2', label: 'Menu Item2' },
-  { value: 'top3', label: 'Menu Item3' },
-  { value: 'top4', label: 'Menu Item4' }
-];`;
+const categories = [1, 2, 3, 4].map((number) => ({
+  Name: t('sample.navigationview.category', { number }),
+  Glyph: ['\uE80F', '\uE765', '\uE8F1', '\uE715'][number - 1],
+  Tooltip: t('sample.navigationview.category-tooltip', { number })
+}));
+const dataSelectedItem = ref(categories[0]);
+const dataContentTitle = contentTitleFor(dataSelectedItem);
 
-// Example 3: Hierarchical Navigation
-const hierarchicalSelectedValue = ref('home');
+const footerMenuItems = [
+  { Content: t('sample.navigationview.browse'), Icon: '\uE8F1', Tag: 'SamplePage1' },
+  { Content: t('sample.navigationview.track-order'), Icon: '\uE707', Tag: 'SamplePage2' },
+  { Content: t('sample.navigationview.order-history'), Icon: '\uE8EC', Tag: 'SamplePage3' }
+];
+const footerBottomItems = [
+  { Content: t('sample.navigationview.account'), Icon: '\uE77B', Tag: 'SamplePage4' },
+  { Content: t('sample.navigationview.your-cart'), Icon: '\uE7BF', Tag: 'SamplePage5' },
+  { Content: t('sample.navigationview.help'), Icon: '\uE897', Tag: 'SamplePage5' }
+];
+const footerSelectedItem = ref(footerMenuItems[0]);
+const footerContentTitle = contentTitleFor(footerSelectedItem);
+const footerPaneMode = ref('Left');
+const footerPaneIndex = computed({
+  get: () => footerPaneMode.value === 'Left' ? 0 : 1,
+  set: value => { footerPaneMode.value = value === 0 ? 'Left' : 'Top'; }
+});
+const footerPaneOptions = [
+  { Text: t('sample.navigationview.left-mode'), Value: 'Left' },
+  { Text: t('sample.navigationview.top-mode'), Value: 'Top' }
+];
+
 const hierarchicalMenuItems = [
-  { value: 'home', label: 'Home', icon: '' },
   {
-    value: 'account',
-    label: 'Account',
-    icon: '',
-    children: [
-      { value: 'mail', label: 'Mail', icon: '' },
-      { value: 'calendar', label: 'Calendar', icon: '' }
+    Content: t('sample.navigationview.home'),
+    Icon: '\uE80F',
+    Tag: 'SamplePage1',
+    ToolTip: t('sample.navigationview.home')
+  },
+  {
+    Content: t('sample.navigationview.account'),
+    Icon: '\uE77B',
+    Tag: 'SamplePage2',
+    ToolTip: t('sample.navigationview.account'),
+    MenuItems: [
+      {
+        Content: t('sample.navigationview.mail'),
+        Icon: '\uE715',
+        Tag: 'SamplePage3',
+        ToolTip: t('sample.navigationview.mail')
+      },
+      {
+        Content: t('sample.navigationview.calendar'),
+        Icon: '\uE787',
+        Tag: 'SamplePage4',
+        ToolTip: t('sample.navigationview.calendar')
+      }
     ]
   },
   {
-    value: 'documents',
-    label: 'Document options',
-    icon: '',
-    selectsOnInvoked: false,
-    children: [
-      { value: 'create', label: 'Create new', icon: '' },
-      { value: 'upload', label: 'Upload file', icon: '' }
+    Content: t('sample.navigationview.document-options'),
+    Icon: '\uE8A5',
+    SelectsOnInvoked: false,
+    ToolTip: t('sample.navigationview.document-options'),
+    MenuItems: [
+      {
+        Content: t('sample.navigationview.create-new'),
+        Icon: '\uE8F4',
+        Tag: 'SamplePage5',
+        ToolTip: t('sample.navigationview.create-new')
+      },
+      {
+        Content: t('sample.navigationview.upload-file'),
+        Icon: '\uE8E5',
+        Tag: 'SamplePage6',
+        ToolTip: t('sample.navigationview.upload-file')
+      }
     ]
   }
 ];
-
-const hierarchicalContentTitle = computed(() => {
-  for (const item of hierarchicalMenuItems) {
-    if (item.value === hierarchicalSelectedValue.value) return item.label;
-    if (item.children) {
-      const child = item.children.find(c => c.value === hierarchicalSelectedValue.value);
-      if (child) return child.label;
-    }
+const hierarchicalSelectedItem = ref(hierarchicalMenuItems[0]);
+const hierarchicalContentTitle = contentTitleFor(hierarchicalSelectedItem);
+const hierarchicalPaneMode = ref('Left');
+const hierarchicalPaneIndex = computed({
+  get: () => ({ Left: 0, Top: 1, LeftCompact: 2 })[hierarchicalPaneMode.value],
+  set: value => {
+    hierarchicalPaneMode.value = ['Left', 'Top', 'LeftCompact'][value] ?? 'Left';
   }
-  return 'Content';
 });
+const hierarchicalPaneOptions = [
+  { Text: t('sample.navigationview.left-mode'), Value: 'Left' },
+  { Text: t('sample.navigationview.top-mode'), Value: 'Top' },
+  { Text: t('sample.navigationview.left-compact-mode'), Value: 'LeftCompact' }
+];
 
-const example3Template = `<WinNavigationView
-  :selectedValue="hierarchicalSelectedValue"
-  @update:selectedValue="hierarchicalSelectedValue = $event"
-  :menuItems="hierarchicalMenuItems"
-  header="Hierarchical Menu"
-  paneDisplayMode="Left"
-  style="height: 460px;">
-  <div style="padding: 24px;">
-    <p>Content for {{ hierarchicalSelectedValue }}</p>
-  </div>
-</WinNavigationView>`;
-
-const example3Vue = `const hierarchicalSelectedValue = ref('home');
-const hierarchicalMenuItems = [
-  { value: 'home', label: 'Home', icon: '\\uE80F' },
+const apiSettingsVisible = ref(true);
+const apiBackVisible = ref(true);
+const apiBackEnabled = ref(false);
+const apiAutoSuggestVisible = ref(true);
+const apiHeader = ref(t('sample.navigationview.header-value'));
+const apiAlwaysShowHeader = ref(true);
+const apiPaneTitle = ref(t('sample.navigationview.pane-title-value'));
+const apiPaneCustomVisible = ref(false);
+const apiPaneFooterVisible = ref(false);
+const apiPaneMode = ref('Left');
+const apiSelectionFollowsFocus = ref(false);
+const apiSuppressMenuItem2 = ref(false);
+const apiMenuItems = computed(() => [
+  menuItem(1, '\uE768'),
   {
-    value: 'account',
-    label: 'Account',
-    icon: '\\uE77B',
-    children: [
-      { value: 'mail', label: 'Mail', icon: '\\uE715' },
-      { value: 'calendar', label: 'Calendar', icon: '\\uE787' }
-    ]
+    Type: 'Header',
+    Content: t('sample.navigationview.actions')
   },
   {
-    value: 'documents',
-    label: 'Document options',
-    icon: '\\uE8A5',
-    selectsOnInvoked: false,
-    children: [
-      { value: 'create', label: 'Create new', icon: '\\uE8F4' },
-      { value: 'upload', label: 'Upload file', icon: '\\uE8E5' }
-    ]
+    ...menuItem(2, '\uE74E'),
+    SelectsOnInvoked: !apiSuppressMenuItem2.value
+  },
+  menuItem(3, '\uE72C')
+]);
+const apiSelectedItem = ref(apiMenuItems.value[0]);
+const apiContentTitle = contentTitleFor(apiSelectedItem);
+const apiPaneIndex = computed({
+  get: () => apiPaneMode.value === 'Left' ? 0 : 1,
+  set: value => { apiPaneMode.value = value === 0 ? 'Left' : 'Top'; }
+});
+const apiPaneOptions = [
+  { Text: t('sample.navigationview.left'), Value: 'Left' },
+  { Text: t('sample.navigationview.top'), Value: 'Top' }
+];
+
+const onApiSelectionChanged = (args) => {
+  apiSelectedItem.value = args.SelectedItem;
+  if (!args.IsSettingsSelected) {
+    apiHeader.value = selectedPageTitle(args.SelectedItem);
   }
-];`;
+};
 
-// Example 4: Footer Menu Items
-const footerSelectedValue = ref('browse');
-const footerPaneMode = ref('Left');
-const footerMenuItems = [
-  { value: 'browse', label: 'Browse', icon: '' },
-  { value: 'track', label: 'Track an Order', icon: '' },
-  { value: 'history', label: 'Order History', icon: '' }
-];
-const footerBottomItems = [
-  { value: 'account', label: 'Account', icon: '' },
-  { value: 'cart', label: 'Your Cart', icon: '' },
-  { value: 'help', label: 'Help', icon: '' }
-];
-
-const footerContentTitle = computed(() => {
-  const item = [...footerMenuItems, ...footerBottomItems].find(i => i.value === footerSelectedValue.value);
-  return item ? item.label : 'Content';
-});
-
-const example4Template = `<WinNavigationView
-  :selectedValue="footerSelectedValue"
-  @update:selectedValue="footerSelectedValue = $event"
-  :menuItems="footerMenuItems"
-  :footerItems="footerBottomItems"
-  header="This is Header Text"
-  :paneDisplayMode="footerPaneMode"
-  style="height: 460px;">
-  <div style="padding: 24px;">
-    <p>Content for {{ footerSelectedValue }}</p>
-  </div>
+const example1Code = `<WinNavigationView
+  :SelectedItem="selectedItem"
+  :MenuItems="menuItems"
+  :Header="contentTitle"
+  PaneDisplayMode="Auto"
+  @SelectionChanged="onSelectionChanged">
+  <WinTextBlock :Text="contentTitle" />
 </WinNavigationView>`;
 
-const example4Vue = `const footerSelectedValue = ref('browse');
-const footerPaneMode = ref('Left');
-const footerMenuItems = [
-  { value: 'browse', label: 'Browse', icon: '\\uE8F1' },
-  { value: 'track', label: 'Track an Order', icon: '\\uE707' },
-  { value: 'history', label: 'Order History', icon: '\\uE8EC' }
-];
-const footerBottomItems = [
-  { value: 'account', label: 'Account', icon: '\\uE77B' },
-  { value: 'cart', label: 'Your Cart', icon: '\\uE7BF' },
-  { value: 'help', label: 'Help', icon: '\\uE897' }
-];`;
-
-// Example 5: API Control
-const apiSelectedValue = ref('menu1');
-const apiHeader = ref('Header');
-const apiPaneTitle = ref('Pane Title');
-const apiSettingsVisible = ref(true);
-const apiBackVisible = ref(true);
-const apiPaneMode = ref('Left');
-const apiMenuItems = [
-  { value: 'menu1', label: 'Menu Item1', icon: '' },
-  { value: 'menu2', label: 'Menu Item2', icon: '' },
-  { value: 'menu3', label: 'Menu Item3', icon: '' }
-];
-
-const apiContentTitle = computed(() => {
-  const item = apiMenuItems.find(i => i.value === apiSelectedValue.value);
-  return item ? item.label : apiSelectedValue.value === 'settings' ? 'Settings' : 'Content';
-});
-
-const example5Template = `<WinNavigationView
-  :selectedValue="apiSelectedValue"
-  @update:selectedValue="apiSelectedValue = $event"
-  :menuItems="apiMenuItems"
-  :header="apiHeader"
-  :paneTitle="apiPaneTitle"
-  :isSettingsVisible="apiSettingsVisible"
-  :isBackButtonVisible="apiBackVisible ? 'visible' : 'collapsed'"
-  :paneDisplayMode="apiPaneMode"
-  style="height: 540px;">
-  <div style="padding: 24px;">
-    <p>Content for {{ apiSelectedValue }}</p>
-  </div>
+const example2Code = `<WinNavigationView
+  :SelectedItem="selectedItem"
+  :MenuItems="menuItems"
+  :Header="$t('sample.navigationview.header-text')"
+  PaneDisplayMode="Top"
+  @SelectionChanged="onSelectionChanged">
+  <WinTextBlock :Text="contentTitle" />
 </WinNavigationView>`;
 
-const example5Vue = `const apiSelectedValue = ref('menu1');
-const apiHeader = ref('Header');
-const apiPaneTitle = ref('Pane Title');
-const apiSettingsVisible = ref(true);
-const apiBackVisible = ref(true);
-const apiPaneMode = ref('Left');
-const apiMenuItems = [
-  { value: 'menu1', label: 'Menu Item1', icon: '\\uE768' },
-  { value: 'menu2', label: 'Menu Item2', icon: '\\uE74E' },
-  { value: 'menu3', label: 'Menu Item3', icon: '\\uE72C' }
-];`;
+const example3Code = `<WinNavigationView
+  :SelectedItem="selectedItem"
+  :MenuItems="menuItems"
+  :PaneDisplayMode="paneDisplayMode"
+  :IsPaneOpen="false"
+  @SelectionChanged="onSelectionChanged">
+  <WinTextBlock :Text="contentTitle" />
+</WinNavigationView>`;
+
+const example4Code = `<WinNavigationView
+  :SelectedItem="selectedItem"
+  :MenuItems="menuItems"
+  PaneDisplayMode="Top"
+  SelectionFollowsFocus="Enabled"
+  IsBackButtonVisible="Collapsed"
+  @SelectionChanged="onSelectionChanged">
+  <WinTextBlock :Text="contentTitle" />
+</WinNavigationView>`;
+
+const example5Code = `<WinNavigationView
+  :SelectedItem="selectedItem"
+  :MenuItemsSource="categories"
+  :Header="contentTitle"
+  @SelectionChanged="onSelectionChanged">
+  <WinTextBlock :Text="contentTitle" />
+</WinNavigationView>`;
+
+const example6Code = `<WinNavigationView
+  :SelectedItem="selectedItem"
+  :MenuItems="menuItems"
+  :FooterMenuItems="footerMenuItems"
+  :Header="$t('sample.navigationview.header-text')"
+  :PaneDisplayMode="paneDisplayMode"
+  :IsSettingsVisible="false"
+  @SelectionChanged="onSelectionChanged">
+  <WinTextBlock :Text="contentTitle" />
+</WinNavigationView>`;
+
+const example7Code = `<WinNavigationView
+  :SelectedItem="selectedItem"
+  :MenuItems="hierarchicalMenuItems"
+  :PaneDisplayMode="paneDisplayMode"
+  @SelectionChanged="onSelectionChanged">
+  <WinTextBlock :Text="contentTitle" />
+</WinNavigationView>`;
+
+const example8Code = `<WinNavigationView
+  :SelectedItem="selectedItem"
+  :MenuItems="menuItems"
+  :IsSettingsVisible="isSettingsVisible"
+  :IsBackButtonVisible="isBackButtonVisible"
+  :IsBackEnabled="isBackEnabled"
+  :Header="header"
+  :AlwaysShowHeader="alwaysShowHeader"
+  :PaneTitle="paneTitle"
+  :PaneDisplayMode="paneDisplayMode"
+  :SelectionFollowsFocus="selectionFollowsFocus"
+  @SelectionChanged="onSelectionChanged">
+  <template #AutoSuggestBox>
+    <WinAutoSuggestBox QueryIcon="Find" />
+  </template>
+  <template #PaneCustomContent>
+    <WinHyperlinkButton>
+      <WinTextBlock :Text="$t('sample.navigationview.more-info')" />
+    </WinHyperlinkButton>
+  </template>
+  <WinTextBlock :Text="contentTitle" />
+</WinNavigationView>`;
 </script>
 
 <style scoped>
+.page-heading {
+  position: relative;
+}
+
 .page-header {
+  margin: 0 0 8px;
+  color: var(--text-primary);
   font-size: 28px;
   font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
 }
 
 .page-description {
-  font-size: 14px;
+  margin: 0 72px 16px 0;
   color: var(--text-secondary);
-  margin: 0 0 16px 0;
   line-height: 1.5;
 }
 
@@ -503,24 +694,67 @@ const apiMenuItems = [
   right: 0;
   display: flex;
   gap: 4px;
-  align-items: center;
+}
+
+.header-action {
+  width: 32px;
+  height: 32px;
+  min-width: 0;
+  padding: 0;
 }
 
 .icon {
+  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
   font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  line-height: 16px;
 }
 
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0 0 4px 0;
-}
-
-.nav-example-container {
+.gallery-page-content,
+.sample-layout {
   width: 100%;
-  max-width: 100%;
-  overflow: hidden;
+  min-width: 0;
+}
+
+.sample-description {
+  width: 100%;
+  margin: 0;
+}
+
+.nav-view-sample {
+  width: 100%;
+  height: 460px;
+  border: 1px solid var(--ctrl-border-rest);
+  border-radius: 4px;
+}
+
+.nav-view-api {
+  height: 540px;
+  margin-top: 12px;
+}
+
+.nav-frame-content {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nav-content-title {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.api-options {
+  width: 100%;
+}
+
+.api-pane-footer {
+  width: 100%;
+}
+
+.pane-footer-action {
+  width: 40px;
+  height: 36px;
+  min-width: 0;
+  padding: 0;
 }
 </style>

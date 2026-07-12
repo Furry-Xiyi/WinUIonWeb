@@ -1,9 +1,10 @@
 <template>
   <Teleport to="body">
-    <Transition name="win-content-dialog">
+    <Transition name="win-content-dialog" :duration="{ enter: 250, leave: 167 }">
       <div
         v-if="effectiveIsOpen"
-        class="win-content-dialog-overlay"
+        class="win-content-dialog-overlay win-theme-scope"
+        :class="dialogThemeClass"
         @pointerdown.self="onOverlayPointerDown">
         <section class="win-content-dialog" role="dialog" aria-modal="true" :aria-labelledby="Title ? titleId : undefined">
           <WinScrollViewer
@@ -17,6 +18,8 @@
               :id="titleId"
               class="win-content-dialog-title"
               :Text="Title"
+              :FontSize="20"
+              :FontWeight="600"
               TextWrapping="WrapWholeWords" />
             <div class="win-content-dialog-body">
               <slot></slot>
@@ -29,7 +32,7 @@
               :Style="DefaultButton === 'Primary' ? '{StaticResource AccentButtonStyle}' : '{StaticResource DefaultButtonStyle}'"
               :IsEnabled="IsPrimaryButtonEnabled"
               @Click="closeWithResult('Primary')">
-              <WinTextBlock :Text="PrimaryButtonText" />
+              <WinTextBlock :Text="PrimaryButtonText" :FontSize="14" :FontWeight="400" />
             </WinButton>
             <WinButton
               v-if="SecondaryButtonText"
@@ -37,14 +40,14 @@
               :Style="DefaultButton === 'Secondary' ? '{StaticResource AccentButtonStyle}' : '{StaticResource DefaultButtonStyle}'"
               :IsEnabled="IsSecondaryButtonEnabled"
               @Click="closeWithResult('Secondary')">
-              <WinTextBlock :Text="SecondaryButtonText" />
+              <WinTextBlock :Text="SecondaryButtonText" :FontSize="14" :FontWeight="400" />
             </WinButton>
             <WinButton
               v-if="CloseButtonText"
               class="win-content-dialog-button win-content-dialog-close"
               :Style="DefaultButton === 'Close' ? '{StaticResource AccentButtonStyle}' : '{StaticResource DefaultButtonStyle}'"
               @Click="closeWithResult('None')">
-              <WinTextBlock :Text="CloseButtonText" />
+              <WinTextBlock :Text="CloseButtonText" :FontSize="14" :FontWeight="400" />
             </WinButton>
           </div>
         </section>
@@ -76,7 +79,9 @@ const props = defineProps({
   IsPrimaryButtonEnabled: { type: Boolean, default: true },
   IsSecondaryButtonEnabled: { type: Boolean, default: true },
   FullSizeDesired: { type: Boolean, default: false },
-  IsLightDismissEnabled: { type: Boolean, default: false }
+  IsLightDismissEnabled: { type: Boolean, default: false },
+  Theme: { type: String, default: '' },
+  theme: { type: String, default: '' }
 });
 
 const emit = defineEmits([
@@ -102,6 +107,10 @@ const SecondaryButtonText = computed(() => props.SecondaryButtonText || props.se
 const CloseButtonText = computed(() => props.CloseButtonText || props.closeText);
 const IsPrimaryButtonEnabled = computed(() => props.IsPrimaryButtonEnabled);
 const IsSecondaryButtonEnabled = computed(() => props.IsSecondaryButtonEnabled);
+const dialogThemeClass = computed(() => {
+  const theme = props.Theme || props.theme;
+  return theme === 'light' || theme === 'dark' ? `theme-${theme}` : '';
+});
 const DefaultButton = computed(() => {
   if (props.DefaultButton && props.DefaultButton !== 'None') return props.DefaultButton;
   if (props.defaultButton === 'primary') return 'Primary';
@@ -176,7 +185,7 @@ defineExpose({
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--ContentDialogSmokeFill, rgba(0, 0, 0, 0.30));
+  background: var(--dialog-overlay);
 }
 
 .win-content-dialog {
@@ -188,8 +197,8 @@ defineExpose({
   flex-direction: column;
   overflow: hidden;
   color: var(--text-primary);
-  background: var(--ContentDialogBackground, var(--ctrl-solid-fill));
-  border: 1px solid var(--ContentDialogBorderBrush, var(--stroke-surface-flyout, var(--flyout-border)));
+  background: var(--flyout-bg);
+  border: 1px solid var(--flyout-border);
   border-radius: 8px;
   box-shadow: 0 32px 64px rgba(0, 0, 0, 0.28);
 }
@@ -198,8 +207,8 @@ defineExpose({
   min-height: 0;
   flex: 1 1 auto;
   padding: 24px;
-  background: var(--ContentDialogTopOverlay, var(--layer-fill-color-alt, var(--layer-default)));
-  border-bottom: 1px solid var(--ContentDialogSeparatorBorderBrush, var(--card-stroke));
+  background: var(--dialog-content-bg);
+  border-bottom: 1px solid var(--dialog-divider);
 }
 
 .win-content-dialog-title {
@@ -221,7 +230,7 @@ defineExpose({
   grid-template-columns: minmax(0, 1fr) 0 0 8px minmax(0, 1fr);
   column-gap: 0;
   padding: 24px;
-  background: var(--ContentDialogBackground, var(--ctrl-solid-fill));
+  background: var(--dialog-button-bg);
 }
 
 .win-content-dialog-command-space.all-visible {
@@ -265,11 +274,11 @@ defineExpose({
 }
 
 .win-content-dialog-enter-active .win-content-dialog {
-  animation: win-content-dialog-enter 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  animation: win-content-dialog-enter 250ms cubic-bezier(0, 0, 0, 1) both;
 }
 
 .win-content-dialog-leave-active .win-content-dialog {
-  animation: win-content-dialog-exit 167ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  animation: win-content-dialog-exit 167ms cubic-bezier(0, 0, 0, 1) both;
 }
 
 .win-content-dialog-enter-from,

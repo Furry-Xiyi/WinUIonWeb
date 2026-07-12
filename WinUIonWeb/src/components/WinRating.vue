@@ -396,15 +396,9 @@ const onKeyDown = (event) => {
   pointer-events: none;
 }
 
-html.theme-dark .win-rating-control,
 .example-theme-wrapper.theme-dark .win-rating-control,
 .win-theme-scope.theme-dark .win-rating-control {
   --rating-pointer-placeholder-foreground: var(--control-alt-fill-color-tertiary, rgba(255, 255, 255, 0.0419));
 }
 
-@media (prefers-color-scheme: dark) {
-  html:not(.theme-light) .win-rating-control {
-    --rating-pointer-placeholder-foreground: var(--control-alt-fill-color-tertiary, rgba(255, 255, 255, 0.0419));
-  }
-}
 </style>

@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinInfoBar from '../../components/WinInfoBar.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
@@ -138,27 +138,13 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'infobar');
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Example 1: Severity options
 const example1IsOpen = ref(true);

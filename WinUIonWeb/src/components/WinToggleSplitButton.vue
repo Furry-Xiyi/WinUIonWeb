@@ -114,10 +114,10 @@ const onSelect = (item) => {
     background: transparent;
     --ButtonBorderBrush: var(--ctrl-border);
     --ButtonBorderBrushPointerOver: var(--ctrl-border);
-    --ButtonBorderBrushPressed: var(--ControlStrokeColorDefaultBrush, var(--ctrl-border));
+    --ButtonBorderBrushPressed: var(--ctrl-border);
     --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
     --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
-    --ButtonBorderBrushPressedBottom: var(--ControlStrokeColorDefaultBrush, var(--ctrl-border));
+    --ButtonBorderBrushPressedBottom: var(--ctrl-border);
     --SplitButtonBorderBrush: var(--ButtonBorderBrush);
     --SplitButtonBorderBrushBottom: var(--ButtonBorderBrushBottom);
   }
@@ -195,7 +195,6 @@ const onSelect = (item) => {
     border-bottom-color: var(--ButtonBorderBrushPressedBottom);
   }
 
-  :global(html.theme-dark) .win-split-button,
   :global(.example-theme-wrapper.theme-dark) .win-split-button {
     --ButtonBorderBrush: rgba(255, 255, 255, 0.05);
     --ButtonBorderBrushPointerOver: rgba(255, 255, 255, 0.05);
@@ -203,22 +202,8 @@ const onSelect = (item) => {
     --ButtonBorderBrushPointerOverBottom: rgba(255, 255, 255, 0.0075);
   }
 
-  :global(html.theme-dark) .win-split-button:has(.win-btn:active),
   :global(.example-theme-wrapper.theme-dark) .win-split-button:has(.win-btn:active) {
-    --ButtonBorderBrushPressedBottom: var(--ControlStrokeColorDefaultBrush, var(--ctrl-border));
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :global(html:not(.theme-light)) .win-split-button {
-      --ButtonBorderBrush: rgba(255, 255, 255, 0.05);
-      --ButtonBorderBrushPointerOver: rgba(255, 255, 255, 0.05);
-      --ButtonBorderBrushBottom: rgba(255, 255, 255, 0.0075);
-      --ButtonBorderBrushPointerOverBottom: rgba(255, 255, 255, 0.0075);
-    }
-
-    :global(html:not(.theme-light)) .win-split-button:has(.win-btn:active) {
-      --ButtonBorderBrushPressedBottom: var(--ControlStrokeColorDefaultBrush, var(--ctrl-border));
-    }
+    --ButtonBorderBrushPressedBottom: var(--ctrl-border);
   }
 
   .win-split-button.toggled-on {
