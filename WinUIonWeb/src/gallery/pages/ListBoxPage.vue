@@ -1,7 +1,6 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
+  <div class="gallery-item-page">
+    <div class="page-heading">
           <WinTextBlock class="page-header" :Text="$t('text.listbox')" />
           <WinTextBlock class="page-description" :Text="$t('text.a-control-that-presents-an-inline-list-of-items')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
@@ -11,8 +10,9 @@
             </WinToggleButton>
           </div>
         </div>
+    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-listbox')" :theme="pageTheme">
+          <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-listbox')" :theme="pageTheme">
             <template #example>
               <WinListBox :ItemsSource="['Blue', 'Green', 'Red', 'Yellow']" v-model:SelectedIndex="idx" style="width: 200px;" />
             </template>
@@ -21,8 +21,8 @@
             </template>
           </WinControlExample>
       </div>
-    </div>
-  </WinScrollViewer>
+    </WinScrollViewer>
+  </div>
 </template>
 
 <script setup>

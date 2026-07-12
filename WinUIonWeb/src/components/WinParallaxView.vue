@@ -13,11 +13,15 @@
     <WinScrollViewer
       class="parallax-source"
       ref="sourceRef"
+<<<<<<< HEAD
       VerticalScrollMode="Auto"
       VerticalScrollBarVisibility="Auto"
       HorizontalScrollMode="Auto"
       HorizontalScrollBarVisibility="Auto"
       @ViewChanged="handleScroll"
+=======
+      @scroll.capture="handleScroll"
+>>>>>>> 88129fbea7c52388dfcc62740a63cb7ae808b6b2
     >
       <slot></slot>
     </WinScrollViewer>
@@ -156,12 +160,16 @@ const parallaxX = ref(0);
 const parallaxY = ref(0);
 
 // Calculate parallax offset based on scroll position
+<<<<<<< HEAD
 const getScrollElement = () => {
   const source = sourceRef.value;
   return source?.scrollViewerRef?.value ?? source?.scrollViewerRef ?? null;
 };
 
 const calculateParallax = (scrollSource = getScrollElement()) => {
+=======
+const calculateParallax = (scrollSource = sourceRef.value) => {
+>>>>>>> 88129fbea7c52388dfcc62740a63cb7ae808b6b2
   if (!scrollSource) return;
 
   const source = scrollSource;
@@ -229,7 +237,11 @@ const handleScroll = (e) => {
   }
 
   rafId = requestAnimationFrame(() => {
+<<<<<<< HEAD
       calculateParallax();
+=======
+      calculateParallax(e.target);
+>>>>>>> 88129fbea7c52388dfcc62740a63cb7ae808b6b2
   });
 };
 
