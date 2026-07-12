@@ -157,6 +157,8 @@ const isHorizontalExpanded = ref(false)
 const isVerticalContracting = ref(false)
 const isHorizontalContracting = ref(false)
 const velocityAnimationFrame = ref<number>()
+const velocityExpectedLeft = ref<number | null>(null)
+const velocityExpectedTop = ref<number | null>(null)
 const isWheelScrolling = ref(false)
 
 // Touch/Gesture state
@@ -383,6 +385,7 @@ function getScrollBarMetrics(orientation: 'vertical' | 'horizontal') {
 // Scroll handling
 function handleScroll(event: Event) {
   stopSmoothWheelScrollIfExternalScroll()
+  stopScrollVelocityIfExternalScroll()
 
   const now = Date.now()
   const isIntermediate = now - lastScrollTime.value < 100
@@ -882,6 +885,28 @@ function cancelScrollVelocity() {
     cancelAnimationFrame(velocityAnimationFrame.value)
     velocityAnimationFrame.value = undefined
   }
+  velocityExpectedLeft.value = null
+  velocityExpectedTop.value = null
+}
+
+function stopScrollVelocityIfExternalScroll() {
+  const container = scrollViewerRef.value
+  if (!container || velocityAnimationFrame.value === undefined) return
+
+  const expectedLeft = velocityExpectedLeft.value
+  const expectedTop = velocityExpectedTop.value
+  if (expectedLeft === null || expectedTop === null) {
+    cancelScrollVelocity()
+    return
+  }
+
+  const isExpectedVelocityScroll =
+    Math.abs(container.scrollLeft - expectedLeft) < 0.75 &&
+    Math.abs(container.scrollTop - expectedTop) < 0.75
+
+  if (!isExpectedVelocityScroll) {
+    cancelScrollVelocity()
+  }
 }
 
 function ZoomTo(zoomFactor: number) {
@@ -905,8 +930,7 @@ function AddScrollVelocity(
   offsetsVelocity: { x?: number; y?: number } | [number, number],
   inertiaDecayRate = scrollControllerInertiaDecayRate
 ) {
-  cancelScrollVelocity()
-  stopSmoothWheelScroll()
+  cancelPendingAnimatedScrollForDirectInput()
   let horizontalVelocity = Array.isArray(offsetsVelocity) ? offsetsVelocity[0] : offsetsVelocity.x ?? 0
   let verticalVelocity = Array.isArray(offsetsVelocity) ? offsetsVelocity[1] : offsetsVelocity.y ?? 0
   let lastTimestamp = performance.now()
@@ -924,6 +948,8 @@ function AddScrollVelocity(
 
     container.scrollLeft = nextLeft
     container.scrollTop = nextTop
+    velocityExpectedLeft.value = container.scrollLeft
+    velocityExpectedTop.value = container.scrollTop
     scrollRevision.value += 1
     updateScrollBarVisibility()
     emitViewChanged(true)
@@ -934,6 +960,8 @@ function AddScrollVelocity(
 
     if (!moved || (Math.abs(horizontalVelocity) < 0.5 && Math.abs(verticalVelocity) < 0.5)) {
       velocityAnimationFrame.value = undefined
+      velocityExpectedLeft.value = null
+      velocityExpectedTop.value = null
       emitViewChanged(false)
       return
     }
