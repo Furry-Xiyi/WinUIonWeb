@@ -27,10 +27,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, nextTick } from 'vue';
 import { useI18n } from './i18n/index';
-<<<<<<< HEAD
 import WinScrollViewer from './WinScrollViewer.vue';
-=======
->>>>>>> 88129fbea7c52388dfcc62740a63cb7ae808b6b2
 import WinTextBlock from './WinTextBlock.vue';
 
 const { t } = useI18n();

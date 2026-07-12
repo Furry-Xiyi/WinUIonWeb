@@ -43,6 +43,7 @@
       :class="{ 'visible': showVerticalScrollBar, 'expanded': isVerticalExpanded, 'contracting': isVerticalContracting, 'dragging': isDraggingVertical, 'line-scrolling': activeLineScroll?.orientation === 'vertical' || isWheelScrolling, 'has-cross-scrollbar': hasHorizontalScrollBar }"
       @pointerenter="handleScrollBarPointerEnter('vertical', $event)"
       @pointerleave="handleScrollBarPointerLeave('vertical')"
+      @pointerdown="handleScrollBarPointerDown('vertical', $event)"
       @wheel="handleScrollBarWheel"
     >
       <button class="scrollbar-button decrease icon" type="button" aria-hidden="true" tabindex="-1" @pointerdown.prevent="startLineScroll('vertical', -1, $event)"></button>
@@ -50,7 +51,7 @@
       <div
         class="scrollbar-thumb"
         :style="verticalThumbStyle"
-        @mousedown="startVerticalDrag"
+        @pointerdown.prevent.stop="startVerticalDrag"
       ></div>
       <button class="scrollbar-button increase icon" type="button" aria-hidden="true" tabindex="-1" @pointerdown.prevent="startLineScroll('vertical', 1, $event)"></button>
     </div>
@@ -62,6 +63,7 @@
       :class="{ 'visible': showHorizontalScrollBar, 'expanded': isHorizontalExpanded, 'contracting': isHorizontalContracting, 'dragging': isDraggingHorizontal, 'line-scrolling': activeLineScroll?.orientation === 'horizontal' || isWheelScrolling, 'has-cross-scrollbar': hasVerticalScrollBar }"
       @pointerenter="handleScrollBarPointerEnter('horizontal', $event)"
       @pointerleave="handleScrollBarPointerLeave('horizontal')"
+      @pointerdown="handleScrollBarPointerDown('horizontal', $event)"
       @wheel="handleScrollBarWheel"
     >
       <button class="scrollbar-button decrease icon" type="button" aria-hidden="true" tabindex="-1" @pointerdown.prevent="startLineScroll('horizontal', -1, $event)"></button>
@@ -69,7 +71,7 @@
       <div
         class="scrollbar-thumb"
         :style="horizontalThumbStyle"
-        @mousedown="startHorizontalDrag"
+        @pointerdown.prevent.stop="startHorizontalDrag"
       ></div>
       <button class="scrollbar-button increase icon" type="button" aria-hidden="true" tabindex="-1" @pointerdown.prevent="startLineScroll('horizontal', 1, $event)"></button>
     </div>
@@ -178,6 +180,10 @@ const isHorizontalPointerOver = ref(false)
 // Drag state for custom scrollbars
 const isDraggingVertical = ref(false)
 const isDraggingHorizontal = ref(false)
+const verticalInteractionToken = ref(0)
+const horizontalInteractionToken = ref(0)
+const activeVerticalDragPointerId = ref<number | null>(null)
+const activeHorizontalDragPointerId = ref<number | null>(null)
 const activeLineScroll = ref<{ orientation: 'vertical' | 'horizontal', direction: number, lastTime: number } | null>(null)
 const lineScrollAnimationFrame = ref<number>()
 const wheelScrollAnimationFrame = ref<number>()
@@ -420,9 +426,56 @@ function updateScrollBarVisibility() {
   showHorizontalScrollBar.value = hasHorizontalScrollBar.value
 }
 
-function expandScrollBarAfterLayout(orientation: 'vertical' | 'horizontal') {
+function clearScrollBarTimers(orientation: 'vertical' | 'horizontal') {
+  if (orientation === 'vertical') {
+    if (verticalHoverExpandTimer.value) clearTimeout(verticalHoverExpandTimer.value)
+    if (verticalContractTimer.value) clearTimeout(verticalContractTimer.value)
+    if (verticalContractAnimationTimer.value) clearTimeout(verticalContractAnimationTimer.value)
+    verticalHoverExpandTimer.value = undefined
+    verticalContractTimer.value = undefined
+    verticalContractAnimationTimer.value = undefined
+  } else {
+    if (horizontalHoverExpandTimer.value) clearTimeout(horizontalHoverExpandTimer.value)
+    if (horizontalContractTimer.value) clearTimeout(horizontalContractTimer.value)
+    if (horizontalContractAnimationTimer.value) clearTimeout(horizontalContractAnimationTimer.value)
+    horizontalHoverExpandTimer.value = undefined
+    horizontalContractTimer.value = undefined
+    horizontalContractAnimationTimer.value = undefined
+  }
+}
+
+function getScrollBarInteractionToken(orientation: 'vertical' | 'horizontal') {
+  return orientation === 'vertical' ? verticalInteractionToken.value : horizontalInteractionToken.value
+}
+
+function bumpScrollBarInteractionToken(orientation: 'vertical' | 'horizontal') {
+  if (orientation === 'vertical') {
+    verticalInteractionToken.value += 1
+    return verticalInteractionToken.value
+  }
+  horizontalInteractionToken.value += 1
+  return horizontalInteractionToken.value
+}
+
+function beginScrollBarInteraction(orientation: 'vertical' | 'horizontal') {
+  const token = bumpScrollBarInteractionToken(orientation)
+  clearScrollBarTimers(orientation)
+  if (orientation === 'vertical') {
+    isVerticalContracting.value = false
+    showVerticalScrollBar.value = hasVerticalScrollBar.value
+  } else {
+    isHorizontalContracting.value = false
+    showHorizontalScrollBar.value = hasHorizontalScrollBar.value
+  }
+  scrollRevision.value += 1
+  updateScrollBarVisibility()
+  return token
+}
+
+function expandScrollBarAfterLayout(orientation: 'vertical' | 'horizontal', token = getScrollBarInteractionToken(orientation)) {
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
+      if (token !== getScrollBarInteractionToken(orientation)) return
       if (orientation === 'vertical') {
         if (!isVerticalPointerOver.value && activeLineScroll.value?.orientation !== 'vertical' && !isDraggingVertical.value) return
         isVerticalContracting.value = false
@@ -438,37 +491,39 @@ function expandScrollBarAfterLayout(orientation: 'vertical' | 'horizontal') {
   })
 }
 
+function expandScrollBarNow(orientation: 'vertical' | 'horizontal') {
+  const token = beginScrollBarInteraction(orientation)
+  if (orientation === 'vertical') {
+    isVerticalExpanded.value = hasVerticalScrollBar.value
+  } else {
+    isHorizontalExpanded.value = hasHorizontalScrollBar.value
+  }
+  scrollRevision.value += 1
+  updateScrollBarVisibility()
+  return token
+}
+
 function handleScrollBarPointerEnter(orientation: 'vertical' | 'horizontal', event: PointerEvent) {
   if (event.pointerType !== 'mouse') return
   if (orientation === 'vertical') {
     isVerticalPointerOver.value = true
-    if (verticalHoverExpandTimer.value) clearTimeout(verticalHoverExpandTimer.value)
-    if (verticalContractTimer.value) clearTimeout(verticalContractTimer.value)
-    if (verticalContractAnimationTimer.value) clearTimeout(verticalContractAnimationTimer.value)
-    isVerticalContracting.value = false
-    showVerticalScrollBar.value = hasVerticalScrollBar.value
-    isVerticalExpanded.value = false
-    scrollRevision.value += 1
-    updateScrollBarVisibility()
-    expandScrollBarAfterLayout('vertical')
   } else {
     isHorizontalPointerOver.value = true
-    if (horizontalHoverExpandTimer.value) clearTimeout(horizontalHoverExpandTimer.value)
-    if (horizontalContractTimer.value) clearTimeout(horizontalContractTimer.value)
-    if (horizontalContractAnimationTimer.value) clearTimeout(horizontalContractAnimationTimer.value)
-    isHorizontalContracting.value = false
-    showHorizontalScrollBar.value = hasHorizontalScrollBar.value
-    isHorizontalExpanded.value = false
-    scrollRevision.value += 1
-    updateScrollBarVisibility()
-    expandScrollBarAfterLayout('horizontal')
   }
+
+  const token = beginScrollBarInteraction(orientation)
+  expandScrollBarAfterLayout(orientation, token)
+}
+
+function handleScrollBarPointerDown(orientation: 'vertical' | 'horizontal', event: PointerEvent) {
+  if (event.pointerType === 'mouse') return
+  if ((event.target as HTMLElement | null)?.closest('.scrollbar-thumb, .scrollbar-button')) return
+  expandScrollBarNow(orientation)
 }
 
 function handleScrollBarPointerLeave(orientation: 'vertical' | 'horizontal') {
   if (orientation === 'vertical') {
     isVerticalPointerOver.value = false
-    if (verticalHoverExpandTimer.value) clearTimeout(verticalHoverExpandTimer.value)
     if (!isDraggingVertical.value && activeLineScroll.value?.orientation !== 'vertical') {
       scheduleScrollBarContract('vertical')
     }
@@ -476,17 +531,18 @@ function handleScrollBarPointerLeave(orientation: 'vertical' | 'horizontal') {
   }
 
   isHorizontalPointerOver.value = false
-  if (horizontalHoverExpandTimer.value) clearTimeout(horizontalHoverExpandTimer.value)
   if (!isDraggingHorizontal.value && activeLineScroll.value?.orientation !== 'horizontal') {
     scheduleScrollBarContract('horizontal')
   }
 }
 
 function scheduleScrollBarContract(orientation: 'vertical' | 'horizontal') {
+  const token = bumpScrollBarInteractionToken(orientation)
   const timer = orientation === 'vertical' ? verticalContractTimer : horizontalContractTimer
   if (timer.value) clearTimeout(timer.value)
 
   timer.value = window.setTimeout(() => {
+    if (token !== getScrollBarInteractionToken(orientation)) return
     if (orientation === 'vertical') {
       if (isVerticalPointerOver.value || isDraggingVertical.value || activeLineScroll.value?.orientation === 'vertical') return
       if (!isVerticalExpanded.value) return
@@ -495,6 +551,7 @@ function scheduleScrollBarContract(orientation: 'vertical' | 'horizontal') {
       isVerticalExpanded.value = false
       scrollRevision.value += 1
       verticalContractAnimationTimer.value = window.setTimeout(() => {
+        if (token !== getScrollBarInteractionToken(orientation)) return
         if (isVerticalPointerOver.value || isDraggingVertical.value || activeLineScroll.value?.orientation === 'vertical') {
           isVerticalContracting.value = false
           isVerticalExpanded.value = hasVerticalScrollBar.value
@@ -511,6 +568,7 @@ function scheduleScrollBarContract(orientation: 'vertical' | 'horizontal') {
       isHorizontalExpanded.value = false
       scrollRevision.value += 1
       horizontalContractAnimationTimer.value = window.setTimeout(() => {
+        if (token !== getScrollBarInteractionToken(orientation)) return
         if (isHorizontalPointerOver.value || isDraggingHorizontal.value || activeLineScroll.value?.orientation === 'horizontal') {
           isHorizontalContracting.value = false
           isHorizontalExpanded.value = hasHorizontalScrollBar.value
@@ -539,17 +597,7 @@ function scrollLine(orientation: 'vertical' | 'horizontal', direction: number, d
 
 function startLineScroll(orientation: 'vertical' | 'horizontal', direction: number, event: PointerEvent) {
   if (!scrollViewerRef.value) return
-  if (orientation === 'vertical') {
-    if (verticalContractTimer.value) clearTimeout(verticalContractTimer.value)
-    if (verticalContractAnimationTimer.value) clearTimeout(verticalContractAnimationTimer.value)
-    isVerticalContracting.value = false
-    isVerticalExpanded.value = true
-  } else {
-    if (horizontalContractTimer.value) clearTimeout(horizontalContractTimer.value)
-    if (horizontalContractAnimationTimer.value) clearTimeout(horizontalContractAnimationTimer.value)
-    isHorizontalContracting.value = false
-    isHorizontalExpanded.value = true
-  }
+  expandScrollBarNow(orientation)
 
   ;(event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId)
   stopLineScroll()
@@ -974,21 +1022,24 @@ function AddScrollVelocity(
 }
 
 // Custom scrollbar dragging
-function startVerticalDrag(event: MouseEvent) {
+function startVerticalDrag(event: PointerEvent) {
   cancelPendingAnimatedScrollForDirectInput()
+  expandScrollBarNow('vertical')
   isDraggingVertical.value = true
-  if (verticalContractTimer.value) clearTimeout(verticalContractTimer.value)
-  isVerticalExpanded.value = true
+  activeVerticalDragPointerId.value = event.pointerId
+  ;(event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId)
   dragStartY.value = event.clientY
   dragStartScrollTop.value = scrollViewerRef.value?.scrollTop || 0
 
-  document.addEventListener('mousemove', handleVerticalDrag)
-  document.addEventListener('mouseup', stopVerticalDrag)
+  document.addEventListener('pointermove', handleVerticalDrag)
+  document.addEventListener('pointerup', stopVerticalDrag)
+  document.addEventListener('pointercancel', stopVerticalDrag)
   event.preventDefault()
 }
 
-function handleVerticalDrag(event: MouseEvent) {
+function handleVerticalDrag(event: PointerEvent) {
   if (!isDraggingVertical.value || !scrollViewerRef.value) return
+  if (activeVerticalDragPointerId.value !== null && event.pointerId !== activeVerticalDragPointerId.value) return
 
   const deltaY = event.clientY - dragStartY.value
   const metrics = getScrollBarMetrics('vertical')
@@ -998,32 +1049,39 @@ function handleVerticalDrag(event: MouseEvent) {
   const maxScroll = Math.max(1, scrollViewerRef.value.scrollHeight - scrollViewerRef.value.clientHeight)
   scrollViewerRef.value.scrollTop = dragStartScrollTop.value + (deltaY / travel) * maxScroll
   scrollRevision.value += 1
+  event.preventDefault()
 }
 
-function stopVerticalDrag() {
+function stopVerticalDrag(event?: PointerEvent) {
+  if (event && activeVerticalDragPointerId.value !== null && event.pointerId !== activeVerticalDragPointerId.value) return
   isDraggingVertical.value = false
-  document.removeEventListener('mousemove', handleVerticalDrag)
-  document.removeEventListener('mouseup', stopVerticalDrag)
+  activeVerticalDragPointerId.value = null
+  document.removeEventListener('pointermove', handleVerticalDrag)
+  document.removeEventListener('pointerup', stopVerticalDrag)
+  document.removeEventListener('pointercancel', stopVerticalDrag)
   if (!isVerticalPointerOver.value) {
     scheduleScrollBarContract('vertical')
   }
 }
 
-function startHorizontalDrag(event: MouseEvent) {
+function startHorizontalDrag(event: PointerEvent) {
   cancelPendingAnimatedScrollForDirectInput()
+  expandScrollBarNow('horizontal')
   isDraggingHorizontal.value = true
-  if (horizontalContractTimer.value) clearTimeout(horizontalContractTimer.value)
-  isHorizontalExpanded.value = true
+  activeHorizontalDragPointerId.value = event.pointerId
+  ;(event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId)
   dragStartX.value = event.clientX
   dragStartScrollLeft.value = scrollViewerRef.value?.scrollLeft || 0
 
-  document.addEventListener('mousemove', handleHorizontalDrag)
-  document.addEventListener('mouseup', stopHorizontalDrag)
+  document.addEventListener('pointermove', handleHorizontalDrag)
+  document.addEventListener('pointerup', stopHorizontalDrag)
+  document.addEventListener('pointercancel', stopHorizontalDrag)
   event.preventDefault()
 }
 
-function handleHorizontalDrag(event: MouseEvent) {
+function handleHorizontalDrag(event: PointerEvent) {
   if (!isDraggingHorizontal.value || !scrollViewerRef.value) return
+  if (activeHorizontalDragPointerId.value !== null && event.pointerId !== activeHorizontalDragPointerId.value) return
 
   const deltaX = event.clientX - dragStartX.value
   const metrics = getScrollBarMetrics('horizontal')
@@ -1033,12 +1091,16 @@ function handleHorizontalDrag(event: MouseEvent) {
   const maxScroll = Math.max(1, scrollViewerRef.value.scrollWidth - scrollViewerRef.value.clientWidth)
   scrollViewerRef.value.scrollLeft = dragStartScrollLeft.value + (deltaX / travel) * maxScroll
   scrollRevision.value += 1
+  event.preventDefault()
 }
 
-function stopHorizontalDrag() {
+function stopHorizontalDrag(event?: PointerEvent) {
+  if (event && activeHorizontalDragPointerId.value !== null && event.pointerId !== activeHorizontalDragPointerId.value) return
   isDraggingHorizontal.value = false
-  document.removeEventListener('mousemove', handleHorizontalDrag)
-  document.removeEventListener('mouseup', stopHorizontalDrag)
+  activeHorizontalDragPointerId.value = null
+  document.removeEventListener('pointermove', handleHorizontalDrag)
+  document.removeEventListener('pointerup', stopHorizontalDrag)
+  document.removeEventListener('pointercancel', stopHorizontalDrag)
   if (!isHorizontalPointerOver.value) {
     scheduleScrollBarContract('horizontal')
   }
@@ -1100,10 +1162,12 @@ onBeforeUnmount(() => {
   resizeObserver?.disconnect()
   cancelScrollVelocity()
 
-  document.removeEventListener('mousemove', handleVerticalDrag)
-  document.removeEventListener('mouseup', stopVerticalDrag)
-  document.removeEventListener('mousemove', handleHorizontalDrag)
-  document.removeEventListener('mouseup', stopHorizontalDrag)
+  document.removeEventListener('pointermove', handleVerticalDrag)
+  document.removeEventListener('pointerup', stopVerticalDrag)
+  document.removeEventListener('pointercancel', stopVerticalDrag)
+  document.removeEventListener('pointermove', handleHorizontalDrag)
+  document.removeEventListener('pointerup', stopHorizontalDrag)
+  document.removeEventListener('pointercancel', stopHorizontalDrag)
 })
 </script>
 
@@ -1152,6 +1216,9 @@ onBeforeUnmount(() => {
   z-index: 1;
   min-width: 0;
   min-height: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .scrollbar.visible {
@@ -1230,6 +1297,9 @@ onBeforeUnmount(() => {
   border: 0;
   border-radius: 3px;
   cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
   transition:
     width 167ms cubic-bezier(0, 0, 0, 1),
     height 167ms cubic-bezier(0, 0, 0, 1),
@@ -1327,6 +1397,9 @@ onBeforeUnmount(() => {
   font-size: 8px;
   line-height: 1;
   pointer-events: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
   transition: opacity 83ms linear 500ms, color 83ms linear;
 }
 
@@ -1383,6 +1456,12 @@ onBeforeUnmount(() => {
 .scrollbar-button:active {
   color: var(--ScrollBarButtonArrowForegroundPressed, var(--text-secondary));
   transform: scale(0.875);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .scrollbar-button {
+    pointer-events: auto;
+  }
 }
 
 /* Visual States */
