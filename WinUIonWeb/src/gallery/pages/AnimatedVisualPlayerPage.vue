@@ -5,8 +5,8 @@
           <WinTextBlock class="page-header" :Text="$t('text.animatedvisualplayer')" />
           <WinTextBlock class="page-description" :Text="$t('text.plays-animated-content')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -20,10 +20,10 @@
                     <WinAnimatedVisualPlayer :key="playerKey" :playing="playing" :reversed="reversed" :duration="duration" />
                   </div>
                   <div class="avp-buttons">
-                    <WinButton AutomationProperties.Name="Play" :title="$t('text.play')" @Click="play"><span class="icon">&#xE768;</span></WinButton>
-                    <WinToggleButton AutomationProperties.Name="Pause" v-model:IsChecked="paused" :title="$t('text.pause')"><span class="icon">&#xE769;</span></WinToggleButton>
-                    <WinButton AutomationProperties.Name="Stop" :title="$t('text.stop')" @Click="stop"><span class="icon">&#xE71A;</span></WinButton>
-                    <WinButton AutomationProperties.Name="Reverse" :title="$t('sample.animatedvisualplayer.reverse')" @Click="reverse"><span class="icon">&#xE892;</span></WinButton>
+                    <WinButton AutomationProperties.Name="Play" v-bind="{ 'tooltipservice.tooltip': $t('text.play') }" @Click="play"><span class="icon">&#xE768;</span></WinButton>
+                    <WinToggleButton AutomationProperties.Name="Pause" v-model:IsChecked="paused" v-bind="{ 'tooltipservice.tooltip': $t('text.pause') }"><span class="icon">&#xE769;</span></WinToggleButton>
+                    <WinButton AutomationProperties.Name="Stop" v-bind="{ 'tooltipservice.tooltip': $t('text.stop') }" @Click="stop"><span class="icon">&#xE71A;</span></WinButton>
+                    <WinButton AutomationProperties.Name="Reverse" v-bind="{ 'tooltipservice.tooltip': $t('sample.animatedvisualplayer.reverse') }" @Click="reverse"><span class="icon">&#xE892;</span></WinButton>
                   </div>
                 </div>
               </template>

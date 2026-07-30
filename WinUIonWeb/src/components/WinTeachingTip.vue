@@ -23,7 +23,13 @@
               <slot>{{ Content }}</slot>
             </div>
           </div>
-          <button v-if="ShowAlternateCloseButton" class="win-teaching-tip-close" type="button" @click="close">
+          <button
+            v-if="ShowAlternateCloseButton"
+            class="win-teaching-tip-close"
+            type="button"
+            :aria-label="t('text.close')"
+            v-bind="{ 'tooltipservice.tooltip': t('text.close') }"
+            @click="close">
             <span class="icon" aria-hidden="true">&#xE711;</span>
           </button>
         </div>
@@ -50,6 +56,9 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import WinButton from './WinButton.vue';
 import WinTextBlock from './WinTextBlock.vue';
+import { useI18n } from './i18n/index';
+
+const { t } = useI18n();
 
 const props = defineProps({
   IsOpen: { type: Boolean, default: undefined },

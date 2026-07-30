@@ -34,7 +34,8 @@
       <button v-if="isClosable"
               class="infobar-close-button"
               @click="handleClose"
-              aria-label="Close"
+              :aria-label="t('text.close')"
+              v-bind="{ 'tooltipservice.tooltip': t('text.close') }"
               type="button">
         <span class="close-icon">&#xE711;</span>
       </button>
@@ -44,6 +45,9 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import { useI18n } from './i18n/index';
+
+const { t } = useI18n();
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },

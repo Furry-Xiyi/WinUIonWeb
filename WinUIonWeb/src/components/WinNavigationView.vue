@@ -4,7 +4,7 @@
       <div class="win-nav-indicator-track" ref="indicatorTrack">
         <div class="win-nav-indicator" :style="indicatorStyle"></div>
       </div>
-      <button v-if="showBackButtonResolved" class="win-nav-back-button" :disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave" ref="topBackButtonRef">
+      <button v-if="showBackButtonResolved" class="win-nav-back-button" :disabled="!canGoBack" :aria-label="t('text.back')" v-bind="{ 'tooltipservice.tooltip': t('text.back') }" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave" ref="topBackButtonRef">
         <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd"></span>
       </button>
       <div class="win-nav-menu win-nav-top-primary-menu" ref="topPrimaryMenuRef">
@@ -13,19 +13,19 @@
             <WinTextBlock :Text="item.label" />
           </div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-child-selected': isChildOfGroup(item) }">
-            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
+            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
               <span class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)"></span>
             </div>
           </div>
         </template>
-        <div v-if="topOverflowMenuItems.length" class="win-nav-item win-nav-more-button" :aria-label="t('text.more')" @click="toggleMoreFlyout" ref="moreButtonRef">
+        <div v-if="topOverflowMenuItems.length" class="win-nav-item win-nav-more-button" :aria-label="t('text.more')" v-bind="{ 'tooltipservice.tooltip': t('text.more') }" @click="toggleMoreFlyout" ref="moreButtonRef">
           <span class="icon">&#xE712;</span>
           <WinTextBlock v-if="officialProps.OverflowLabelMode === 'MoreLabel'" class="label" :Text="t('text.more')" />
         </div>
@@ -35,7 +35,7 @@
         <template v-for="item in footerItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
@@ -65,10 +65,10 @@
       <div class="win-nav-indicator-track" ref="indicatorTrack" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'">
         <div class="win-nav-indicator" :class="{ 'is-child': indicatorIsChild }" :style="indicatorStyle"></div>
       </div>
-      <button v-if="showBackButtonInLeftNav" class="win-nav-back-button" :disabled="!canGoBack" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
+      <button v-if="showBackButtonInLeftNav" class="win-nav-back-button" :disabled="!canGoBack" :aria-label="t('text.back')" v-bind="{ 'tooltipservice.tooltip': t('text.back') }" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
         <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
       </button>
-      <button v-if="isPaneToggleButtonVisible" class="win-nav-hamburger" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
+      <button v-if="isPaneToggleButtonVisible" class="win-nav-hamburger" :aria-label="t('text.navigation-menu')" v-bind="{ 'tooltipservice.tooltip': t('text.navigation-menu') }" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
         <span class="icon animated-icon animated-icon-hamburger" :class="hamburgerClass" @animationend="onHamburgerAnimEnd">&#xE700;</span>
       </button>
       <div v-if="$slots.PaneHeader || paneTitle || $slots.AutoSuggestBox" class="win-nav-pane-top" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'">
@@ -92,19 +92,19 @@
               <WinTextBlock :Text="item.label" />
             </div>
             <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-            <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+            <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
               <span class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
             </div>
             <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
-              <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
+              <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
                 <span class="icon">{{ item.icon }}</span>
                 <WinTextBlock class="label" :Text="item.label" />
                 <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
               </div>
               <div v-if="!isCompact" class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? (groupHeights[item.value] || 0) + 'px' : '0px' }">
                 <div class="win-nav-group-children-inner" :ref="el => setChildrenRef(item.value, el)">
-                  <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value }" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
+                  <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value }" v-bind="itemToolTipAttrs(child)" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
                     <span class="icon">{{ child.icon }}</span>
                     <WinTextBlock class="label" :Text="child.label" />
                   </div>
@@ -119,12 +119,12 @@
         <template v-for="item in footerItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
         </template>
-        <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
+        <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" v-bind="isCompact ? { 'tooltipservice.tooltip': resolvedSettingsLabel } : {}" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
           <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
           <WinTextBlock class="label" :Text="resolvedSettingsLabel" />
         </div>
@@ -143,19 +143,19 @@
         <template v-for="item in topOverflowMenuItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" :title="item.tooltip || undefined" @click="onMoreItemClick(item)">
+          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onMoreItemClick(item)">
             <span class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
-            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" @click="onMoreGroupHeaderClick(item)">
+            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onMoreGroupHeaderClick(item)">
               <span class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
             </div>
             <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 38 + 2) + 'px' : '0px' }">
               <div class="win-nav-group-children-inner">
-                <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value }" @click="onMoreChildClick(item, child)">
+                <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value }" v-bind="itemToolTipAttrs(child)" @click="onMoreChildClick(item, child)">
                   <span class="icon">{{ child.icon }}</span>
                   <WinTextBlock class="label" :Text="child.label" />
                 </div>
@@ -321,6 +321,10 @@ const resolvedPaneDisplayMode = computed(() => {
   return 'LeftMinimal';
 });
 const isTopNavigation = computed(() => resolvedPaneDisplayMode.value === 'Top');
+const itemToolTipAttrs = (item) => {
+  const toolTip = item?.tooltip || (!isTopNavigation.value && isCompact.value ? item?.label : '');
+  return toolTip ? { 'tooltipservice.tooltip': toolTip } : {};
+};
 const flyoutPlacement = computed(() => isTopNavigation.value ? 'Bottom' : 'RightEdgeAlignedTop');
 const isLeftMinimalMode = computed(() => resolvedPaneDisplayMode.value === 'LeftMinimal');
 const isLeftCompactMode = computed(() => resolvedPaneDisplayMode.value === 'LeftCompact');

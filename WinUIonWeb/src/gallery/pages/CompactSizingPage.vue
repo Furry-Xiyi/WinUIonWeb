@@ -11,10 +11,10 @@
                 </p>
               </div>
               <div class="header-actions">
-                <WinButton class="icon-button" @click="toggleTheme" :title="`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`">
+                <WinButton class="icon-button" v-bind="{ 'tooltipservice.tooltip': `Switch to ${theme === 'light' ? 'dark' : 'light'} theme` }" @click="toggleTheme">
                   <span class="icon">{{ theme === 'light' ? '🌙' : '☀️' }}</span>
                 </WinButton>
-                <WinButton class="icon-button" @click="toggleFavorite" :title="isFavorite ? 'Remove from favorites' : 'Add to favorites'">
+                <WinButton class="icon-button" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @click="toggleFavorite">
                   <span class="icon">{{ isFavorite ? '★' : '☆' }}</span>
                 </WinButton>
               </div>

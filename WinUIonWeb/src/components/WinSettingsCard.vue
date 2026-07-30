@@ -11,7 +11,7 @@
     @click="handleClick"
     :type="IsClickEnabled ? 'button' : undefined"
     :role="IsClickEnabled ? undefined : 'group'"
-    :title="ActionIconToolTip || undefined">
+    v-bind="ActionIconToolTip ? { 'tooltipservice.tooltip': ActionIconToolTip } : {}">
     <div v-if="ContentAlignment !== 'Left'" class="win-settings-card-header">
       <span v-if="hasHeaderIcon" class="win-settings-card-icon icon" aria-hidden="true">
         <slot name="HeaderIcon">

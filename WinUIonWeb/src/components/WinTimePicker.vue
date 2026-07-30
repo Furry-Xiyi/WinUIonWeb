@@ -105,8 +105,8 @@
           <div class="picker-highlight"></div>
         </div>
         <div class="picker-actions">
-          <button class="picker-action-btn" @click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></button>
-          <button class="picker-action-btn" @click="close(false)"><span class="icon" aria-hidden="true">&#xE711;</span></button>
+          <button class="picker-action-btn" :aria-label="t('text.accept')" v-bind="{ 'tooltipservice.tooltip': t('text.accept') }" @click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></button>
+          <button class="picker-action-btn" :aria-label="t('text.cancel')" v-bind="{ 'tooltipservice.tooltip': t('text.cancel') }" @click="close(false)"><span class="icon" aria-hidden="true">&#xE711;</span></button>
         </div>
       </div>
     </Teleport>

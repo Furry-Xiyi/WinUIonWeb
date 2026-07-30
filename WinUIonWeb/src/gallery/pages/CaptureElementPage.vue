@@ -5,8 +5,8 @@
           <WinTextBlock class="page-header" :Text="$t('text.capture-element-camera')" />
           <WinTextBlock class="page-description" :Text="$t('text.captures-media-from-a-camera')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -18,7 +18,7 @@
               </template>
               <template #options>
                 <div class="capture-options">
-                  <WinToggleSwitch v-model:IsOn="mirrored" :Header="$t('sample.capture.mirror-preview')" :title="$t('sample.capture.mirror-tooltip')" />
+                  <WinToggleSwitch v-model:IsOn="mirrored" :Header="$t('sample.capture.mirror-preview')" v-bind="{ 'tooltipservice.tooltip': $t('sample.capture.mirror-tooltip') }" />
                   <WinButton :IsEnabled="cameraReady" @Click="capture">
                     <WinTextBlock :Text="$t('sample.capture.capture-photo')" />
                   </WinButton>

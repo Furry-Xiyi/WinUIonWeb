@@ -28,6 +28,7 @@
         class="commandbar-overflow-button"
         :class="{ 'active': isOpen }"
         :aria-label="isOpen ? t('text.close-overflow-menu') : t('text.more-options')"
+        v-bind="{ 'tooltipservice.tooltip': isOpen ? t('text.close-overflow-menu') : t('text.more-options') }"
         :aria-expanded="isOpen"
         @click="toggleOverflow"
       >

@@ -12,7 +12,11 @@
       </div>
       <div class="style-cell">
         <span class="resource-text">{{ resourceName }}</span>
-        <button class="copy-button" @click="copyToClipboard" :aria-label="`Copy ${resourceName}`">
+        <button
+          class="copy-button"
+          :aria-label="`Copy ${resourceName}`"
+          v-bind="{ 'tooltipservice.tooltip': `Copy ${resourceName}` }"
+          @click="copyToClipboard">
           <span class="icon">📋</span>
         </button>
       </div>

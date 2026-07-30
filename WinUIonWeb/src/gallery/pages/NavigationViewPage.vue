@@ -10,7 +10,7 @@
         <div class="page-header-actions">
           <WinButton
             class="header-action"
-            :title="$t('sample.navigationview.change-theme')"
+            v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }"
             :aria-label="$t('sample.navigationview.change-theme')"
             @Click="toggleTheme">
             <WinTextBlock class="icon" Text="" />
@@ -18,7 +18,7 @@
           <WinToggleButton
             v-model:IsChecked="isFavoriteState"
             class="header-action"
-            :title="favoriteActionLabel"
+            v-bind="{ 'tooltipservice.tooltip': favoriteActionLabel }"
             :aria-label="favoriteActionLabel"
             @update:IsChecked="toggleFavorite">
             <WinTextBlock class="icon" :Text="isFavoriteState ? '' : ''" />
@@ -279,14 +279,14 @@
                   <WinButton
                     class="pane-footer-action"
                     Style="{StaticResource SubtleButtonStyle}"
-                    :title="$t('sample.navigationview.download')"
+                    v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.download') }"
                     :aria-label="$t('sample.navigationview.download')">
                     <WinTextBlock class="icon" Text="" />
                   </WinButton>
                   <WinButton
                     class="pane-footer-action"
                     Style="{StaticResource SubtleButtonStyle}"
-                    :title="$t('sample.navigationview.favorite')"
+                    v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.favorite') }"
                     :aria-label="$t('sample.navigationview.favorite')">
                     <WinTextBlock class="icon" Text="" />
                   </WinButton>

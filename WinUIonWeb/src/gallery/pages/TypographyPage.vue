@@ -7,10 +7,10 @@
                 <h1 class="page-title">Typography</h1>
               </div>
               <div class="header-actions">
-                <button class="icon-button" @click="toggleTheme" aria-label="Toggle theme">
+                <button class="icon-button" aria-label="Toggle theme" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @click="toggleTheme">
                   <span class="icon">&#xE793;</span>
                 </button>
-                <button class="icon-button" @click="toggleFavorite" aria-label="Toggle favorite">
+                <button class="icon-button" aria-label="Toggle favorite" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? 'Remove from favorites' : 'Add to favorites' }" @click="toggleFavorite">
                   <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
                 </button>
               </div>
@@ -37,31 +37,31 @@
                       <div class="typography-showcase">
                         <div class="showcase-item display-text">
                           <span class="text-sample">Display</span>
-                          <button class="info-button" @click="showInfo('Display')" aria-label="Show Display info">
+                          <button class="info-button" aria-label="Show Display info" v-bind="{ 'tooltipservice.tooltip': 'Show Display info' }" @click="showInfo('Display')">
                             <span class="icon">ℹ️</span>
                           </button>
                         </div>
                         <div class="showcase-item title-text">
                           <span class="text-sample">Title</span>
-                          <button class="info-button" @click="showInfo('Title')" aria-label="Show Title info">
+                          <button class="info-button" aria-label="Show Title info" v-bind="{ 'tooltipservice.tooltip': 'Show Title info' }" @click="showInfo('Title')">
                             <span class="icon">ℹ️</span>
                           </button>
                         </div>
                         <div class="showcase-item body-strong-text">
                           <span class="text-sample">Body Strong</span>
-                          <button class="info-button" @click="showInfo('Body Strong')" aria-label="Show Body Strong info">
+                          <button class="info-button" aria-label="Show Body Strong info" v-bind="{ 'tooltipservice.tooltip': 'Show Body Strong info' }" @click="showInfo('Body Strong')">
                             <span class="icon">ℹ️</span>
                           </button>
                         </div>
                         <div class="showcase-item body-text">
                           <span class="text-sample">Body</span>
-                          <button class="info-button" @click="showInfo('Body')" aria-label="Show Body info">
+                          <button class="info-button" aria-label="Show Body info" v-bind="{ 'tooltipservice.tooltip': 'Show Body info' }" @click="showInfo('Body')">
                             <span class="icon">ℹ️</span>
                           </button>
                         </div>
                         <div class="showcase-item caption-text">
                           <span class="text-sample">Caption</span>
-                          <button class="info-button" @click="showInfo('Caption')" aria-label="Show Caption info">
+                          <button class="info-button" aria-label="Show Caption info" v-bind="{ 'tooltipservice.tooltip': 'Show Caption info' }" @click="showInfo('Caption')">
                             <span class="icon">ℹ️</span>
                           </button>
                         </div>
@@ -472,4 +472,3 @@ const cSharpCode = `<div class="typography-samples">
   }
 }
 </style>
-

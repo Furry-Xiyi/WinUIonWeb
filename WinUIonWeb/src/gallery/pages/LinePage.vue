@@ -11,10 +11,10 @@
                 </p>
               </div>
               <div class="page-actions">
-                <button class="icon-button" @click="toggleTheme" title="Toggle theme">
+                <button class="icon-button" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @click="toggleTheme">
                   <span class="icon">🌓</span>
                 </button>
-                <button class="icon-button" @click="toggleFavorite" title="Add to favorites">
+                <button class="icon-button" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @click="toggleFavorite">
                   <span class="icon">{{ isFavorite ? '★' : '☆' }}</span>
                 </button>
               </div>

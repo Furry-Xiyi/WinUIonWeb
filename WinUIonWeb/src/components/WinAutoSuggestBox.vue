@@ -28,6 +28,7 @@
             type="button"
             :disabled="!IsEnabled"
             :aria-label="t('text.submit-query')"
+            v-bind="{ 'tooltipservice.tooltip': t('text.submit-query') }"
             @pointerdown.prevent
             @click="submitQuery()">
             <span class="win-asb-icon">{{ resolvedQueryIcon }}</span>

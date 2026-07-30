@@ -23,6 +23,7 @@
           type="button"
           :disabled="!IsEnabled"
           :aria-label="t('text.reveal-password')"
+          v-bind="{ 'tooltipservice.tooltip': t('text.reveal-password') }"
           @pointerdown.prevent="peekPassword"
           @pointerup.prevent="hidePeek"
           @pointerleave="hidePeek"

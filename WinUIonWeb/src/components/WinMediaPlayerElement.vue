@@ -19,25 +19,37 @@
         <div class="win-media-row command-row">
           <WinFlyout ref="volumeFlyout" direction="up" align="center">
             <template #trigger>
-              <button class="win-media-icon-button" @click.stop="volumeFlyout?.toggle()" :aria-label="mutedState ? t('text.unmute') : t('text.volume')">
+              <button
+                class="win-media-icon-button"
+                :aria-label="mutedState ? t('text.unmute') : t('text.volume')"
+                v-bind="{ 'tooltipservice.tooltip': mutedState ? t('text.unmute') : t('text.volume') }"
+                @click.stop="volumeFlyout?.toggle()">
                 <span class="icon">{{ muteIcon }}</span>
               </button>
             </template>
             <div class="win-media-volume-panel">
-              <WinButton Style="SubtleButtonStyle" class="win-media-volume-subtle" @Click="toggleMute">
+              <WinButton
+                Style="SubtleButtonStyle"
+                class="win-media-volume-subtle"
+                v-bind="{ 'tooltipservice.tooltip': mutedState ? t('text.unmute') : t('text.mute') }"
+                @Click="toggleMute">
                 <span class="icon">{{ muteIcon }}</span>
               </WinButton>
               <input class="win-media-range volume-range" type="range" min="0" max="100" step="1" :value="volumeValue" @input="setVolume" />
             </div>
           </WinFlyout>
-          <button class="win-media-icon-button play-button" @click="togglePlay" :aria-label="isPlaying ? t('text.pause') : t('text.play')">
+          <button
+            class="win-media-icon-button play-button"
+            :aria-label="isPlaying ? t('text.pause') : t('text.play')"
+            v-bind="{ 'tooltipservice.tooltip': isPlaying ? t('text.pause') : t('text.play') }"
+            @click="togglePlay">
             <span class="icon">{{ playIcon }}</span>
           </button>
           <div class="right-command-group">
-            <button class="win-media-icon-button" @click="toggleAspectMode" :aria-label="t('text.aspect-ratio')">
+            <button class="win-media-icon-button" :aria-label="t('text.aspect-ratio')" v-bind="{ 'tooltipservice.tooltip': t('text.aspect-ratio') }" @click="toggleAspectMode">
               <span class="icon">&#xE9A6;</span>
             </button>
-            <button class="win-media-icon-button" @click="showCastPanel" :aria-label="t('text.cast')">
+            <button class="win-media-icon-button" :aria-label="t('text.cast')" v-bind="{ 'tooltipservice.tooltip': t('text.cast') }" @click="showCastPanel">
               <span class="icon">&#xEC16;</span>
             </button>
           </div>

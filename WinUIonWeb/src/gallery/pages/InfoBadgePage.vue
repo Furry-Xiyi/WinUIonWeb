@@ -94,7 +94,8 @@
               <template #example>
                 <WinButton
                   style="width: 200px; height: 60px; position: relative;"
-                  aria-label="Refresh required">
+                  aria-label="Refresh required"
+                  ToolTipService.ToolTip="Refresh required">
                   <span class="icon" style="font-size: 20px;">&#xE72C;</span>
                   <WinInfoBadge
                     iconSource="E7BA"

@@ -80,6 +80,7 @@
           class="win-textbox-delete-button"
           type="button"
           :aria-label="t('text.clear-text')"
+          v-bind="{ 'tooltipservice.tooltip': t('text.clear-text') }"
           @pointerdown.prevent
           @click="clearText">
           <span class="win-textbox-delete-button-layout">

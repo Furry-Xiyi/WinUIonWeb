@@ -6,7 +6,8 @@
     <button v-if="effectiveIsZoomOutButtonEnabled && effectiveIsZoomedInViewActive && effectiveCanChangeViews"
             class="zoom-out-button"
             @click="toggleZoom"
-            :aria-label="'Switch to zoomed out view'">
+            :aria-label="t('text.switch-to-zoomed-out-view')"
+            v-bind="{ 'tooltipservice.tooltip': t('text.switch-to-zoomed-out-view') }">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
         <path d="M2 2h5v1H3v4H2V2zm7 0h5v5h-1V3H9V2zM2 14h5v-1H3v-4H2v5zm12 0h-5v-1h4v-4h1v5z"/>
       </svg>
@@ -44,6 +45,9 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import WinScrollViewer from './WinScrollViewer.vue';
+import { useI18n } from './i18n/index';
+
+const { t } = useI18n();
 
 // 对齐官方属性命名
 const props = defineProps({

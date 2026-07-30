@@ -1,5 +1,9 @@
 <template>
-  <div class="win-person-picture" :style="rootStyle" :title="DisplayName || Initials">
+  <div
+    class="win-person-picture"
+    :style="rootStyle"
+    :aria-label="DisplayName || Initials || undefined"
+    v-bind="DisplayName || Initials ? { 'tooltipservice.tooltip': DisplayName || Initials } : {}">
     <img v-if="ProfilePicture" :src="ProfilePicture" alt="" />
     <span v-else-if="resolvedInitials" class="win-person-initials">{{ resolvedInitials }}</span>
     <span v-else class="icon"></span>

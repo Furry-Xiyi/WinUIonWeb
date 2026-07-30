@@ -17,10 +17,10 @@
                 </p>
               </div>
               <div class="page-actions">
-                <WinButton @click="toggleTheme" :title="themeButtonTitle">
+                <WinButton v-bind="{ 'tooltipservice.tooltip': themeButtonTitle }" @click="toggleTheme">
                   <span class="icon">{{ themeIcon }}</span>
                 </WinButton>
-                <WinButton @click="toggleFavorite" :title="favoriteButtonTitle">
+                <WinButton v-bind="{ 'tooltipservice.tooltip': favoriteButtonTitle }" @click="toggleFavorite">
                   <span class="icon">{{ favoriteIcon }}</span>
                 </WinButton>
               </div>
@@ -46,7 +46,7 @@
                         class="geometry-button"
                         style="left: 16px; top: 16px;"
                         @click="toggleTooltip1"
-                        :title="'8px'">
+                        v-bind="{ 'tooltipservice.tooltip': '8px' }">
                         <span class="icon">&#xE946;</span>
                       </WinButton>
                       <div
@@ -62,7 +62,7 @@
                         class="geometry-button"
                         style="left: 16px; top: 148px;"
                         @click="toggleTooltip2"
-                        :title="'Body'">
+                        v-bind="{ 'tooltipservice.tooltip': 'Body' }">
                         <span class="icon">&#xE946;</span>
                       </WinButton>
                       <div
@@ -77,7 +77,7 @@
                         class="geometry-button"
                         style="left: 240px; top: 168px;"
                         @click="toggleTooltip3"
-                        :title="'4px'">
+                        v-bind="{ 'tooltipservice.tooltip': '4px' }">
                         <span class="icon">&#xE946;</span>
                       </WinButton>
                       <div
@@ -117,7 +117,7 @@
                         <WinButton
                           class="copy-button"
                           @click="copyToClipboard('OverlayCornerRadius')"
-                          title="Copy to clipboard">
+                          ToolTipService.ToolTip="Copy to clipboard">
                           <span class="icon">&#xE8C8;</span>
                         </WinButton>
                       </div>
@@ -141,7 +141,7 @@
                         <WinButton
                           class="copy-button"
                           @click="copyToClipboard('ControlCornerRadius')"
-                          title="Copy to clipboard">
+                          ToolTipService.ToolTip="Copy to clipboard">
                           <span class="icon">&#xE8C8;</span>
                         </WinButton>
                       </div>

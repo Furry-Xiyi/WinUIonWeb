@@ -51,7 +51,10 @@
                 IsTextSelectionEnabled />
             </WinScrollViewer>
             <div class="copy-button-border">
-              <WinButton class="copy-code-button" :title="t('text.copy')" @Click="copyActiveCode">
+              <WinButton
+                class="copy-code-button"
+                v-bind="{ 'tooltipservice.tooltip': t('text.copy') }"
+                @Click="copyActiveCode">
                 <span class="icon"></span>
               </WinButton>
             </div>

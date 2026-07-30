@@ -19,7 +19,7 @@
             type="button"
             role="menuitem"
             :aria-pressed="command.IsToggle ? Boolean(command.IsChecked) : undefined"
-            :title="command.ToolTipServiceToolTip || command.ToolTip || command.Label"
+            v-bind="{ 'tooltipservice.tooltip': command.ToolTipServiceToolTip || command.ToolTip || command.Label }"
             :disabled="command.IsEnabled === false"
             @click="invoke(command)">
             <span v-if="command.Icon" class="win-cbf-icon">{{ iconGlyph(command.Icon) }}</span>
@@ -32,6 +32,7 @@
           class="win-cbf-more-button"
           type="button"
           :aria-label="t('text.more')"
+          v-bind="{ 'tooltipservice.tooltip': t('text.more') }"
           :aria-expanded="secondaryOpen"
           @click="secondaryOpen = !secondaryOpen">
           <span class="win-cbf-icon"></span>

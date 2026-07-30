@@ -3,7 +3,7 @@
     <!-- 主题切换按钮 -->
     <WinButton
       subtle
-      :title="themeTooltip"
+      v-bind="{ 'tooltipservice.tooltip': themeTooltip }"
       @click="$emit('theme-toggle')"
       style="width: 32px; height: 32px; padding: 0; min-width: 0;">
       <span class="icon">&#xE793;</span>
@@ -12,7 +12,7 @@
     <!-- 收藏按钮 -->
     <WinToggleButton
       v-model:IsChecked="favoriteState"
-      :title="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+      v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }"
       @update:IsChecked="$emit('favorite-toggle')"
       style="width: 32px; height: 32px; padding: 0; min-width: 0;">
       <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>

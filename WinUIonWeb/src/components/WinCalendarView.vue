@@ -9,8 +9,8 @@
         <span>{{ labelText }}</span>
       </button>
       <div class="calendar-nav">
-        <button class="icon-btn" :disabled="!IsEnabled" @click="onNav(-1)">&#xEDDB;</button>
-        <button class="icon-btn" :disabled="!IsEnabled" @click="onNav(1)">&#xEDDC;</button>
+        <button class="icon-btn" :disabled="!IsEnabled" :aria-label="t('text.previous')" v-bind="{ 'tooltipservice.tooltip': t('text.previous') }" @click="onNav(-1)">&#xEDDB;</button>
+        <button class="icon-btn" :disabled="!IsEnabled" :aria-label="t('text.next')" v-bind="{ 'tooltipservice.tooltip': t('text.next') }" @click="onNav(1)">&#xEDDC;</button>
       </div>
     </div>
 
@@ -164,6 +164,9 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, watch } from "vue";
 import WinScrollViewer from "./WinScrollViewer.vue";
+import { useI18n } from "./i18n/index";
+
+const { t } = useI18n();
 
 const props = defineProps({
   CalendarIdentifier: { type: String, default: "GregorianCalendar" },

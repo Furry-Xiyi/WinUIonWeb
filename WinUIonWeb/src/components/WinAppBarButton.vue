@@ -2,8 +2,8 @@
   <button
     :class="buttonClasses"
     :disabled="!isEnabled"
-    :aria-label="ariaLabel"
-    :title="tooltip"
+    :aria-label="ariaLabel || label"
+    v-bind="resolvedToolTip ? { 'tooltipservice.tooltip': resolvedToolTip } : {}"
     @click="handleClick"
     @mouseenter="isPointerOver = true"
     @mouseleave="isPointerOver = false"
@@ -89,6 +89,9 @@ const buttonClasses = computed(() => {
 const hasIconContent = computed(() => {
   return slots.content || props.icon
 })
+
+const resolvedToolTip = computed(() => props.tooltip ||
+  ((props.isCompact || props.labelPosition === 'Collapsed') ? props.label : ''))
 
 // Symbol icon mapping (subset of common WinUI symbols)
 const symbolGlyphs: Record<string, string> = {

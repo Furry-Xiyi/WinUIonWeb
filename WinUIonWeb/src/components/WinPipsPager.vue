@@ -11,6 +11,7 @@
       :disabled="effectiveDisabled || effectiveSelectedPageIndex <= 0"
       @click="previousPage"
       :aria-label="previousButtonLabel"
+      v-bind="{ 'tooltipservice.tooltip': previousButtonLabel }"
     >
       <span class="icon" v-html="effectiveOrientation === 'Horizontal' ? '&#xE76B;' : '&#xE70E;'"></span>
     </button>
@@ -44,6 +45,7 @@
       :disabled="effectiveDisabled || effectiveSelectedPageIndex >= effectiveNumberOfPages - 1"
       @click="nextPage"
       :aria-label="nextButtonLabel"
+      v-bind="{ 'tooltipservice.tooltip': nextButtonLabel }"
     >
       <span class="icon" v-html="effectiveOrientation === 'Horizontal' ? '&#xE76C;' : '&#xE70D;'"></span>
     </button>

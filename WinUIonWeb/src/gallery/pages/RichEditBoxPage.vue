@@ -5,8 +5,8 @@
           <WinTextBlock class="page-header" :Text="$t('text.richeditbox')" />
           <WinTextBlock class="page-description" :Text="$t('text.the-richeditbox-control-lets-a-user-enter-format')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon"></span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+            <WinButton v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon"></span></WinButton>
+            <WinToggleButton v-model:IsChecked="isFavoriteState" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
@@ -26,12 +26,12 @@
               <template #example>
                 <div class="custom-editor">
                   <div class="custom-toolbar">
-                    <WinButton @click="showFileMessage('Open file')" title="Open file" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE8E5;</span></WinButton>
-                    <WinButton @click="showFileMessage('Save file')" title="Save file" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE74E;</span></WinButton>
+                    <WinButton @click="showFileMessage('Open file')" ToolTipService.ToolTip="Open file" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE8E5;</span></WinButton>
+                    <WinButton @click="showFileMessage('Save file')" ToolTipService.ToolTip="Save file" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE74E;</span></WinButton>
                     <span class="separator"></span>
-                    <WinButton @click="customEditor?.execCommand('bold')" title="Bold" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE8DD;</span></WinButton>
-                    <WinButton @click="customEditor?.execCommand('italic')" title="Italic" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE8DB;</span></WinButton>
-                    <button v-for="color in colors" :key="color" class="color-button" :style="{ background: color }" :title="color" @click="customEditor?.execCommand('foreColor', color)"></button>
+                    <WinButton @click="customEditor?.execCommand('bold')" ToolTipService.ToolTip="Bold" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE8DD;</span></WinButton>
+                    <WinButton @click="customEditor?.execCommand('italic')" ToolTipService.ToolTip="Italic" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE8DB;</span></WinButton>
+                    <button v-for="color in colors" :key="color" class="color-button" :style="{ background: color }" v-bind="{ 'tooltipservice.tooltip': color }" @click="customEditor?.execCommand('foreColor', color)"></button>
                   </div>
                   <WinRichEditBox ref="customEditor" v-model:Html="customHtml" :ShowFormattingCommands="false" PlaceholderText="Compose formatted text" :Height="200" />
                   <div class="find-row">

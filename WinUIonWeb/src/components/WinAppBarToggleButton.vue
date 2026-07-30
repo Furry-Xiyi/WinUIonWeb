@@ -10,6 +10,7 @@
     ]"
     :disabled="disabled"
     :aria-label="ariaLabel || label"
+    v-bind="isCompact && label ? { 'tooltipservice.tooltip': label } : {}"
     :aria-pressed="isChecked === null ? 'mixed' : isChecked"
     role="button"
     @click="handleClick"
