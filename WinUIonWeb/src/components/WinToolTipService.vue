@@ -3,12 +3,15 @@
     :IsOpen="isOpen"
     :Content="content"
     :Placement="placement"
-    :PlacementTarget="placementTarget"
+    :PlacementTarget="placementTarget || undefined"
+    :PlacementPoint="placementPoint || undefined"
     :Theme="theme"
     :UseNativeToolTip="false"
     :InitialShowDelay="0"
     :BetweenShowDelay="0"
-    IsServiceHost />
+    IsServiceHost
+    @tooltip-pointer-enter="onToolTipPointerEnter"
+    @tooltip-pointer-leave="onToolTipPointerLeave" />
 </template>
 
 <script setup lang="ts">
@@ -26,6 +29,7 @@ const isOpen = ref(false);
 const content = ref('');
 const placement = ref('Mouse');
 const placementTarget = shallowRef<HTMLElement | null>(null);
+const placementPoint = ref<{ x: number; y: number } | null>(null);
 const theme = ref('');
 const attachedElements = new Set<HTMLElement>();
 const originalTitles = new WeakMap<HTMLElement, string | null>();
@@ -36,6 +40,7 @@ let openTimer: number | undefined;
 let closeTimer: number | undefined;
 let touchDismissTimer: number | undefined;
 let lastClosedAt = 0;
+let isPointerOverToolTip = false;
 
 function toolTipText(element: HTMLElement): string | null {
   return element.getAttribute(TOOL_TIP_ATTRIBUTE);
@@ -59,7 +64,7 @@ function syncNativeTitle(element: HTMLElement) {
     placement.value = element.getAttribute(PLACEMENT_ATTRIBUTE) || 'Mouse';
     placementTarget.value = resolvePlacementTarget(element);
   } else {
-    element.setAttribute('title', text);
+    element.removeAttribute('title');
   }
 }
 
@@ -74,7 +79,7 @@ function restoreOriginalTitle(element: HTMLElement) {
 function restoreAttachedTitle(element: HTMLElement) {
   const text = toolTipText(element);
   if (text === null) restoreOriginalTitle(element);
-  else element.setAttribute('title', text);
+  else element.removeAttribute('title');
 }
 
 function scanNode(node: Node) {
@@ -142,6 +147,11 @@ function clearTouchDismissTimer() {
   touchDismissTimer = undefined;
 }
 
+function elementCenter(element: HTMLElement) {
+  const rect = element.getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
+
 function openFor(element: HTMLElement) {
   const text = toolTipText(element);
   if (text === null) return;
@@ -157,7 +167,7 @@ function openFor(element: HTMLElement) {
   isOpen.value = true;
 }
 
-function queueOpen(element: HTMLElement, immediate = false) {
+function queueOpen(element: HTMLElement, immediate = false, point?: { x: number; y: number }) {
   if (activeElement === element && isOpen.value) {
     clearCloseTimer();
     return;
@@ -166,6 +176,7 @@ function queueOpen(element: HTMLElement, immediate = false) {
   clearOpenTimer();
   clearCloseTimer();
   pendingElement = element;
+  placementPoint.value = point || elementCenter(element);
   const recentlyClosed = performance.now() - lastClosedAt <= BETWEEN_SHOW_DELAY;
   const delay = immediate || recentlyClosed ? 0 : INITIAL_SHOW_DELAY;
   openTimer = window.setTimeout(() => openFor(element), delay);
@@ -175,10 +186,12 @@ function closeActive() {
   clearOpenTimer();
   clearCloseTimer();
   clearTouchDismissTimer();
+  isPointerOverToolTip = false;
   if (activeElement) restoreAttachedTitle(activeElement);
   activeElement = null;
   isOpen.value = false;
   placementTarget.value = null;
+  placementPoint.value = null;
   content.value = '';
   lastClosedAt = performance.now();
 }
@@ -186,13 +199,14 @@ function closeActive() {
 function queueClose(element: HTMLElement) {
   if (pendingElement !== element && activeElement !== element) return;
   clearOpenTimer();
+  if (isPointerOverToolTip) return;
   clearCloseTimer();
   closeTimer = window.setTimeout(closeActive, BETWEEN_SHOW_DELAY);
 }
 
 function onPointerOver(event: PointerEvent) {
   const element = findToolTipElement(event.target);
-  if (element) queueOpen(element);
+  if (element) queueOpen(element, false, { x: event.clientX, y: event.clientY });
 }
 
 function onPointerOut(event: PointerEvent) {
@@ -206,7 +220,7 @@ function onPointerOut(event: PointerEvent) {
 function onPointerDown(event: PointerEvent) {
   const element = findToolTipElement(event.target);
   if (event.pointerType === 'touch' && element) {
-    queueOpen(element, true);
+    queueOpen(element, true, { x: event.clientX, y: event.clientY });
     clearTouchDismissTimer();
     touchDismissTimer = window.setTimeout(closeActive, 5000);
   } else if (!element && activeElement) {
@@ -216,7 +230,7 @@ function onPointerDown(event: PointerEvent) {
 
 function onFocusIn(event: FocusEvent) {
   const element = findToolTipElement(event.target);
-  if (element) queueOpen(element, true);
+  if (element) queueOpen(element, true, elementCenter(element));
 }
 
 function onFocusOut(event: FocusEvent) {
@@ -224,18 +238,37 @@ function onFocusOut(event: FocusEvent) {
   if (element) queueClose(element);
 }
 
+function onToolTipPointerEnter() {
+  isPointerOverToolTip = true;
+  clearCloseTimer();
+}
+
+function onToolTipPointerLeave() {
+  isPointerOverToolTip = false;
+  if (activeElement) queueClose(activeElement);
+}
+
 onMounted(() => {
   document.querySelectorAll<HTMLElement>(TOOL_TIP_SELECTOR).forEach(syncNativeTitle);
   observer = new MutationObserver(records => {
     records.forEach(record => {
-      if (record.type === 'attributes' && record.target instanceof HTMLElement) syncNativeTitle(record.target);
+      if (record.type === 'attributes' && record.target instanceof HTMLElement) {
+        if (record.attributeName === TOOL_TIP_ATTRIBUTE) syncNativeTitle(record.target);
+        if (
+          record.attributeName === 'class'
+          && activeElement
+          && (record.target === activeElement || record.target.contains(activeElement))
+        ) {
+          theme.value = resolveTheme(activeElement);
+        }
+      }
       record.addedNodes.forEach(scanNode);
       record.removedNodes.forEach(releaseNode);
     });
   });
   observer.observe(document.body, {
     attributes: true,
-    attributeFilter: [TOOL_TIP_ATTRIBUTE],
+    attributeFilter: [TOOL_TIP_ATTRIBUTE, 'class'],
     childList: true,
     subtree: true
   });

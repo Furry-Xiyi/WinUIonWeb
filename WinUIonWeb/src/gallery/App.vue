@@ -211,15 +211,23 @@ const appTitle = computed(() => t(appManifest.resources?.title ?? 'app.title'));
 
 const navMenuItems = [
   { Tag: 'home', Icon: '\uE80F', Content: t('text.home') },
-  { Tag: 'menusandtoolbars', Icon: '\uE74E', Content: t('text.menus-and-toolbars'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'commandbar', Icon: '\uE76F', Content: t('text.commandbar') },
-    { Tag: 'commandbarflyout', Icon: '\uF0E2', Content: t('text.commandbarflyout') },
-    { Tag: 'menubar', Icon: '\uE76F', Content: t('text.menubar') },
-    { Tag: 'menuflyout', Icon: '\uF0E2', Content: t('text.menuflyout') },
-    { Tag: 'swipecontrol', Icon: '\uE8D7', Content: t('text.swipecontrol') },
-    { Tag: 'standarduicommand', Icon: '\uE8A5', Content: t('text.standarduicommand') },
-    { Tag: 'xamluicommand', Icon: '\uE8A5', Content: t('text.xamluicommand') }
-  ]},
+  { Tag: 'buttons', Icon: '\uE73A', Content: t('text.basic-input'), SelectsOnInvoked: false, MenuItems: [
+      { Tag: 'button', Icon: '\uE71A', Content: t('text.button') },
+      { Tag: 'dropdownbutton', Icon: '\uE70D', Content: t('text.dropdownbutton') },
+      { Tag: 'hyperlinkbutton', Icon: '\uE71B', Content: t('text.hyperlinkbutton') },
+      { Tag: 'repeatbutton', Icon: '\uE8AB', Content: t('text.repeatbutton') },
+      { Tag: 'togglebutton', Icon: '\uEF1F', Content: t('text.togglebutton') },
+      { Tag: 'splitbutton', Icon: '\uE90D', Content: t('text.splitbutton') },
+      { Tag: 'togglesplitbutton', Icon: '\uE90D', Content: t('text.togglesplitbutton') },
+      { Tag: 'checkbox', Icon: '\uE73D', Content: t('text.checkbox') },
+      { Tag: 'colorpicker', Icon: '\uEF3C', Content: t('text.colorpicker') },
+      { Tag: 'combobox', Icon: '\uE7FB', Content: t('text.combobox') },
+      { Tag: 'radiobutton', Icon: '\uECCB', Content: t('text.radiobuttons') },
+      { Tag: 'rating', Icon: '\uE734', Content: t('text.ratingcontrol') },
+      { Tag: 'slider', Icon: '\uE9E9', Content: t('text.slider') },
+      { Tag: 'toggleswitch', Icon: '\uF19F', Content: t('text.toggleswitch') }
+    ]
+  },
   { Tag: 'collections', Icon: '\uE80A', Content: t('text.collections'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'flipview', Icon: '\uF1CB', Content: t('text.flipview') },
     { Tag: 'gridview', Icon: '\uF0E2', Content: t('text.gridview') },
@@ -237,42 +245,11 @@ const navMenuItems = [
       { Tag: 'timepicker', Icon: '\uE823', Content: t('text.timepicker') }
     ]
   },
-  {
-    Tag: 'buttons', Icon: '\uE73A', Content: t('text.basic-input'), SelectsOnInvoked: false, MenuItems: [
-      { Tag: 'button', Icon: '\uE71A', Content: t('text.button') },
-      { Tag: 'dropdownbutton', Icon: '\uE70D', Content: t('text.dropdownbutton') },
-      { Tag: 'hyperlinkbutton', Icon: '\uE71B', Content: t('text.hyperlinkbutton') },
-      { Tag: 'repeatbutton', Icon: '\uE8AB', Content: t('text.repeatbutton') },
-      { Tag: 'togglebutton', Icon: '\uEF1F', Content: t('text.togglebutton') },
-      { Tag: 'splitbutton', Icon: '\uE90D', Content: t('text.splitbutton') },
-      { Tag: 'togglesplitbutton', Icon: '\uE90D', Content: t('text.togglesplitbutton') },
-      { Tag: 'checkbox', Icon: '\uE73D', Content: t('text.checkbox') },
-      { Tag: 'colorpicker', Icon: '\uEF3C', Content: t('text.colorpicker') },
-      { Tag: 'combobox', Icon: '\uE7FB', Content: t('text.combobox') },
-      { Tag: 'radiobutton', Icon: '\uECCB', Content: t('text.radiobuttons') },
-      { Tag: 'rating', Icon: '\uE734', Content: t('text.ratingcontrol') },
-      { Tag: 'slider', Icon: '\uE9E9', Content: t('text.slider') },
-      { Tag: 'toggleswitch', Icon: '\uF19F', Content: t('text.toggleswitch') }
-    ]
-  },
-  { Tag: 'statusandinfo', Icon: '\uE8F2', Content: t('text.status-and-info'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'infobadge', Icon: '\uF4AA', Content: t('text.infobadge') },
-    { Tag: 'infobar', Icon: '\uE946', Content: t('text.infobar') },
-    { Tag: 'progressbar', Icon: '\uE895', Content: t('text.progressbar') },
-    { Tag: 'progressring', Icon: '\uE895', Content: t('text.progressring') },
-    { Tag: 'tooltip', Icon: '\uE946', Content: t('text.tooltip') }
-  ]},
   { Tag: 'dialogsandflyouts', Icon: '\uE15F', Content: t('text.dialogs-and-flyouts'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'contentdialog', Icon: '\uE8F2', Content: t('text.contentdialog') },
     { Tag: 'flyout', Icon: '\uE8A8', Content: t('text.flyout') },
     { Tag: 'popup', Icon: '\uE7C4', Content: t('text.popup') },
     { Tag: 'teachingtip', Icon: '\uEC42', Content: t('text.teachingtip') }
-  ]},
-  { Tag: 'scrolling', Icon: '\uE174', Content: t('text.scrolling'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'pipspager', Icon: '\uE8A7', Content: t('text.pipspager') },
-    { Tag: 'scrollview', Icon: '\uE7F4', Content: t('text.scrollview') },
-    { Tag: 'scrollviewer', Icon: '\uE7F4', Content: t('text.scrollviewer') },
-    { Tag: 'semanticzoom', Icon: '\uE8A7', Content: t('text.semanticzoom') }
   ]},
   { Tag: 'layout', Icon: '\uE8A1', Content: t('text.layout'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'border', Icon: '\uE8A1', Content: t('text.border') },
@@ -285,18 +262,43 @@ const navMenuItems = [
     { Tag: 'variablesizedwrapgrid', Icon: '\uE8A9', Content: t('text.variablesizedwrapgrid') },
     { Tag: 'viewbox', Icon: '\uE8A7', Content: t('text.viewbox') }
   ]},
-  { Tag: 'navigation', Icon: '\uE700', Content: t('text.navigation'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'breadcrumbbar', Icon: '\uE76B', Content: t('text.breadcrumbbar') },
-    { Tag: 'navigationview', Icon: '\uE700', Content: t('text.navigationview') },
-    { Tag: 'pivot', Icon: '\uE7C4', Content: t('text.pivot') },
-    { Tag: 'selectorbar', Icon: '\uE762', Content: t('text.selectorbar') }
-  ]},
   { Tag: 'media', Icon: '\uE173', Content: t('text.media'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'animatedvisualplayer', Icon: '\uF5B0', Content: t('text.animatedvisualplayer') },
     { Tag: 'captureelement', Icon: '\uE722', Content: t('text.capture-element-camera') },
     { Tag: 'image', Icon: '\uE8B9', Content: t('text.image') },
     { Tag: 'mediaplayerelement', Icon: '\uE714', Content: t('text.mediaplayerelement') },
     { Tag: 'personpicture', Icon: '\uE77B', Content: t('text.personpicture') }
+  ]},
+  { Tag: 'menusandtoolbars', Icon: '\uE74E', Content: t('text.menus-and-toolbars'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'commandbar', Icon: '\uE76F', Content: t('text.commandbar') },
+    { Tag: 'commandbarflyout', Icon: '\uF0E2', Content: t('text.commandbarflyout') },
+    { Tag: 'menubar', Icon: '\uE76F', Content: t('text.menubar') },
+    { Tag: 'menuflyout', Icon: '\uF0E2', Content: t('text.menuflyout') },
+    { Tag: 'swipecontrol', Icon: '\uE8D7', Content: t('text.swipecontrol') },
+    { Tag: 'standarduicommand', Icon: '\uE8A5', Content: t('text.standarduicommand') },
+    { Tag: 'xamluicommand', Icon: '\uE8A5', Content: t('text.xamluicommand') }
+  ]},
+  { Tag: 'motion', Icon: '\uE945', Content: t('text.motion'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'parallaxview', Icon: '\uE7F4', Content: t('text.parallaxview') }
+  ]},
+  { Tag: 'navigation', Icon: '\uE700', Content: t('text.navigation'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'breadcrumbbar', Icon: '\uE76B', Content: t('text.breadcrumbbar') },
+    { Tag: 'navigationview', Icon: '\uE700', Content: t('text.navigationview') },
+    { Tag: 'pivot', Icon: '\uE7C4', Content: t('text.pivot') },
+    { Tag: 'selectorbar', Icon: '\uE762', Content: t('text.selectorbar') }
+  ]},
+  { Tag: 'scrolling', Icon: '\uE174', Content: t('text.scrolling'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'pipspager', Icon: '\uE8A7', Content: t('text.pipspager') },
+    { Tag: 'scrollview', Icon: '\uE7F4', Content: t('text.scrollview') },
+    { Tag: 'scrollviewer', Icon: '\uE7F4', Content: t('text.scrollviewer') },
+    { Tag: 'semanticzoom', Icon: '\uE8A7', Content: t('text.semanticzoom') }
+  ]},
+  { Tag: 'statusandinfo', Icon: '\uE8F2', Content: t('text.status-and-info'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'infobadge', Icon: '\uF4AA', Content: t('text.infobadge') },
+    { Tag: 'infobar', Icon: '\uE946', Content: t('text.infobar') },
+    { Tag: 'progressbar', Icon: '\uE895', Content: t('text.progressbar') },
+    { Tag: 'progressring', Icon: '\uE895', Content: t('text.progressring') },
+    { Tag: 'tooltip', Icon: '\uE946', Content: t('text.tooltip') }
   ]},
   { Tag: 'text', Icon: '\uE8D2', Content: t('text.text'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'autosuggestbox', Icon: '\uE721', Content: t('text.autosuggestbox') },
@@ -306,9 +308,6 @@ const navMenuItems = [
     { Tag: 'richtextblock', Icon: '\uE8D2', Content: t('text.richtextblock') },
     { Tag: 'textblock', Icon: '\uE8E4', Content: t('text.textblock') },
     { Tag: 'textbox', Icon: '\uE8AC', Content: t('text.textbox') }
-  ]},
-  { Tag: 'motion', Icon: '\uE945', Content: t('text.motion'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'parallaxview', Icon: '\uE7F4', Content: t('text.parallaxview') }
   ]}
 ];
 
@@ -443,9 +442,8 @@ watch(currentPage, (newVal, oldVal) => {
     --card-stroke: rgba(0, 0, 0, 0.06);
     --stroke-divider: rgba(0, 0, 0, 0.06);
     --stroke-surface-flyout: rgba(0, 0, 0, 0.06);
-    --flyout-bg: rgba(252, 252, 252, 0.78);
+    --flyout-bg: rgba(252, 252, 252, 0.92);
     --flyout-backdrop: blur(30px) saturate(160%) brightness(1.02);
-    --flyout-material-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
     --ctrl-fill-default: rgba(255, 255, 255, 0.70);
     --ctrl-fill-secondary: rgba(249, 249, 249, 0.50);
     --ctrl-fill-tertiary: rgba(249, 249, 249, 0.30);
@@ -515,9 +513,8 @@ watch(currentPage, (newVal, oldVal) => {
     --card-stroke: rgba(0, 0, 0, 0.10);
     --stroke-divider: rgba(255, 255, 255, 0.08);
     --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
-    --flyout-bg: rgba(44, 44, 44, 0.58);
+    --flyout-bg: rgba(44, 44, 44, 0.86);
     --flyout-backdrop: blur(44px) saturate(190%) brightness(1.22) contrast(1.05);
-    --flyout-material-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.025) 45%, rgba(0, 0, 0, 0.12));
     --ctrl-fill-default: #2D2D2D;
     --ctrl-fill-secondary: #333333;
     --ctrl-fill-tertiary: #272727;

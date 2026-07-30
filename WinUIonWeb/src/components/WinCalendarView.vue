@@ -738,7 +738,6 @@ watch([() => props.Language, () => props.CalendarIdentifier], () => {
     min-width: 304px;
     flex: 0 0 304px;
     background: var(--layer-default);
-    background-image: var(--flyout-material-overlay);
     backdrop-filter: var(--flyout-backdrop);
     -webkit-backdrop-filter: var(--flyout-backdrop);
     border: 1px solid var(--ctrl-border-rest);

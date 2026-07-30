@@ -2,8 +2,9 @@
   <img class="win-image" :class="stretchClass" :src="resolvedSource" :alt="alt" :style="imageStyle" />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
+import type { CSSProperties } from 'vue';
 
 const props = defineProps({
   Source: { type: String, default: '' },
@@ -23,15 +24,28 @@ const props = defineProps({
   radius: { type: Number, default: 0 }
 });
 
-const toCssSize = value => typeof value === 'number' ? `${value}px` : value;
+const toCssSize = (value: string | number) => (
+  typeof value === 'number' || (typeof value === 'string' && /^-?\d+(\.\d+)?$/.test(value.trim()))
+    ? `${value}px`
+    : value
+);
 const resolvedSource = computed(() => props.Source || props.UriSource || props.src);
 const resolvedStretch = computed(() => props.Stretch || props.stretch || 'Uniform');
 
-const imageStyle = computed(() => ({
+const horizontalAlignments: Record<string, CSSProperties['alignSelf']> = {
+  left: 'flex-start',
+  center: 'center',
+  right: 'flex-end',
+  stretch: 'stretch'
+};
+
+const imageStyle = computed<CSSProperties>(() => ({
   width: toCssSize(props.Width || props.width),
   height: toCssSize(props.Height || props.height),
   borderRadius: `${props.radius}px`,
-  alignSelf: props.HorizontalAlignment ? props.HorizontalAlignment.toLowerCase() : undefined
+  alignSelf: props.HorizontalAlignment
+    ? horizontalAlignments[props.HorizontalAlignment.toLowerCase()]
+    : undefined
 }));
 
 const stretchClass = computed(() => `stretch-${resolvedStretch.value.toLowerCase()}`);

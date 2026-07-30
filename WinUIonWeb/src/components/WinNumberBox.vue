@@ -351,7 +351,6 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 4px;
   background: var(--flyout-background, var(--layer-fill-color-default));
-  background-image: var(--flyout-material-overlay);
   border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--card-stroke)));
   border-radius: 8px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);

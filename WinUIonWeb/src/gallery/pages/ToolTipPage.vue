@@ -18,54 +18,33 @@
 
       <div class="gallery-page-content">
         <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="simpleToolTipCode" :headerText="$t('sample.tooltip.simple')">
-          <template #example>
-            <WinButton ToolTipService.ToolTip="Simple ToolTip">
-              <WinTextBlock :Text="$t('sample.tooltip.button-content')" />
-            </WinButton>
-          </template>
+          <WinButton ToolTipService.ToolTip="Simple ToolTip">
+            <WinTextBlock :Text="$t('sample.tooltip.button-content')" />
+          </WinButton>
         </WinControlExample>
 
         <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="serviceToolTipCode" :headerText="$t('sample.tooltip.attached')">
-          <template #example>
-            <WinToolTip
-              :Content="$t('sample.tooltip.service-content')"
-              VerticalOffset="-80"
-              :Theme="pageTheme">
-              <WinTextBlock class="sample-text" :Text="$t('sample.tooltip.textblock-target')" TextWrapping="WrapWholeWords" />
-            </WinToolTip>
-          </template>
+          <WinToolTip
+            :Content="$t('sample.tooltip.service-content')"
+            VerticalOffset="-80"
+            :Theme="pageTheme">
+            <WinTextBlock class="sample-text" :Text="$t('sample.tooltip.textblock-target')" TextWrapping="WrapWholeWords" />
+          </WinToolTip>
         </WinControlExample>
 
         <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="imageToolTipCode" :headerText="$t('sample.tooltip.image')">
-          <template #example>
-            <div class="image-example-shell">
-              <WinToolTip
-                :Content="$t('sample.tooltip.image-content')"
-                Placement="Right"
-                PlacementRect="0,0,400,266"
-                :Theme="pageTheme">
-                <WinImage
-                  :Source="cliffImage"
-                  Width="400"
-                  Height="266"
-                  Stretch="UniformToFill"
-                  :alt="$t('sample.tooltip.image-alt')" />
-              </WinToolTip>
-            </div>
-          </template>
-        </WinControlExample>
-
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="controlledToolTipCode" :headerText="$t('sample.tooltip.controlled')">
-          <template #example>
-            <div class="controlled-tooltip-sample">
-              <WinButton @Click="isControlledToolTipOpen = !isControlledToolTipOpen">
-                <WinTextBlock :Text="$t('sample.tooltip.toggle-open')" />
-              </WinButton>
-              <WinToolTip v-model:IsOpen="isControlledToolTipOpen" Placement="Bottom" :Content="$t('sample.tooltip.controlled-content')" :Theme="pageTheme">
-                <WinTextBlock class="controlled-target" :Text="$t('sample.tooltip.controlled-target')" />
-              </WinToolTip>
-            </div>
-          </template>
+          <WinToolTip
+            :Content="$t('sample.tooltip.image-content')"
+            Placement="Right"
+            PlacementRect="0,0,400,266"
+            :Theme="pageTheme">
+            <WinImage
+              :Source="cliffImage"
+              :Width="400"
+              :Height="266"
+              Stretch="UniformToFill"
+              :alt="$t('sample.tooltip.image-alt')" />
+          </WinToolTip>
         </WinControlExample>
       </div>
     </div>
@@ -73,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+import { computed, inject } from 'vue';
 import type { Ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
@@ -88,7 +67,6 @@ import { createPageState } from '../../utils/pageState';
 const currentPage = inject<Ref<string>>('currentPage');
 const pageKey = computed(() => currentPage?.value || 'tooltip');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-const isControlledToolTipOpen = ref(false);
 
 const simpleToolTipCode = `<WinButton ToolTipService.ToolTip="Simple ToolTip">
   <WinTextBlock Text="Button with a simple ToolTip." />
@@ -101,10 +79,6 @@ const serviceToolTipCode = `<WinToolTip Content="Offset ToolTip." VerticalOffset
 const imageToolTipCode = `<WinToolTip Content="Non-occluding ToolTip." Placement="Right" PlacementRect="0,0,400,266">
   <WinImage Source="/Assets/SampleMedia/cliff.jpg" Width="400" Height="266" />
 </WinToolTip>`;
-
-const controlledToolTipCode = `<WinToolTip v-model:IsOpen="isToolTipOpen" Placement="Bottom" Content="This ToolTip is controlled by IsOpen.">
-  <WinTextBlock Text="Controlled placement target" />
-</WinToolTip>`;
 </script>
 
 <style scoped>
@@ -115,7 +89,4 @@ const controlledToolTipCode = `<WinToolTip v-model:IsOpen="isToolTipOpen" Placem
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
 .sample-text { max-width: 280px; color: var(--text-primary); }
-.image-example-shell { max-width: 100%; padding: 8px; overflow-x: auto; }
-.controlled-tooltip-sample { display: flex; align-items: center; gap: 16px; min-height: 48px; }
-.controlled-target { padding: 6px 10px; color: var(--text-primary); border: 1px solid var(--card-stroke); border-radius: 4px; }
 </style>

@@ -3,11 +3,10 @@
     v-if="!IsServiceHost"
     ref="anchorRef"
     class="win-tooltip-anchor"
-    :title="nativeTitle"
     :aria-describedby="isVisible ? tooltipId : undefined"
+    :aria-label="contentText || undefined"
     @pointerenter="onPointerEnter"
     @pointerleave="onPointerLeave"
-    @pointermove="onPointerMove"
     @pointerdown="onPointerDown"
     @focusin="onFocusIn"
     @focusout="onFocusOut">
@@ -23,7 +22,9 @@
         class="win-tooltip"
         :class="[themeClass, `placement-${actualPlacement.toLowerCase()}`]"
         :style="tooltipStyle"
-        role="tooltip">
+        role="tooltip"
+        @pointerenter="onToolTipPointerEnter"
+        @pointerleave="onToolTipPointerLeave">
         <slot v-if="$slots.content" name="content"></slot>
         <WinTextBlock v-else :Text="contentText" TextWrapping="WrapWholeWords" />
       </div>
@@ -33,11 +34,12 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch } from 'vue';
-import type { ComponentPublicInstance } from 'vue';
+import type { ComponentPublicInstance, CSSProperties } from 'vue';
 import WinTextBlock from './WinTextBlock.vue';
 
 type PlacementKey = 'bottom' | 'left' | 'mouse' | 'right' | 'top';
 type Position = { top: number; left: number };
+type Point = { x: number; y: number };
 type PlacementTargetValue = HTMLElement | ComponentPublicInstance | { value?: unknown; $el?: unknown } | string | null;
 type PlacementRectValue = { x?: number; y?: number; left?: number; top?: number; width?: number; height?: number; getBoundingClientRect?: () => DOMRect } | string | null;
 
@@ -49,6 +51,7 @@ const props = defineProps({
   IsEnabled: { type: Boolean, default: true },
   Placement: { type: String, default: 'Mouse' },
   PlacementTarget: { type: [Object, String], default: null },
+  PlacementPoint: { type: Object, default: null },
   PlacementRect: { type: [Object, String], default: null },
   HorizontalOffset: { type: [String, Number], default: 0 },
   VerticalOffset: { type: [String, Number], default: 0 },
@@ -77,14 +80,16 @@ const props = defineProps({
   'ToolTipService.PlacementTarget': { type: [Object, String], default: null }
 });
 
-const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed', 'Opening', 'Closing']);
+const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed', 'Opening', 'Closing', 'tooltip-pointer-enter', 'tooltip-pointer-leave']);
 const slots = useSlots();
 const anchorRef = ref<HTMLElement | null>(null);
 const tooltipRef = ref<HTMLElement | null>(null);
 const localIsOpen = ref(false);
 const isHoveringTarget = ref(false);
-const pointer = ref({ x: 0, y: 0 });
+const isHoveringTooltip = ref(false);
+const pointer = ref<Point | null>(null);
 const position = ref({ top: 0, left: 0 });
+const isPositioned = ref(false);
 const actualPlacement = ref('Mouse');
 const tooltipId = `win-tooltip-${Math.random().toString(36).slice(2, 10)}`;
 let openTimer: number | undefined;
@@ -105,11 +110,6 @@ const contentText = computed(() => {
 });
 const placement = computed(() => props.ToolTipServicePlacement || props['ToolTipService.Placement'] || props.Placement || 'Mouse');
 const placementTarget = computed(() => props.ToolTipServicePlacementTarget || props['ToolTipService.PlacementTarget'] || props.PlacementTarget);
-const nativeTitle = computed(() => {
-  if (!props.UseNativeToolTip || props.NativeToolTip === false || isVisible.value) return undefined;
-  if (typeof props.NativeToolTip === 'string' && props.NativeToolTip) return props.NativeToolTip;
-  return contentText.value || undefined;
-});
 const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark'
   ? `win-theme-scope theme-${props.Theme}`
   : 'win-tooltip-theme');
@@ -133,9 +133,10 @@ const xamlThickness = (value: string | number | null | undefined) => {
   return value;
 };
 
-const tooltipStyle = computed(() => ({
+const tooltipStyle = computed<CSSProperties>(() => ({
   top: `${position.value.top}px`,
   left: `${position.value.left}px`,
+  visibility: isPositioned.value ? undefined : 'hidden',
   background: props.Background || undefined,
   backgroundImage: props.Background ? 'none' : undefined,
   color: props.Foreground || undefined,
@@ -184,6 +185,8 @@ function rectFromPlacementRect(): DOMRect | Position & { right: number; bottom: 
 
 function setOpen(value: boolean, immediate = false) {
   if (value === effectiveIsOpen.value && !immediate) return;
+  if (value) isPositioned.value = false;
+  else isHoveringTooltip.value = false;
   localIsOpen.value = value;
   emit('update:IsOpen', value);
 }
@@ -211,9 +214,12 @@ function show(immediate = false) {
 
 function hide(force = false) {
   clearTimers();
-  if (!force && isHoveringTarget.value) return;
+  if (!force && (isHoveringTarget.value || isHoveringTooltip.value)) return;
   if (!effectiveIsOpen.value) return;
-  closeTimer = window.setTimeout(() => setOpen(false), force ? 0 : Math.max(0, props.BetweenShowDelay));
+  closeTimer = window.setTimeout(() => {
+    setOpen(false);
+    isPositioned.value = false;
+  }, force ? 0 : Math.max(0, props.BetweenShowDelay));
 }
 
 function toggle() {
@@ -223,25 +229,35 @@ function toggle() {
 
 function onPointerEnter(event: PointerEvent) {
   isHoveringTarget.value = true;
-  pointer.value = { x: event.clientX, y: event.clientY };
+  if (!effectiveIsOpen.value) pointer.value = { x: event.clientX, y: event.clientY };
   show(false);
 }
 function onPointerLeave() {
   isHoveringTarget.value = false;
   hide();
 }
-function onPointerMove(event: PointerEvent) {
-  pointer.value = { x: event.clientX, y: event.clientY };
-  if (isVisible.value && placement.value.toLowerCase() === 'mouse') void updatePosition();
-}
 function onPointerDown(event: PointerEvent) {
+  pointer.value = { x: event.clientX, y: event.clientY };
   if (event.pointerType === 'touch') show(true);
 }
 function onFocusIn() {
+  const rect = targetElement()?.getBoundingClientRect();
+  if (rect) pointer.value = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   show(true);
 }
 function onFocusOut() {
   isHoveringTarget.value = false;
+  hide();
+}
+function onToolTipPointerEnter() {
+  isHoveringTooltip.value = true;
+  if (closeTimer !== undefined) window.clearTimeout(closeTimer);
+  closeTimer = undefined;
+  emit('tooltip-pointer-enter');
+}
+function onToolTipPointerLeave() {
+  isHoveringTooltip.value = false;
+  emit('tooltip-pointer-leave');
   hide();
 }
 function clamp(value: number, min: number, max: number) {
@@ -253,39 +269,103 @@ async function updatePosition() {
   await nextTick();
   const tooltip = tooltipRef.value;
   if (!tooltip) return;
-  const targetRect = rectFromPlacementRect() || targetElement()?.getBoundingClientRect();
+  const placementRect = rectFromPlacementRect();
+  const targetRect = placementRect || targetElement()?.getBoundingClientRect();
   if (!targetRect) return;
   const tipRect = tooltip.getBoundingClientRect();
-  const gap = 8;
+  const gap = 20;
+  const viewportMargin = 8;
   const requestedMode = String(placement.value || 'Mouse').toLowerCase();
   const mode: PlacementKey = ['bottom', 'left', 'mouse', 'right', 'top'].includes(requestedMode)
     ? requestedMode as PlacementKey
     : 'mouse';
-  const candidates: Record<PlacementKey, Position> = {
-    mouse: { top: pointer.value.y + gap, left: pointer.value.x + gap },
-    top: { top: targetRect.top - tipRect.height - gap, left: targetRect.left + (targetRect.width - tipRect.width) / 2 },
-    bottom: { top: targetRect.bottom + gap, left: targetRect.left + (targetRect.width - tipRect.width) / 2 },
-    left: { top: targetRect.top + (targetRect.height - tipRect.height) / 2, left: targetRect.left - tipRect.width - gap },
-    right: { top: targetRect.top + (targetRect.height - tipRect.height) / 2, left: targetRect.right + gap }
+  const placementPoint = props.PlacementPoint as { x?: number; y?: number } | null;
+  const mousePoint = placementPoint && Number.isFinite(placementPoint.x) && Number.isFinite(placementPoint.y)
+    ? { x: Number(placementPoint.x), y: Number(placementPoint.y) }
+    : pointer.value || { x: targetRect.left + targetRect.width / 2, y: targetRect.top + targetRect.height / 2 };
+  const horizontalOffset = Number(props.HorizontalOffset || 0);
+  const verticalOffset = Number(props.VerticalOffset || 0);
+  const alignToPlacementRectPointer = Boolean(placementRect);
+  const horizontalCenter = alignToPlacementRectPointer
+    ? mousePoint.x - tipRect.width / 2
+    : targetRect.left + (targetRect.width - tipRect.width) / 2;
+  const verticalCenter = alignToPlacementRectPointer
+    ? mousePoint.y - tipRect.height / 2
+    : targetRect.top + (targetRect.height - tipRect.height) / 2;
+  const candidates: Record<Exclude<PlacementKey, 'mouse'>, Position> = {
+    top: { top: targetRect.top - tipRect.height - gap - verticalOffset, left: horizontalCenter },
+    bottom: { top: targetRect.bottom + gap + verticalOffset, left: horizontalCenter },
+    left: { top: verticalCenter, left: targetRect.left - tipRect.width - gap - horizontalOffset },
+    right: { top: verticalCenter, left: targetRect.right + gap + horizontalOffset }
   };
-  const fallbackOrder: Record<PlacementKey, PlacementKey[]> = {
-    mouse: ['mouse', 'bottom', 'top', 'right', 'left'],
-    top: ['top', 'bottom', 'right', 'left'],
-    bottom: ['bottom', 'top', 'right', 'left'],
-    left: ['left', 'right', 'bottom', 'top'],
-    right: ['right', 'left', 'bottom', 'top']
+  const fallbackOrder: Record<Exclude<PlacementKey, 'mouse'>, Exclude<PlacementKey, 'mouse'>[]> = {
+    top: ['top', 'bottom', 'left', 'right'],
+    bottom: ['bottom', 'top', 'left', 'right'],
+    left: ['left', 'right', 'top', 'bottom'],
+    right: ['right', 'left', 'top', 'bottom']
   };
-  const fits = (candidate: Position) => candidate.top >= 8
-    && candidate.left >= 8
-    && candidate.top + tipRect.height <= window.innerHeight - 8
-    && candidate.left + tipRect.width <= window.innerWidth - 8;
-  const resolved = fallbackOrder[mode].find(candidateMode => fits(candidates[candidateMode])) || mode;
-  const { top, left } = candidates[resolved];
+  const canPlaceOnSide = (candidateMode: Exclude<PlacementKey, 'mouse'>) => {
+    const candidate = candidates[candidateMode];
+    if (candidateMode === 'top') return candidate.top >= viewportMargin;
+    if (candidateMode === 'bottom') return candidate.top + tipRect.height <= window.innerHeight - viewportMargin;
+    if (candidateMode === 'left') return candidate.left >= viewportMargin;
+    return candidate.left + tipRect.width <= window.innerWidth - viewportMargin;
+  };
+
+  let resolved: PlacementKey;
+  let resolvedPosition: Position;
+  if (mode === 'mouse') {
+    const mouseLeft = mousePoint.x - tipRect.width / 2 + horizontalOffset;
+    const above = {
+      top: mousePoint.y - tipRect.height - gap,
+      left: mouseLeft
+    };
+    const below = {
+      top: mousePoint.y + gap,
+      left: mouseLeft
+    };
+    if (verticalOffset !== 0) {
+      const offsetPosition = {
+        top: mousePoint.y - verticalOffset,
+        left: mouseLeft
+      };
+      const offsetIsAbove = offsetPosition.top + tipRect.height / 2 < mousePoint.y;
+      const offsetFits = offsetPosition.top >= viewportMargin
+        && offsetPosition.top + tipRect.height <= window.innerHeight - viewportMargin;
+      const opposite = offsetIsAbove ? below : above;
+      const oppositeFits = opposite.top >= viewportMargin
+        && opposite.top + tipRect.height <= window.innerHeight - viewportMargin;
+      if (offsetFits) {
+        resolved = offsetIsAbove ? 'top' : 'bottom';
+        resolvedPosition = offsetPosition;
+      } else if (oppositeFits) {
+        resolved = offsetIsAbove ? 'bottom' : 'top';
+        resolvedPosition = opposite;
+      } else {
+        resolved = offsetIsAbove ? 'top' : 'bottom';
+        resolvedPosition = offsetPosition;
+      }
+    } else if (above.top >= viewportMargin) {
+      resolved = 'top';
+      resolvedPosition = above;
+    } else if (below.top + tipRect.height <= window.innerHeight - viewportMargin) {
+      resolved = 'bottom';
+      resolvedPosition = below;
+    } else {
+      resolved = 'top';
+      resolvedPosition = above;
+    }
+  } else {
+    resolved = fallbackOrder[mode].find(canPlaceOnSide) || mode;
+    resolvedPosition = candidates[resolved];
+  }
+
   position.value = {
-    top: clamp(top + Number(props.VerticalOffset || 0), 8, window.innerHeight - tipRect.height - 8),
-    left: clamp(left + Number(props.HorizontalOffset || 0), 8, window.innerWidth - tipRect.width - 8)
+    top: clamp(resolvedPosition.top, viewportMargin, window.innerHeight - tipRect.height - viewportMargin),
+    left: clamp(resolvedPosition.left, viewportMargin, window.innerWidth - tipRect.width - viewportMargin)
   };
   actualPlacement.value = resolved[0].toUpperCase() + resolved.slice(1);
+  isPositioned.value = true;
 }
 
 watch(effectiveIsOpen, async (value, oldValue) => {
@@ -299,7 +379,7 @@ watch(effectiveIsOpen, async (value, oldValue) => {
   emit(value ? 'Opened' : 'Closed');
 });
 watch(
-  [isVisible, placement, placementTarget, () => props.PlacementRect, () => props.HorizontalOffset, () => props.VerticalOffset, contentText],
+  [isVisible, placement, placementTarget, () => props.PlacementPoint, () => props.PlacementRect, () => props.HorizontalOffset, () => props.VerticalOffset, contentText],
   () => { if (isVisible.value) void updatePosition(); },
   { deep: true }
 );
@@ -332,17 +412,25 @@ defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSe
   padding: 6px 9px 8px;
   overflow-wrap: anywhere;
   color: var(--ToolTipForegroundBrush, var(--text-primary));
-  background: var(--ToolTipBackgroundBrush, var(--flyout-background, var(--flyout-bg)));
-  background-image: var(--flyout-material-overlay);
+  background: var(--ToolTipBackgroundBrush, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-background, var(--flyout-bg))));
+  background-clip: padding-box;
   border: 1px solid var(--ToolTipBorderBrush, var(--surface-stroke-color-flyout, var(--flyout-border)));
   border-radius: var(--ControlCornerRadius, 4px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .14);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, .14), 0 0 2px rgba(0, 0, 0, .18);
   backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
   font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
   font-size: 12px;
   line-height: 16px;
-  pointer-events: none;
+  pointer-events: auto;
+  isolation: isolate;
+}
+
+.win-tooltip .win-text-block {
+  display: inline;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
 }
 .win-tooltip-enter-active { animation: win-tooltip-fade-in 167ms cubic-bezier(0, 0, 0, 1) both; }
 .win-tooltip-leave-active { animation: win-tooltip-fade-out 83ms linear both; }

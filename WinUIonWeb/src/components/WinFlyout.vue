@@ -179,7 +179,6 @@ defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
   overflow: hidden;
   color: var(--text-primary);
   background: var(--flyout-background, var(--flyout-bg));
-  background-image: var(--flyout-material-overlay);
   border: 1px solid var(--surface-stroke-color-flyout, var(--flyout-border));
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);

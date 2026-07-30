@@ -129,7 +129,6 @@ const popupCode = `<WinPopup
   padding: 16px;
   color: var(--text-primary);
   background: var(--flyout-background, var(--flyout-bg));
-  background-image: var(--flyout-material-overlay);
   border: 1px solid var(--surface-stroke-color-default, var(--surface-stroke-color-flyout));
   border-radius: 8px;
   backdrop-filter: var(--flyout-backdrop);
