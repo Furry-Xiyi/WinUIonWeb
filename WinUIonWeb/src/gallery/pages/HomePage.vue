@@ -440,7 +440,7 @@ onUnmounted(() => {
   align-items: stretch;
   gap: 0;
   overflow: hidden;
-  isolation: isolate;
+  z-index: 0;
   background: transparent;
   border-color: var(--flyout-border);
   border-radius: 8px;
@@ -503,6 +503,7 @@ onUnmounted(() => {
   margin-top: 4px;
   max-height: 48px;
   overflow: hidden;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }

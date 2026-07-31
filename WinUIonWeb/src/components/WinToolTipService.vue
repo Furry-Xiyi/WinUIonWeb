@@ -7,8 +7,6 @@
     :PlacementPoint="placementPoint || undefined"
     :Theme="theme"
     :UseNativeToolTip="false"
-    :InitialShowDelay="0"
-    :BetweenShowDelay="0"
     IsServiceHost
     @tooltip-pointer-enter="onToolTipPointerEnter"
     @tooltip-pointer-leave="onToolTipPointerLeave" />
@@ -22,8 +20,13 @@ const TOOL_TIP_ATTRIBUTE = 'tooltipservice.tooltip';
 const PLACEMENT_ATTRIBUTE = 'tooltipservice.placement';
 const PLACEMENT_TARGET_ATTRIBUTE = 'tooltipservice.placementtarget';
 const TOOL_TIP_SELECTOR = '[tooltipservice\\.tooltip]';
-const INITIAL_SHOW_DELAY = 500;
-const BETWEEN_SHOW_DELAY = 100;
+const MOUSE_HOVER_TIME = 400;
+const INITIAL_SHOW_DELAY = MOUSE_HOVER_TIME * 2;
+const RESHOW_DELAY = MOUSE_HOVER_TIME * 1.5;
+const TOUCH_SHOW_DELAY = MOUSE_HOVER_TIME;
+const BETWEEN_SHOW_DELAY = 200;
+
+type InputMode = 'keyboard' | 'mouse' | 'touch';
 
 const isOpen = ref(false);
 const content = ref('');
@@ -39,7 +42,7 @@ let observer: MutationObserver | null = null;
 let openTimer: number | undefined;
 let closeTimer: number | undefined;
 let touchDismissTimer: number | undefined;
-let lastClosedAt = 0;
+let lastClosedAt = Number.NEGATIVE_INFINITY;
 let isPointerOverToolTip = false;
 
 function toolTipText(element: HTMLElement): string | null {
@@ -167,18 +170,30 @@ function openFor(element: HTMLElement) {
   isOpen.value = true;
 }
 
-function queueOpen(element: HTMLElement, immediate = false, point?: { x: number; y: number }) {
+function queueOpen(element: HTMLElement, inputMode: InputMode, point?: { x: number; y: number }) {
   if (activeElement === element && isOpen.value) {
     clearCloseTimer();
     return;
   }
   if (pendingElement === element) return;
-  clearOpenTimer();
-  clearCloseTimer();
+
+  const isSwitchingVisibleTarget = Boolean(activeElement && activeElement !== element && isOpen.value);
+  if (isSwitchingVisibleTarget) {
+    closeActive();
+  } else {
+    clearOpenTimer();
+    clearCloseTimer();
+  }
+
   pendingElement = element;
   placementPoint.value = point || elementCenter(element);
   const recentlyClosed = performance.now() - lastClosedAt <= BETWEEN_SHOW_DELAY;
-  const delay = immediate || recentlyClosed ? 0 : INITIAL_SHOW_DELAY;
+  const isReshow = isSwitchingVisibleTarget || recentlyClosed;
+  const delay = inputMode === 'touch'
+    ? isReshow ? 0 : TOUCH_SHOW_DELAY
+    : inputMode === 'mouse' && isReshow
+      ? RESHOW_DELAY
+      : INITIAL_SHOW_DELAY;
   openTimer = window.setTimeout(() => openFor(element), delay);
 }
 
@@ -206,7 +221,9 @@ function queueClose(element: HTMLElement) {
 
 function onPointerOver(event: PointerEvent) {
   const element = findToolTipElement(event.target);
-  if (element) queueOpen(element, false, { x: event.clientX, y: event.clientY });
+  if (element && event.pointerType !== 'touch') {
+    queueOpen(element, 'mouse', { x: event.clientX, y: event.clientY });
+  }
 }
 
 function onPointerOut(event: PointerEvent) {
@@ -220,7 +237,7 @@ function onPointerOut(event: PointerEvent) {
 function onPointerDown(event: PointerEvent) {
   const element = findToolTipElement(event.target);
   if (event.pointerType === 'touch' && element) {
-    queueOpen(element, true, { x: event.clientX, y: event.clientY });
+    queueOpen(element, 'touch', { x: event.clientX, y: event.clientY });
     clearTouchDismissTimer();
     touchDismissTimer = window.setTimeout(closeActive, 5000);
   } else if (!element && activeElement) {
@@ -230,7 +247,7 @@ function onPointerDown(event: PointerEvent) {
 
 function onFocusIn(event: FocusEvent) {
   const element = findToolTipElement(event.target);
-  if (element) queueOpen(element, true, elementCenter(element));
+  if (element) queueOpen(element, 'keyboard', elementCenter(element));
 }
 
 function onFocusOut(event: FocusEvent) {

@@ -65,8 +65,8 @@ const props = defineProps({
   MaxWidth: { type: [String, Number], default: 320 },
   CornerRadius: { type: [String, Number], default: '' },
   BackgroundSizing: { type: String, default: 'InnerBorderEdge' },
-  InitialShowDelay: { type: Number, default: 500 },
-  BetweenShowDelay: { type: Number, default: 100 },
+  InitialShowDelay: { type: Number, default: 800 },
+  BetweenShowDelay: { type: Number, default: 200 },
   ShowOnDisabled: { type: Boolean, default: false },
   IsServiceHost: { type: Boolean, default: false },
   Theme: { type: String, default: '' },
@@ -90,10 +90,12 @@ const isHoveringTooltip = ref(false);
 const pointer = ref<Point | null>(null);
 const position = ref({ top: 0, left: 0 });
 const isPositioned = ref(false);
+const isMouseCentered = ref(false);
 const actualPlacement = ref('Mouse');
 const tooltipId = `win-tooltip-${Math.random().toString(36).slice(2, 10)}`;
 let openTimer: number | undefined;
 let closeTimer: number | undefined;
+let suppressFocusShowUntil = 0;
 
 const isEnabled = computed(() => props.IsEnabled !== false);
 const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
@@ -136,6 +138,7 @@ const xamlThickness = (value: string | number | null | undefined) => {
 const tooltipStyle = computed<CSSProperties>(() => ({
   top: `${position.value.top}px`,
   left: `${position.value.left}px`,
+  transform: isMouseCentered.value ? 'translateX(-50%)' : undefined,
   visibility: isPositioned.value ? undefined : 'hidden',
   background: props.Background || undefined,
   backgroundImage: props.Background ? 'none' : undefined,
@@ -198,13 +201,13 @@ function clearTimers() {
   closeTimer = undefined;
 }
 
-function show(immediate = false) {
+function show(immediate = false, delayOverride?: number) {
   const target = targetElement();
   const targetIsDisabled = Boolean(target?.matches?.(':disabled') || target?.querySelector?.(':disabled'));
   if (!isEnabled.value || (targetIsDisabled && !props.ShowOnDisabled) || (!contentText.value && !slots.content)) return;
   clearTimers();
   if (effectiveIsOpen.value) return;
-  const delay = immediate ? 0 : Math.max(0, props.InitialShowDelay);
+  const delay = immediate ? 0 : Math.max(0, delayOverride ?? props.InitialShowDelay);
   openTimer = window.setTimeout(async () => {
     setOpen(true);
     await nextTick();
@@ -228,6 +231,7 @@ function toggle() {
 }
 
 function onPointerEnter(event: PointerEvent) {
+  if (event.pointerType === 'touch') return;
   isHoveringTarget.value = true;
   if (!effectiveIsOpen.value) pointer.value = { x: event.clientX, y: event.clientY };
   show(false);
@@ -238,12 +242,17 @@ function onPointerLeave() {
 }
 function onPointerDown(event: PointerEvent) {
   pointer.value = { x: event.clientX, y: event.clientY };
-  if (event.pointerType === 'touch') show(true);
+  if (event.pointerType === 'touch') {
+    isHoveringTarget.value = true;
+    suppressFocusShowUntil = performance.now() + 100;
+    show(false, props.InitialShowDelay / 2);
+  }
 }
 function onFocusIn() {
+  if (performance.now() < suppressFocusShowUntil) return;
   const rect = targetElement()?.getBoundingClientRect();
   if (rect) pointer.value = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-  show(true);
+  show(false);
 }
 function onFocusOut() {
   isHoveringTarget.value = false;
@@ -362,8 +371,15 @@ async function updatePosition() {
 
   position.value = {
     top: clamp(resolvedPosition.top, viewportMargin, window.innerHeight - tipRect.height - viewportMargin),
-    left: clamp(resolvedPosition.left, viewportMargin, window.innerWidth - tipRect.width - viewportMargin)
+    left: mode === 'mouse'
+      ? clamp(
+          mousePoint.x + horizontalOffset,
+          viewportMargin + tipRect.width / 2,
+          window.innerWidth - viewportMargin - tipRect.width / 2
+        )
+      : clamp(resolvedPosition.left, viewportMargin, window.innerWidth - tipRect.width - viewportMargin)
   };
+  isMouseCentered.value = mode === 'mouse';
   actualPlacement.value = resolved[0].toUpperCase() + resolved.slice(1);
   isPositioned.value = true;
 }
@@ -413,12 +429,17 @@ defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSe
   overflow-wrap: anywhere;
   color: var(--ToolTipForegroundBrush, var(--text-primary));
   background: var(--ToolTipBackgroundBrush, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-background, var(--flyout-bg))));
+  background: color-mix(
+    in srgb,
+    var(--ToolTipBackgroundBrush, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-background, var(--flyout-bg)))) 78%,
+    transparent
+  );
   background-clip: padding-box;
   border: 1px solid var(--ToolTipBorderBrush, var(--surface-stroke-color-flyout, var(--flyout-border)));
   border-radius: var(--ControlCornerRadius, 4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, .14), 0 0 2px rgba(0, 0, 0, .18);
-  backdrop-filter: var(--flyout-backdrop);
-  -webkit-backdrop-filter: var(--flyout-backdrop);
+  backdrop-filter: var(--flyout-backdrop, blur(30px) saturate(160%));
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px) saturate(160%));
   font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
   font-size: 12px;
   line-height: 16px;
