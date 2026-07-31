@@ -88,7 +88,7 @@ const example3Template = `<div class="horizontal-example">
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-primary); }
 .page-description { font-size: 14px; color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.5; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; align-items: center; }
-.icon { font-size: 16px; font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets'; }
+.icon { font-size: 16px; }
 .stack-example { display: flex; flex-direction: column; gap: 8px; }
 .horizontal-example { display: flex; align-items: center; gap: 8px; }
 .error-text { color: var(--system-error-default, #c42b1c); font-size: 14px; }

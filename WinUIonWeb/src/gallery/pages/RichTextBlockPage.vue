@@ -221,7 +221,6 @@ const example4Vue = `const highlightColor = ref('yellow');
 
 .icon {
   font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 
 .rich-text-block {

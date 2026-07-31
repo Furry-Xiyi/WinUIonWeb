@@ -356,7 +356,6 @@ defineExpose({
 }
 
 .nav-button .icon {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
   font-size: 12px;
   display: block;
 }

@@ -211,7 +211,6 @@ const luminosityOpacity = ref(0.8);
 }
 
 .icon {
-  font-family: 'Segoe MDL2 Assets';
   font-size: 16px;
   line-height: 1;
 }

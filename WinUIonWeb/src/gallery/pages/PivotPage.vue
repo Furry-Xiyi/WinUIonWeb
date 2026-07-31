@@ -113,6 +113,5 @@ const selectedIndex = ref(0);`;
 
 .icon {
   font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 </style>

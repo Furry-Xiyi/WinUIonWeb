@@ -137,7 +137,6 @@ const handleClose = () => {
 }
 
 .icon {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
   font-size: 16px;
   display: flex;
   align-items: center;
@@ -241,7 +240,6 @@ const handleClose = () => {
 }
 
 .close-icon {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
   font-size: 12px;
 }
 

@@ -297,7 +297,6 @@ const example4Vue = `const dynamicValue = ref(1);
 
 .icon {
   font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 
 .number-input-container {

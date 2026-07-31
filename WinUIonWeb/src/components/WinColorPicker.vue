@@ -676,7 +676,6 @@ onMounted(() => {
   }
 
   .cp-more-button .icon {
-    font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
     font-size: 12px;
   }
 </style>

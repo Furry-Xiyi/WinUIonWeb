@@ -242,12 +242,10 @@ const templateSelectorTreeViewVue = `<WinTreeView v-model:ItemsSource="fileTree"
 }
 
 .icon {
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
   font-size: 16px;
 }
 .tree-icon {
   width: 20px;
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
 }
 .tree-icon.folder::before { content: "\E8B7"; }
 .tree-icon.file::before { content: "\E8A5"; }

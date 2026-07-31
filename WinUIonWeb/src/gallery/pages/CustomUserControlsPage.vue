@@ -318,7 +318,6 @@ const example3Vue = `public sealed partial class TemperatureConverterControl : U
 
 .icon {
   font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 
 .section-header {

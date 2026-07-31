@@ -119,7 +119,7 @@ const commandBarFlyoutCode = `<WinCommandBarFlyout
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
-.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.icon { font-size: 16px; }
 .commandbarflyout-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .image-button { padding: 0; border: 0; background: transparent; cursor: pointer; }
 .sample-image { height: 300px; display: block; }

@@ -24,6 +24,7 @@
                   :Description="tile.Description"
                   :HeaderIcon="tile.Icon"
                   :IsClickEnabled="true"
+                  :IsActionIconVisible="false"
                   role="link"
                   tabindex="0"
                   @Click="openTile(tile)"
@@ -447,14 +448,23 @@ onUnmounted(() => {
 }
 
 .home-header-tile::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
+  pointer-events: none;
   border-radius: inherit;
   background: color-mix(in srgb, var(--flyout-bg) 78%, transparent);
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);
+}
+
+.home-header-tile:hover::before {
+  background: color-mix(in srgb, var(--flyout-bg) 84%, transparent);
+}
+
+.home-header-tile:active::before {
+  background: color-mix(in srgb, var(--flyout-bg) 72%, transparent);
 }
 
 .home-header-tile::after {
@@ -463,12 +473,14 @@ onUnmounted(() => {
   right: 12px;
   bottom: 10px;
   color: var(--text-secondary);
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
+  font-family: 'WinUIOnWebIcons';
   font-size: 14px;
-  z-index: 1;
+  z-index: 2;
 }
 
 .home-header-tile :deep(.win-settings-card-header) {
+  position: relative;
+  z-index: 1;
   flex: 1;
   flex-direction: column;
   align-items: flex-start;
@@ -509,6 +521,8 @@ onUnmounted(() => {
 }
 
 .home-header-tile :deep(.win-settings-card-content) {
+  position: relative;
+  z-index: 1;
   display: none;
 }
 

@@ -287,7 +287,6 @@ const onViewChangeCompleted = (event) => {
 
 .icon {
   font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 
 .output-text {
@@ -352,7 +351,6 @@ const onViewChangeCompleted = (event) => {
 }
 
 .group-icon {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
   font-size: 32px;
   color: var(--accent-base);
   flex-shrink: 0;

@@ -704,7 +704,6 @@ const example8Code = `<WinNavigationView
 }
 
 .icon {
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
   font-size: 16px;
   line-height: 16px;
 }

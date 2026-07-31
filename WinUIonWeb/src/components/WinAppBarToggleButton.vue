@@ -219,7 +219,6 @@ const getSymbolIcon = (icon: string): string => {
 }
 
 .win-symbol-icon {
-  font-family: 'Segoe MDL2 Assets', 'Segoe UI Symbol';
   font-weight: normal;
   font-style: normal;
 }

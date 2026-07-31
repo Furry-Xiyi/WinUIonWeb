@@ -145,7 +145,7 @@ const example2Template = `<WinAutoSuggestBox
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-primary); }
 .page-description { font-size: 14px; color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.5; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; align-items: center; }
-.icon { font-size: 16px; font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets'; }
+.icon { font-size: 16px; }
 .horizontal-example { display: flex; align-items: center; gap: 16px; }
 .search-example { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .output-text { color: var(--text-primary); font-size: 14px; }

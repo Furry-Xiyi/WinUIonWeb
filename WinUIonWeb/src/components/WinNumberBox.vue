@@ -318,7 +318,6 @@ onBeforeUnmount(() => {
 .win-number-spin-button span,
 .win-number-compact-indicator span,
 .win-number-popup-button span {
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
   font-size: 12px;
 }
 

@@ -1083,7 +1083,6 @@ onBeforeUnmount(() => {
   justify-content: center;
   pointer-events: none;
   color: var(--text-secondary);
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons", sans-serif;
   font-size: 12px;
   line-height: 12px;
 }

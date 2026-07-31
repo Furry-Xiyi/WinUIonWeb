@@ -266,7 +266,7 @@ const selectionItemsViewVue = `<WinItemsView
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
-.icon { font-size: 16px; font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; }
+.icon { font-size: 16px; }
 .sample-stack { display: flex; flex-direction: column; min-width: 0; }
 .basic-items-view { width: 220px; height: 400px; }
 .swappable-items-view,

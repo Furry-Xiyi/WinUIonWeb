@@ -44,6 +44,7 @@ let closeTimer: number | undefined;
 let touchDismissTimer: number | undefined;
 let lastClosedAt = Number.NEGATIVE_INFINITY;
 let isPointerOverToolTip = false;
+let suppressedElement: HTMLElement | null = null;
 
 function toolTipText(element: HTMLElement): string | null {
   return element.getAttribute(TOOL_TIP_ATTRIBUTE);
@@ -99,6 +100,7 @@ function releaseNode(node: Node) {
   elements.forEach(element => {
     if (activeElement === element) closeActive();
     if (pendingElement === element) clearOpenTimer();
+    if (suppressedElement === element) suppressedElement = null;
     if (attachedElements.has(element)) restoreOriginalTitle(element);
   });
 }
@@ -171,6 +173,7 @@ function openFor(element: HTMLElement) {
 }
 
 function queueOpen(element: HTMLElement, inputMode: InputMode, point?: { x: number; y: number }) {
+  if (suppressedElement === element) return;
   if (activeElement === element && isOpen.value) {
     clearCloseTimer();
     return;
@@ -198,6 +201,7 @@ function queueOpen(element: HTMLElement, inputMode: InputMode, point?: { x: numb
 }
 
 function closeActive() {
+  const wasOpen = Boolean(activeElement && isOpen.value);
   clearOpenTimer();
   clearCloseTimer();
   clearTouchDismissTimer();
@@ -208,7 +212,7 @@ function closeActive() {
   placementTarget.value = null;
   placementPoint.value = null;
   content.value = '';
-  lastClosedAt = performance.now();
+  if (wasOpen) lastClosedAt = performance.now();
 }
 
 function queueClose(element: HTMLElement) {
@@ -231,6 +235,7 @@ function onPointerOut(event: PointerEvent) {
   if (!element) return;
   const related = event.relatedTarget;
   if (related instanceof Node && element.contains(related)) return;
+  if (suppressedElement === element) suppressedElement = null;
   queueClose(element);
 }
 
@@ -240,6 +245,9 @@ function onPointerDown(event: PointerEvent) {
     queueOpen(element, 'touch', { x: event.clientX, y: event.clientY });
     clearTouchDismissTimer();
     touchDismissTimer = window.setTimeout(closeActive, 5000);
+  } else if (element) {
+    suppressedElement = element;
+    if (activeElement === element || pendingElement === element) closeActive();
   } else if (!element && activeElement) {
     closeActive();
   }

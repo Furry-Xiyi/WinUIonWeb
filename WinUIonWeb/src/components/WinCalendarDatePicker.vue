@@ -205,7 +205,6 @@ const onDateSelect = (dates) => {
   .picker-icon {
     width: 32px;
     color: var(--text-secondary);
-    font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
     font-size: 12px;
     line-height: 32px;
     text-align: center;

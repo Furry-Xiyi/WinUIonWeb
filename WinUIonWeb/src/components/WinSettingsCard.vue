@@ -157,7 +157,6 @@ const handleClick = (e) => {
     justify-content: center;
     color: var(--TextFillColorSecondaryBrush, var(--text-secondary));
     flex-shrink: 0;
-    font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
     font-size: 20px;
     line-height: 20px;
   }
@@ -192,7 +191,6 @@ const handleClick = (e) => {
   .win-settings-card-action-icon {
     margin-left: -2px;
     color: var(--text-secondary);
-    font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
     font-size: 13px;
     flex-shrink: 0;
   }

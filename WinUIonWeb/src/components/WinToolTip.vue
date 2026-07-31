@@ -91,6 +91,7 @@ const pointer = ref<Point | null>(null);
 const position = ref({ top: 0, left: 0 });
 const isPositioned = ref(false);
 const isMouseCentered = ref(false);
+const isSuppressedUntilPointerLeave = ref(false);
 const actualPlacement = ref('Mouse');
 const tooltipId = `win-tooltip-${Math.random().toString(36).slice(2, 10)}`;
 let openTimer: number | undefined;
@@ -232,12 +233,14 @@ function toggle() {
 
 function onPointerEnter(event: PointerEvent) {
   if (event.pointerType === 'touch') return;
+  if (isSuppressedUntilPointerLeave.value) return;
   isHoveringTarget.value = true;
   if (!effectiveIsOpen.value) pointer.value = { x: event.clientX, y: event.clientY };
   show(false);
 }
 function onPointerLeave() {
   isHoveringTarget.value = false;
+  isSuppressedUntilPointerLeave.value = false;
   hide();
 }
 function onPointerDown(event: PointerEvent) {
@@ -246,10 +249,13 @@ function onPointerDown(event: PointerEvent) {
     isHoveringTarget.value = true;
     suppressFocusShowUntil = performance.now() + 100;
     show(false, props.InitialShowDelay / 2);
+  } else {
+    isSuppressedUntilPointerLeave.value = true;
+    hide(true);
   }
 }
 function onFocusIn() {
-  if (performance.now() < suppressFocusShowUntil) return;
+  if (isSuppressedUntilPointerLeave.value || performance.now() < suppressFocusShowUntil) return;
   const rect = targetElement()?.getBoundingClientRect();
   if (rect) pointer.value = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   show(false);

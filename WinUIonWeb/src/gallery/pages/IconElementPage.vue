@@ -256,12 +256,10 @@ const example6Vue = `// Symbol: Accept (&#xE8FB;)`;
 
 .icon {
   font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 
 .font-icon,
 .symbol-icon {
-  font-family: 'Segoe MDL2 Assets', 'Segoe Fluent Icons';
   font-size: 20px;
   display: inline-block;
 }

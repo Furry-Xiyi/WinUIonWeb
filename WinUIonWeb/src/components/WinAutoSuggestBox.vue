@@ -378,7 +378,6 @@ onBeforeUnmount(() => {
 }
 
 .win-asb-icon {
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
   font-size: 13px;
 }
 

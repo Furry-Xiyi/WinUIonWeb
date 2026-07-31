@@ -179,7 +179,7 @@ const groupedListViewVue = `<WinListView :ItemsSource="groups" IsGrouped :AreSti
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
-.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.icon { font-size: 16px; }
 .sample-stack { display: flex; flex-direction: column; gap: 15px; width: 100%; }
 .listview-demo-scroll { width: 400px; max-width: 100%; height: 400px; border: 1px solid var(--card-stroke); background: var(--card-bg); }
 .listview-demo-scroll.narrow { width: 350px; }

@@ -260,7 +260,6 @@ defineExpose({ close, updatePosition });
   flex: 0 0 auto;
   width: 20px;
   color: var(--text-primary);
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
   font-size: 16px;
   line-height: 20px;
   text-align: center;
@@ -298,7 +297,6 @@ defineExpose({ close, updatePosition });
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
   font-size: 16px;
 }
 

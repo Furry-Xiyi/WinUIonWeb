@@ -134,7 +134,7 @@ const heroCode = computed(() => `<WinButton ref="testButton3" @Click="testButton
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
-.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.icon { font-size: 16px; }
 .hero-image { width: 100%; height: 100%; object-fit: cover; display: block; }
 .tip-description { margin-top: 16px; }
 </style>

@@ -398,7 +398,6 @@ defineExpose({ showAt, hide, openAt, isOpen });
 
 .win-cbf-icon,
 .win-cbf-overflow-icon {
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons", sans-serif;
   font-size: 16px;
   line-height: 1;
 }

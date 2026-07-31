@@ -288,7 +288,6 @@ const copyActiveCode = async () => {
 }
 
 .copy-code-button .icon {
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons", sans-serif;
   font-size: 14px;
 }
 

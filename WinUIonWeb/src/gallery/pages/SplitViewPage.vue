@@ -135,7 +135,7 @@ const splitViewCode = computed(() => `<WinSplitView
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
-.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.icon { font-size: 16px; }
 .split-view-sample-host { width: 400px; height: 300px; overflow: hidden; }
 .split-pane-layout { height: 100%; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
 .pane-header { margin: 12px 0 0 60px; font-size: 14px; line-height: 20px; color: var(--text-primary); }

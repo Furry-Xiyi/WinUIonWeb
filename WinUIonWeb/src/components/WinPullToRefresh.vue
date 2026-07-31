@@ -142,7 +142,6 @@ const onTouchEnd = () => {
     justify-content: center;
     width: 24px;
     height: 24px;
-    font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
     font-size: 20px;
     line-height: 0;
     color: var(--text-color);

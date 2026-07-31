@@ -121,7 +121,7 @@ const gifCode = computed(() => `<WinTextBlock Text="${t('sample.image.gif-auto')
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
-.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.icon { font-size: 16px; }
 .image-stack { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; color: var(--text-primary); }
 .nine-grid-even { width: 260px; }
 .nine-grid-css { width: 260px; height: 164px; border-image-source: url('https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/ninegrid.gif'); border-image-slice: 30 20 30 20 fill; border-image-width: 30px 20px 30px 20px; border-image-repeat: stretch; }

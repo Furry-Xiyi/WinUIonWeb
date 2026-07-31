@@ -162,7 +162,7 @@ const example5Template = `<WinRichEditBox
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-primary); }
 .page-description { font-size: 14px; color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.5; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; align-items: center; }
-.icon { font-size: 16px; font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets'; }
+.icon { font-size: 16px; }
 .custom-editor, .stack-example { width: 100%; display: flex; flex-direction: column; gap: 10px; }
 .custom-toolbar { display: flex; align-items: center; gap: 4px; }
 .separator { width: 1px; height: 24px; margin: 0 4px; background: var(--divider-stroke); }

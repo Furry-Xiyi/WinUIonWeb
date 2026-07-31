@@ -162,7 +162,6 @@ const computedShadow = computed(() => {
 }
 
 .icon {
-  font-family: 'Segoe MDL2 Assets', 'Segoe Fluent Icons', 'Segoe UI Symbol';
   font-size: 16px;
   display: inline-block;
   line-height: 1;

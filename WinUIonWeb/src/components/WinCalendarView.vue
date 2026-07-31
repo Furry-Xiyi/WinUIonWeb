@@ -774,7 +774,6 @@ watch([() => props.Language, () => props.CalendarIdentifier], () => {
 }
 
 .icon-btn {
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
   background: transparent;
   border: none;
   width: 32px;

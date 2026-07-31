@@ -410,8 +410,40 @@ watch(currentPage, (newVal, oldVal) => {
 
   body .icon,
   body .icon-btn,
-  body .ptr-icon-wrapper {
-    font-family: 'WinUIOnWebIcons', 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif;
+  body .ptr-icon-wrapper,
+  body .symbol-icon,
+  body .win-symbol-icon,
+  body .win-asb-icon,
+  body .picker-icon,
+  body .checkbox-glyph,
+  body .win-combo-chevron,
+  body .win-cbf-icon,
+  body .win-cbf-overflow-icon,
+  body .win-expander-header-icon,
+  body .win-expander-arrow,
+  body .infobadge-icon,
+  body .close-icon,
+  body .win-menu-flyout-icon,
+  body .win-menu-flyout-check,
+  body .win-menu-flyout-check-placeholder,
+  body .win-menu-flyout-chevron,
+  body .win-number-spin-button span,
+  body .win-number-compact-indicator span,
+  body .win-number-popup-button span,
+  body .win-password-reveal span,
+  body .win-rating-glyph,
+  body .scrollbar-button,
+  body .win-settings-card-icon,
+  body .win-settings-card-action-icon,
+  body .win-teaching-tip-icon,
+  body .win-teaching-tip-close,
+  body .win-textbox-delete-glyph,
+  body .font-icon,
+  body .icon-glyph,
+  body .icon-preview-glyph,
+  body .group-icon,
+  body .tree-icon {
+    font-family: 'WinUIOnWebIcons';
   }
 
   .page-header {

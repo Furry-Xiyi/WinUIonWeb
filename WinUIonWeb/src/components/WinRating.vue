@@ -333,7 +333,6 @@ const onKeyDown = (event) => {
   display: block;
   width: var(--rating-font-size);
   height: var(--rating-font-size);
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons", sans-serif;
   font-size: var(--rating-font-size);
   line-height: var(--rating-font-size);
   font-weight: 400;

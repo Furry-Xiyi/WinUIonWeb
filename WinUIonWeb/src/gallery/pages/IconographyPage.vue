@@ -404,7 +404,6 @@ const getSampleIcons = () => {
 }
 
 .icon-glyph {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', 'Segoe UI Symbol';
   font-size: 28px;
   color: var(--text-primary);
 }
@@ -464,7 +463,6 @@ const getSampleIcons = () => {
 }
 
 .icon-preview-glyph {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', 'Segoe UI Symbol';
   font-size: 48px;
   color: var(--text-primary);
 }

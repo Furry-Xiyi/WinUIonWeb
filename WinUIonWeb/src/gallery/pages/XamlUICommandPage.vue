@@ -131,7 +131,6 @@ const executeCustomCommand = () => {
 
 .icon {
   font-size: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 
 .output-text {

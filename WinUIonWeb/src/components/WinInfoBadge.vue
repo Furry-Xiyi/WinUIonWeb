@@ -174,7 +174,6 @@ const ariaLabel = computed(() => {
 }
 
 .infobadge-icon .infobadge-icon {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
   font-size: 10px;
 }
 

@@ -77,5 +77,5 @@ const repeatButtonSimpleVue = `<div>
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .horizontal-stack { display: flex; align-items: center; }
-.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
+.icon { font-size: 16px; }
 </style>

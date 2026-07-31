@@ -189,7 +189,6 @@ const toggleExpanded = () => {
   align-items: center;
   justify-content: center;
   color: var(--TextFillColorSecondaryBrush, var(--text-secondary));
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
   font-size: 20px;
   line-height: 20px;
   flex-shrink: 0;
@@ -250,7 +249,6 @@ const toggleExpanded = () => {
 
 .win-expander-arrow {
   font-size: 12px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
   display: block;
   transition: transform var(--fast-duration) var(--fast-out-slow-in);
 }

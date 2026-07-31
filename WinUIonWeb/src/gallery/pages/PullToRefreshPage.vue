@@ -89,7 +89,7 @@ const customIconPullToRefreshVue = `<WinPullToRefresh icon="&#xE1E2;" @RefreshRe
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
-.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; font-size: 16px; }
+.icon { font-size: 16px; }
 .refresh-surface { width: 300px; height: 300px; background: var(--card-bg-secondary); border: 1px solid var(--text-primary); }
 .refresh-row { padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
 .accent-output { color: var(--accent-base); font-weight: 600; }

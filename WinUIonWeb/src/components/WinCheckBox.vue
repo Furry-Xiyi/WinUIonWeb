@@ -159,7 +159,6 @@ const toggle = () => {
 }
 
 .checkbox-glyph {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', 'WinUIOnWebIcons', sans-serif;
   font-size: 12px;
   line-height: 1;
   color: var(--CheckBoxCheckGlyphForeground, var(--accent-text));

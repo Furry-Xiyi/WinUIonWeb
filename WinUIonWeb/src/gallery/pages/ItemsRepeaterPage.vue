@@ -356,7 +356,7 @@ const contentHeavyRepeaterVue = `<WinItemsRepeater :ItemsSource="visibleRecipes"
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 1.5; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; align-items: center; }
 .header-action { width: 32px; height: 32px; padding: 0; min-width: 0; }
-.icon { font-size: 16px; font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets"; }
+.icon { font-size: 16px; }
 .sample-stack { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .scroll-host { max-width: 100%; }
 .max-500 { max-height: 500px; }

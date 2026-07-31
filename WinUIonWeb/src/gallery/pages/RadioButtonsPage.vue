@@ -103,7 +103,7 @@ const radioButtonStringsVue = `<WinRadioButton Header="Background" MaxColumns="3
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
-.icon { font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", "WinUIOnWebIcons"; font-size: 16px; }
+.icon { font-size: 16px; }
 .vertical-stack { display: flex; flex-direction: column; align-items: flex-start; }
 .radio-color-output { width: 100%; height: 50px; box-sizing: border-box; margin: 10px 0; border: 10px solid; }
 </style>

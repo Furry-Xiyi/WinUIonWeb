@@ -194,7 +194,6 @@ const handleClick = (event: MouseEvent) => {
 }
 
 .symbol-icon {
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
   font-size: 16px;
   display: inline-block;
 }

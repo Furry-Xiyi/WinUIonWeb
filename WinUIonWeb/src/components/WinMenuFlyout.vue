@@ -482,7 +482,6 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
   min-width: 16px;
   margin-right: 12px;
   text-align: center;
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
   line-height: 1;
 }
 
@@ -497,7 +496,6 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 .win-menu-flyout-chevron {
   margin-left: 24px;
   color: var(--text-secondary);
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
   font-size: 12px;
 }
 

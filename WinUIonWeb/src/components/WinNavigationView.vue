@@ -13,12 +13,12 @@
             <WinTextBlock :Text="item.label" />
           </div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-child-selected': isChildOfGroup(item) }">
-            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
+            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
               <span class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)"></span>
@@ -35,7 +35,7 @@
         <template v-for="item in footerItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
@@ -92,19 +92,19 @@
               <WinTextBlock :Text="item.label" />
             </div>
             <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-            <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+            <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
               <span class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
             </div>
             <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
-              <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
+              <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
                 <span class="icon">{{ item.icon }}</span>
                 <WinTextBlock class="label" :Text="item.label" />
                 <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
               </div>
               <div v-if="!isCompact" class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? (groupHeights[item.value] || 0) + 'px' : '0px' }">
                 <div class="win-nav-group-children-inner" :ref="el => setChildrenRef(item.value, el)">
-                  <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value }" v-bind="itemToolTipAttrs(child)" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
+                  <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
                     <span class="icon">{{ child.icon }}</span>
                     <WinTextBlock class="label" :Text="child.label" />
                   </div>
@@ -119,7 +119,7 @@
         <template v-for="item in footerItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
@@ -143,19 +143,19 @@
         <template v-for="item in topOverflowMenuItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onMoreItemClick(item)">
+          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreItemClick(item)">
             <span class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
-            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value }" v-bind="itemToolTipAttrs(item)" @click="onMoreGroupHeaderClick(item)">
+            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreGroupHeaderClick(item)">
               <span class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
             </div>
             <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 38 + 2) + 'px' : '0px' }">
               <div class="win-nav-group-children-inner">
-                <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value }" v-bind="itemToolTipAttrs(child)" @click="onMoreChildClick(item, child)">
+                <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onMoreChildClick(item, child)">
                   <span class="icon">{{ child.icon }}</span>
                   <WinTextBlock class="label" :Text="child.label" />
                 </div>
@@ -234,6 +234,7 @@ const normalizeItem = (item, fallbackKey = 'item') => {
     children: Array.isArray(children)
       ? children.map((child, index) => normalizeItem(child, `${fallbackKey}-${index}`))
       : null,
+    isEnabled: (item?.IsEnabled ?? item?.isEnabled ?? !(item?.Disabled ?? item?.disabled ?? false)) !== false,
     selectsOnInvoked: (item?.SelectsOnInvoked ?? item?.selectsOnInvoked) !== false,
     source: item
   };
@@ -552,6 +553,7 @@ const commitNavigationValue = (value, { invoked = true, isSettings = false } = {
   const normalizedItem = isSettings ? null : findNormalizedItem(value);
   const item = isSettings ? createSettingsItem() : normalizedItem?.source;
   if (!item) return false;
+  if (!isSettings && normalizedItem.isEnabled === false) return false;
 
   if (invoked) {
     emit('ItemInvoked', {
@@ -700,10 +702,12 @@ const selectNavigationValue = (value, isChild = null) => {
 };
 
 const onItemClick = (item) => {
+  if (!item.isEnabled) return;
   selectNavigationValue(item.value, false);
 };
 
 const onChildClick = (group, child) => {
+  if (!child.isEnabled) return;
   selectNavigationValue(child.value, true);
 };
 
@@ -756,16 +760,19 @@ const toggleMoreFlyout = () => {
 };
 
 const onMoreItemClick = (item) => {
+  if (!item.isEnabled) return;
   closeMoreFlyout();
   selectNavigationValue(item.value, false);
 };
 
 const onMoreChildClick = (group, child) => {
+  if (!child.isEnabled) return;
   closeMoreFlyout();
   selectNavigationValue(child.value, true);
 };
 
 const onMoreGroupHeaderClick = (item) => {
+  if (!item.isEnabled) return;
   if (item.selectsOnInvoked !== false && !isChildOfGroup(item)) {
     selectNavigationValue(item.value, false);
     closeMoreFlyout();
@@ -778,6 +785,7 @@ const onMoreGroupHeaderClick = (item) => {
 };
 
 const onGroupHeaderClick = (item) => {
+  if (!item.isEnabled) return;
   if (isTopNavigation.value) {
     const el = itemRefs[item.value];
     if (el) {
@@ -786,10 +794,10 @@ const onGroupHeaderClick = (item) => {
       flyoutGroupValue.value = item.value;
       const items = [];
       if (item.selectsOnInvoked !== false) {
-        items.push({ Text: item.label, Value: item.value, Icon: item.icon, IsHeader: true });
+        items.push({ Text: item.label, Value: item.value, Icon: item.icon, IsHeader: true, IsEnabled: item.isEnabled });
       }
       for (const child of (item.children || [])) {
-        items.push({ Text: child.label, Value: child.value, Icon: child.icon });
+        items.push({ Text: child.label, Value: child.value, Icon: child.icon, IsEnabled: child.isEnabled });
       }
       flyoutItems.value = items;
       flyoutOpen.value = !flyoutOpen.value;
@@ -821,10 +829,10 @@ const onGroupHeaderClick = (item) => {
       flyoutGroupValue.value = item.value;
       const items = [];
       if (item.selectsOnInvoked !== false) {
-        items.push({ Text: item.label, Value: item.value, Icon: item.icon, IsHeader: true });
+        items.push({ Text: item.label, Value: item.value, Icon: item.icon, IsHeader: true, IsEnabled: item.isEnabled });
       }
       for (const child of (item.children || [])) {
-        items.push({ Text: child.label, Value: child.value, Icon: child.icon });
+        items.push({ Text: child.label, Value: child.value, Icon: child.icon, IsEnabled: child.isEnabled });
       }
       flyoutItems.value = items;
       flyoutOpen.value = true;
@@ -911,6 +919,7 @@ const closeFlyout = () => {
 };
 
 const onFlyoutSelect = (item) => {
+  if (item.IsEnabled === false) return;
   const itemValue = item.Value;
   const isHeader = item.IsHeader;
   const movesTopChildToGroup = isTopNavigation.value && flyoutGroupValue.value && !isHeader;
@@ -1779,6 +1788,12 @@ watch(() => props.selectedValue, (val) => {
       box-shadow: none;
     }
 
+    .win-nav-shell.is-left-compact .win-nav-left-panel.is-compact {
+      background: var(--app-bg);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
     .win-nav-shell:not(.is-overlay-left) .win-nav-left-panel.is-compact {
       width: var(--win-nav-open-pane-length, 320px);
       margin-right: calc(var(--win-nav-compact-pane-length, 48px) - var(--win-nav-open-pane-length, 320px));
@@ -1941,12 +1956,12 @@ watch(() => props.selectedValue, (val) => {
       opacity: 0.65;
     }
 
-    .win-nav-back-button:hover,
+    .win-nav-back-button:not(:disabled):hover,
     .win-nav-hamburger:hover {
       background: var(--subtle-secondary);
     }
 
-    .win-nav-back-button:active,
+    .win-nav-back-button:not(:disabled):active,
     .win-nav-hamburger:active {
       background: var(--subtle-tertiary);
     }
@@ -1994,6 +2009,7 @@ watch(() => props.selectedValue, (val) => {
 
   .win-nav-item {
     position: relative;
+    box-sizing: border-box;
     height: 36px;
     padding: 0 12px;
     border-radius: 4px;
@@ -2028,6 +2044,25 @@ watch(() => props.selectedValue, (val) => {
 
     .win-nav-item.is-selected:active {
       background: var(--subtle-pressed);
+    }
+
+  .win-nav-item.is-disabled {
+    color: var(--text-disabled);
+    cursor: default;
+  }
+
+    .win-nav-item.is-disabled:not(.is-selected),
+    .win-nav-item.is-disabled:not(.is-selected):hover,
+    .win-nav-item.is-disabled:not(.is-selected):active {
+      background: transparent;
+      color: var(--text-disabled);
+    }
+
+    .win-nav-item.is-disabled.is-selected,
+    .win-nav-item.is-disabled.is-selected:hover,
+    .win-nav-item.is-disabled.is-selected:active {
+      background: var(--subtle-secondary);
+      color: var(--text-disabled);
     }
 
   .win-nav-item .icon {
@@ -2077,6 +2112,18 @@ watch(() => props.selectedValue, (val) => {
   .win-nav-left-panel.is-compact .win-nav-item .label {
     opacity: 0;
     pointer-events: none;
+  }
+
+  .win-nav-left-panel.is-compact .win-nav-item {
+    width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    min-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    max-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    overflow: hidden;
+  }
+
+  .win-nav-left-panel.is-compact.is-pane-closing .win-nav-item {
+    width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
+    max-width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
   }
 
   .win-nav-left-panel.is-compact.is-pane-closing .win-nav-item .label {
@@ -2140,17 +2187,17 @@ watch(() => props.selectedValue, (val) => {
         margin-right: 0;
       }
 
-    .win-nav-top-bar .win-nav-item:hover {
+    .win-nav-top-bar .win-nav-item:not(.is-disabled):hover {
       background: transparent;
       opacity: 0.8;
     }
 
-    .win-nav-top-bar .win-nav-item:active {
+    .win-nav-top-bar .win-nav-item:not(.is-disabled):active {
       opacity: 0.6;
       transition: opacity 0.06s ease-out;
     }
 
-    .win-nav-top-bar .win-nav-item.is-selected:active {
+    .win-nav-top-bar .win-nav-item.is-selected:not(.is-disabled):active {
       opacity: 0.6;
     }
 
@@ -2158,7 +2205,7 @@ watch(() => props.selectedValue, (val) => {
       background: transparent;
     }
 
-      .win-nav-top-bar .win-nav-item.is-selected:hover {
+      .win-nav-top-bar .win-nav-item.is-selected:not(.is-disabled):hover {
         background: transparent;
       }
 
@@ -2250,7 +2297,7 @@ watch(() => props.selectedValue, (val) => {
     background: transparent;
   }
 
-    .win-nav-left-panel .win-nav-group.is-child-selected > .win-nav-group-header:hover {
+    .win-nav-left-panel .win-nav-group.is-child-selected > .win-nav-group-header:not(.is-disabled):hover {
       background: var(--subtle-secondary);
     }
 

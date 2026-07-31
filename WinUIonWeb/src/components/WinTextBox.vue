@@ -887,7 +887,6 @@ defineExpose({
 
 .win-textbox-delete-glyph {
   display: block;
-  font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif;
   font-size: 12px;
   line-height: 12px;
 }
