@@ -48,8 +48,9 @@
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                   <label style="font-size: 12px; color: var(--text-secondary);">Kind</label>
                   <WinComboBox
-                    v-model="selectedAnimationKindIndex"
-                    :options="animationKindOptions"
+                    v-model:SelectedIndex="selectedAnimationKindIndex"
+                    :ItemsSource="animationKindOptions"
+                    DisplayMemberPath="label"
                     style="min-width: 240px;" />
                 </div>
               </template>

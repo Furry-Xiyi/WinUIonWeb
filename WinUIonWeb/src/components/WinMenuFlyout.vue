@@ -551,22 +551,18 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 
 @keyframes flyout-menu-open-down {
   from {
-    clip-path: inset(0 0 calc(100% - 1px) 0);
     transform: translateY(-16px);
   }
   to {
-    clip-path: inset(0 0 0 0);
     transform: translateY(0);
   }
 }
 
 @keyframes flyout-menu-open-up {
   from {
-    clip-path: inset(calc(100% - 1px) 0 0 0);
     transform: translateY(16px);
   }
   to {
-    clip-path: inset(0 0 0 0);
     transform: translateY(0);
   }
 }

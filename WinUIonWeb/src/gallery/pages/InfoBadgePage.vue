@@ -45,9 +45,11 @@
                     header="InfoBadge Opacity">
                   </WinToggleSwitch>
                   <WinComboBox
-                    v-model="displayModeValue"
-                    header="Display Mode"
-                    :options="displayModeOptions">
+                    v-model:SelectedValue="displayModeValue"
+                    Header="Display Mode"
+                    :ItemsSource="displayModeOptions"
+                    DisplayMemberPath="label"
+                    SelectedValuePath="value">
                   </WinComboBox>
                 </div>
               </template>
@@ -77,9 +79,11 @@
 
                 <div style="width: 160px;">
                   <WinComboBox
-                    v-model="badgeStyle"
-                    header="Styles"
-                    :options="styleOptions">
+                    v-model:SelectedValue="badgeStyle"
+                    Header="Styles"
+                    :ItemsSource="styleOptions"
+                    DisplayMemberPath="label"
+                    SelectedValuePath="value">
                   </WinComboBox>
                 </div>
               </template>

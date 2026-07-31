@@ -34,18 +34,18 @@
               <template #options>
                 <WinGrid MinWidth="200" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
                   <WinTextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="ZoomMode" style="grid-column: 1; grid-row: 1;" />
-                  <WinComboBox v-model:SelectedIndex="zoomModeIndex" Width="130" :ItemsSource="scrollViewerZoomModeItems" style="grid-column: 2; grid-row: 1;" />
+                  <WinComboBox v-model:SelectedIndex="zoomModeIndex" Width="130" :ItemsSource="scrollViewerZoomModeItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 1;" />
                   <WinSlider v-model:Value="zoomFactor" Header="Zoom" :IsEnabled="zoomMode !== 'Disabled'" :Maximum="10" :Minimum="0.1" Margin="0,10,0,0" style="grid-column: 1 / span 2; grid-row: 2;" />
                   <WinTextBlock HorizontalTextAlignment="Center" Margin="0,12" Text="ScrollMode" style="grid-column: 1 / span 2; grid-row: 3;" />
                   <WinTextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="Horizontal" style="grid-column: 1; grid-row: 4;" />
-                  <WinComboBox v-model:SelectedIndex="horizontalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" style="grid-column: 2; grid-row: 4;" />
+                  <WinComboBox v-model:SelectedIndex="horizontalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 4;" />
                   <WinTextBlock Margin="0,8,10,0" VerticalAlignment="Center" Text="Vertical" style="grid-column: 1; grid-row: 5;" />
-                  <WinComboBox v-model:SelectedIndex="verticalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" style="grid-column: 2; grid-row: 5; margin-top: 8px;" />
+                  <WinComboBox v-model:SelectedIndex="verticalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 5; margin-top: 8px;" />
                   <WinTextBlock HorizontalTextAlignment="Center" Margin="0,20,0,12" Text="ScrollbarVisibility" style="grid-column: 1 / span 2; grid-row: 6;" />
                   <WinTextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="Horizontal" style="grid-column: 1; grid-row: 7;" />
-                  <WinComboBox v-model:SelectedIndex="horizontalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewerScrollBarVisibilityItems" style="grid-column: 2; grid-row: 7;" />
+                  <WinComboBox v-model:SelectedIndex="horizontalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewerScrollBarVisibilityItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 7;" />
                   <WinTextBlock Margin="0,8,10,0" VerticalAlignment="Center" Text="Vertical" style="grid-column: 1; grid-row: 8;" />
-                  <WinComboBox v-model:SelectedIndex="verticalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewerScrollBarVisibilityItems" style="grid-column: 2; grid-row: 8; margin-top: 8px;" />
+                  <WinComboBox v-model:SelectedIndex="verticalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewerScrollBarVisibilityItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 8; margin-top: 8px;" />
                 </WinGrid>
               </template>
             </WinControlExample>

@@ -37,9 +37,11 @@
               <template #options>
                 <div class="options-grid">
                   <WinComboBox
-                    v-model="mappingMode"
-                    header="MappingMode"
-                    :options="mappingModeOptions"
+                    v-model:SelectedValue="mappingMode"
+                    Header="MappingMode"
+                    :ItemsSource="mappingModeOptions"
+                    DisplayMemberPath="label"
+                    SelectedValuePath="value"
                     style="grid-column: span 2;" />
 
                   <WinSlider
@@ -91,9 +93,11 @@
                     :smallChange="sliderSmallChange" />
 
                   <WinComboBox
-                    v-model="spreadMethod"
-                    header="SpreadMethod"
-                    :options="spreadMethodOptions"
+                    v-model:SelectedValue="spreadMethod"
+                    Header="SpreadMethod"
+                    :ItemsSource="spreadMethodOptions"
+                    DisplayMemberPath="label"
+                    SelectedValuePath="value"
                     style="grid-column: span 2; margin-top: 10px;" />
                 </div>
               </template>

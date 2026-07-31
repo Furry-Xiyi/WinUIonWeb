@@ -95,9 +95,11 @@
               </template>
               <template #options>
                 <WinComboBox
-                  v-model="highlightColor"
-                  header="Text highlighting color"
-                  :items="highlightOptions"
+                  v-model:SelectedValue="highlightColor"
+                  Header="Text highlighting color"
+                  :ItemsSource="highlightOptions"
+                  DisplayMemberPath="label"
+                  SelectedValuePath="value"
                   style="min-width: 200px;" />
               </template>
             </WinControlExample>
@@ -286,5 +288,4 @@ const example4Vue = `const highlightColor = ref('yellow');
   padding: 2px 4px;
 }
 </style>
-
 

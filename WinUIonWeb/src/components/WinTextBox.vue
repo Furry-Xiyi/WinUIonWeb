@@ -211,6 +211,7 @@ const undoStack = ref<string[]>([]);
 const redoStack = ref<string[]>([]);
 const clipboardText = ref('');
 const contextMenuOpen = ref(false);
+const isRestoringContextMenuFocus = ref(false);
 const contextMenuAnchor = ref<DOMRect | {
   x: number;
   y: number;
@@ -492,6 +493,7 @@ const onContextMenu = async (event: MouseEvent) => {
     width: 0,
     height: 0
   };
+  isRestoringContextMenuFocus.value = true;
   contextMenuOpen.value = true;
 };
 
@@ -505,6 +507,12 @@ const clearText = () => {
 
 const closeContextMenu = () => {
   contextMenuOpen.value = false;
+  nextTick(() => {
+    focus();
+    requestAnimationFrame(() => {
+      isRestoringContextMenuFocus.value = false;
+    });
+  });
 };
 
 const onContextMenuSelect = (item: TextBoxMenuItem) => {
@@ -637,6 +645,7 @@ onBeforeUnmount(() => {
   undoStack.value = [];
   redoStack.value = [];
   contextMenuOpen.value = false;
+  isRestoringContextMenuFocus.value = false;
 });
 
 defineExpose({
@@ -650,6 +659,9 @@ defineExpose({
   cutSelectionToClipboard,
   pasteFromClipboard,
   clearText,
+  get isContextMenuOpen() {
+    return contextMenuOpen.value || isRestoringContextMenuFocus.value;
+  },
   get canUndo() {
     return canUndo.value;
   },

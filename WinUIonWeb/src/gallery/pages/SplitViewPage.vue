@@ -59,8 +59,8 @@
                     <WinTextBlock :Text="$t('sample.splitview.is-pane-open')" />
                   </WinToggleButton>
                   <WinToggleSwitch v-model:IsOn="isRight" :Header="$t('sample.splitview.placement')" :OffContent="$t('sample.splitview.left')" :OnContent="$t('sample.splitview.right')" />
-                  <WinComboBox v-model:SelectedIndex="displayModeIndex" :Header="$t('sample.splitview.display-mode')" Width="196" :ItemsSource="displayModeItems" />
-                  <WinComboBox v-model:SelectedIndex="paneBackgroundIndex" :Header="$t('sample.splitview.pane-background')" Width="196" :ItemsSource="paneBackgroundItems" />
+                  <WinComboBox v-model:SelectedIndex="displayModeIndex" :Header="$t('sample.splitview.display-mode')" Width="196" :ItemsSource="displayModeItems" DisplayMemberPath="Text" />
+                  <WinComboBox v-model:SelectedIndex="paneBackgroundIndex" :Header="$t('sample.splitview.pane-background')" Width="196" :ItemsSource="paneBackgroundItems" DisplayMemberPath="Text" />
                   <WinSlider v-model:Value="openPaneLength" :Header="$t('sample.splitview.open-pane-length')" Width="196" :Minimum="128" :Maximum="500" :StepFrequency="8" />
                   <WinSlider v-model:Value="compactPaneLength" :Header="$t('sample.splitview.compact-pane-length')" Width="196" :Minimum="24" :Maximum="128" :StepFrequency="8" />
                 </div>

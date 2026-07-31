@@ -34,7 +34,11 @@
               :Header="$t('text.navigation-pane-position')"
               :Description="$t('text.select-the-navigation-bar-position')"
               :HeaderIcon="'\uF594'">
-              <WinComboBox :options="navPositionOptions" :modelValue="navPositionIndex" @update:modelValue="v => navPosition = navPositionValues[v]" />
+              <WinComboBox
+                v-model:SelectedValue="navPosition"
+                :ItemsSource="navPositionOptions"
+                DisplayMemberPath="label"
+                SelectedValuePath="value" />
             </WinSettingsCard>
           </div>
       </div>
@@ -43,7 +47,7 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue';
+import { inject } from 'vue';
 import WinExpander from '../../components/WinExpander.vue';
 import WinRadioButton from '../../components/WinRadioButton.vue';
 import WinSettingsCard from '../../components/WinSettingsCard.vue';
@@ -62,8 +66,6 @@ const navPositionOptions = [
   { label: t('text.left'), value: 'Auto' },
   { label: t('text.top'), value: 'Top' }
 ];
-const navPositionValues = navPositionOptions.map(option => option.value);
-const navPositionIndex = computed(() => Math.max(0, navPositionValues.indexOf(navPosition.value)));
 </script>
 
 <style scoped>

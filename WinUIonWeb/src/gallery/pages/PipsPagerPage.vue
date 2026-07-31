@@ -46,9 +46,9 @@
               <template #options>
                 <WinStackPanel>
                   <WinTextBlock :Text="outputText" />
-                  <WinComboBox Header="Orientation" :SelectedIndex="orientationIndex" :ItemsSource="orientationItems" @SelectionChanged="orientationIndex = $event.SelectedIndex" />
-                  <WinComboBox Header="Previous Button Visibility" :SelectedIndex="previousButtonVisibilityIndex" :ItemsSource="buttonVisibilityItems" @SelectionChanged="previousButtonVisibilityIndex = $event.SelectedIndex" />
-                  <WinComboBox Header="Next Button Visibility" :SelectedIndex="nextButtonVisibilityIndex" :ItemsSource="buttonVisibilityItems" @SelectionChanged="nextButtonVisibilityIndex = $event.SelectedIndex" />
+                  <WinComboBox Header="Orientation" :SelectedIndex="orientationIndex" :ItemsSource="orientationItems" DisplayMemberPath="Text" @SelectionChanged="orientationIndex = $event.SelectedIndex" />
+                  <WinComboBox Header="Previous Button Visibility" :SelectedIndex="previousButtonVisibilityIndex" :ItemsSource="buttonVisibilityItems" DisplayMemberPath="Text" @SelectionChanged="previousButtonVisibilityIndex = $event.SelectedIndex" />
+                  <WinComboBox Header="Next Button Visibility" :SelectedIndex="nextButtonVisibilityIndex" :ItemsSource="buttonVisibilityItems" DisplayMemberPath="Text" @SelectionChanged="nextButtonVisibilityIndex = $event.SelectedIndex" />
                 </WinStackPanel>
               </template>
             </WinControlExample>

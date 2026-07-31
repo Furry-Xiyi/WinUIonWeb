@@ -42,9 +42,9 @@
                     Is Open
                   </WinCheckBox>
                   <WinComboBox
-                    v-model="example1Severity"
-                    :options="severityOptions"
-                    header="Severity"
+                    v-model:SelectedValue="example1Severity"
+                    :ItemsSource="severityOptions"
+                    Header="Severity"
                     style="width: 100%;" />
                 </div>
               </template>
@@ -80,14 +80,14 @@
                     Is Open
                   </WinCheckBox>
                   <WinComboBox
-                    v-model="example2MessageLength"
-                    :options="messageLengthOptions"
-                    header="Message Length"
+                    v-model:SelectedValue="example2MessageLength"
+                    :ItemsSource="messageLengthOptions"
+                    Header="Message Length"
                     style="width: 100%;" />
                   <WinComboBox
-                    v-model="example2ActionButton"
-                    :options="actionButtonOptions"
-                    header="Action Button"
+                    v-model:SelectedValue="example2ActionButton"
+                    :ItemsSource="actionButtonOptions"
+                    Header="Action Button"
                     style="width: 100%;" />
                 </div>
               </template>

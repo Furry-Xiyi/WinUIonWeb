@@ -42,10 +42,12 @@
                     offContent="Do work"
                   />
                   <WinComboBox
-                    v-model="selectedBackground1"
-                    header="Background color"
-                    placeholder="Pick a color"
-                    :options="backgroundOptions"
+                    v-model:SelectedValue="selectedBackground1"
+                    Header="Background color"
+                    PlaceholderText="Pick a color"
+                    :ItemsSource="backgroundOptions"
+                    DisplayMemberPath="label"
+                    SelectedValuePath="value"
                     style="width: 200px;"
                   />
                 </div>
@@ -77,10 +79,12 @@
 
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <WinComboBox
-                    v-model="selectedBackground2"
-                    header="Background color"
-                    placeholder="Pick a color"
-                    :options="backgroundOptions"
+                    v-model:SelectedValue="selectedBackground2"
+                    Header="Background color"
+                    PlaceholderText="Pick a color"
+                    :ItemsSource="backgroundOptions"
+                    DisplayMemberPath="label"
+                    SelectedValuePath="value"
                     style="width: 200px;"
                   />
                 </div>

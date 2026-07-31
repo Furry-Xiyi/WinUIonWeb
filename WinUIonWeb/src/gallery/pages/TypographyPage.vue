@@ -391,6 +391,7 @@ const cSharpCode = `<div class="typography-samples">
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   cursor: pointer;
   display: flex;
   align-items: center;

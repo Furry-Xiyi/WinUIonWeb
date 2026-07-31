@@ -125,7 +125,7 @@
               <template #options>
                 <div class="selection-options">
                   <WinTextBlock :Text="$t('sample.selection-mode')" />
-                  <WinComboBox :ItemsSource="selectionModeOptions" v-model:SelectedIndex="selectionModeSelectedIndex" />
+                  <WinComboBox v-model:SelectedIndex="selectionModeSelectedIndex" :ItemsSource="selectionModeOptions" DisplayMemberPath="Text" />
                   <WinTextBlock :Text="$t('sample.is-item-invoked-enabled')" />
                   <WinCheckBox v-model:IsChecked="isItemInvokedEnabled" />
                 </div>

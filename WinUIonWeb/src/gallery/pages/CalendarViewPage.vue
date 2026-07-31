@@ -40,15 +40,15 @@
                   <WinCheckBox v-model="IsOutOfScopeEnabled"><WinTextBlock Text="IsOutOfScopeEnabled" /></WinCheckBox>
 
                   <div class="option-group">
-                    <WinComboBox Header="SelectionMode" :ItemsSource="selectionModes" v-model="selectionModeIndex" style="width: 220px;" />
+                    <WinComboBox v-model:SelectedIndex="selectionModeIndex" Header="SelectionMode" :ItemsSource="selectionModes" style="width: 220px;" />
                   </div>
 
                   <div class="option-group">
-                    <WinComboBox Header="CalendarIdentifier" :ItemsSource="calendarIdentifiers" v-model="calendarIdentifierIndex" style="width: 220px;" />
+                    <WinComboBox v-model:SelectedIndex="calendarIdentifierIndex" Header="CalendarIdentifier" :ItemsSource="calendarIdentifiers" DisplayMemberPath="label" style="width: 220px;" />
                   </div>
 
                   <div class="option-group">
-                    <WinComboBox Header="Language" :ItemsSource="languages" v-model="languageIndex" style="width: 220px;" />
+                    <WinComboBox v-model:SelectedIndex="languageIndex" Header="Language" :ItemsSource="languages" DisplayMemberPath="label" style="width: 220px;" />
                   </div>
                 </div>
               </template>

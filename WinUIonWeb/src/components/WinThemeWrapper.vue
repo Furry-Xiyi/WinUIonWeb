@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, provide } from 'vue';
 
 const props = defineProps<{
   theme?: 'light' | 'dark' | 'system';
@@ -32,6 +32,8 @@ const resolvedTheme = computed(() => {
 const themeClass = computed(() => {
   return `theme-${resolvedTheme.value}`;
 });
+
+provide('winuiTheme', resolvedTheme);
 </script>
 
 <style>

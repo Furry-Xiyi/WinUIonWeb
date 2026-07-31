@@ -23,7 +23,7 @@
                 </WinExpander>
               </template>
               <template #options>
-                <WinComboBox v-model:SelectedIndex="expandDirectionIndex" Header="ExpandDirection" Width="196" :ItemsSource="expandDirectionItems" />
+                <WinComboBox v-model:SelectedIndex="expandDirectionIndex" Header="ExpandDirection" Width="196" :ItemsSource="expandDirectionItems" DisplayMemberPath="Text" />
               </template>
             </WinControlExample>
 

@@ -68,11 +68,11 @@
                 </div>
                 <div class="options-group">
                   <label class="option-label">Tint Color:</label>
-                  <WinComboBox v-model="tintColorIndex" :options="colorOptions" />
+                  <WinComboBox v-model:SelectedIndex="tintColorIndex" :ItemsSource="colorOptions" DisplayMemberPath="label" />
                 </div>
                 <div class="options-group">
                   <label class="option-label">Fallback Color:</label>
-                  <WinComboBox v-model="fallbackColorIndex" :options="fallbackColorOptions" />
+                  <WinComboBox v-model:SelectedIndex="fallbackColorIndex" :ItemsSource="fallbackColorOptions" DisplayMemberPath="label" />
                 </div>
               </template>
             </WinControlExample>

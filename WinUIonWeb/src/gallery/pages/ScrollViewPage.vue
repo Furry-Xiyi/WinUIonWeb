@@ -37,19 +37,19 @@
               <template #options>
                 <WinGrid MinWidth="200" ColumnDefinitions="Auto,*" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="16">
                   <WinTextBlock VerticalAlignment="Center" Text="ZoomMode" style="grid-column: 1; grid-row: 1;" />
-                  <WinComboBox v-model:SelectedIndex="zoomModeIndex" Width="130" :ItemsSource="scrollViewZoomModeItems" style="grid-column: 2; grid-row: 1;" />
+                  <WinComboBox v-model:SelectedIndex="zoomModeIndex" Width="130" :ItemsSource="scrollViewZoomModeItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 1;" />
                   <WinTextBlock VerticalAlignment="Center" Text="ZoomFactor" style="grid-column: 1; grid-row: 2;" />
                   <WinNumberBox v-model:Value="zoomFactor" :Minimum="0.1" :Maximum="10" :SmallChange="1" :LargeChange="10" SpinButtonPlacementMode="Inline" style="grid-column: 2; grid-row: 2;" />
                   <WinTextBlock HorizontalTextAlignment="Center" Text="ScrollMode" style="grid-column: 1 / span 2; grid-row: 3;" />
                   <WinTextBlock VerticalAlignment="Center" Text="Horizontal" style="grid-column: 1; grid-row: 4;" />
-                  <WinComboBox v-model:SelectedIndex="horizontalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" style="grid-column: 2; grid-row: 4;" />
+                  <WinComboBox v-model:SelectedIndex="horizontalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 4;" />
                   <WinTextBlock VerticalAlignment="Center" Text="Vertical" style="grid-column: 1; grid-row: 5;" />
-                  <WinComboBox v-model:SelectedIndex="verticalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" style="grid-column: 2; grid-row: 5;" />
+                  <WinComboBox v-model:SelectedIndex="verticalScrollModeIndex" Width="130" :ItemsSource="scrollModeItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 5;" />
                   <WinTextBlock HorizontalTextAlignment="Center" Text="ScrollbarVisibility" style="grid-column: 1 / span 2; grid-row: 6;" />
                   <WinTextBlock VerticalAlignment="Center" Text="Horizontal" style="grid-column: 1; grid-row: 7;" />
-                  <WinComboBox v-model:SelectedIndex="horizontalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewScrollBarVisibilityItems" style="grid-column: 2; grid-row: 7;" />
+                  <WinComboBox v-model:SelectedIndex="horizontalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewScrollBarVisibilityItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 7;" />
                   <WinTextBlock VerticalAlignment="Center" Text="Vertical" style="grid-column: 1; grid-row: 8;" />
-                  <WinComboBox v-model:SelectedIndex="verticalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewScrollBarVisibilityItems" style="grid-column: 2; grid-row: 8;" />
+                  <WinComboBox v-model:SelectedIndex="verticalScrollBarVisibilityIndex" Width="130" :ItemsSource="scrollViewScrollBarVisibilityItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 8;" />
                 </WinGrid>
               </template>
             </WinControlExample>
@@ -87,7 +87,7 @@
               <template #options>
                 <WinGrid MinWidth="320" ColumnDefinitions="Auto,*" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto" RowSpacing="16">
                   <WinTextBlock VerticalAlignment="Center" Text="Scroll with animation" style="grid-column: 1; grid-row: 1;" />
-                  <WinComboBox v-model:SelectedIndex="verticalAnimationIndex" Width="160" :ItemsSource="animationItems" style="grid-column: 2; grid-row: 1;" />
+                  <WinComboBox v-model:SelectedIndex="verticalAnimationIndex" Width="160" :ItemsSource="animationItems" DisplayMemberPath="Text" style="grid-column: 2; grid-row: 1;" />
                   <WinTextBlock VerticalAlignment="Center" Text="Animation duration (msec)" style="grid-column: 1; grid-row: 2;" />
                   <WinNumberBox v-model:Value="animationDuration" :Minimum="1000" :Maximum="5000" :SmallChange="500" :LargeChange="1000" SpinButtonPlacementMode="Inline" style="grid-column: 2; grid-row: 2;" />
                   <WinButton HorizontalAlignment="Stretch" @Click="scrollWithAnimation" style="grid-column: 1 / span 2; grid-row: 3;">

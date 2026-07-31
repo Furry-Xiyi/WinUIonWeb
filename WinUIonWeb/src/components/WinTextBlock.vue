@@ -147,7 +147,11 @@ const textBlockStyle = computed(() => {
   if (props.FontWeight !== '') style.fontWeight = props.FontWeight;
   if (props.Foreground) style.color = props.Foreground;
   if (props.HorizontalTextAlignment) style.textAlign = props.HorizontalTextAlignment.toLowerCase();
-  if (props.LineHeight !== '') style.lineHeight = cssLength(props.LineHeight);
+  if (props.LineHeight !== '') {
+    style.lineHeight = cssLength(props.LineHeight);
+  } else if (props.FontSize !== '') {
+    style.lineHeight = 'normal';
+  }
   if (props.Margin) style.margin = xamlThickness(props.Margin);
   if (props.Padding) style.padding = xamlThickness(props.Padding);
   if (props.SelectionHighlightColor) style['--TextBlockSelectionHighlightColor'] = props.SelectionHighlightColor;
