@@ -1,0 +1,312 @@
+/* animations.css */
+.chevron-animate {
+  display: inline-block;
+  font-size: 12px;
+  animation: none;
+}
+
+  .chevron-animate.pressing {
+    animation: chevron-press 0.083s ease-out forwards;
+  }
+
+  .chevron-animate.releasing {
+    animation: chevron-release 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+  }
+
+@keyframes chevron-press {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(2px);
+  }
+}
+
+@keyframes chevron-release {
+  from {
+    transform: translateY(2px);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes flyout-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(-1);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+.flyout-animate {
+  animation: flyout-enter var(--fast-duration) var(--fast-out-slow-in) both;
+  transform-origin: top center;
+}
+
+@keyframes page-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(140px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(200px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes page-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(-200px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes page-enter-fade {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes page-enter-fade-reverse {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 日历上下滚动动画 */
+@keyframes cal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cal-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-up {
+  animation: page-enter-up 0.450s cubic-bezier(0.1, 0.9, 0.1, 1) both;
+}
+
+.page-transition-left {
+  animation: page-enter-left 0.450s cubic-bezier(0.1, 0.9, 0.1, 1) both;
+}
+
+.page-transition-right {
+  animation: page-enter-right 0.450s cubic-bezier(0.1, 0.9, 0.1, 1) both;
+}
+
+.page-transition-fade {
+  animation: page-enter-fade 0.333s cubic-bezier(0.1, 0.9, 0.1, 1) both;
+}
+
+.page-transition-fade-reverse {
+  animation: page-enter-fade-reverse 0.333s cubic-bezier(0.12, 0, 0, 1) both;
+}
+
+.cal-slide-up-anim {
+  animation: cal-slide-up 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.cal-slide-down-anim {
+  animation: cal-slide-down 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+@keyframes picker-flyout-enter {
+  from {
+    opacity: 0;
+    transform: scaleY(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes picker-flyout-exit {
+  from {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scaleY(0.94);
+  }
+}
+
+.picker-flyout-animate {
+  animation: picker-flyout-enter 0.333s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  transform-origin: center center;
+}
+
+.picker-flyout-closing {
+  animation: picker-flyout-exit 0.1s cubic-bezier(0.7, 0, 1, 0.5) both;
+  transform-origin: center center;
+}
+
+/* AnimatedIcon */
+.animated-icon {
+  display: inline-block;
+}
+
+.animated-icon-hamburger {
+  animation: none;
+}
+
+  .animated-icon-hamburger.pressing {
+    animation: hamburger-press 0.15s cubic-bezier(0.167, 0.167, 0, 1) forwards;
+  }
+
+  .animated-icon-hamburger.releasing {
+    animation: hamburger-release 0.317s cubic-bezier(0.35, 0, 0, 1) forwards;
+  }
+
+@keyframes hamburger-press {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0.521);
+  }
+}
+
+@keyframes hamburger-release {
+  0% {
+    transform: scaleX(0.521);
+    animation-timing-function: cubic-bezier(0.85, 0, 0.75, 1);
+  }
+
+  42% {
+    transform: scaleX(1.048);
+    animation-timing-function: cubic-bezier(0.35, 0, 0, 1);
+  }
+
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.animated-icon-back {
+  animation: none;
+  transform-origin: 100% 50%;
+}
+
+  .animated-icon-back.pressing {
+    animation: animated-icon-back-press 0.15s cubic-bezier(0.167, 0.167, 0, 1) forwards;
+  }
+
+  .animated-icon-back.releasing {
+    animation: animated-icon-back-release 0.317s cubic-bezier(0.35, 0, 0, 1) forwards;
+  }
+
+@keyframes animated-icon-back-press {
+  from {
+    transform: translate(0.2px, 0) scaleX(1);
+  }
+
+  to {
+    transform: translate(0.2px, 0) scaleX(0.721);
+  }
+}
+
+@keyframes animated-icon-back-release {
+  0% {
+    transform: translate(0.2px, 0) scaleX(0.721);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.75, 1);
+  }
+
+  53% {
+    transform: translate(0.2px, 0) scaleX(1.009);
+    animation-timing-function: cubic-bezier(0.35, 0, 0, 1);
+  }
+
+  100% {
+    transform: translate(0.2px, 0) scaleX(1);
+  }
+}
+
+.animated-icon-gear {
+  transition: transform 0.1s ease;
+}
+
+  .animated-icon-gear.gear-rewind {
+    animation: animated-icon-gear-rewind 0.15s cubic-bezier(0.167, 0.167, 1, 1) forwards;
+  }
+
+  .animated-icon-gear.gear-spin {
+    animation: animated-icon-gear-spin 0.65s cubic-bezier(0, 0, 0, 1) forwards;
+  }
+
+@keyframes animated-icon-gear-rewind {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-20deg);
+  }
+}
+
+@keyframes animated-icon-gear-spin {
+  from {
+    transform: rotate(-20deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
