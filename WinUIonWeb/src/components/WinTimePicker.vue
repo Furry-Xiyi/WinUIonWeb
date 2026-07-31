@@ -432,8 +432,8 @@ function onWheel(event, type) {
     border: 1px solid var(--stroke-surface-flyout);
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.14);
-    backdrop-filter: var(--flyout-backdrop);
     -webkit-backdrop-filter: var(--flyout-backdrop);
+    backdrop-filter: var(--flyout-backdrop);
     display: flex;
     flex-direction: column;
     overflow: hidden;

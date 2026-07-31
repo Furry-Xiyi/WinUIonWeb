@@ -282,8 +282,8 @@ const luminosityOpacity = ref(0.8);
   position: absolute;
   inset: 12px;
   border-radius: 6px;
-  backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
 }
 
 /* Default Acrylic */

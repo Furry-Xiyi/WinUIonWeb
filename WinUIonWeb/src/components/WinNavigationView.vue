@@ -1759,8 +1759,8 @@ watch(() => props.selectedValue, (val) => {
       bottom: 0;
       z-index: 20;
       background: var(--host-nav-pane-bg);
-      backdrop-filter: var(--flyout-backdrop);
       -webkit-backdrop-filter: var(--flyout-backdrop);
+      backdrop-filter: var(--flyout-backdrop);
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
       width: var(--win-nav-open-pane-length, 320px);
       clip-path: inset(0 0 0 0);
@@ -1769,8 +1769,8 @@ watch(() => props.selectedValue, (val) => {
 
     html.winui-webview-host .win-nav-shell.is-overlay-left .win-nav-left-panel:not(.is-compact) {
       background: var(--host-nav-pane-bg);
-      backdrop-filter: var(--flyout-backdrop);
       -webkit-backdrop-filter: var(--flyout-backdrop);
+      backdrop-filter: var(--flyout-backdrop);
     }
 
     .win-nav-shell.is-overlay-left .win-nav-left-panel.is-compact {
@@ -1787,14 +1787,14 @@ watch(() => props.selectedValue, (val) => {
 
     .win-nav-shell.is-left-minimal .win-nav-left-panel.is-compact {
       background: transparent;
-      backdrop-filter: none;
       -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
 
     .win-nav-shell.is-left-minimal .win-nav-left-panel.is-compact.is-pane-closing {
       background: var(--host-nav-pane-bg);
-      backdrop-filter: var(--flyout-backdrop);
       -webkit-backdrop-filter: var(--flyout-backdrop);
+      backdrop-filter: var(--flyout-backdrop);
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
     }
 

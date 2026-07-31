@@ -1321,8 +1321,8 @@ onBeforeUnmount(() => {
   background-image: none;
   border: 0 solid var(--ScrollBarTrackStroke, transparent);
   border-radius: 6px;
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
   -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
   transition: opacity 83ms linear;
 }
 

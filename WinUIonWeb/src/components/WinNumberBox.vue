@@ -354,8 +354,8 @@ onBeforeUnmount(() => {
   border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--card-stroke)));
   border-radius: 8px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
   -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
 }
 
 .win-number-popup-button {

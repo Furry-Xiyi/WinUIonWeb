@@ -131,8 +131,8 @@ const popupCode = `<WinPopup
   background: var(--flyout-background, var(--flyout-bg));
   border: 1px solid var(--surface-stroke-color-default, var(--surface-stroke-color-flyout));
   border-radius: 8px;
-  backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
+  backdrop-filter: var(--flyout-backdrop);
 }
 .popup-card-stack { display: flex; flex-direction: column; gap: 8px; }
 .options-panel { display: flex; flex-direction: column; gap: 12px; width: 220px; }

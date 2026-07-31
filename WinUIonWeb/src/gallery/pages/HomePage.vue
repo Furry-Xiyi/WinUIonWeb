@@ -453,8 +453,8 @@ onUnmounted(() => {
   z-index: -1;
   border-radius: inherit;
   background: color-mix(in srgb, var(--flyout-bg) 78%, transparent);
-  backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
+  backdrop-filter: var(--flyout-backdrop);
 }
 
 .home-header-tile::after {

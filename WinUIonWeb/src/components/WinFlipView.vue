@@ -120,8 +120,8 @@ const trackStyle = computed(() => {
   .flip-btn {
     position: absolute;
     background: var(--flyout-bg);
-    backdrop-filter: var(--flyout-backdrop);
     -webkit-backdrop-filter: var(--flyout-backdrop);
+    backdrop-filter: var(--flyout-backdrop);
     border: 1px solid var(--card-stroke);
     border-radius: 4px;
     color: var(--text-primary);
@@ -143,8 +143,8 @@ const trackStyle = computed(() => {
 
     .flip-btn:hover {
       background: var(--flyout-bg);
-      backdrop-filter: var(--flyout-backdrop);
       -webkit-backdrop-filter: var(--flyout-backdrop);
+      backdrop-filter: var(--flyout-backdrop);
     }
 
       .flip-btn:hover .flip-arrow {
@@ -153,8 +153,8 @@ const trackStyle = computed(() => {
 
     .flip-btn:active {
       background: var(--flyout-bg);
-      backdrop-filter: var(--flyout-backdrop);
       -webkit-backdrop-filter: var(--flyout-backdrop);
+      backdrop-filter: var(--flyout-backdrop);
     }
 
       .flip-btn:active .flip-arrow {

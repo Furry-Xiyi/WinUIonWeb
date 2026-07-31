@@ -205,8 +205,8 @@ onBeforeUnmount(() => {
   background-clip: padding-box;
   border: 1px solid var(--flyout-border, var(--card-stroke));
   border-radius: var(--ControlCornerRadius, 4px);
-  backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
+  backdrop-filter: var(--flyout-backdrop);
   cursor: pointer;
   z-index: 2;
   transition: background var(--fast-duration), border-color var(--fast-duration), color var(--fast-duration);

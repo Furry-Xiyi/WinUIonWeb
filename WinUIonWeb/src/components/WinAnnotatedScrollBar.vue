@@ -411,8 +411,8 @@ defineExpose({
   pointer-events: auto;
   cursor: pointer;
   transition: all var(--fast-duration) var(--fast-out-slow-in);
-  backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
 }
 
 .scrollbar-label:hover {
@@ -482,8 +482,8 @@ defineExpose({
   text-overflow: ellipsis;
   pointer-events: none;
   z-index: 100;
-  backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
 }
 
 .detail-label::after {

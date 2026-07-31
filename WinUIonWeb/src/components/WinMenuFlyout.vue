@@ -364,8 +364,8 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
   border: 1px solid var(--flyout-border);
   border-radius: 8px;
   background: var(--flyout-bg, var(--layer-default));
-  backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
+  backdrop-filter: var(--flyout-backdrop);
   animation: flyout-menu-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, flyout-menu-opacity 83ms linear both;
 }
 
@@ -514,8 +514,8 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
   border-radius: 8px;
   background: var(--flyout-bg, var(--layer-default));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-  backdrop-filter: var(--flyout-backdrop);
   -webkit-backdrop-filter: var(--flyout-backdrop);
+  backdrop-filter: var(--flyout-backdrop);
   animation: flyout-menu-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, flyout-menu-opacity 83ms linear both;
 }
 

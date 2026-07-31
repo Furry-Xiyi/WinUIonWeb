@@ -295,8 +295,8 @@ defineExpose({ showAt, hide, openAt, isOpen });
   border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--control-stroke-color-default)));
   border-radius: 8px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
   -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
   overflow: hidden;
   animation: cbf-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, cbf-fade 83ms linear both;
 }

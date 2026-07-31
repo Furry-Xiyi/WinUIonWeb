@@ -224,8 +224,8 @@ const onDateSelect = (dates) => {
     border: 1px solid var(--ctrl-border);
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.14);
-    backdrop-filter: var(--flyout-backdrop);
     -webkit-backdrop-filter: var(--flyout-backdrop);
+    backdrop-filter: var(--flyout-backdrop);
     min-width: 304px;
   }
 

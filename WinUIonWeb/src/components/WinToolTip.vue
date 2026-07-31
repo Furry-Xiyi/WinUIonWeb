@@ -438,8 +438,8 @@ defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSe
   border: 1px solid var(--ToolTipBorderBrush, var(--surface-stroke-color-flyout, var(--flyout-border)));
   border-radius: var(--ControlCornerRadius, 4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, .14), 0 0 2px rgba(0, 0, 0, .18);
-  backdrop-filter: var(--flyout-backdrop, blur(30px) saturate(160%));
   -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px) saturate(160%));
+  backdrop-filter: var(--flyout-backdrop, blur(30px) saturate(160%));
   font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
   font-size: 12px;
   line-height: 16px;
