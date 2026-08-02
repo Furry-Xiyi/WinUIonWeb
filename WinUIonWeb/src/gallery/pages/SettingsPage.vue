@@ -42,13 +42,44 @@
             <WinSettingsCard
               :Header="$t('text.navigation-pane-position')"
               :Description="$t('text.select-the-navigation-bar-position')"
-              :HeaderIcon="'\uF594'">
+              :HeaderIcon="'\uF594'"
+              :HeaderHeight="70">
               <WinComboBox
                 v-model:SelectedValue="navPosition"
                 :ItemsSource="navPositionOptions"
                 DisplayMemberPath="label"
                 SelectedValuePath="value" />
             </WinSettingsCard>
+          </div>
+          <WinTextBlock class="about-section-title" :Text="$t('text.about')" />
+          <div class="about-controls">
+            <WinExpander
+              HeaderHeight="70">
+              <template #HeaderIcon>
+                <img class="about-app-icon" src="/src/assets/AppIcon.ico" alt="App Icon" />
+              </template>
+              <template #Header>
+                <div class="about-header-container">
+                  <div class="about-header-text">
+                    <WinTextBlock :Text="appTitle" FontSize="14.4" />
+                    <WinTextBlock :Text="copyrightText" FontSize="12" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
+                  </div>
+                  <WinTextBlock :Text="versionText" FontSize="14.4" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
+                </div>
+              </template>
+              <div class="about-content">
+                <WinHyperlinkButton
+                  NavigateUri="https://qm.qq.com/q/UPnTGW164m"
+                  TargetName="_blank"
+                  HorizontalAlignment="Left"
+                  :Content="$t('text.qq-group')" />
+                <WinHyperlinkButton
+                  NavigateUri="https://discord.gg/4NScc8sEzw"
+                  TargetName="_blank"
+                  HorizontalAlignment="Left"
+                  :Content="$t('text.discord-group')" />
+              </div>
+            </WinExpander>
           </div>
       </div>
     </div>
@@ -63,6 +94,8 @@ import WinRadioButtons from '../../components/WinRadioButtons.vue';
 import WinSettingsCard from '../../components/WinSettingsCard.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
+import WinStackPanel from '../../components/WinStackPanel.vue';
 import { useI18n } from '../../components/i18n/index';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
@@ -85,23 +118,65 @@ const navPositionOptions = [
   { label: t('text.left'), value: 'Auto' },
   { label: t('text.top'), value: 'Top' }
 ];
+const appTitle = t('app.title');
+const currentYear = new Date().getFullYear();
+const copyrightText = computed(() => `© ${currentYear} ${t('text.about-author')}. ${t('text.all-rights-reserved')}`);
+const versionText = '1.0.0 Beta';
 </script>
 
 <style scoped>
 .settings-section-title {
   font-size: 14px;
   font-weight: 600;
-  margin-bottom: 6px;
 }
 
 .settings-controls {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  margin-top: 6px;
 }
 
 .settings-controls :deep(.win-expander),
 .settings-controls :deep(.win-settings-card) {
-  margin-bottom: 0;
+  margin-bottom: 4px;
+}
+
+.about-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 32px;
+}
+
+.about-controls {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.about-app-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.about-header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+}
+
+.about-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.about-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 </style>

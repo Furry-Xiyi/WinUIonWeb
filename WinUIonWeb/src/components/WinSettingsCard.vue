@@ -8,6 +8,7 @@
       'content-vertical': ContentAlignment === 'Vertical',
       'has-header-content': hasHeaderContent
     }"
+    :style="HeaderHeight ? { minHeight: HeaderHeight + 'px' } : {}"
     @click="handleClick"
     :type="IsClickEnabled ? 'button' : undefined"
     :role="IsClickEnabled ? undefined : 'group'"
@@ -68,7 +69,8 @@ const props = defineProps({
   ActionIconToolTip: { type: String, default: '' },
   IsClickEnabled: { type: Boolean, default: false },
   ContentAlignment: { type: String, default: 'Right' },
-  IsActionIconVisible: { type: Boolean, default: true }
+  IsActionIconVisible: { type: Boolean, default: true },
+  HeaderHeight: { type: Number, default: 0 }
 });
 
 const emit = defineEmits(['Click']);
