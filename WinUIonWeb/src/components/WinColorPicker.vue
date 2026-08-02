@@ -4,8 +4,10 @@
       <div class="cp-spectrum-area" :class="{ 'cp-ring': isRing }">
         <canvas ref="spectrumCanvas" class="cp-spectrum"
                 :width="spectrumSize" :height="spectrumSize"
-                @pointerdown="onSpectrumDown" @pointermove="onSpectrumMove" @pointerup="onSpectrumUp"></canvas>
-        <div class="cp-spectrum-thumb" :style="spectrumThumbStyle"></div>
+                tabindex="0"
+                @pointerdown="onSpectrumDown" @pointermove="onSpectrumMove" @pointerup="onSpectrumUp"
+                @pointercancel="onSpectrumCancel" @focus="onSpectrumFocus" @blur="onSpectrumBlur"></canvas>
+        <div ref="spectrumThumbRef" class="cp-spectrum-thumb" :style="spectrumThumbStyle"></div>
       </div>
 
       <div class="cp-preview-bar" v-if="IsColorPreviewVisible">
@@ -67,6 +69,14 @@
         <WinTextBlock :Text="t('sample.opacity')" />
       </template>
     </div>
+
+    <WinToolTip
+      ref="spectrumToolTipRef"
+      IsServiceHost
+      :IsOpen="spectrumToolTipOpen"
+      :Content="spectrumToolTipContent"
+      Placement="Top"
+      :PlacementTarget="spectrumThumbRef" />
   </div>
 </template>
 
@@ -77,6 +87,7 @@ import WinComboBox from './WinComboBox.vue';
 import WinNumberBox from './WinNumberBox.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import WinTextBox from './WinTextBox.vue';
+import WinToolTip from './WinToolTip.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
@@ -107,6 +118,8 @@ const emit = defineEmits(['update:modelValue', 'update:Color', 'ColorChanged', '
 
 const spectrumSize = 256;
 const spectrumCanvas = ref(null);
+const spectrumThumbRef = ref(null);
+const spectrumToolTipRef = ref(null);
 const valueTrack = ref(null);
 const alphaTrack = ref(null);
 
@@ -118,6 +131,7 @@ const selectedColorModelIndex = ref(0);
 let draggingSpectrum = false;
 let draggingValue = false;
 let draggingAlpha = false;
+const spectrumToolTipOpen = ref(false);
 
 const ColorSpectrumShape = computed(() => props.ColorSpectrumShape ?? props.colorSpectrumShape);
 const IsColorPreviewVisible = computed(() => props.IsColorPreviewVisible ?? props.isColorPreviewVisible);
@@ -148,6 +162,7 @@ const currentHex = computed(() => {
 });
 
 const hexDisplay = computed(() => currentHex.value.toUpperCase());
+const spectrumToolTipContent = computed(() => hexDisplay.value);
 const opacityPercent = computed(() => Math.round(alpha.value * 100));
 const hsvHue = computed(() => Math.round(hsv.h) % 360);
 const hsvSaturation = computed(() => Math.round(hsv.s * 100));
@@ -302,8 +317,10 @@ watch(hexDisplay, (value) => {
 
 function onSpectrumDown(e) {
   draggingSpectrum = true;
+  e.currentTarget.focus?.({ preventScroll: true });
   e.currentTarget.setPointerCapture(e.pointerId);
   updateSpectrumFromEvent(e);
+  spectrumToolTipOpen.value = true;
 }
 
 function onSpectrumMove(e) {
@@ -313,7 +330,21 @@ function onSpectrumMove(e) {
 
 function onSpectrumUp(e) {
   draggingSpectrum = false;
-  e.currentTarget.releasePointerCapture(e.pointerId);
+  if (e.currentTarget.hasPointerCapture?.(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+}
+
+function onSpectrumCancel(e) {
+  draggingSpectrum = false;
+  if (e.currentTarget.hasPointerCapture?.(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+}
+
+function onSpectrumFocus() {
+  spectrumToolTipOpen.value = true;
+}
+
+function onSpectrumBlur() {
+  draggingSpectrum = false;
+  spectrumToolTipOpen.value = false;
 }
 
 function updateSpectrumFromEvent(e) {
@@ -453,6 +484,10 @@ watch(ColorSpectrumShape, () => {
 });
 
 watch(() => hsv.v, () => {});
+
+watch([spectrumToolTipContent, spectrumThumbStyle], () => {
+  if (spectrumToolTipOpen.value) nextTick(() => spectrumToolTipRef.value?.updatePosition?.());
+}, { deep: true });
 
 onMounted(() => {
   syncFromProp(props.Color ?? props.modelValue);

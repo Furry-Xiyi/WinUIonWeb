@@ -147,12 +147,14 @@ watch(codeTabs, (tabs) => {
 
 const displayStyle = computed(() => ({
   height: normalizeCssLength(props.exampleHeight),
+  width: '100%',
   justifyContent: {
     Left: 'flex-start',
     Center: 'center',
     Right: 'flex-end',
     Stretch: 'stretch'
-  }[props.horizontalContentAlignment] ?? 'flex-start'
+  }[props.horizontalContentAlignment] ?? 'flex-start',
+  alignItems: 'stretch'
 }));
 
 const onCodeTabChanged = ({ selectedIndex }) => {
@@ -189,6 +191,8 @@ const copyActiveCode = async () => {
 .example-container {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  width: 100%;
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--card-stroke);
   border-bottom: none;
@@ -204,7 +208,8 @@ const copyActiveCode = async () => {
 .example-display {
   padding: 12px;
   display: flex;
-  align-items: center;
+  width: 100%;
+  min-width: 0;
   background: var(--control-example-display-bg, var(--SolidBackgroundFillColorBaseBrush, var(--ctrl-solid-fill)));
   color: var(--text-primary);
 }

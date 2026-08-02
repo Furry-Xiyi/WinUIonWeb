@@ -16,20 +16,13 @@
 
             <WinHorizontalScrollContainer class="home-header-tiles-scroll">
               <div class="home-header-tiles">
-                <WinSettingsCard
+                <WinHomeHeaderTile
                   v-for="tile in headerTiles"
                   :key="tile.Title"
-                  class="home-header-tile"
-                  :Header="tile.Title"
+                  :Title="tile.Title"
                   :Description="tile.Description"
-                  :HeaderIcon="tile.Icon"
-                  :IsClickEnabled="true"
-                  :IsActionIconVisible="false"
-                  role="link"
-                  tabindex="0"
-                  @Click="openTile(tile)"
-                  @keydown.enter="openTile(tile)"
-                  @keydown.space.prevent="openTile(tile)" />
+                  :Icon="tile.Icon"
+                  :Link="tile.Link" />
               </div>
             </WinHorizontalScrollContainer>
           </section>
@@ -44,22 +37,24 @@
             <section v-if="selectedFilter === 'Recent'" key="Recent" class="sample-panel page-transition-up">
               <template v-if="RecentlyVisitedSamplesList.length > 0">
                 <WinTextBlock class="sample-panel-title" :Text="$t('text.recently-visited')" />
-                  <WinHorizontalScrollContainer class="recently-visited-container">
-                    <div class="single-row-grid-view">
-                      <button
-                        v-for="item in RecentlyVisitedSamplesList"
+                <WinHorizontalScrollContainer class="recently-visited-container">
+                  <div class="single-row-grid-view">
+                    <button
+                      v-for="item in RecentlyVisitedSamplesList"
                       :key="item.UniqueId"
                       class="control-item single-row"
                       type="button"
                       @click="OnItemGridViewItemClick(item)">
-                      <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
-                      <span class="control-item-text">
-                        <WinTextBlock class="control-item-title" :Text="item.Title" />
-                        <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                      <span class="control-item-surface">
+                        <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
+                        <span class="control-item-text">
+                          <WinTextBlock class="control-item-title" :Text="item.Title" />
+                          <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                        </span>
                       </span>
-                      </button>
-                    </div>
-                  </WinHorizontalScrollContainer>
+                    </button>
+                  </div>
+                </WinHorizontalScrollContainer>
               </template>
 
               <WinTextBlock class="sample-panel-title recently-added-title" Text="Recently added or updated" />
@@ -70,10 +65,12 @@
                   class="control-item"
                   type="button"
                   @click="OnItemGridViewItemClick(item)">
-                  <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
-                  <span class="control-item-text">
-                    <WinTextBlock class="control-item-title" :Text="item.Title" />
-                    <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                  <span class="control-item-surface">
+                    <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
+                    <span class="control-item-text">
+                      <WinTextBlock class="control-item-title" :Text="item.Title" />
+                      <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                    </span>
                   </span>
                 </button>
               </div>
@@ -87,10 +84,12 @@
                   class="control-item"
                   type="button"
                   @click="OnItemGridViewItemClick(item)">
-                  <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
-                  <span class="control-item-text">
-                    <WinTextBlock class="control-item-title" :Text="item.Title" />
-                    <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                  <span class="control-item-surface">
+                    <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
+                    <span class="control-item-text">
+                      <WinTextBlock class="control-item-title" :Text="item.Title" />
+                      <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                    </span>
                   </span>
                 </button>
               </div>
@@ -111,9 +110,9 @@
 
 <script setup>
 import { computed, inject, onMounted, onUnmounted, ref } from 'vue';
+import WinHomeHeaderTile from '../components/WinHomeHeaderTile.vue';
 import WinHorizontalScrollContainer from '../../components/WinHorizontalScrollContainer.vue';
 import WinSelectorBar from '../../components/WinSelectorBar.vue';
-import WinSettingsCard from '../../components/WinSettingsCard.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import appIcon from '../../assets/AppIcon.ico';
 import splashDark from '../../assets/HomePage/Splash-Dark.png';
@@ -307,10 +306,6 @@ const OnItemGridViewItemClick = (item) => {
   }
 };
 
-const openTile = (tile) => {
-  window.open(tile.Link, '_blank', 'noopener');
-};
-
 const syncFavorites = () => {
   favorites.value = getStoredFavorites();
 };
@@ -427,105 +422,6 @@ onUnmounted(() => {
   width: max-content;
 }
 
-.home-header-tile {
-  position: relative;
-  width: 232px;
-  flex: 0 0 232px;
-  height: 172px;
-  min-height: 172px;
-  box-sizing: border-box;
-  margin-bottom: 0;
-  padding: 24px;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  gap: 0;
-  overflow: hidden;
-  z-index: 0;
-  background: transparent;
-  border-color: var(--flyout-border);
-  border-radius: 8px;
-}
-
-.home-header-tile::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background: color-mix(in srgb, var(--flyout-bg) 78%, transparent);
-  -webkit-backdrop-filter: var(--flyout-backdrop);
-  backdrop-filter: var(--flyout-backdrop);
-}
-
-.home-header-tile:hover::before {
-  background: color-mix(in srgb, var(--flyout-bg) 84%, transparent);
-}
-
-.home-header-tile:active::before {
-  background: color-mix(in srgb, var(--flyout-bg) 72%, transparent);
-}
-
-.home-header-tile::after {
-  content: "\E8A7";
-  position: absolute;
-  right: 12px;
-  bottom: 10px;
-  color: var(--text-secondary);
-  font-family: 'WinUIOnWebIcons';
-  font-size: 14px;
-  z-index: 2;
-}
-
-.home-header-tile :deep(.win-settings-card-header) {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.home-header-tile :deep(.win-settings-card-icon) {
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  font-size: 24px;
-  line-height: 36px;
-  color: var(--text-primary);
-}
-
-.home-header-tile :deep(.win-settings-card-icon img) {
-  max-width: 36px;
-  max-height: 36px;
-  display: block;
-}
-
-.home-header-tile :deep(.win-settings-card-title) {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
-}
-
-.home-header-tile :deep(.win-settings-card-desc) {
-  display: -webkit-box;
-  margin-top: 4px;
-  max-height: 48px;
-  overflow: hidden;
-  line-clamp: 3;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-
-.home-header-tile :deep(.win-settings-card-content) {
-  position: relative;
-  z-index: 1;
-  display: none;
-}
-
 .filter-bar {
   justify-self: center;
   width: max-content;
@@ -638,17 +534,41 @@ onUnmounted(() => {
   width: 300px;
   height: 96px;
   box-sizing: border-box;
+  padding: 0;
+  display: block;
+  text-align: left;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  --control-item-state-fill: transparent;
+}
+
+.control-item-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
   padding: 8px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   column-gap: 0;
-  text-align: left;
-  color: var(--text-primary);
+  color: inherit;
   background: var(--control-fill-color-default, var(--ctrl-fill-default));
   border: 1px solid var(--card-stroke);
-  border-radius: 8px;
-  cursor: pointer;
-  font: inherit;
+  border-radius: inherit;
+}
+
+.control-item-surface::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--control-item-state-fill);
+  border-radius: calc(8px - 1px);
 }
 
 .control-item.single-row {
@@ -656,15 +576,18 @@ onUnmounted(() => {
   flex: 0 0 300px;
 }
 
-.control-item:hover {
-  background: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
+.control-item:hover:not(:active) {
+  color: var(--text-secondary);
+  --control-item-state-fill: var(--subtle-fill-color-secondary, var(--subtle-secondary));
 }
 
 .control-item:active {
-  background: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary));
+  --control-item-state-fill: var(--subtle-fill-color-tertiary, var(--subtle-tertiary));
 }
 
 .control-item-image {
+  position: relative;
+  z-index: 1;
   width: 32px;
   margin: 12px 16px 0 8px;
   align-self: start;
@@ -672,6 +595,8 @@ onUnmounted(() => {
 }
 
 .control-item-text {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -679,7 +604,7 @@ onUnmounted(() => {
 
 .control-item-title {
   margin-top: 12px;
-  color: var(--text-primary);
+  color: inherit;
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
@@ -732,11 +657,6 @@ onUnmounted(() => {
 
   .home-header-copy {
     margin-left: 24px;
-  }
-
-  .home-header-tiles-scroll {
-    padding-left: 24px;
-    padding-right: 24px;
   }
 
   .filter-bar {

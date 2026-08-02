@@ -280,8 +280,14 @@ const contentStyle = computed(() => {
 
   if (effectiveContentOrientation.value === 'Horizontal') {
     styles.display = 'inline-flex'
+    styles.minWidth = 'max-content'
   } else if (effectiveContentOrientation.value === 'Both' || effectiveContentOrientation.value === 'None') {
     styles.display = 'inline-block'
+    styles.minWidth = 'max-content'
+  } else {
+    styles.display = 'block'
+    styles.width = '100%'
+    styles.minWidth = '0'
   }
 
   return styles
@@ -1256,7 +1262,8 @@ onBeforeUnmount(() => {
 }
 
 .scroll-content {
-  min-width: min-content;
+  width: 100%;
+  min-width: 0;
   min-height: min-content;
   transition: transform 0.1s ease-out;
   will-change: transform;

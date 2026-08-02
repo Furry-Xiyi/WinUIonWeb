@@ -14,66 +14,73 @@
 
     <div class="win-textbox-border">
       <div class="win-textbox-content">
-        <textarea
-          v-if="AcceptsReturn"
-          ref="fieldRef"
-          class="win-textbox-field win-textbox-textarea"
-          :value="currentText"
-          :placeholder="PlaceholderText"
-          :readonly="IsReadOnly"
-          :disabled="isDisabled"
-          :maxlength="MaxLength > 0 ? MaxLength : undefined"
-          :spellcheck="IsSpellCheckEnabled"
-          :inputmode="inputMode"
-          :autocomplete="IsTextPredictionEnabled ? 'on' : 'off'"
-          :autocapitalize="textPredictionAttr"
-          :autocorrect="textPredictionAttr"
-          :style="fieldStyle"
-          @input="onInput"
-          @focus="onFocus"
-          @blur="onBlur"
-          @keydown="onKeydown"
-          @paste="onPaste"
-          @contextmenu="onContextMenu"
-          @select="onSelect"
-          @cut="onCuttingToClipboard"
-          @copy="onCopyingToClipboard"
-          @compositionstart="emit('TextCompositionStarted')"
-          @compositionupdate="emit('TextCompositionChanged')"
-          @compositionend="emit('TextCompositionEnded')"
-          @pointerenter="onPointerEnter"
-          @pointerleave="onPointerLeave" />
+        <slot
+          name="field"
+          :onFocus="onFocus"
+          :onBlur="onBlur"
+          :onPointerEnter="onPointerEnter"
+          :onPointerLeave="onPointerLeave">
+          <textarea
+            v-if="AcceptsReturn"
+            ref="fieldRef"
+            class="win-textbox-field win-textbox-textarea"
+            :value="currentText"
+            :placeholder="PlaceholderText"
+            :readonly="IsReadOnly"
+            :disabled="isDisabled"
+            :maxlength="MaxLength > 0 ? MaxLength : undefined"
+            :spellcheck="IsSpellCheckEnabled"
+            :inputmode="inputMode"
+            :autocomplete="IsTextPredictionEnabled ? 'on' : 'off'"
+            :autocapitalize="textPredictionAttr"
+            :autocorrect="textPredictionAttr"
+            :style="fieldStyle"
+            @input="onInput"
+            @focus="onFocus"
+            @blur="onBlur"
+            @keydown="onKeydown"
+            @paste="onPaste"
+            @contextmenu="onContextMenu"
+            @select="onSelect"
+            @cut="onCuttingToClipboard"
+            @copy="onCopyingToClipboard"
+            @compositionstart="emit('TextCompositionStarted')"
+            @compositionupdate="emit('TextCompositionChanged')"
+            @compositionend="emit('TextCompositionEnded')"
+            @pointerenter="onPointerEnter"
+            @pointerleave="onPointerLeave" />
 
-        <input
-          v-else
-          ref="fieldRef"
-          class="win-textbox-field"
-          type="text"
-          :value="currentText"
-          :placeholder="PlaceholderText"
-          :readonly="IsReadOnly"
-          :disabled="isDisabled"
-          :maxlength="MaxLength > 0 ? MaxLength : undefined"
-          :spellcheck="IsSpellCheckEnabled"
-          :inputmode="inputMode"
-          :autocomplete="IsTextPredictionEnabled ? 'on' : 'off'"
-          :autocapitalize="textPredictionAttr"
-          :autocorrect="textPredictionAttr"
-          :style="fieldStyle"
-          @input="onInput"
-          @focus="onFocus"
-          @blur="onBlur"
-          @keydown="onKeydown"
-          @paste="onPaste"
-          @contextmenu="onContextMenu"
-          @select="onSelect"
-          @cut="onCuttingToClipboard"
-          @copy="onCopyingToClipboard"
-          @compositionstart="emit('TextCompositionStarted')"
-          @compositionupdate="emit('TextCompositionChanged')"
-          @compositionend="emit('TextCompositionEnded')"
-          @pointerenter="onPointerEnter"
-          @pointerleave="onPointerLeave" />
+          <input
+            v-else
+            ref="fieldRef"
+            class="win-textbox-field"
+            type="text"
+            :value="currentText"
+            :placeholder="PlaceholderText"
+            :readonly="IsReadOnly"
+            :disabled="isDisabled"
+            :maxlength="MaxLength > 0 ? MaxLength : undefined"
+            :spellcheck="IsSpellCheckEnabled"
+            :inputmode="inputMode"
+            :autocomplete="IsTextPredictionEnabled ? 'on' : 'off'"
+            :autocapitalize="textPredictionAttr"
+            :autocorrect="textPredictionAttr"
+            :style="fieldStyle"
+            @input="onInput"
+            @focus="onFocus"
+            @blur="onBlur"
+            @keydown="onKeydown"
+            @paste="onPaste"
+            @contextmenu="onContextMenu"
+            @select="onSelect"
+            @cut="onCuttingToClipboard"
+            @copy="onCopyingToClipboard"
+            @compositionstart="emit('TextCompositionStarted')"
+            @compositionupdate="emit('TextCompositionChanged')"
+            @compositionend="emit('TextCompositionEnded')"
+            @pointerenter="onPointerEnter"
+            @pointerleave="onPointerLeave" />
+        </slot>
 
         <button
           v-if="showDeleteButton"
@@ -685,26 +692,41 @@ defineExpose({
 
 <style scoped>
 .win-textbox {
-  --textbox-background: var(--control-fill-color-default, var(--ctrl-fill-default));
-  --textbox-background-pointer-over: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
-  --textbox-background-focused: var(--control-fill-color-input-active, var(--ctrl-fill-input-active));
-  --textbox-background-disabled: var(--control-fill-color-disabled, var(--ctrl-fill-disabled));
-  --textbox-border-top: var(--control-stroke-color-default, var(--ctrl-border-rest));
-  --textbox-border-bottom: var(--control-strong-stroke-color-default, var(--ctrl-strong-stroke));
-  --textbox-border-focused: var(--accent-base);
+  --textbox-background: var(--TextControlBackground, var(--ControlFillColorDefaultBrush, var(--control-fill-color-default, var(--ctrl-fill-default))));
+  --textbox-background-pointer-over: var(--TextControlBackgroundPointerOver, var(--ControlFillColorSecondaryBrush, var(--control-fill-color-secondary, var(--ctrl-fill-secondary))));
+  --textbox-background-pressed: var(--ControlFillColorTertiaryBrush, var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary)));
+  --textbox-background-focused: var(--TextControlBackgroundFocused, var(--ControlFillColorInputActiveBrush, var(--control-fill-color-input-active, var(--ctrl-fill-input-active))));
+  --textbox-background-disabled: var(--TextControlBackgroundDisabled, var(--ControlFillColorDisabledBrush, var(--control-fill-color-disabled, var(--ctrl-fill-disabled))));
+  --textbox-border-top: var(--ControlStrokeColorDefaultBrush, var(--control-stroke-color-default, var(--ctrl-border-rest)));
+  --textbox-border-bottom: var(--ControlStrongStrokeColorDefaultBrush, var(--control-strong-stroke-color-default, var(--ctrl-strong-stroke)));
+  --textbox-border-focused: var(--SystemAccentColorDark1, var(--accent-base));
+  --textbox-foreground: var(--TextControlForeground, var(--TextFillColorPrimaryBrush, var(--text-primary, var(--text-fill-color-primary))));
+  --textbox-foreground-pointer-over: var(--TextControlForegroundPointerOver, var(--TextFillColorPrimaryBrush, var(--text-primary, var(--text-fill-color-primary))));
+  --textbox-foreground-focused: var(--TextControlForegroundFocused, var(--TextFillColorPrimaryBrush, var(--text-primary, var(--text-fill-color-primary))));
+  --textbox-foreground-disabled: var(--TextControlForegroundDisabled, var(--TextFillColorDisabledBrush, var(--text-disabled, var(--text-fill-color-disabled))));
+  --textbox-placeholder-foreground: var(--TextControlPlaceholderForeground, var(--TextFillColorSecondaryBrush, var(--text-secondary, var(--text-fill-color-secondary))));
+  --textbox-placeholder-foreground-pointer-over: var(--TextControlPlaceholderForegroundPointerOver, var(--TextFillColorSecondaryBrush, var(--text-secondary, var(--text-fill-color-secondary))));
+  --textbox-placeholder-foreground-focused: var(--TextControlPlaceholderForegroundFocused, var(--TextFillColorSecondaryBrush, var(--text-secondary, var(--text-fill-color-secondary))));
+  --textbox-placeholder-foreground-disabled: var(--TextControlPlaceholderForegroundDisabled, var(--TextFillColorDisabledBrush, var(--text-disabled, var(--text-fill-color-disabled))));
+  --textbox-button-background-pointer-over: var(--TextControlButtonBackgroundPointerOver, var(--SubtleFillColorSecondaryBrush, var(--subtle-fill-color-secondary, var(--subtle-secondary))));
+  --textbox-button-background-pressed: var(--TextControlButtonBackgroundPressed, var(--SubtleFillColorTertiaryBrush, var(--subtle-fill-color-tertiary, var(--subtle-tertiary))));
+  --textbox-button-foreground: var(--TextControlButtonForeground, var(--TextFillColorSecondaryBrush, var(--text-secondary, var(--text-fill-color-secondary))));
+  --textbox-button-foreground-pointer-over: var(--TextControlButtonForegroundPointerOver, var(--TextFillColorSecondaryBrush, var(--text-secondary, var(--text-fill-color-secondary))));
+  --textbox-button-foreground-pressed: var(--TextControlButtonForegroundPressed, var(--TextFillColorTertiaryBrush, var(--text-tertiary, var(--text-fill-color-tertiary))));
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
+:global(html.theme-dark) .win-textbox,
 :global(.example-theme-wrapper.theme-dark) .win-textbox {
-  --textbox-border-focused: var(--accent-hover);
+  --textbox-border-focused: var(--SystemAccentColorLight2, var(--accent-hover));
 }
 
 :global(html.theme-light) .win-textbox,
 :global(.example-theme-wrapper.theme-light) .win-textbox {
-  --textbox-border-focused: var(--accent-base);
+  --textbox-border-focused: var(--SystemAccentColorDark1, var(--accent-base));
 }
 
 .win-textbox-header {
@@ -731,14 +753,42 @@ defineExpose({
     box-shadow var(--fast-duration, 100ms);
 }
 
+.win-textbox-border::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 1px;
+  pointer-events: none;
+  background: var(--textbox-border-focused);
+  border-radius: 0 0 4px 4px;
+  clip-path: polygon(0 100%, 2px 0, calc(100% - 2px) 0, 100% 100%);
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition:
+    opacity var(--fast-duration, 100ms),
+    transform var(--fast-duration, 100ms);
+}
+
 .win-textbox.is-hovered:not(.is-disabled) .win-textbox-border {
   background: var(--textbox-background-pointer-over);
 }
 
+.win-textbox:active:not(.is-disabled):not(.is-focused) .win-textbox-border {
+  background: var(--textbox-background-pressed);
+}
+
 .win-textbox.is-focused:not(.is-disabled) .win-textbox-border {
   background: var(--textbox-background-focused);
-  border-bottom-color: var(--textbox-border-top);
-  box-shadow: inset 0 -2px 0 var(--textbox-border-focused);
+  border-bottom-color: var(--textbox-border-focused);
+}
+
+.win-textbox.is-focused:not(.is-disabled) .win-textbox-border::after {
+  opacity: 1;
+  transform: scaleY(1);
 }
 
 .win-textbox-content {
@@ -756,7 +806,7 @@ defineExpose({
   width: 100%;
   box-sizing: border-box;
   padding: 5px 6px 6px 10px;
-  color: var(--text-primary, var(--text-fill-color-primary));
+  color: var(--textbox-foreground);
   background: transparent;
   border: 0;
   outline: 0;
@@ -785,7 +835,7 @@ defineExpose({
   margin: 0;
   padding: 0;
   overflow: hidden;
-  color: var(--text-secondary, var(--text-fill-color-secondary, rgba(0, 0, 0, 0.62)));
+  color: var(--textbox-button-foreground);
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -807,7 +857,7 @@ defineExpose({
   margin: 0;
   padding: 0;
   overflow: hidden;
-  color: var(--text-secondary, var(--text-fill-color-secondary, rgba(0, 0, 0, 0.62)));
+  color: var(--textbox-button-foreground);
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -831,11 +881,11 @@ defineExpose({
 }
 
 :slotted(.win-textbox-action-button:hover) {
-  color: var(--text-primary, var(--text-fill-color-primary, rgba(0, 0, 0, 0.89)));
+  color: var(--textbox-button-foreground-pointer-over);
 }
 
 :slotted(.win-textbox-action-button:active) {
-  color: var(--text-tertiary, var(--text-fill-color-tertiary, rgba(0, 0, 0, 0.45)));
+  color: var(--textbox-button-foreground-pressed);
 }
 
 :slotted(.win-textbox-action-button:disabled) {
@@ -876,13 +926,21 @@ defineExpose({
 
 :deep(.win-textbox-action-button:hover > span),
 .win-textbox-delete-button:hover .win-textbox-delete-button-layout {
-  background: var(--subtle-fill-color-secondary, var(--subtle-secondary, rgba(0, 0, 0, 0.06)));
+  background: var(--textbox-button-background-pointer-over);
+}
+
+.win-textbox-delete-button:hover {
+  color: var(--textbox-button-foreground-pointer-over);
 }
 
 :deep(.win-textbox-action-button:active > span),
 .win-textbox-delete-button:active .win-textbox-delete-button-layout {
-  background: var(--subtle-fill-color-tertiary, var(--subtle-tertiary, rgba(0, 0, 0, 0.03)));
-  color: var(--text-tertiary, var(--text-fill-color-tertiary, rgba(0, 0, 0, 0.45)));
+  background: var(--textbox-button-background-pressed);
+  color: var(--textbox-button-foreground-pressed);
+}
+
+.win-textbox-delete-button:active {
+  color: var(--textbox-button-foreground-pressed);
 }
 
 .win-textbox-delete-glyph {
@@ -892,13 +950,29 @@ defineExpose({
 }
 
 .win-textbox-field::placeholder {
-  color: var(--text-tertiary, var(--text-fill-color-tertiary, rgba(0, 0, 0, 0.45)));
+  color: var(--textbox-placeholder-foreground);
   opacity: 1;
 }
 
+.win-textbox.is-hovered:not(.is-disabled) .win-textbox-field {
+  color: var(--textbox-foreground-pointer-over);
+}
+
+.win-textbox.is-hovered:not(.is-disabled) .win-textbox-field::placeholder {
+  color: var(--textbox-placeholder-foreground-pointer-over);
+}
+
+.win-textbox.is-focused:not(.is-disabled) .win-textbox-field {
+  color: var(--textbox-foreground-focused);
+}
+
+.win-textbox.is-focused:not(.is-disabled) .win-textbox-field::placeholder {
+  color: var(--textbox-placeholder-foreground-focused);
+}
+
 .win-textbox-field::selection {
-  color: var(--accent-text, #ffffff);
-  background: var(--textbox-selection-background, var(--accent-base, var(--accent-default, #0067c0)));
+  background-color: var(--textbox-selection-background, Highlight);
+  color: HighlightText;
 }
 
 .win-textbox-description {
@@ -925,10 +999,10 @@ defineExpose({
 .win-textbox.is-disabled .win-textbox-header,
 .win-textbox.is-disabled .win-textbox-description,
 .win-textbox.is-disabled .win-textbox-field {
-  color: var(--text-disabled, var(--text-fill-color-disabled, rgba(0, 0, 0, 0.36)));
+  color: var(--textbox-foreground-disabled);
 }
 
 .win-textbox.is-disabled .win-textbox-field::placeholder {
-  color: var(--text-disabled, var(--text-fill-color-disabled, rgba(0, 0, 0, 0.36)));
+  color: var(--textbox-placeholder-foreground-disabled);
 }
 </style>

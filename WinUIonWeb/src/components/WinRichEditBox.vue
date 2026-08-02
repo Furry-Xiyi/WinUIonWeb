@@ -1,14 +1,27 @@
 <template>
-  <div
-    ref="rootRef"
+  <WinTextBox
     class="win-rich-edit-box"
-    :class="{ 'is-disabled': !IsEnabled, 'is-readonly': IsReadOnly, 'is-focused': isFocused }"
-    :style="rootStyle">
-    <div v-if="Header || $slots.header" class="win-reb-header">
+    :style="rootStyle"
+    :Header="Header"
+    :Description="Description"
+    :AcceptsReturn="AcceptsReturn"
+    :IsReadOnly="IsReadOnly"
+    :IsEnabled="IsEnabled"
+    :MaxLength="MaxLength"
+    :TextWrapping="TextWrapping"
+    :TextAlignment="TextAlignment"
+    :IsSpellCheckEnabled="IsSpellCheckEnabled"
+    :IsTextPredictionEnabled="IsTextPredictionEnabled"
+    :InputScope="InputScope"
+    :CharacterCasing="CharacterCasing"
+    :SelectionHighlightColor="SelectionHighlightColor"
+    :PreventKeyboardDisplayOnProgrammaticFocus="PreventKeyboardDisplayOnProgrammaticFocus"
+    :ShowDeleteButton="false">
+    <template v-if="Header || $slots.header" #header>
       <slot name="header">{{ Header }}</slot>
-    </div>
+    </template>
 
-    <div class="win-reb-border" @click="focus">
+    <template #field="{ onFocus: setTextBoxFocused, onBlur: setTextBoxBlurred, onPointerEnter, onPointerLeave }">
       <WinScrollViewer
         class="win-reb-editor-scroll"
         :style="editorScrollStyle"
@@ -28,33 +41,35 @@
           aria-multiline="true"
           :aria-readonly="IsReadOnly"
           @input="onInput"
-          @focus="onFocus"
-          @blur="onBlur"
+          @focus="onEditorFocus(setTextBoxFocused)"
+          @blur="onEditorBlur(setTextBoxBlurred)"
           @keydown="onKeydown"
           @paste="onPaste"
           @copy="onCopy"
           @cut="onCut"
           @contextmenu="onContextMenu"
           @mouseup="onSelectionGesture"
-          @keyup="onSelectionGesture"></div>
+          @keyup="onSelectionGesture"
+          @pointerenter="onPointerEnter"
+          @pointerleave="onPointerLeave"></div>
       </WinScrollViewer>
-    </div>
+    </template>
 
-    <div v-if="Description || $slots.description" class="win-reb-description">
+    <template v-if="Description || $slots.description" #description>
       <slot name="description">{{ Description }}</slot>
-    </div>
+    </template>
+  </WinTextBox>
 
-    <WinCommandBarFlyout
-      :Open="commandBarOpen"
-      :AnchorRect="commandBarAnchor"
-      :PrimaryCommands="commandBarPrimaryCommands"
-      :SecondaryCommands="commandBarSecondaryCommands"
-      Placement="Auto"
-      ShowMode="Standard"
-      :ShowPrimaryLabels="true"
-      @Close="commandBarOpen = false"
-      @Command="onFlyoutCommand" />
-  </div>
+  <WinCommandBarFlyout
+    :Open="commandBarOpen"
+    :AnchorRect="commandBarAnchor"
+    :PrimaryCommands="commandBarPrimaryCommands"
+    :SecondaryCommands="commandBarSecondaryCommands"
+    Placement="Auto"
+    ShowMode="Standard"
+    :ShowPrimaryLabels="true"
+    @Close="commandBarOpen = false"
+    @Command="onFlyoutCommand" />
 </template>
 
 <script setup lang="ts">
@@ -62,6 +77,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { CSSProperties } from 'vue';
 import WinCommandBarFlyout from './WinCommandBarFlyout.vue';
 import WinScrollViewer from './WinScrollViewer.vue';
+import WinTextBox from './WinTextBox.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
@@ -69,10 +85,11 @@ const { t } = useI18n();
 type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
 type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
 type CharacterCasing = 'Normal' | 'Lower' | 'Upper';
-type ClipboardCopyFormat = 'AllFormats' | 'PlainText' | 'RichText';
+type ClipboardCopyFormat = 'AllFormats' | 'PlainText';
 type TextReadingOrder = 'Default' | 'DetectFromContent' | 'UseFlowDirection';
 type CandidateWindowAlignment = 'Default' | 'BottomEdge';
 type HeaderPlacement = 'Top' | 'Left';
+type DisabledFormattingAccelerators = 'None' | 'Bold' | 'Italic' | 'Underline' | 'All' | string;
 type CommandBarFlyoutCommand = {
   Label: string;
   Icon?: string;
@@ -93,7 +110,7 @@ const props = withDefaults(defineProps<{
   ClipboardCopyFormat?: ClipboardCopyFormat;
   Description?: string;
   DesiredCandidateWindowAlignment?: CandidateWindowAlignment;
-  DisabledFormattingAccelerators?: string;
+  DisabledFormattingAccelerators?: DisabledFormattingAccelerators;
   Header?: string;
   HeaderPlacement?: HeaderPlacement;
   HeaderTemplate?: unknown | null;
@@ -125,7 +142,7 @@ const props = withDefaults(defineProps<{
   ClipboardCopyFormat: 'AllFormats',
   Description: '',
   DesiredCandidateWindowAlignment: 'Default',
-  DisabledFormattingAccelerators: '',
+  DisabledFormattingAccelerators: 'None',
   Header: '',
   HeaderPlacement: 'Top',
   HeaderTemplate: undefined,
@@ -156,11 +173,12 @@ const emit = defineEmits<{
   'update:Html': [value: string];
   TextChanged: [args: { text: string; html: string }];
   SelectionChanged: [args: { selectionStart: number; selectionLength: number; selectedText: string }];
+  SelectionChanging: [args: { SelectionStart: number; SelectionLength: number; Cancel: boolean }];
   ContextMenuOpening: [args: { handled: boolean; x: number; y: number }];
   Paste: [args: { handled: boolean; text: string }];
   CopyingToClipboard: [args: { cancel: boolean; text: string }];
   CuttingToClipboard: [args: { cancel: boolean; text: string }];
-  TextChanging: [args: { isContentChanging: boolean; text: string }];
+  TextChanging: [args: { IsContentChanging: boolean; text: string }];
   TextCompositionStarted: [];
   TextCompositionChanged: [];
   TextCompositionEnded: [];
@@ -169,7 +187,6 @@ const emit = defineEmits<{
   LostFocus: [];
 }>();
 
-const rootRef = ref<HTMLElement | null>(null);
 const editorRef = ref<HTMLDivElement | null>(null);
 const isFocused = ref(false);
 const commandBarOpen = ref(false);
@@ -178,12 +195,15 @@ const internalHtml = ref(props.Html || escapeText(props.Text));
 const savedSelection = ref<Range | null>(null);
 
 const disabledFormatting = computed(() => props.DisabledFormattingAccelerators.toLowerCase());
+const isFormattingDisabled = (command: 'bold' | 'italic' | 'underline') => {
+  return disabledFormatting.value.includes('all') || disabledFormatting.value.includes(command);
+};
 const commandBarPrimaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
   const commands: CommandBarFlyoutCommand[] = [];
   if (!props.ShowFormattingCommands) return commands;
-  if (!disabledFormatting.value.includes('bold')) commands.push({ Label: t('text.bold'), Icon: 'Bold', Command: 'bold', IsToggle: true, IsChecked: isCommandActive('bold') });
-  if (!disabledFormatting.value.includes('italic')) commands.push({ Label: t('text.italic'), Icon: 'Italic', Command: 'italic', IsToggle: true, IsChecked: isCommandActive('italic') });
-  if (!disabledFormatting.value.includes('underline')) commands.push({ Label: t('text.underline'), Icon: 'Underline', Command: 'underline', IsToggle: true, IsChecked: isCommandActive('underline') });
+  if (!isFormattingDisabled('bold')) commands.push({ Label: t('text.bold'), Icon: 'Bold', Command: 'bold', IsToggle: true, IsChecked: isCommandActive('bold') });
+  if (!isFormattingDisabled('italic')) commands.push({ Label: t('text.italic'), Icon: 'Italic', Command: 'italic', IsToggle: true, IsChecked: isCommandActive('italic') });
+  if (!isFormattingDisabled('underline')) commands.push({ Label: t('text.underline'), Icon: 'Underline', Command: 'underline', IsToggle: true, IsChecked: isCommandActive('underline') });
   return commands;
 });
 
@@ -208,7 +228,6 @@ const commandBarSecondaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
 const cssSize = (value: number | string) => value === '' ? undefined : typeof value === 'number' ? `${value}px` : value;
 const rootStyle = computed<CSSProperties & Record<string, string | undefined>>(() => ({
   width: cssSize(props.Width),
-  '--reb-selection-background': props.SelectionHighlightColor || undefined,
   '--reb-selection-background-blur': props.SelectionHighlightColorWhenNotFocused || undefined
 }));
 
@@ -283,7 +302,7 @@ const onInput = () => {
     editor.innerText = text;
   }
   internalHtml.value = editor.innerHTML;
-  emit('TextChanging', { isContentChanging: true, text });
+  emit('TextChanging', { IsContentChanging: true, text });
   emit('update:Text', text);
   emit('update:Html', internalHtml.value);
   emit('TextChanged', { text, html: internalHtml.value });
@@ -291,6 +310,9 @@ const onInput = () => {
 
 const emitSelection = () => {
   const text = getSelectionText();
+  const changingArgs = { SelectionStart: 0, SelectionLength: text.length, Cancel: false };
+  emit('SelectionChanging', changingArgs);
+  if (changingArgs.Cancel) return;
   emit('SelectionChanged', { selectionStart: 0, selectionLength: text.length, selectedText: text });
 };
 
@@ -317,16 +339,15 @@ const onKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Enter' && !props.AcceptsReturn) event.preventDefault();
   if (!(event.ctrlKey || event.metaKey)) return;
   const key = event.key.toLowerCase();
-  const disabled = props.DisabledFormattingAccelerators.toLowerCase();
-  if (key === 'b' && !disabled.includes('bold')) {
+  if (key === 'b' && !isFormattingDisabled('bold')) {
     event.preventDefault();
     runTextCommand('bold');
   }
-  if (key === 'i' && !disabled.includes('italic')) {
+  if (key === 'i' && !isFormattingDisabled('italic')) {
     event.preventDefault();
     runTextCommand('italic');
   }
-  if (key === 'u' && !disabled.includes('underline')) {
+  if (key === 'u' && !isFormattingDisabled('underline')) {
     event.preventDefault();
     runTextCommand('underline');
   }
@@ -406,12 +427,14 @@ const onFlyoutCommand = (item: CommandBarFlyoutCommand) => {
   if (item?.Command) void runTextCommand(item.Command);
 };
 
-const onFocus = () => {
+const onEditorFocus = (setTextBoxFocused?: () => void) => {
+  setTextBoxFocused?.();
   isFocused.value = true;
   emit('GotFocus');
 };
 
-const onBlur = () => {
+const onEditorBlur = (setTextBoxBlurred?: () => void) => {
+  setTextBoxBlurred?.();
   isFocused.value = false;
   emit('LostFocus');
 };
@@ -474,6 +497,12 @@ defineExpose({
   setHtml,
   getText: plainText,
   getHtml: () => editorRef.value?.innerHTML ?? '',
+  Document: {
+    getText: plainText,
+    setText,
+    setHtml,
+    getHtml: () => editorRef.value?.innerHTML ?? ''
+  },
   TextDocument: {
     getText: plainText,
     setText,
@@ -485,97 +514,73 @@ defineExpose({
 
 <style scoped>
 .win-rich-edit-box {
-  --reb-background: var(--control-fill-color-default, var(--ctrl-fill-default));
-  --reb-background-hover: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
-  --reb-background-focused: var(--control-fill-color-input-active, var(--ctrl-fill-input-active));
-  --reb-border-top: var(--control-stroke-color-default, var(--ctrl-border-rest));
-  --reb-border-bottom: var(--control-strong-stroke-color-default, var(--ctrl-strong-stroke));
-  --reb-accent: var(--accent-base);
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+  --rich-edit-box-min-height: 120px;
 }
 
-:global(.example-theme-wrapper.theme-dark) .win-rich-edit-box {
-  --reb-accent: var(--accent-hover);
+.win-rich-edit-box :deep(.win-textbox-border) {
+  min-height: var(--rich-edit-box-min-height);
 }
 
-.win-reb-header {
-  margin-bottom: 8px;
-  color: var(--text-primary);
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.win-reb-border {
-  overflow: hidden;
-  min-height: 120px;
-  background: var(--reb-background);
-  border: 1px solid var(--reb-border-top);
-  border-bottom-color: var(--reb-border-bottom);
-  border-radius: 4px;
-  transition: background 100ms, box-shadow 100ms;
-}
-
-.win-rich-edit-box:not(.is-disabled):not(.is-readonly) .win-reb-border:hover {
-  background: var(--reb-background-hover);
-}
-
-.win-rich-edit-box.is-focused:not(.is-disabled) .win-reb-border {
-  background: var(--reb-background-focused);
-  border-bottom-color: var(--reb-border-top);
-  box-shadow: inset 0 -2px 0 var(--reb-accent);
+.win-rich-edit-box :deep(.win-textbox-content) {
+  min-height: calc(var(--rich-edit-box-min-height) - 2px);
 }
 
 .win-reb-editor-scroll {
+  flex: 1;
+  min-width: 0;
   min-height: 118px;
 }
 
 .win-reb-editor {
   min-height: 118px;
-  padding: 8px 10px;
+  padding: 5px 6px 6px 10px;
   box-sizing: border-box;
   outline: 0;
-  color: var(--text-primary);
+  color: var(--textbox-foreground);
   font-family: "Segoe UI", system-ui, sans-serif;
   font-size: 14px;
   line-height: 20px;
+  user-select: text;
 }
 
 .win-reb-editor:empty::before {
   content: attr(data-placeholder);
-  color: var(--text-tertiary);
+  color: var(--textbox-placeholder-foreground);
   pointer-events: none;
 }
 
 .win-reb-editor::selection {
-  color: var(--accent-text, #fff);
-  background: var(--reb-selection-background, var(--accent-base));
+  background-color: var(--textbox-selection-background, Highlight);
+  color: HighlightText;
 }
 
 .win-rich-edit-box:not(.is-focused) .win-reb-editor::selection {
-  background: var(--reb-selection-background-blur, transparent);
+  background-color: var(--reb-selection-background-blur, var(--textbox-selection-background, Highlight));
+  color: HighlightText;
 }
 
-.win-reb-description {
-  margin-top: 6px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  line-height: 16px;
+.win-rich-edit-box.is-hovered:not(.is-disabled) .win-reb-editor {
+  color: var(--textbox-foreground-pointer-over);
 }
 
-.win-rich-edit-box.is-disabled {
-  pointer-events: none;
+.win-rich-edit-box.is-hovered:not(.is-disabled) .win-reb-editor:empty::before {
+  color: var(--textbox-placeholder-foreground-pointer-over);
 }
 
-.win-rich-edit-box.is-disabled .win-reb-border {
-  background: var(--control-fill-color-disabled, var(--ctrl-fill-disabled));
+.win-rich-edit-box.is-focused:not(.is-disabled) .win-reb-editor {
+  color: var(--textbox-foreground-focused);
 }
 
-.win-rich-edit-box.is-disabled .win-reb-editor,
-.win-rich-edit-box.is-disabled .win-reb-header,
-.win-rich-edit-box.is-disabled .win-reb-description {
-  color: var(--text-disabled);
+.win-rich-edit-box.is-focused:not(.is-disabled) .win-reb-editor:empty::before {
+  color: var(--textbox-placeholder-foreground-focused);
+}
+
+.win-rich-edit-box.is-disabled .win-reb-editor {
+  color: var(--textbox-foreground-disabled);
+}
+
+.win-rich-edit-box.is-disabled .win-reb-editor:empty::before {
+  color: var(--textbox-placeholder-foreground-disabled);
 }
 
 </style>

@@ -25,6 +25,7 @@ const INITIAL_SHOW_DELAY = MOUSE_HOVER_TIME * 2;
 const RESHOW_DELAY = MOUSE_HOVER_TIME * 1.5;
 const TOUCH_SHOW_DELAY = MOUSE_HOVER_TIME;
 const BETWEEN_SHOW_DELAY = 200;
+const CLOSE_ANIMATION_DURATION = 167;
 
 type InputMode = 'keyboard' | 'mouse' | 'touch';
 
@@ -45,6 +46,9 @@ let touchDismissTimer: number | undefined;
 let lastClosedAt = Number.NEGATIVE_INFINITY;
 let isPointerOverToolTip = false;
 let suppressedElement: HTMLElement | null = null;
+let lastInputMode: InputMode | null = null;
+let isClosing = false;
+let canCancelClose = false;
 
 function toolTipText(element: HTMLElement): string | null {
   return element.getAttribute(TOOL_TIP_ATTRIBUTE);
@@ -161,6 +165,8 @@ function openFor(element: HTMLElement) {
   const text = toolTipText(element);
   if (text === null) return;
   clearCloseTimer();
+  isClosing = false;
+  canCancelClose = false;
   if (activeElement && activeElement !== element) restoreAttachedTitle(activeElement);
   activeElement = element;
   pendingElement = null;
@@ -174,6 +180,14 @@ function openFor(element: HTMLElement) {
 
 function queueOpen(element: HTMLElement, inputMode: InputMode, point?: { x: number; y: number }) {
   if (suppressedElement === element) return;
+  if (activeElement === element && isClosing && canCancelClose) {
+    clearCloseTimer();
+    isClosing = false;
+    canCancelClose = false;
+    element.removeAttribute('title');
+    isOpen.value = true;
+    return;
+  }
   if (activeElement === element && isOpen.value) {
     clearCloseTimer();
     return;
@@ -200,34 +214,59 @@ function queueOpen(element: HTMLElement, inputMode: InputMode, point?: { x: numb
   openTimer = window.setTimeout(() => openFor(element), delay);
 }
 
-function closeActive() {
+function closeActive(allowCancellation = false) {
   const wasOpen = Boolean(activeElement && isOpen.value);
+  const closingElement = activeElement;
   clearOpenTimer();
   clearCloseTimer();
   clearTouchDismissTimer();
   isPointerOverToolTip = false;
-  if (activeElement) restoreAttachedTitle(activeElement);
-  activeElement = null;
+  if (closingElement) restoreAttachedTitle(closingElement);
   isOpen.value = false;
-  placementTarget.value = null;
-  placementPoint.value = null;
-  content.value = '';
   if (wasOpen) lastClosedAt = performance.now();
+  if (!closingElement) {
+    isClosing = false;
+    canCancelClose = false;
+    placementTarget.value = null;
+    placementPoint.value = null;
+    content.value = '';
+    return;
+  }
+
+  isClosing = true;
+  canCancelClose = allowCancellation;
+  closeTimer = window.setTimeout(() => {
+    closeTimer = undefined;
+    if (!isClosing || isOpen.value || activeElement !== closingElement) return;
+    activeElement = null;
+    isClosing = false;
+    canCancelClose = false;
+    placementTarget.value = null;
+    placementPoint.value = null;
+    content.value = '';
+  }, CLOSE_ANIMATION_DURATION);
 }
 
 function queueClose(element: HTMLElement) {
   if (pendingElement !== element && activeElement !== element) return;
   clearOpenTimer();
   if (isPointerOverToolTip) return;
-  clearCloseTimer();
-  closeTimer = window.setTimeout(closeActive, BETWEEN_SHOW_DELAY);
+  closeActive(true);
 }
 
 function onPointerOver(event: PointerEvent) {
   const element = findToolTipElement(event.target);
   if (element && event.pointerType !== 'touch') {
+    lastInputMode = 'mouse';
     queueOpen(element, 'mouse', { x: event.clientX, y: event.clientY });
   }
+}
+
+function onPointerMove(event: PointerEvent) {
+  if (event.pointerType === 'touch' || !pendingElement) return;
+  const element = findToolTipElement(event.target);
+  if (element !== pendingElement) return;
+  placementPoint.value = { x: event.clientX, y: event.clientY };
 }
 
 function onPointerOut(event: PointerEvent) {
@@ -240,6 +279,7 @@ function onPointerOut(event: PointerEvent) {
 }
 
 function onPointerDown(event: PointerEvent) {
+  lastInputMode = event.pointerType === 'touch' ? 'touch' : 'mouse';
   const element = findToolTipElement(event.target);
   if (event.pointerType === 'touch' && element) {
     queueOpen(element, 'touch', { x: event.clientX, y: event.clientY });
@@ -255,7 +295,9 @@ function onPointerDown(event: PointerEvent) {
 
 function onFocusIn(event: FocusEvent) {
   const element = findToolTipElement(event.target);
-  if (element) queueOpen(element, 'keyboard', elementCenter(element));
+  if (element && lastInputMode === 'keyboard') {
+    queueOpen(element, 'keyboard', elementCenter(element));
+  }
 }
 
 function onFocusOut(event: FocusEvent) {
@@ -263,9 +305,19 @@ function onFocusOut(event: FocusEvent) {
   if (element) queueClose(element);
 }
 
+function onKeyDown() {
+  lastInputMode = 'keyboard';
+}
+
 function onToolTipPointerEnter() {
   isPointerOverToolTip = true;
   clearCloseTimer();
+  if (activeElement && isClosing && canCancelClose && suppressedElement !== activeElement) {
+    isClosing = false;
+    canCancelClose = false;
+    activeElement.removeAttribute('title');
+    isOpen.value = true;
+  }
 }
 
 function onToolTipPointerLeave() {
@@ -298,8 +350,10 @@ onMounted(() => {
     subtree: true
   });
   document.addEventListener('pointerover', onPointerOver, true);
+  document.addEventListener('pointermove', onPointerMove, true);
   document.addEventListener('pointerout', onPointerOut, true);
   document.addEventListener('pointerdown', onPointerDown, true);
+  document.addEventListener('keydown', onKeyDown, true);
   document.addEventListener('focusin', onFocusIn, true);
   document.addEventListener('focusout', onFocusOut, true);
 });
@@ -311,8 +365,10 @@ onBeforeUnmount(() => {
   clearTouchDismissTimer();
   attachedElements.forEach(restoreOriginalTitle);
   document.removeEventListener('pointerover', onPointerOver, true);
+  document.removeEventListener('pointermove', onPointerMove, true);
   document.removeEventListener('pointerout', onPointerOut, true);
   document.removeEventListener('pointerdown', onPointerDown, true);
+  document.removeEventListener('keydown', onKeyDown, true);
   document.removeEventListener('focusin', onFocusIn, true);
   document.removeEventListener('focusout', onFocusOut, true);
 });

@@ -59,5 +59,7 @@ const rootStyle = computed(() => {
 <style scoped>
 .win-grid {
   display: grid;
+  min-width: 0;
+  min-height: 0;
 }
 </style>

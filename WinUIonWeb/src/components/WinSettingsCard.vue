@@ -106,16 +106,47 @@ const handleClick = (e) => {
 
   .win-settings-card.clickable {
     cursor: pointer;
-    transition: background 60ms ease, border-color 60ms ease;
+    transition: background var(--faster-duration, 83ms) linear;
   }
 
-  .win-settings-card.clickable:hover {
-    background: var(--subtle-fill-secondary);
-    border-color: var(--card-stroke-secondary);
+  .win-settings-card.clickable:hover:not(:active) {
+    color: var(--text-primary);
+    background: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
+    border-color: var(--control-stroke-color-default, var(--ctrl-border));
   }
 
   .win-settings-card.clickable:active {
-    background: var(--subtle-fill-tertiary);
+    color: var(--text-secondary);
+    background: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary));
+    border-color: var(--control-stroke-color-default, var(--ctrl-border));
+  }
+
+  .win-settings-card.clickable:active .win-settings-card-icon,
+  .win-settings-card.clickable:active .win-settings-card-title,
+  .win-settings-card.clickable:active .win-settings-card-desc {
+    color: var(--text-secondary);
+  }
+
+  html.theme-light .win-settings-card.clickable:hover:not(:active),
+  html[data-theme='light'] .win-settings-card.clickable:hover:not(:active) {
+    border-bottom-color: var(--control-stroke-color-secondary, var(--ctrl-border-accent));
+  }
+
+  html.theme-dark .win-settings-card.clickable:hover:not(:active),
+  html[data-theme='dark'] .win-settings-card.clickable:hover:not(:active) {
+    border-top-color: var(--control-stroke-color-secondary, var(--ctrl-border-accent));
+  }
+
+  @media (prefers-color-scheme: light) {
+    html:not(.theme-dark):not([data-theme='dark']) .win-settings-card.clickable:hover:not(:active) {
+      border-bottom-color: var(--control-stroke-color-secondary, var(--ctrl-border-accent));
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not(.theme-light):not([data-theme='light']) .win-settings-card.clickable:hover:not(:active) {
+      border-top-color: var(--control-stroke-color-secondary, var(--ctrl-border-accent));
+    }
   }
 
   .win-settings-card.content-left {

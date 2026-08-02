@@ -1,46 +1,50 @@
 <template>
   <div class="win-nav-shell" :class="shellClasses" :style="paneStyle" ref="shellRef">
-    <nav v-if="isTopNavigation" class="win-nav-top-bar" ref="navRef">
+    <nav v-if="isTopNavigation" class="win-nav-top-bar" ref="navRef" @keydown="onNavigationKeydown" @focusin="onNavigationFocusIn">
       <div class="win-nav-indicator-track" ref="indicatorTrack">
         <div class="win-nav-indicator" :style="indicatorStyle"></div>
       </div>
       <button v-if="showBackButtonResolved" class="win-nav-back-button" :disabled="!canGoBack" :aria-label="t('text.back')" v-bind="{ 'tooltipservice.tooltip': t('text.back') }" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave" ref="topBackButtonRef">
-        <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd"></span>
+        <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
       </button>
+      <div v-if="$slots.PaneHeader" class="win-nav-top-fixed win-nav-top-pane-header"><slot name="PaneHeader"></slot></div>
+      <WinTextBlock v-else-if="paneTitle && !isPaneToggleButtonVisible" class="win-nav-top-fixed win-nav-top-pane-title" :Text="paneTitle" />
       <div class="win-nav-menu win-nav-top-primary-menu" ref="topPrimaryMenuRef">
         <template v-for="item in topVisibleMenuItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header">
             <WinTextBlock :Text="item.label" />
           </div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
-            <span class="icon">{{ item.icon }}</span>
+          <div v-else-if="!item.children" class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+            <span v-if="item.icon" class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-child-selected': isChildOfGroup(item) }">
-            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
-              <span class="icon">{{ item.icon }}</span>
+            <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
+              <span v-if="item.icon" class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
-              <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)"></span>
+              <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onGroupChevronClick(item)"></span>
             </div>
           </div>
         </template>
-        <div v-if="topOverflowMenuItems.length" class="win-nav-item win-nav-more-button" :aria-label="t('text.more')" v-bind="{ 'tooltipservice.tooltip': t('text.more') }" @click="toggleMoreFlyout" ref="moreButtonRef">
+        <div v-if="topOverflowMenuItems.length" class="win-nav-item win-nav-more-button" role="button" tabindex="0" :aria-label="t('text.more')" v-bind="{ 'tooltipservice.tooltip': t('text.more') }" @click="toggleMoreFlyout" ref="moreButtonRef">
           <span class="icon">&#xE712;</span>
           <WinTextBlock v-if="officialProps.OverflowLabelMode === 'MoreLabel'" class="label" :Text="t('text.more')" />
         </div>
       </div>
-      <div style="flex:1"></div>
+      <div class="win-nav-top-pane-custom-content"><slot name="PaneCustomContent"></slot></div>
+      <div v-if="$slots.AutoSuggestBox" class="win-nav-top-fixed win-nav-top-pane-search"><slot name="AutoSuggestBox"></slot></div>
+      <div v-if="$slots.PaneFooter" class="win-nav-top-fixed win-nav-top-pane-footer"><slot name="PaneFooter"></slot></div>
       <div class="win-nav-menu win-nav-top-footer-menu" ref="topFooterMenuRef">
         <template v-for="item in footerItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
-            <span class="icon">{{ item.icon }}</span>
+          <div v-else class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+            <span v-if="item.icon" class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
         </template>
-        <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
+        <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" role="button" :class="{ 'is-selected': selectedValue === settingsValue }" tabindex="0" v-bind="{ 'tooltipservice.tooltip': resolvedSettingsLabel }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
           <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
           <WinTextBlock class="label" :Text="resolvedSettingsLabel" />
         </div>
@@ -50,7 +54,7 @@
           <div v-if="item.type === 'Header'" class="win-nav-item-header" :data-value="item.value"><WinTextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator" :data-value="item.value"></div>
           <div v-else class="win-nav-item" :data-value="item.value">
-            <span class="icon">{{ item.icon }}</span>
+            <span v-if="item.icon" class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
             <span v-if="item.children" class="icon win-nav-group-chevron">&#xE70D;</span>
           </div>
@@ -61,72 +65,83 @@
         </div>
       </div>
     </nav>
-    <nav v-else class="win-nav-left-panel" :class="['win-nav-left-panel', { 'is-compact': isCompact, 'is-minimal': isLeftMinimalMode }, paneTransition ? `is-pane-${paneTransition}` : '']" :style="paneStyle" ref="navRef">
-      <div class="win-nav-indicator-track" ref="indicatorTrack" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'">
-        <div class="win-nav-indicator" :class="{ 'is-child': indicatorIsChild }" :style="indicatorStyle"></div>
-      </div>
-      <button v-if="showBackButtonInLeftNav" class="win-nav-back-button" :disabled="!canGoBack" :aria-label="t('text.back')" v-bind="{ 'tooltipservice.tooltip': t('text.back') }" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
+    <nav v-else class="win-nav-left-panel" :class="['win-nav-left-panel', { 'is-compact': isCompact, 'is-closed-compact': isClosedCompact, 'is-minimal': isLeftMinimalMode, 'has-back-button': showBackButtonInLeftNav, 'has-pane-toggle-button': isPaneToggleButtonVisible }, paneTransition ? `is-pane-${paneTransition}` : '']" :style="paneStyle" ref="navRef" @keydown="onNavigationKeydown" @focusin="onNavigationFocusIn">
+      <button v-if="showBackButtonInLeftNav" class="win-nav-back-button" :class="{ 'is-minimal-pane-open-hidden': !backButtonVisuallyVisible }" :disabled="!canGoBack || !backButtonVisuallyVisible" :aria-hidden="backButtonVisuallyVisible ? undefined : 'true'" :aria-label="t('text.back')" v-bind="{ 'tooltipservice.tooltip': t('text.back') }" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
         <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
       </button>
-      <button v-if="isPaneToggleButtonVisible" class="win-nav-hamburger" :aria-label="t('text.navigation-menu')" v-bind="{ 'tooltipservice.tooltip': t('text.navigation-menu') }" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
-        <span class="icon animated-icon animated-icon-hamburger" :class="hamburgerClass" @animationend="onHamburgerAnimEnd">&#xE700;</span>
-      </button>
-      <div v-if="$slots.PaneHeader || paneTitle || $slots.AutoSuggestBox" class="win-nav-pane-top" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'">
-        <div v-if="$slots.PaneHeader" class="win-nav-pane-header"><slot name="PaneHeader"></slot></div>
-        <WinTextBlock v-if="paneTitle" class="win-nav-pane-title" :Text="paneTitle" />
-        <div v-if="$slots.AutoSuggestBox" class="win-nav-pane-search"><slot name="AutoSuggestBox"></slot></div>
+      <div v-if="isPaneToggleButtonVisible" class="win-nav-pane-command-row">
+        <button v-if="isPaneToggleButtonVisible" class="win-nav-hamburger" :class="{ 'has-pane-title': paneTitle && paneTitleSpaceVisible }" :aria-label="paneToggleLabel" v-bind="{ 'tooltipservice.tooltip': paneToggleLabel }" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
+          <span class="icon animated-icon animated-icon-hamburger" :class="hamburgerClass" @animationend="onHamburgerAnimEnd">&#xE700;</span>
+          <WinTextBlock v-if="paneTitle && showPaneTitle" class="win-nav-pane-title" :Text="paneTitle" />
+        </button>
       </div>
-      <div v-if="$slots.PaneCustomContent" class="win-nav-pane-custom-content" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'"><slot name="PaneCustomContent"></slot></div>
-      <WinScrollViewer
-        class="win-nav-left-scrollable"
-        ref="scrollArea"
-        v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'"
-        VerticalScrollMode="Auto"
-        VerticalScrollBarVisibility="Auto"
-        HorizontalScrollMode="Disabled"
-        HorizontalScrollBarVisibility="Disabled"
-        @ViewChanged="onScroll">
-        <div class="win-nav-menu">
-          <template v-for="item in menuItems" :key="item.value">
-            <div v-if="item.type === 'Header'" class="win-nav-item-header">
-              <WinTextBlock :Text="item.label" />
-            </div>
-            <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-            <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
-              <span class="icon">{{ item.icon }}</span>
-              <WinTextBlock class="label" :Text="item.label" />
-            </div>
-            <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
-              <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
-                <span class="icon">{{ item.icon }}</span>
-                <WinTextBlock class="label" :Text="item.label" />
-                <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
+      <div class="win-nav-pane-surface" v-show="isLeftPaneContentVisible" :aria-hidden="isLeftMinimalMode && isCompact ? 'true' : undefined" :inert="isLeftMinimalMode && isCompact">
+        <div class="win-nav-indicator-track" ref="indicatorTrack">
+          <div class="win-nav-indicator" :class="{ 'is-child': indicatorIsChild }" :style="indicatorStyle"></div>
+        </div>
+        <div v-if="!isPaneToggleButtonVisible && paneTitle && showPaneTitle" class="win-nav-pane-title-holder">
+          <WinTextBlock class="win-nav-pane-title" :Text="paneTitle" />
+        </div>
+        <div v-if="$slots.PaneHeader" v-show="isFullPaneList" class="win-nav-pane-header" :class="{ 'has-pane-toggle': isPaneToggleButtonVisible }"><slot name="PaneHeader"></slot></div>
+        <div v-if="$slots.AutoSuggestBox" class="win-nav-pane-top" :class="{ 'is-closed-compact': isClosedCompact }">
+          <div class="win-nav-pane-search">
+            <div v-show="!isClosedCompact" class="win-nav-pane-search-presenter" ref="paneAutoSuggestPresenterRef"><slot name="AutoSuggestBox"></slot></div>
+            <button v-show="isClosedCompact" class="win-nav-pane-search-button" :aria-label="t('text.search')" v-bind="{ 'tooltipservice.tooltip': t('text.search') }" @click="onPaneSearchButtonClick">
+              <span class="icon">&#xE721;</span>
+            </button>
+          </div>
+        </div>
+        <div v-if="$slots.PaneCustomContent" class="win-nav-pane-custom-content"><slot name="PaneCustomContent"></slot></div>
+        <WinScrollViewer
+          class="win-nav-left-scrollable"
+          ref="scrollArea"
+          VerticalScrollMode="Auto"
+          VerticalScrollBarVisibility="Auto"
+          HorizontalScrollMode="Disabled"
+          HorizontalScrollBarVisibility="Disabled"
+          @ViewChanged="onScroll">
+          <div class="win-nav-menu">
+            <template v-for="item in menuItems" :key="item.value">
+              <div v-if="item.type === 'Header'" class="win-nav-item-header">
+                <WinTextBlock :Text="item.label" />
               </div>
-              <div v-if="!isCompact" class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? (groupHeights[item.value] || 0) + 'px' : '0px' }">
-                <div class="win-nav-group-children-inner" :ref="el => setChildrenRef(item.value, el)">
-                  <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
-                    <span class="icon">{{ child.icon }}</span>
-                    <WinTextBlock class="label" :Text="child.label" />
+              <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
+              <div v-else-if="!item.children" class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+                <span v-if="item.icon" class="icon">{{ item.icon }}</span>
+                <WinTextBlock class="label" :Text="item.label" />
+              </div>
+              <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
+                <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
+                  <span v-if="item.icon" class="icon">{{ item.icon }}</span>
+                  <WinTextBlock class="label" :Text="item.label" />
+                  <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onGroupChevronClick(item)">&#xE70D;</span>
+                </div>
+                <div v-if="!isClosedCompact" class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? (groupHeights[item.value] || 0) + 'px' : '0px' }">
+                  <div class="win-nav-group-children-inner" :ref="el => setChildrenRef(item.value, el)">
+                    <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" role="button" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
+                      <span v-if="child.icon" class="icon">{{ child.icon }}</span>
+                      <WinTextBlock class="label" :Text="child.label" />
+                    </div>
                   </div>
                 </div>
               </div>
+            </template>
+          </div>
+        </WinScrollViewer>
+        <div class="win-nav-footer">
+          <div v-if="$slots.PaneFooter" class="win-nav-pane-footer"><slot name="PaneFooter"></slot></div>
+          <template v-for="item in footerItems" :key="item.value">
+            <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
+            <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
+            <div v-else class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
+              <span v-if="item.icon" class="icon">{{ item.icon }}</span>
+              <WinTextBlock class="label" :Text="item.label" />
             </div>
           </template>
-        </div>
-      </WinScrollViewer>
-      <div class="win-nav-footer" v-show="!isLeftMinimalMode || !isCompact || paneTransition === 'closing'">
-        <div v-if="$slots.PaneFooter" class="win-nav-pane-footer"><slot name="PaneFooter"></slot></div>
-        <template v-for="item in footerItems" :key="item.value">
-          <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
-          <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
-            <span class="icon">{{ item.icon }}</span>
-            <WinTextBlock class="label" :Text="item.label" />
+          <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" role="button" :class="{ 'is-selected': selectedValue === settingsValue }" tabindex="0" v-bind="(isTopNavigation || isClosedCompact) ? { 'tooltipservice.tooltip': resolvedSettingsLabel } : {}" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
+            <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
+            <WinTextBlock class="label" :Text="resolvedSettingsLabel" />
           </div>
-        </template>
-        <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" :class="{ 'is-selected': selectedValue === settingsValue }" v-bind="isCompact ? { 'tooltipservice.tooltip': resolvedSettingsLabel } : {}" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
-          <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
-          <WinTextBlock class="label" :Text="resolvedSettingsLabel" />
         </div>
       </div>
     </nav>
@@ -143,20 +158,20 @@
         <template v-for="item in topOverflowMenuItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
-          <div v-else-if="!item.children" class="win-nav-item" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreItemClick(item)">
-            <span class="icon">{{ item.icon }}</span>
+          <div v-else-if="!item.children" class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreItemClick(item)">
+            <span v-if="item.icon" class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
-            <div class="win-nav-item win-nav-group-header" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreGroupHeaderClick(item)">
-              <span class="icon">{{ item.icon }}</span>
+            <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreGroupHeaderClick(item)">
+              <span v-if="item.icon" class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
-              <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)">&#xE70D;</span>
+              <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onMoreGroupChevronClick(item)">&#xE70D;</span>
             </div>
-            <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 38 + 2) + 'px' : '0px' }">
+            <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 40) + 'px' : '0px' }">
               <div class="win-nav-group-children-inner">
-                <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onMoreChildClick(item, child)">
-                  <span class="icon">{{ child.icon }}</span>
+                <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" role="button" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onMoreChildClick(item, child)">
+                  <span v-if="child.icon" class="icon">{{ child.icon }}</span>
                   <WinTextBlock class="label" :Text="child.label" />
                 </div>
               </div>
@@ -168,7 +183,7 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, inject, computed, onMounted, onBeforeUnmount, watch, nextTick, useSlots } from 'vue';
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick, useSlots, toRaw } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
 import WinScrollViewer from './WinScrollViewer.vue';
 import WinTextBlock from './WinTextBlock.vue';
@@ -210,13 +225,26 @@ const officialProps = defineProps({
   AlwaysShowHeader: { type: Boolean, default: true },
   SelectionFollowsFocus: { type: String, default: 'Disabled' },
   ShoulderNavigationEnabled: { type: String, default: 'Never' },
-  OverflowLabelMode: { type: String, default: 'MoreLabel' },
-  IsTitleBarAutoPaddingEnabled: { type: Boolean, default: true }
+  OverflowLabelMode: { type: String, default: 'NoLabel' },
 });
 
 const getItemTag = item => item && typeof item === 'object'
   ? (item.Tag ?? item.Value ?? item.Name ?? item.value)
   : item;
+const sourceIdentityMap = new WeakMap();
+let nextSourceIdentity = 0;
+const getSourceIdentity = (item, fallbackKey) => {
+  if (!item || typeof item !== 'object') return getItemTag(item) ?? fallbackKey;
+  // Props and v-model refs can expose either a Vue proxy or the original
+  // source object. Identity must survive that boundary, especially when
+  // footer items intentionally share a Tag (for example Cart and Help).
+  const source = toRaw(item);
+  if (!sourceIdentityMap.has(source)) {
+    nextSourceIdentity += 1;
+    sourceIdentityMap.set(source, `nvi-${nextSourceIdentity}`);
+  }
+  return sourceIdentityMap.get(source);
+};
 const normalizeItem = (item, fallbackKey = 'item') => {
   const declaredType = item?.Type ?? item?.type ?? (item?.IsHeader ? 'Header' : item?.IsSeparator ? 'Separator' : 'Item');
   const type = declaredType === 'NavigationViewItemHeader'
@@ -226,7 +254,8 @@ const normalizeItem = (item, fallbackKey = 'item') => {
       : declaredType;
   const children = item?.MenuItems ?? item?.children;
   return {
-    value: getItemTag(item) ?? `__${String(type).toLowerCase()}-${fallbackKey}`,
+    value: getSourceIdentity(item, `__${String(type).toLowerCase()}-${fallbackKey}`),
+    tag: getItemTag(item),
     label: item?.Content ?? item?.Name ?? item?.Text ?? item?.label ?? '',
     icon: item?.Icon ?? item?.Glyph ?? item?.icon ?? '',
     tooltip: item?.ToolTip ?? item?.Tooltip ?? item?.tooltip ?? '',
@@ -246,7 +275,19 @@ const menuItems = computed(() => resolveItems(officialProps.MenuItems, officialP
 const footerItems = computed(() => resolveItems(officialProps.FooterMenuItems, officialProps.FooterMenuItemsSource)
   .map((item, index) => normalizeItem(item, `footer-${index}`)));
 const internalSelectedItem = ref(officialProps.SelectedItem);
-const selectedValue = computed(() => getItemTag(internalSelectedItem.value));
+const flattenedItems = computed(() => [...menuItems.value, ...footerItems.value]
+  .flatMap(item => [item, ...(item.children || [])]));
+const resolveSelectedValue = (selectedItem) => {
+  if (selectedItem?.IsSettingsItem || getItemTag(selectedItem) === 'settings') return 'settings';
+  if (selectedItem && typeof selectedItem === 'object') {
+    const rawSelectedItem = toRaw(selectedItem);
+    const exactItem = flattenedItems.value.find(item => item.source === selectedItem || toRaw(item.source) === rawSelectedItem);
+    if (exactItem) return exactItem.value;
+  }
+  const selectedTag = getItemTag(selectedItem);
+  return flattenedItems.value.find(item => item.tag === selectedTag)?.value ?? selectedTag;
+};
+const selectedValue = computed(() => resolveSelectedValue(internalSelectedItem.value));
 
 // Internal aliases keep the rendering code focused on layout while the public surface mirrors WinUI.
 const props = {
@@ -269,8 +310,6 @@ const props = {
   get settingsIcon() { return '\uE713'; }
 };
 
-const titleBarVisible = inject('winTitleBarVisible', ref(false));
-const hasTitlebar = computed(() => titleBarVisible.value);
 const resolvedSettingsLabel = computed(() => props.settingsLabel);
 const emit = defineEmits([
   'update:SelectedItem',
@@ -292,6 +331,7 @@ const shellRef = ref(null);
 const navRef = ref(null);
 const indicatorTrack = ref(null);
 const scrollArea = ref(null);
+const paneAutoSuggestPresenterRef = ref(null);
 const topPrimaryMenuRef = ref(null);
 const topFooterMenuRef = ref(null);
 const topMeasureRef = ref(null);
@@ -310,7 +350,7 @@ const moreFlyoutOpen = ref(false);
 const moreFlyoutAnchor = ref(null);
 const topAvailableWidth = ref(Number.POSITIVE_INFINITY);
 const topItemWidths = ref({});
-const topMoreButtonWidth = ref(72);
+const topMoreButtonWidth = ref(36);
 const containerWidth = ref(typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
 
 const normalizedPaneDisplayMode = computed(() => props.paneDisplayMode);
@@ -322,14 +362,30 @@ const resolvedPaneDisplayMode = computed(() => {
   return 'LeftMinimal';
 });
 const isTopNavigation = computed(() => resolvedPaneDisplayMode.value === 'Top');
-const itemToolTipAttrs = (item) => {
-  const toolTip = item?.tooltip || (!isTopNavigation.value && isCompact.value ? item?.label : '');
-  return toolTip ? { 'tooltipservice.tooltip': toolTip } : {};
-};
 const flyoutPlacement = computed(() => isTopNavigation.value ? 'Bottom' : 'RightEdgeAlignedTop');
 const isLeftMinimalMode = computed(() => resolvedPaneDisplayMode.value === 'LeftMinimal');
 const isLeftCompactMode = computed(() => resolvedPaneDisplayMode.value === 'LeftCompact');
 const isLeftOverlayMode = computed(() => isLeftMinimalMode.value || isLeftCompactMode.value);
+const isLeftPaneContentVisible = computed(() => !isLeftMinimalMode.value || !isCompact.value || paneTransition.value === 'closing');
+const isClosedCompact = computed(() => !isTopNavigation.value && isCompact.value && !isLeftMinimalMode.value);
+const itemToolTipAttrs = (item) => {
+  const toolTip = item?.tooltip || (!isTopNavigation.value && isClosedCompact.value ? item?.label : '');
+  return {
+    tabindex: item?.isEnabled === false ? -1 : 0,
+    ...(toolTip ? { 'tooltipservice.tooltip': toolTip } : {})
+  };
+};
+
+const isMinimalClosing = computed(() => isLeftMinimalMode.value && isCompact.value && paneTransition.value === 'closing');
+const isFullPaneList = computed(() => isLeftPaneContentVisible.value && !isClosedCompact.value);
+// Minimal is an overlay, so its closing frame keeps the full pane content in
+// the tree while the pane surface plays the reverse of the opening motion.
+// Minimal closed state exposes only the back and hamburger buttons. The title
+// is removed as soon as the pane starts closing so the hamburger keeps its
+// compact hit target while the surface runs the reverse opening animation.
+const showPaneTitle = computed(() => isFullPaneList.value && !isCompact.value);
+const paneTitleSpaceVisible = computed(() => showPaneTitle.value);
+const paneToggleLabel = computed(() => t(isCompact.value ? 'text.open-navigation' : 'text.close-navigation'));
 const displayMode = computed(() => {
   if (isTopNavigation.value || isLeftMinimalMode.value) return 'Minimal';
   if (isLeftCompactMode.value) return 'Compact';
@@ -341,7 +397,7 @@ const paneTitle = computed(() => props.paneTitle);
 const header = computed(() => props.header);
 const shouldShowHeader = computed(() => (
   !!(header.value || slots.Header) &&
-  (officialProps.AlwaysShowHeader || displayMode.value === 'Expanded')
+  (officialProps.AlwaysShowHeader || (!isTopNavigation.value && displayMode.value === 'Minimal'))
 ));
 const settingsValue = computed(() => props.settingsValue);
 const settingsLabel = computed(() => props.settingsLabel);
@@ -349,15 +405,23 @@ const settingsIcon = computed(() => props.settingsIcon);
 const showBackButtonResolved = computed(() => {
   if (props.isBackButtonVisible === 'Visible') return true;
   if (props.isBackButtonVisible === 'Collapsed') return false;
-  return !isTopNavigation.value && displayMode.value === 'Minimal';
+  // WinUI's Auto value follows the platform default (visible outside Xbox),
+  // rather than being limited to the minimal responsive state.
+  return true;
 });
 const showBackButtonInLeftNav = computed(() => showBackButtonResolved.value && !isTopNavigation.value);
-const paneTransitionDurationMs = compact => isLeftOverlayMode.value
-  ? (compact ? 120 : 350)
-  : 200;
+const backButtonVisuallyVisible = computed(() => showBackButtonResolved.value);
+const paneTransitionDurationMs = compact => {
+  if (isLeftMinimalMode.value) return compact ? 120 : 350;
+  if (isLeftCompactMode.value) return compact ? 120 : 350;
+  return compact ? 100 : 200;
+};
 const paneStyle = computed(() => ({
   '--win-nav-open-pane-length': `${props.openPaneLength}px`,
   '--win-nav-compact-pane-length': `${props.compactPaneLength}px`,
+  '--win-nav-header-margin-left': `${isLeftMinimalMode.value
+    ? (isPaneToggleButtonVisible.value ? 40 : 0) + (showBackButtonInLeftNav.value ? 40 : 0) - 24
+    : 56}px`,
   '--win-nav-pane-duration': `${paneTransitionDurationMs(isCompact.value)}ms`,
   '--win-nav-pane-easing': isLeftOverlayMode.value
     ? 'cubic-bezier(0.1, 0.9, 0.2, 1)'
@@ -368,7 +432,6 @@ const shellClasses = computed(() => [
   isLeftOverlayMode.value ? 'is-overlay-left' : '',
   isLeftMinimalMode.value ? 'is-left-minimal' : '',
   isLeftCompactMode.value ? 'is-left-compact' : '',
-  hasTitlebar.value && officialProps.IsTitleBarAutoPaddingEnabled ? 'has-titlebar' : '',
   officialProps.IsPaneVisible ? '' : 'is-pane-hidden'
 ]);
 
@@ -377,14 +440,13 @@ let childrenRefs = {};
 let prevSelectedEl = null;
 let lastSelectedEl = null;
 let lastIsChild = false;
-let prevIsChild = false;
-let lastIndicatorRegion = null;
 let ro = null;
+let layoutObserver = null;
+let layoutObserverFrame = null;
 let skipTransition = false;
 let indicatorAnimationId = 0;
 let compactTransitionTimer = null;
 let paneTransitionTimer = null;
-let responsiveCollapsePending = false;
 let suppressNextTopChildWatcherMove = false;
 
 const gearClass = ref('');
@@ -400,10 +462,22 @@ let backPressDone = false;
 const canGoBack = computed(() => officialProps.IsBackEnabled);
 
 const INDICATOR_SIZE = 16;
-const TOP_INDICATOR_MAX_STRETCH = INDICATOR_SIZE * 2.75;
-const LEFT_INDICATOR_MAX_STRETCH = INDICATOR_SIZE * 2.5;
 const EASE_OUT = 'cubic-bezier(0.1, 0.9, 0.2, 1)';
 const EASE_COLLAPSE = 'cubic-bezier(0.4, 0.0, 0.7, 0.3)';
+// The native control uses one stretch path for a same-level move. Generating
+// the path from the ordered endpoints gives the exact spatial mirror for
+// right-to-left and left-to-right motion instead of maintaining two variants.
+const makeStretchIndicatorKeyframes = (axis, from, to) => {
+  const distance = Math.abs(to - from);
+  const edge = Math.min(from, to);
+  const transform = value => axis === 'x' ? `translateX(${value}px)` : `translateY(${value}px)`;
+  const size = axis === 'x' ? 'width' : 'height';
+  return [
+    { transform: transform(from), [size]: `${INDICATOR_SIZE}px`, offset: 0, easing: 'cubic-bezier(0.9, 0.1, 1, 0.2)' },
+    { transform: transform(edge), [size]: `${distance + INDICATOR_SIZE}px`, offset: 0.333, easing: EASE_OUT },
+    { transform: transform(to), [size]: `${INDICATOR_SIZE}px`, offset: 1 }
+  ];
+};
 
 const readTranslate = (el, axis, fallback) => {
   const transform = getComputedStyle(el).transform;
@@ -458,7 +532,9 @@ const measureTopItemWidth = (value) => {
   const item = props.menuItems.find(entry => entry.value === value);
   if (!item) return 84;
   const labelWidth = String(item.label || '').length * 7.5;
-  return Math.ceil(labelWidth + 48 + (item.children ? 24 : 0));
+  const itemChromeWidth = item.icon ? 48 : 24;
+  const chevronWidth = item.children ? (item.icon ? 24 : 28) : 0;
+  return Math.ceil(labelWidth + itemChromeWidth + chevronWidth);
 };
 
 const getTopItemsWidth = (values) => {
@@ -565,7 +641,7 @@ const commitNavigationValue = (value, { invoked = true, isSettings = false } = {
   }
 
   if (!isSettings && (item.SelectsOnInvoked ?? item.selectsOnInvoked) === false) return false;
-  if (getItemTag(internalSelectedItem.value) === value) return true;
+  if (selectedValue.value === value) return true;
 
   internalSelectedItem.value = item;
   emit('update:SelectedItem', typeof officialProps.SelectedItem === 'object' ? item : getItemTag(item));
@@ -606,7 +682,7 @@ const setChildrenRef = (value, el) => {
 };
 
 const Expand = (item) => {
-  const value = getItemTag(item);
+  const value = resolveSelectedValue(item);
   const normalizedItem = findNormalizedItem(value);
   if (!normalizedItem?.children || groupExpanded[value]) return;
   emit('Expanding', { ExpandingItemContainer: normalizedItem.source, ExpandingItem: normalizedItem.source });
@@ -615,7 +691,7 @@ const Expand = (item) => {
 };
 
 const Collapse = (item) => {
-  const value = getItemTag(item);
+  const value = resolveSelectedValue(item);
   const normalizedItem = findNormalizedItem(value);
   if (!normalizedItem?.children || !groupExpanded[value]) return;
   groupExpanded[value] = false;
@@ -627,7 +703,7 @@ const MenuItemFromContainer = container => {
   return value === props.settingsValue ? createSettingsItem() : findNormalizedItem(value)?.source ?? null;
 };
 
-const ContainerFromMenuItem = item => itemRefs[getItemTag(item)] ?? null;
+const ContainerFromMenuItem = item => itemRefs[resolveSelectedValue(item)] ?? null;
 
 defineExpose({
   DisplayMode: displayMode,
@@ -666,7 +742,7 @@ const collapseOverlayAfterNavigation = () => {
 
 const getIndicatorTargetForValue = (value) => {
   const parentGroup = findParentGroup(value);
-  if (parentGroup && (isTopNavigation.value || isCompact.value)) {
+  if (parentGroup && (isTopNavigation.value || isClosedCompact.value)) {
     return { value: parentGroup.value, isChild: false };
   }
   return { value, isChild: !!parentGroup };
@@ -679,13 +755,38 @@ const moveIndicatorForValue = (value) => {
 
 const prepareSelectionTarget = (value) => {
   const parentGroup = findParentGroup(value);
-  if (parentGroup && !isTopNavigation.value && !isCompact.value && !groupExpanded[parentGroup.value]) {
+  if (parentGroup && !isTopNavigation.value && !isClosedCompact.value && !groupExpanded[parentGroup.value]) {
     groupExpanded[parentGroup.value] = true;
     nextTick(() => measureGroup(parentGroup.value));
   }
 };
 
-const selectNavigationValue = (value, isChild = null) => {
+const syncIndicatorForSelectedItem = (value) => {
+  if (value === null || value === undefined || value === '') {
+    lastSelectedEl = null;
+    lastIsChild = false;
+    indicatorStyle.value = { opacity: '0', transition: 'none' };
+    return;
+  }
+
+  prepareSelectionTarget(value);
+  nextTick(() => {
+    updateTopNavigationLayout();
+    nextTick(() => {
+      const target = getIndicatorTargetForValue(value);
+      if (isLeftMinimalMode.value && isCompact.value && paneTransition.value !== 'closing') {
+        lastSelectedEl = itemRefs[target.value] || null;
+        lastIsChild = target.isChild;
+        indicatorIsChild.value = target.isChild;
+        indicatorStyle.value = { opacity: '0', transition: 'none' };
+        return;
+      }
+      moveIndicatorTo(target.value, target.isChild);
+    });
+  });
+};
+
+const selectNavigationValue = (value, isChild = null, { collapsePane = true } = {}) => {
   if (!commitNavigationValue(value)) return;
   prepareSelectionTarget(value);
   nextTick(() => {
@@ -696,7 +797,7 @@ const selectNavigationValue = (value, isChild = null) => {
       } else {
         moveIndicatorTo(value, isChild);
       }
-      collapseOverlayAfterNavigation();
+      if (collapsePane) collapseOverlayAfterNavigation();
     });
   });
 };
@@ -711,6 +812,45 @@ const onChildClick = (group, child) => {
   selectNavigationValue(child.value, true);
 };
 
+const onNavigationKeydown = (event) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const target = event.target?.closest?.('.win-nav-item');
+  if (!target) return;
+
+  const value = getValueForElement(target);
+  if (!value) return;
+
+  event.preventDefault();
+  if (value === settingsValue.value) {
+    selectSettings();
+    return;
+  }
+
+  const item = findNormalizedItem(value);
+  if (!item || !item.isEnabled) return;
+
+  const parentGroup = findParentGroup(value);
+  if (parentGroup) {
+    onChildClick(parentGroup, item);
+  } else if (item.children) {
+    onGroupHeaderClick(item);
+  } else {
+    onItemClick(item);
+  }
+};
+
+const onNavigationFocusIn = (event) => {
+  if (officialProps.SelectionFollowsFocus !== 'Enabled') return;
+  const target = event.target?.closest?.('.win-nav-item');
+  if (!target || target.classList.contains('is-disabled')) return;
+  const value = getValueForElement(target);
+  if (!value) return;
+
+  const item = findNormalizedItem(value);
+  if (!item || !item.isEnabled || item.children) return;
+  onItemClick(item);
+};
+
 const updateTopNavigationLayout = () => {
   if (!isTopNavigation.value) return;
 
@@ -723,7 +863,13 @@ const updateTopNavigationLayout = () => {
   const navWidth = navEl.getBoundingClientRect().width;
   const footerWidth = footerEl?.getBoundingClientRect().width || 0;
   const topBackWidth = topBackEl?.getBoundingClientRect().width || 0;
-  topAvailableWidth.value = Math.max(0, navWidth - footerWidth - topBackWidth - 12);
+  const fixedContentWidth = Array.from(navEl.children)
+    .filter(el => el.classList.contains('win-nav-top-fixed'))
+    .reduce((width, el) => width + el.getBoundingClientRect().width, 0);
+  const nextAvailableWidth = Math.max(0, navWidth - footerWidth - topBackWidth - fixedContentWidth);
+  if (Math.abs(topAvailableWidth.value - nextAvailableWidth) >= 0.5) {
+    topAvailableWidth.value = nextAvailableWidth;
+  }
 
   if (measureEl) {
     const nextWidths = {};
@@ -736,7 +882,11 @@ const updateTopNavigationLayout = () => {
         nextWidths[value] = width;
       }
     });
-    topItemWidths.value = nextWidths;
+    const previousWidths = topItemWidths.value;
+    const nextKeys = Object.keys(nextWidths);
+    const widthsChanged = Object.keys(previousWidths).length !== nextKeys.length
+      || nextKeys.some(value => previousWidths[value] !== nextWidths[value]);
+    if (widthsChanged) topItemWidths.value = nextWidths;
   }
 };
 
@@ -784,9 +934,63 @@ const onMoreGroupHeaderClick = (item) => {
   groupChevrons[item.value] = groupExpanded[item.value] ? 'chevron-open' : 'chevron-close';
 };
 
-const onGroupHeaderClick = (item) => {
+const onMoreGroupChevronClick = (item) => {
+  if (!item.isEnabled) return;
+  if (groupExpanded[item.value]) Collapse(item.source); else Expand(item.source);
+  groupChevrons[item.value] = groupExpanded[item.value] ? 'chevron-open' : 'chevron-close';
+};
+
+const toggleLeftGroup = (item) => {
+  const wasExpanded = groupExpanded[item.value];
+  if (wasExpanded) Collapse(item.source); else Expand(item.source);
+  nextTick(() => measureGroup(item.value));
+  if (wasExpanded && isChildOfGroup(item)) {
+    const header = itemRefs[item.value];
+    if (header) {
+      prevSelectedEl = lastSelectedEl;
+      lastSelectedEl = header;
+      lastIsChild = false;
+      skipTransition = false;
+      calcIndicator();
+    }
+  } else if (!wasExpanded && isChildOfGroup(item)) {
+    nextTick(() => {
+      measureGroup(item.value);
+      setTimeout(() => {
+        const sel = itemRefs[props.selectedValue];
+        if (sel) {
+          prevSelectedEl = lastSelectedEl;
+          lastSelectedEl = sel;
+          lastIsChild = true;
+          skipTransition = false;
+          calcIndicator();
+        }
+      }, 300);
+    });
+  } else {
+    trackIndicatorDuringTransition();
+  }
+};
+
+const onGroupChevronClick = (item) => {
+  if (!item.isEnabled) return;
+  if (isTopNavigation.value || isCompact.value) {
+    onGroupHeaderClick(item, false);
+    return;
+  }
+  toggleLeftGroup(item);
+};
+
+const onGroupHeaderClick = (item, invokeItem = true) => {
   if (!item.isEnabled) return;
   if (isTopNavigation.value) {
+    if (invokeItem) {
+      if (item.selectsOnInvoked !== false) {
+        selectNavigationValue(item.value, false, { collapsePane: false });
+      } else {
+        commitNavigationValue(item.value);
+      }
+    }
     const el = itemRefs[item.value];
     if (el) {
       const rect = el.getBoundingClientRect();
@@ -811,6 +1015,13 @@ const onGroupHeaderClick = (item) => {
     return;
   }
   if (isCompact.value) {
+    if (invokeItem) {
+      if (item.selectsOnInvoked !== false) {
+        selectNavigationValue(item.value, false, { collapsePane: false });
+      } else {
+        commitNavigationValue(item.value);
+      }
+    }
     const el = itemRefs[item.value];
     if (el) {
       const itemRect = el.getBoundingClientRect();
@@ -841,42 +1052,12 @@ const onGroupHeaderClick = (item) => {
     }
     return;
   }
-  if (item.selectsOnInvoked !== false && !isChildOfGroup(item)) {
-    selectNavigationValue(item.value, false);
+  if (item.selectsOnInvoked !== false) {
+    selectNavigationValue(item.value, false, { collapsePane: false });
   } else if (item.selectsOnInvoked === false) {
     commitNavigationValue(item.value);
   }
-  const wasExpanded = groupExpanded[item.value];
-  if (wasExpanded) Collapse(item.source); else Expand(item.source);
-  nextTick(() => measureGroup(item.value));
-  if (wasExpanded && isChildOfGroup(item)) {
-    const header = itemRefs[item.value];
-    if (header) {
-      prevSelectedEl = lastSelectedEl;
-      prevIsChild = lastIsChild;
-      lastSelectedEl = header;
-      lastIsChild = false;
-      skipTransition = false;
-      calcIndicator();
-    }
-  } else if (!wasExpanded && isChildOfGroup(item)) {
-    nextTick(() => {
-      measureGroup(item.value);
-      setTimeout(() => {
-        const sel = itemRefs[props.selectedValue];
-        if (sel) {
-          prevSelectedEl = lastSelectedEl;
-          prevIsChild = lastIsChild;
-          lastSelectedEl = sel;
-          lastIsChild = true;
-          skipTransition = false;
-          calcIndicator();
-        }
-      }, 300);
-    });
-  } else {
-    trackIndicatorDuringTransition();
-  }
+  toggleLeftGroup(item);
 };
 
 let trackingRaf = null;
@@ -958,7 +1139,6 @@ const moveIndicatorTo = (value, isChild) => {
 
 const moveIndicatorToEl = (el, isChild) => {
   prevSelectedEl = lastSelectedEl;
-  prevIsChild = lastIsChild;
   lastSelectedEl = el;
   lastIsChild = isChild;
   calcIndicator();
@@ -986,7 +1166,7 @@ const toggleCompact = () => {
   setCompact(!isCompact.value);
 };
 
-const setCompact = (compact) => {
+const setCompact = (compact, emitUpdate = true) => {
   if (compact === isCompact.value) return;
   if (compact) {
     const args = { Cancel: false };
@@ -1005,23 +1185,47 @@ const setCompact = (compact) => {
     nextTick(() => restoreIndicatorAfterPaneLayout());
   }, transitionDuration);
   isCompact.value = compact;
-  emit('update:IsPaneOpen', !compact);
+  if (emitUpdate) emit('update:IsPaneOpen', !compact);
+};
+
+const onPaneSearchButtonClick = () => {
+  if (!isClosedCompact.value) return;
+  setCompact(false);
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      const presenter = paneAutoSuggestPresenterRef.value;
+      const focusTarget = presenter?.querySelector?.('input, textarea, [contenteditable="true"], [tabindex]:not([tabindex="-1"])');
+      focusTarget?.focus?.({ preventScroll: true });
+    });
+  });
 };
 
 const syncDisplayMode = () => {
   const automaticMode = normalizedPaneDisplayMode.value === 'Auto';
   if (automaticMode && isLeftOverlayMode.value) {
-    // Auto owns the compact/minimal transition. Keep the pane folded when the
-    // host crosses a responsive breakpoint instead of reopening from IsPaneOpen.
-    if (!isCompact.value && !responsiveCollapsePending) {
-      responsiveCollapsePending = true;
-      nextTick(() => {
-        responsiveCollapsePending = false;
-        if (normalizedPaneDisplayMode.value === 'Auto' && isLeftOverlayMode.value) setCompact(true);
-      });
+    // Native adaptive layout enters Compact/Minimal already folded. A window
+    // breakpoint is a state sync, not a user pane-toggle animation.
+    if (!isCompact.value) {
+      if (paneTransitionTimer) clearTimeout(paneTransitionTimer);
+      paneTransitionTimer = null;
+      paneTransition.value = '';
+      isCompact.value = true;
+      emit('update:IsPaneOpen', false);
+      nextTick(() => restoreIndicatorAfterPaneLayout());
     }
     return;
-  } else if (isLeftMinimalMode.value) {
+  }
+
+  // Explicit display modes are stable layout contracts. Only Auto is allowed
+  // to resolve a breakpoint into LeftCompact/LeftMinimal. Keep the controlled
+  // IsPaneOpen value for a fixed Left pane, without letting resize state leak
+  // into the display-mode resolver.
+  if (normalizedPaneDisplayMode.value === 'Left') {
+    if (typeof props.isPaneOpen === 'boolean') isCompact.value = !props.isPaneOpen;
+    return;
+  }
+
+  if (isLeftMinimalMode.value) {
     isCompact.value = true;
   } else if (typeof props.isPaneOpen === 'boolean') {
     isCompact.value = !props.isPaneOpen;
@@ -1072,6 +1276,20 @@ const onScroll = () => {
     calcIndicator();
     requestAnimationFrame(() => { skipTransition = false; });
   }
+};
+
+const queueLayoutRefresh = () => {
+  if (layoutObserverFrame) cancelAnimationFrame(layoutObserverFrame);
+  layoutObserverFrame = requestAnimationFrame(() => {
+    layoutObserverFrame = null;
+    // A child insertion/removal only invalidates measurements. Do not feed it
+    // through the responsive resize path, which can rewrite the top layout and
+    // patch the whole navigation tree again.
+    observeLayoutElements();
+    measureAllGroups();
+    if (isTopNavigation.value) updateTopNavigationLayout();
+    restoreIndicatorAfterPaneLayout();
+  });
 };
 
 const getScrollAreaElement = () => scrollArea.value?.scrollViewerRef?.value ?? scrollArea.value?.scrollViewerRef ?? scrollArea.value ?? null;
@@ -1129,8 +1347,6 @@ const calcIndicator = () => {
     return scrollEl && scrollEl.contains(el) ? 'menu' : 'footer';
   };
 
-  const crossLevel = (lastIsChild !== prevIsChild) && sourceEl;
-
   const snapToFinal = (finalTransform, dimension, finalSize) => {
     requestAnimationFrame(() => {
       if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) return;
@@ -1161,7 +1377,6 @@ const calcIndicator = () => {
       nextIndicatorAnimation(indicatorEl);
       track.style.clipPath = makeClipX(targetRect, null);
       indicatorStyle.value = { transition: 'none', transform: `translateX(${newX}px)`, width: '16px', opacity: '1' };
-      lastIndicatorRegion = getRegion(lastSelectedEl);
       return;
     }
     const oldX = readTranslate(indicatorEl, 'x', newX);
@@ -1169,66 +1384,27 @@ const calcIndicator = () => {
     if (dist < 1) {
       track.style.clipPath = makeClipX(targetRect, null);
       indicatorStyle.value = { transform: `translateX(${newX}px)`, width: '16px', opacity: '1' };
-      lastIndicatorRegion = getRegion(lastSelectedEl);
       return;
     }
 
     const animationId = nextIndicatorAnimation(indicatorEl);
-    const hideThreshold = 160;
-    const sourceRegion = sourceEl ? getRegion(sourceEl) : lastIndicatorRegion;
-    const targetRegion = getRegion(lastSelectedEl);
-    const topContinuousMove = sourceRegion === targetRegion || dist <= hideThreshold;
-    lastIndicatorRegion = targetRegion;
+    // Top navigation items share one horizontal depth, including the footer
+    // and settings items. Only a missing source (for example while overflow
+    // is being reparented) should skip the stretch animation.
+    const topContinuousMove = !!sourceRect && Math.abs(sourceRect.top - targetRect.top) < 1;
 
     if (topContinuousMove) {
       indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
       track.style.clipPath = makeClipX(targetRect, sourceRect);
-      const movingRight = newX > oldX;
       const dur = 600;
-      const stretchW = Math.min(dist + INDICATOR_SIZE, TOP_INDICATOR_MAX_STRETCH);
-      let keyframes;
-      if (movingRight) {
-        keyframes = [
-          { transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_OUT },
-          { transform: `translateX(${oldX}px)`, width: `${stretchW}px`, offset: 0.333, easing: EASE_OUT },
-          { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }
-        ];
-      } else {
-        keyframes = [
-          { transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_OUT },
-          { transform: `translateX(${newX}px)`, width: `${stretchW}px`, offset: 0.333, easing: EASE_OUT },
-          { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }
-        ];
-      }
+      const keyframes = makeStretchIndicatorKeyframes('x', oldX, newX);
       const anim = indicatorEl.animate(keyframes, { duration: dur, fill: 'forwards' });
       anim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateX(${newX}px)`, 'x', '16px'); };
       return;
     }
 
-    const movingRight = newX > oldX;
-    indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
-    const fallbackSourceRect = sourceRect || {
-      left: oldX,
-      right: oldX + INDICATOR_SIZE,
-      top: targetRect.top,
-      bottom: targetRect.bottom
-    };
-    track.style.clipPath = makeClipX(targetRect, fallbackSourceRect);
-    const collapseDur = 350; const expandDur = 350;
-    let collapseKeyframes, expandKeyframes;
-    if (movingRight) {
-      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateX(${oldX + 16}px)`, width: '0px', offset: 1 }];
-      expandKeyframes = [{ transform: `translateX(${newX}px)`, width: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }];
-    } else {
-      collapseKeyframes = [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateX(${oldX}px)`, width: '0px', offset: 1 }];
-      expandKeyframes = [{ transform: `translateX(${newX + 16}px)`, width: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }];
-    }
-    const collapseAnim = indicatorEl.animate(collapseKeyframes, { duration: collapseDur, fill: 'forwards' });
-    collapseAnim.onfinish = () => {
-      if (animationId !== indicatorAnimationId) return;
-      const expandAnim = indicatorEl.animate(expandKeyframes, { duration: expandDur, fill: 'forwards' });
-      expandAnim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateX(${newX}px)`, 'x', '16px'); };
-    };
+    track.style.clipPath = makeClipX(targetRect, null);
+    indicatorStyle.value = { transform: `translateX(${newX}px)`, width: '16px', opacity: '1', transition: 'none' };
 
   } else {
     const newY = elRect.top - trackRect.top + elRect.height / 2 - 8;
@@ -1289,28 +1465,6 @@ const calcIndicator = () => {
     track.style.clipPath = makeClipY(clampedTargetRect, clampedSourceRect);
     const animationId = nextIndicatorAnimation(indicatorEl);
 
-    if (crossLevel) {
-      indicatorStyle.value = { transform: `translateY(${oldY}px)`, height: '16px', opacity: '1', transition: 'none' };
-      const movingDown = newY > oldY;
-      const collapseDur = 300; const expandDur = 300;
-      let collapseKf, expandKf;
-      if (movingDown) {
-        collapseKf = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateY(${oldY + 16}px)`, height: '0px', offset: 1 }];
-        expandKf = [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-      } else {
-        collapseKf = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateY(${oldY}px)`, height: '0px', offset: 1 }];
-        expandKf = [{ transform: `translateY(${newY + 16}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-      }
-      const collapseAnim = indicatorEl.animate(collapseKf, { duration: collapseDur, fill: 'forwards' });
-      collapseAnim.onfinish = () => {
-        if (animationId !== indicatorAnimationId) return;
-        indicatorIsChild.value = lastIsChild;
-        const expandAnim = indicatorEl.animate(expandKf, { duration: expandDur, fill: 'forwards' });
-        expandAnim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateY(${newY}px)`, 'y', '16px'); };
-      };
-      return;
-    }
-
     indicatorIsChild.value = lastIsChild;
     const movingDown = newY > oldY;
     indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' };
@@ -1321,7 +1475,6 @@ const calcIndicator = () => {
     // boundary. Items within the same region use the continuous stretch motion.
     const useStretchMove = !forceMove;
     const dur = 600;
-    let keyframes;
 
     if (!useStretchMove) {
       const collapseKf = movingDown
@@ -1339,12 +1492,7 @@ const calcIndicator = () => {
       return;
     }
 
-    const stretchH = Math.min(dist + INDICATOR_SIZE, LEFT_INDICATOR_MAX_STRETCH);
-    if (movingDown) {
-      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${oldY}px)`, height: `${stretchH}px`, offset: 0.2, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-    } else {
-      keyframes = [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: `${stretchH}px`, offset: 0.2, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-    }
+    const keyframes = makeStretchIndicatorKeyframes('y', oldY, newY);
     const anim = indicatorEl.animate(keyframes, { duration: dur, fill: 'forwards' });
     anim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateY(${newY}px)`, 'y', '16px'); };
   }
@@ -1357,17 +1505,17 @@ const restoreIndicatorAfterPaneLayout = () => {
   const value = props.selectedValue;
   if (!value || !navRef.value) return;
   const parentGroup = findParentGroup(value);
-  const target = parentGroup && isCompact.value
+  const target = parentGroup && isClosedCompact.value
     ? itemRefs[parentGroup.value]
     : itemRefs[value] || (value === settingsValue.value ? itemRefs[settingsValue.value] : null);
   const indicatorEl = indicatorTrack.value?.querySelector('.win-nav-indicator');
   if (!target || !indicatorEl) return;
-  const targetIsMissing = !navRef.value.contains(lastSelectedEl);
-  const indicatorHidden = indicatorStyle.value.opacity !== '1';
-  const minimalPaneRevealed = isLeftMinimalMode.value && paneTransition.value === 'opening';
-  if (!targetIsMissing && !indicatorHidden && !minimalPaneRevealed) return;
+  if (indicatorEl.getAnimations().some(animation => animation.playState === 'running')) return;
+  // Layout state changes (ClosedCompact hides headers and labels) move every
+  // item. Always snap/recalculate after the layout settles so the indicator
+  // cannot remain at a stale position or stay hidden after a fold.
   lastSelectedEl = target;
-  lastIsChild = !!parentGroup && !isCompact.value;
+  lastIsChild = !!parentGroup && !isClosedCompact.value;
   indicatorIsChild.value = lastIsChild;
   skipTransition = true;
   nextIndicatorAnimation(indicatorEl);
@@ -1377,7 +1525,12 @@ const restoreIndicatorAfterPaneLayout = () => {
 
 let resizeTimer = null;
 const onResize = () => {
-  containerWidth.value = shellRef.value?.getBoundingClientRect().width || (typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
+  // Width participates in display-mode resolution only for Auto. Fixed Left,
+  // LeftCompact, LeftMinimal, and Top instances must not re-enter responsive
+  // mode merely because their parent example is resized.
+  if (normalizedPaneDisplayMode.value === 'Auto') {
+    containerWidth.value = shellRef.value?.getBoundingClientRect().width || (typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
+  }
   updateTopNavigationLayout();
   skipTransition = true;
   if (resizeTimer) cancelAnimationFrame(resizeTimer);
@@ -1385,12 +1538,12 @@ const onResize = () => {
     const val = props.selectedValue;
     if (val) {
       const parentGroup = findParentGroup(val);
-      if (parentGroup && (isTopNavigation.value || isCompact.value)) {
+      if (parentGroup && (isTopNavigation.value || isClosedCompact.value)) {
         lastSelectedEl = itemRefs[parentGroup.value] || null;
         lastIsChild = false;
       } else {
         lastSelectedEl = itemRefs[val] || null;
-        lastIsChild = !!parentGroup;
+        lastIsChild = !!parentGroup && !isClosedCompact.value;
       }
     }
   }
@@ -1405,19 +1558,33 @@ const onResize = () => {
     });
   });
 };
-const rebindRo = () => {
-  if (ro) ro.disconnect();
-  ro = new ResizeObserver(onResize);
+const observeLayoutElements = () => {
+  if (!ro) return;
   if (shellRef.value) ro.observe(shellRef.value);
   if (navRef.value) ro.observe(navRef.value);
   if (topFooterMenuRef.value) ro.observe(topFooterMenuRef.value);
   if (topBackButtonRef.value) ro.observe(topBackButtonRef.value);
+  if (navRef.value) {
+    navRef.value.querySelectorAll('.win-nav-pane-top, .win-nav-pane-header, .win-nav-pane-custom-content, .win-nav-pane-footer')
+      .forEach(element => ro.observe(element));
+  }
+};
+const rebindRo = () => {
+  if (ro) ro.disconnect();
+  ro = new ResizeObserver(onResize);
+  observeLayoutElements();
+};
+const rebindLayoutMutationObserver = () => {
+  if (!layoutObserver) return;
+  layoutObserver.disconnect();
+  if (navRef.value) layoutObserver.observe(navRef.value, { childList: true, subtree: true, characterData: true });
 };
 
 const refreshAfterPositionChange = () => {
   skipTransition = true;
   nextTick(() => {
     rebindRo();
+    rebindLayoutMutationObserver();
     measureAllGroups();
     updateTopNavigationLayout();
     const val = props.selectedValue;
@@ -1425,6 +1592,9 @@ const refreshAfterPositionChange = () => {
       const parentGroup = findParentGroup(val);
       if (parentGroup) {
         if (isTopNavigation.value) {
+          lastSelectedEl = itemRefs[parentGroup.value];
+          lastIsChild = false;
+        } else if (isClosedCompact.value) {
           lastSelectedEl = itemRefs[parentGroup.value];
           lastIsChild = false;
         } else {
@@ -1450,7 +1620,7 @@ const initIndicator = () => {
     if (val) {
       const parentGroup = findParentGroup(val);
       if (parentGroup) {
-        if (!isTopNavigation.value) {
+        if (!isTopNavigation.value && !isClosedCompact.value) {
           if (!groupExpanded[parentGroup.value]) {
             groupExpanded[parentGroup.value] = true;
             nextTick(() => {
@@ -1486,6 +1656,10 @@ onMounted(() => {
   containerWidth.value = shellRef.value?.getBoundingClientRect().width || window.innerWidth;
   syncDisplayMode();
   rebindRo();
+  layoutObserver = new MutationObserver(queueLayoutRefresh);
+  // Page content is a sibling of the navigation tree. Observing the shell
+  // caused every page switch to refresh navigation layout unnecessarily.
+  rebindLayoutMutationObserver();
   window.addEventListener('resize', onResize);
   document.addEventListener('pointerdown', onDocumentPointerDown, true);
   initIndicator();
@@ -1493,6 +1667,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (ro) ro.disconnect();
+  if (layoutObserver) layoutObserver.disconnect();
+  if (layoutObserverFrame) cancelAnimationFrame(layoutObserverFrame);
   if (paneTransitionTimer) clearTimeout(paneTransitionTimer);
   window.removeEventListener('resize', onResize);
   document.removeEventListener('pointerdown', onDocumentPointerDown, true);
@@ -1500,21 +1676,32 @@ onBeforeUnmount(() => {
 
 watch(() => props.paneDisplayMode, () => {
   syncDisplayMode();
-  refreshAfterPositionChange();
 });
 
 watch(resolvedPaneDisplayMode, (value, oldValue) => {
+  if (value !== oldValue) {
+    if (paneTransitionTimer) clearTimeout(paneTransitionTimer);
+    paneTransitionTimer = null;
+    paneTransition.value = '';
+  }
   syncDisplayMode();
+  if (value !== oldValue) nextTick(syncDisplayMode);
   refreshAfterPositionChange();
   if (value !== oldValue) emit('DisplayModeChanged', { DisplayMode: displayMode.value });
 });
 
 watch(() => props.isPaneOpen, (value) => {
-  isCompact.value = !value;
+  setCompact(!value, false);
 });
 
 watch(() => officialProps.SelectedItem, (item) => {
+  const previousValue = resolveSelectedValue(internalSelectedItem.value);
+  const nextValue = resolveSelectedValue(item);
+  if (previousValue !== nextValue && isTopNavigation.value && findParentGroup(nextValue)) {
+    suppressNextTopChildWatcherMove = true;
+  }
   internalSelectedItem.value = item;
+  if (previousValue !== nextValue) syncIndicatorForSelectedItem(nextValue);
 });
 
 watch(isSettingsVisible, (visible) => {
@@ -1532,6 +1719,25 @@ watch(isCompact, (compact) => {
   if (compactTransitionTimer) {
     clearTimeout(compactTransitionTimer);
     compactTransitionTimer = null;
+  }
+
+  // LeftMinimal uses an overlay pane, not ClosedCompact. Keep its complete
+  // menu (including expanded children and the child indicator) intact while
+  // the pane surface plays the reverse opening animation.
+  if (isLeftMinimalMode.value) {
+    if (!compact) {
+      const parentGroup = findParentGroup(props.selectedValue);
+      if (parentGroup) {
+        groupExpanded[parentGroup.value] = true;
+        nextTick(() => {
+          measureGroup(parentGroup.value);
+          requestAnimationFrame(() => restoreIndicatorAfterPaneLayout());
+        });
+      } else {
+        requestAnimationFrame(() => restoreIndicatorAfterPaneLayout());
+      }
+    }
+    return;
   }
 
   if (compact) {
@@ -1617,7 +1823,6 @@ watch(isCompact, (compact) => {
           const sel = itemRefs[props.selectedValue];
           if (sel) {
             prevSelectedEl = lastSelectedEl;
-            prevIsChild = lastIsChild;
             lastSelectedEl = sel;
             lastIsChild = true;
             skipTransition = false;
@@ -1627,10 +1832,6 @@ watch(isCompact, (compact) => {
       });
     }
   }
-});
-
-watch(isCompact, () => {
-  requestAnimationFrame(() => restoreIndicatorAfterPaneLayout());
 });
 
 watch(() => props.selectedValue, (val) => {
@@ -1659,6 +1860,10 @@ watch(() => props.selectedValue, (val) => {
     display: flex;
     width: 100%;
     height: 100%;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+    isolation: isolate;
     overflow: hidden;
     background: var(--app-bg);
   }
@@ -1678,12 +1883,14 @@ watch(() => props.selectedValue, (val) => {
   .win-nav-content {
     position: relative;
     flex: 1;
+    display: flex;
+    flex-direction: column;
     min-width: 0;
     min-height: 0;
     background: var(--layer-default);
     overflow: hidden;
     overflow-x: hidden;
-    transition: margin-left var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)), background var(--normal-duration) var(--fast-out-slow-in);
+    transition: background var(--normal-duration) var(--fast-out-slow-in);
   }
 
   .win-nav-shell.is-left .win-nav-content {
@@ -1697,6 +1904,8 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-shell.is-left-compact .win-nav-content {
+    /* Keep the compact rail in the layout at all times.  The overlay pane
+       opens above this fixed rail, so toggling it never remeasures the page. */
     margin-left: var(--win-nav-compact-pane-length, 48px);
   }
 
@@ -1711,9 +1920,11 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-content-inner {
-    height: 100%;
+    flex: 1 1 auto;
+    height: auto;
     min-height: 0;
     padding: 0;
+    overflow: hidden;
   }
 
   .win-nav-content-overlay {
@@ -1733,14 +1944,31 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-page-header {
-    min-height: 48px;
-    padding: 0 32px;
+    min-height: 40px;
+    margin: 44px 0 0 var(--win-nav-header-margin-left, 56px);
+    padding: 0;
     display: flex;
     align-items: center;
-    font-size: 20px;
+    font-size: 28px;
+    line-height: 36px;
     font-weight: 600;
     color: var(--text-primary);
     border-bottom: 1px solid transparent;
+  }
+
+  .win-nav-page-header .win-text-block {
+    color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+  }
+
+  .win-nav-shell.is-top .win-nav-page-header {
+    min-height: 40px;
+    margin: 0;
+    padding: 0 32px;
+    font-size: 20px;
+    line-height: 28px;
   }
 
     .win-nav-page-header + .win-nav-content-inner {
@@ -1761,23 +1989,28 @@ watch(() => props.selectedValue, (val) => {
     overflow: hidden;
   }
 
-    .win-nav-shell.is-overlay-left .win-nav-left-panel {
+  .win-nav-pane-surface {
+    display: contents;
+  }
+
+  .win-nav-shell.is-overlay-left .win-nav-left-panel {
       position: absolute;
       top: 0;
       left: 0;
       bottom: 0;
       z-index: 20;
-      background: var(--host-nav-pane-bg);
+      background: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
       -webkit-backdrop-filter: var(--flyout-backdrop);
       backdrop-filter: var(--flyout-backdrop);
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+      border-radius: 0 8px 8px 0;
       width: var(--win-nav-open-pane-length, 320px);
       clip-path: inset(0 0 0 0);
       transition: clip-path var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)), background var(--normal-duration) var(--fast-out-slow-in), box-shadow var(--win-nav-pane-duration, 350ms) linear;
     }
 
     html.winui-webview-host .win-nav-shell.is-overlay-left .win-nav-left-panel:not(.is-compact) {
-      background: var(--host-nav-pane-bg);
+      background: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
       -webkit-backdrop-filter: var(--flyout-backdrop);
       backdrop-filter: var(--flyout-backdrop);
     }
@@ -1786,12 +2019,56 @@ watch(() => props.selectedValue, (val) => {
       width: var(--win-nav-open-pane-length, 320px);
       clip-path: inset(0 calc(var(--win-nav-open-pane-length, 320px) - var(--win-nav-compact-pane-length, 48px)) 0 0);
       box-shadow: none;
+      border-radius: 0;
     }
 
     .win-nav-shell.is-left-compact .win-nav-left-panel.is-compact {
-      background: var(--app-bg);
+      /* The closed compact pane shares the normal Left rail surface. The
+         shell background supplies the solid fill; the pane itself remains
+         transparent just like PaneNotOverlaying in the native template. */
+      background: transparent;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
+    }
+
+    .win-nav-shell.is-left-compact .win-nav-left-panel,
+    html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-compact .win-nav-left-panel {
+      background: transparent;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      box-shadow: none;
+    }
+
+    .win-nav-shell.is-left-compact .win-nav-left-panel::after {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      z-index: 1;
+      width: var(--win-nav-open-pane-length, 320px);
+      pointer-events: none;
+      background: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+      -webkit-backdrop-filter: var(--flyout-backdrop);
+      backdrop-filter: var(--flyout-backdrop);
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+      opacity: 1;
+      transition: opacity var(--win-nav-pane-duration, 350ms) linear;
+    }
+
+    .win-nav-shell.is-left-compact .win-nav-left-panel.is-compact::after {
+      opacity: 0;
+    }
+
+    .win-nav-shell.is-left-compact .win-nav-left-panel > .win-nav-back-button,
+    .win-nav-shell.is-left-compact .win-nav-left-panel > .win-nav-pane-command-row,
+    .win-nav-shell.is-left-compact .win-nav-left-panel > .win-nav-pane-surface > *:not(.win-nav-indicator-track) {
+      position: relative;
+      z-index: 2;
+    }
+
+    .win-nav-shell.is-left-compact .win-nav-left-panel > .win-nav-pane-surface > .win-nav-indicator-track {
+      position: absolute;
+      z-index: 3;
     }
 
     .win-nav-shell:not(.is-overlay-left) .win-nav-left-panel.is-compact {
@@ -1804,19 +2081,22 @@ watch(() => props.selectedValue, (val) => {
       background: transparent;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
+      width: var(--win-nav-open-pane-length, 320px);
+      clip-path: none;
+      pointer-events: none;
     }
 
     .win-nav-shell.is-left-minimal .win-nav-left-panel.is-compact.is-pane-closing {
-      background: var(--host-nav-pane-bg);
-      -webkit-backdrop-filter: var(--flyout-backdrop);
-      backdrop-filter: var(--flyout-backdrop);
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+      background: transparent;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      box-shadow: none;
     }
 
-    .win-nav-left-panel > .win-nav-pane-top,
-    .win-nav-left-panel > .win-nav-pane-custom-content,
-    .win-nav-left-panel > .win-nav-left-scrollable,
-    .win-nav-left-panel > .win-nav-footer,
+    .win-nav-left-panel > .win-nav-pane-surface > .win-nav-pane-top,
+    .win-nav-left-panel > .win-nav-pane-surface > .win-nav-pane-custom-content,
+    .win-nav-left-panel > .win-nav-pane-surface > .win-nav-left-scrollable,
+    .win-nav-left-panel > .win-nav-pane-surface > .win-nav-footer,
     .win-nav-left-panel .win-nav-menu {
       box-sizing: border-box;
       width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
@@ -1833,11 +2113,82 @@ watch(() => props.selectedValue, (val) => {
       z-index: 3;
     }
 
-  .win-nav-shell:not(.is-overlay-left) .win-nav-left-panel.is-pane-opening + .win-nav-content {
+  .win-nav-shell.is-left-minimal .win-nav-left-panel {
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+    clip-path: none;
+  }
+
+  /* The host acrylic rule has a stronger selector than the minimal reset.
+     Keep minimal to one pane surface instead of stacking a second translucent
+     overlay behind it. */
+  .win-nav-shell.is-overlay-left.is-left-minimal .win-nav-left-panel,
+  html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-minimal .win-nav-left-panel {
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .win-nav-shell.is-left-minimal .win-nav-pane-surface {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    width: auto;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+    -webkit-backdrop-filter: var(--flyout-backdrop);
+    backdrop-filter: var(--flyout-backdrop);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+    border-radius: 0 8px 8px 0;
+    transform: translateX(0);
+    transform-origin: left center;
+  }
+
+  .win-nav-shell.is-left-minimal .win-nav-left-panel.has-back-button .win-nav-pane-surface,
+  .win-nav-shell.is-left-minimal .win-nav-left-panel.has-pane-toggle-button .win-nav-pane-surface {
+    padding-top: 48px;
+  }
+
+  .win-nav-shell.is-left-minimal .win-nav-left-panel.has-back-button.has-pane-toggle-button .win-nav-pane-surface {
+    padding-top: 88px;
+  }
+
+  .win-nav-shell.is-left-minimal .win-nav-left-panel.is-pane-opening .win-nav-pane-surface {
+    animation: win-nav-minimal-pane var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)) both;
+  }
+
+  .win-nav-shell.is-left-minimal .win-nav-left-panel.is-pane-closing .win-nav-pane-surface {
+    animation: win-nav-minimal-pane var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)) reverse both;
+    pointer-events: none;
+  }
+
+  .win-nav-shell.is-left-minimal .win-nav-left-panel > .win-nav-back-button,
+  .win-nav-shell.is-left-minimal .win-nav-left-panel > .win-nav-pane-command-row {
+    position: relative;
+    z-index: 4;
+    pointer-events: auto;
+  }
+
+  @keyframes win-nav-minimal-pane {
+    from { transform: translateX(calc(-1 * var(--win-nav-open-pane-length, 320px))); }
+    to { transform: translateX(0); }
+  }
+
+  .win-nav-shell:not(.is-overlay-left):not(.is-left-compact) .win-nav-left-panel.is-pane-opening + .win-nav-content {
     animation: win-nav-inline-content-opening var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
   }
 
-  .win-nav-shell:not(.is-overlay-left) .win-nav-left-panel.is-pane-closing + .win-nav-content {
+  .win-nav-shell:not(.is-overlay-left):not(.is-left-compact) .win-nav-left-panel.is-pane-closing + .win-nav-content {
     animation: win-nav-inline-content-closing var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
   }
 
@@ -1854,57 +2205,215 @@ watch(() => props.selectedValue, (val) => {
   .win-nav-left-scrollable {
     flex: 1;
     min-height: 0;
-    margin-top: 2px;
     position: relative;
   }
 
   .win-nav-footer {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
     flex-shrink: 0;
-    padding-top: 4px;
     position: relative;
     z-index: 2;
     background: var(--app-bg);
   }
 
+  .win-nav-pane-command-row {
+    box-sizing: border-box;
+    width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
+    min-height: 40px;
+    display: flex;
+    align-items: flex-start;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 4;
+  }
+
   .win-nav-pane-top {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0;
     flex-shrink: 0;
-    padding: 6px 8px 8px;
+    padding: 0 12px 8px;
     position: relative;
     z-index: 2;
+  }
+
+  .win-nav-pane-top.is-closed-compact {
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .win-nav-pane-header,
   .win-nav-pane-footer,
   .win-nav-pane-custom-content {
+    box-sizing: border-box;
+    width: 100%;
     min-height: 32px;
     display: flex;
     align-items: center;
     color: var(--text-primary);
+  }
+
+  .win-nav-pane-footer {
+    flex: 0 0 auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: stretch;
+    overflow: hidden;
+    /* PaneFooter is hosted by the same content grid as footer items.  Keep
+       its content edge at the pane's 4px inset; individual controls provide
+       their own content padding, just like NavigationViewItem. */
+    padding: 0;
+    margin-bottom: 4px;
+  }
+
+  .win-nav-pane-footer > .win-stack-panel,
+  .win-nav-pane-footer > * {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .win-nav-pane-footer .win-stack-panel {
+    flex: 1 1 auto;
+    align-items: stretch !important;
+  }
+
+  .win-nav-pane-footer .win-btn {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    min-height: 36px;
+    margin: 2px 0;
+    padding: 0 12px;
+    border-radius: 4px;
+    gap: 0;
+    justify-content: flex-start;
+  }
+
+  .win-nav-pane-footer .win-btn > .icon {
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+  }
+
+  .win-nav-left-panel.is-closed-compact .win-nav-pane-footer {
+    width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    min-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    padding: 0;
+  }
+
+  .win-nav-left-panel.is-closed-compact .win-nav-pane-footer > *,
+  .win-nav-left-panel.is-closed-compact .win-nav-pane-footer .win-stack-panel {
+    width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    min-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+  }
+
+  .win-nav-left-panel.is-closed-compact .win-nav-pane-footer .win-btn {
+    width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    min-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    margin: 2px 0;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .win-nav-pane-header.has-pane-toggle {
+    min-height: 40px;
+    margin-top: -40px;
+    margin-left: 40px;
+    padding-right: 8px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .win-nav-pane-title-holder {
+    box-sizing: border-box;
+    height: 40px;
+    min-height: 40px;
+    padding: 4px 8px 0;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
   }
 
   .win-nav-pane-title {
     min-height: 32px;
     display: flex;
     align-items: center;
-    font-size: 20px;
+    font-size: 14px;
+    line-height: 20px;
     font-weight: 600;
     color: var(--text-primary);
+  }
+
+  .win-nav-hamburger.has-pane-title {
+    width: auto;
+    min-width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
+    max-width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  .win-nav-hamburger.has-pane-title > .icon {
+    margin: 0 12px;
+    flex-shrink: 0;
+  }
+
+  .win-nav-hamburger .win-nav-pane-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .win-nav-pane-search {
     display: flex;
     align-items: center;
+    min-height: 40px;
   }
 
-    .win-nav-pane-search > * {
+    .win-nav-pane-search-presenter,
+    .win-nav-pane-search-presenter > * {
       width: 100%;
     }
+
+  .win-nav-pane-search-button {
+    box-sizing: border-box;
+    width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    min-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-primary);
+    background: transparent;
+    cursor: pointer;
+    transition: background var(--fast-duration) var(--fast-out-slow-in);
+  }
+
+  .win-nav-pane-search-button:hover {
+    background: var(--subtle-secondary);
+  }
+
+  .win-nav-pane-search-button:active {
+    background: var(--subtle-tertiary);
+  }
+
+  .win-nav-pane-search-button .icon {
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    line-height: 16px;
+  }
 
   .win-nav-shell.is-overlay-left .win-nav-footer {
     background: transparent;
@@ -1927,6 +2436,14 @@ watch(() => props.selectedValue, (val) => {
     cursor: pointer;
     background: transparent;
     transition: background var(--fast-duration) var(--fast-out-slow-in);
+  }
+
+  /* Minimal keeps the top command rows at their native positions while the
+     pane is open. The back button is replaced by the pane command in that
+     state, but its row remains reserved so the hamburger never shifts. */
+  .win-nav-back-button.is-minimal-pane-open-hidden {
+    visibility: hidden;
+    pointer-events: none;
   }
 
     .win-nav-hamburger .icon {
@@ -1953,7 +2470,6 @@ watch(() => props.selectedValue, (val) => {
     .win-nav-back-button:disabled {
       color: var(--text-disabled);
       cursor: default;
-      opacity: 0.65;
     }
 
     .win-nav-back-button:not(:disabled):hover,
@@ -1969,16 +2485,82 @@ watch(() => props.selectedValue, (val) => {
   .win-nav-menu {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
   }
 
   .win-nav-top-bar {
     position: relative;
-    width: 100%;
+    box-sizing: border-box;
+    width: calc(100% - 8px);
     height: 48px;
+    margin: 0 4px;
+    flex-shrink: 0;
     transition: width var(--normal-duration) var(--fast-out-slow-in), background var(--normal-duration) var(--fast-out-slow-in);
     display: flex;
     align-items: center;
+  }
+
+  .win-nav-top-fixed {
+    flex-shrink: 0;
+  }
+
+  .win-nav-top-pane-header,
+  .win-nav-top-pane-title,
+  .win-nav-top-pane-footer {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+  }
+
+  .win-nav-top-pane-title {
+    margin: 0 16px;
+  }
+
+  .win-nav-top-pane-footer > .win-stack-panel {
+    height: 40px;
+    align-items: stretch;
+  }
+
+  .win-nav-top-pane-footer .win-btn {
+    box-sizing: border-box;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    margin: 2px 0;
+    padding: 0;
+  }
+
+  .win-nav-top-pane-custom-content {
+    min-width: 0;
+    height: 48px;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .win-nav-top-primary-menu {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .win-nav-top-footer-menu {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .win-nav-top-pane-search {
+    min-width: 216px;
+    height: 48px;
+    margin: 0 4px;
+    display: flex;
+    align-items: center;
+  }
+
+  .win-nav-top-pane-search > * {
+    width: 100%;
   }
 
   .win-nav-top-measure {
@@ -2011,6 +2593,7 @@ watch(() => props.selectedValue, (val) => {
     position: relative;
     box-sizing: border-box;
     height: 36px;
+    margin: 2px 0;
     padding: 0 12px;
     border-radius: 4px;
     display: flex;
@@ -2022,15 +2605,15 @@ watch(() => props.selectedValue, (val) => {
     user-select: none;
   }
 
-    .win-nav-item:hover {
+    .win-nav-item:not(.is-disabled):hover {
       background: var(--subtle-secondary);
     }
 
-    .win-nav-item:active {
+    .win-nav-item:not(.is-disabled):active {
       background: var(--subtle-tertiary);
     }
 
-  .win-nav-left-panel .win-nav-item:active {
+  .win-nav-left-panel .win-nav-item:not(.is-disabled):active {
     color: var(--text-secondary);
   }
 
@@ -2038,12 +2621,13 @@ watch(() => props.selectedValue, (val) => {
     background: var(--subtle-secondary);
   }
 
-    .win-nav-item.is-selected:hover {
+    .win-nav-item.is-selected:not(.is-disabled):hover {
       background: var(--subtle-tertiary);
     }
 
-    .win-nav-item.is-selected:active {
-      background: var(--subtle-pressed);
+    .win-nav-item.is-selected:not(.is-disabled):active {
+      background: var(--subtle-secondary);
+      color: var(--text-secondary);
     }
 
   .win-nav-item.is-disabled {
@@ -2085,23 +2669,29 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-item-header {
-    min-height: 32px;
-    padding: 8px 16px 4px;
+    box-sizing: border-box;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 16px;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     color: var(--text-secondary);
-    font-size: 12px;
-    line-height: 16px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
     user-select: none;
   }
 
   .win-nav-item-header .win-text-block {
     color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
   }
 
   .win-nav-item-separator {
     height: 1px;
-    margin: 4px 12px;
+    margin: 3px 0 4px;
     background: var(--stroke-divider);
   }
 
@@ -2109,34 +2699,29 @@ watch(() => props.selectedValue, (val) => {
     font-size: 14px;
   }
 
-  .win-nav-left-panel.is-compact .win-nav-item .label {
+  .win-nav-left-panel.is-closed-compact .win-nav-item .label {
     opacity: 0;
     pointer-events: none;
   }
 
-  .win-nav-left-panel.is-compact .win-nav-item {
+  .win-nav-left-panel.is-closed-compact .win-nav-item {
     width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
     min-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
     max-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
     overflow: hidden;
   }
 
-  .win-nav-left-panel.is-compact.is-pane-closing .win-nav-item {
-    width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
-    max-width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
+  .win-nav-left-panel.is-closed-compact .win-nav-item-header {
+    height: 0;
+    min-height: 0;
+    padding: 0;
+    opacity: 0;
+    overflow: hidden;
   }
 
-  .win-nav-left-panel.is-compact.is-pane-closing .win-nav-item .label {
-    opacity: 1;
-  }
-
-  .win-nav-left-panel.is-compact .win-nav-group-chevron {
+  .win-nav-left-panel.is-closed-compact .win-nav-group-chevron {
     opacity: 0;
     pointer-events: none;
-  }
-
-  .win-nav-left-panel.is-compact.is-pane-closing .win-nav-group-chevron {
-    opacity: 1;
   }
 
   .win-nav-indicator {
@@ -2168,18 +2753,40 @@ watch(() => props.selectedValue, (val) => {
 
   .win-nav-top-bar .win-nav-item {
     justify-content: center;
-    padding: 0 16px;
+    padding: 0 12px;
+  }
+
+  .win-nav-top-bar .win-nav-item-header,
+  .win-nav-top-measure .win-nav-item-header {
+    padding: 0 12px;
+  }
+
+  .win-nav-top-bar .win-nav-item-separator,
+  .win-nav-top-measure .win-nav-item-separator {
+    align-self: center;
+    width: 1px;
+    min-width: 1px;
+    height: 24px;
+    margin: 0 4px 0 3px;
   }
 
     .win-nav-top-bar .win-nav-more-button,
     .win-nav-top-measure .win-nav-more-button {
-      min-width: 40px;
-      padding: 0 12px;
+      box-sizing: border-box;
+      width: 36px;
+      min-width: 36px;
+      max-width: 36px;
+      height: 36px;
+      min-height: 36px;
+      max-height: 36px;
+      padding: 0;
+      justify-content: center;
     }
 
       .win-nav-top-bar .win-nav-more-button .icon,
       .win-nav-top-measure .win-nav-more-button .icon {
-        margin-right: 8px;
+        margin-right: 0;
+        font-size: 20px;
       }
 
       .win-nav-top-bar .win-nav-more-button .icon:only-child,
@@ -2187,18 +2794,23 @@ watch(() => props.selectedValue, (val) => {
         margin-right: 0;
       }
 
+      .win-nav-top-bar .win-nav-more-button .label,
+      .win-nav-top-measure .win-nav-more-button .label {
+        display: none;
+      }
+
     .win-nav-top-bar .win-nav-item:not(.is-disabled):hover {
-      background: transparent;
-      opacity: 0.8;
+      background: var(--subtle-secondary);
     }
 
     .win-nav-top-bar .win-nav-item:not(.is-disabled):active {
-      opacity: 0.6;
-      transition: opacity 0.06s ease-out;
+      background: var(--subtle-tertiary);
+      color: var(--text-secondary);
     }
 
     .win-nav-top-bar .win-nav-item.is-selected:not(.is-disabled):active {
-      opacity: 0.6;
+      background: transparent;
+      color: var(--text-secondary);
     }
 
     .win-nav-top-bar .win-nav-item.is-selected {
@@ -2218,35 +2830,26 @@ watch(() => props.selectedValue, (val) => {
     display: none;
   }
 
+  .win-nav-top-bar .win-nav-settings-item {
+    box-sizing: border-box;
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    padding: 0;
+    margin: 2px 0;
+    justify-content: center;
+  }
+
   .win-nav-top-bar .win-nav-settings-item .icon {
     margin-right: 0;
   }
 
-  .win-nav-shell.has-titlebar.is-left .win-nav-left-panel {
-    padding-top: calc(env(titlebar-area-height, 32px) + 8px);
-  }
-
-  .win-nav-shell.has-titlebar.is-overlay-left .win-nav-left-panel {
-    padding-top: calc(env(titlebar-area-height, 32px) + 8px);
-  }
-
-  .win-nav-shell.has-titlebar.is-left .win-nav-content {
-    margin-top: env(titlebar-area-height, 32px);
-    border-radius: 8px 0 0 0;
-  }
-
-  .win-nav-shell.has-titlebar.is-overlay-left .win-nav-content {
-    margin-top: env(titlebar-area-height, 32px);
-    border-radius: 8px 0 0 0;
-  }
-
-  .win-nav-shell.has-titlebar.is-left-minimal .win-nav-content {
-    border-left: 0;
-    border-radius: 0;
-  }
-
-  .win-nav-shell.has-titlebar.is-top {
-    padding-top: env(titlebar-area-height, 32px);
+  .win-nav-shell.is-top .win-nav-content,
+  .win-nav-shell.is-top .win-nav-content-inner {
+    border-radius: 0 !important;
   }
 
   .win-nav-group-header {
@@ -2254,9 +2857,15 @@ watch(() => props.selectedValue, (val) => {
   }
 
     .win-nav-group-header .win-nav-group-chevron {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      min-width: 40px;
+      height: 36px;
       margin-left: auto;
-      margin-right: 0;
-      font-size: 12px;
+      margin-right: -14px;
+      font-size: 8px;
       transition: transform 200ms var(--fast-out-slow-in), opacity var(--fast-duration) var(--fast-out-slow-in);
       transform: rotate(0deg);
     }
@@ -2281,8 +2890,8 @@ watch(() => props.selectedValue, (val) => {
   .win-nav-group-children-inner {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding-top: 2px;
+    gap: 0;
+    padding-top: 0;
   }
 
   .win-nav-group-child {
@@ -2301,16 +2910,25 @@ watch(() => props.selectedValue, (val) => {
       background: var(--subtle-secondary);
     }
 
-  .win-nav-left-panel.is-compact .win-nav-group.is-child-selected > .win-nav-group-header {
+  .win-nav-left-panel.is-closed-compact .win-nav-group.is-child-selected > .win-nav-group-header {
     background: transparent;
   }
 
   .win-nav-top-bar .win-nav-group-header .win-nav-group-chevron {
-    margin-left: 8px;
+    margin-left: auto;
     margin-right: 0;
-    font-size: 10px;
+    font-size: 8px;
     transform: rotate(0deg);
     transition: transform 200ms var(--fast-out-slow-in);
+  }
+
+  .win-nav-top-bar .win-nav-group-header > .label:first-child + .win-nav-group-chevron {
+    margin-left: auto;
+  }
+
+  .win-nav-more-panel .win-nav-group-header .win-nav-group-chevron {
+    margin-left: auto;
+    margin-right: -14px;
   }
 
     .win-nav-top-bar .win-nav-group-header .win-nav-group-chevron.chevron-open {
@@ -2353,7 +2971,9 @@ watch(() => props.selectedValue, (val) => {
 
   @media (prefers-reduced-motion: reduce) {
     .win-nav-left-panel,
+    .win-nav-pane-surface,
     .win-nav-content,
+    .win-nav-indicator,
     .win-nav-group-children,
     .win-nav-group-chevron {
       transition-duration: 0ms !important;

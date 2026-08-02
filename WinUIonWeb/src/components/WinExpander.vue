@@ -61,11 +61,12 @@ const props = defineProps({
   HeaderTemplateSelector: { type: [Object, Function, String], default: null },
   IsExpanded: { type: Boolean, default: false },
   ExpandDirection: { type: String, default: 'Down' },
-  Padding: { type: [String, Number], default: '24' },
+  Padding: { type: [String, Number], default: '16' },
   HorizontalContentAlignment: { type: String, default: 'Stretch' },
   VerticalContentAlignment: { type: String, default: 'Stretch' },
   Width: { type: [String, Number], default: '' },
   MinWidth: { type: [String, Number], default: '' },
+  HeaderHeight: { type: [String, Number], default: '' },
   MaxWidth: { type: [String, Number], default: '' },
   HorizontalAlignment: { type: String, default: '' },
   VerticalAlignment: { type: String, default: '' }
@@ -115,6 +116,20 @@ const flexDistribution = (value) => ({
   Stretch: 'flex-start'
 }[value] ?? 'flex-start');
 
+const selfAlignment = (value) => ({
+  Top: 'flex-start',
+  Center: 'center',
+  Bottom: 'flex-end',
+  Stretch: 'stretch'
+}[value] ?? 'stretch');
+
+const justifySelfAlignment = (value) => ({
+  Left: 'start',
+  Center: 'center',
+  Right: 'end',
+  Stretch: 'stretch'
+}[value] ?? 'stretch');
+
 const contentStyle = computed(() => ({
   padding: xamlThickness(props.Padding),
   alignItems: flexAlignment(props.HorizontalContentAlignment),
@@ -125,9 +140,10 @@ const rootStyle = computed(() => {
   const style = {};
   if (props.Width !== '') style.width = cssLength(props.Width);
   if (props.MinWidth !== '') style.minWidth = cssLength(props.MinWidth);
+  if (props.HeaderHeight !== '') style['--win-expander-header-height'] = cssLength(props.HeaderHeight);
   if (props.MaxWidth !== '') style.maxWidth = cssLength(props.MaxWidth);
-  if (props.HorizontalAlignment) style.justifySelf = props.HorizontalAlignment.toLowerCase();
-  if (props.VerticalAlignment) style.alignSelf = props.VerticalAlignment.toLowerCase();
+  if (props.HorizontalAlignment) style.justifySelf = justifySelfAlignment(props.HorizontalAlignment);
+  if (props.VerticalAlignment) style.alignSelf = selfAlignment(props.VerticalAlignment);
   return style;
 });
 
@@ -157,12 +173,15 @@ const toggleExpanded = () => {
 
 .win-expander-header {
   width: 100%;
-  padding: 16px;
+  height: var(--win-expander-header-height, auto);
+  min-height: 48px;
+  padding: 0 16px;
+  box-sizing: border-box;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  background: var(--card-bg);
+  background: var(--CardBackgroundFillColorDefaultBrush, var(--card-bg));
   border: none;
   border-radius: 4px;
   transition: background var(--fast-duration) var(--fast-out-slow-in);
@@ -289,11 +308,12 @@ const toggleExpanded = () => {
 }
 
 .win-expander-content {
-  padding: 24px;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  background: var(--card-bg-secondary);
+  background: var(--CardBackgroundFillColorSecondaryBrush, var(--card-bg-secondary));
   border-radius: 0 0 3px 3px;
 }
 

@@ -15,13 +15,14 @@
   -->
   <div class="win-titlebar" v-if="visible">
     <img :src="finalIcon" class="win-titlebar-icon" />
-    <span class="win-titlebar-title" :class="{ 'is-inactive': !windowFocused }">{{ title }}</span>
+    <WinTextBlock class="win-titlebar-title" :class="{ 'is-inactive': !windowFocused }" :Text="title" />
   </div>
 </template>
 
 <script setup>
 import { ref, watch, inject, onMounted, onUnmounted, computed } from 'vue';
 import appIcon from '../assets/AppIcon.ico';
+import WinTextBlock from './WinTextBlock.vue';
 
 const windowFocused = ref(document.hasFocus());
 
@@ -110,7 +111,7 @@ watch(() => props.theme, (val) => updateThemeColor(val));
     top: env(titlebar-area-y, 0);
     left: env(titlebar-area-x, 0);
     width: env(titlebar-area-width, 100%);
-    height: env(titlebar-area-height, 32px);
+    height: var(--win-titlebar-height, env(titlebar-area-height, 32px));
     display: flex;
     align-items: center;
     gap: 8px;

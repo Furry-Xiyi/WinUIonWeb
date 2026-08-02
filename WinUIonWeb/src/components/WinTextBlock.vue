@@ -276,6 +276,7 @@ onBeforeUnmount(() => {
 <style>
 .win-text-block {
   display: block;
+  min-width: 0;
   margin: 0;
   color: var(--text-primary);
   font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);

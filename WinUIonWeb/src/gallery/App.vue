@@ -1,7 +1,8 @@
 <template>
   <WinTitleBar :title="appTitle" :theme="themeSetting" />
   <WinToolTipService />
-  <WinNavigationView :SelectedItem="selectedNavigationItem"
+  <div class="gallery-app-content" :class="{ 'has-titlebar': titleBarActive || isHostedInUwpWebView }">
+    <WinNavigationView :SelectedItem="selectedNavigationItem"
                      :PaneDisplayMode="navPosition"
                      :MenuItems="navMenuItems"
                      :FooterMenuItems="[]"
@@ -12,7 +13,8 @@
     <div v-if="pageComponent" :key="currentPage" :class="['page-view active', pageTransition]">
       <component :is="pageComponent" />
     </div>
-  </WinNavigationView>
+    </WinNavigationView>
+  </div>
 </template>
 
 <script setup>
@@ -77,6 +79,19 @@ import MenuFlyoutPage from './pages/MenuFlyoutPage.vue';
 import SwipeControlPage from './pages/SwipeControlPage.vue';
 import StandardUICommandPage from './pages/StandardUICommandPage.vue';
 import XamlUICommandPage from './pages/XamlUICommandPage.vue';
+import AcrylicBrushPage from './pages/AcrylicBrushPage.vue';
+import AnimatedIconPage from './pages/AnimatedIconPage.vue';
+import CompactSizingPage from './pages/CompactSizingPage.vue';
+import GeometryPage from './pages/GeometryPage.vue';
+import IconElementPage from './pages/IconElementPage.vue';
+import IconographyPage from './pages/IconographyPage.vue';
+import LinePage from './pages/LinePage.vue';
+import RadialGradientBrushPage from './pages/RadialGradientBrushPage.vue';
+import ResourcesPage from './pages/ResourcesPage.vue';
+import StylePage from './pages/StylePage.vue';
+import SystemBackdropsPage from './pages/SystemBackdrops(MicaAcrylic)Page.vue';
+import ThemeShadowPage from './pages/ThemeShadowPage.vue';
+import TypographyPage from './pages/TypographyPage.vue';
 import PopupPage from './pages/PopupPage.vue';
 import TeachingTipPage from './pages/TeachingTipPage.vue';
 import ToolTipPage from './pages/ToolTipPage.vue';
@@ -174,7 +189,20 @@ const pageMap = {
   richtextblock: RichTextBlockPage,
   textbox: TextBoxPage,
   textblock: TextBlockPage,
-  settings: SettingsPage
+  settings: SettingsPage,
+  xamlresources: ResourcesPage,
+  xamlstyles: StylePage,
+  geometry: GeometryPage,
+  iconography: IconographyPage,
+  typography: TypographyPage,
+  acrylic: AcrylicBrushPage,
+  animatedicon: AnimatedIconPage,
+  compactsizing: CompactSizingPage,
+  iconelement: IconElementPage,
+  line: LinePage,
+  radialgradientbrush: RadialGradientBrushPage,
+  systembackdrops: SystemBackdropsPage,
+  themeshadow: ThemeShadowPage
 };
 
 const titleBarActive = ref(false);
@@ -212,22 +240,21 @@ const appTitle = computed(() => t(appManifest.resources?.title ?? 'app.title'));
 const navMenuItems = [
   { Tag: 'home', Icon: '\uE80F', Content: t('text.home') },
   { Tag: 'buttons', Icon: '\uE73A', Content: t('text.basic-input'), SelectsOnInvoked: false, MenuItems: [
-      { Tag: 'button', Icon: '\uE71A', Content: t('text.button') },
-      { Tag: 'dropdownbutton', Icon: '\uE70D', Content: t('text.dropdownbutton') },
-      { Tag: 'hyperlinkbutton', Icon: '\uE71B', Content: t('text.hyperlinkbutton') },
-      { Tag: 'repeatbutton', Icon: '\uE8AB', Content: t('text.repeatbutton') },
-      { Tag: 'togglebutton', Icon: '\uEF1F', Content: t('text.togglebutton') },
-      { Tag: 'splitbutton', Icon: '\uE90D', Content: t('text.splitbutton') },
-      { Tag: 'togglesplitbutton', Icon: '\uE90D', Content: t('text.togglesplitbutton') },
-      { Tag: 'checkbox', Icon: '\uE73D', Content: t('text.checkbox') },
-      { Tag: 'colorpicker', Icon: '\uEF3C', Content: t('text.colorpicker') },
-      { Tag: 'combobox', Icon: '\uE7FB', Content: t('text.combobox') },
-      { Tag: 'radiobutton', Icon: '\uECCB', Content: t('text.radiobuttons') },
-      { Tag: 'rating', Icon: '\uE734', Content: t('text.ratingcontrol') },
-      { Tag: 'slider', Icon: '\uE9E9', Content: t('text.slider') },
-      { Tag: 'toggleswitch', Icon: '\uF19F', Content: t('text.toggleswitch') }
-    ]
-  },
+    { Tag: 'button', Icon: '\uE71A', Content: t('text.button') },
+    { Tag: 'dropdownbutton', Icon: '\uE70D', Content: t('text.dropdownbutton') },
+    { Tag: 'hyperlinkbutton', Icon: '\uE71B', Content: t('text.hyperlinkbutton') },
+    { Tag: 'repeatbutton', Icon: '\uE8AB', Content: t('text.repeatbutton') },
+    { Tag: 'togglebutton', Icon: '\uEF1F', Content: t('text.togglebutton') },
+    { Tag: 'splitbutton', Icon: '\uE90D', Content: t('text.splitbutton') },
+    { Tag: 'togglesplitbutton', Icon: '\uE90D', Content: t('text.togglesplitbutton') },
+    { Tag: 'checkbox', Icon: '\uE73D', Content: t('text.checkbox') },
+    { Tag: 'colorpicker', Icon: '\uEF3C', Content: t('text.colorpicker') },
+    { Tag: 'combobox', Icon: '\uE7FB', Content: t('text.combobox') },
+    { Tag: 'radiobutton', Icon: '\uECCB', Content: t('text.radiobuttons') },
+    { Tag: 'rating', Icon: '\uE734', Content: t('text.ratingcontrol') },
+    { Tag: 'slider', Icon: '\uE9E9', Content: t('text.slider') },
+    { Tag: 'toggleswitch', Icon: '\uF19F', Content: t('text.toggleswitch') }
+  ]},
   { Tag: 'collections', Icon: '\uE80A', Content: t('text.collections'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'flipview', Icon: '\uF1CB', Content: t('text.flipview') },
     { Tag: 'gridview', Icon: '\uF0E2', Content: t('text.gridview') },
@@ -300,6 +327,16 @@ const navMenuItems = [
     { Tag: 'progressring', Icon: '\uE895', Content: t('text.progressring') },
     { Tag: 'tooltip', Icon: '\uE946', Content: t('text.tooltip') }
   ]},
+  { Tag: 'styles', Icon: '\uE790', Content: t('text.styles'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'acrylic', Icon: '\uE8B9', Content: t('text.acrylic') },
+    { Tag: 'animatedicon', Icon: '\uE895', Content: t('text.animated-icon') },
+    { Tag: 'compactsizing', Icon: '\uE7AD', Content: t('text.compact-sizing') },
+    { Tag: 'iconelement', Icon: '\uE8FB', Content: t('text.icon-element') },
+    { Tag: 'line', Icon: '\uE809', Content: t('text.line') },
+    { Tag: 'radialgradientbrush', Icon: '\uE790', Content: t('text.radial-gradient-brush') },
+    { Tag: 'systembackdrops', Icon: '\uE7F4', Content: t('text.system-backdrops') },
+    { Tag: 'themeshadow', Icon: '\uE7AD', Content: t('text.theme-shadow') }
+  ]},
   { Tag: 'text', Icon: '\uE8D2', Content: t('text.text'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'autosuggestbox', Icon: '\uE721', Content: t('text.autosuggestbox') },
     { Tag: 'numberbox', Icon: '\uF261', Content: t('text.numberbox') },
@@ -346,7 +383,10 @@ const onBackRequested = () => {
   }
 };
 
-const allPages = Object.keys(pageMap);
+const allPages = [
+  ...navMenuItems.flatMap(item => item.MenuItems?.map(child => child.Tag) ?? [item.Tag]),
+  'settings'
+];
 
 function applyTheme(mode) {
   const html = document.documentElement;
@@ -401,6 +441,19 @@ watch(currentPage, (newVal, oldVal) => {
 <style>
   @import '../styles/theme.css';
   @import '../styles/animations.css';
+
+  .gallery-app-content {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .gallery-app-content.has-titlebar {
+    --gallery-titlebar-height: var(--win-titlebar-height, env(titlebar-area-height, 32px));
+    height: calc(100% - var(--gallery-titlebar-height));
+    margin-top: var(--gallery-titlebar-height);
+  }
 
   @font-face {
     font-family: 'WinUIOnWebIcons';

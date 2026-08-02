@@ -16,6 +16,7 @@ const props = defineProps({
   Padding: { type: [String, Number], default: '' },
   Margin: { type: [String, Number], default: '' },
   HorizontalAlignment: { type: String, default: '' },
+  HorizontalContentAlignment: { type: String, default: 'Stretch' },
   VerticalAlignment: { type: String, default: '' }
 });
 
@@ -37,7 +38,10 @@ const xamlThickness = (value) => {
 const rootStyle = computed(() => {
   const style = {
     flexDirection: props.Orientation === 'Horizontal' ? 'row' : 'column',
-    gap: cssLength(props.Spacing)
+    gap: cssLength(props.Spacing),
+    alignItems: props.Orientation === 'Horizontal'
+      ? 'center'
+      : ({ Left: 'flex-start', Center: 'center', Right: 'flex-end', Stretch: 'stretch' }[props.HorizontalContentAlignment] ?? 'stretch')
   };
   if (props.Width !== '') style.width = cssLength(props.Width);
   if (props.Height !== '') style.height = cssLength(props.Height);
@@ -53,6 +57,6 @@ const rootStyle = computed(() => {
 <style scoped>
 .win-stack-panel {
   display: flex;
-  align-items: flex-start;
+  min-width: 0;
 }
 </style>

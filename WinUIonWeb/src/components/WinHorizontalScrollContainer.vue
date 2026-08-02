@@ -203,7 +203,7 @@ onBeforeUnmount(() => {
   color: var(--text-primary);
   background: var(--flyout-bg);
   background-clip: padding-box;
-  border: 1px solid var(--flyout-border, var(--card-stroke));
+  border: 0;
   border-radius: var(--ControlCornerRadius, 4px);
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);

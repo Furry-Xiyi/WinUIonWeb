@@ -19,18 +19,30 @@
         </template>
       </div>
       <div
+        ref="thumbRef"
         class="win-slider-thumb"
         :class="{ 'is-pointer-over': isThumbPointerOver && !isTrackInteraction, 'is-pressed': isThumbPressed }"
         :style="thumbStyle"
         @pointerenter="isThumbPointerOver = true"
         @pointerleave="isThumbPointerOver = false" />
     </div>
+    <WinToolTip
+      ref="thumbToolTipRef"
+      IsServiceHost
+      :IsOpen="isThumbToolTipOpen"
+      :IsEnabled="IsEnabled && IsThumbToolTipEnabled"
+      :Content="thumbToolTipContent"
+      :Placement="tooltipPlacement"
+      :PlacementTarget="thumbRef"
+      Padding="8,3,8,5"
+      FontSize="15" />
   </div>
 </template>
 
 <script setup>
-import { computed, ref, useAttrs } from 'vue';
+import { computed, nextTick, ref, useAttrs, watch } from 'vue';
 import WinTextBlock from './WinTextBlock.vue';
+import WinToolTip from './WinToolTip.vue';
 
 defineOptions({ inheritAttrs: false });
 
@@ -46,6 +58,8 @@ const props = defineProps({
   TickPlacement: { type: String, default: 'None' },
   SnapsTo: { type: String, default: 'StepValues' },
   IsEnabled: { type: Boolean, default: true },
+  IsThumbToolTipEnabled: { type: Boolean, default: true },
+  ThumbToolTipValueConverter: { type: [Function, Object], default: null },
   Width: { type: [String, Number], default: '' },
   Height: { type: [String, Number], default: '' },
   Margin: { type: String, default: '' },
@@ -61,10 +75,13 @@ const props = defineProps({
 const emit = defineEmits(['update:Value', 'ValueChanged', 'update:modelValue']);
 const attrs = useAttrs();
 const trackRef = ref(null);
+const thumbRef = ref(null);
+const thumbToolTipRef = ref(null);
 const dragValue = ref(null);
 const isThumbPointerOver = ref(false);
 const isThumbPressed = ref(false);
 const isTrackInteraction = ref(false);
+const isThumbToolTipOpen = ref(false);
 const thumbLength = 18;
 const thumbCenterOffset = thumbLength / 2;
 const tickOffset = (thumbLength - 1) / 2;
@@ -88,6 +105,39 @@ const showTopLeftTicks = computed(() => tickPlacement.value === 'outside' || tic
 const showBottomRightTicks = computed(() => tickPlacement.value === 'outside' || tickPlacement.value === 'bottomright' || tickPlacement.value === 'inline' || props.showTicks);
 const range = computed(() => Math.max(0.0001, maximum.value - minimum.value));
 const percent = computed(() => Math.max(0, Math.min(100, ((effectiveValue.value - minimum.value) / range.value) * 100)));
+const tooltipPlacement = computed(() => orientation.value === 'Vertical' ? 'Left' : 'Top');
+
+const sliderValueDecimals = computed(() => {
+  const frequency = stepFrequency.value;
+  let decimals = 0;
+  let scaled = frequency;
+  while (decimals < 4 && Math.abs(scaled - Math.round(scaled)) > 0.00001) {
+    decimals += 1;
+    scaled *= 10;
+  }
+  return decimals;
+});
+
+const formatSliderValue = (value) => {
+  const converter = props.ThumbToolTipValueConverter;
+  if (converter) {
+    try {
+      const converted = typeof converter === 'function'
+        ? converter(value)
+        : typeof converter.convert === 'function'
+          ? converter.convert(value)
+          : typeof converter.Convert === 'function'
+            ? converter.Convert(value)
+            : undefined;
+      if (converted !== undefined && converted !== null) return String(converted);
+    } catch {
+      // Fall back to the platform's default numeric formatter.
+    }
+  }
+  return Number(value).toFixed(sliderValueDecimals.value);
+};
+
+const thumbToolTipContent = computed(() => formatSliderValue(effectiveValue.value));
 
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
@@ -174,6 +224,14 @@ const setValue = (value, { commit = true } = {}) => {
   if (oldValue !== nextValue) emit('ValueChanged', { OldValue: oldValue, NewValue: nextValue });
 };
 
+const showThumbToolTip = () => {
+  if (props.IsEnabled && props.IsThumbToolTipEnabled) isThumbToolTipOpen.value = true;
+};
+
+const hideThumbToolTip = () => {
+  isThumbToolTipOpen.value = false;
+};
+
 const updateFromPointer = (event) => {
   const rect = trackRef.value.getBoundingClientRect();
   const usableSize = Math.max(1, (orientation.value === 'Vertical' ? rect.height : rect.width) - thumbLength);
@@ -190,16 +248,33 @@ const onPointerDown = (event) => {
   isTrackInteraction.value = !startedOnThumb;
   trackRef.value.setPointerCapture(event.pointerId);
   updateFromPointer(event);
-  trackRef.value.onpointermove = updateFromPointer;
-  trackRef.value.onpointerup = () => {
+  showThumbToolTip();
+  const finishPointerInteraction = () => {
+    if (!isThumbPressed.value && !isTrackInteraction.value) return;
     if (String(props.SnapsTo).toLowerCase() === 'ticks' && dragValue.value !== null) setValue(dragValue.value, { commit: true });
     dragValue.value = null;
     isThumbPressed.value = false;
     isTrackInteraction.value = false;
     trackRef.value.onpointermove = null;
-    trackRef.value?.releasePointerCapture(event.pointerId);
+    trackRef.value.onpointerup = null;
+    trackRef.value.onpointercancel = null;
+    trackRef.value.onlostpointercapture = null;
+    if (trackRef.value?.hasPointerCapture?.(event.pointerId)) trackRef.value.releasePointerCapture(event.pointerId);
+    hideThumbToolTip();
   };
+  trackRef.value.onpointermove = updateFromPointer;
+  trackRef.value.onpointerup = finishPointerInteraction;
+  trackRef.value.onpointercancel = finishPointerInteraction;
+  trackRef.value.onlostpointercapture = finishPointerInteraction;
 };
+
+watch(effectiveValue, () => {
+  if (isThumbToolTipOpen.value) nextTick(() => thumbToolTipRef.value?.updatePosition?.());
+});
+
+watch([() => props.IsEnabled, () => props.IsThumbToolTipEnabled], ([isEnabled, isToolTipEnabled]) => {
+  if (!isEnabled || !isToolTipEnabled) hideThumbToolTip();
+});
 </script>
 
 <style>

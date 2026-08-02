@@ -6,6 +6,7 @@
     :aria-describedby="isVisible ? tooltipId : undefined"
     :aria-label="contentText || undefined"
     @pointerenter="onPointerEnter"
+    @pointermove="onPointerMove"
     @pointerleave="onPointerLeave"
     @pointerdown="onPointerDown"
     @focusin="onFocusIn"
@@ -90,7 +91,6 @@ const isHoveringTooltip = ref(false);
 const pointer = ref<Point | null>(null);
 const position = ref({ top: 0, left: 0 });
 const isPositioned = ref(false);
-const isMouseCentered = ref(false);
 const isSuppressedUntilPointerLeave = ref(false);
 const actualPlacement = ref('Mouse');
 const tooltipId = `win-tooltip-${Math.random().toString(36).slice(2, 10)}`;
@@ -139,8 +139,8 @@ const xamlThickness = (value: string | number | null | undefined) => {
 const tooltipStyle = computed<CSSProperties>(() => ({
   top: `${position.value.top}px`,
   left: `${position.value.left}px`,
-  transform: isMouseCentered.value ? 'translateX(-50%)' : undefined,
   visibility: isPositioned.value ? undefined : 'hidden',
+  animationPlayState: isPositioned.value ? 'running' : 'paused',
   background: props.Background || undefined,
   backgroundImage: props.Background ? 'none' : undefined,
   color: props.Foreground || undefined,
@@ -187,9 +187,9 @@ function rectFromPlacementRect(): DOMRect | Position & { right: number; bottom: 
   return { left, top, right: left + width, bottom: top + height, width, height };
 }
 
-function setOpen(value: boolean, immediate = false) {
+function setOpen(value: boolean, immediate = false, preservePosition = false) {
   if (value === effectiveIsOpen.value && !immediate) return;
-  if (value) isPositioned.value = false;
+  if (value && !preservePosition) isPositioned.value = false;
   else isHoveringTooltip.value = false;
   localIsOpen.value = value;
   emit('update:IsOpen', value);
@@ -220,10 +220,7 @@ function hide(force = false) {
   clearTimers();
   if (!force && (isHoveringTarget.value || isHoveringTooltip.value)) return;
   if (!effectiveIsOpen.value) return;
-  closeTimer = window.setTimeout(() => {
-    setOpen(false);
-    isPositioned.value = false;
-  }, force ? 0 : Math.max(0, props.BetweenShowDelay));
+  setOpen(false);
 }
 
 function toggle() {
@@ -237,6 +234,10 @@ function onPointerEnter(event: PointerEvent) {
   isHoveringTarget.value = true;
   if (!effectiveIsOpen.value) pointer.value = { x: event.clientX, y: event.clientY };
   show(false);
+}
+function onPointerMove(event: PointerEvent) {
+  if (event.pointerType === 'touch' || effectiveIsOpen.value || !isHoveringTarget.value) return;
+  pointer.value = { x: event.clientX, y: event.clientY };
 }
 function onPointerLeave() {
   isHoveringTarget.value = false;
@@ -269,6 +270,7 @@ function onToolTipPointerEnter() {
   if (closeTimer !== undefined) window.clearTimeout(closeTimer);
   closeTimer = undefined;
   emit('tooltip-pointer-enter');
+  if (props.IsOpen === undefined && !effectiveIsOpen.value) setOpen(true, true, true);
 }
 function onToolTipPointerLeave() {
   isHoveringTooltip.value = false;
@@ -300,11 +302,10 @@ async function updatePosition() {
     : pointer.value || { x: targetRect.left + targetRect.width / 2, y: targetRect.top + targetRect.height / 2 };
   const horizontalOffset = Number(props.HorizontalOffset || 0);
   const verticalOffset = Number(props.VerticalOffset || 0);
-  const alignToPlacementRectPointer = Boolean(placementRect);
-  const horizontalCenter = alignToPlacementRectPointer
+  const horizontalCenter = placementRect
     ? mousePoint.x - tipRect.width / 2
     : targetRect.left + (targetRect.width - tipRect.width) / 2;
-  const verticalCenter = alignToPlacementRectPointer
+  const verticalCenter = placementRect
     ? mousePoint.y - tipRect.height / 2
     : targetRect.top + (targetRect.height - tipRect.height) / 2;
   const candidates: Record<Exclude<PlacementKey, 'mouse'>, Position> = {
@@ -377,15 +378,8 @@ async function updatePosition() {
 
   position.value = {
     top: clamp(resolvedPosition.top, viewportMargin, window.innerHeight - tipRect.height - viewportMargin),
-    left: mode === 'mouse'
-      ? clamp(
-          mousePoint.x + horizontalOffset,
-          viewportMargin + tipRect.width / 2,
-          window.innerWidth - viewportMargin - tipRect.width / 2
-        )
-      : clamp(resolvedPosition.left, viewportMargin, window.innerWidth - tipRect.width - viewportMargin)
+    left: clamp(resolvedPosition.left, viewportMargin, window.innerWidth - tipRect.width - viewportMargin)
   };
-  isMouseCentered.value = mode === 'mouse';
   actualPlacement.value = resolved[0].toUpperCase() + resolved.slice(1);
   isPositioned.value = true;
 }
@@ -459,8 +453,8 @@ defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSe
   font-size: inherit;
   line-height: inherit;
 }
-.win-tooltip-enter-active { animation: win-tooltip-fade-in 167ms cubic-bezier(0, 0, 0, 1) both; }
-.win-tooltip-leave-active { animation: win-tooltip-fade-out 83ms linear both; }
+.win-tooltip-enter-active { animation: win-tooltip-fade-in 167ms linear both; }
+.win-tooltip-leave-active { animation: win-tooltip-fade-out 167ms linear both; }
 @keyframes win-tooltip-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes win-tooltip-fade-out { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
