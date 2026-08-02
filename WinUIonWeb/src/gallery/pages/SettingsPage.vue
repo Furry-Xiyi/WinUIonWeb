@@ -130,11 +130,12 @@ const versionText = '1.0.0 Beta';
   font-weight: 600;
 }
 
-.settings-controls {
-  display: flex;
-  flex-direction: column;
-  margin-top: 6px;
-}
+  .settings-controls {
+    display: flex;
+    flex-direction: column;
+    margin-top: 6px;
+    margin-bottom: 32px;
+  }
 
 .settings-controls :deep(.win-expander),
 .settings-controls :deep(.win-settings-card) {
