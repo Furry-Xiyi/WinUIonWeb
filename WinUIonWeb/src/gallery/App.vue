@@ -327,16 +327,6 @@ const navMenuItems = [
     { Tag: 'progressring', Icon: '\uE895', Content: t('text.progressring') },
     { Tag: 'tooltip', Icon: '\uE946', Content: t('text.tooltip') }
   ]},
-  { Tag: 'styles', Icon: '\uE790', Content: t('text.styles'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'acrylic', Icon: '\uE8B9', Content: t('text.acrylic') },
-    { Tag: 'animatedicon', Icon: '\uE895', Content: t('text.animated-icon') },
-    { Tag: 'compactsizing', Icon: '\uE7AD', Content: t('text.compact-sizing') },
-    { Tag: 'iconelement', Icon: '\uE8FB', Content: t('text.icon-element') },
-    { Tag: 'line', Icon: '\uE809', Content: t('text.line') },
-    { Tag: 'radialgradientbrush', Icon: '\uE790', Content: t('text.radial-gradient-brush') },
-    { Tag: 'systembackdrops', Icon: '\uE7F4', Content: t('text.system-backdrops') },
-    { Tag: 'themeshadow', Icon: '\uE7AD', Content: t('text.theme-shadow') }
-  ]},
   { Tag: 'text', Icon: '\uE8D2', Content: t('text.text'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'autosuggestbox', Icon: '\uE721', Content: t('text.autosuggestbox') },
     { Tag: 'numberbox', Icon: '\uF261', Content: t('text.numberbox') },
