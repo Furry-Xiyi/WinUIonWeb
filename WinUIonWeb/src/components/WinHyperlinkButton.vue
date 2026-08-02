@@ -77,12 +77,10 @@ const buttonStyle = computed(() => {
   if (props.Height !== '') style.height = cssLength(props.Height);
   if (props.Margin) style.margin = xamlThickness(props.Margin);
   if (props.Padding) style.padding = xamlThickness(props.Padding);
-  // Map HorizontalAlignment to alignSelf so links don't stretch in flex containers.
   if (props.HorizontalAlignment) {
     const map = { left: 'flex-start', center: 'center', right: 'flex-end', stretch: 'stretch', auto: 'auto' };
     style.alignSelf = map[props.HorizontalAlignment.toLowerCase()] || props.HorizontalAlignment.toLowerCase();
   }
-  // Map VerticalAlignment to justifySelf for grid contexts.
   if (props.VerticalAlignment) {
     const vmap = { top: 'flex-start', center: 'center', bottom: 'flex-end', stretch: 'stretch', auto: 'auto' };
     style.justifySelf = vmap[props.VerticalAlignment.toLowerCase()] || props.VerticalAlignment.toLowerCase();
@@ -109,7 +107,7 @@ const onAnchorClick = (event) => {
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: var(--accent-base);
+  color: var(--accent-text-fill-color-primary);
   font-size: 14px;
   font-family: inherit;
   text-decoration: none;
@@ -119,14 +117,13 @@ const onAnchorClick = (event) => {
   user-select: none;
 }
 
-.win-hyperlink-button:hover {
-  background: var(--subtle-secondary);
-  color: var(--accent-hover);
-}
+  .win-hyperlink-button:hover {
+    background: var(--subtle-secondary);
+  }
 
 .win-hyperlink-button:active {
   background: var(--subtle-tertiary);
-  color: var(--accent-pressed);
+  color: var(--accent-base);
 }
 
 .win-hyperlink-button:disabled,

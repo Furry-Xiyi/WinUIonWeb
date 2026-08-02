@@ -250,6 +250,18 @@
   initial-value: rgba(255,255,255,0.70);
 }
 
+@property --accent-text-fill-color-primary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0D4897;
+}
+
+@property --accent-text-fill-color-primary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0D4897;
+}
+
 @property --toggle-border {
   syntax: '<color>';
   inherits: true;
@@ -451,6 +463,7 @@
     --accent-aa-text: #000000;
     --accent-text: #000000;
     --accent-text-secondary: rgba(0, 0, 0, 0.50);
+    --accent-text-fill-color-primary: #99EBFF;
     --TextFillColorPrimaryBrush: #FFFFFF;
     --TextFillColorSecondaryBrush: rgba(255, 255, 255, 0.77);
     --TextFillColorDisabledBrush: rgba(255, 255, 255, 0.36);
@@ -748,6 +761,7 @@ html.theme-dark {
   --accent-aa-text: #000000;
   --accent-text: #000000;
   --accent-text-secondary: rgba(0, 0, 0, 0.50);
+  --accent-text-fill-color-primary: #99EBFF;
   --TextFillColorPrimaryBrush: #FFFFFF;
   --TextFillColorSecondaryBrush: rgba(255, 255, 255, 0.77);
   --TextFillColorDisabledBrush: rgba(255, 255, 255, 0.36);

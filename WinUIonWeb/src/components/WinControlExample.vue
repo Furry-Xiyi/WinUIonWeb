@@ -154,7 +154,7 @@ const displayStyle = computed(() => ({
     Right: 'flex-end',
     Stretch: 'stretch'
   }[props.horizontalContentAlignment] ?? 'flex-start',
-  alignItems: 'stretch'
+  alignItems: 'flex-start'
 }));
 
 const onCodeTabChanged = ({ selectedIndex }) => {
