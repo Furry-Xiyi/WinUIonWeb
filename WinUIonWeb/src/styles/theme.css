@@ -352,6 +352,7 @@
   --accent: var(--accent-base);
   --accent-text: #FFFFFF;
   --accent-text-secondary: rgba(255, 255, 255, 0.70);
+  --accent-text-fill-color-primary: #0D4897;
   --TextFillColorPrimaryBrush: rgba(0, 0, 0, 0.89);
   --TextFillColorSecondaryBrush: rgba(0, 0, 0, 0.62);
   --TextFillColorDisabledBrush: rgba(0, 0, 0, 0.36);

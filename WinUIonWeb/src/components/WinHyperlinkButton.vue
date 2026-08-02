@@ -36,12 +36,17 @@ const props = defineProps({
   NavigateUri: { type: String, default: '' },
   TargetName: { type: String, default: '' },
   IsEnabled: { type: Boolean, default: true },
+  Background: { type: String, default: '' },
+  Foreground: { type: String, default: '' },
   Width: { type: [String, Number], default: '' },
   Height: { type: [String, Number], default: '' },
   Margin: { type: String, default: '' },
   Padding: { type: String, default: '' },
   HorizontalAlignment: { type: String, default: '' },
-  VerticalAlignment: { type: String, default: '' }
+  VerticalAlignment: { type: String, default: '' },
+  FontFamily: { type: String, default: '' },
+  FontSize: { type: [String, Number], default: '' },
+  CornerRadius: { type: [String, Number], default: '' }
 });
 
 const emit = defineEmits(['Click']);
@@ -77,6 +82,11 @@ const buttonStyle = computed(() => {
   if (props.Height !== '') style.height = cssLength(props.Height);
   if (props.Margin) style.margin = xamlThickness(props.Margin);
   if (props.Padding) style.padding = xamlThickness(props.Padding);
+  if (props.Background) style.background = props.Background;
+  if (props.Foreground) style.color = props.Foreground;
+  if (props.FontFamily) style.fontFamily = props.FontFamily;
+  if (props.FontSize !== '') style.fontSize = cssLength(props.FontSize);
+  if (props.CornerRadius !== '') style.borderRadius = cssLength(props.CornerRadius);
   if (props.HorizontalAlignment) {
     const map = { left: 'flex-start', center: 'center', right: 'flex-end', stretch: 'stretch', auto: 'auto' };
     style.alignSelf = map[props.HorizontalAlignment.toLowerCase()] || props.HorizontalAlignment.toLowerCase();
@@ -102,34 +112,46 @@ const onAnchorClick = (event) => {
 .win-hyperlink-button {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--ButtonPadding, 5px 11px 6px);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--ControlCornerRadius, 4px);
   background: transparent;
   color: var(--accent-text-fill-color-primary);
-  font-size: 14px;
-  font-family: inherit;
+  font-size: var(--ControlContentThemeFontSize, 14px);
+  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
+  font-weight: normal;
   text-decoration: none;
   cursor: pointer;
-  transition: background var(--fast-duration) var(--fast-out-slow-in),
-              color var(--fast-duration) var(--fast-out-slow-in);
+  transition: background 83ms cubic-bezier(0.1, 0.9, 0.2, 1),
+              color 83ms cubic-bezier(0.1, 0.9, 0.2, 1);
   user-select: none;
+  min-height: 32px;
+  outline: none;
+  flex: 0 0 auto;
 }
 
-  .win-hyperlink-button:hover {
-    background: var(--subtle-secondary);
-  }
+.win-hyperlink-button:hover:not(:disabled):not(.disabled) {
+  background: var(--subtle-fill-color-secondary, var(--subtle-secondary));
+  color: var(--accent-text-fill-color-primary);
+}
 
-.win-hyperlink-button:active {
-  background: var(--subtle-tertiary);
-  color: var(--accent-base);
+.win-hyperlink-button:active:not(:disabled):not(.disabled) {
+  background: var(--subtle-fill-color-tertiary, var(--subtle-tertiary));
+  color: var(--accent-text-fill-color-primary);
 }
 
 .win-hyperlink-button:disabled,
 .win-hyperlink-button.disabled {
-  color: var(--text-disabled);
+  color: var(--accent-text-fill-color-disabled, var(--text-disabled));
   cursor: not-allowed;
   pointer-events: none;
+  opacity: 0.5;
+}
+
+.win-hyperlink-button:focus-visible {
+  outline: 2px solid var(--accent-base);
+  outline-offset: -3px;
 }
 </style>
