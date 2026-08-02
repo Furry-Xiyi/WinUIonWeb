@@ -1,7 +1,7 @@
 export default {
-  "app.shortTitle": "WinUI 图库",
+  "app.shortTitle": "WinUI on Web 图库",
   "app.title": "WinUI on Web 图库",
-  "app.version": "WinUI on Web 1.0 预览版",
+  "app.version": "WinUI on Web 1.0.0-预览版",
   "text.a-2-state-checkbox": "双状态复选框",
   "text.a-basic-autosuggestbox": "基本自动建议框",
   "text.a-basic-calendar-view": "基本日历视图。",

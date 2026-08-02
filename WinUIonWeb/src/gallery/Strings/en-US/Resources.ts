@@ -1,7 +1,7 @@
 export default {
-  "app.shortTitle": "WinUI Gallery",
+  "app.shortTitle": "WinUI on Web Gallery",
   "app.title": "WinUI on Web Gallery",
-  "app.version": "WinUI on Web 1.0-Insider",
+  "app.version": "WinUI on Web 1.0.0-Insider",
   "text.a-2-state-checkbox": "A 2-state CheckBox",
   "text.a-basic-autosuggestbox": "A basic AutoSuggestBox",
   "text.a-basic-calendar-view": "A basic calendar view.",
