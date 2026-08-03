@@ -134,7 +134,6 @@ export default {
   "text.displays-read-only-text": "Displays read-only text.",
   "text.documents": "Documents",
   "text.down": "Down",
-  "text.drill-left-right": "Drill (left / right)",
   "text.dropdownbutton": "DropDownButton",
   "text.edit": "Edit",
   "text.email": "Email",
@@ -142,12 +141,10 @@ export default {
   "text.english-en-us": "English (en-US)",
   "text.enter-an-expression": "Enter an expression:",
   "text.enter-rich-text": "Enter rich text",
-  "text.entrance-slide-up": "Entrance (slide up)",
   "text.eve": "Eve",
   "text.expander": "Expander",
   "text.explore-the-winui-on-web-source-code-and-reposit": "Explore the WinUI on Web source code and repository.",
   "text.extended": "Extended",
-  "text.fade": "Fade",
   "text.favorites": "Favorites",
   "text.file": "File",
   "text.find-samples-that-demonstrate-specific-tasks-fea": "Find samples that demonstrate specific tasks, features, and APIs.",
@@ -214,6 +211,14 @@ export default {
   "text.options": "Options:",
   "text.overlay": "Overlay",
   "text.page-transition": "Page Transition",
+  "text.default-navigation-transition-info": "DefaultNavigationTransitionInfo",
+  "text.entrance-navigation-transition-info": "EntranceNavigationTransitionInfo",
+  "text.drill-in-navigation-transition-info": "DrillInNavigationTransitionInfo",
+  "text.suppress-navigation-transition-info": "SuppressNavigationTransitionInfo",
+  "text.slide-navigation-transition-info-from-right": "SlideNavigationTransitionInfo (Effect = FromRight)",
+  "text.slide-navigation-transition-info-from-left": "SlideNavigationTransitionInfo (Effect = FromLeft)",
+  "text.common-navigation-transition-info": "CommonNavigationTransitionInfo",
+  "text.continuum-navigation-transition-info": "ContinuumNavigationTransitionInfo",
   "text.partner-center": "Partner Center",
   "text.passwordbox": "PasswordBox",
   "text.persiancalendar": "PersianCalendar",
@@ -224,6 +229,7 @@ export default {
   "text.popup": "Popup",
   "text.pipspager": "PipsPager",
   "text.pivot": "Pivot",
+  "text.pivot-description": "Pivot is not recommended for Windows 11 design patterns. Please use the SelectorBar and SelectorBarItem. A Pivot allows you to show a collection of items from different sources in a tabbed view.",
   "text.popup-with-offset-positioning": "Popup with offset positioning.",
   "text.progressbar": "ProgressBar",
   "text.progressring": "ProgressRing",
@@ -253,7 +259,9 @@ export default {
   "text.scrolling": "Scrolling",
   "text.semanticzoom": "SemanticZoom",
   "text.selectorbar": "SelectorBar",
+  "text.selectorbar-description": "The SelectorBar control lets users select between different views, pages, or collections by choosing from an inline list of items.",
   "text.share": "Share",
+  "text.shared": "Shared",
   "text.show-a-targeted-teachingtip-on-a-button": "Show a targeted TeachingTip on a button.",
   "text.show-dialog": "Show dialog",
   "text.show-popup-using-offset": "Show Popup (using Offset)",
@@ -731,6 +739,27 @@ export default {
   ,"sample.breadcrumbbar.folder-1": "Folder1"
   ,"sample.breadcrumbbar.folder-2": "Folder2"
   ,"sample.breadcrumbbar.folder-3": "Folder3"
+  ,"sample.pivot.basic": "A basic pivot."
+  ,"sample.pivot.email": "EMAIL"
+  ,"sample.pivot.all": "All"
+  ,"sample.pivot.all-content": "all emails go here."
+  ,"sample.pivot.unread": "Unread"
+  ,"sample.pivot.unread-content": "unread emails go here."
+  ,"sample.pivot.flagged": "Flagged"
+  ,"sample.pivot.flagged-content": "flagged emails go here."
+  ,"sample.pivot.urgent": "Urgent"
+  ,"sample.pivot.urgent-content": "urgent emails go here."
+  ,"sample.selectorbar.basic": "A Basic SelectorBar"
+  ,"sample.selectorbar.frame-slide-transitions": "SelectorBar with Frame Slide Transitions"
+  ,"sample.selectorbar.collections": "SelectorBar Displaying Different Collections Using ItemsView"
+  ,"sample.selectorbar.page-1": "Page1"
+  ,"sample.selectorbar.page-2": "Page2"
+  ,"sample.selectorbar.page-3": "Page3"
+  ,"sample.selectorbar.page-4": "Page4"
+  ,"sample.selectorbar.page-5": "Page5"
+  ,"sample.selectorbar.pink": "Pink"
+  ,"sample.selectorbar.plum": "Plum"
+  ,"sample.selectorbar.powder-blue": "PowderBlue"
   ,"sample.capture.preview": "A MediaCapture preview displayed via a MediaPlayerElement."
   ,"sample.capture.mirror-preview": "Mirror preview"
   ,"sample.capture.mirror-tooltip": "Mirrors only the preview, not captured photos"

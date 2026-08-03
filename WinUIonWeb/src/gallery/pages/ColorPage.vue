@@ -25,9 +25,9 @@
             </div>
 
             <WinSelectorBar
-              :items="selectorItems"
-              :selectedIndex="selectedSection"
-              @selectionChanged="onSectionChanged"
+              :Items="selectorItems"
+              :SelectedItem="selectorItems[selectedSection]"
+              @SelectionChanged="onSectionChanged"
               class="section-selector" />
 
             <div class="color-content">
@@ -57,12 +57,12 @@ const pageKey = computed(() => currentPage?.value || 'color');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const selectorItems = [
-  { text: 'Text' },
-  { text: 'Fill' },
-  { text: 'Stroke' },
-  { text: 'Background' },
-  { text: 'Signal' },
-  { text: 'High Contrast' }
+  { Text: 'Text' },
+  { Text: 'Fill' },
+  { Text: 'Stroke' },
+  { Text: 'Background' },
+  { Text: 'Signal' },
+  { Text: 'High Contrast' }
 ];
 
 const selectedSection = ref(0);
@@ -79,7 +79,8 @@ const sections = [
 const currentSectionComponent = shallowRef(sections[0]);
 
 
-const onSectionChanged = (index) => {
+const onSectionChanged = (sender) => {
+  const index = Math.max(0, sender?.Items?.indexOf(sender?.SelectedItem) ?? 0);
   selectedSection.value = index;
   currentSectionComponent.value = sections[index];
 };
@@ -143,4 +144,3 @@ const onSectionChanged = (index) => {
   margin-top: 20px;
 }
 </style>
-

@@ -356,6 +356,10 @@
   --TextFillColorPrimaryBrush: rgba(0, 0, 0, 0.89);
   --TextFillColorSecondaryBrush: rgba(0, 0, 0, 0.62);
   --TextFillColorDisabledBrush: rgba(0, 0, 0, 0.36);
+  --SystemControlForegroundBaseMediumBrush: rgba(0, 0, 0, 0.60);
+  --SystemControlHighlightAltBaseMediumHighBrush: rgba(0, 0, 0, 0.80);
+  --SystemControlHighlightAltBaseHighBrush: #000000;
+  --SystemControlDisabledBaseMediumLowBrush: rgba(0, 0, 0, 0.40);
   --TextOnAccentFillColorPrimaryBrush: #FFFFFF;
   --TextOnAccentFillColorSecondaryBrush: rgba(255, 255, 255, 0.70);
   --TextOnAccentFillColorDisabledBrush: #FFFFFF;
@@ -468,6 +472,10 @@
     --TextFillColorPrimaryBrush: #FFFFFF;
     --TextFillColorSecondaryBrush: rgba(255, 255, 255, 0.77);
     --TextFillColorDisabledBrush: rgba(255, 255, 255, 0.36);
+    --SystemControlForegroundBaseMediumBrush: rgba(255, 255, 255, 0.60);
+    --SystemControlHighlightAltBaseMediumHighBrush: rgba(255, 255, 255, 0.80);
+    --SystemControlHighlightAltBaseHighBrush: #FFFFFF;
+    --SystemControlDisabledBaseMediumLowBrush: rgba(255, 255, 255, 0.40);
     --TextOnAccentFillColorPrimaryBrush: #000000;
     --TextOnAccentFillColorSecondaryBrush: rgba(0, 0, 0, 0.50);
     --TextOnAccentFillColorDisabledBrush: rgba(255, 255, 255, 0.53);
@@ -643,6 +651,10 @@ html.theme-light {
   --TextFillColorPrimaryBrush: rgba(0, 0, 0, 0.89);
   --TextFillColorSecondaryBrush: rgba(0, 0, 0, 0.62);
   --TextFillColorDisabledBrush: rgba(0, 0, 0, 0.36);
+  --SystemControlForegroundBaseMediumBrush: rgba(0, 0, 0, 0.60);
+  --SystemControlHighlightAltBaseMediumHighBrush: rgba(0, 0, 0, 0.80);
+  --SystemControlHighlightAltBaseHighBrush: #000000;
+  --SystemControlDisabledBaseMediumLowBrush: rgba(0, 0, 0, 0.40);
   --TextOnAccentFillColorPrimaryBrush: #FFFFFF;
   --TextOnAccentFillColorSecondaryBrush: rgba(255, 255, 255, 0.70);
   --TextOnAccentFillColorDisabledBrush: #FFFFFF;
@@ -766,6 +778,10 @@ html.theme-dark {
   --TextFillColorPrimaryBrush: #FFFFFF;
   --TextFillColorSecondaryBrush: rgba(255, 255, 255, 0.77);
   --TextFillColorDisabledBrush: rgba(255, 255, 255, 0.36);
+  --SystemControlForegroundBaseMediumBrush: rgba(255, 255, 255, 0.60);
+  --SystemControlHighlightAltBaseMediumHighBrush: rgba(255, 255, 255, 0.80);
+  --SystemControlHighlightAltBaseHighBrush: #FFFFFF;
+  --SystemControlDisabledBaseMediumLowBrush: rgba(255, 255, 255, 0.40);
   --TextOnAccentFillColorPrimaryBrush: #000000;
   --TextOnAccentFillColorSecondaryBrush: rgba(0, 0, 0, 0.50);
   --TextOnAccentFillColorDisabledBrush: rgba(255, 255, 255, 0.53);

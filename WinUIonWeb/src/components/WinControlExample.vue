@@ -32,12 +32,12 @@
         :IsExpanded="false"
         :Header="t('text.source-code')"
         class="code-expander">
-        <div class="source-code-presenter" :data-theme="theme">
+        <div class="source-code-presenter">
           <WinSelectorBar
             v-if="codeTabItems.length > 1"
-            :items="codeTabItems"
-            :selectedIndex="selectedCodeTab"
-            @selectionChanged="onCodeTabChanged" />
+            :Items="codeTabItems"
+            :SelectedItem="codeTabItems[selectedCodeTab]"
+            @SelectionChanged="onCodeTabChanged" />
           <div class="sample-code-presenter">
             <WinScrollViewer
               class="source-code-scroll"
@@ -129,7 +129,7 @@ const codeTabs = computed(() => {
   return tabs;
 });
 
-const codeTabItems = computed(() => codeTabs.value.map(({ text }) => ({ text })));
+const codeTabItems = computed(() => codeTabs.value.map(({ text }) => ({ Text: text })));
 const activeCode = computed(() => codeTabs.value[selectedCodeTab.value]?.code ?? '');
 
 const showSourceCode = computed(() => {
@@ -157,8 +157,9 @@ const displayStyle = computed(() => ({
   alignItems: 'flex-start'
 }));
 
-const onCodeTabChanged = ({ selectedIndex }) => {
-  selectedCodeTab.value = selectedIndex;
+const onCodeTabChanged = (sender) => {
+  const selectedIndex = sender?.Items?.indexOf(sender?.SelectedItem) ?? 0;
+  selectedCodeTab.value = Math.max(0, selectedIndex);
 };
 
 const copyActiveCode = async () => {
@@ -308,20 +309,14 @@ const copyActiveCode = async () => {
   --control-on-image-fill-color-default: rgba(243, 243, 243, 0.85);
 }
 
-.source-code-presenter[data-theme="light"] .copy-button-border {
-  --control-on-image-fill-color-default: rgba(243, 243, 243, 0.85);
-  --ctrl-fill-default: rgba(255, 255, 255, 0.70);
-  --ctrl-fill-secondary: rgba(249, 249, 249, 0.50);
-  --ctrl-fill-tertiary: rgba(249, 249, 249, 0.30);
-  --text-primary: rgba(0, 0, 0, 0.89);
+:global(html.theme-dark) .copy-button-border {
+  --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
 }
 
-.source-code-presenter[data-theme="dark"] .copy-button-border {
-  --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
-  --ctrl-fill-default: rgba(255, 255, 255, 0.0605);
-  --ctrl-fill-secondary: rgba(255, 255, 255, 0.0837);
-  --ctrl-fill-tertiary: rgba(255, 255, 255, 0.0326);
-  --text-primary: #ffffff;
+@media (prefers-color-scheme: dark) {
+  :global(html:not(.theme-light):not(.theme-dark)) .copy-button-border {
+    --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
+  }
 }
 
 .source-code-presenter :deep(.win-selector-bar) {

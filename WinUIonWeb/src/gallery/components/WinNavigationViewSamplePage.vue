@@ -129,43 +129,33 @@
 </template>
 
 <script setup>
-import { inject, nextTick, ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import WinGrid from '../../components/WinGrid.vue';
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 import WinStackPanel from '../../components/WinStackPanel.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
+import {
+  createEntranceNavigationTransitionInfo,
+  getNavigationTransitionInfoClassName
+} from '../../utils/navigationTransitionInfo';
 
 const props = defineProps({
   Page: { type: String, default: 'SamplePage1' },
   NavigationVersion: { type: Number, default: 0 },
-  NavigationRank: { type: Number, default: Number.NaN }
+  NavigationTransitionInfo: {
+    type: Object,
+    default: () => createEntranceNavigationTransitionInfo()
+  }
 });
 
-const animSetting = inject('animSetting', ref('entrance'));
-const transitionClass = ref('page-transition-up');
+const transitionClass = ref(getNavigationTransitionInfoClassName(props.NavigationTransitionInfo));
 const sampleScrollViewer = ref(null);
 let transitionSequence = 0;
-const pageRank = page => page === 'SampleSettingsPage'
-  ? Number.MAX_SAFE_INTEGER
-  : Number(String(page).match(/(\d+)$/)?.[1] || 0);
-
-const resolveTransitionClass = (page, previousPage, rank, previousRank) => {
-  if (animSetting.value === 'fade') {
-    return 'page-transition-fade';
-  }
-  if (animSetting.value === 'drill') {
-    const hasRankDirection = Number.isFinite(rank) && Number.isFinite(previousRank) && rank !== previousRank;
-    return (hasRankDirection ? rank > previousRank : pageRank(page) >= pageRank(previousPage))
-      ? 'page-transition-left'
-      : 'page-transition-right';
-  }
-  return 'page-transition-up';
-};
 
 watch(
-  () => [props.Page, props.NavigationVersion, props.NavigationRank],
-  ([page, , rank], [previousPage, , previousRank]) => {
-    const nextClass = resolveTransitionClass(page, previousPage, rank, previousRank);
+  () => [props.Page, props.NavigationVersion, props.NavigationTransitionInfo],
+  () => {
+    const nextClass = getNavigationTransitionInfoClassName(props.NavigationTransitionInfo);
     const sequence = ++transitionSequence;
     transitionClass.value = '';
     nextTick(() => {

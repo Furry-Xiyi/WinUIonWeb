@@ -47,13 +47,14 @@ import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
+const navigate = inject('navigate', () => {});
 const pageKey = computed(() => currentPage?.value || 'hyperlinkbutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const DisableControl1 = ref(false);
 
 const GoToHyperlinkButton_Click = () => {
-  if (currentPage) currentPage.value = 'togglebutton';
+  navigate('togglebutton');
 };
 
 const hyperlinkButtonNavigateVue = `<WinHyperlinkButton

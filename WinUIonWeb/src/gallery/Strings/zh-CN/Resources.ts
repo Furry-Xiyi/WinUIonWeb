@@ -134,7 +134,6 @@ export default {
   "text.displays-read-only-text": "显示只读文本。",
   "text.documents": "文档",
   "text.down": "下",
-  "text.drill-left-right": "钻取（左 / 右）",
   "text.dropdownbutton": "下拉按钮",
   "text.edit": "编辑",
   "text.email": "电子邮件",
@@ -142,12 +141,10 @@ export default {
   "text.english-en-us": "英语（en-US）",
   "text.enter-an-expression": "输入表达式：",
   "text.enter-rich-text": "输入富文本",
-  "text.entrance-slide-up": "进入（向上滑入）",
   "text.eve": "伊芙",
   "text.expander": "展开器",
   "text.explore-the-winui-on-web-source-code-and-reposit": "浏览 WinUI on Web 的源代码和仓库。",
   "text.extended": "扩展",
-  "text.fade": "淡入淡出",
   "text.favorites": "收藏",
   "text.file": "文件",
   "text.find-samples-that-demonstrate-specific-tasks-fea": "查找展示特定任务、功能和 API 的示例。",
@@ -214,6 +211,14 @@ export default {
   "text.options": "选项：",
   "text.overlay": "覆盖",
   "text.page-transition": "页面过渡",
+  "text.default-navigation-transition-info": "默认 (DefaultNavigationTransitionInfo)",
+  "text.entrance-navigation-transition-info": "进入 (EntranceNavigationTransitionInfo)",
+  "text.drill-in-navigation-transition-info": "钻取 (DrillInNavigationTransitionInfo)",
+  "text.suppress-navigation-transition-info": "无动画 (SuppressNavigationTransitionInfo)",
+  "text.slide-navigation-transition-info-from-right": "滑动 (SlideNavigationTransitionInfo, Effect = FromRight)",
+  "text.slide-navigation-transition-info-from-left": "滑动 (SlideNavigationTransitionInfo, Effect = FromLeft)",
+  "text.common-navigation-transition-info": "通用 (CommonNavigationTransitionInfo)",
+  "text.continuum-navigation-transition-info": "连续 (ContinuumNavigationTransitionInfo)",
   "text.partner-center": "合作伙伴中心",
   "text.passwordbox": "密码框",
   "text.persiancalendar": "波斯历",
@@ -224,6 +229,7 @@ export default {
   "text.popup": "弹出控件",
   "text.pipspager": "分页点控件",
   "text.pivot": "透视视图",
+  "text.pivot-description": "不建议在 Windows 11 设计模式中使用 Pivot。请改用 SelectorBar 和 SelectorBarItem。Pivot 可在选项卡视图中显示来自不同来源的项目集合。",
   "text.popup-with-offset-positioning": "带偏移定位的弹出控件。",
   "text.progressbar": "进度条",
   "text.progressring": "进度环",
@@ -253,7 +259,9 @@ export default {
   "text.scrolling": "滚动",
   "text.semanticzoom": "语义缩放",
   "text.selectorbar": "选择器栏",
+  "text.selectorbar-description": "SelectorBar 控件允许用户从内联项目列表中选择不同视图、页面或集合。",
   "text.share": "共享",
+  "text.shared": "共享",
   "text.show-a-targeted-teachingtip-on-a-button": "在按钮上显示定向教学提示。",
   "text.show-dialog": "显示对话框",
   "text.show-popup-using-offset": "显示弹出控件（使用偏移）",
@@ -731,6 +739,27 @@ export default {
   ,"sample.breadcrumbbar.folder-1": "文件夹1"
   ,"sample.breadcrumbbar.folder-2": "文件夹2"
   ,"sample.breadcrumbbar.folder-3": "文件夹3"
+  ,"sample.pivot.basic": "基础透视视图。"
+  ,"sample.pivot.email": "电子邮件"
+  ,"sample.pivot.all": "全部"
+  ,"sample.pivot.all-content": "所有邮件显示在这里。"
+  ,"sample.pivot.unread": "未读"
+  ,"sample.pivot.unread-content": "未读邮件显示在这里。"
+  ,"sample.pivot.flagged": "已标记"
+  ,"sample.pivot.flagged-content": "已标记邮件显示在这里。"
+  ,"sample.pivot.urgent": "紧急"
+  ,"sample.pivot.urgent-content": "紧急邮件显示在这里。"
+  ,"sample.selectorbar.basic": "基本 SelectorBar"
+  ,"sample.selectorbar.frame-slide-transitions": "带 Frame 滑动过渡的 SelectorBar"
+  ,"sample.selectorbar.collections": "使用 ItemsView 显示不同集合的 SelectorBar"
+  ,"sample.selectorbar.page-1": "第 1 页"
+  ,"sample.selectorbar.page-2": "第 2 页"
+  ,"sample.selectorbar.page-3": "第 3 页"
+  ,"sample.selectorbar.page-4": "第 4 页"
+  ,"sample.selectorbar.page-5": "第 5 页"
+  ,"sample.selectorbar.pink": "粉色"
+  ,"sample.selectorbar.plum": "洋李色"
+  ,"sample.selectorbar.powder-blue": "粉蓝色"
   ,"sample.capture.preview": "通过 MediaPlayerElement 显示的 MediaCapture 预览。"
   ,"sample.capture.mirror-preview": "镜像预览"
   ,"sample.capture.mirror-tooltip": "只镜像预览，不镜像捕获的照片"

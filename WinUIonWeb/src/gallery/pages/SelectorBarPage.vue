@@ -1,268 +1,297 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">SelectorBar</h1>
-          <p class="page-description">
-            The SelectorBar control provides a simple way to navigate between items or views in your app. It is often used as a tab bar pattern to navigate between pages or change the active content of a view.
-          </p>
-          <div class="page-header-actions">
-            <WinButton
-              @click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-              <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
-          </div>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+        <WinTextBlock class="page-header" :Text="$t('text.selectorbar')" />
+        <WinTextBlock
+          class="page-description"
+          :Text="$t('text.selectorbar-description')"
+          TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <WinButton class="header-action" @Click="toggleTheme">
+            <WinTextBlock class="icon" Text="&#xE793;" />
+          </WinButton>
+          <WinToggleButton
+            v-model:IsChecked="isFavoriteState"
+            class="header-action"
+            @update:IsChecked="toggleFavorite">
+            <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
+          </WinToggleButton>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example 1: A Basic SelectorBar -->
-            <WinControlExample
-              headerText="A Basic SelectorBar"
-              :theme="pageTheme"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <WinSelectorBar
-                  :items="example1Items"
-                  v-model:selectedIndex="selectedIndex1"
-                  @selectionChanged="onExample1SelectionChanged" />
-              </template>
-              <template #options>
-                <p class="output-text">Selected: {{ example1Items[selectedIndex1]?.text || 'None' }}</p>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 2: SelectorBar with Frame Slide Transitions -->
-            <WinControlExample
-              headerText="SelectorBar with Frame Slide Transitions"
-              :theme="pageTheme"
-              :templateCode="example2Template"
-              :vueCode="example2Vue">
-              <template #example>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <WinSelectorBar
-                    :items="example2Items"
-                    v-model:selectedIndex="selectedIndex2"
-                    @selectionChanged="onExample2SelectionChanged" />
-
-                  <div class="content-frame" :key="currentPageExample2">
-                    <div class="page-content" :style="{ animation: slideAnimation }">
-                      <h3>{{ currentPageExample2 }}</h3>
-                      <p>This is the content for {{ currentPageExample2 }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <p class="output-text">Current page: {{ currentPageExample2 }}</p>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 3: SelectorBar Displaying Different Collections -->
-            <WinControlExample
-              headerText="SelectorBar Displaying Different Collections Using ItemsView"
-              :theme="pageTheme"
-              :templateCode="example3Template"
-              :vueCode="example3Vue">
-              <template #example>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <WinSelectorBar v-model="selectedItem3" @selectionChanged="onExample3SelectionChanged">
-                    <WinSelectorBarItem text="Pink" :isSelected="true" />
-                    <WinSelectorBarItem text="Plum" />
-                    <WinSelectorBarItem text="PowderBlue" />
-                  </WinSelectorBar>
-
-                  <div class="color-grid">
-                    <div
-                      v-for="(color, index) in currentColors"
-                      :key="index"
-                      class="color-item"
-                      :style="{ backgroundColor: color }">
-                    </div>
-                  </div>
-                </div>
-
-                <p class="output-text">Selected collection: {{ selectedItem3?.text || 'None' }}</p>
-              </template>
-            </WinControlExample>
       </div>
-    </WinScrollViewer>
-  </div>
+
+      <div class="gallery-page-content">
+        <WinControlExample
+          class="basic-input-example-theme"
+          :theme="pageTheme"
+          :vue="BasicSelectorBarVue"
+          :headerText="$t('sample.selectorbar.basic')">
+          <template #example>
+            <WinSelectorBar>
+              <WinSelectorBarItem :Text="$t('text.recent')" Icon="Clock" />
+              <WinSelectorBarItem :Text="$t('text.shared')" Icon="Share" />
+              <WinSelectorBarItem :Text="$t('text.favorites')" Icon="Favorite" />
+            </WinSelectorBar>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          class="basic-input-example-theme"
+          :theme="pageTheme"
+          :vue="FrameSlideTransitionsVue"
+          :headerText="$t('sample.selectorbar.frame-slide-transitions')">
+          <template #example>
+            <div class="selectorbar-sample-stack">
+              <WinSelectorBar @SelectionChanged="SelectorBar2_SelectionChanged">
+                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-1')" IsSelected />
+                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-2')" />
+                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-3')" />
+                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-4')" />
+                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-5')" />
+              </WinSelectorBar>
+
+              <div class="selectorbar-content-frame">
+                <div
+                  :key="CurrentFramePage.Name"
+                  class="selectorbar-sample-page"
+                  :class="[CurrentFramePage.ClassName, FrameTransitionClass]">
+                  <div
+                    v-for="Tile in CurrentFramePage.Tiles"
+                    :key="Tile.Key"
+                    class="sample-page-tile"
+                    :class="Tile.Shape"
+                    :style="Tile.Style"></div>
+                  <div
+                    v-if="CurrentFramePage.Body"
+                    class="sample-page-copy"
+                    :class="CurrentFramePage.CopyClass">
+                    <WinTextBlock
+                      v-if="CurrentFramePage.Title"
+                      class="sample-page-title"
+                      :Text="CurrentFramePage.Title"
+                      TextWrapping="WrapWholeWords" />
+                    <WinTextBlock
+                      class="sample-page-body"
+                      :Text="CurrentFramePage.Body"
+                      TextWrapping="WrapWholeWords" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          class="basic-input-example-theme"
+          :theme="pageTheme"
+          :vue="DisplayingDifferentCollectionsVue"
+          :headerText="$t('sample.selectorbar.collections')">
+          <template #example>
+            <div class="selectorbar-sample-stack">
+              <WinSelectorBar @SelectionChanged="SelectorBar3_SelectionChanged">
+                <WinSelectorBarItem :Text="$t('sample.selectorbar.pink')" IsSelected />
+                <WinSelectorBarItem :Text="$t('sample.selectorbar.plum')" />
+                <WinSelectorBarItem :Text="$t('sample.selectorbar.powder-blue')" />
+              </WinSelectorBar>
+
+              <WinItemsView
+                class="selectorbar-colors-view"
+                :ItemsSource="ItemsView3ItemsSource"
+                :Layout="ColorsLayout">
+                <template #item="{ item }">
+                  <div class="color-item-container" :style="{ background: item }"></div>
+                </template>
+              </WinItemsView>
+            </div>
+          </template>
+        </WinControlExample>
+      </div>
+    </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
-import WinSelectorBar from '../../components/WinSelectorBar.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import { createPageState } from '../../utils/pageState';
-
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinItemsView from '../../components/WinItemsView.vue';
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import WinSelectorBar from '../../components/WinSelectorBar.vue';
+import WinSelectorBarItem from '../../components/WinSelectorBarItem.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
+import { createPageState } from '../../utils/pageState';
+import {
+  DefaultNavigationTransitionInfo,
+  createSlideNavigationTransitionInfo,
+  getNavigationTransitionInfoClassName
+} from '../../utils/navigationTransitionInfo';
+
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'selectorbar');
-
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Example 1: Basic SelectorBar
-const selectedIndex1 = ref(0);
-const example1Items = ref([
-  { text: 'Recent', icon: 'Clock' },
-  { text: 'Shared', icon: 'Share' },
-  { text: 'Favorites', icon: 'Favorite' }
-]);
+const LoremIpsumTitle = t('sample.navigationview.lorem-title');
+const LoremIpsum = t('sample.navigationview.lorem-body');
+const previousSelectedIndex = ref(0);
+const selectedFramePageIndex = ref(0);
+const FrameTransitionClass = ref(getNavigationTransitionInfoClassName(DefaultNavigationTransitionInfo));
 
-const onExample1SelectionChanged = (event) => {
-  console.log('Selected:', event);
-};
+const PinkColorCollection = Array.from({ length: 5 }, () => 'Pink');
+const PlumColorCollection = Array.from({ length: 7 }, () => 'Plum');
+const PowderBlueColorCollection = Array.from({ length: 4 }, () => 'PowderBlue');
+const ItemsView3ItemsSource = ref(PinkColorCollection);
+const ColorsLayout = { Type: 'StackLayout', Orientation: 'Horizontal', Spacing: 0 };
 
-const example1Template = `<WinSelectorBar
-  :items="items"
-  v-model:selectedIndex="selectedIndex"
-  @selectionChanged="onSelectionChanged" />`;
-
-const example1Vue = `const selectedIndex = ref(0);
-const items = ref([
-  { text: 'Recent', icon: 'Clock' },
-  { text: 'Shared', icon: 'Share' },
-  { text: 'Favorites', icon: 'Favorite' }
-]);
-
-const onSelectionChanged = (event) => {
-  console.log('Selected:', event);
-};`;
-
-// Example 2: SelectorBar with Frame Slide Transitions
-const selectedIndex2 = ref(0);
-const example2Items = ref([
-  { text: 'Page1' },
-  { text: 'Page2' },
-  { text: 'Page3' },
-  { text: 'Page4' },
-  { text: 'Page5' }
-]);
-const currentPageExample2 = ref('Page1');
-const slideAnimation = ref('slideFromRight 0.3s ease-out');
-const previousPageIndex = ref(0);
-
-const onExample2SelectionChanged = (event) => {
-  const direction = event.selectedIndex > previousPageIndex.value ? 'slideFromRight' : 'slideFromLeft';
-  slideAnimation.value = `${direction} 0.3s ease-out`;
-  currentPageExample2.value = event.selectedItem.text;
-  previousPageIndex.value = event.selectedIndex;
-};
-
-const example2Template = `<div style="display: flex; flex-direction: column; gap: 16px;">
-  <WinSelectorBar v-model="selectedItem2" @selectionChanged="onSelectionChanged">
-    <WinSelectorBarItem text="Page1" :isSelected="true" />
-    <WinSelectorBarItem text="Page2" />
-    <WinSelectorBarItem text="Page3" />
-    <WinSelectorBarItem text="Page4" />
-    <WinSelectorBarItem text="Page5" />
-  </WinSelectorBar>
-
-  <div class="content-frame">
-    <h3>{{ currentPage }}</h3>
-    <p>This is the content for {{ currentPage }}</p>
-  </div>
-</div>`;
-
-const example2Vue = `const selectedItem2 = ref(null);
-const currentPage = ref('Page1');
-const previousPageIndex = ref(0);
-
-const onSelectionChanged = (item, index) => {
-  const direction = index > previousPageIndex.value ? 'right' : 'left';
-  // Apply slide animation based on direction
-  currentPage.value = item.text;
-  previousPageIndex.value = index;
-};`;
-
-// Example 3: SelectorBar Displaying Different Collections
-const selectedItem3 = ref(null);
-const currentColors = ref([
-  '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF',
-  '#FFB3D9', '#FFC9BA', '#FFF5BA', '#C9FFBA', '#BAF3FF'
-]);
-
-const pinkColors = [
-  '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF',
-  '#FFB3D9', '#FFC9BA', '#FFF5BA', '#C9FFBA', '#BAF3FF'
-];
-
-const plumColors = [
-  '#DDA0DD', '#E6A8D7', '#F0B0D1', '#F5C8E8', '#E0B0FF',
-  '#D8BFD8', '#DDA0DD', '#E6A8D7', '#F0B0D1', '#F5C8E8'
-];
-
-const powderBlueColors = [
-  '#B0E0E6', '#ADD8E6', '#87CEEB', '#87CEFA', '#B0C4DE',
-  '#AFEEEE', '#B0E0E6', '#ADD8E6', '#87CEEB', '#87CEFA'
-];
-
-const onExample3SelectionChanged = (item) => {
-  if (item.text === 'Pink') {
-    currentColors.value = pinkColors;
-  } else if (item.text === 'Plum') {
-    currentColors.value = plumColors;
-  } else if (item.text === 'PowderBlue') {
-    currentColors.value = powderBlueColors;
+const SamplePages = [
+  {
+    Name: 'Page1',
+    ClassName: 'sample-page-one',
+    Body: LoremIpsum,
+    CopyClass: 'page-one-copy',
+    Tiles: [
+      { Key: 'source', Shape: 'rectangle', Style: { gridColumn: '1', gridRow: '2 / span 2', minWidth: '250px', minHeight: '150px', margin: '5px', background: 'var(--AccentFillColorDefaultBrush, var(--accent-base))' } },
+      { Key: 'dark-1', Shape: 'rectangle', Style: { gridColumn: '2', gridRow: '2', minHeight: '150px', margin: '6px', background: 'DarkGray' } },
+      { Key: 'light-1', Shape: 'rectangle', Style: { gridColumn: '3', gridRow: '2', minHeight: '150px', margin: '6px', background: 'LightGray' } },
+      { Key: 'light-2', Shape: 'rectangle', Style: { gridColumn: '2', gridRow: '3', minHeight: '150px', margin: '6px', background: 'LightGray' } },
+      { Key: 'dark-2', Shape: 'rectangle', Style: { gridColumn: '3', gridRow: '3', minHeight: '150px', margin: '6px', background: 'DarkGray' } }
+    ]
+  },
+  {
+    Name: 'Page2',
+    Title: LoremIpsumTitle,
+    ClassName: 'sample-page-two',
+    Body: LoremIpsum,
+    CopyClass: 'page-two-copy',
+    Tiles: [
+      { Key: 'destination', Shape: 'rectangle', Style: { gridColumn: '1', gridRow: '2', width: '150px', height: '200px', minHeight: '150px', margin: '12px', alignSelf: 'start', background: 'var(--AccentFillColorDefaultBrush, var(--accent-base))' } }
+    ]
+  },
+  {
+    Name: 'Page3',
+    ClassName: 'sample-page-three',
+    Body: LoremIpsum,
+    CopyClass: 'page-three-copy',
+    Tiles: [
+      { Key: 'wide', Shape: 'rectangle', Style: { gridColumn: '1', gridRow: '2 / span 2', minHeight: '150px', margin: '5px', background: 'LightGray' } },
+      { Key: 'dark', Shape: 'rectangle', Style: { gridColumn: '2', gridRow: '2', minHeight: '150px', margin: '5px', background: 'DarkGray' } },
+      { Key: 'gray', Shape: 'rectangle', Style: { gridColumn: '2', gridRow: '3', minHeight: '150px', margin: '5px', background: 'Gray' } },
+      { Key: 'light', Shape: 'rectangle', Style: { gridColumn: '3', gridRow: '2', minHeight: '150px', margin: '5px', background: 'LightGray' } },
+      { Key: 'dark-2', Shape: 'rectangle', Style: { gridColumn: '3', gridRow: '3', minHeight: '150px', margin: '5px', background: 'DarkGray' } }
+    ]
+  },
+  {
+    Name: 'Page4',
+    ClassName: 'sample-page-four',
+    Body: LoremIpsum,
+    CopyClass: 'page-four-copy',
+    Tiles: [
+      { Key: 'wide', Shape: 'rectangle', Style: { gridColumn: '1', gridRow: '1', minHeight: '150px', margin: '5px', background: 'DarkSalmon' } },
+      { Key: 'dark', Shape: 'rectangle', Style: { gridColumn: '2', gridRow: '1', minHeight: '150px', margin: '5px', background: 'DarkRed' } },
+      { Key: 'light', Shape: 'rectangle', Style: { gridColumn: '3', gridRow: '1', minHeight: '150px', margin: '5px', background: 'LightCoral' } },
+      { Key: 'light-2', Shape: 'rectangle', Style: { gridColumn: '1', gridRow: '2', minHeight: '150px', margin: '5px', background: 'LightCoral' } },
+      { Key: 'dark-2', Shape: 'rectangle', Style: { gridColumn: '2', gridRow: '2', minHeight: '150px', margin: '5px', background: 'DarkRed' } },
+      { Key: 'middle', Shape: 'rectangle', Style: { gridColumn: '3', gridRow: '2', minHeight: '150px', margin: '5px', background: 'IndianRed' } }
+    ]
+  },
+  {
+    Name: 'Page5',
+    ClassName: 'sample-page-five',
+    Body: LoremIpsum,
+    CopyClass: 'page-five-copy',
+    Tiles: [
+      { Key: 'khaki', Shape: 'rectangle', Style: { gridColumn: '1', gridRow: '1', minHeight: '150px', margin: '5px', background: 'Khaki' } },
+      { Key: 'dark-khaki', Shape: 'rectangle', Style: { gridColumn: '2', gridRow: '1', minHeight: '150px', margin: '5px', background: 'DarkKhaki' } },
+      { Key: 'ellipse-large', Shape: 'ellipse', Style: { gridColumn: '3', gridRow: '1', width: '150px', height: '150px', background: 'DarkSeaGreen' } },
+      { Key: 'ellipse-small', Shape: 'ellipse', Style: { gridColumn: '1 / span 2', gridRow: '2', width: '75px', height: '75px', background: 'MediumSeaGreen' } },
+      { Key: 'olive', Shape: 'rectangle', Style: { gridColumn: '3', gridRow: '2', minHeight: '150px', margin: '5px', background: 'DarkOliveGreen' } }
+    ]
   }
+];
+
+const CurrentFramePage = computed(() => SamplePages[selectedFramePageIndex.value] ?? SamplePages[0]);
+
+const GetSelectorBarSelectedIndex = (sender) => {
+  const selectedItem = sender?.SelectedItem;
+  const items = Array.isArray(sender?.Items) ? sender.Items : [];
+  const selectedIndex = items.indexOf(selectedItem);
+  return selectedIndex >= 0 ? selectedIndex : 0;
 };
 
-const example3Template = `<div style="display: flex; flex-direction: column; gap: 16px;">
-  <WinSelectorBar v-model="selectedItem3" @selectionChanged="onSelectionChanged">
-    <WinSelectorBarItem text="Pink" :isSelected="true" />
-    <WinSelectorBarItem text="Plum" />
-    <WinSelectorBarItem text="PowderBlue" />
-  </WinSelectorBar>
+const SelectorBar2_SelectionChanged = (sender) => {
+  const currentSelectedIndex = GetSelectorBarSelectedIndex(sender);
+  const slideNavigationTransitionEffect = currentSelectedIndex - previousSelectedIndex.value > 0 ? 'FromRight' : 'FromLeft';
 
-  <div class="color-grid">
-    <div
-      v-for="(color, index) in currentColors"
-      :key="index"
-      class="color-item"
-      :style="{ backgroundColor: color }">
-    </div>
-  </div>
-</div>`;
+  FrameTransitionClass.value = getNavigationTransitionInfoClassName(
+    createSlideNavigationTransitionInfo(slideNavigationTransitionEffect)
+  );
+  selectedFramePageIndex.value = currentSelectedIndex;
+  previousSelectedIndex.value = currentSelectedIndex;
+};
 
-const example3Vue = `const selectedItem3 = ref(null);
-const currentColors = ref(pinkColors);
-
-const pinkColors = ['#FFB3BA', '#FFDFBA', '#FFFFBA', ...];
-const plumColors = ['#DDA0DD', '#E6A8D7', '#F0B0D1', ...];
-const powderBlueColors = ['#B0E0E6', '#ADD8E6', '#87CEEB', ...];
-
-const onSelectionChanged = (item) => {
-  if (item.text === 'Pink') {
-    currentColors.value = pinkColors;
-  } else if (item.text === 'Plum') {
-    currentColors.value = plumColors;
+const SelectorBar3_SelectionChanged = (sender) => {
+  const currentSelectedIndex = GetSelectorBarSelectedIndex(sender);
+  if (currentSelectedIndex === 0) {
+    ItemsView3ItemsSource.value = PinkColorCollection;
+  } else if (currentSelectedIndex === 1) {
+    ItemsView3ItemsSource.value = PlumColorCollection;
   } else {
-    currentColors.value = powderBlueColors;
+    ItemsView3ItemsSource.value = PowderBlueColorCollection;
   }
-};`;
+};
+
+const BasicSelectorBarVue = `<WinSelectorBar>
+  <WinSelectorBarItem Text="Recent" Icon="Clock" />
+  <WinSelectorBarItem Text="Shared" Icon="Share" />
+  <WinSelectorBarItem Text="Favorites" Icon="Favorite" />
+</WinSelectorBar>`;
+
+const FrameSlideTransitionsVue = `<WinSelectorBar @SelectionChanged="SelectorBar2_SelectionChanged">
+  <WinSelectorBarItem Text="Page1" IsSelected />
+  <WinSelectorBarItem Text="Page2" />
+  <WinSelectorBarItem Text="Page3" />
+  <WinSelectorBarItem Text="Page4" />
+  <WinSelectorBarItem Text="Page5" />
+</WinSelectorBar>
+
+<div class="selectorbar-content-frame">
+  <div :key="CurrentFramePage.Name" :class="FrameTransitionClass">
+    <component :is="CurrentFramePage" />
+  </div>
+</div>`;
+
+const DisplayingDifferentCollectionsVue = `<WinSelectorBar @SelectionChanged="SelectorBar3_SelectionChanged">
+  <WinSelectorBarItem Text="Pink" IsSelected />
+  <WinSelectorBarItem Text="Plum" />
+  <WinSelectorBarItem Text="PowderBlue" />
+</WinSelectorBar>
+
+<WinItemsView
+  :ItemsSource="ItemsView3ItemsSource"
+  :Layout="{ Type: 'StackLayout', Orientation: 'Horizontal' }">
+  <template #item="{ item }">
+    <div class="color-item-container" :style="{ background: item }" />
+  </template>
+</WinItemsView>`;
 </script>
 
 <style scoped>
+.page-heading {
+  position: relative;
+}
+
 .page-header {
+  margin: 0 0 8px;
+  color: var(--text-primary);
   font-size: 28px;
   font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
 }
 
 .page-description {
-  font-size: 14px;
+  margin: 0 72px 16px 0;
   color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
 }
 
 .page-header-actions {
@@ -271,83 +300,174 @@ const onSelectionChanged = (item) => {
   right: 0;
   display: flex;
   gap: 4px;
-  align-items: center;
+}
+
+.header-action {
+  width: 32px;
+  height: 32px;
+  min-width: 0;
+  padding: 0;
 }
 
 .icon {
+  color: inherit;
+  font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons');
   font-size: 16px;
+  line-height: 16px;
 }
 
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
+.selectorbar-sample-stack {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.content-frame {
-  min-height: 120px;
-  padding: 16px;
-  background: var(--control-fill-default);
-  border-radius: 4px;
-  border: 1px solid var(--control-stroke-default);
+.selectorbar-content-frame {
+  width: 100%;
+  max-width: 780px;
+  min-height: 260px;
+  overflow: hidden;
 }
 
-.page-content {
-  animation-fill-mode: forwards;
-}
-
-.page-content h3 {
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.page-content p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-@keyframes slideFromRight {
-  from {
-    transform: translateX(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideFromLeft {
-  from {
-    transform: translateX(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.color-grid {
+.selectorbar-sample-page {
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-  gap: 8px;
-  padding: 8px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  grid-auto-rows: auto;
+  align-content: start;
+  justify-self: stretch;
+  color: var(--text-primary);
+  background: transparent;
+  will-change: opacity, transform;
 }
 
-.color-item {
+.sample-page-one {
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto auto 1fr;
+}
+
+.sample-page-two {
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+}
+
+.sample-page-three {
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: auto auto auto 1fr;
+}
+
+.sample-page-four {
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: auto auto auto;
+}
+
+.sample-page-five {
+  grid-template-columns: 1fr 1fr 4fr;
+  grid-template-rows: auto auto auto auto;
+}
+
+.sample-page-tile {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.sample-page-tile.ellipse {
+  border-radius: 50%;
+}
+
+.sample-page-title {
+  margin: 0 0 12px;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.sample-page-copy {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  justify-self: stretch;
+  color: var(--text-primary);
+}
+
+.sample-page-body {
+  margin: 0;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  line-height: 20px;
+}
+
+.page-one-copy {
+  grid-column: 1 / span 3;
+  grid-row: 4;
+  margin: 12px 6px;
+}
+
+.page-two-copy {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  min-height: 200px;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 12px;
+}
+
+.page-three-copy {
+  grid-column: 1 / span 3;
+  grid-row: 4;
+  margin: 5px;
+}
+
+.page-four-copy {
+  grid-column: 1 / span 3;
+  grid-row: 3;
+  margin: 5px;
+}
+
+.page-five-copy {
+  grid-column: 1 / span 3;
+  grid-row: 4;
+  margin: 5px;
+}
+
+.selectorbar-colors-view {
+  width: 100%;
+  max-width: 100%;
+  min-height: 92px;
+}
+
+.selectorbar-colors-view :deep(.win-scroll-viewer-viewport) {
+  overflow-y: hidden;
+}
+
+.selectorbar-colors-view :deep(.layout-stacklayout.orientation-horizontal) {
+  flex-direction: row;
+}
+
+.selectorbar-colors-view :deep(.win-items-view-item) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.selectorbar-colors-view :deep(.win-items-view-item:hover),
+.selectorbar-colors-view :deep(.win-items-view-item:active) {
+  background: transparent;
+}
+
+.color-item-container {
   width: 112px;
   height: 82px;
-  border-radius: 4px;
-  border: 1px solid var(--control-stroke-default);
-  transition: transform 0.1s ease;
-}
-
-.color-item:hover {
-  transform: scale(1.05);
+  margin: 4px;
 }
 </style>

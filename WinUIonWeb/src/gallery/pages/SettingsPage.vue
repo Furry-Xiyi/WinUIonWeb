@@ -33,10 +33,11 @@
               :Header="$t('text.page-transition')"
               :Description="$t('text.animation-style-when-switching-pages')"
               HeaderIcon="&#xE8AB;">
-              <WinRadioButtons :SelectedIndex="animIndex" @SelectionChanged="onAnimSelectionChanged">
-                <WinRadioButton :Content="$t('text.entrance-slide-up')" />
-                <WinRadioButton :Content="$t('text.drill-left-right')" />
-                <WinRadioButton :Content="$t('text.fade')" />
+              <WinRadioButtons :SelectedIndex="NavigationTransitionInfoIndex" @SelectionChanged="OnNavigationTransitionInfoSelectionChanged">
+                <WinRadioButton
+                  v-for="Option in NavigationTransitionInfoOptions"
+                  :key="Option.Key"
+                  :Content="$t(Option.LabelKey)" />
               </WinRadioButtons>
             </WinExpander>
             <WinSettingsCard
@@ -95,25 +96,83 @@ import WinSettingsCard from '../../components/WinSettingsCard.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
-import WinStackPanel from '../../components/WinStackPanel.vue';
 import { useI18n } from '../../components/i18n/index';
+import {
+  DefaultNavigationTransitionInfo,
+  createCommonNavigationTransitionInfo,
+  createContinuumNavigationTransitionInfo,
+  createDrillInNavigationTransitionInfo,
+  createEntranceNavigationTransitionInfo,
+  createSlideNavigationTransitionInfo,
+  createSuppressNavigationTransitionInfo,
+  navigationTransitionInfoEquals
+} from '../../utils/navigationTransitionInfo';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
 const themeSetting = inject('themeSetting');
 const materialSetting = inject('materialSetting');
-const animSetting = inject('animSetting');
+const navigationTransitionInfo = inject('navigationTransitionInfo');
 const navPosition = inject('navPosition');
 const isHostedInUwpWebView = inject('isHostedInUwpWebView');
 const themeOptions = ['system', 'light', 'dark'];
 const materialOptions = ['mica', 'acrylic'];
-const animOptions = ['entrance', 'drill', 'fade'];
+const NavigationTransitionInfoOptions = [
+  {
+    Key: 'DefaultNavigationTransitionInfo',
+    LabelKey: 'text.default-navigation-transition-info',
+    NavigationTransitionInfo: DefaultNavigationTransitionInfo
+  },
+  {
+    Key: 'EntranceNavigationTransitionInfo',
+    LabelKey: 'text.entrance-navigation-transition-info',
+    NavigationTransitionInfo: createEntranceNavigationTransitionInfo()
+  },
+  {
+    Key: 'DrillInNavigationTransitionInfo',
+    LabelKey: 'text.drill-in-navigation-transition-info',
+    NavigationTransitionInfo: createDrillInNavigationTransitionInfo()
+  },
+  {
+    Key: 'SuppressNavigationTransitionInfo',
+    LabelKey: 'text.suppress-navigation-transition-info',
+    NavigationTransitionInfo: createSuppressNavigationTransitionInfo()
+  },
+  {
+    Key: 'SlideNavigationTransitionInfoFromRight',
+    LabelKey: 'text.slide-navigation-transition-info-from-right',
+    NavigationTransitionInfo: createSlideNavigationTransitionInfo('FromRight')
+  },
+  {
+    Key: 'SlideNavigationTransitionInfoFromLeft',
+    LabelKey: 'text.slide-navigation-transition-info-from-left',
+    NavigationTransitionInfo: createSlideNavigationTransitionInfo('FromLeft')
+  },
+  {
+    Key: 'CommonNavigationTransitionInfo',
+    LabelKey: 'text.common-navigation-transition-info',
+    NavigationTransitionInfo: createCommonNavigationTransitionInfo()
+  },
+  {
+    Key: 'ContinuumNavigationTransitionInfo',
+    LabelKey: 'text.continuum-navigation-transition-info',
+    NavigationTransitionInfo: createContinuumNavigationTransitionInfo()
+  }
+];
 const themeIndex = computed(() => themeOptions.indexOf(themeSetting.value));
 const materialIndex = computed(() => materialOptions.indexOf(materialSetting.value));
-const animIndex = computed(() => animOptions.indexOf(animSetting.value));
+const NavigationTransitionInfoIndex = computed(() => {
+  const index = NavigationTransitionInfoOptions.findIndex((Option) => (
+    navigationTransitionInfoEquals(navigationTransitionInfo.value, Option.NavigationTransitionInfo)
+  ));
+  return index >= 0 ? index : 0;
+});
 const onThemeSelectionChanged = ({ SelectedIndex }) => { themeSetting.value = themeOptions[SelectedIndex]; };
 const onMaterialSelectionChanged = ({ SelectedIndex }) => { materialSetting.value = materialOptions[SelectedIndex]; };
-const onAnimSelectionChanged = ({ SelectedIndex }) => { animSetting.value = animOptions[SelectedIndex]; };
+const OnNavigationTransitionInfoSelectionChanged = ({ SelectedIndex }) => {
+  const Option = NavigationTransitionInfoOptions[SelectedIndex];
+  if (Option) navigationTransitionInfo.value = Option.NavigationTransitionInfo;
+};
 const navPositionOptions = [
   { label: t('text.left'), value: 'Auto' },
   { label: t('text.top'), value: 'Top' }

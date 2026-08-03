@@ -31,7 +31,7 @@
                 :Header="defaultHeader"
                 PaneDisplayMode="Auto"
                 @SelectionChanged="NavigationView_SelectionChanged5">
-                <WinNavigationViewSamplePage :Page="defaultPage" :NavigationVersion="defaultNavigationVersion" />
+                <WinNavigationViewSamplePage :Page="defaultPage" :NavigationVersion="defaultNavigationVersion" :NavigationTransitionInfo="defaultNavigationTransitionInfo" />
               </WinNavigationView>
             </WinGrid>
           </template>
@@ -55,7 +55,7 @@
                 :Header="$t('sample.navigationview.header-text')"
                 PaneDisplayMode="Top"
                 @SelectionChanged="NavigationView_SelectionChanged6">
-                <WinNavigationViewSamplePage :Page="topPage" :NavigationVersion="topNavigationVersion" :NavigationRank="topNavigationRank" />
+                <WinNavigationViewSamplePage :Page="topPage" :NavigationVersion="topNavigationVersion" :NavigationTransitionInfo="topNavigationTransitionInfo" />
               </WinNavigationView>
             </WinGrid>
           </template>
@@ -78,7 +78,7 @@
                 :MenuItems="adaptiveMenuItems"
                 :PaneDisplayMode="adaptivePaneMode"
                 @SelectionChanged="NavigationView_SelectionChanged2">
-                <WinNavigationViewSamplePage :Page="adaptivePage" :NavigationVersion="adaptiveNavigationVersion" />
+                <WinNavigationViewSamplePage :Page="adaptivePage" :NavigationVersion="adaptiveNavigationVersion" :NavigationTransitionInfo="adaptiveNavigationTransitionInfo" />
               </WinNavigationView>
             </WinGrid>
           </template>
@@ -104,7 +104,7 @@
                 SelectionFollowsFocus="Enabled"
                 IsBackButtonVisible="Collapsed"
                 @SelectionChanged="NavigationView_SelectionChanged7">
-                <WinNavigationViewSamplePage :Page="tabsPage" :NavigationVersion="tabsNavigationVersion" :NavigationRank="tabsNavigationRank" />
+                <WinNavigationViewSamplePage :Page="tabsPage" :NavigationVersion="tabsNavigationVersion" :NavigationTransitionInfo="tabsNavigationTransitionInfo" />
               </WinNavigationView>
             </WinGrid>
           </template>
@@ -128,7 +128,7 @@
                 :Header="dataHeader"
                 :MenuItemTemplateSelector="categoryTemplateSelector"
                 @SelectionChanged="NavigationView_SelectionChanged4">
-                <WinNavigationViewSamplePage :Page="dataPage" :NavigationVersion="dataNavigationVersion" />
+                <WinNavigationViewSamplePage :Page="dataPage" :NavigationVersion="dataNavigationVersion" :NavigationTransitionInfo="dataNavigationTransitionInfo" />
               </WinNavigationView>
             </WinGrid>
           </template>
@@ -154,7 +154,7 @@
                 v-model:IsPaneOpen="footerIsPaneOpen"
                 :IsSettingsVisible="false"
                 @SelectionChanged="NavigationView_SelectionChanged9">
-                <WinNavigationViewSamplePage :Page="footerPage" :NavigationVersion="footerNavigationVersion" :NavigationRank="footerNavigationRank" />
+                <WinNavigationViewSamplePage :Page="footerPage" :NavigationVersion="footerNavigationVersion" :NavigationTransitionInfo="footerNavigationTransitionInfo" />
               </WinNavigationView>
             </WinGrid>
           </template>
@@ -188,7 +188,7 @@
                 :PaneDisplayMode="hierarchicalPaneMode"
                 v-model:IsPaneOpen="hierarchicalIsPaneOpen"
                 @SelectionChanged="NavigationView_SelectionChanged8">
-                <WinNavigationViewSamplePage :Page="hierarchicalPage" :NavigationVersion="hierarchicalNavigationVersion" />
+                <WinNavigationViewSamplePage :Page="hierarchicalPage" :NavigationVersion="hierarchicalNavigationVersion" :NavigationTransitionInfo="hierarchicalNavigationTransitionInfo" />
               </WinNavigationView>
             </WinGrid>
           </template>
@@ -241,7 +241,7 @@
                   </WinButton>
                 </WinStackPanel>
               </template>
-              <WinNavigationViewSamplePage :Page="apiPage" :NavigationVersion="apiNavigationVersion" />
+              <WinNavigationViewSamplePage :Page="apiPage" :NavigationVersion="apiNavigationVersion" :NavigationTransitionInfo="apiNavigationTransitionInfo" />
             </WinNavigationView>
           </template>
           <template #options>
@@ -289,6 +289,7 @@ import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinNavigationViewSamplePage from '../components/WinNavigationViewSamplePage.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
+import { createEntranceNavigationTransitionInfo } from '../../utils/navigationTransitionInfo';
 
 const { t } = useI18n();
 const currentPage = inject('currentPage');
@@ -307,6 +308,9 @@ const pageForArgs = args => args.IsSettingsSelected
 const pageTitle = page => page === 'SampleSettingsPage'
   ? t('sample.navigationview.settings-page')
   : t('sample.navigationview.sample-page', { number: String(page).match(/(\d+)$/)?.[1] || 1 });
+const RecommendedNavigationTransitionInfo = (args) => (
+  args?.RecommendedNavigationTransitionInfo ?? createEntranceNavigationTransitionInfo()
+);
 
 const defaultMenuItems = [
   menuItem(1, '\uE768'),
@@ -318,8 +322,10 @@ const defaultSelectedItem = ref(defaultMenuItems[0]);
 const defaultPage = ref('SamplePage1');
 const defaultHeader = ref(pageTitle('SamplePage1'));
 const defaultNavigationVersion = ref(0);
+const defaultNavigationTransitionInfo = ref(createEntranceNavigationTransitionInfo());
 const NavigationView_SelectionChanged5 = (args) => {
   defaultNavigationVersion.value += 1;
+  defaultNavigationTransitionInfo.value = RecommendedNavigationTransitionInfo(args);
   defaultSelectedItem.value = args.SelectedItem;
   defaultPage.value = pageForArgs(args);
   if (!args.IsSettingsSelected) defaultHeader.value = pageTitle(defaultPage.value);
@@ -334,25 +340,26 @@ const topMenuItems = [
 const topSelectedItem = ref(topMenuItems[0]);
 const topPage = ref('SamplePage1');
 const topNavigationVersion = ref(0);
-const topNavigationRank = ref(0);
+const topNavigationTransitionInfo = ref(createEntranceNavigationTransitionInfo());
 const NavigationView_SelectionChanged6 = (args) => {
   topNavigationVersion.value += 1;
+  topNavigationTransitionInfo.value = RecommendedNavigationTransitionInfo(args);
   topSelectedItem.value = args.SelectedItem;
   topPage.value = pageForArgs(args);
-  const selectedIndex = topMenuItems.indexOf(args.SelectedItem);
-  topNavigationRank.value = selectedIndex >= 0 ? selectedIndex : Number.MAX_SAFE_INTEGER;
 };
 
 const adaptiveMenuItems = [menuItem(1), menuItem(2), menuItem(3), menuItem(4)];
 const adaptiveSelectedItem = ref(adaptiveMenuItems[0]);
 const adaptivePage = ref('SamplePage1');
 const adaptiveNavigationVersion = ref(0);
+const adaptiveNavigationTransitionInfo = ref(createEntranceNavigationTransitionInfo());
 const adaptivePaneMode = ref(typeof window !== 'undefined' && window.innerWidth >= 641 ? 'Top' : 'Auto');
 const updateAdaptivePaneMode = () => {
   adaptivePaneMode.value = window.innerWidth >= 641 ? 'Top' : 'Auto';
 };
 const NavigationView_SelectionChanged2 = (args) => {
   adaptiveNavigationVersion.value += 1;
+  adaptiveNavigationTransitionInfo.value = RecommendedNavigationTransitionInfo(args);
   adaptiveSelectedItem.value = args.SelectedItem;
   adaptivePage.value = pageForArgs(args);
 };
@@ -370,13 +377,12 @@ const tabsMenuItems = [1, 2, 3, 4].map(number => ({
 const tabsSelectedItem = ref(tabsMenuItems[0]);
 const tabsPage = ref('SamplePage1');
 const tabsNavigationVersion = ref(0);
-const tabsNavigationRank = ref(0);
+const tabsNavigationTransitionInfo = ref(createEntranceNavigationTransitionInfo());
 const NavigationView_SelectionChanged7 = (args) => {
   tabsNavigationVersion.value += 1;
+  tabsNavigationTransitionInfo.value = RecommendedNavigationTransitionInfo(args);
   tabsSelectedItem.value = args.SelectedItem;
   tabsPage.value = pageForArgs(args);
-  const selectedIndex = tabsMenuItems.indexOf(args.SelectedItem);
-  tabsNavigationRank.value = selectedIndex >= 0 ? selectedIndex : Number.MAX_SAFE_INTEGER;
 };
 
 const categories = [1, 2, 3, 4].map((number) => ({
@@ -389,8 +395,10 @@ const dataSelectedItem = ref(categories[0]);
 const dataHeader = ref(pageTitle('SamplePage1'));
 const dataPage = ref('SamplePage1');
 const dataNavigationVersion = ref(0);
+const dataNavigationTransitionInfo = ref(createEntranceNavigationTransitionInfo());
 const NavigationView_SelectionChanged4 = (args) => {
   dataNavigationVersion.value += 1;
+  dataNavigationTransitionInfo.value = RecommendedNavigationTransitionInfo(args);
   dataSelectedItem.value = args.SelectedItem;
   if (args.IsSettingsSelected) {
     dataPage.value = 'SampleSettingsPage';
@@ -414,7 +422,7 @@ const footerBottomItems = [
 const footerSelectedItem = ref(footerMenuItems[0]);
 const footerPage = ref('SamplePage1');
 const footerNavigationVersion = ref(0);
-const footerNavigationRank = ref(0);
+const footerNavigationTransitionInfo = ref(createEntranceNavigationTransitionInfo());
 const footerPaneMode = ref('Left');
 const footerIsPaneOpen = ref(true);
 const panePositionLeft_Checked = (sampleName) => {
@@ -460,10 +468,9 @@ const footerPaneOptions = [
 ];
 const NavigationView_SelectionChanged9 = (args) => {
   footerNavigationVersion.value += 1;
+  footerNavigationTransitionInfo.value = RecommendedNavigationTransitionInfo(args);
   footerSelectedItem.value = args.SelectedItem;
   footerPage.value = pageForArgs(args);
-  const selectedIndex = [...footerMenuItems, ...footerBottomItems].indexOf(args.SelectedItem);
-  footerNavigationRank.value = selectedIndex >= 0 ? selectedIndex : Number.MAX_SAFE_INTEGER;
 };
 
 const hierarchicalMenuItems = [
@@ -486,10 +493,12 @@ const hierarchicalMenuItems = [
 const hierarchicalSelectedItem = ref(hierarchicalMenuItems[0]);
 const hierarchicalPage = ref('SamplePage1');
 const hierarchicalNavigationVersion = ref(0);
+const hierarchicalNavigationTransitionInfo = ref(createEntranceNavigationTransitionInfo());
 const hierarchicalPaneMode = ref('Left');
 const hierarchicalIsPaneOpen = ref(true);
 const NavigationView_SelectionChanged8 = (args) => {
   hierarchicalNavigationVersion.value += 1;
+  hierarchicalNavigationTransitionInfo.value = RecommendedNavigationTransitionInfo(args);
   hierarchicalSelectedItem.value = args.SelectedItem;
   hierarchicalPage.value = pageForArgs(args);
 };
@@ -516,12 +525,14 @@ const apiMenuItems = ref([
 const apiSelectedItem = ref(apiMenuItems.value[0]);
 const apiPage = ref('SamplePage1');
 const apiNavigationVersion = ref(0);
+const apiNavigationTransitionInfo = ref(createEntranceNavigationTransitionInfo());
 watch(apiSuppressMenuItem2, (suppressed) => {
   const menuItem2 = apiMenuItems.value[2];
   if (menuItem2) menuItem2.SelectsOnInvoked = !suppressed;
 }, { immediate: true });
 const NavigationView_SelectionChanged = (args) => {
   apiNavigationVersion.value += 1;
+  apiNavigationTransitionInfo.value = RecommendedNavigationTransitionInfo(args);
   apiSelectedItem.value = args.SelectedItem;
   apiPage.value = pageForArgs(args);
   if (!args.IsSettingsSelected) apiHeader.value = pageTitle(apiPage.value);

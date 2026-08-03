@@ -23,6 +23,7 @@
       <div class="gallery-page-content">
         <WinStackPanel>
           <WinControlExample
+            class="basic-input-example-theme"
             :theme="pageTheme"
             :vue="BreadcrumbBarControlVue"
             :headerText="$t('sample.breadcrumbbar.control')">
@@ -32,6 +33,7 @@
           </WinControlExample>
 
           <WinControlExample
+            class="basic-input-example-theme"
             :theme="pageTheme"
             :vue="BreadcrumbBarCustomDataTemplateVue"
             :headerText="$t('sample.breadcrumbbar.custom-data-template')">

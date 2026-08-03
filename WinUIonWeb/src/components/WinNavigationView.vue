@@ -188,6 +188,10 @@ import WinMenuFlyout from './WinMenuFlyout.vue';
 import WinScrollViewer from './WinScrollViewer.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import { useI18n } from './i18n/index';
+import {
+  createEntranceNavigationTransitionInfo,
+  createSlideNavigationTransitionInfo
+} from '../utils/navigationTransitionInfo';
 
 const { t } = useI18n();
 const slots = useSlots();
@@ -481,6 +485,82 @@ const makeStretchIndicatorKeyframes = (axis, from, to) => {
   ];
 };
 
+const clearIndicatorMask = (track) => {
+  track.style.maskImage = '';
+  track.style.maskSize = '';
+  track.style.maskPosition = '';
+  track.style.maskRepeat = '';
+  track.style.removeProperty('-webkit-mask-image');
+  track.style.removeProperty('-webkit-mask-size');
+  track.style.removeProperty('-webkit-mask-position');
+  track.style.removeProperty('-webkit-mask-repeat');
+};
+
+// Native NavigationView animates the indicators owned by only the previous
+// and next item containers. Two additive masks reproduce those item-local
+// bounds without the self-intersecting clip polygon that WebKit rasterizes
+// inconsistently while the indicator is stretching.
+const setIndicatorVisibility = (track, axis, targetRect, sourceRect = null) => {
+  const trackRect = track.getBoundingClientRect();
+  const extent = axis === 'x' ? trackRect.width : trackRect.height;
+  const startKey = axis === 'x' ? 'left' : 'top';
+  const endKey = axis === 'x' ? 'right' : 'bottom';
+  const clampRect = (rect) => {
+    if (!rect) return null;
+    const start = Math.max(0, Math.min(extent, rect[startKey]));
+    const end = Math.max(start, Math.min(extent, rect[endKey]));
+    return end > start ? { start, end } : null;
+  };
+
+  const target = clampRect(targetRect);
+  const source = clampRect(sourceRect);
+  if (!target) {
+    clearIndicatorMask(track);
+    track.style.clipPath = 'inset(0 100% 0 0)';
+    return;
+  }
+
+  const overlaps = source && target.start <= source.end && source.start <= target.end;
+  if (!source || overlaps) {
+    clearIndicatorMask(track);
+    const start = source ? Math.min(target.start, source.start) : target.start;
+    const end = source ? Math.max(target.end, source.end) : target.end;
+    track.style.clipPath = axis === 'x'
+      ? `inset(0px ${Math.max(0, extent - end)}px 0px ${start}px)`
+      : `inset(${start}px 0px ${Math.max(0, extent - end)}px 0px)`;
+    return;
+  }
+
+  const maskImage = 'linear-gradient(#000 0 0), linear-gradient(#000 0 0)';
+  const maskSize = axis === 'x'
+    ? `${target.end - target.start}px 100%, ${source.end - source.start}px 100%`
+    : `100% ${target.end - target.start}px, 100% ${source.end - source.start}px`;
+  const maskPosition = axis === 'x'
+    ? `${target.start}px 0px, ${source.start}px 0px`
+    : `0px ${target.start}px, 0px ${source.start}px`;
+
+  track.style.clipPath = 'none';
+  track.style.maskImage = maskImage;
+  track.style.maskSize = maskSize;
+  track.style.maskPosition = maskPosition;
+  track.style.maskRepeat = 'no-repeat';
+  track.style.setProperty('-webkit-mask-image', maskImage);
+  track.style.setProperty('-webkit-mask-size', maskSize);
+  track.style.setProperty('-webkit-mask-position', maskPosition);
+  track.style.setProperty('-webkit-mask-repeat', 'no-repeat');
+};
+
+const setIndicatorRestingStyle = (indicatorEl, style) => {
+  const previousStyle = indicatorStyle.value || {};
+  for (const property of Object.keys(previousStyle)) {
+    if (!(property in style)) indicatorEl.style[property] = '';
+  }
+  for (const [property, value] of Object.entries(style)) {
+    indicatorEl.style[property] = value;
+  }
+  indicatorStyle.value = style;
+};
+
 const readTranslate = (el, axis, fallback) => {
   const transform = getComputedStyle(el).transform;
   if (transform && transform !== 'none') {
@@ -627,18 +707,37 @@ const createSettingsItem = () => ({
   IsSettingsItem: true
 });
 
+const getNavigationTransitionIndex = (value, isSettings = false) => {
+  if (isSettings || value === settingsValue.value) return props.menuItems.length + props.footerItems.length;
+  const parentGroup = findParentGroup(value);
+  const effectiveValue = parentGroup && isTopNavigation.value ? parentGroup.value : value;
+  const orderedItems = [...props.menuItems, ...props.footerItems];
+  return orderedItems.findIndex((item) => item.value === effectiveValue);
+};
+
+const createRecommendedNavigationTransitionInfo = (value, isSettings = false) => {
+  if (!isTopNavigation.value) return createEntranceNavigationTransitionInfo();
+
+  const oldIndex = getNavigationTransitionIndex(selectedValue.value, selectedValue.value === settingsValue.value);
+  const newIndex = getNavigationTransitionIndex(value, isSettings);
+  if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return createEntranceNavigationTransitionInfo();
+
+  return createSlideNavigationTransitionInfo(newIndex > oldIndex ? 'FromRight' : 'FromLeft');
+};
+
 const commitNavigationValue = (value, { invoked = true, isSettings = false } = {}) => {
   const normalizedItem = isSettings ? null : findNormalizedItem(value);
   const item = isSettings ? createSettingsItem() : normalizedItem?.source;
   if (!item) return false;
   if (!isSettings && normalizedItem.isEnabled === false) return false;
+  const RecommendedNavigationTransitionInfo = createRecommendedNavigationTransitionInfo(value, isSettings);
 
   if (invoked) {
     emit('ItemInvoked', {
       InvokedItem: item.Content ?? item.label,
       IsSettingsInvoked: isSettings,
       InvokedItemContainer: item,
-      RecommendedNavigationTransitionInfo: { Type: 'EntranceNavigationTransitionInfo' }
+      RecommendedNavigationTransitionInfo
     });
   }
 
@@ -651,7 +750,7 @@ const commitNavigationValue = (value, { invoked = true, isSettings = false } = {
     SelectedItem: item,
     IsSettingsSelected: isSettings,
     SelectedItemContainer: item,
-    RecommendedNavigationTransitionInfo: { Type: 'EntranceNavigationTransitionInfo' }
+    RecommendedNavigationTransitionInfo
   });
   return true;
 };
@@ -1100,7 +1199,7 @@ const trackIndicatorDuringTransition = () => {
       top: elRect.top - trackRect.top,
       bottom: elRect.bottom - trackRect.top
     };
-    track.style.clipPath = `polygon(0% ${targetRect.top}px, 100% ${targetRect.top}px, 100% ${targetRect.bottom}px, 0% ${targetRect.bottom}px)`;
+    setIndicatorVisibility(track, 'y', targetRect);
     indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' };
     if (performance.now() - startTime < duration) {
       trackingRaf = requestAnimationFrame(tick);
@@ -1334,21 +1433,6 @@ const calcIndicator = () => {
   const targetRect = getItemRectRelTrack(lastSelectedEl);
   const sourceRect = sourceEl && navRef.value.contains(sourceEl) ? getItemRectRelTrack(sourceEl) : null;
 
-  // A self-intersecting polygon rasterizes differently in WebKit while the
-  // child changes size. A single inset bounds the same stretch corridor and
-  // keeps the existing keyframes, timing and easing browser-independent.
-  const makeClipX = (r1, r2) => {
-    const left = Math.max(0, Math.min(r1.left, r2?.left ?? r1.left));
-    const right = Math.min(trackRect.width, Math.max(r1.right, r2?.right ?? r1.right));
-    return `inset(0px ${Math.max(0, trackRect.width - right)}px 0px ${left}px)`;
-  };
-
-  const makeClipY = (r1, r2) => {
-    const top = Math.max(0, Math.min(r1.top, r2?.top ?? r1.top));
-    const bottom = Math.min(trackRect.height, Math.max(r1.bottom, r2?.bottom ?? r1.bottom));
-    return `inset(${top}px 0px ${Math.max(0, trackRect.height - bottom)}px 0px)`;
-  };
-
   const getRegion = (el) => {
     const scrollEl = getScrollAreaElement();
     if (isTopNavigation.value) {
@@ -1375,13 +1459,17 @@ const calcIndicator = () => {
       let expectedPos;
       if (dimension === 'x') {
         expectedPos = freshElRect.left - freshTrackRect.left + freshElRect.width / 2 - 8;
-        track.style.clipPath = makeClipX(freshTargetRect, null);
-        indicatorStyle.value = { transform: `translateX(${expectedPos}px)`, width: '16px', opacity: '1', transition: 'none' };
+        setIndicatorVisibility(track, 'x', freshTargetRect);
+        setIndicatorRestingStyle(indicatorEl, { transform: `translateX(${expectedPos}px)`, width: '16px', opacity: '1', transition: 'none' });
       } else {
         expectedPos = freshElRect.top - freshTrackRect.top + freshElRect.height / 2 - 8;
-        track.style.clipPath = makeClipY(freshTargetRect, null);
-        indicatorStyle.value = { transform: `translateY(${expectedPos}px)`, height: '16px', opacity: '1', transition: 'none' };
+        setIndicatorVisibility(track, 'y', freshTargetRect);
+        setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${expectedPos}px)`, height: '16px', opacity: '1', transition: 'none' });
       }
+      // WebKit exposes the underlying style for a frame when a fill-forwards
+      // animation is cancelled. Commit the final resting style first so that
+      // handoff cannot replay the stretched intermediate width or height.
+      nextIndicatorAnimation(indicatorEl);
     });
   };
 
@@ -1389,18 +1477,19 @@ const calcIndicator = () => {
     const newX = elRect.left - trackRect.left + elRect.width / 2 - 8;
     if (skipTransition || indicatorStyle.value.opacity === '0') {
       nextIndicatorAnimation(indicatorEl);
-      track.style.clipPath = makeClipX(targetRect, null);
+      setIndicatorVisibility(track, 'x', targetRect);
       indicatorStyle.value = { transition: 'none', transform: `translateX(${newX}px)`, width: '16px', opacity: '1' };
       return;
     }
     const oldX = readTranslate(indicatorEl, 'x', newX);
     const dist = Math.abs(newX - oldX);
     if (dist < 1) {
-      track.style.clipPath = makeClipX(targetRect, null);
+      setIndicatorVisibility(track, 'x', targetRect);
       indicatorStyle.value = { transform: `translateX(${newX}px)`, width: '16px', opacity: '1' };
       return;
     }
 
+    setIndicatorRestingStyle(indicatorEl, { transform: `translateX(${newX}px)`, width: '16px', opacity: '1', transition: 'none' });
     const animationId = nextIndicatorAnimation(indicatorEl);
     const sourceRegion = sourceEl ? getRegion(sourceEl) : getRegion(lastSelectedEl);
     const targetRegion = getRegion(lastSelectedEl);
@@ -1409,8 +1498,7 @@ const calcIndicator = () => {
       && sourceRegion === targetRegion;
 
     if (topContinuousMove) {
-      indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
-      track.style.clipPath = makeClipX(targetRect, sourceRect);
+      setIndicatorVisibility(track, 'x', targetRect, sourceRect);
       const dur = 600;
       const keyframes = makeStretchIndicatorKeyframes('x', oldX, newX);
       const anim = indicatorEl.animate(keyframes, { duration: dur, fill: 'forwards' });
@@ -1418,8 +1506,7 @@ const calcIndicator = () => {
       return;
     }
 
-    track.style.clipPath = makeClipX(targetRect, null);
-    indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
+    setIndicatorVisibility(track, 'x', targetRect, sourceRect);
     const movingRight = newX > oldX;
     const collapseKf = movingRight
       ? [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateX(${oldX + 16}px)`, width: '0px', offset: 1 }]
@@ -1430,6 +1517,7 @@ const calcIndicator = () => {
     const collapseAnim = indicatorEl.animate(collapseKf, { duration: 300, fill: 'forwards' });
     collapseAnim.onfinish = () => {
       if (animationId !== indicatorAnimationId) return;
+      collapseAnim.cancel();
       const expandAnim = indicatorEl.animate(expandKf, { duration: 300, fill: 'forwards' });
       expandAnim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateX(${newX}px)`, 'x', '16px'); };
     };
@@ -1467,14 +1555,14 @@ const calcIndicator = () => {
 
     if (skipTransition || indicatorStyle.value.opacity === '0') {
       nextIndicatorAnimation(indicatorEl);
-      track.style.clipPath = makeClipY(clampedTargetRect, null);
+      setIndicatorVisibility(track, 'y', clampedTargetRect);
       indicatorStyle.value = { transition: 'none', transform: `translateY(${newY}px)`, height: '16px', opacity: '1' };
       indicatorIsChild.value = lastIsChild;
       return;
     }
     const oldY = readTranslate(indicatorEl, 'y', newY);
     const dist = Math.abs(newY - oldY);
-    if (dist < 1) { track.style.clipPath = makeClipY(clampedTargetRect, null); indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1' }; indicatorIsChild.value = lastIsChild; return; }
+    if (dist < 1) { setIndicatorVisibility(track, 'y', clampedTargetRect); indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1' }; indicatorIsChild.value = lastIsChild; return; }
 
     let clampedSourceRect = sourceRect;
     if (sourceRect && scrollEl) {
@@ -1490,12 +1578,12 @@ const calcIndicator = () => {
       }
     }
 
-    track.style.clipPath = makeClipY(clampedTargetRect, clampedSourceRect);
+    setIndicatorVisibility(track, 'y', clampedTargetRect, clampedSourceRect);
+    setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' });
     const animationId = nextIndicatorAnimation(indicatorEl);
 
     indicatorIsChild.value = lastIsChild;
     const movingDown = newY > oldY;
-    indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' };
     const sourceRegion = sourceEl ? getRegion(sourceEl) : getRegion(lastSelectedEl);
     const targetRegion = getRegion(lastSelectedEl);
     const forceMove = sourceRegion !== targetRegion;
@@ -1514,6 +1602,7 @@ const calcIndicator = () => {
       const collapseAnim = indicatorEl.animate(collapseKf, { duration: 300, fill: 'forwards' });
       collapseAnim.onfinish = () => {
         if (animationId !== indicatorAnimationId) return;
+        collapseAnim.cancel();
         const expandAnim = indicatorEl.animate(expandKf, { duration: 300, fill: 'forwards' });
         expandAnim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateY(${newY}px)`, 'y', '16px'); };
       };
@@ -1808,7 +1897,7 @@ watch(isCompact, (compact) => {
               ? { top: childRect.top - trackRect.top, bottom: childRect.bottom - trackRect.top }
               : { top: savedOldY, bottom: savedOldY + 16 };
             indicatorIsChild.value = true;
-            track.style.clipPath = `polygon(0% ${childClip.top}px, 100% ${childClip.top}px, 100% ${childClip.bottom}px, 0% ${childClip.bottom}px)`;
+            setIndicatorVisibility(track, 'y', childClip);
             indicatorStyle.value = { transform: `translateY(${savedOldY}px)`, height: '16px', opacity: '1', transition: 'none' };
 
             const collapseAnim = indicatorEl.animate([
@@ -1823,8 +1912,9 @@ watch(isCompact, (compact) => {
               const freshNewY = freshHeaderRect.top - freshTrackRect.top + freshHeaderRect.height / 2 - 8;
               const freshTargetR = { top: freshHeaderRect.top - freshTrackRect.top, bottom: freshHeaderRect.bottom - freshTrackRect.top };
               indicatorIsChild.value = false;
-              track.style.clipPath = `polygon(0% ${freshTargetR.top}px, 100% ${freshTargetR.top}px, 100% ${freshTargetR.bottom}px, 0% ${freshTargetR.bottom}px)`;
-              indicatorStyle.value = { transform: `translateY(${freshNewY + 16}px)`, height: '0px', opacity: '1', transition: 'none' };
+              setIndicatorVisibility(track, 'y', freshTargetR);
+              setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${freshNewY}px)`, height: '16px', opacity: '1', transition: 'none' });
+              collapseAnim.cancel();
 
               const expandAnim = indicatorEl.animate([
                 { transform: `translateY(${freshNewY + 16}px)`, height: '0px', offset: 0, easing: EASE_OUT },
@@ -1838,8 +1928,9 @@ watch(isCompact, (compact) => {
                 const fh = header.getBoundingClientRect();
                 const fy = fh.top - ft.top + fh.height / 2 - 8;
                 const ftr = { top: fh.top - ft.top, bottom: fh.bottom - ft.top };
-                track.style.clipPath = `polygon(0% ${ftr.top}px, 100% ${ftr.top}px, 100% ${ftr.bottom}px, 0% ${ftr.bottom}px)`;
-                indicatorStyle.value = { transform: `translateY(${fy}px)`, height: '16px', opacity: '1', transition: 'none' };
+                setIndicatorVisibility(track, 'y', ftr);
+                setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${fy}px)`, height: '16px', opacity: '1', transition: 'none' });
+                nextIndicatorAnimation(indicatorEl);
               };
             };
           } else {
@@ -2244,6 +2335,10 @@ watch(() => props.selectedValue, (val) => {
     flex: 1;
     min-height: 0;
     position: relative;
+  }
+
+  .win-nav-left-panel .win-nav-left-scrollable > .scrollbar-vertical {
+    right: -4px;
   }
 
   .win-nav-footer {

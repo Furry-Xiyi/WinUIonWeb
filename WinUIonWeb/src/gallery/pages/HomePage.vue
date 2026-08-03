@@ -29,12 +29,13 @@
 
           <WinSelectorBar
             class="filter-bar token-filter-bar"
-            :items="filterItems"
-            :selectedIndex="selectedFilterIndex"
-            @selectionChanged="OnFilterChanged" />
+            HorizontalAlignment="Center"
+            :Items="filterItems"
+            :SelectedItem="filterItems[selectedFilterIndex]"
+            @SelectionChanged="OnFilterChanged" />
 
           <main class="switch-presenter">
-            <section v-if="selectedFilter === 'Recent'" key="Recent" class="sample-panel page-transition-up">
+            <section v-if="selectedFilter === 'Recent'" key="Recent" class="sample-panel EntranceNavigationTransitionInfo">
               <template v-if="RecentlyVisitedSamplesList.length > 0">
                 <WinTextBlock class="sample-panel-title" :Text="$t('text.recently-visited')" />
                 <WinHorizontalScrollContainer class="recently-visited-container">
@@ -76,7 +77,7 @@
               </div>
             </section>
 
-            <section v-else key="Favorites" class="sample-panel page-transition-up">
+            <section v-else key="Favorites" class="sample-panel EntranceNavigationTransitionInfo">
               <div v-if="FavoriteSamplesList.length > 0" class="grid-view">
                 <button
                   v-for="item in FavoriteSamplesList"
@@ -123,7 +124,7 @@ import { useI18n } from '../../components/i18n/index';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const { t } = useI18n();
-const currentPage = inject('currentPage');
+const navigate = inject('navigate', () => {});
 const favorites = ref(getStoredFavorites());
 const selectedFilterIndex = ref(0);
 const selectedFilter = ref('Recent');
@@ -138,8 +139,8 @@ const imageIcon = (src) => `<img src="${src}" alt="">`;
 const glyphIcon = (glyph) => glyph;
 
 const filterItems = [
-  { icon: 'Clock', text: t('text.recent'), Tag: 'Recent' },
-  { icon: 'Favorite', text: t('text.favorites'), Tag: 'Favorites' }
+  { Icon: 'Clock', Text: t('text.recent'), Tag: 'Recent' },
+  { Icon: 'Favorite', Text: t('text.favorites'), Tag: 'Favorites' }
 ];
 
 const headerTiles = computed(() => [
@@ -295,15 +296,15 @@ const onSystemThemeChange = () => {
 
 const heroImage = computed(() => isDark.value ? splashDark : splashLight);
 
-const OnFilterChanged = ({ selectedIndex, selectedItem }) => {
+const OnFilterChanged = (sender) => {
+  const selectedItem = sender?.SelectedItem;
+  const selectedIndex = Math.max(0, sender?.Items?.indexOf(selectedItem) ?? 0);
   selectedFilterIndex.value = selectedIndex;
   selectedFilter.value = selectedItem.Tag;
 };
 
 const OnItemGridViewItemClick = (item) => {
-  if (currentPage?.value) {
-    currentPage.value = item.UniqueId;
-  }
+  if (item?.UniqueId) navigate(item.UniqueId);
 };
 
 const syncFavorites = () => {
@@ -424,6 +425,7 @@ onUnmounted(() => {
 
 .filter-bar {
   justify-self: center;
+  align-self: center;
   width: max-content;
   max-width: 100%;
   margin: 24px 0 16px 0;
@@ -433,10 +435,15 @@ onUnmounted(() => {
   gap: 8px;
 }
 
-.token-filter-bar :deep(.selector-bar-item) {
-  box-sizing: border-box;
-  padding: 5px 23px 6px;
+.token-filter-bar :deep(.win-selector-bar-items-view) {
   gap: 8px;
+  padding: 0;
+}
+
+.token-filter-bar :deep(.win-selector-bar-item) {
+  box-sizing: border-box;
+  min-height: 32px;
+  padding: 0;
   color: var(--text-primary);
   background: var(--control-fill-color-default, var(--ctrl-fill-default));
   border: 1px solid var(--control-stroke-color-default, var(--ctrl-border));
@@ -444,45 +451,50 @@ onUnmounted(() => {
   line-height: 20px;
 }
 
-.token-filter-bar :deep(.item-text) {
+.token-filter-bar :deep(.win-selector-bar-item-content) {
+  gap: 8px;
+  margin: 5px 23px 6px;
+}
+
+.token-filter-bar :deep(.win-selector-bar-item-text) {
   line-height: 20px;
 }
 
-.token-filter-bar :deep(.item-icon .icon) {
+.token-filter-bar :deep(.win-selector-bar-item-icon .icon) {
   font-size: 16px;
   line-height: 16px;
 }
 
-.token-filter-bar :deep(.selector-bar-item:hover) {
+.token-filter-bar :deep(.win-selector-bar-item:hover) {
   color: var(--text-primary);
   background: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
 }
 
-.token-filter-bar :deep(.selector-bar-item:active) {
+.token-filter-bar :deep(.win-selector-bar-item:active) {
   color: var(--text-secondary);
   background: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
 }
 
-.token-filter-bar :deep(.selector-bar-item.is-selected) {
+.token-filter-bar :deep(.win-selector-bar-item.is-selected) {
   color: var(--accent-text);
   background: var(--accent-base);
   border-color: var(--accent-base);
   font-weight: 400;
 }
 
-.token-filter-bar :deep(.selector-bar-item.is-selected:hover) {
+.token-filter-bar :deep(.win-selector-bar-item.is-selected:hover) {
   color: var(--accent-text);
   background: var(--accent-hover);
   border-color: var(--accent-hover);
 }
 
-.token-filter-bar :deep(.selector-bar-item.is-selected:active) {
+.token-filter-bar :deep(.win-selector-bar-item.is-selected:active) {
   color: var(--accent-text-secondary);
   background: var(--accent-pressed);
   border-color: var(--accent-pressed);
 }
 
-.token-filter-bar :deep(.selector-indicator) {
+.token-filter-bar :deep(.win-selector-bar-item-selection-visual) {
   display: none;
 }
 

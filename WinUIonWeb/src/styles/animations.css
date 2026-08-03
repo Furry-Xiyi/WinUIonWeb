@@ -50,55 +50,230 @@
   transform-origin: top center;
 }
 
-@keyframes page-enter-up {
-  from {
+@keyframes EntranceNavigationTransitionInfo_NavigationTrigger_NavigatingTo {
+  0% {
     opacity: 0;
     transform: translateY(140px);
   }
 
-  to {
+  33.333% {
+    opacity: 0;
+    transform: translateY(140px);
+  }
+
+  33.334% {
+    opacity: 1;
+    transform: translateY(140px);
+  }
+
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes page-enter-left {
+@keyframes EntranceNavigationTransitionInfo_NavigationTrigger_NavigatingAway {
   from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes EntranceNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo {
+  0% {
+    opacity: 0;
+  }
+
+  33.333% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes EntranceNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(140px);
+  }
+}
+
+@keyframes SlideNavigationTransitionInfo_FromRight_NavigationTrigger_NavigatingTo {
+  0% {
     opacity: 0;
     transform: translateX(200px);
   }
 
-  to {
+  33.333% {
+    opacity: 0;
+    transform: translateX(200px);
+  }
+
+  33.334% {
+    opacity: 1;
+    transform: translateX(200px);
+  }
+
+  100% {
     opacity: 1;
     transform: translateX(0);
   }
 }
 
-@keyframes page-enter-right {
-  from {
+@keyframes SlideNavigationTransitionInfo_FromLeft_NavigationTrigger_NavigatingTo {
+  0% {
     opacity: 0;
     transform: translateX(-200px);
   }
 
-  to {
+  33.333% {
+    opacity: 0;
+    transform: translateX(-200px);
+  }
+
+  33.334% {
+    opacity: 1;
+    transform: translateX(-200px);
+  }
+
+  100% {
     opacity: 1;
     transform: translateX(0);
   }
 }
 
-@keyframes page-enter-fade {
+@keyframes SlideNavigationTransitionInfo_FromRight_NavigationTrigger_NavigatingAway {
   from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(-150px);
+  }
+}
+
+@keyframes SlideNavigationTransitionInfo_FromLeft_NavigationTrigger_NavigatingAway {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(150px);
+  }
+}
+
+@keyframes SlideNavigationTransitionInfo_FromRight_NavigationTrigger_BackNavigatingTo {
+  0% {
+    opacity: 0;
+    transform: translateX(-150px);
+  }
+
+  33.333% {
+    opacity: 0;
+    transform: translateX(-150px);
+  }
+
+  33.334% {
+    opacity: 1;
+    transform: translateX(-150px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes SlideNavigationTransitionInfo_FromLeft_NavigationTrigger_BackNavigatingTo {
+  0% {
+    opacity: 0;
+    transform: translateX(150px);
+  }
+
+  33.333% {
+    opacity: 0;
+    transform: translateX(150px);
+  }
+
+  33.334% {
+    opacity: 1;
+    transform: translateX(150px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes SlideNavigationTransitionInfo_FromRight_NavigationTrigger_BackNavigatingAway {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(200px);
+  }
+}
+
+@keyframes SlideNavigationTransitionInfo_FromLeft_NavigationTrigger_BackNavigatingAway {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(-200px);
+  }
+}
+
+@keyframes DrillInNavigationTransitionInfo_NavigationTrigger_NavigatingTo {
+  0% {
     opacity: 0;
     transform: scale(0.94);
   }
 
-  to {
+  42.529% {
+    opacity: 1;
+    transform: scale(0.974);
+  }
+
+  100% {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-@keyframes page-enter-fade-reverse {
+@keyframes DrillInNavigationTransitionInfo_NavigationTrigger_NavigatingAway {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes DrillInNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo {
   from {
     opacity: 0;
     transform: scale(1.06);
@@ -107,6 +282,149 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes DrillInNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes CommonNavigationTransitionInfo_NavigationTrigger_NavigatingTo {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(-80deg);
+  }
+
+  23.021% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(-80deg);
+  }
+
+  23.022% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(-80deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0deg);
+  }
+}
+
+@keyframes CommonNavigationTransitionInfo_NavigationTrigger_NavigatingAway {
+  0% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0deg);
+  }
+
+  99.999% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(50deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(50deg);
+  }
+}
+
+@keyframes CommonNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(50deg);
+  }
+
+  23.021% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(50deg);
+  }
+
+  23.022% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(50deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0deg);
+  }
+}
+
+@keyframes CommonNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway {
+  0% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0deg);
+  }
+
+  99.999% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(-80deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(-80deg);
+  }
+}
+
+@keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingTo {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(1.06);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingAway {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+}
+
+@keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo {
+  0% {
+    opacity: 0;
+    transform: perspective(900px) translateY(-20px) rotateX(-90deg);
+  }
+
+  43.274% {
+    opacity: 0;
+    transform: perspective(900px) translateY(-20px) rotateX(-90deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: perspective(900px) translateY(0) rotateX(0deg);
+  }
+}
+
+@keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(1.04);
   }
 }
 
@@ -135,24 +453,134 @@
   }
 }
 
-.page-transition-up {
-  animation: page-enter-up 0.450s cubic-bezier(0.1, 0.9, 0.1, 1) both;
+.DefaultNavigationTransitionInfo,
+.EntranceNavigationTransitionInfo,
+.SlideNavigationTransitionInfo,
+.DrillInNavigationTransitionInfo,
+.CommonNavigationTransitionInfo,
+.ContinuumNavigationTransitionInfo {
+  will-change: opacity, transform;
+  transform-origin: center center;
 }
 
-.page-transition-left {
-  animation: page-enter-left 0.450s cubic-bezier(0.1, 0.9, 0.1, 1) both;
+.SuppressNavigationTransitionInfo {
+  animation: none;
 }
 
-.page-transition-right {
-  animation: page-enter-right 0.450s cubic-bezier(0.1, 0.9, 0.1, 1) both;
+.DefaultNavigationTransitionInfo,
+.DefaultNavigationTransitionInfo.NavigationTrigger_NavigatingTo,
+.EntranceNavigationTransitionInfo {
+  animation: EntranceNavigationTransitionInfo_NavigationTrigger_NavigatingTo 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
 }
 
-.page-transition-fade {
-  animation: page-enter-fade 0.333s cubic-bezier(0.1, 0.9, 0.1, 1) both;
+.DefaultNavigationTransitionInfo.NavigationTrigger_NavigatingAway,
+.EntranceNavigationTransitionInfo.NavigationTrigger_NavigatingAway {
+  animation: EntranceNavigationTransitionInfo_NavigationTrigger_NavigatingAway 0.150s cubic-bezier(0.7, 0, 1, 0.5) both;
 }
 
-.page-transition-fade-reverse {
-  animation: page-enter-fade-reverse 0.333s cubic-bezier(0.12, 0, 0, 1) both;
+.DefaultNavigationTransitionInfo.NavigationTrigger_BackNavigatingTo,
+.EntranceNavigationTransitionInfo.NavigationTrigger_BackNavigatingTo {
+  animation: EntranceNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.DefaultNavigationTransitionInfo.NavigationTrigger_BackNavigatingAway,
+.EntranceNavigationTransitionInfo.NavigationTrigger_BackNavigatingAway {
+  animation: EntranceNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway 0.150s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.SlideNavigationTransitionInfo.FromRight {
+  animation: SlideNavigationTransitionInfo_FromRight_NavigationTrigger_NavigatingTo 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.SlideNavigationTransitionInfo.FromLeft {
+  animation: SlideNavigationTransitionInfo_FromLeft_NavigationTrigger_NavigatingTo 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.SlideNavigationTransitionInfo.FromRight.NavigationTrigger_NavigatingAway {
+  animation: SlideNavigationTransitionInfo_FromRight_NavigationTrigger_NavigatingAway 0.150s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.SlideNavigationTransitionInfo.FromLeft.NavigationTrigger_NavigatingAway {
+  animation: SlideNavigationTransitionInfo_FromLeft_NavigationTrigger_NavigatingAway 0.150s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.SlideNavigationTransitionInfo.FromRight.NavigationTrigger_BackNavigatingTo {
+  animation: SlideNavigationTransitionInfo_FromRight_NavigationTrigger_BackNavigatingTo 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.SlideNavigationTransitionInfo.FromLeft.NavigationTrigger_BackNavigatingTo {
+  animation: SlideNavigationTransitionInfo_FromLeft_NavigationTrigger_BackNavigatingTo 0.450s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.SlideNavigationTransitionInfo.FromRight.NavigationTrigger_BackNavigatingAway {
+  animation: SlideNavigationTransitionInfo_FromRight_NavigationTrigger_BackNavigatingAway 0.150s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.SlideNavigationTransitionInfo.FromLeft.NavigationTrigger_BackNavigatingAway {
+  animation: SlideNavigationTransitionInfo_FromLeft_NavigationTrigger_BackNavigatingAway 0.150s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.DrillInNavigationTransitionInfo {
+  animation: DrillInNavigationTransitionInfo_NavigationTrigger_NavigatingTo 0.783s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.DrillInNavigationTransitionInfo.NavigationTrigger_NavigatingAway {
+  animation: DrillInNavigationTransitionInfo_NavigationTrigger_NavigatingAway 0.100s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.DrillInNavigationTransitionInfo.NavigationTrigger_BackNavigatingTo {
+  animation: DrillInNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo 0.333s cubic-bezier(0.12, 0, 0, 1) both;
+}
+
+.DrillInNavigationTransitionInfo.NavigationTrigger_BackNavigatingAway {
+  animation: DrillInNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway 0.100s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.CommonNavigationTransitionInfo {
+  animation: CommonNavigationTransitionInfo_NavigationTrigger_NavigatingTo 0.556s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  backface-visibility: hidden;
+  transform-origin: left center;
+}
+
+.CommonNavigationTransitionInfo.NavigationTrigger_NavigatingAway {
+  animation: CommonNavigationTransitionInfo_NavigationTrigger_NavigatingAway 0.128s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.CommonNavigationTransitionInfo.NavigationTrigger_BackNavigatingTo {
+  animation: CommonNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo 0.556s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.CommonNavigationTransitionInfo.NavigationTrigger_BackNavigatingAway {
+  animation: CommonNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway 0.128s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.ContinuumNavigationTransitionInfo {
+  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingTo 0.350s cubic-bezier(0.12, 0, 0, 1) both;
+}
+
+.ContinuumNavigationTransitionInfo.NavigationTrigger_NavigatingAway {
+  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingAway 0.250s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+.ContinuumNavigationTransitionInfo.NavigationTrigger_BackNavigatingTo {
+  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo 0.617s cubic-bezier(0.12, 0, 0, 1) both;
+  transform-origin: top left;
+}
+
+.ContinuumNavigationTransitionInfo.NavigationTrigger_BackNavigatingAway {
+  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway 0.250s cubic-bezier(0.7, 0, 1, 0.5) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .DefaultNavigationTransitionInfo,
+  .EntranceNavigationTransitionInfo,
+  .SlideNavigationTransitionInfo,
+  .DrillInNavigationTransitionInfo,
+  .CommonNavigationTransitionInfo,
+  .ContinuumNavigationTransitionInfo,
+  .SuppressNavigationTransitionInfo {
+    animation: none !important;
+  }
 }
 
 .cal-slide-up-anim {

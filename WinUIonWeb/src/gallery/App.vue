@@ -10,9 +10,14 @@
                      :IsBackEnabled="isBackEnabled"
                      @ItemInvoked="onNavigationItemInvoked"
                      @BackRequested="onBackRequested">
-    <div v-if="pageComponent" :key="currentPage" :class="['page-view active', pageTransition]">
-      <component :is="pageComponent" />
-    </div>
+      <Transition
+        appear
+        :enter-active-class="pageTransitionEnter"
+        :leave-active-class="pageTransitionLeave">
+        <div v-if="pageComponent" :key="currentPage" class="page-view active">
+          <component :is="pageComponent" />
+        </div>
+      </Transition>
     </WinNavigationView>
   </div>
 </template>
@@ -113,6 +118,17 @@ import RichEditBoxPage from './pages/RichEditBoxPage.vue';
 import RichTextBlockPage from './pages/RichTextBlockPage.vue';
 
 import { useI18n } from '../components/i18n/index';
+import {
+  DefaultNavigationTransitionInfo,
+  NavigationTrigger_BackNavigatingAway,
+  NavigationTrigger_BackNavigatingTo,
+  NavigationTrigger_NavigatingAway,
+  NavigationTrigger_NavigatingTo,
+  getNavigationTransitionInfoClassName,
+  normalizeNavigationTransitionInfo,
+  parseNavigationTransitionInfo,
+  stringifyNavigationTransitionInfo
+} from '../utils/navigationTransitionInfo';
 
 const { t } = useI18n();
 const pageMap = {
@@ -213,9 +229,20 @@ const readStoredSetting = (key, fallback, allowedValues) => {
   return allowedValues.includes(value) ? value : fallback;
 };
 
+const readStoredNavigationTransitionInfo = () => parseNavigationTransitionInfo(
+  localStorage.getItem('winui-navigation-transition-info'),
+  DefaultNavigationTransitionInfo
+);
+
 const persistSetting = (key, source) => {
   watch(source, (value) => {
     localStorage.setItem(key, value);
+  }, { immediate: true });
+};
+
+const persistNavigationTransitionInfo = (source) => {
+  watch(source, (value) => {
+    localStorage.setItem('winui-navigation-transition-info', stringifyNavigationTransitionInfo(value));
   }, { immediate: true });
 };
 
@@ -223,13 +250,14 @@ const currentPage = ref('home');
 const navPosition = ref(readStoredSetting('winui-nav-position', 'Auto', ['Auto', 'Top', 'Left', 'LeftCompact', 'LeftMinimal']));
 const themeSetting = ref(readStoredSetting('winui-theme-setting', 'system', ['system', 'light', 'dark']));
 const materialSetting = ref(readStoredSetting('winui-material-setting', 'mica', ['mica', 'acrylic']));
-const animSetting = ref(readStoredSetting('winui-animation-setting', 'entrance', ['entrance', 'drill', 'fade']));
-const pageTransition = ref('page-transition-up');
+const navigationTransitionInfo = ref(readStoredNavigationTransitionInfo());
+const pageTransitionEnter = ref(getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationTrigger_NavigatingTo));
+const pageTransitionLeave = ref(getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationTrigger_NavigatingAway));
 const isHostedInUwpWebView = ref(false);
 
 provide('themeSetting', themeSetting);
 provide('materialSetting', materialSetting);
-provide('animSetting', animSetting);
+provide('navigationTransitionInfo', navigationTransitionInfo);
 provide('navPosition', navPosition);
 provide('currentPage', currentPage);
 provide('isHostedInUwpWebView', isHostedInUwpWebView);
@@ -309,10 +337,10 @@ const navMenuItems = [
     { Tag: 'parallaxview', Icon: '\uE7F4', Content: t('text.parallaxview') }
   ]},
   { Tag: 'navigation', Icon: '\uE700', Content: t('text.navigation'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'breadcrumbbar', Icon: '\uE76B', Content: t('text.breadcrumbbar') },
+    { Tag: 'breadcrumbbar', Icon: '\uE76C', Content: t('text.breadcrumbbar') },
     { Tag: 'navigationview', Icon: '\uE700', Content: t('text.navigationview') },
-    { Tag: 'pivot', Icon: '\uE7C4', Content: t('text.pivot') },
-    { Tag: 'selectorbar', Icon: '\uE762', Content: t('text.selectorbar') }
+    { Tag: 'pivot', Icon: '\uE8F9', Content: t('text.pivot') },
+    { Tag: 'selectorbar', Icon: '\uE8AB', Content: t('text.selectorbar') }
   ]},
   { Tag: 'scrolling', Icon: '\uE174', Content: t('text.scrolling'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'pipspager', Icon: '\uE8A7', Content: t('text.pipspager') },
@@ -352,31 +380,41 @@ const selectedNavigationItem = computed({
     return find(navMenuItems);
   },
   set: item => {
-    if (item?.Tag) currentPage.value = item.Tag;
+    if (item?.Tag) navigate(item.Tag, navigationTransitionInfo.value);
   }
 });
 
 const navigationHistory = ref([]);
 const isBackEnabled = computed(() => navigationHistory.value.length > 0);
 const suppressHistoryPush = ref(false);
+const navigate = (
+  tag,
+  NavigationTransitionInfo = navigationTransitionInfo.value,
+  NavigationTrigger = NavigationTrigger_NavigatingTo
+) => {
+  if (!tag || tag === currentPage.value) return;
+  const normalizedNavigationTransitionInfo = normalizeNavigationTransitionInfo(NavigationTransitionInfo);
+  const NavigationLeaveTrigger = NavigationTrigger === NavigationTrigger_BackNavigatingTo
+    ? NavigationTrigger_BackNavigatingAway
+    : NavigationTrigger_NavigatingAway;
+  pageTransitionEnter.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationTrigger);
+  pageTransitionLeave.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationLeaveTrigger);
+  currentPage.value = tag;
+};
+provide('navigate', navigate);
 const onNavigationItemInvoked = args => {
   const item = args?.InvokedItemContainer;
   if (!item || item.SelectsOnInvoked === false) return;
   const tag = item.Tag;
-  if (tag) currentPage.value = tag;
+  if (tag) navigate(tag, navigationTransitionInfo.value);
 };
 const onBackRequested = () => {
   const previousPage = navigationHistory.value.pop();
   if (previousPage) {
     suppressHistoryPush.value = true;
-    currentPage.value = previousPage;
+    navigate(previousPage, navigationTransitionInfo.value, NavigationTrigger_BackNavigatingTo);
   }
 };
-
-const allPages = [
-  ...navMenuItems.flatMap(item => item.MenuItems?.map(child => child.Tag) ?? [item.Tag]),
-  'settings'
-];
 
 function applyTheme(mode) {
   const html = document.documentElement;
@@ -389,7 +427,7 @@ watch(themeSetting, (val) => applyTheme(val), { immediate: true });
 persistSetting('winui-nav-position', navPosition);
 persistSetting('winui-theme-setting', themeSetting);
 persistSetting('winui-material-setting', materialSetting);
-persistSetting('winui-animation-setting', animSetting);
+persistNavigationTransitionInfo(navigationTransitionInfo);
 
 function postUwpSetting(key, value) {
   if (!isHostedInUwpWebView.value || !window.chrome?.webview?.postMessage) return;
@@ -405,25 +443,18 @@ onMounted(() => {
   isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__ || window.chrome?.webview);
   postUwpSetting('theme', themeSetting.value);
   postUwpSetting('material', materialSetting.value);
+  postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(navigationTransitionInfo.value));
 });
 
 watch(themeSetting, (value) => postUwpSetting('theme', value));
 watch(materialSetting, (value) => postUwpSetting('material', value));
+watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(value)));
 
 watch(currentPage, (newVal, oldVal) => {
   if (suppressHistoryPush.value) {
     suppressHistoryPush.value = false;
   } else if (oldVal && oldVal !== newVal && navigationHistory.value[navigationHistory.value.length - 1] !== oldVal) {
     navigationHistory.value.push(oldVal);
-  }
-  const ni = allPages.indexOf(newVal);
-  const oi = allPages.indexOf(oldVal);
-  if (animSetting.value === 'entrance') {
-    pageTransition.value = 'page-transition-up';
-  } else if (animSetting.value === 'fade') {
-    pageTransition.value = 'page-transition-fade';
-  } else {
-    pageTransition.value = ni > oi ? 'page-transition-left' : 'page-transition-right';
   }
 });
 </script>
@@ -511,6 +542,10 @@ watch(currentPage, (newVal, oldVal) => {
     --text-secondary: rgba(0, 0, 0, 0.62);
     --text-tertiary: rgba(0, 0, 0, 0.45);
     --text-disabled: rgba(0, 0, 0, 0.36);
+    --SystemControlForegroundBaseMediumBrush: rgba(0, 0, 0, 0.60);
+    --SystemControlHighlightAltBaseMediumHighBrush: rgba(0, 0, 0, 0.80);
+    --SystemControlHighlightAltBaseHighBrush: #000000;
+    --SystemControlDisabledBaseMediumLowBrush: rgba(0, 0, 0, 0.40);
     --layer-default: rgba(255, 255, 255, 0.50);
     --card-bg: rgba(255, 255, 255, 0.70);
     --card-bg-secondary: rgba(246, 246, 246, 0.50);
@@ -582,6 +617,10 @@ watch(currentPage, (newVal, oldVal) => {
     --text-secondary: rgba(255, 255, 255, 0.77);
     --text-tertiary: rgba(255, 255, 255, 0.53);
     --text-disabled: rgba(255, 255, 255, 0.36);
+    --SystemControlForegroundBaseMediumBrush: rgba(255, 255, 255, 0.60);
+    --SystemControlHighlightAltBaseMediumHighBrush: rgba(255, 255, 255, 0.80);
+    --SystemControlHighlightAltBaseHighBrush: #FFFFFF;
+    --SystemControlDisabledBaseMediumLowBrush: rgba(255, 255, 255, 0.40);
     --layer-default: rgba(58, 58, 58, 0.50);
     --card-bg: #2B2B2B;
     --card-bg-secondary: #252525;
@@ -661,12 +700,16 @@ watch(currentPage, (newVal, oldVal) => {
   }
 
   .page-view {
-    display: none;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     min-width: 0;
     min-height: 0;
     flex: 1 1 auto;
+    overflow: hidden;
   }
 
     .page-view.active {
@@ -682,4 +725,8 @@ watch(currentPage, (newVal, oldVal) => {
       flex: 1 1 auto;
       min-height: 0;
     }
+
+  .win-nav-content-inner {
+    position: relative;
+  }
 </style>
