@@ -12,7 +12,11 @@
       <slot name="header">{{ Header }}</slot>
     </div>
 
-    <div class="win-textbox-border">
+    <div
+      class="win-textbox-border"
+      @pointerenter="onPointerEnter"
+      @pointerleave="onPointerLeave">
+      <div class="win-textbox-focus-border" aria-hidden="true"></div>
       <div class="win-textbox-content">
         <slot
           name="field"
@@ -196,14 +200,16 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   'update:Text': [value: string];
-  TextChanging: [args: { cancel: boolean; isContentChanging: boolean; checkedLength: number; text: string }];
-  TextChanged: [args: { reason: 'UserInput' | 'ProgrammaticChange'; text: string }];
-  SelectionChanged: [args: { selectionStart: number; selectionLength: number; selectedText: string }];
+  BeforeTextChanging: [args: { NewText: string; Cancel: boolean }];
+  TextChanging: [args: { IsContentChanging: boolean }];
+  TextChanged: [];
+  SelectionChanged: [];
+  SelectionChanging: [args: { SelectionStart: number; SelectionLength: number; Cancel: boolean }];
   GotFocus: [];
   LostFocus: [];
-  Paste: [args: { handled: boolean; format: 'Text'; text: string }];
-  CuttingToClipboard: [args: { cancel: boolean; text: string }];
-  CopyingToClipboard: [args: { cancel: boolean; text: string }];
+  Paste: [args: { Handled: boolean }];
+  CuttingToClipboard: [args: { Handled: boolean }];
+  CopyingToClipboard: [args: { Handled: boolean }];
   CandidateWindowBoundsChanged: [args: { rect: DOMRect | { x: number; y: number; width: number; height: number } }];
   TextCompositionStarted: [];
   TextCompositionChanged: [];
@@ -346,7 +352,7 @@ const pushUndo = (previousText: string) => {
   redoStack.value = [];
 };
 
-const emitTextValue = (value: string, reason: 'UserInput' | 'ProgrammaticChange', options: { undo?: boolean } = {}) => {
+const emitTextValue = (value: string, _reason: 'UserInput' | 'ProgrammaticChange', options: { undo?: boolean } = {}) => {
   const previous = currentText.value;
   if (options.undo) pushUndo(previous);
 
@@ -354,7 +360,7 @@ const emitTextValue = (value: string, reason: 'UserInput' | 'ProgrammaticChange'
     localText.value = value;
   }
   emit('update:Text', value);
-  emit('TextChanged', { reason, text: value });
+  emit('TextChanged');
 };
 
 const resizeTextarea = () => {
@@ -382,18 +388,15 @@ const normalizeInput = (value: string) => {
 const onInput = (event: Event) => {
   const element = event.target as HTMLInputElement | HTMLTextAreaElement;
   const nextValue = normalizeInput(element.value);
-  const changingArgs = {
-    cancel: false,
-    isContentChanging: nextValue !== currentText.value,
-    checkedLength: nextValue.length,
-    text: nextValue
-  };
+  const beforeChangingArgs = { NewText: nextValue, Cancel: false };
 
-  emit('TextChanging', changingArgs);
-  if (changingArgs.cancel) {
+  emit('BeforeTextChanging', beforeChangingArgs);
+  if (beforeChangingArgs.Cancel) {
     element.value = currentText.value;
     return;
   }
+
+  emit('TextChanging', { IsContentChanging: nextValue !== currentText.value });
 
   if (element.value !== nextValue) {
     element.value = nextValue;
@@ -444,30 +447,28 @@ const readSelection = () => {
 
 const onSelect = () => {
   const selection = readSelection();
-  emit('SelectionChanged', {
-    selectionStart: selection.start,
-    selectionLength: selection.length,
-    selectedText: selection.text
-  });
+  const changingArgs = { SelectionStart: selection.start, SelectionLength: selection.length, Cancel: false };
+  emit('SelectionChanging', changingArgs);
+  if (changingArgs.Cancel) return;
+  emit('SelectionChanged');
 };
 
 const onCuttingToClipboard = (event: ClipboardEvent) => {
-  const args = { cancel: false, text: readSelection().text };
+  const args = { Handled: false };
   emit('CuttingToClipboard', args);
-  if (args.cancel) event.preventDefault();
+  if (args.Handled) event.preventDefault();
 };
 
 const onCopyingToClipboard = (event: ClipboardEvent) => {
-  const args = { cancel: false, text: readSelection().text };
+  const args = { Handled: false };
   emit('CopyingToClipboard', args);
-  if (args.cancel) event.preventDefault();
+  if (args.Handled) event.preventDefault();
 };
 
 const onPaste = (event: ClipboardEvent) => {
-  const text = event.clipboardData?.getData('text') ?? '';
-  const args = { handled: false, format: 'Text' as const, text };
+  const args = { Handled: false };
   emit('Paste', args);
-  if (args.handled) event.preventDefault();
+  if (args.Handled) event.preventDefault();
 };
 
 const readClipboardText = async () => {
@@ -656,35 +657,31 @@ onBeforeUnmount(() => {
 });
 
 defineExpose({
-  focus,
-  selectAll,
-  select,
-  getRectFromCharacterIndex,
-  undo,
-  redo,
-  copySelectionToClipboard,
-  cutSelectionToClipboard,
-  pasteFromClipboard,
-  clearText,
-  get isContextMenuOpen() {
-    return contextMenuOpen.value || isRestoringContextMenuFocus.value;
-  },
-  get canUndo() {
+  Focus: focus,
+  SelectAll: selectAll,
+  Select: select,
+  GetRectFromCharacterIndex: getRectFromCharacterIndex,
+  Undo: undo,
+  Redo: redo,
+  CopySelectionToClipboard: copySelectionToClipboard,
+  CutSelectionToClipboard: cutSelectionToClipboard,
+  PasteFromClipboard: pasteFromClipboard,
+  get CanUndo() {
     return canUndo.value;
   },
-  get canRedo() {
+  get CanRedo() {
     return canRedo.value;
   },
-  get selectedText() {
+  get SelectedText() {
     return readSelection().text;
   },
-  set selectedText(value: string) {
+  set SelectedText(value: string) {
     replaceSelectedText(value);
   },
-  get selectionStart() {
+  get SelectionStart() {
     return readSelection().start;
   },
-  get selectionLength() {
+  get SelectionLength() {
     return readSelection().length;
   }
 });
@@ -699,7 +696,7 @@ defineExpose({
   --textbox-background-disabled: var(--TextControlBackgroundDisabled, var(--ControlFillColorDisabledBrush, var(--control-fill-color-disabled, var(--ctrl-fill-disabled))));
   --textbox-border-top: var(--ControlStrokeColorDefaultBrush, var(--control-stroke-color-default, var(--ctrl-border-rest)));
   --textbox-border-bottom: var(--ControlStrongStrokeColorDefaultBrush, var(--control-strong-stroke-color-default, var(--ctrl-strong-stroke)));
-  --textbox-border-focused: var(--SystemAccentColorDark1, var(--accent-base));
+  --textbox-border-focused: var(--SystemAccentColorDark1, var(--AccentFillColorDefaultBrush, var(--accent-base)));
   --textbox-foreground: var(--TextControlForeground, var(--TextFillColorPrimaryBrush, var(--text-primary, var(--text-fill-color-primary))));
   --textbox-foreground-pointer-over: var(--TextControlForegroundPointerOver, var(--TextFillColorPrimaryBrush, var(--text-primary, var(--text-fill-color-primary))));
   --textbox-foreground-focused: var(--TextControlForegroundFocused, var(--TextFillColorPrimaryBrush, var(--text-primary, var(--text-fill-color-primary))));
@@ -720,13 +717,15 @@ defineExpose({
 }
 
 :global(html.theme-dark) .win-textbox,
-:global(.example-theme-wrapper.theme-dark) .win-textbox {
-  --textbox-border-focused: var(--SystemAccentColorLight2, var(--accent-hover));
+:global(.example-theme-wrapper.theme-dark) .win-textbox,
+:global(.win-theme-scope.theme-dark) .win-textbox {
+  --textbox-border-focused: var(--SystemAccentColorLight2, var(--AccentFillColorDefaultBrush, var(--accent-base)));
 }
 
 :global(html.theme-light) .win-textbox,
-:global(.example-theme-wrapper.theme-light) .win-textbox {
-  --textbox-border-focused: var(--SystemAccentColorDark1, var(--accent-base));
+:global(.example-theme-wrapper.theme-light) .win-textbox,
+:global(.win-theme-scope.theme-light) .win-textbox {
+  --textbox-border-focused: var(--SystemAccentColorDark1, var(--AccentFillColorDefaultBrush, var(--accent-base)));
 }
 
 .win-textbox-header {
@@ -740,37 +739,33 @@ defineExpose({
 .win-textbox-border {
   position: relative;
   min-height: 32px;
-  overflow: hidden;
+  overflow: visible;
   background: var(--textbox-background);
   border: 1px solid var(--textbox-border-top);
   border-bottom-color: var(--textbox-border-bottom);
   border-radius: 4px;
   box-shadow: inset 0 0 0 transparent;
   box-sizing: border-box;
-  transition:
-    background var(--fast-duration, 100ms),
-    border-color var(--fast-duration, 100ms),
-    box-shadow var(--fast-duration, 100ms);
 }
 
-.win-textbox-border::after {
+.win-textbox-focus-border {
+  position: absolute;
+  inset: -1px;
+  z-index: 4;
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.win-textbox-focus-border::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 3;
-  height: 1px;
-  pointer-events: none;
+  height: 2px;
   background: var(--textbox-border-focused);
-  border-radius: 0 0 4px 4px;
-  clip-path: polygon(0 100%, 2px 0, calc(100% - 2px) 0, 100% 100%);
-  opacity: 0;
-  transform: scaleY(0);
-  transform-origin: bottom;
-  transition:
-    opacity var(--fast-duration, 100ms),
-    transform var(--fast-duration, 100ms);
 }
 
 .win-textbox.is-hovered:not(.is-disabled) .win-textbox-border {
@@ -783,12 +778,10 @@ defineExpose({
 
 .win-textbox.is-focused:not(.is-disabled) .win-textbox-border {
   background: var(--textbox-background-focused);
-  border-bottom-color: var(--textbox-border-focused);
 }
 
-.win-textbox.is-focused:not(.is-disabled) .win-textbox-border::after {
-  opacity: 1;
-  transform: scaleY(1);
+.win-textbox.is-focused:not(.is-disabled) .win-textbox-focus-border {
+  display: block;
 }
 
 .win-textbox-content {

@@ -17,31 +17,31 @@
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.textblock.style-applied')">
-              <template #example><WinTextBlock Style="{StaticResource CustomTextBlockStyle}" Text="I am a styled TextBlock." /></template>
+              <template #example><WinTextBlock Style="{StaticResource CustomTextBlockStyle}" :Text="$t('sample.textblock.styled-text')" /></template>
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template" :headerText="$t('sample.textblock.properties')">
               <template #example>
-                <WinTextBlock CharacterSpacing="200" FontFamily="Arial" FontSize="24" FontStyle="Italic" Foreground="CornflowerBlue" Text="I am super excited to be here!" TextWrapping="WrapWholeWords" />
+                <WinTextBlock CharacterSpacing="200" FontFamily="Arial" FontSize="24" FontStyle="Italic" Foreground="CornflowerBlue" :Text="$t('sample.common.excited-text')" TextWrapping="WrapWholeWords" />
               </template>
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example4Template" :headerText="$t('sample.textblock.inline-elements')">
               <template #example>
                 <WinTextBlock>
-                  <span style="font-family: 'Times New Roman'; color: DarkGray;">Text in a TextBlock doesn't have to be a simple string.</span>
+                  <span style="font-family: 'Times New Roman'; color: DarkGray;">{{ $t('sample.textblock.inline-first') }}</span>
                   <br>
-                  <span>Text can be <strong>bold</strong>, <em>italic</em>, or <u>underlined</u>.</span>
+                  <span>{{ $t('sample.textblock.inline-prefix') }} <strong>{{ $t('sample.textblock.inline-bold') }}</strong>, <em>{{ $t('sample.textblock.inline-italic') }}</em>, {{ $t('sample.textblock.inline-or') }} <u>{{ $t('sample.textblock.inline-underlined') }}</u>.</span>
                 </WinTextBlock>
               </template>
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example5Template" :headerText="$t('sample.textblock.selectable')">
               <template #example>
-                <WinTextBlock :IsTextSelectionEnabled="selectionEnabled" SelectionHighlightColor="DarkOrange" Text="I am a selectable TextBlock with custom SelectionHighlightColor." />
+                <WinTextBlock :IsTextSelectionEnabled="selectionEnabled" SelectionHighlightColor="DarkOrange" :Text="$t('sample.textblock.selectable-text')" />
               </template>
               <template #options>
-                <WinToggleSwitch v-model="selectionEnabled"><WinTextBlock Text="IsTextSelectionEnabled" /></WinToggleSwitch>
+                <WinToggleSwitch v-model="selectionEnabled"><WinTextBlock :Text="$t('sample.textblock.selection-toggle')" /></WinToggleSwitch>
               </template>
             </WinControlExample>
       </div>
@@ -56,26 +56,28 @@ import WinControlExample from '../../components/WinControlExample.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'textblock');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 const selectionEnabled = ref(false);
 
-const example1Template = `<WinTextBlock Text="I am a TextBlock." />`;
-const example2Template = `<WinTextBlock Style="{StaticResource CustomTextBlockStyle}" Text="I am a styled TextBlock." />`;
-const example3Template = `<WinTextBlock CharacterSpacing="200" FontFamily="Arial" FontSize="24" FontStyle="Italic" Foreground="CornflowerBlue" Text="I am super excited to be here!" TextWrapping="WrapWholeWords" />`;
-const example4Template = `<WinTextBlock>
-  <span style="font-family: 'Times New Roman'; color: DarkGray;">Text in a TextBlock doesn't have to be a simple string.</span>
+const example1Template = computed(() => `<WinTextBlock Text="${t('text.i-am-a-textblock')}" />`);
+const example2Template = computed(() => `<WinTextBlock Style="{StaticResource CustomTextBlockStyle}" Text="${t('sample.textblock.styled-text')}" />`);
+const example3Template = computed(() => `<WinTextBlock CharacterSpacing="200" FontFamily="Arial" FontSize="24" FontStyle="Italic" Foreground="CornflowerBlue" Text="${t('sample.common.excited-text')}" TextWrapping="WrapWholeWords" />`);
+const example4Template = computed(() => `<WinTextBlock>
+  <span style="font-family: 'Times New Roman'; color: DarkGray;">${t('sample.textblock.inline-first')}</span>
   <br>
-  <span>Text can be <strong>bold</strong>, <em>italic</em>, or <u>underlined</u>.</span>
-</WinTextBlock>`;
-const example5Template = `<WinTextBlock
+  <span>${t('sample.textblock.inline-prefix')} <strong>${t('sample.textblock.inline-bold')}</strong>, <em>${t('sample.textblock.inline-italic')}</em>, ${t('sample.textblock.inline-or')} <u>${t('sample.textblock.inline-underlined')}</u>.</span>
+</WinTextBlock>`);
+const example5Template = computed(() => `<WinTextBlock
   :IsTextSelectionEnabled="selectionEnabled"
   SelectionHighlightColor="DarkOrange"
-  Text="I am a selectable TextBlock with custom SelectionHighlightColor." />`;
+  Text="${t('sample.textblock.selectable-text')}" />`);
 </script>
 
 <style scoped>

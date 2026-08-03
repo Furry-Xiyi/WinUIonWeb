@@ -1,6 +1,6 @@
 <template>
   <div class="win-nav-shell" :class="shellClasses" :style="paneStyle" ref="shellRef">
-    <nav v-if="isTopNavigation" class="win-nav-top-bar" ref="navRef" @keydown="onNavigationKeydown" @focusin="onNavigationFocusIn">
+    <nav v-if="isTopNavigation" class="win-nav-top-bar" ref="navRef" @keydown="onNavigationKeydown" @focusin="onNavigationFocusIn" @pointerdown.capture="onNavigationPointerDown" @touchstart.capture="onNavigationPointerDown">
       <div class="win-nav-indicator-track" ref="indicatorTrack">
         <div class="win-nav-indicator" :style="indicatorStyle"></div>
       </div>
@@ -65,7 +65,7 @@
         </div>
       </div>
     </nav>
-    <nav v-else class="win-nav-left-panel" :class="['win-nav-left-panel', { 'is-compact': isCompact, 'is-closed-compact': isClosedCompact, 'is-minimal': isLeftMinimalMode, 'has-back-button': showBackButtonInLeftNav, 'has-pane-toggle-button': isPaneToggleButtonVisible }, paneTransition ? `is-pane-${paneTransition}` : '']" :style="paneStyle" ref="navRef" @keydown="onNavigationKeydown" @focusin="onNavigationFocusIn">
+    <nav v-else class="win-nav-left-panel" :class="['win-nav-left-panel', { 'is-compact': isCompact, 'is-closed-compact': isClosedCompact, 'is-minimal': isLeftMinimalMode, 'has-back-button': showBackButtonInLeftNav, 'has-pane-toggle-button': isPaneToggleButtonVisible }, paneTransition ? `is-pane-${paneTransition}` : '']" :style="paneStyle" ref="navRef" @keydown="onNavigationKeydown" @focusin="onNavigationFocusIn" @pointerdown.capture="onNavigationPointerDown" @touchstart.capture="onNavigationPointerDown">
       <button v-if="showBackButtonInLeftNav" class="win-nav-back-button" :class="{ 'is-minimal-pane-open-hidden': !backButtonVisuallyVisible }" :disabled="!canGoBack || !backButtonVisuallyVisible" :aria-hidden="backButtonVisuallyVisible ? undefined : 'true'" :aria-label="t('text.back')" v-bind="{ 'tooltipservice.tooltip': t('text.back') }" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
         <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
       </button>
@@ -168,7 +168,7 @@
               <WinTextBlock class="label" :Text="item.label" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onMoreGroupChevronClick(item)">&#xE70D;</span>
             </div>
-            <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 40) + 'px' : '0px' }">
+            <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 36) + 'px' : '0px' }">
               <div class="win-nav-group-children-inner">
                 <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" role="button" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onMoreChildClick(item, child)">
                   <span v-if="child.icon" class="icon">{{ child.icon }}</span>
@@ -350,7 +350,7 @@ const moreFlyoutOpen = ref(false);
 const moreFlyoutAnchor = ref(null);
 const topAvailableWidth = ref(Number.POSITIVE_INFINITY);
 const topItemWidths = ref({});
-const topMoreButtonWidth = ref(36);
+const topMoreButtonWidth = ref(40);
 const containerWidth = ref(typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
 
 const normalizedPaneDisplayMode = computed(() => props.paneDisplayMode);
@@ -448,6 +448,8 @@ let indicatorAnimationId = 0;
 let compactTransitionTimer = null;
 let paneTransitionTimer = null;
 let suppressNextTopChildWatcherMove = false;
+let lastNavigationPointerDownTime = Number.NEGATIVE_INFINITY;
+let lastResizeShellWidth = 0;
 
 const gearClass = ref('');
 const hamburgerClass = ref('');
@@ -532,14 +534,14 @@ const measureTopItemWidth = (value) => {
   const item = props.menuItems.find(entry => entry.value === value);
   if (!item) return 84;
   const labelWidth = String(item.label || '').length * 7.5;
-  const itemChromeWidth = item.icon ? 48 : 24;
+  const itemChromeWidth = item.icon ? 56 : 32;
   const chevronWidth = item.children ? (item.icon ? 24 : 28) : 0;
   return Math.ceil(labelWidth + itemChromeWidth + chevronWidth);
 };
 
 const getTopItemsWidth = (values) => {
   if (!values.length) return 0;
-  return values.reduce((sum, value) => sum + measureTopItemWidth(value), 0) + (values.length - 1) * 4;
+  return values.reduce((sum, value) => sum + measureTopItemWidth(value), 0);
 };
 
 const topLayout = computed(() => {
@@ -560,7 +562,7 @@ const topLayout = computed(() => {
 
   const selectedRoot = selectedTopRootValue.value;
   const protectedValue = orderedValues.includes(selectedRoot) ? selectedRoot : null;
-  const moreReserve = topMoreButtonWidth.value + 4;
+  const moreReserve = topMoreButtonWidth.value;
   const capacity = Math.max(0, available - moreReserve);
   let visibleValues = [];
 
@@ -839,12 +841,27 @@ const onNavigationKeydown = (event) => {
   }
 };
 
+const onNavigationPointerDown = () => {
+  lastNavigationPointerDownTime = performance.now();
+};
+
 const onNavigationFocusIn = (event) => {
   if (officialProps.SelectionFollowsFocus !== 'Enabled') return;
   const target = event.target?.closest?.('.win-nav-item');
   if (!target || target.classList.contains('is-disabled')) return;
+  // Pointer focus is followed by click invocation. Handling both would move
+  // the indicator during focusin, leaving the click with no distance to animate.
+  // WebKit can report touch focus as :focus-visible, so input modality must be
+  // tracked independently instead of relying on that selector alone.
+  if (performance.now() - lastNavigationPointerDownTime < 1000) return;
+  if (!target.matches(':focus-visible')) return;
   const value = getValueForElement(target);
   if (!value) return;
+
+  if (value === settingsValue.value) {
+    selectSettings();
+    return;
+  }
 
   const item = findNormalizedItem(value);
   if (!item || !item.isEnabled || item.children) return;
@@ -875,7 +892,9 @@ const updateTopNavigationLayout = () => {
     const nextWidths = {};
     measureEl.querySelectorAll('[data-value]').forEach((el) => {
       const value = el.getAttribute('data-value');
-      const width = Math.ceil(el.getBoundingClientRect().width);
+      const style = getComputedStyle(el);
+      const marginWidth = Number.parseFloat(style.marginLeft || '0') + Number.parseFloat(style.marginRight || '0');
+      const width = Math.ceil(el.getBoundingClientRect().width + marginWidth);
       if (value === '__more') {
         topMoreButtonWidth.value = width;
       } else if (value) {
@@ -1315,24 +1334,19 @@ const calcIndicator = () => {
   const targetRect = getItemRectRelTrack(lastSelectedEl);
   const sourceRect = sourceEl && navRef.value.contains(sourceEl) ? getItemRectRelTrack(sourceEl) : null;
 
+  // A self-intersecting polygon rasterizes differently in WebKit while the
+  // child changes size. A single inset bounds the same stretch corridor and
+  // keeps the existing keyframes, timing and easing browser-independent.
   const makeClipX = (r1, r2) => {
-    if (!r2) return `polygon(${r1.left}px 0%, ${r1.right}px 0%, ${r1.right}px 100%, ${r1.left}px 100%)`;
-    const left1 = Math.min(r1.left, r2.left);
-    const right1 = r1.left < r2.left ? r1.right : r2.right;
-    const left2 = r1.left < r2.left ? r2.left : r1.left;
-    const right2 = Math.max(r1.right, r2.right);
-    if (right1 >= left2) return `polygon(${left1}px 0%, ${right2}px 0%, ${right2}px 100%, ${left1}px 100%)`;
-    return `polygon(${left1}px 0%, ${right1}px 0%, ${right1}px 100%, ${left1}px 100%, ${left1}px 0%, ${left2}px 0%, ${left2}px 100%, ${right2}px 100%, ${right2}px 0%, ${left2}px 0%)`;
+    const left = Math.max(0, Math.min(r1.left, r2?.left ?? r1.left));
+    const right = Math.min(trackRect.width, Math.max(r1.right, r2?.right ?? r1.right));
+    return `inset(0px ${Math.max(0, trackRect.width - right)}px 0px ${left}px)`;
   };
 
   const makeClipY = (r1, r2) => {
-    if (!r2) return `polygon(0% ${r1.top}px, 100% ${r1.top}px, 100% ${r1.bottom}px, 0% ${r1.bottom}px)`;
-    const top1 = Math.min(r1.top, r2.top);
-    const bottom1 = r1.top < r2.top ? r1.bottom : r2.bottom;
-    const top2 = r1.top < r2.top ? r2.top : r1.top;
-    const bottom2 = Math.max(r1.bottom, r2.bottom);
-    if (bottom1 >= top2) return `polygon(0% ${top1}px, 100% ${top1}px, 100% ${bottom2}px, 0% ${bottom2}px)`;
-    return `polygon(0% ${top1}px, 100% ${top1}px, 100% ${bottom1}px, 0% ${bottom1}px, 0% ${top2}px, 100% ${top2}px, 100% ${bottom2}px, 0% ${bottom2}px)`;
+    const top = Math.max(0, Math.min(r1.top, r2?.top ?? r1.top));
+    const bottom = Math.min(trackRect.height, Math.max(r1.bottom, r2?.bottom ?? r1.bottom));
+    return `inset(${top}px 0px ${Math.max(0, trackRect.height - bottom)}px 0px)`;
   };
 
   const getRegion = (el) => {
@@ -1388,10 +1402,11 @@ const calcIndicator = () => {
     }
 
     const animationId = nextIndicatorAnimation(indicatorEl);
-    // Top navigation items share one horizontal depth, including the footer
-    // and settings items. Only a missing source (for example while overflow
-    // is being reparented) should skip the stretch animation.
-    const topContinuousMove = !!sourceRect && Math.abs(sourceRect.top - targetRect.top) < 1;
+    const sourceRegion = sourceEl ? getRegion(sourceEl) : getRegion(lastSelectedEl);
+    const targetRegion = getRegion(lastSelectedEl);
+    const topContinuousMove = !!sourceRect
+      && Math.abs(sourceRect.top - targetRect.top) < 1
+      && sourceRegion === targetRegion;
 
     if (topContinuousMove) {
       indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
@@ -1404,7 +1419,20 @@ const calcIndicator = () => {
     }
 
     track.style.clipPath = makeClipX(targetRect, null);
-    indicatorStyle.value = { transform: `translateX(${newX}px)`, width: '16px', opacity: '1', transition: 'none' };
+    indicatorStyle.value = { transform: `translateX(${oldX}px)`, width: '16px', opacity: '1', transition: 'none' };
+    const movingRight = newX > oldX;
+    const collapseKf = movingRight
+      ? [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateX(${oldX + 16}px)`, width: '0px', offset: 1 }]
+      : [{ transform: `translateX(${oldX}px)`, width: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateX(${oldX}px)`, width: '0px', offset: 1 }];
+    const expandKf = movingRight
+      ? [{ transform: `translateX(${newX}px)`, width: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }]
+      : [{ transform: `translateX(${newX + 16}px)`, width: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateX(${newX}px)`, width: '16px', offset: 1 }];
+    const collapseAnim = indicatorEl.animate(collapseKf, { duration: 300, fill: 'forwards' });
+    collapseAnim.onfinish = () => {
+      if (animationId !== indicatorAnimationId) return;
+      const expandAnim = indicatorEl.animate(expandKf, { duration: 300, fill: 'forwards' });
+      expandAnim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateX(${newX}px)`, 'x', '16px'); };
+    };
 
   } else {
     const newY = elRect.top - trackRect.top + elRect.height / 2 - 8;
@@ -1525,13 +1553,22 @@ const restoreIndicatorAfterPaneLayout = () => {
 
 let resizeTimer = null;
 const onResize = () => {
+  const nextShellWidth = shellRef.value?.getBoundingClientRect().width || window.innerWidth;
+  const shellWidthChanged = Math.abs(nextShellWidth - lastResizeShellWidth) >= 0.5;
+  lastResizeShellWidth = nextShellWidth;
   // Width participates in display-mode resolution only for Auto. Fixed Left,
   // LeftCompact, LeftMinimal, and Top instances must not re-enter responsive
   // mode merely because their parent example is resized.
   if (normalizedPaneDisplayMode.value === 'Auto') {
-    containerWidth.value = shellRef.value?.getBoundingClientRect().width || (typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
+    containerWidth.value = nextShellWidth || (typeof window === 'undefined' ? props.expandedModeThresholdWidth : window.innerWidth);
   }
   updateTopNavigationLayout();
+  const activeIndicator = indicatorTrack.value?.querySelector('.win-nav-indicator');
+  const indicatorIsAnimating = activeIndicator?.getAnimations().some(animation => animation.playState === 'running');
+  // iOS changes the visual viewport height as browser chrome moves and emits
+  // resize during a tap. The item geometry is unchanged, so do not cancel and
+  // restart an in-flight selection animation for a height-only resize.
+  if (!shellWidthChanged && indicatorIsAnimating) return;
   skipTransition = true;
   if (resizeTimer) cancelAnimationFrame(resizeTimer);
   if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) {
@@ -1654,6 +1691,7 @@ const initIndicator = () => {
 
 onMounted(() => {
   containerWidth.value = shellRef.value?.getBoundingClientRect().width || window.innerWidth;
+  lastResizeShellWidth = containerWidth.value;
   syncDisplayMode();
   rebindRo();
   layoutObserver = new MutationObserver(queueLayoutRefresh);
@@ -1893,28 +1931,28 @@ watch(() => props.selectedValue, (val) => {
     transition: background var(--normal-duration) var(--fast-out-slow-in);
   }
 
-  .win-nav-shell.is-left .win-nav-content {
+  .win-nav-shell.is-left > .win-nav-content {
     border-radius: 8px 0 0 0;
     border-top: 1px solid var(--ctrl-border-rest);
     border-left: 1px solid var(--ctrl-border-rest);
   }
 
-  .win-nav-shell.is-overlay-left .win-nav-content {
+  .win-nav-shell.is-overlay-left > .win-nav-content {
     margin-left: 0;
   }
 
-  .win-nav-shell.is-left-compact .win-nav-content {
+  .win-nav-shell.is-left-compact > .win-nav-content {
     /* Keep the compact rail in the layout at all times.  The overlay pane
        opens above this fixed rail, so toggling it never remeasures the page. */
     margin-left: var(--win-nav-compact-pane-length, 48px);
   }
 
-  .win-nav-shell.is-left-minimal .win-nav-content {
+  .win-nav-shell.is-left-minimal > .win-nav-content {
     border-left: 0;
     border-radius: 0;
   }
 
-  .win-nav-shell.is-top .win-nav-content {
+  .win-nav-shell.is-top > .win-nav-content {
     border-top: 1px solid var(--ctrl-border-rest);
     border-radius: 0;
   }
@@ -1934,12 +1972,12 @@ watch(() => props.selectedValue, (val) => {
     pointer-events: none;
   }
 
-  .win-nav-shell.is-pane-hidden .win-nav-left-panel,
-  .win-nav-shell.is-pane-hidden .win-nav-top-bar {
+  .win-nav-shell.is-pane-hidden > .win-nav-left-panel,
+  .win-nav-shell.is-pane-hidden > .win-nav-top-bar {
     display: none;
   }
 
-  .win-nav-shell.is-pane-hidden.is-left-compact .win-nav-content {
+  .win-nav-shell.is-pane-hidden.is-left-compact > .win-nav-content {
     margin-left: 0;
   }
 
@@ -1963,7 +2001,7 @@ watch(() => props.selectedValue, (val) => {
     font-weight: inherit;
   }
 
-  .win-nav-shell.is-top .win-nav-page-header {
+  .win-nav-shell.is-top > .win-nav-content > .win-nav-page-header {
     min-height: 40px;
     margin: 0;
     padding: 0 32px;
@@ -1993,7 +2031,7 @@ watch(() => props.selectedValue, (val) => {
     display: contents;
   }
 
-  .win-nav-shell.is-overlay-left .win-nav-left-panel {
+  .win-nav-shell.is-overlay-left > .win-nav-left-panel {
       position: absolute;
       top: 0;
       left: 0;
@@ -2009,20 +2047,20 @@ watch(() => props.selectedValue, (val) => {
       transition: clip-path var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)), background var(--normal-duration) var(--fast-out-slow-in), box-shadow var(--win-nav-pane-duration, 350ms) linear;
     }
 
-    html.winui-webview-host .win-nav-shell.is-overlay-left .win-nav-left-panel:not(.is-compact) {
+    html.winui-webview-host .win-nav-shell.is-overlay-left > .win-nav-left-panel:not(.is-compact) {
       background: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
       -webkit-backdrop-filter: var(--flyout-backdrop);
       backdrop-filter: var(--flyout-backdrop);
     }
 
-    .win-nav-shell.is-overlay-left .win-nav-left-panel.is-compact {
+    .win-nav-shell.is-overlay-left > .win-nav-left-panel.is-compact {
       width: var(--win-nav-open-pane-length, 320px);
       clip-path: inset(0 calc(var(--win-nav-open-pane-length, 320px) - var(--win-nav-compact-pane-length, 48px)) 0 0);
       box-shadow: none;
       border-radius: 0;
     }
 
-    .win-nav-shell.is-left-compact .win-nav-left-panel.is-compact {
+    .win-nav-shell.is-left-compact > .win-nav-left-panel.is-compact {
       /* The closed compact pane shares the normal Left rail surface. The
          shell background supplies the solid fill; the pane itself remains
          transparent just like PaneNotOverlaying in the native template. */
@@ -2031,15 +2069,15 @@ watch(() => props.selectedValue, (val) => {
       backdrop-filter: none;
     }
 
-    .win-nav-shell.is-left-compact .win-nav-left-panel,
-    html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-compact .win-nav-left-panel {
+    .win-nav-shell.is-left-compact > .win-nav-left-panel,
+    html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-compact > .win-nav-left-panel {
       background: transparent;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
       box-shadow: none;
     }
 
-    .win-nav-shell.is-left-compact .win-nav-left-panel::after {
+    .win-nav-shell.is-left-compact > .win-nav-left-panel::after {
       content: '';
       position: absolute;
       inset: 0 auto 0 0;
@@ -2055,29 +2093,29 @@ watch(() => props.selectedValue, (val) => {
       transition: opacity var(--win-nav-pane-duration, 350ms) linear;
     }
 
-    .win-nav-shell.is-left-compact .win-nav-left-panel.is-compact::after {
+    .win-nav-shell.is-left-compact > .win-nav-left-panel.is-compact::after {
       opacity: 0;
     }
 
-    .win-nav-shell.is-left-compact .win-nav-left-panel > .win-nav-back-button,
-    .win-nav-shell.is-left-compact .win-nav-left-panel > .win-nav-pane-command-row,
-    .win-nav-shell.is-left-compact .win-nav-left-panel > .win-nav-pane-surface > *:not(.win-nav-indicator-track) {
+    .win-nav-shell.is-left-compact > .win-nav-left-panel > .win-nav-back-button,
+    .win-nav-shell.is-left-compact > .win-nav-left-panel > .win-nav-pane-command-row,
+    .win-nav-shell.is-left-compact > .win-nav-left-panel > .win-nav-pane-surface > *:not(.win-nav-indicator-track) {
       position: relative;
       z-index: 2;
     }
 
-    .win-nav-shell.is-left-compact .win-nav-left-panel > .win-nav-pane-surface > .win-nav-indicator-track {
+    .win-nav-shell.is-left-compact > .win-nav-left-panel > .win-nav-pane-surface > .win-nav-indicator-track {
       position: absolute;
       z-index: 3;
     }
 
-    .win-nav-shell:not(.is-overlay-left) .win-nav-left-panel.is-compact {
+    .win-nav-shell:not(.is-overlay-left) > .win-nav-left-panel.is-compact {
       width: var(--win-nav-open-pane-length, 320px);
       margin-right: calc(var(--win-nav-compact-pane-length, 48px) - var(--win-nav-open-pane-length, 320px));
       clip-path: inset(0 calc(var(--win-nav-open-pane-length, 320px) - var(--win-nav-compact-pane-length, 48px)) 0 0);
     }
 
-    .win-nav-shell.is-left-minimal .win-nav-left-panel.is-compact {
+    .win-nav-shell.is-left-minimal > .win-nav-left-panel.is-compact {
       background: transparent;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -2086,7 +2124,7 @@ watch(() => props.selectedValue, (val) => {
       pointer-events: none;
     }
 
-    .win-nav-shell.is-left-minimal .win-nav-left-panel.is-compact.is-pane-closing {
+    .win-nav-shell.is-left-minimal > .win-nav-left-panel.is-compact.is-pane-closing {
       background: transparent;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -2113,7 +2151,7 @@ watch(() => props.selectedValue, (val) => {
       z-index: 3;
     }
 
-  .win-nav-shell.is-left-minimal .win-nav-left-panel {
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel {
     background: transparent;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -2124,15 +2162,15 @@ watch(() => props.selectedValue, (val) => {
   /* The host acrylic rule has a stronger selector than the minimal reset.
      Keep minimal to one pane surface instead of stacking a second translucent
      overlay behind it. */
-  .win-nav-shell.is-overlay-left.is-left-minimal .win-nav-left-panel,
-  html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-minimal .win-nav-left-panel {
+  .win-nav-shell.is-overlay-left.is-left-minimal > .win-nav-left-panel,
+  html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-minimal > .win-nav-left-panel {
     background: transparent;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: none;
   }
 
-  .win-nav-shell.is-left-minimal .win-nav-pane-surface {
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface {
     position: absolute;
     left: 0;
     right: 0;
@@ -2154,26 +2192,26 @@ watch(() => props.selectedValue, (val) => {
     transform-origin: left center;
   }
 
-  .win-nav-shell.is-left-minimal .win-nav-left-panel.has-back-button .win-nav-pane-surface,
-  .win-nav-shell.is-left-minimal .win-nav-left-panel.has-pane-toggle-button .win-nav-pane-surface {
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel.has-back-button > .win-nav-pane-surface,
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel.has-pane-toggle-button > .win-nav-pane-surface {
     padding-top: 48px;
   }
 
-  .win-nav-shell.is-left-minimal .win-nav-left-panel.has-back-button.has-pane-toggle-button .win-nav-pane-surface {
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel.has-back-button.has-pane-toggle-button > .win-nav-pane-surface {
     padding-top: 88px;
   }
 
-  .win-nav-shell.is-left-minimal .win-nav-left-panel.is-pane-opening .win-nav-pane-surface {
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel.is-pane-opening > .win-nav-pane-surface {
     animation: win-nav-minimal-pane var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)) both;
   }
 
-  .win-nav-shell.is-left-minimal .win-nav-left-panel.is-pane-closing .win-nav-pane-surface {
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel.is-pane-closing > .win-nav-pane-surface {
     animation: win-nav-minimal-pane var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)) reverse both;
     pointer-events: none;
   }
 
-  .win-nav-shell.is-left-minimal .win-nav-left-panel > .win-nav-back-button,
-  .win-nav-shell.is-left-minimal .win-nav-left-panel > .win-nav-pane-command-row {
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-back-button,
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-command-row {
     position: relative;
     z-index: 4;
     pointer-events: auto;
@@ -2184,11 +2222,11 @@ watch(() => props.selectedValue, (val) => {
     to { transform: translateX(0); }
   }
 
-  .win-nav-shell:not(.is-overlay-left):not(.is-left-compact) .win-nav-left-panel.is-pane-opening + .win-nav-content {
+  .win-nav-shell:not(.is-overlay-left):not(.is-left-compact) > .win-nav-left-panel.is-pane-opening + .win-nav-content {
     animation: win-nav-inline-content-opening var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
   }
 
-  .win-nav-shell:not(.is-overlay-left):not(.is-left-compact) .win-nav-left-panel.is-pane-closing + .win-nav-content {
+  .win-nav-shell:not(.is-overlay-left):not(.is-left-compact) > .win-nav-left-panel.is-pane-closing + .win-nav-content {
     animation: win-nav-inline-content-closing var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
   }
 
@@ -2415,7 +2453,7 @@ watch(() => props.selectedValue, (val) => {
     line-height: 16px;
   }
 
-  .win-nav-shell.is-overlay-left .win-nav-footer {
+  .win-nav-shell.is-overlay-left > .win-nav-left-panel .win-nav-footer {
     background: transparent;
   }
 
@@ -2569,7 +2607,7 @@ watch(() => props.selectedValue, (val) => {
     top: -10000px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 0;
     height: 48px;
     visibility: hidden;
     pointer-events: none;
@@ -2585,7 +2623,7 @@ watch(() => props.selectedValue, (val) => {
     .win-nav-top-bar .win-nav-menu {
       flex-direction: row;
       align-items: center;
-      gap: 4px;
+      gap: 0;
       height: 100%;
     }
 
@@ -2730,6 +2768,10 @@ watch(() => props.selectedValue, (val) => {
     border-radius: 2px;
     pointer-events: none;
     z-index: 10;
+    contain: layout paint;
+    will-change: transform, width, height;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 
   .win-nav-left-panel .win-nav-indicator {
@@ -2751,9 +2793,43 @@ watch(() => props.selectedValue, (val) => {
     height: 3px;
   }
 
-  .win-nav-top-bar .win-nav-item {
-    justify-content: center;
-    padding: 0 12px;
+  .win-nav-top-bar .win-nav-item,
+  .win-nav-top-measure .win-nav-item {
+    color: var(--text-primary);
+  }
+
+  .win-nav-top-bar .win-nav-item:not(.win-nav-more-button):not(.win-nav-settings-item),
+  .win-nav-top-measure .win-nav-item:not(.win-nav-more-button) {
+    box-sizing: border-box;
+    width: max-content;
+    height: 40px;
+    min-height: 40px;
+    margin: 2px 4px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    justify-content: start;
+  }
+
+  .win-nav-top-bar .win-nav-item:not(.win-nav-more-button):not(.win-nav-settings-item) > .icon:not(.win-nav-group-chevron),
+  .win-nav-top-measure .win-nav-item:not(.win-nav-more-button) > .icon:not(.win-nav-group-chevron) {
+    grid-column: 1;
+    width: 16px;
+    min-width: 16px;
+    margin: 0 0 0 12px;
+    top: 0;
+  }
+
+  .win-nav-top-bar .win-nav-item:not(.win-nav-more-button):not(.win-nav-settings-item) > .label,
+  .win-nav-top-measure .win-nav-item:not(.win-nav-more-button) > .label {
+    grid-column: 2;
+    margin: 0 12px;
+  }
+
+  .win-nav-top-bar .win-nav-item:has(> .icon:not(.win-nav-group-chevron)):not(.win-nav-more-button):not(.win-nav-settings-item) > .label,
+  .win-nav-top-measure .win-nav-item:has(> .icon:not(.win-nav-group-chevron)):not(.win-nav-more-button) > .label {
+    margin-left: 8px;
   }
 
   .win-nav-top-bar .win-nav-item-header,
@@ -2773,20 +2849,31 @@ watch(() => props.selectedValue, (val) => {
     .win-nav-top-bar .win-nav-more-button,
     .win-nav-top-measure .win-nav-more-button {
       box-sizing: border-box;
-      width: 36px;
-      min-width: 36px;
-      max-width: 36px;
-      height: 36px;
-      min-height: 36px;
-      max-height: 36px;
+      width: 40px;
+      min-width: 40px;
+      max-width: 40px;
+      height: 40px;
+      min-height: 40px;
+      max-height: 40px;
+      margin: 0;
       padding: 0;
+      display: flex;
+      align-items: center;
       justify-content: center;
     }
 
       .win-nav-top-bar .win-nav-more-button .icon,
       .win-nav-top-measure .win-nav-more-button .icon {
-        margin-right: 0;
+        top: 0;
+        width: 20px;
+        min-width: 20px;
+        height: 20px;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         font-size: 20px;
+        line-height: 20px;
       }
 
       .win-nav-top-bar .win-nav-more-button .icon:only-child,
@@ -2801,6 +2888,7 @@ watch(() => props.selectedValue, (val) => {
 
     .win-nav-top-bar .win-nav-item:not(.is-disabled):hover {
       background: var(--subtle-secondary);
+      color: var(--text-primary);
     }
 
     .win-nav-top-bar .win-nav-item:not(.is-disabled):active {
@@ -2808,23 +2896,20 @@ watch(() => props.selectedValue, (val) => {
       color: var(--text-secondary);
     }
 
-    .win-nav-top-bar .win-nav-item.is-selected:not(.is-disabled):active {
-      background: transparent;
-      color: var(--text-secondary);
-    }
-
     .win-nav-top-bar .win-nav-item.is-selected {
       background: transparent;
+      color: var(--text-primary);
     }
 
       .win-nav-top-bar .win-nav-item.is-selected:not(.is-disabled):hover {
         background: transparent;
+        color: var(--text-primary);
       }
 
-    .win-nav-top-bar .win-nav-item .icon {
-      margin-right: 8px;
-      top: 0.5px;
-    }
+      .win-nav-top-bar .win-nav-item.is-selected:not(.is-disabled):active {
+        background: transparent;
+        color: var(--text-secondary);
+      }
 
   .win-nav-top-bar .win-nav-settings-item .label {
     display: none;
@@ -2832,23 +2917,26 @@ watch(() => props.selectedValue, (val) => {
 
   .win-nav-top-bar .win-nav-settings-item {
     box-sizing: border-box;
-    width: 36px;
-    min-width: 36px;
-    max-width: 36px;
-    height: 36px;
-    min-height: 36px;
-    max-height: 36px;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
     padding: 0;
-    margin: 2px 0;
+    margin: 2px 4px;
+    display: flex;
+    align-items: center;
     justify-content: center;
   }
 
   .win-nav-top-bar .win-nav-settings-item .icon {
-    margin-right: 0;
+    margin: 0;
+    top: 0;
   }
 
-  .win-nav-shell.is-top .win-nav-content,
-  .win-nav-shell.is-top .win-nav-content-inner {
+  .win-nav-shell.is-top > .win-nav-content,
+  .win-nav-shell.is-top > .win-nav-content > .win-nav-content-inner {
     border-radius: 0 !important;
   }
 
@@ -2914,21 +3002,21 @@ watch(() => props.selectedValue, (val) => {
     background: transparent;
   }
 
-  .win-nav-top-bar .win-nav-group-header .win-nav-group-chevron {
-    margin-left: auto;
-    margin-right: 0;
+  .win-nav-top-bar .win-nav-group-header > .win-nav-group-chevron,
+  .win-nav-top-measure .win-nav-item > .win-nav-group-chevron {
+    grid-column: 3;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    margin: 0 0 0 -12px;
     font-size: 8px;
     transform: rotate(0deg);
     transition: transform 200ms var(--fast-out-slow-in);
   }
 
-  .win-nav-top-bar .win-nav-group-header > .label:first-child + .win-nav-group-chevron {
-    margin-left: auto;
-  }
-
-  .win-nav-more-panel .win-nav-group-header .win-nav-group-chevron {
-    margin-left: auto;
-    margin-right: -14px;
+  .win-nav-top-bar .win-nav-group-header:has(> .icon:not(.win-nav-group-chevron)) > .win-nav-group-chevron,
+  .win-nav-top-measure .win-nav-item:has(> .icon:not(.win-nav-group-chevron)) > .win-nav-group-chevron {
+    margin-left: -16px;
   }
 
     .win-nav-top-bar .win-nav-group-header .win-nav-group-chevron.chevron-open {
@@ -2950,10 +3038,12 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-more-panel {
-    min-width: 220px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    width: max-content;
+    min-width: 0;
+    max-width: min(320px, calc(100vw - 16px));
+    display: grid;
+    grid-template-columns: max-content;
+    justify-items: stretch;
   }
 
   .win-nav-more-title {
@@ -2966,7 +3056,85 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-more-panel .win-nav-item {
+    box-sizing: border-box;
+    width: auto;
+    height: 36px;
+    min-height: 36px;
+    margin: 0;
+    padding: 0 14px 0 0;
+    display: grid;
+    grid-template-columns: auto minmax(max-content, 1fr) auto auto;
+    align-items: center;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-primary);
+  }
+
+  .win-nav-more-panel > .win-nav-group {
     width: 100%;
+  }
+
+  .win-nav-more-panel .win-nav-item > .icon:not(.win-nav-group-chevron) {
+    grid-column: 1;
+    width: 16px;
+    min-width: 16px;
+    margin: 0 0 0 16px;
+  }
+
+  .win-nav-more-panel .win-nav-item > .label {
+    grid-column: 2;
+    margin: 0 20px 0 16px;
+  }
+
+  .win-nav-more-panel .win-nav-item:has(> .icon:not(.win-nav-group-chevron)) > .label {
+    margin-left: 12px;
+  }
+
+  .win-nav-more-panel .win-nav-group-header > .win-nav-group-chevron {
+    grid-column: 4;
+    box-sizing: border-box;
+    width: 40px;
+    min-width: 40px;
+    height: 36px;
+    margin: 0 -8px 0 -4px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .win-nav-more-panel .win-nav-item:not(.is-disabled):hover {
+    background: var(--subtle-secondary);
+    color: var(--text-primary);
+  }
+
+  .win-nav-more-panel .win-nav-item:not(.is-disabled):active {
+    background: var(--subtle-tertiary);
+    color: var(--text-secondary);
+  }
+
+  .win-nav-more-panel .win-nav-item.is-selected {
+    background: var(--subtle-secondary);
+    color: var(--text-primary);
+  }
+
+  .win-nav-more-panel .win-nav-item.is-selected:not(.is-disabled):hover {
+    background: var(--subtle-tertiary);
+    color: var(--text-primary);
+  }
+
+  .win-nav-more-panel .win-nav-item.is-selected:not(.is-disabled):active {
+    background: var(--subtle-secondary);
+    color: var(--text-secondary);
+  }
+
+  .win-nav-more-panel .win-nav-group-child {
+    padding-left: 28px;
+  }
+
+  .win-menu-flyout:has(.win-nav-more-panel) {
+    --flyout-scroll-max-height: calc(var(--flyout-max-height, 70vh) - 6px);
+    padding: 2px 0;
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -355,6 +355,7 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 
 .win-menu-flyout {
   position: relative;
+  --flyout-scroll-max-height: calc(var(--flyout-max-height, 600px) - 10px);
   min-width: var(--flyout-min-width, 20px);
   max-height: var(--flyout-max-height, 600px);
   padding: 4px;
@@ -380,7 +381,12 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 .win-menu-flyout-scroll {
   display: flex;
   flex-direction: column;
-  max-height: var(--flyout-max-height, 70vh);
+  max-height: var(--flyout-scroll-max-height, 70vh);
+}
+
+.win-menu-flyout-scroll > .win-scroll-viewer-viewport {
+  height: auto;
+  max-height: inherit;
 }
 
 .win-menu-flyout-scroll :deep(.scroll-content) {

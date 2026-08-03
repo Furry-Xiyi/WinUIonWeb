@@ -45,8 +45,8 @@
       <div
         v-if="isOpen && suggestionItems.length"
         ref="popupRef"
-        class="win-asb-popup"
-        :class="openDirection === 'up' ? 'opens-up' : 'opens-down'"
+        class="win-asb-popup win-theme-scope"
+        :class="[openDirection === 'up' ? 'opens-up' : 'opens-down', popupThemeClass]"
         :style="popupStyle"
         role="listbox">
         <WinScrollViewer
@@ -77,13 +77,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from './i18n/index';
-
-const { t } = useI18n();
-import type { CSSProperties } from 'vue';
+import type { ComputedRef, CSSProperties } from 'vue';
 import WinScrollViewer from './WinScrollViewer.vue';
 import WinTextBox from './WinTextBox.vue';
+
+const { t } = useI18n();
 
 type Suggestion = string | number | Record<string, unknown>;
 type TextChangedReason = 'UserInput' | 'ProgrammaticChange' | 'SuggestionChosen';
@@ -129,9 +129,9 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   'update:Text': [value: string];
   'update:IsSuggestionListOpen': [value: boolean];
-  TextChanged: [args: { text: string; reason: TextChangedReason }];
-  SuggestionChosen: [args: { selectedItem: Suggestion }];
-  QuerySubmitted: [args: { queryText: string; chosenSuggestion: Suggestion | null }];
+  TextChanged: [args: { Reason: TextChangedReason }];
+  SuggestionChosen: [args: { SelectedItem: Suggestion }];
+  QuerySubmitted: [args: { QueryText: string; ChosenSuggestion: Suggestion | null }];
 }>();
 
 const rootRef = ref<HTMLElement | null>(null);
@@ -143,11 +143,17 @@ const highlightedIndex = ref(-1);
 const popupStyle = ref<CSSProperties & Record<string, string>>({});
 const openDirection = ref<'up' | 'down'>('down');
 const candidateWindowGap = ref(0);
+const inheritedTheme = inject<ComputedRef<'light' | 'dark'> | null>('winuiTheme', null);
+const anchorTheme = ref<'light' | 'dark' | ''>('');
 
 const isOpen = computed(() => localOpen.value && props.IsEnabled);
 const suggestionItems = computed(() => props.ItemsSource ?? []);
 const currentText = computed(() => props.Text ?? localText.value);
 const resolvedQueryIcon = computed(() => props.QueryIcon === 'Find' ? '\uE721' : props.QueryIcon);
+const popupThemeClass = computed(() => {
+  const theme = inheritedTheme?.value || anchorTheme.value;
+  return theme === 'light' || theme === 'dark' ? `theme-${theme}` : '';
+});
 const rootStyle = computed<CSSProperties & Record<string, string | undefined>>(() => ({
   width: props.Width === '' ? undefined : typeof props.Width === 'number' ? `${props.Width}px` : props.Width,
   '--asb-input-bottom-radius': isOpen.value && openDirection.value === 'down' ? '0' : '4px'
@@ -185,7 +191,7 @@ const setOpen = async (value: boolean) => {
 const onTextInput = (value: string) => {
   localText.value = value;
   emit('update:Text', value);
-  emit('TextChanged', { text: value, reason: 'UserInput' });
+  emit('TextChanged', { Reason: 'UserInput' });
   void setOpen(suggestionItems.value.length > 0);
 };
 
@@ -201,17 +207,17 @@ const chooseSuggestion = (index: number) => {
   const item = suggestionItems.value[index];
   if (item === undefined || isNoResultsItem(item)) return;
   const text = getItemText(item);
-  emit('SuggestionChosen', { selectedItem: item });
+  emit('SuggestionChosen', { SelectedItem: item });
   if (props.UpdateTextOnSelect) {
     localText.value = text;
     emit('update:Text', text);
-    emit('TextChanged', { text, reason: 'SuggestionChosen' });
+    emit('TextChanged', { Reason: 'SuggestionChosen' });
   }
   submitQuery(item, text);
 };
 
 const submitQuery = (chosenSuggestion: Suggestion | null = null, queryText = currentText.value) => {
-  emit('QuerySubmitted', { queryText, chosenSuggestion });
+  emit('QuerySubmitted', { QueryText: queryText, ChosenSuggestion: chosenSuggestion });
   void setOpen(false);
 };
 
@@ -240,7 +246,15 @@ const onKeydown = (event: KeyboardEvent) => {
   }
 };
 
+const resolveAnchorTheme = () => {
+  const themeScope = rootRef.value?.closest('.theme-light, .theme-dark');
+  if (themeScope?.classList.contains('theme-dark')) return 'dark';
+  if (themeScope?.classList.contains('theme-light')) return 'light';
+  return '';
+};
+
 const updatePopupPosition = () => {
+  anchorTheme.value = resolveAnchorTheme();
   const rect = anchorRef.value?.getBoundingClientRect() ?? rootRef.value?.getBoundingClientRect();
   if (!rect) return;
   const maxHeight = typeof props.MaxSuggestionListHeight === 'number' ? props.MaxSuggestionListHeight : Number(props.MaxSuggestionListHeight) || 300;
@@ -302,7 +316,7 @@ const onDocumentPointerDown = (event: PointerEvent) => {
 
 watch(() => props.Text, (value) => {
   localText.value = value ?? '';
-  emit('TextChanged', { text: localText.value, reason: 'ProgrammaticChange' });
+  emit('TextChanged', { Reason: 'ProgrammaticChange' });
 });
 
 watch(() => props.IsSuggestionListOpen, (value) => setOpen(Boolean(value)));

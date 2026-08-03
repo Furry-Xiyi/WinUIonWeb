@@ -40,7 +40,8 @@
     <Teleport to="body">
       <div
         v-if="compactPopupOpen"
-        class="win-number-compact-popup"
+        class="win-number-compact-popup win-theme-scope"
+        :class="compactPopupThemeClass"
         :style="compactPopupStyle"
         @pointerdown.prevent>
         <button type="button" class="win-number-popup-button" :disabled="!canIncrease" @click="changeBy(SmallChange)">
@@ -55,8 +56,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import type { CSSProperties } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { ComputedRef, CSSProperties } from 'vue';
 import WinTextBox from './WinTextBox.vue';
 
 type SpinPlacement = 'Hidden' | 'Compact' | 'Inline';
@@ -116,16 +117,28 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   'update:Value': [value: number];
   'update:Text': [value: string];
-  ValueChanged: [args: { oldValue: number; newValue: number }];
+  ValueChanged: [args: { OldValue: number; NewValue: number }];
 }>();
 
 const rootRef = ref<HTMLElement | null>(null);
-const text = ref(props.Text || (Number.isNaN(props.Value) ? '' : String(props.Value)));
 const isFocused = ref(false);
 const compactPopupStyle = ref<CSSProperties>({});
+const inheritedTheme = inject<ComputedRef<'light' | 'dark'> | null>('winuiTheme', null);
+const anchorTheme = ref<'light' | 'dark' | ''>('');
+
+const formatValue = (value: number) => {
+  if (Number.isNaN(value)) return '';
+  return props.NumberFormatter?.format(value) ?? String(value);
+};
+
+const text = ref(props.Text || formatValue(props.Value));
 
 const displayText = computed(() => text.value);
 const compactPopupOpen = computed(() => props.SpinButtonPlacementMode === 'Compact' && props.IsEnabled && isFocused.value);
+const compactPopupThemeClass = computed(() => {
+  const theme = inheritedTheme?.value || anchorTheme.value;
+  return theme === 'light' || theme === 'dark' ? `theme-${theme}` : '';
+});
 const rootStyle = computed<CSSProperties>(() => ({
   width: props.Width === '' ? undefined : typeof props.Width === 'number' ? `${props.Width}px` : props.Width
 }));
@@ -145,7 +158,8 @@ const evaluateExpression = (source: string) => {
 };
 
 const parseText = (source: string) => {
-  const value = props.AcceptsExpression ? evaluateExpression(source) : Number(source);
+  const normalized = source.replace(/,/g, '');
+  const value = props.AcceptsExpression ? evaluateExpression(normalized) : Number(normalized);
   return Number.isFinite(value) ? value : Number.NaN;
 };
 
@@ -163,25 +177,31 @@ const sanitizeText = (value: string) => {
   return next;
 };
 
-const setValue = (value: number) => {
-  const oldValue = props.Value;
+const setValue = (value: number, oldValue = props.Value) => {
   const newValue = Number.isNaN(value) ? Number.NaN : clamp(value);
-  text.value = Number.isNaN(newValue) ? '' : String(newValue);
+  text.value = formatValue(newValue);
   emit('update:Value', newValue);
   emit('update:Text', text.value);
-  if (!Object.is(oldValue, newValue)) emit('ValueChanged', { oldValue, newValue });
+  if (!Object.is(oldValue, newValue)) emit('ValueChanged', { OldValue: oldValue, NewValue: newValue });
+  return newValue;
 };
 
 const onTextInput = (value: string) => {
   const sanitized = sanitizeText(value);
   text.value = sanitized;
   emit('update:Text', sanitized);
-  const parsed = parseText(sanitized);
-  if (!Number.isNaN(parsed)) emit('update:Value', clamp(parsed));
+};
+
+const resolveAnchorTheme = () => {
+  const themeScope = rootRef.value?.closest('.theme-light, .theme-dark');
+  if (themeScope?.classList.contains('theme-dark')) return 'dark';
+  if (themeScope?.classList.contains('theme-light')) return 'light';
+  return '';
 };
 
 const updateCompactPopupPosition = async () => {
   if (!rootRef.value) return;
+  anchorTheme.value = resolveAnchorTheme();
   const rect = (rootRef.value.querySelector('.win-textbox-border') as HTMLElement | null)?.getBoundingClientRect()
     ?? rootRef.value.getBoundingClientRect();
   const popupHeight = 88;
@@ -206,26 +226,29 @@ const onLostFocus = () => {
 
 const commitText = () => {
   if (text.value.trim() === '') {
-    setValue(Number.NaN);
-    return;
+    return setValue(Number.NaN);
   }
   const parsed = parseText(text.value);
   if (Number.isNaN(parsed)) {
-    if (props.ValidationMode === 'InvalidInputOverwritten') text.value = Number.isNaN(props.Value) ? '' : String(props.Value);
-    return;
+    if (props.ValidationMode === 'InvalidInputOverwritten') text.value = formatValue(props.Value);
+    return props.Value;
   }
-  setValue(parsed);
+  return setValue(parsed);
 };
 
 const changeBy = (delta: number) => {
-  const base = Number.isNaN(props.Value) ? 0 : props.Value;
-  setValue(base + delta);
+  const committed = commitText();
+  const base = Number.isNaN(committed) ? 0 : committed;
+  setValue(base + delta, committed);
 };
 
 const onKeydown = (event: KeyboardEvent) => {
   if (event.ctrlKey || event.metaKey || event.altKey) return;
   if (event.key.length === 1 && sanitizeText(event.key) !== event.key) event.preventDefault();
-  if (event.key === 'Enter') commitText();
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    commitText();
+  }
   if (event.key === 'ArrowUp') {
     event.preventDefault();
     changeBy(event.shiftKey ? props.LargeChange : props.SmallChange);
@@ -249,7 +272,11 @@ const onWindowMove = () => {
 };
 
 watch(() => props.Value, (value) => {
-  text.value = Number.isNaN(value) ? '' : String(value);
+  text.value = formatValue(value);
+});
+
+watch(() => props.NumberFormatter, () => {
+  text.value = formatValue(props.Value);
 });
 
 watch(() => props.Text, (value) => {
