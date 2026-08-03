@@ -408,7 +408,9 @@ onBeforeUnmount(() => {
   overflow: hidden;
   padding: 4px;
   box-sizing: border-box;
-  background: var(--flyout-background, var(--layer-fill-color-default));
+  --win-acrylic-fill: var(--flyout-background, var(--layer-fill-color-default));
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--card-stroke)));
   border-radius: var(--asb-popup-radius, 8px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);

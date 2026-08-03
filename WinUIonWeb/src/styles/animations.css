@@ -245,19 +245,28 @@
 }
 
 @keyframes DrillInNavigationTransitionInfo_NavigationTrigger_NavigatingTo {
+  from {
+    transform: scale(0.94);
+    animation-timing-function: cubic-bezier(0.1, 0.9, 0.2, 1);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes DrillInNavigationTransitionInfo_NavigationTrigger_NavigatingTo_Opacity {
   0% {
     opacity: 0;
-    transform: scale(0.94);
+    animation-timing-function: cubic-bezier(0.17, 0.17, 0, 1);
   }
 
   42.529% {
     opacity: 1;
-    transform: scale(0.974);
   }
 
   100% {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -376,55 +385,80 @@
 }
 
 @keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingTo {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(20px) scale(1.06);
+    transform: scale(0.9);
   }
 
-  to {
+  43.273% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  43.274% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: scale(0.9);
+    animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
 @keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingAway {
-  from {
+  0% {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
 
-  to {
+  48% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+  }
+
+  100% {
     opacity: 0;
-    transform: translateY(-20px) scale(0.96);
   }
 }
 
 @keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo {
   0% {
     opacity: 0;
-    transform: perspective(900px) translateY(-20px) rotateX(-90deg);
   }
 
   43.274% {
     opacity: 0;
-    transform: perspective(900px) translateY(-20px) rotateX(-90deg);
+    animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
   }
 
   100% {
     opacity: 1;
-    transform: perspective(900px) translateY(0) rotateX(0deg);
   }
 }
 
-@keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+@keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway_TranslateY {
+  0% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.9, 0, 1, 0.2);
   }
 
-  to {
+  100% {
+    transform: translateY(200px);
+  }
+}
+
+@keyframes ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway_Opacity {
+  0% {
+    opacity: 1;
+  }
+
+  96% {
+    opacity: 1;
+  }
+
+  100% {
     opacity: 0;
-    transform: translateY(20px) scale(1.04);
   }
 }
 
@@ -521,7 +555,9 @@
 }
 
 .DrillInNavigationTransitionInfo {
-  animation: DrillInNavigationTransitionInfo_NavigationTrigger_NavigatingTo 0.783s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  animation:
+    DrillInNavigationTransitionInfo_NavigationTrigger_NavigatingTo 0.783s linear both,
+    DrillInNavigationTransitionInfo_NavigationTrigger_NavigatingTo_Opacity 0.783s linear both;
 }
 
 .DrillInNavigationTransitionInfo.NavigationTrigger_NavigatingAway {
@@ -555,20 +591,21 @@
 }
 
 .ContinuumNavigationTransitionInfo {
-  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingTo 0.350s cubic-bezier(0.12, 0, 0, 1) both;
+  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingTo 0.617s linear both;
 }
 
 .ContinuumNavigationTransitionInfo.NavigationTrigger_NavigatingAway {
-  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingAway 0.250s cubic-bezier(0.7, 0, 1, 0.5) both;
+  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_NavigatingAway 0.250s linear both;
 }
 
 .ContinuumNavigationTransitionInfo.NavigationTrigger_BackNavigatingTo {
-  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo 0.617s cubic-bezier(0.12, 0, 0, 1) both;
-  transform-origin: top left;
+  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo 0.617s linear both;
 }
 
 .ContinuumNavigationTransitionInfo.NavigationTrigger_BackNavigatingAway {
-  animation: ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway 0.250s cubic-bezier(0.7, 0, 1, 0.5) both;
+  animation:
+    ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway_TranslateY 0.250s linear both,
+    ContinuumNavigationTransitionInfo_NavigationTrigger_BackNavigatingAway_Opacity 0.250s step-end both;
 }
 
 @media (prefers-reduced-motion: reduce) {

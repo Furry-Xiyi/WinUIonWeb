@@ -51,8 +51,22 @@ const copyToClipboard = async () => {
 }
 
 .typography-row.has-background {
-  background: var(--card-bg-default);
+  position: relative;
+  isolation: isolate;
+  background: transparent;
   border-radius: 4px;
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.typography-row.has-background::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--card-bg-default, var(--card-bg));
 }
 
 .row-content {

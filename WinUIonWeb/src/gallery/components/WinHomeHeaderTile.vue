@@ -55,15 +55,30 @@ const isIconMarkup = computed(() => props.Icon.trim().startsWith('<'));
   box-sizing: border-box;
   overflow: hidden;
   color: var(--text-primary);
-  background: rgba(252, 252, 252, 0.8);
+  background: transparent;
   border-radius: 8px;
+  isolation: isolate;
   -webkit-backdrop-filter: blur(30px);
   backdrop-filter: blur(30px);
 }
 
+.win-home-header-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: color-mix(in srgb, rgba(252, 252, 252, 1) 80%, transparent);
+}
+
 :global(html.theme-dark .win-home-header-tile),
 :global(html[data-theme='dark'] .win-home-header-tile) {
-  background: rgba(44, 44, 44, 0.8);
+  --home-header-tile-fill: rgba(44, 44, 44, 0.8);
+}
+
+.win-home-header-tile::before {
+  background: var(--home-header-tile-fill, rgba(252, 252, 252, 0.8));
 }
 
 .win-home-header-tile :deep(.win-hyperlink-button) {
@@ -160,7 +175,7 @@ const isIconMarkup = computed(() => props.Icon.trim().startsWith('<'));
 
 @media (prefers-color-scheme: dark) {
   :global(html:not(.theme-light):not([data-theme='light']) .win-home-header-tile) {
-    background: rgba(44, 44, 44, 0.8);
+    --home-header-tile-fill: rgba(44, 44, 44, 0.8);
   }
 }
 </style>

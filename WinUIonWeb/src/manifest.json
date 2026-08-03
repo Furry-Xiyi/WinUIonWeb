@@ -4,6 +4,8 @@
     "name": "app.title",
     "shortName": "app.shortTitle"
   },
+  "author": "app.author",
+  "version": "app.version",
   "display": "standalone",
   "display_override": [ "window-controls-overlay" ],
   "start_url": "/WinUIonWeb/",
@@ -12,6 +14,12 @@
       "src": "@app-icon",
       "sizes": "16x16 32x32 48x48 64x64 128x128 256x256",
       "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "@app-icon-180",
+      "sizes": "180x180",
+      "type": "image/png",
       "purpose": "any"
     }
   ],

@@ -125,14 +125,25 @@ const popupCode = `<WinPopup
 .icon { font-size: 16px; }
 .popup-output { display: inline-flex; align-items: flex-start; justify-content: flex-start; min-width: 320px; min-height: 180px; }
 .popup-card {
+  position: relative;
   min-width: 240px;
   padding: 16px;
   color: var(--text-primary);
-  background: var(--flyout-background, var(--flyout-bg));
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--surface-stroke-color-default, var(--surface-stroke-color-flyout));
   border-radius: 8px;
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);
+}
+.popup-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--flyout-background, var(--flyout-bg));
 }
 .popup-card-stack { display: flex; flex-direction: column; gap: 8px; }
 .options-panel { display: flex; flex-direction: column; gap: 12px; width: 220px; }

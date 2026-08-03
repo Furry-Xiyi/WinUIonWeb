@@ -280,23 +280,35 @@ const luminosityOpacity = ref(0.8);
 .acrylic-layer {
   position: absolute;
   inset: 12px;
+  isolation: isolate;
+  background: transparent;
   border-radius: 6px;
   -webkit-backdrop-filter: blur(30px);
   backdrop-filter: blur(30px);
 }
 
+.acrylic-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--acrylic-demo-fill);
+}
+
 /* Default Acrylic */
 .default-acrylic {
-  background: rgba(252, 252, 252, 0.8);
+  --acrylic-demo-fill: rgba(252, 252, 252, 0.8);
 }
 
 [data-theme='dark'] .default-acrylic {
-  background: rgba(44, 44, 44, 0.8);
+  --acrylic-demo-fill: rgba(44, 44, 44, 0.8);
 }
 
 /* Custom Acrylic */
 .acrylic-layer:not(.default-acrylic):not(.luminosity-acrylic) {
-  background: color-mix(
+  --acrylic-demo-fill: color-mix(
     in srgb,
     var(--tint-color) calc(var(--tint-opacity) * 100%),
     transparent
@@ -305,7 +317,7 @@ const luminosityOpacity = ref(0.8);
 
 /* Luminosity Acrylic */
 .luminosity-acrylic {
-  background: rgba(135, 206, 235, calc(var(--tint-opacity)));
+  --acrylic-demo-fill: rgba(135, 206, 235, calc(var(--tint-opacity)));
   mix-blend-mode: luminosity;
   opacity: var(--luminosity-opacity);
 }

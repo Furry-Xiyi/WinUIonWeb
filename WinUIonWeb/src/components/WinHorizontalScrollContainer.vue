@@ -201,9 +201,11 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   color: var(--text-primary);
-  background: var(--flyout-bg);
+  isolation: isolate;
+  background: transparent;
   background-clip: padding-box;
-  border: 0;
+  border: 1px solid var(--ControlStrokeColorDefaultBrush, var(--control-stroke-color-default, var(--ctrl-border)));
+  box-sizing: border-box;
   border-radius: var(--ControlCornerRadius, 4px);
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);
@@ -212,14 +214,25 @@ onBeforeUnmount(() => {
   transition: background var(--fast-duration), border-color var(--fast-duration), color var(--fast-duration);
 }
 
-.win-horizontal-scroll-button:hover {
+.win-horizontal-scroll-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
   background: var(--flyout-bg);
-  border-color: var(--control-stroke-color-default, var(--flyout-border, var(--card-stroke)));
+}
+
+.win-horizontal-scroll-button:hover {
+  background: transparent;
+  border-color: var(--ControlStrokeColorDefaultBrush, var(--control-stroke-color-default, var(--ctrl-border)));
 }
 
 .win-horizontal-scroll-button:active {
   color: var(--text-secondary);
-  background: var(--flyout-bg);
+  background: transparent;
+  border-color: var(--ControlStrokeColorDefaultBrush, var(--control-stroke-color-default, var(--ctrl-border)));
 }
 
 .win-horizontal-scroll-button.scroll-back {

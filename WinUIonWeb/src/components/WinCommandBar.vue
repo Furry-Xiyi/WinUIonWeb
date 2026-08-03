@@ -393,14 +393,31 @@ defineExpose({
 
 <style scoped>
 .win-commandbar {
+  --commandbar-fill: var(--muxc-layer-fill-default, #F9F9F9);
   display: flex;
   flex-direction: column;
-  background: var(--muxc-layer-fill-default, #F9F9F9);
+  isolation: isolate;
+  background: transparent;
   border-bottom: 1px solid var(--muxc-control-stroke-default, rgba(0, 0, 0, 0.0578));
   min-height: 48px;
   font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
   position: relative;
   z-index: 100;
+}
+
+.win-commandbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--commandbar-fill);
+}
+
+.win-commandbar.open {
+  --commandbar-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
 }
 
 /* Primary Commands Area */
@@ -476,12 +493,25 @@ defineExpose({
   right: 0;
   min-width: 200px;
   max-width: 400px;
-  background: var(--muxc-layer-fill-default, #F9F9F9);
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--muxc-control-stroke-default, rgba(0, 0, 0, 0.0578));
   border-radius: var(--muxc-overlay-corner-radius, 8px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   padding: 4px 0;
   max-height: 60vh;
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.commandbar-secondary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
 }
 
 .commandbar-secondary-content {
@@ -530,8 +560,13 @@ defineExpose({
 }
 
 :global(.example-theme-wrapper.theme-dark) .win-commandbar {
-  background: var(--muxc-layer-fill-default, #2C2C2C);
+  --commandbar-fill: var(--muxc-layer-fill-default, #2C2C2C);
+  background: transparent;
   border-bottom-color: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
+}
+
+:global(.example-theme-wrapper.theme-dark) .win-commandbar.open {
+  --commandbar-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
 }
 
 :global(.example-theme-wrapper.theme-dark) .commandbar-overflow-button {
@@ -548,7 +583,7 @@ defineExpose({
 }
 
 :global(.example-theme-wrapper.theme-dark) .commandbar-secondary {
-  background: var(--muxc-layer-fill-default, #2C2C2C);
+  background: transparent;
   border-color: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }

@@ -30,7 +30,7 @@
               v-if="Description"
               class="win-expander-description"
               :Text="Description"
-              FontSize="12"
+              FontSize="var(--SettingsCardDescriptionFontSize, 12px)"
               LineHeight="16"
               Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))"
               TextWrapping="Wrap" />
@@ -66,7 +66,7 @@ const props = defineProps({
   VerticalContentAlignment: { type: String, default: 'Stretch' },
   Width: { type: [String, Number], default: '' },
   MinWidth: { type: [String, Number], default: '' },
-  HeaderHeight: { type: [String, Number], default: '' },
+  Height: { type: [String, Number], default: '' },
   MaxWidth: { type: [String, Number], default: '' },
   HorizontalAlignment: { type: String, default: '' },
   VerticalAlignment: { type: String, default: '' }
@@ -84,6 +84,21 @@ const cssLength = (value) => {
     return `${Number(value.trim())}px`;
   }
   return typeof value === 'number' ? `${value}px` : value;
+};
+
+const expanderHeaderHeight = (value) => {
+  const length = cssLength(value);
+  if (!length || length === 'auto') return '';
+
+  const numericValue = typeof value === 'number'
+    ? value
+    : (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))
+      ? Number(value.trim())
+      : null);
+
+  return numericValue === null
+    ? `calc(${length} - 2px)`
+    : `${Math.max(numericValue - 2, 0)}px`;
 };
 
 const xamlThickness = (value) => {
@@ -138,9 +153,16 @@ const contentStyle = computed(() => ({
 
 const rootStyle = computed(() => {
   const style = {};
+  if (props.Height !== '') {
+    const height = cssLength(props.Height);
+    if (height) {
+      style.minHeight = height;
+      const headerHeight = expanderHeaderHeight(props.Height);
+      if (headerHeight) style['--win-expander-header-height'] = headerHeight;
+    }
+  }
   if (props.Width !== '') style.width = cssLength(props.Width);
   if (props.MinWidth !== '') style.minWidth = cssLength(props.MinWidth);
-  if (props.HeaderHeight !== '') style['--win-expander-header-height'] = cssLength(props.HeaderHeight);
   if (props.MaxWidth !== '') style.maxWidth = cssLength(props.MaxWidth);
   if (props.HorizontalAlignment) style.justifySelf = justifySelfAlignment(props.HorizontalAlignment);
   if (props.VerticalAlignment) style.alignSelf = selfAlignment(props.VerticalAlignment);
@@ -172,6 +194,8 @@ const toggleExpanded = () => {
 }
 
 .win-expander-header {
+  position: relative;
+  isolation: isolate;
   width: 100%;
   height: var(--win-expander-header-height, auto);
   min-height: 48px;
@@ -181,13 +205,25 @@ const toggleExpanded = () => {
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  background: var(--CardBackgroundFillColorDefaultBrush, var(--card-bg));
+  background: transparent;
   border: none;
   border-radius: 4px;
   transition: background var(--fast-duration) var(--fast-out-slow-in);
   color: var(--text-primary);
   font-size: 14px;
   text-align: left;
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.win-expander-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--win-expander-header-fill, var(--CardBackgroundFillColorDefaultBrush, var(--card-bg)));
 }
 
 .win-expander-header-main {
@@ -267,9 +303,21 @@ const toggleExpanded = () => {
 }
 
 .win-expander-arrow {
+  position: relative;
+  top: 0;
   font-size: 12px;
   display: block;
-  transition: transform var(--fast-duration) var(--fast-out-slow-in);
+  transition: transform var(--fast-duration) var(--fast-out-slow-in), top var(--fast-duration) var(--fast-out-slow-in);
+}
+
+.win-expander:not(.expand-up):not(.is-expanded) .win-expander-header:active .win-expander-arrow,
+.win-expander.expand-up.is-expanded .win-expander-header:active .win-expander-arrow {
+  top: -1px;
+}
+
+.win-expander:not(.expand-up).is-expanded .win-expander-header:active .win-expander-arrow,
+.win-expander.expand-up:not(.is-expanded) .win-expander-header:active .win-expander-arrow {
+  top: 1px;
 }
 
 .win-expander:not(.expand-up).is-expanded .win-expander-arrow {
@@ -308,13 +356,27 @@ const toggleExpanded = () => {
 }
 
 .win-expander-content {
+  position: relative;
+  isolation: isolate;
   min-height: 48px;
   box-sizing: border-box;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  background: var(--CardBackgroundFillColorSecondaryBrush, var(--card-bg-secondary));
+  background: transparent;
   border-radius: 0 0 3px 3px;
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.win-expander-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--win-expander-content-fill, var(--CardBackgroundFillColorSecondaryBrush, var(--card-bg-secondary)));
 }
 
 .win-expander.expand-up .win-expander-content {

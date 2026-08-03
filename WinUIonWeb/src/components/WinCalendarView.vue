@@ -737,17 +737,29 @@ watch([() => props.Language, () => props.CalendarIdentifier], () => {
 
 <style scoped>
   .win-calendar-view {
+    position: relative;
     width: 304px;
     min-width: 304px;
     flex: 0 0 304px;
-    background: var(--layer-default);
-    -webkit-backdrop-filter: var(--flyout-backdrop);
-    backdrop-filter: var(--flyout-backdrop);
+    isolation: isolate;
+    background: transparent;
+    -webkit-backdrop-filter: var(--calendar-view-backdrop, var(--flyout-backdrop));
+    backdrop-filter: var(--calendar-view-backdrop, var(--flyout-backdrop));
     border: 1px solid var(--ctrl-border-rest);
     border-radius: 4px;
     padding: 12px;
     box-sizing: border-box;
     user-select: none;
+  }
+
+  .win-calendar-view::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: var(--calendar-view-fill, var(--layer-default));
   }
 
 .calendar-header {

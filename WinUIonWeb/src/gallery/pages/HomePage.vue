@@ -10,7 +10,7 @@
             </div>
 
             <div class="home-header-copy">
-              <WinTextBlock class="home-header-subtitle" :Text="$t('app.version')" :FontSize="18" />
+              <WinTextBlock class="home-header-subtitle" :Text="$t(appManifest.version ?? 'app.version')" :FontSize="18" />
               <WinTextBlock class="home-header-title" :Text="$t('app.title')" :FontSize="40" FontWeight="600" :LineHeight="52" />
             </div>
 
@@ -28,7 +28,7 @@
           </section>
 
           <WinSelectorBar
-            class="filter-bar token-filter-bar"
+            :class="['filter-bar', 'token-filter-bar', { 'is-cjk-locale': locale === 'zh-CN' }]"
             HorizontalAlignment="Center"
             :Items="filterItems"
             :SelectedItem="filterItems[selectedFilterIndex]"
@@ -118,12 +118,13 @@ import WinTextBlock from '../../components/WinTextBlock.vue';
 import appIcon from '../../assets/AppIcon.ico';
 import splashDark from '../../assets/HomePage/Splash-Dark.png';
 import splashLight from '../../assets/HomePage/Splash-Light.png';
+import appManifest from '../../manifest.json';
 import { favoritesStorageKey, getStoredFavorites } from '../../utils/pageState';
 
 import { useI18n } from '../../components/i18n/index';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const navigate = inject('navigate', () => {});
 const favorites = ref(getStoredFavorites());
 const selectedFilterIndex = ref(0);
@@ -354,7 +355,7 @@ onUnmounted(() => {
   position: absolute;
   inset: 0;
   height: 400px;
-  mask-image: linear-gradient(to bottom, #000 0%, #000 75%, rgba(0, 0, 0, 0) 85%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 88%, rgba(0, 0, 0, 0) 96%, transparent 100%);
   overflow: hidden;
 }
 
@@ -432,37 +433,84 @@ onUnmounted(() => {
 }
 
 .token-filter-bar {
+  --SelectorBarItemSpacing: 8px;
+  --SelectorBarItemIconScale: 0.8;
+  --ControlContentThemeFontSize: 14px;
+  --TokenViewSelectorBarTextFontFamily: 'Segoe UI Variable Text', 'Segoe UI Variable', 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', system-ui, sans-serif;
   gap: 8px;
+}
+
+.token-filter-bar.is-cjk-locale {
+  --TokenViewSelectorBarTextFontFamily: 'Microsoft YaHei UI', 'Microsoft YaHei', 'Segoe UI Variable Text', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
 }
 
 .token-filter-bar :deep(.win-selector-bar-items-view) {
   gap: 8px;
-  padding: 0;
+  padding: 4px 0;
 }
 
 .token-filter-bar :deep(.win-selector-bar-item) {
   box-sizing: border-box;
+  width: auto;
+  height: 32px;
   min-height: 32px;
   padding: 0;
+  grid-template-rows: auto;
+  align-items: center;
+  justify-items: center;
   color: var(--text-primary);
   background: var(--control-fill-color-default, var(--ctrl-fill-default));
   border: 1px solid var(--control-stroke-color-default, var(--ctrl-border));
   border-radius: 16px;
   line-height: 20px;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--TokenViewSelectorBarTextFontFamily);
 }
 
 .token-filter-bar :deep(.win-selector-bar-item-content) {
+  grid-row: 1;
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
-  margin: 5px 23px 6px;
+  width: max-content;
+  height: 20px;
+  margin: 5px 23px 5px;
+  line-height: 1;
 }
 
 .token-filter-bar :deep(.win-selector-bar-item-text) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  font-family: var(--TokenViewSelectorBarTextFontFamily);
+  transform: none;
+  vertical-align: top;
+}
+
+.token-filter-bar :deep(.win-selector-bar-item-icon) {
+  width: 20px;
+  height: 20px;
+  margin: 0 -2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 20px;
+  font-size: 20px;
   line-height: 20px;
 }
 
-.token-filter-bar :deep(.win-selector-bar-item-icon .icon) {
-  font-size: 16px;
-  line-height: 16px;
+.token-filter-bar :deep(.win-selector-bar-item-icon-glyph) {
+  width: 20px;
+  height: 20px;
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .token-filter-bar :deep(.win-selector-bar-item:hover) {
@@ -551,15 +599,15 @@ onUnmounted(() => {
   text-align: left;
   color: var(--text-primary);
   background: transparent;
-  border: 0;
+  border: 1px solid var(--card-stroke);
   border-radius: 8px;
   cursor: pointer;
   font: inherit;
-  --control-item-state-fill: transparent;
 }
 
 .control-item-surface {
   position: relative;
+  isolation: isolate;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -568,19 +616,21 @@ onUnmounted(() => {
   grid-template-columns: auto minmax(0, 1fr);
   column-gap: 0;
   color: inherit;
-  background: var(--control-fill-color-default, var(--ctrl-fill-default));
-  border: 1px solid var(--card-stroke);
-  border-radius: inherit;
+  background: transparent;
+  border-radius: 8px;
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
 }
 
 .control-item-surface::before {
   content: '';
   position: absolute;
-  inset: 1px;
-  z-index: 0;
+  inset: 0;
+  z-index: -1;
   pointer-events: none;
-  background: var(--control-item-state-fill);
-  border-radius: calc(8px - 1px);
+  border-radius: inherit;
+  background: var(--control-item-fill, var(--CardBackgroundFillColorDefaultBrush, var(--card-bg)));
+  transition: background var(--faster-duration, 83ms) linear;
 }
 
 .control-item.single-row {
@@ -589,17 +639,23 @@ onUnmounted(() => {
 }
 
 .control-item:hover:not(:active) {
-  color: var(--text-secondary);
-  --control-item-state-fill: var(--subtle-fill-color-secondary, var(--subtle-secondary));
+  color: var(--text-primary);
+}
+
+.control-item:hover:not(:active) .control-item-surface {
+  --control-item-fill: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
 }
 
 .control-item:active {
-  --control-item-state-fill: var(--subtle-fill-color-tertiary, var(--subtle-tertiary));
+  color: var(--text-secondary);
+}
+
+.control-item:active .control-item-surface {
+  --control-item-fill: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary));
 }
 
 .control-item-image {
   position: relative;
-  z-index: 1;
   width: 32px;
   margin: 12px 16px 0 8px;
   align-self: start;
@@ -607,8 +663,6 @@ onUnmounted(() => {
 }
 
 .control-item-text {
-  position: relative;
-  z-index: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;

@@ -435,12 +435,12 @@ defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSe
   padding: 6px 9px 8px;
   overflow-wrap: anywhere;
   color: var(--ToolTipForegroundBrush, var(--text-primary));
-  background: var(--ToolTipBackgroundBrush, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-background, var(--flyout-bg))));
-  background: color-mix(
+  --win-acrylic-fill: color-mix(
     in srgb,
     var(--ToolTipBackgroundBrush, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-background, var(--flyout-bg)))) 78%,
     transparent
   );
+  background: transparent;
   background-clip: padding-box;
   border: 1px solid var(--ToolTipBorderBrush, var(--surface-stroke-color-flyout, var(--flyout-border)));
   border-radius: var(--ControlCornerRadius, 4px);

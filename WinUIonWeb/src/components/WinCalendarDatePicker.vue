@@ -219,7 +219,11 @@ const onDateSelect = (dates) => {
   .picker-flyout {
     position: fixed;
     z-index: 100;
-    background: var(--flyout-bg);
+    --win-acrylic-fill: var(--flyout-bg);
+    --calendar-view-fill: transparent;
+    --calendar-view-backdrop: none;
+    isolation: isolate;
+    background: transparent;
     border: 1px solid var(--ctrl-border);
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.14);

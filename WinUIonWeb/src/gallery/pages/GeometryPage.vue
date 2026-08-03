@@ -346,13 +346,26 @@ const vueCode = `<div style="border-radius: 8px;">
 
 .teaching-tip {
   position: absolute;
-  background: var(--flyout-bg);
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--ctrl-border-rest);
   border-radius: 8px;
   padding: 12px 16px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   z-index: 20;
   min-width: 200px;
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.teaching-tip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--flyout-bg);
 }
 
 .teaching-tip-title {

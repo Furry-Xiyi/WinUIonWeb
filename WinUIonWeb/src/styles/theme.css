@@ -844,3 +844,51 @@ html.theme-dark {
   --AcrylicInAppFillColorDefaultBrush: var(--flyout-bg);
   --ToolTipBackgroundBrush: var(--AcrylicInAppFillColorDefaultBrush);
 }
+
+/* Chromium keeps backdrop sampling reliable when the tint is painted in a
+   separate layer inside an isolated stacking context. */
+:where(
+  .win-asb-popup,
+  .win-combo-flyout,
+  .picker-flyout,
+  .win-commandbar-flyout,
+  .win-flyout,
+  .win-menu-flyout,
+  .win-menu-submenu-flyout,
+  .win-number-compact-popup,
+  .win-teaching-tip,
+  .win-tooltip
+) {
+  --win-acrylic-fill: var(--flyout-background, var(--flyout-bg));
+  isolation: isolate;
+  background: transparent !important;
+}
+
+:where(
+  .win-asb-popup,
+  .win-combo-flyout,
+  .picker-flyout,
+  .win-commandbar-flyout,
+  .win-flyout,
+  .win-menu-flyout,
+  .win-menu-submenu-flyout,
+  .win-number-compact-popup,
+  .win-teaching-tip,
+  .win-tooltip
+)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--win-acrylic-fill);
+}
+
+.win-tooltip {
+  --win-acrylic-fill: color-mix(
+    in srgb,
+    var(--ToolTipBackgroundBrush, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg))) 78%,
+    transparent
+  );
+}

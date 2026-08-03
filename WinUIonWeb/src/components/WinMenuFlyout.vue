@@ -355,6 +355,7 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 
 .win-menu-flyout {
   position: relative;
+  --win-acrylic-fill: var(--flyout-bg, var(--layer-default));
   --flyout-scroll-max-height: calc(var(--flyout-max-height, 600px) - 10px);
   min-width: var(--flyout-min-width, 20px);
   max-height: var(--flyout-max-height, 600px);
@@ -364,7 +365,8 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
   overflow: hidden;
   border: 1px solid var(--flyout-border);
   border-radius: 8px;
-  background: var(--flyout-bg, var(--layer-default));
+  isolation: isolate;
+  background: transparent;
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);
   animation: flyout-menu-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, flyout-menu-opacity 83ms linear both;
@@ -507,6 +509,7 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 
 .win-menu-submenu-flyout {
   position: relative;
+  --win-acrylic-fill: var(--flyout-bg, var(--layer-default));
   min-width: var(--flyout-min-width, 180px);
   max-height: var(--flyout-max-height, 600px);
   padding: 4px;
@@ -516,7 +519,8 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
   overflow: visible;
   border: 1px solid var(--flyout-border);
   border-radius: 8px;
-  background: var(--flyout-bg, var(--layer-default));
+  isolation: isolate;
+  background: transparent;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);

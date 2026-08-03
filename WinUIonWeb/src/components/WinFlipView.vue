@@ -119,7 +119,8 @@ const trackStyle = computed(() => {
 
   .flip-btn {
     position: absolute;
-    background: var(--flyout-bg);
+    isolation: isolate;
+    background: transparent;
     -webkit-backdrop-filter: var(--flyout-backdrop);
     backdrop-filter: var(--flyout-backdrop);
     border: 1px solid var(--card-stroke);
@@ -133,6 +134,16 @@ const trackStyle = computed(() => {
     transition: background var(--fast-duration);
   }
 
+    .flip-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      border-radius: inherit;
+      background: var(--flyout-bg);
+    }
+
     .flip-btn .flip-arrow {
       font-size: 8px;
       transition: transform 0.1s ease, color var(--fast-duration);
@@ -142,9 +153,7 @@ const trackStyle = computed(() => {
     }
 
     .flip-btn:hover {
-      background: var(--flyout-bg);
-      -webkit-backdrop-filter: var(--flyout-backdrop);
-      backdrop-filter: var(--flyout-backdrop);
+      background: transparent;
     }
 
       .flip-btn:hover .flip-arrow {
@@ -152,9 +161,7 @@ const trackStyle = computed(() => {
       }
 
     .flip-btn:active {
-      background: var(--flyout-bg);
-      -webkit-backdrop-filter: var(--flyout-backdrop);
-      backdrop-filter: var(--flyout-backdrop);
+      background: transparent;
     }
 
       .flip-btn:active .flip-arrow {

@@ -318,13 +318,26 @@ const showContextMenu = (event, index) => {
   top: 100%;
   left: 0;
   margin-top: 4px;
-  background: var(--layer-fill-color-default);
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--control-stroke-default);
   border-radius: 4px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   min-width: 150px;
   z-index: 1000;
   padding: 4px;
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.menu-flyout::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--flyout-bg, var(--layer-fill-color-default));
 }
 
 .menu-item {

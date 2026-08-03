@@ -1,7 +1,8 @@
 export default {
   "app.shortTitle": "WinUI on Web 图库",
   "app.title": "WinUI on Web 图库",
-  "app.version": "WinUI on Web 1.0.0-预览版",
+  "app.version": "1.0.0-Insider",
+  "app.author": "惜忆想睡觉",
   "text.a-2-state-checkbox": "双状态复选框",
   "text.a-basic-autosuggestbox": "基本自动建议框",
   "text.a-basic-calendar-view": "基本日历视图。",
@@ -853,7 +854,7 @@ export default {
      ,"text.theme-shadow": "主题阴影"
      ,"text.typography": "排版"
      ,"text.about": "关于"
-     ,"text.about-author": "Furry-Xiyi"
+     ,"text.about-copyright": "© {year} {author}。{rights}"
      ,"text.all-rights-reserved": "保留所有权利。"
      ,"text.qq-group": "QQ 群组"
      ,"text.discord-group": "Discord 群组"

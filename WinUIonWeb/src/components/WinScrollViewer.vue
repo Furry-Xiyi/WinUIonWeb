@@ -1324,13 +1324,24 @@ onBeforeUnmount(() => {
   inset: 0;
   z-index: 0;
   opacity: 0;
-  background: var(--ScrollBarTrackFill, color-mix(in srgb, var(--flyout-bg, Canvas) 78%, transparent));
+  isolation: isolate;
+  background: transparent;
   background-image: none;
   border: 0 solid var(--ScrollBarTrackStroke, transparent);
   border-radius: 6px;
   -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
   backdrop-filter: var(--flyout-backdrop, blur(30px));
   transition: opacity 83ms linear;
+}
+
+.scrollbar-track::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--ScrollBarTrackFill, color-mix(in srgb, var(--flyout-bg, Canvas) 78%, transparent));
 }
 
 .scrollbar-vertical.has-cross-scrollbar .scrollbar-track {

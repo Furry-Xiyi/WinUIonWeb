@@ -401,7 +401,9 @@ defineExpose({
   right: 0;
   transform: translateY(-50%);
   padding: 2px 6px;
-  background: var(--layer-on-acrylic-fill-color-default);
+  --win-annotated-label-fill: var(--layer-on-acrylic-fill-color-default);
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--card-stroke-color-default);
   border-radius: 4px;
   font-size: 11px;
@@ -415,8 +417,19 @@ defineExpose({
   backdrop-filter: blur(30px);
 }
 
+.scrollbar-label::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--win-annotated-label-fill);
+  transition: background var(--fast-duration) var(--fast-out-slow-in);
+}
+
 .scrollbar-label:hover {
-  background: var(--subtle-fill-color-secondary);
+  --win-annotated-label-fill: var(--subtle-fill-color-secondary);
   border-color: var(--control-stroke-color-default);
   color: var(--text-fill-color-primary);
   transform: translateY(-50%) scale(1.05);
@@ -470,7 +483,8 @@ defineExpose({
   left: -120px;
   width: 100px;
   padding: 6px 10px;
-  background: var(--layer-fill-color-default);
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--surface-stroke-color-flyout);
   border-radius: 6px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
@@ -484,6 +498,16 @@ defineExpose({
   z-index: 100;
   -webkit-backdrop-filter: blur(30px);
   backdrop-filter: blur(30px);
+}
+
+.detail-label::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--layer-fill-color-default);
 }
 
 .detail-label::after {

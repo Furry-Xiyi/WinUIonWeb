@@ -258,7 +258,7 @@ function cssLength(value) {
     background: #000;
   }
 
-.win-media-controls {
+  .win-media-controls {
     position: absolute;
     left: 0;
     right: 0;
@@ -272,7 +272,8 @@ function cssLength(value) {
     gap: 8px;
     border-radius: 0;
     border: 0;
-    background: rgba(0, 0, 0, 0.72);
+    isolation: isolate;
+    background: transparent;
     color: white;
     box-shadow: none;
     opacity: 0;
@@ -280,6 +281,18 @@ function cssLength(value) {
     pointer-events: none;
     transition: opacity 260ms cubic-bezier(0.1, 0.9, 0.2, 1), transform 260ms cubic-bezier(0.1, 0.9, 0.2, 1);
     z-index: 5;
+    -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+    backdrop-filter: var(--flyout-backdrop, blur(30px));
+  }
+
+  .win-media-controls::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: var(--MediaTransportControlsPanelBackground, rgba(0, 0, 0, 0.72));
   }
 
   .win-media-player.controls-visible .win-media-controls,

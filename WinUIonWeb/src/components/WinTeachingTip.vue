@@ -235,7 +235,9 @@ defineExpose({ close, updatePosition });
   max-height: min(520px, calc(100vh - 16px));
   overflow: visible;
   color: var(--text-primary);
-  background: var(--TeachingTipBackgroundBrush, var(--flyout-background, var(--flyout-bg)));
+  --win-acrylic-fill: var(--flyout-background, var(--flyout-bg));
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--surface-stroke-color-flyout, var(--flyout-border));
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
@@ -328,9 +330,21 @@ defineExpose({ close, updatePosition });
   left: var(--teaching-tip-tail-left, 50%);
   width: 16px;
   height: 16px;
-  background: var(--TeachingTipBackgroundBrush, var(--flyout-background, var(--flyout-bg)));
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--surface-stroke-color-flyout, var(--flyout-border));
   transform: translateX(-50%) rotate(45deg);
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.win-teaching-tip-tail::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--win-acrylic-fill, var(--flyout-background, var(--flyout-bg)));
 }
 
 .win-teaching-tip.placement-bottom .win-teaching-tip-tail {

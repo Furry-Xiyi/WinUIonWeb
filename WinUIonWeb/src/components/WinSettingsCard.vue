@@ -8,52 +8,54 @@
       'content-vertical': ContentAlignment === 'Vertical',
       'has-header-content': hasHeaderContent
     }"
-    :style="HeaderHeight ? { minHeight: HeaderHeight + 'px' } : {}"
+    :style="rootStyle"
     @click="handleClick"
     :type="IsClickEnabled ? 'button' : undefined"
     :role="IsClickEnabled ? undefined : 'group'"
     v-bind="ActionIconToolTip ? { 'tooltipservice.tooltip': ActionIconToolTip } : {}">
-    <div v-if="ContentAlignment !== 'Left'" class="win-settings-card-header">
-      <span v-if="hasHeaderIcon" class="win-settings-card-icon icon" aria-hidden="true">
-        <slot name="HeaderIcon">
-          <span v-if="isHeaderIconMarkup" v-html="HeaderIcon"></span>
-          <template v-else>{{ HeaderIcon }}</template>
+    <div class="win-settings-card-surface">
+      <div v-if="ContentAlignment !== 'Left'" class="win-settings-card-header">
+        <span v-if="hasHeaderIcon" class="win-settings-card-icon icon" aria-hidden="true">
+          <slot name="HeaderIcon">
+            <span v-if="isHeaderIconMarkup" v-html="HeaderIcon"></span>
+            <template v-else>{{ HeaderIcon }}</template>
+          </slot>
+        </span>
+        <div class="win-settings-card-text">
+          <slot name="Header">
+            <WinTextBlock
+              v-if="Header"
+              class="win-settings-card-title"
+              :Text="Header"
+              FontSize="14"
+              LineHeight="20"
+              TextWrapping="Wrap" />
+          </slot>
+          <slot name="Description">
+            <WinTextBlock
+              v-if="Description"
+              class="win-settings-card-desc"
+              :Text="Description"
+              FontSize="var(--SettingsCardDescriptionFontSize, 12px)"
+              LineHeight="16"
+              Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))"
+              TextWrapping="Wrap" />
+          </slot>
+        </div>
+      </div>
+      <div class="win-settings-card-content">
+        <slot></slot>
+      </div>
+      <span
+        v-if="IsClickEnabled && IsActionIconVisible"
+        class="win-settings-card-action-icon icon"
+        aria-hidden="true">
+        <slot name="ActionIcon">
+          <span v-if="isActionIconMarkup" v-html="ActionIcon"></span>
+          <template v-else>{{ ActionIcon }}</template>
         </slot>
       </span>
-      <div class="win-settings-card-text">
-        <slot name="Header">
-          <WinTextBlock
-            v-if="Header"
-            class="win-settings-card-title"
-            :Text="Header"
-            FontSize="14"
-            LineHeight="20"
-            TextWrapping="Wrap" />
-        </slot>
-        <slot name="Description">
-          <WinTextBlock
-            v-if="Description"
-            class="win-settings-card-desc"
-            :Text="Description"
-            FontSize="12"
-            LineHeight="16"
-            Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))"
-            TextWrapping="Wrap" />
-        </slot>
-      </div>
     </div>
-    <div class="win-settings-card-content">
-      <slot></slot>
-    </div>
-    <span
-      v-if="IsClickEnabled && IsActionIconVisible"
-      class="win-settings-card-action-icon icon"
-      aria-hidden="true">
-      <slot name="ActionIcon">
-        <span v-if="isActionIconMarkup" v-html="ActionIcon"></span>
-        <template v-else>{{ ActionIcon }}</template>
-      </slot>
-    </span>
   </component>
 </template>
 
@@ -70,7 +72,8 @@ const props = defineProps({
   IsClickEnabled: { type: Boolean, default: false },
   ContentAlignment: { type: String, default: 'Right' },
   IsActionIconVisible: { type: Boolean, default: true },
-  HeaderHeight: { type: Number, default: 0 }
+  Height: { type: [String, Number], default: '' },
+  Width: { type: [String, Number], default: '' }
 });
 
 const emit = defineEmits(['Click']);
@@ -80,6 +83,20 @@ const hasHeaderIcon = computed(() => Boolean(props.HeaderIcon) || Boolean(slots.
 const hasHeaderContent = computed(() => Boolean(props.Header) || Boolean(props.Description) || hasHeaderIcon.value || Boolean(slots.Header) || Boolean(slots.Description));
 const isHeaderIconMarkup = computed(() => props.HeaderIcon.trim().startsWith('<'));
 const isActionIconMarkup = computed(() => props.ActionIcon.trim().startsWith('<'));
+const cssLength = (value) => {
+  if (value === '' || value === undefined || value === null) return '';
+  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) {
+    return `${Number(value.trim())}px`;
+  }
+  return typeof value === 'number' ? `${value}px` : value;
+};
+
+const rootStyle = computed(() => {
+  const style = {};
+  if (props.Height !== '') style.minHeight = cssLength(props.Height);
+  if (props.Width !== '') style.width = cssLength(props.Width);
+  return style;
+});
 
 const handleClick = (e) => {
   if (props.IsClickEnabled) {
@@ -91,35 +108,71 @@ const handleClick = (e) => {
 <style>
   .win-settings-card {
     width: 100%;
-    background: var(--card-bg);
     border: 1px solid var(--card-stroke);
     border-radius: 4px;
-    padding: 16px;
     margin-bottom: 4px;
+    padding: 0;
+    display: block;
+    min-height: 68px;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    --settings-card-fill: var(--CardBackgroundFillColorDefaultBrush, var(--card-bg));
+  }
+
+  .win-settings-card-surface {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    background: transparent;
+    border-radius: 4px;
+    padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-    min-height: 68px;
     color: var(--text-primary);
     font: inherit;
     text-align: left;
+    -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+    backdrop-filter: var(--flyout-backdrop, blur(30px));
+  }
+
+  .win-settings-card-surface::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: var(--settings-card-fill);
+    transition: background var(--faster-duration, 83ms) linear;
   }
 
   .win-settings-card.clickable {
     cursor: pointer;
-    transition: background var(--faster-duration, 83ms) linear;
+  }
+
+  .win-settings-card.clickable .win-settings-card-surface {
+    cursor: pointer;
   }
 
   .win-settings-card.clickable:hover:not(:active) {
     color: var(--text-primary);
-    background: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
+    --settings-card-fill: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
+  }
+
+  .win-settings-card.clickable:hover:not(:active) {
     border-color: var(--control-stroke-color-default, var(--ctrl-border));
   }
 
   .win-settings-card.clickable:active {
     color: var(--text-secondary);
-    background: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary));
+    --settings-card-fill: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary));
+  }
+
+  .win-settings-card.clickable:active {
     border-color: var(--control-stroke-color-default, var(--ctrl-border));
   }
 
@@ -151,7 +204,7 @@ const handleClick = (e) => {
     }
   }
 
-  .win-settings-card.content-left {
+  .win-settings-card.content-left .win-settings-card-surface {
     justify-content: flex-start;
     align-items: center;
   }
@@ -161,7 +214,7 @@ const handleClick = (e) => {
     justify-content: flex-start;
   }
 
-  .win-settings-card.content-vertical {
+  .win-settings-card.content-vertical .win-settings-card-surface {
     flex-direction: column;
     align-items: stretch;
   }
@@ -229,7 +282,7 @@ const handleClick = (e) => {
   }
 
   @media (max-width: 640px) {
-    .win-settings-card.has-header-content:not(.content-left) {
+    .win-settings-card.has-header-content:not(.content-left) .win-settings-card-surface {
       flex-direction: column;
       align-items: stretch;
     }

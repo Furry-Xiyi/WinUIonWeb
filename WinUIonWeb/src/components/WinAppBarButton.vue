@@ -258,12 +258,26 @@ const handleClick = (event: MouseEvent) => {
 /* Flyout */
 .appbar-button-flyout {
   z-index: 1000;
-  background: var(--muxc-layer-fill-default, #FFFFFF);
+  --appbar-flyout-fill: var(--flyout-background, var(--flyout-bg, var(--muxc-layer-fill-default, rgba(252, 252, 252, 0.92))));
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--muxc-control-stroke-default, rgba(0, 0, 0, 0.0578));
   border-radius: var(--muxc-overlay-corner-radius, 8px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   padding: 4px;
   min-width: 200px;
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.appbar-button-flyout::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--appbar-flyout-fill);
 }
 
 /* Dark theme support */
@@ -281,7 +295,8 @@ const handleClick = (event: MouseEvent) => {
   }
 
   :global(.example-theme-wrapper.theme-dark) .appbar-button-flyout {
-    background: var(--muxc-layer-fill-default, #2C2C2C);
+    --appbar-flyout-fill: var(--flyout-background, var(--flyout-bg, var(--muxc-layer-fill-default, rgba(44, 44, 44, 0.86))));
+    background: transparent;
     border: 1px solid var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
   }
 }

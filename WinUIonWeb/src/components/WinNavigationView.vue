@@ -415,21 +415,42 @@ const showBackButtonResolved = computed(() => {
 });
 const showBackButtonInLeftNav = computed(() => showBackButtonResolved.value && !isTopNavigation.value);
 const backButtonVisuallyVisible = computed(() => showBackButtonResolved.value);
-const paneTransitionDurationMs = compact => {
-  if (isLeftMinimalMode.value) return compact ? 120 : 350;
-  if (isLeftCompactMode.value) return compact ? 120 : 350;
-  return compact ? 100 : 200;
-};
+// Keep the three left-pane modes on the same transition contracts as the
+// native NavigationView/SplitView template. Left uses CompactInline; the
+// other two modes use the overlay transitions.
+const paneTransitionSpec = computed(() => {
+  if (isLeftMinimalMode.value || isLeftCompactMode.value) {
+    return {
+      openDurationMs: 350,
+      closeDurationMs: 120,
+      easing: 'cubic-bezier(0.1, 0.9, 0.2, 1)'
+    };
+  }
+
+  return {
+    openDurationMs: 200,
+    // CompactInline closes to ClosedCompactLeft. The native template uses
+    // SplitViewPaneAnimationOpenDuration (200ms) for that transition; the
+    // 100ms close resource is only used when the pane leaves the layout
+    // entirely (Closed), which NavigationView does not use for Left.
+    closeDurationMs: 200,
+    easing: 'cubic-bezier(0, 0.35, 0.15, 1)'
+  };
+});
+const paneTransitionDurationMs = (compact, mode = paneTransitionSpec.value) => (
+  compact ? mode.closeDurationMs : mode.openDurationMs
+);
 const paneStyle = computed(() => ({
   '--win-nav-open-pane-length': `${props.openPaneLength}px`,
   '--win-nav-compact-pane-length': `${props.compactPaneLength}px`,
-  '--win-nav-header-margin-left': `${isLeftMinimalMode.value
-    ? (isPaneToggleButtonVisible.value ? 40 : 0) + (showBackButtonInLeftNav.value ? 40 : 0) - 24
-    : 56}px`,
+  // NavigationViewMinimalHeaderMargin is -24,44,0,0 in the native theme.
+  // The command buttons live in their own overlay row and must not change
+  // the content header's left inset when Minimal is entered.
+  '--win-nav-header-margin-left': `${isLeftMinimalMode.value ? -24 : 56}px`,
   '--win-nav-pane-duration': `${paneTransitionDurationMs(isCompact.value)}ms`,
-  '--win-nav-pane-easing': isLeftOverlayMode.value
-    ? 'cubic-bezier(0.1, 0.9, 0.2, 1)'
-    : 'cubic-bezier(0, 0.35, 0.15, 1)'
+  '--win-nav-pane-open-duration': `${paneTransitionSpec.value.openDurationMs}ms`,
+  '--win-nav-pane-close-duration': `${paneTransitionSpec.value.closeDurationMs}ms`,
+  '--win-nav-pane-easing': paneTransitionSpec.value.easing
 }));
 const shellClasses = computed(() => [
   isTopNavigation.value ? 'is-top' : 'is-left',
@@ -2113,7 +2134,7 @@ watch(() => props.selectedValue, (val) => {
     padding: 4px 4px;
     margin-right: 0;
     clip-path: inset(0 0 0 0);
-    transition: clip-path var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)), background var(--normal-duration) var(--fast-out-slow-in);
+    transition: clip-path var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)), background var(--normal-duration) var(--fast-out-slow-in);
     flex-shrink: 0;
     overflow: hidden;
   }
@@ -2122,13 +2143,15 @@ watch(() => props.selectedValue, (val) => {
     display: contents;
   }
 
-  .win-nav-shell.is-overlay-left > .win-nav-left-panel {
+    .win-nav-shell.is-overlay-left > .win-nav-left-panel {
       position: absolute;
       top: 0;
       left: 0;
       bottom: 0;
       z-index: 20;
-      background: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+      --win-nav-pane-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+      isolation: isolate;
+      background: transparent;
       -webkit-backdrop-filter: var(--flyout-backdrop);
       backdrop-filter: var(--flyout-backdrop);
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
@@ -2138,8 +2161,20 @@ watch(() => props.selectedValue, (val) => {
       transition: clip-path var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)), background var(--normal-duration) var(--fast-out-slow-in), box-shadow var(--win-nav-pane-duration, 350ms) linear;
     }
 
+    .win-nav-shell.is-overlay-left > .win-nav-left-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      border-radius: inherit;
+      background: var(--win-nav-pane-fill);
+      transition: background var(--normal-duration) var(--fast-out-slow-in);
+    }
+
     html.winui-webview-host .win-nav-shell.is-overlay-left > .win-nav-left-panel:not(.is-compact) {
-      background: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+      --win-nav-pane-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+      background: transparent;
       -webkit-backdrop-filter: var(--flyout-backdrop);
       backdrop-filter: var(--flyout-backdrop);
     }
@@ -2168,6 +2203,16 @@ watch(() => props.selectedValue, (val) => {
       box-shadow: none;
     }
 
+    .win-nav-shell.is-left-compact > .win-nav-left-panel:not(.is-compact),
+    html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-compact > .win-nav-left-panel:not(.is-compact) {
+      -webkit-backdrop-filter: var(--flyout-backdrop);
+      backdrop-filter: var(--flyout-backdrop);
+    }
+
+    .win-nav-shell.is-left-compact > .win-nav-left-panel::before {
+      content: none;
+    }
+
     .win-nav-shell.is-left-compact > .win-nav-left-panel::after {
       content: '';
       position: absolute;
@@ -2175,9 +2220,7 @@ watch(() => props.selectedValue, (val) => {
       z-index: 1;
       width: var(--win-nav-open-pane-length, 320px);
       pointer-events: none;
-      background: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
-      -webkit-backdrop-filter: var(--flyout-backdrop);
-      backdrop-filter: var(--flyout-backdrop);
+      background: var(--win-nav-pane-fill, var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg)));
       border-radius: 0 8px 8px 0;
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
       opacity: 1;
@@ -2231,6 +2274,11 @@ watch(() => props.selectedValue, (val) => {
       width: calc(var(--win-nav-open-pane-length, 320px) - 8px);
     }
 
+    .win-nav-left-panel.is-closed-compact > .win-nav-pane-surface > .win-nav-left-scrollable,
+    .win-nav-left-panel.is-closed-compact .win-nav-menu {
+      width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
+    }
+
     .win-nav-left-panel .win-nav-indicator-track {
       position: absolute;
       top: 0;
@@ -2248,6 +2296,10 @@ watch(() => props.selectedValue, (val) => {
     backdrop-filter: none;
     box-shadow: none;
     clip-path: none;
+  }
+
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel::before {
+    content: none;
   }
 
   /* The host acrylic rule has a stronger selector than the minimal reset.
@@ -2274,13 +2326,25 @@ watch(() => props.selectedValue, (val) => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+    --win-nav-pane-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+    isolation: isolate;
+    background: transparent;
     -webkit-backdrop-filter: var(--flyout-backdrop);
     backdrop-filter: var(--flyout-backdrop);
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
     border-radius: 0 8px 8px 0;
     transform: translateX(0);
     transform-origin: left center;
+  }
+
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: var(--win-nav-pane-fill);
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-left-panel.has-back-button > .win-nav-pane-surface,
@@ -2293,11 +2357,11 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-left-panel.is-pane-opening > .win-nav-pane-surface {
-    animation: win-nav-minimal-pane var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)) both;
+    animation: win-nav-minimal-pane var(--win-nav-pane-open-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)) both;
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-left-panel.is-pane-closing > .win-nav-pane-surface {
-    animation: win-nav-minimal-pane var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)) reverse both;
+    animation: win-nav-minimal-pane var(--win-nav-pane-close-duration, 120ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)) reverse both;
     pointer-events: none;
   }
 
@@ -2314,11 +2378,11 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-shell:not(.is-overlay-left):not(.is-left-compact) > .win-nav-left-panel.is-pane-opening + .win-nav-content {
-    animation: win-nav-inline-content-opening var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
+    animation: win-nav-inline-content-opening var(--win-nav-pane-open-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
   }
 
   .win-nav-shell:not(.is-overlay-left):not(.is-left-compact) > .win-nav-left-panel.is-pane-closing + .win-nav-content {
-    animation: win-nav-inline-content-closing var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
+    animation: win-nav-inline-content-closing var(--win-nav-pane-close-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)) both;
   }
 
   @keyframes win-nav-inline-content-opening {

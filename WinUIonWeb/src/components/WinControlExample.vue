@@ -190,6 +190,8 @@ const copyActiveCode = async () => {
 }
 
 .example-container {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   width: 100%;
@@ -198,6 +200,18 @@ const copyActiveCode = async () => {
   border: 1px solid var(--card-stroke);
   border-bottom: none;
   border-radius: 8px 8px 0 0;
+  background: transparent;
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.example-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
   background: var(--card-bg);
 }
 
@@ -222,7 +236,7 @@ const copyActiveCode = async () => {
   flex-direction: column;
   gap: 12px;
   align-self: stretch;
-  background: var(--card-bg);
+  background: transparent;
   border-left: 1px solid var(--stroke-divider);
   border-radius: 0 8px 0 0;
   color: var(--text-primary);
@@ -236,8 +250,9 @@ const copyActiveCode = async () => {
 }
 
 .code-expander :deep(.win-expander-header) {
+  --win-expander-header-fill: var(--card-bg-secondary);
   border-radius: 0 0 8px 8px;
-  background: var(--card-bg-secondary);
+  background: transparent;
   min-height: auto;
   padding: 8px 12px;
 }

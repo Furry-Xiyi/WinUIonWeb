@@ -73,9 +73,23 @@ const select = (index) => {
 <style>
   /* styles/listbox.css */
   .win-list-box {
-    background: var(--card-bg);
+    position: relative;
+    isolation: isolate;
+    background: transparent;
     border: 1px solid var(--card-stroke);
     border-radius: 0;
+    -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+    backdrop-filter: var(--flyout-backdrop, blur(30px));
+  }
+
+  .win-list-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: var(--card-bg);
   }
 
   .win-list-box-items {

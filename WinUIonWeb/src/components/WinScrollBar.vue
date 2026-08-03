@@ -229,9 +229,23 @@ const onThumbDown = (e) => {
 /* Track */
 .win-scrollbar-track {
   position: absolute;
+  isolation: isolate;
+  opacity: 0;
   background: transparent;
   border-radius: 8px;
-  transition: background 0.1s var(--standard-easing);
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+  transition: opacity 0.1s var(--standard-easing);
+}
+
+.win-scrollbar-track::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--ScrollBarTrackFill, color-mix(in srgb, var(--flyout-bg, Canvas) 78%, transparent));
 }
 
 .win-scrollbar.vertical .win-scrollbar-track {
@@ -245,7 +259,8 @@ const onThumbDown = (e) => {
 }
 
 .win-scrollbar:hover .win-scrollbar-track {
-  background: rgba(0, 0, 0, 0.03);
+  opacity: 1;
+  background: transparent;
 }
 
 /* Thumb */
@@ -330,7 +345,7 @@ const onThumbDown = (e) => {
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .win-scrollbar:hover .win-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent;
   }
 
   .win-scrollbar-thumb {

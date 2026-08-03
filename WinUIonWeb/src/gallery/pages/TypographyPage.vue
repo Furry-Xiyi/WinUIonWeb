@@ -385,11 +385,14 @@ const cSharpCode = `<div class="typography-samples">
 }
 
 .info-button {
+  position: relative;
   width: 24px;
   height: 24px;
   border: none;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.2);
+  --typography-info-fill: rgba(255, 255, 255, 0.2);
+  isolation: isolate;
+  background: transparent;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   cursor: pointer;
@@ -400,8 +403,20 @@ const cSharpCode = `<div class="typography-samples">
   padding: 4px;
 }
 
+.info-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--typography-info-fill);
+  transition: background 0.2s;
+}
+
 .info-button:hover {
-  background: rgba(255, 255, 255, 0.3);
+  --typography-info-fill: rgba(255, 255, 255, 0.3);
+  background: transparent;
 }
 
 .info-button .icon {
@@ -435,7 +450,8 @@ const cSharpCode = `<div class="typography-samples">
 
 .info-tooltip {
   position: fixed;
-  background: var(--flyout-bg);
+  isolation: isolate;
+  background: transparent;
   border: 1px solid var(--ctrl-border-rest);
   border-radius: 8px;
   padding: 12px 16px;
@@ -445,6 +461,18 @@ const cSharpCode = `<div class="typography-samples">
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
+  backdrop-filter: var(--flyout-backdrop, blur(30px));
+}
+
+.info-tooltip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--flyout-bg);
 }
 
 .tooltip-content {

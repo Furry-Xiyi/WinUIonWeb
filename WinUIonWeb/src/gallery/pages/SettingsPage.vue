@@ -7,7 +7,7 @@
           <WinTextBlock class="settings-section-title" :Text="$t('text.appearance')" />
           <div class="settings-controls">
             <WinExpander
-              HeaderHeight="70"
+              Height="70"
               :Header="$t('text.theme')"
               :Description="$t('text.choose-your-app-color-mode')"
               HeaderIcon="">
@@ -19,7 +19,7 @@
             </WinExpander>
             <WinExpander
               v-if="isHostedInUwpWebView"
-              HeaderHeight="70"
+              Height="70"
               :Header="$t('text.material')"
               :Description="$t('text.choose-the-app-background-material')"
               HeaderIcon="&#xE2B1;">
@@ -29,7 +29,7 @@
               </WinRadioButtons>
             </WinExpander>
             <WinExpander
-              HeaderHeight="70"
+              Height="70"
               :Header="$t('text.page-transition')"
               :Description="$t('text.animation-style-when-switching-pages')"
               HeaderIcon="&#xE8AB;">
@@ -44,7 +44,7 @@
               :Header="$t('text.navigation-pane-position')"
               :Description="$t('text.select-the-navigation-bar-position')"
               :HeaderIcon="'\uF594'"
-              :HeaderHeight="70">
+              :Height="70">
               <WinComboBox
                 v-model:SelectedValue="navPosition"
                 :ItemsSource="navPositionOptions"
@@ -55,9 +55,9 @@
           <WinTextBlock class="about-section-title" :Text="$t('text.about')" />
           <div class="about-controls">
             <WinExpander
-              HeaderHeight="70">
+              Height="70">
               <template #HeaderIcon>
-                <img class="about-app-icon" src="/src/assets/AppIcon.ico" alt="App Icon" />
+                <img class="about-app-icon" :src="appIcon" alt="App Icon" />
               </template>
               <template #Header>
                 <div class="about-header-container">
@@ -96,6 +96,8 @@ import WinSettingsCard from '../../components/WinSettingsCard.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
+import appManifest from '../../manifest.json';
+import appIcon from '../../assets/AppIcon.ico';
 import { useI18n } from '../../components/i18n/index';
 import {
   DefaultNavigationTransitionInfo,
@@ -179,8 +181,12 @@ const navPositionOptions = [
 ];
 const appTitle = t('app.title');
 const currentYear = new Date().getFullYear();
-const copyrightText = computed(() => `© ${currentYear} ${t('text.about-author')}. ${t('text.all-rights-reserved')}`);
-const versionText = '1.0.0 Beta';
+const copyrightText = computed(() => t('text.about-copyright', {
+  year: currentYear,
+  author: t(appManifest.author ?? 'app.author'),
+  rights: t('text.all-rights-reserved')
+}));
+const versionText = t(appManifest.version ?? 'app.version');
 </script>
 
 <style scoped>

@@ -1,7 +1,8 @@
 export default {
   "app.shortTitle": "WinUI on Web Gallery",
   "app.title": "WinUI on Web Gallery",
-  "app.version": "WinUI on Web 1.0.0-Insider",
+  "app.version": "1.0.0-Insider",
+  "app.author": "惜忆想睡觉",
   "text.a-2-state-checkbox": "A 2-state CheckBox",
   "text.a-basic-autosuggestbox": "A basic AutoSuggestBox",
   "text.a-basic-calendar-view": "A basic calendar view.",
@@ -853,7 +854,7 @@ export default {
      ,"text.theme-shadow": "ThemeShadow"
      ,"text.typography": "Typography"
      ,"text.about": "About"
-     ,"text.about-author": "Furry-Xiyi"
+     ,"text.about-copyright": "© {year} {author}. {rights}"
      ,"text.all-rights-reserved": "All rights reserved."
      ,"text.qq-group": "QQ Group"
      ,"text.discord-group": "Discord Group"

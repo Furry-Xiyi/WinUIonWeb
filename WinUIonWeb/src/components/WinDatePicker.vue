@@ -444,7 +444,9 @@ function onWheel(event, type) {
   .picker-flyout {
     position: fixed;
     z-index: 100;
-    background: var(--flyout-bg);
+    --win-acrylic-fill: var(--flyout-bg);
+    isolation: isolate;
+    background: transparent;
     border: 1px solid var(--stroke-surface-flyout);
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.14);
