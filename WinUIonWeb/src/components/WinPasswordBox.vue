@@ -83,8 +83,8 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   'update:Password': [value: string];
-  PasswordChanging: [args: { cancel: boolean; password: string }];
-  PasswordChanged: [args: { password: string }];
+  PasswordChanging: [args: { IsContentChanging: boolean }];
+  PasswordChanged: [];
   GotFocus: [];
   LostFocus: [];
 }>();
@@ -102,12 +102,10 @@ const visibleText = computed(() => isPasswordVisible.value ? password.value : pr
 
 const applyPassword = (value: string) => {
   const next = props.MaxLength > 0 ? value.slice(0, props.MaxLength) : value;
-  const args = { cancel: false, password: next };
-  emit('PasswordChanging', args);
-  if (args.cancel) return;
-  password.value = args.password;
-  emit('update:Password', args.password);
-  emit('PasswordChanged', { password: args.password });
+  emit('PasswordChanging', { IsContentChanging: next !== password.value });
+  password.value = next;
+  emit('update:Password', next);
+  emit('PasswordChanged');
 };
 
 const onVisibleTextChanged = (value: string) => {
@@ -123,9 +121,9 @@ const onVisibleTextChanged = (value: string) => {
   }
 };
 
-const onPaste = (args: { handled: boolean; text: string }) => {
+const onPaste = (args: { Handled: boolean }) => {
   if (!props.CanPasteClipboardContent) {
-    args.handled = true;
+    args.Handled = true;
   }
 };
 

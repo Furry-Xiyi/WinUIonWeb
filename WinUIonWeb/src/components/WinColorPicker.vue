@@ -37,7 +37,7 @@
     </div>
 
     <div v-if="detailsVisible" class="cp-details-grid">
-      <WinComboBox Width="120" :ItemsSource="colorModelItems" :SelectedIndex="selectedColorModelIndex" @SelectionChanged="onColorModelChanged" />
+      <WinComboBox Width="120" :ItemsSource="colorModelItems" :SelectedIndex="selectedColorModelIndex" @update:SelectedIndex="onColorModelChanged" />
       <WinTextBox
         v-if="IsHexInputVisible"
         class="cp-hex-box"
@@ -114,7 +114,7 @@ const props = defineProps({
   colorSpectrumShape: { type: String, default: 'Box' }
 });
 
-const emit = defineEmits(['update:modelValue', 'update:Color', 'ColorChanged', 'colorChanged']);
+const emit = defineEmits(['update:modelValue', 'update:Color', 'ColorChanged']);
 
 const spectrumSize = 256;
 const spectrumCanvas = ref(null);
@@ -128,6 +128,7 @@ const alpha = ref(1);
 const moreExpanded = ref(false);
 const hexInputText = ref('');
 const selectedColorModelIndex = ref(0);
+const lastEmittedColor = ref(props.Color ?? props.modelValue);
 let draggingSpectrum = false;
 let draggingValue = false;
 let draggingAlpha = false;
@@ -307,8 +308,8 @@ function drawRingSpectrum(ctx, w, h) {
 function emitColor() {
   emit('update:modelValue', currentHex.value);
   emit('update:Color', currentHex.value);
-  emit('ColorChanged', { Color: currentHex.value, color: currentHex.value, r: rgb.value.r, g: rgb.value.g, b: rgb.value.b, a: alpha.value });
-  emit('colorChanged', { color: currentHex.value, r: rgb.value.r, g: rgb.value.g, b: rgb.value.b, a: alpha.value });
+  emit('ColorChanged', { OldColor: lastEmittedColor.value, NewColor: currentHex.value });
+  lastEmittedColor.value = currentHex.value;
 }
 
 watch(hexDisplay, (value) => {
@@ -432,8 +433,8 @@ function onHsvValueInput(channel, value) {
   emitColor();
 }
 
-function onColorModelChanged(args) {
-  selectedColorModelIndex.value = args.SelectedIndex ?? 0;
+function onColorModelChanged(value) {
+  selectedColorModelIndex.value = value ?? 0;
 }
 
 function onOpacityInput(value) {
@@ -476,6 +477,7 @@ function syncFromProp(hex) {
 watch(() => props.Color ?? props.modelValue, (val) => {
   if (val && val.toLowerCase() !== currentHex.value.toLowerCase()) {
     syncFromProp(val);
+    lastEmittedColor.value = val;
   }
 });
 
@@ -491,6 +493,7 @@ watch([spectrumToolTipContent, spectrumThumbStyle], () => {
 
 onMounted(() => {
   syncFromProp(props.Color ?? props.modelValue);
+  lastEmittedColor.value = currentHex.value;
 });
 </script>
 

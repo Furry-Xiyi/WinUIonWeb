@@ -21,7 +21,7 @@
 
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.passwordbox.header-placeholder-character')">
               <template #example>
-                <WinPasswordBox Header="Password" PlaceholderText="Enter your password" PasswordChar="#" :Width="300" />
+                <WinPasswordBox :Header="$t('sample.passwordbox.password')" :PlaceholderText="$t('sample.passwordbox.enter-password')" PasswordChar="#" :Width="300" />
               </template>
             </WinControlExample>
 
@@ -29,7 +29,7 @@
               <template #example>
                 <div class="horizontal-example">
                   <WinPasswordBox v-model:Password="revealPassword" :PasswordRevealMode="showPassword ? 'Visible' : 'Hidden'" :Width="250" />
-                  <WinCheckBox v-model="showPassword"><WinTextBlock Text="Show password" /></WinCheckBox>
+                  <WinCheckBox v-model="showPassword"><WinTextBlock :Text="$t('sample.passwordbox.show-password')" /></WinCheckBox>
                 </div>
               </template>
             </WinControlExample>
@@ -46,9 +46,11 @@ import WinControlExample from '../../components/WinControlExample.vue';
 import WinPasswordBox from '../../components/WinPasswordBox.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'passwordbox');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -59,7 +61,7 @@ const showPassword = ref(false);
 const passwordMessage = ref('');
 
 const onSimplePasswordChanged = ({ password }) => {
-  passwordMessage.value = password === 'Password' ? "'Password' is not allowed." : '';
+  passwordMessage.value = password === 'Password' ? t('sample.passwordbox.not-allowed') : '';
 };
 
 const example1Template = `<WinPasswordBox
@@ -67,21 +69,21 @@ const example1Template = `<WinPasswordBox
   :Width="300"
   @PasswordChanged="onSimplePasswordChanged" />`;
 
-const example2Template = `<WinPasswordBox
-  Header="Password"
-  PlaceholderText="Enter your password"
+const example2Template = computed(() => `<WinPasswordBox
+  Header="${t('sample.passwordbox.password')}"
+  PlaceholderText="${t('sample.passwordbox.enter-password')}"
   PasswordChar="#"
-  :Width="300" />`;
+  :Width="300" />`);
 
-const example3Template = `<div class="horizontal-example">
+const example3Template = computed(() => `<div class="horizontal-example">
   <WinPasswordBox
     v-model:Password="revealPassword"
     :PasswordRevealMode="showPassword ? 'Visible' : 'Hidden'"
     :Width="250" />
   <WinCheckBox v-model="showPassword">
-    <WinTextBlock Text="Show password" />
+    <WinTextBlock Text="${t('sample.passwordbox.show-password')}" />
   </WinCheckBox>
-</div>`;
+</div>`);
 </script>
 
 <style scoped>

@@ -18,13 +18,13 @@
 
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.numberbox.spin-button')">
               <template #example>
-                <WinNumberBox v-model:Value="spinValue" Header="Enter an integer:" :SmallChange="10" :LargeChange="100" :SpinButtonPlacementMode="spinMode" :Width="300" />
+                <WinNumberBox v-model:Value="spinValue" :Header="$t('sample.numberbox.enter-integer')" :SmallChange="10" :LargeChange="100" :SpinButtonPlacementMode="spinMode" :Width="300" />
               </template>
               <template #options>
                 <div class="options-group">
-                  <WinTextBlock class="options-label" Text="SpinButton placement" />
-                  <WinRadioButton v-model="spinMode" value="Inline"><WinTextBlock Text="Inline" /></WinRadioButton>
-                  <WinRadioButton v-model="spinMode" value="Compact"><WinTextBlock Text="Compact" /></WinRadioButton>
+                  <WinTextBlock class="options-label" :Text="$t('sample.numberbox.spinbutton-placement')" />
+                  <WinRadioButton v-model="spinMode" value="Inline"><WinTextBlock :Text="$t('text.inline')" /></WinRadioButton>
+                  <WinRadioButton v-model="spinMode" value="Compact"><WinTextBlock :Text="$t('sample.numberbox.compact')" /></WinRadioButton>
                 </div>
               </template>
             </WinControlExample>
@@ -32,7 +32,7 @@
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template" :headerText="$t('sample.numberbox.formatted-rounding')">
               <template #example>
                 <div class="stack-example">
-                  <WinNumberBox v-model:Value="currencyValue" Header="Enter a dollar amount:" PlaceholderText="0.00" :SmallChange="0.25" :Width="300" @ValueChanged="roundCurrency" />
+                  <WinNumberBox v-model:Value="currencyValue" :NumberFormatter="currencyFormatter" :Header="$t('sample.numberbox.enter-dollar-amount')" PlaceholderText="0.00" :SmallChange="0.25" :Width="300" @ValueChanged="roundCurrency" />
                   <WinTextBlock class="output-text" :Text="currencyOutput" />
                 </div>
               </template>
@@ -50,9 +50,11 @@ import WinNumberBox from '../../components/WinNumberBox.vue';
 import WinRadioButton from '../../components/WinRadioButton.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t, locale } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'numberbox');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -62,37 +64,39 @@ const spinValue = ref(10);
 const spinMode = ref('Compact');
 const currencyValue = ref(Number.NaN);
 const currencyOutput = ref('');
+const currencyFormatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: false });
 
-const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(value);
-const roundCurrency = ({ newValue }) => {
-  if (Number.isNaN(newValue)) {
+const formatCurrency = (value) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(value);
+const roundCurrency = ({ NewValue }) => {
+  if (Number.isNaN(NewValue)) {
     currencyOutput.value = '';
     return;
   }
-  const rounded = Math.round(newValue * 4) / 4;
+  const rounded = Math.round(NewValue * 4) / 4;
   currencyValue.value = rounded;
   currencyOutput.value = formatCurrency(rounded);
 };
 
-const example1Template = `<WinNumberBox
+const example1Template = computed(() => `<WinNumberBox
   v-model:Value="expressionValue"
   :AcceptsExpression="true"
-  Header="Enter an expression:"
-  PlaceholderText="1 + 2^2" />`;
+  Header="${t('text.enter-an-expression')}"
+  PlaceholderText="1 + 2^2" />`);
 
-const example2Template = `<WinNumberBox
+const example2Template = computed(() => `<WinNumberBox
   v-model:Value="spinValue"
-  Header="Enter an integer:"
+  Header="${t('sample.numberbox.enter-integer')}"
   :SmallChange="10"
   :LargeChange="100"
-  :SpinButtonPlacementMode="spinMode" />`;
+  :SpinButtonPlacementMode="spinMode" />`);
 
-const example3Template = `<WinNumberBox
+const example3Template = computed(() => `<WinNumberBox
   v-model:Value="currencyValue"
-  Header="Enter a dollar amount:"
+  :NumberFormatter="currencyFormatter"
+  Header="${t('sample.numberbox.enter-dollar-amount')}"
   PlaceholderText="0.00"
   :SmallChange="0.25"
-  @ValueChanged="roundCurrency" />`;
+  @ValueChanged="roundCurrency" />`);
 </script>
 
 <style scoped>

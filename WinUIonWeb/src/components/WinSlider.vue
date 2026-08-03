@@ -23,13 +23,13 @@
         class="win-slider-thumb"
         :class="{ 'is-pointer-over': isThumbPointerOver && !isTrackInteraction, 'is-pressed': isThumbPressed }"
         :style="thumbStyle"
-        @pointerenter="isThumbPointerOver = true"
-        @pointerleave="isThumbPointerOver = false" />
+        @pointerenter="onThumbPointerEnter"
+        @pointerleave="onThumbPointerLeave" />
     </div>
     <WinToolTip
       ref="thumbToolTipRef"
       IsServiceHost
-      :IsOpen="isThumbToolTipOpen"
+      v-model:IsOpen="isThumbToolTipOpen"
       :IsEnabled="IsEnabled && IsThumbToolTipEnabled"
       :Content="thumbToolTipContent"
       :Placement="tooltipPlacement"
@@ -224,12 +224,25 @@ const setValue = (value, { commit = true } = {}) => {
   if (oldValue !== nextValue) emit('ValueChanged', { OldValue: oldValue, NewValue: nextValue });
 };
 
-const showThumbToolTip = () => {
-  if (props.IsEnabled && props.IsThumbToolTipEnabled) isThumbToolTipOpen.value = true;
+const showThumbToolTip = (immediate = true) => {
+  if (!props.IsEnabled || !props.IsThumbToolTipEnabled) return;
+  if (immediate) isThumbToolTipOpen.value = true;
+  thumbToolTipRef.value?.show?.(immediate);
 };
 
 const hideThumbToolTip = () => {
+  thumbToolTipRef.value?.hide?.(true);
   isThumbToolTipOpen.value = false;
+};
+
+const onThumbPointerEnter = () => {
+  isThumbPointerOver.value = true;
+  if (!isThumbPressed.value && !isTrackInteraction.value) showThumbToolTip(false);
+};
+
+const onThumbPointerLeave = () => {
+  isThumbPointerOver.value = false;
+  if (!isThumbPressed.value && !isTrackInteraction.value) hideThumbToolTip();
 };
 
 const updateFromPointer = (event) => {
@@ -248,7 +261,7 @@ const onPointerDown = (event) => {
   isTrackInteraction.value = !startedOnThumb;
   trackRef.value.setPointerCapture(event.pointerId);
   updateFromPointer(event);
-  showThumbToolTip();
+  showThumbToolTip(true);
   const finishPointerInteraction = () => {
     if (!isThumbPressed.value && !isTrackInteraction.value) return;
     if (String(props.SnapsTo).toLowerCase() === 'ticks' && dragValue.value !== null) setValue(dragValue.value, { commit: true });

@@ -297,10 +297,7 @@ const RaiseSelectionChanged = (oldItem, selectedItem, selectedIndex) => {
   emit('update:Text', currentText.value);
   emit('SelectionChanged', {
     AddedItems: selectedItem === undefined ? [] : [selectedItem],
-    RemovedItems: oldItem === undefined ? [] : [oldItem],
-    SelectedIndex: selectedIndex,
-    SelectedItem: selectedItem,
-    SelectedValue: selectedItem === undefined ? undefined : GetItemValue(selectedItem)
+    RemovedItems: oldItem === undefined ? [] : [oldItem]
   });
 };
 
@@ -726,15 +723,15 @@ const focusCombo = () => {
   }
 
   if (isEditing.value) {
-    inputRef.value?.focus();
+    inputRef.value?.Focus();
   } else {
     backgroundRef.value?.querySelector('.win-combo-edit-display')?.focus();
   }
 };
 
 const focusEditableText = (selectText = false) => {
-  inputRef.value?.focus();
-  if (selectText) inputRef.value?.selectAll();
+  inputRef.value?.Focus();
+  if (selectText) inputRef.value?.SelectAll();
 };
 
 const beginEditing = () => {
@@ -774,7 +771,6 @@ const onEditableTextChanged = (text) => {
 
 const onEditableLostFocus = () => {
   nextTick(() => {
-    if (inputRef.value?.isContextMenuOpen) return;
     const activeElement = document.activeElement;
     if (backgroundRef.value?.contains(activeElement) || flyoutRef.value?.contains(activeElement)) return;
     endEditing();
@@ -894,11 +890,6 @@ const onInputKeyDown = (event) => {
 };
 
 const onDocumentPointerDown = (event) => {
-  const isInsideEditableContextMenu = inputRef.value?.isContextMenuOpen
-    && event.target instanceof Element
-    && Boolean(event.target.closest('.win-menu-flyout-wrap, .win-menu-flyout-overlay'));
-  if (isInsideEditableContextMenu) return;
-
   const isInsideComboBox = comboRef.value?.contains(event.target);
   const isInsideFlyout = flyoutRef.value?.contains(event.target);
 

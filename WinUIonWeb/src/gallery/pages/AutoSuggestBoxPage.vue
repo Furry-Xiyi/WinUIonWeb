@@ -33,7 +33,7 @@
                     v-model:Text="controlText"
                     :ItemsSource="controlSuggestions"
                     TextMemberPath="title"
-                    PlaceholderText="Type a control name"
+                    :PlaceholderText="$t('sample.autosuggestbox.type-control-name')"
                     QueryIcon="Find"
                     :Width="300"
                     @TextChanged="onControlTextChanged"
@@ -62,24 +62,27 @@ import WinButton from '../../components/WinButton.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'autosuggestbox');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const cats = ['Abyssinian', 'Aegean', 'American Bobtail', 'American Curl', 'American Shorthair', 'Bengal', 'Birman', 'British Shorthair', 'Burmese', 'Chartreux', 'Devon Rex', 'Egyptian Mau', 'Maine Coon', 'Persian', 'Ragdoll', 'Russian Blue', 'Siamese', 'Sphynx', 'Turkish Angora'];
-const controls = [
-  { title: 'AutoSuggestBox', subtitle: 'A text control that shows suggestions as users type.' },
-  { title: 'Button', subtitle: 'A control that responds to user input and raises a Click event.' },
-  { title: 'CheckBox', subtitle: 'A control that a user can select or clear.' },
-  { title: 'ComboBox', subtitle: 'A drop-down list of items a user can select from.' },
-  { title: 'NumberBox', subtitle: 'A control that can be used to display and edit numbers.' },
-  { title: 'PasswordBox', subtitle: 'A control for entering passwords.' },
-  { title: 'RichEditBox', subtitle: 'A control for entering and editing formatted text.' },
-  { title: 'TextBox', subtitle: 'A control that lets a user enter simple text input.' }
-];
+const noResultsText = computed(() => t('sample.autosuggestbox.no-results'));
+const controls = computed(() => [
+  { title: 'AutoSuggestBox', subtitle: t('sample.autosuggestbox.subtitle.autosuggestbox') },
+  { title: 'Button', subtitle: t('sample.autosuggestbox.subtitle.button') },
+  { title: 'CheckBox', subtitle: t('sample.autosuggestbox.subtitle.checkbox') },
+  { title: 'ComboBox', subtitle: t('sample.autosuggestbox.subtitle.combobox') },
+  { title: 'NumberBox', subtitle: t('sample.autosuggestbox.subtitle.numberbox') },
+  { title: 'PasswordBox', subtitle: t('sample.autosuggestbox.subtitle.passwordbox') },
+  { title: 'RichEditBox', subtitle: t('sample.autosuggestbox.subtitle.richeditbox') },
+  { title: 'TextBox', subtitle: t('sample.autosuggestbox.subtitle.textbox') }
+]);
 
 const catText = ref('');
 const catSuggestions = ref([]);
@@ -94,32 +97,32 @@ const filterByTokens = (items, text, selector = (item) => item) => {
   return items.filter((item) => tokens.every((token) => selector(item).toLowerCase().includes(token)));
 };
 
-const onCatTextChanged = ({ reason, text }) => {
-  if (reason !== 'UserInput') return;
-  const results = filterByTokens(cats, text);
-  catSuggestions.value = results.length ? results : ['No results found'];
+const onCatTextChanged = ({ Reason }) => {
+  if (Reason !== 'UserInput') return;
+  const results = filterByTokens(cats, catText.value);
+  catSuggestions.value = results.length ? results : [noResultsText.value];
 };
 
-const onCatSuggestionChosen = ({ selectedItem }) => {
-  chosenCat.value = selectedItem === 'No results found' ? '' : selectedItem;
+const onCatSuggestionChosen = ({ SelectedItem }) => {
+  chosenCat.value = SelectedItem === noResultsText.value ? '' : SelectedItem;
 };
 
-const onControlTextChanged = ({ reason, text }) => {
-  if (reason !== 'UserInput') return;
-  const results = filterByTokens(controls, text, (item) => item.title);
-  controlSuggestions.value = results.length ? results : [{ title: 'No results found', subtitle: '' }];
+const onControlTextChanged = ({ Reason }) => {
+  if (Reason !== 'UserInput') return;
+  const results = filterByTokens(controls.value, controlText.value, (item) => item.title);
+  controlSuggestions.value = results.length ? results : [{ title: noResultsText.value, subtitle: '' }];
 };
 
-const onControlSuggestionChosen = ({ selectedItem }) => {
-  if (selectedItem.title !== 'No results found') controlText.value = selectedItem.title;
+const onControlSuggestionChosen = ({ SelectedItem }) => {
+  if (SelectedItem.title !== noResultsText.value) controlText.value = SelectedItem.title;
 };
 
-const onControlQuerySubmitted = ({ queryText, chosenSuggestion }) => {
-  if (chosenSuggestion?.title && chosenSuggestion.title !== 'No results found') {
-    selectedControl.value = chosenSuggestion;
+const onControlQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
+  if (ChosenSuggestion?.title && ChosenSuggestion.title !== noResultsText.value) {
+    selectedControl.value = ChosenSuggestion;
     return;
   }
-  selectedControl.value = filterByTokens(controls, queryText, (item) => item.title)[0] ?? null;
+  selectedControl.value = filterByTokens(controls.value, QueryText, (item) => item.title)[0] ?? null;
 };
 
 const example1Template = `<WinAutoSuggestBox
@@ -129,16 +132,16 @@ const example1Template = `<WinAutoSuggestBox
   @TextChanged="onCatTextChanged"
   @SuggestionChosen="onCatSuggestionChosen" />`;
 
-const example2Template = `<WinAutoSuggestBox
+const example2Template = computed(() => `<WinAutoSuggestBox
   v-model:Text="controlText"
   :ItemsSource="controlSuggestions"
   TextMemberPath="title"
-  PlaceholderText="Type a control name"
+  PlaceholderText="${t('sample.autosuggestbox.type-control-name')}"
   QueryIcon="Find"
   :Width="300"
   @TextChanged="onControlTextChanged"
   @SuggestionChosen="onControlSuggestionChosen"
-  @QuerySubmitted="onControlQuerySubmitted" />`;
+  @QuerySubmitted="onControlQuerySubmitted" />`);
 </script>
 
 <style scoped>

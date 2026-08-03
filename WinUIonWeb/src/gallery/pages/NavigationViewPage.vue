@@ -151,7 +151,7 @@
                 :FooterMenuItems="footerBottomItems"
                 :Header="$t('sample.navigationview.header-text')"
                 :PaneDisplayMode="footerPaneMode"
-                :IsPaneOpen="footerPaneMode === 'Left'"
+                v-model:IsPaneOpen="footerIsPaneOpen"
                 :IsSettingsVisible="false"
                 @SelectionChanged="NavigationView_SelectionChanged9">
                 <WinNavigationViewSamplePage :Page="footerPage" :NavigationVersion="footerNavigationVersion" :NavigationRank="footerNavigationRank" />
@@ -186,7 +186,7 @@
                 :SelectedItem="hierarchicalSelectedItem"
                 :MenuItems="hierarchicalMenuItems"
                 :PaneDisplayMode="hierarchicalPaneMode"
-                :IsPaneOpen="hierarchicalPaneMode === 'Left'"
+                v-model:IsPaneOpen="hierarchicalIsPaneOpen"
                 @SelectionChanged="NavigationView_SelectionChanged8">
                 <WinNavigationViewSamplePage :Page="hierarchicalPage" :NavigationVersion="hierarchicalNavigationVersion" />
               </WinNavigationView>
@@ -221,7 +221,7 @@
               :IsBackEnabled="apiBackEnabled"
               :AlwaysShowHeader="apiAlwaysShowHeader"
               :PaneDisplayMode="apiPaneMode"
-              :IsPaneOpen="apiPaneMode === 'Left'"
+              v-model:IsPaneOpen="apiIsPaneOpen"
               :SelectionFollowsFocus="apiSelectionFollowsFocus ? 'Enabled' : 'Disabled'"
               :ExpandedModeThresholdWidth="500"
               @SelectionChanged="NavigationView_SelectionChanged">
@@ -416,27 +416,35 @@ const footerPage = ref('SamplePage1');
 const footerNavigationVersion = ref(0);
 const footerNavigationRank = ref(0);
 const footerPaneMode = ref('Left');
+const footerIsPaneOpen = ref(true);
 const panePositionLeft_Checked = (sampleName) => {
   if (sampleName === 'nvSample') {
     apiPaneMode.value = 'Left';
+    apiIsPaneOpen.value = true;
   } else if (sampleName === 'nvSample8') {
     hierarchicalPaneMode.value = 'Left';
+    hierarchicalIsPaneOpen.value = true;
   } else if (sampleName === 'nvSample9') {
     footerPaneMode.value = 'Left';
+    footerIsPaneOpen.value = true;
   }
 };
 const panePositionTop_Checked = (sampleName) => {
   if (sampleName === 'nvSample') {
     apiPaneMode.value = 'Top';
+    apiIsPaneOpen.value = false;
   } else if (sampleName === 'nvSample8') {
     hierarchicalPaneMode.value = 'Top';
+    hierarchicalIsPaneOpen.value = false;
   } else if (sampleName === 'nvSample9') {
     footerPaneMode.value = 'Top';
+    footerIsPaneOpen.value = false;
   }
 };
 const panePositionLeftCompact_Checked = (sampleName) => {
   if (sampleName === 'nvSample8') {
     hierarchicalPaneMode.value = 'LeftCompact';
+    hierarchicalIsPaneOpen.value = false;
   }
 };
 const footerPaneIndex = computed({
@@ -479,6 +487,7 @@ const hierarchicalSelectedItem = ref(hierarchicalMenuItems[0]);
 const hierarchicalPage = ref('SamplePage1');
 const hierarchicalNavigationVersion = ref(0);
 const hierarchicalPaneMode = ref('Left');
+const hierarchicalIsPaneOpen = ref(true);
 const NavigationView_SelectionChanged8 = (args) => {
   hierarchicalNavigationVersion.value += 1;
   hierarchicalSelectedItem.value = args.SelectedItem;
@@ -495,6 +504,7 @@ const apiPaneTitle = ref(t('sample.navigationview.pane-title-value'));
 const apiPaneCustomVisible = ref(false);
 const apiPaneFooterVisible = ref(false);
 const apiPaneMode = ref('Left');
+const apiIsPaneOpen = ref(true);
 const apiSelectionFollowsFocus = ref(false);
 const apiSuppressMenuItem2 = ref(false);
 const apiMenuItems = ref([

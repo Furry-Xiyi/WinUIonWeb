@@ -16,7 +16,9 @@
     :CharacterCasing="CharacterCasing"
     :SelectionHighlightColor="SelectionHighlightColor"
     :PreventKeyboardDisplayOnProgrammaticFocus="PreventKeyboardDisplayOnProgrammaticFocus"
-    :ShowDeleteButton="false">
+    :ShowDeleteButton="false"
+    @pointerdown.capture="onRootPointerDown"
+    @contextmenu.capture="onRootContextMenu">
     <template v-if="Header || $slots.header" #header>
       <slot name="header">{{ Header }}</slot>
     </template>
@@ -28,7 +30,9 @@
         VerticalScrollMode="Auto"
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollMode="Auto"
-        HorizontalScrollBarVisibility="Auto">
+        HorizontalScrollBarVisibility="Auto"
+        @pointerdown="onEditorSurfacePointerDown"
+        @contextmenu="onEditorSurfaceContextMenu">
         <div
           ref="editorRef"
           class="win-reb-editor"
@@ -129,6 +133,8 @@ const props = withDefaults(defineProps<{
   SelectionHighlightColor?: string;
   SelectionHighlightColorWhenNotFocused?: string;
   ShowFormattingCommands?: boolean;
+  PrimaryCommands?: CommandBarFlyoutCommand[];
+  SecondaryCommands?: CommandBarFlyoutCommand[];
   TextAlignment?: TextAlignment;
   TextReadingOrder?: TextReadingOrder;
   TextWrapping?: TextWrapping;
@@ -161,6 +167,8 @@ const props = withDefaults(defineProps<{
   SelectionHighlightColor: '',
   SelectionHighlightColorWhenNotFocused: '',
   ShowFormattingCommands: true,
+  PrimaryCommands: () => [],
+  SecondaryCommands: () => [],
   TextAlignment: 'Left',
   TextReadingOrder: 'DetectFromContent',
   TextWrapping: 'Wrap',
@@ -171,20 +179,21 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   'update:Text': [value: string];
   'update:Html': [value: string];
-  TextChanged: [args: { text: string; html: string }];
-  SelectionChanged: [args: { selectionStart: number; selectionLength: number; selectedText: string }];
+  TextChanged: [];
+  SelectionChanged: [];
   SelectionChanging: [args: { SelectionStart: number; SelectionLength: number; Cancel: boolean }];
-  ContextMenuOpening: [args: { handled: boolean; x: number; y: number }];
-  Paste: [args: { handled: boolean; text: string }];
-  CopyingToClipboard: [args: { cancel: boolean; text: string }];
-  CuttingToClipboard: [args: { cancel: boolean; text: string }];
-  TextChanging: [args: { IsContentChanging: boolean; text: string }];
+  ContextMenuOpening: [args: { Handled: boolean; CursorLeft: number; CursorTop: number }];
+  Paste: [args: { Handled: boolean }];
+  CopyingToClipboard: [args: { Handled: boolean }];
+  CuttingToClipboard: [args: { Handled: boolean }];
+  TextChanging: [args: { IsContentChanging: boolean }];
   TextCompositionStarted: [];
   TextCompositionChanged: [];
   TextCompositionEnded: [];
   CandidateWindowBoundsChanged: [args: { rect: DOMRect | { x: number; y: number; width: number; height: number } }];
   GotFocus: [];
   LostFocus: [];
+  Command: [command: CommandBarFlyoutCommand];
 }>();
 
 const editorRef = ref<HTMLDivElement | null>(null);
@@ -200,10 +209,12 @@ const isFormattingDisabled = (command: 'bold' | 'italic' | 'underline') => {
 };
 const commandBarPrimaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
   const commands: CommandBarFlyoutCommand[] = [];
-  if (!props.ShowFormattingCommands) return commands;
-  if (!isFormattingDisabled('bold')) commands.push({ Label: t('text.bold'), Icon: 'Bold', Command: 'bold', IsToggle: true, IsChecked: isCommandActive('bold') });
-  if (!isFormattingDisabled('italic')) commands.push({ Label: t('text.italic'), Icon: 'Italic', Command: 'italic', IsToggle: true, IsChecked: isCommandActive('italic') });
-  if (!isFormattingDisabled('underline')) commands.push({ Label: t('text.underline'), Icon: 'Underline', Command: 'underline', IsToggle: true, IsChecked: isCommandActive('underline') });
+  if (props.ShowFormattingCommands) {
+    if (!isFormattingDisabled('bold')) commands.push({ Label: t('text.bold'), Icon: 'Bold', Command: 'bold', IsToggle: true, IsChecked: isCommandActive('bold') });
+    if (!isFormattingDisabled('italic')) commands.push({ Label: t('text.italic'), Icon: 'Italic', Command: 'italic', IsToggle: true, IsChecked: isCommandActive('italic') });
+    if (!isFormattingDisabled('underline')) commands.push({ Label: t('text.underline'), Icon: 'Underline', Command: 'underline', IsToggle: true, IsChecked: isCommandActive('underline') });
+  }
+  commands.push(...props.PrimaryCommands);
   return commands;
 });
 
@@ -222,6 +233,7 @@ const commandBarSecondaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
     commands.push({ Label: t('text.numbering'), Icon: '\uE8EF', Command: 'insertOrderedList' });
     commands.push({ Label: t('text.clear-formatting'), Icon: '\uE894', Command: 'removeFormat' });
   }
+  commands.push(...props.SecondaryCommands);
   return commands;
 });
 
@@ -302,10 +314,10 @@ const onInput = () => {
     editor.innerText = text;
   }
   internalHtml.value = editor.innerHTML;
-  emit('TextChanging', { IsContentChanging: true, text });
+  emit('TextChanging', { IsContentChanging: true });
   emit('update:Text', text);
   emit('update:Html', internalHtml.value);
-  emit('TextChanged', { text, html: internalHtml.value });
+  emit('TextChanged');
 };
 
 const emitSelection = () => {
@@ -313,7 +325,7 @@ const emitSelection = () => {
   const changingArgs = { SelectionStart: 0, SelectionLength: text.length, Cancel: false };
   emit('SelectionChanging', changingArgs);
   if (changingArgs.Cancel) return;
-  emit('SelectionChanged', { selectionStart: 0, selectionLength: text.length, selectedText: text });
+  emit('SelectionChanged');
 };
 
 const onSelectionGesture = async () => {
@@ -321,6 +333,33 @@ const onSelectionGesture = async () => {
   emitSelection();
   await nextTick();
   updateSelectionFlyout();
+};
+
+const isEditorSurfaceChrome = (target: EventTarget | null) => {
+  if (!(target instanceof Element)) return false;
+  return Boolean(target.closest('.scrollbar, .scrollbar-button, .scrollbar-thumb, .scrollbar-track'));
+};
+
+const isInsideEditor = (target: EventTarget | null) => (
+  target instanceof Node && Boolean(editorRef.value?.contains(target))
+);
+
+const onEditorSurfacePointerDown = (event: PointerEvent) => {
+  if (event.button !== 0 || isEditorSurfaceChrome(event.target) || isInsideEditor(event.target)) return;
+  focus();
+};
+
+const isEditorTextBoxSurface = (target: EventTarget | null) => {
+  if (!(target instanceof Element)) return false;
+  if (isEditorSurfaceChrome(target) || isInsideEditor(target)) return false;
+  if (target.closest('.win-textbox-header, .win-textbox-description')) return false;
+  if (target.closest('button, a, input, textarea, select, [role="button"]')) return false;
+  return Boolean(target.closest('.win-textbox-border, .win-textbox-content, .win-reb-editor-scroll, .win-scroll-viewer-viewport, .scroll-content'));
+};
+
+const onRootPointerDown = (event: PointerEvent) => {
+  if (event.button !== 0 || !isEditorTextBoxSurface(event.target)) return;
+  focus();
 };
 
 const updateSelectionFlyout = () => {
@@ -353,32 +392,46 @@ const onKeydown = (event: KeyboardEvent) => {
   }
 };
 
+const onEditorSurfaceContextMenu = (event: MouseEvent) => {
+  if (isEditorSurfaceChrome(event.target) || isInsideEditor(event.target)) return;
+  focus();
+  onContextMenu(event);
+};
+
+const onRootContextMenu = (event: MouseEvent) => {
+  if (!isEditorTextBoxSurface(event.target)) return;
+  event.stopPropagation();
+  focus();
+  onContextMenu(event);
+};
+
 const onPaste = (event: ClipboardEvent) => {
-  const args = { handled: false, text: event.clipboardData?.getData('text/plain') ?? '' };
+  const args = { Handled: false };
   emit('Paste', args);
-  if (args.handled) event.preventDefault();
+  if (args.Handled) event.preventDefault();
 };
 
 const onCopy = (event: ClipboardEvent) => {
-  const args = { cancel: false, text: getSelectionText() };
+  const args = { Handled: false };
   emit('CopyingToClipboard', args);
-  if (args.cancel) event.preventDefault();
-  if (props.ClipboardCopyFormat === 'PlainText' && args.text) {
-    event.clipboardData?.setData('text/plain', args.text);
+  if (args.Handled) event.preventDefault();
+  const selectedText = getSelectionText();
+  if (props.ClipboardCopyFormat === 'PlainText' && selectedText) {
+    event.clipboardData?.setData('text/plain', selectedText);
     event.preventDefault();
   }
 };
 
 const onCut = (event: ClipboardEvent) => {
-  const args = { cancel: false, text: getSelectionText() };
+  const args = { Handled: false };
   emit('CuttingToClipboard', args);
-  if (args.cancel) event.preventDefault();
+  if (args.Handled) event.preventDefault();
 };
 
 const onContextMenu = (event: MouseEvent) => {
-  const args = { handled: false, x: event.clientX, y: event.clientY };
+  const args = { Handled: false, CursorLeft: event.clientX, CursorTop: event.clientY };
   emit('ContextMenuOpening', args);
-  if (args.handled) return;
+  if (args.Handled) return;
   event.preventDefault();
   saveSelection();
   commandBarAnchor.value = {
@@ -424,7 +477,13 @@ const runTextCommand = async (command: string) => {
 };
 
 const onFlyoutCommand = (item: CommandBarFlyoutCommand) => {
-  if (item?.Command) void runTextCommand(item.Command);
+  if (!item?.Command) return;
+  const builtInCommands = new Set(['bold', 'italic', 'underline', 'cut', 'copy', 'paste', 'undo', 'redo', 'selectAll', 'insertUnorderedList', 'insertOrderedList', 'removeFormat']);
+  if (builtInCommands.has(item.Command)) void runTextCommand(item.Command);
+  else {
+    commandBarOpen.value = false;
+    emit('Command', item);
+  }
 };
 
 const onEditorFocus = (setTextBoxFocused?: () => void) => {
@@ -519,20 +578,36 @@ defineExpose({
 
 .win-rich-edit-box :deep(.win-textbox-border) {
   min-height: var(--rich-edit-box-min-height);
+  cursor: text;
 }
 
 .win-rich-edit-box :deep(.win-textbox-content) {
   min-height: calc(var(--rich-edit-box-min-height) - 2px);
+  cursor: text;
 }
 
 .win-reb-editor-scroll {
   flex: 1;
   min-width: 0;
   min-height: 118px;
+  cursor: text;
+}
+
+.win-reb-editor-scroll :deep(.win-scroll-viewer-viewport),
+.win-reb-editor-scroll :deep(.scroll-content) {
+  height: 100%;
+  min-height: 100%;
+  cursor: text;
+}
+
+.win-reb-editor-scroll :deep(.scroll-content) {
+  display: flex;
 }
 
 .win-reb-editor {
-  min-height: 118px;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: max(118px, 100%);
   padding: 5px 6px 6px 10px;
   box-sizing: border-box;
   outline: 0;

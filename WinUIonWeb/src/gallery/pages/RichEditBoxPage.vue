@@ -18,25 +18,47 @@
 
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.richeditbox.custom-command-flyout')">
               <template #example>
-                <WinRichEditBox Header="Editor with custom menu" PlaceholderText="Select text and use the command menu." :Width="800" :Height="200" />
+                <WinRichEditBox
+                  :PrimaryCommands="customFlyoutPrimaryCommands"
+                  :Width="800"
+                  :Height="200"
+                  @Command="onCustomFlyoutCommand" />
               </template>
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" horizontalContentAlignment="Stretch" :vue="example3Template" :headerText="$t('sample.richeditbox.custom-formatting-editor')">
               <template #example>
-                <div class="custom-editor">
-                  <div class="custom-toolbar">
-                    <WinButton @click="showFileMessage('Open file')" ToolTipService.ToolTip="Open file" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE8E5;</span></WinButton>
-                    <WinButton @click="showFileMessage('Save file')" ToolTipService.ToolTip="Save file" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE74E;</span></WinButton>
-                    <span class="separator"></span>
-                    <WinButton @click="customEditor?.execCommand('bold')" ToolTipService.ToolTip="Bold" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE8DD;</span></WinButton>
-                    <WinButton @click="customEditor?.execCommand('italic')" ToolTipService.ToolTip="Italic" style="width: 36px; height: 32px; padding: 0; min-width: 0;"><span class="icon">&#xE8DB;</span></WinButton>
-                    <button v-for="color in colors" :key="color" class="color-button" :style="{ background: color }" v-bind="{ 'tooltipservice.tooltip': color }" @click="customEditor?.execCommand('foreColor', color)"></button>
+                <div class="official-custom-editor">
+                  <div class="official-toolbar">
+                    <div class="toolbar-start">
+                      <WinButton class="toolbar-icon-button" @click="showFileMessage($t('sample.richeditbox.open-file'))" v-bind="{ 'tooltipservice.tooltip': $t('sample.richeditbox.open-file') }"><span class="icon">&#xE8E5;</span></WinButton>
+                      <WinButton class="toolbar-icon-button" @click="showFileMessage($t('sample.richeditbox.save-file'))" v-bind="{ 'tooltipservice.tooltip': $t('sample.richeditbox.save-file') }"><span class="icon">&#xE74E;</span></WinButton>
+                    </div>
+                    <div class="toolbar-end">
+                      <WinButton class="toolbar-icon-button" @click="customEditor?.execCommand('bold')" v-bind="{ 'tooltipservice.tooltip': $t('sample.richeditbox.bold') }"><span class="icon">&#xE8DD;</span></WinButton>
+                      <WinButton class="toolbar-icon-button" @click="customEditor?.execCommand('italic')" v-bind="{ 'tooltipservice.tooltip': $t('sample.richeditbox.italic') }"><span class="icon">&#xE8DB;</span></WinButton>
+                      <WinFlyout ref="fontColorFlyout" Placement="Bottom" :Theme="pageTheme">
+                        <template #trigger>
+                          <WinButton class="toolbar-icon-button" @click="fontColorFlyout?.toggle()" v-bind="{ 'tooltipservice.tooltip': $t('sample.richeditbox.font-color') }"><span class="icon">&#xE790;</span></WinButton>
+                        </template>
+                        <div class="font-color-flyout">
+                          <button
+                            v-for="color in colors"
+                            :key="color.value"
+                            class="color-menu-button"
+                            :aria-label="color.label"
+                            v-bind="{ 'tooltipservice.tooltip': color.label }"
+                            @click="applyEditorColor(color.value)">
+                            <span class="color-swatch" :style="{ background: color.value }"></span>
+                          </button>
+                        </div>
+                      </WinFlyout>
+                    </div>
                   </div>
-                  <WinRichEditBox ref="customEditor" v-model:Html="customHtml" :ShowFormattingCommands="false" PlaceholderText="Compose formatted text" :Height="200" />
-                  <div class="find-row">
-                    <WinTextBlock Text="Find:" />
-                    <WinTextBox v-model:Text="findText" PlaceholderText="Enter search text" style="width: 224px;" />
+                  <WinRichEditBox ref="customEditor" v-model:Html="customHtml" :ShowFormattingCommands="false" :Height="200" />
+                  <div class="official-find-row">
+                    <WinTextBlock :Text="$t('sample.richeditbox.find-label')" />
+                    <WinTextBox v-model:Text="findText" :PlaceholderText="$t('sample.richeditbox.search-placeholder')" style="width: 224px;" />
                   </div>
                 </div>
               </template>
@@ -45,9 +67,9 @@
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example4Template" :headerText="$t('sample.richeditbox.math-mode')">
               <template #example>
                 <div class="stack-example">
-                  <WinTextBlock class="note-text" Text="Math mode enables users to have input automatically recognized and converted to math expressions while being received." TextWrapping="WrapWholeWords" />
-                  <WinTextBlock class="note-text" Text="For example, &quot;4^2&quot; is converted to &quot;4²&quot;, and &quot;\pi&quot; is converted to &quot;π&quot;." TextWrapping="WrapWholeWords" />
-                  <WinRichEditBox v-model:Text="mathText" PlaceholderText="Enter math expressions like: 4^2, \pi, \alpha, \beta" :ShowFormattingCommands="false" :Width="724" :Height="80" />
+                  <WinTextBlock class="note-text" :Text="$t('sample.richeditbox.math-note')" TextWrapping="WrapWholeWords" />
+                  <WinTextBlock class="note-text" :Text="$t('sample.richeditbox.math-example')" TextWrapping="WrapWholeWords" />
+                  <WinRichEditBox v-model:Text="mathText" :PlaceholderText="$t('sample.richeditbox.math-placeholder')" :ShowFormattingCommands="false" :Width="724" :Height="80" />
                 </div>
               </template>
             </WinControlExample>
@@ -55,17 +77,17 @@
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" horizontalContentAlignment="Stretch" :vue="example5Template" :headerText="$t('sample.richeditbox.mathml')">
               <template #example>
                 <div class="stack-example">
-                  <WinTextBlock class="note-text" Text="The SetMathML method takes a MathML string and displays the equation in the RichEditBox." TextWrapping="WrapWholeWords" />
-                  <WinTextBlock class="note-text" Text="The GetMathML method retrieves the MathML string of the equation from the RichEditBox." TextWrapping="WrapWholeWords" />
+                  <WinTextBlock class="note-text" :Text="$t('sample.richeditbox.mathml-set-note')" TextWrapping="WrapWholeWords" />
+                  <WinTextBlock class="note-text" :Text="$t('sample.richeditbox.mathml-get-note')" TextWrapping="WrapWholeWords" />
                   <WinRichEditBox v-model:Text="mathmlText" :ShowFormattingCommands="false" :Height="80" @TextChanged="updateMathmlOutput" />
-                  <WinTextBlock class="mathml-title" Text="MathML Code" />
+                  <WinTextBlock class="mathml-title" :Text="$t('sample.richeditbox.mathml-code')" />
                   <WinScrollViewer class="mathml-output" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
                     <pre class="mathml-output-pre">{{ mathmlOutput }}</pre>
                   </WinScrollViewer>
                 </div>
               </template>
               <template #options>
-                <WinButton @click="setSampleFormula"><WinTextBlock Text="Set sample formula" /></WinButton>
+                <WinButton @click="setSampleFormula"><WinTextBlock :Text="$t('sample.richeditbox.set-sample-formula')" /></WinButton>
               </template>
             </WinControlExample>
       </div>
@@ -77,13 +99,16 @@
 import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinFlyout from '../../components/WinFlyout.vue';
 import WinRichEditBox from '../../components/WinRichEditBox.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinTextBox from '../../components/WinTextBox.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'richeditbox');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -93,16 +118,45 @@ const customHtml = ref('');
 const findText = ref('');
 const mathText = ref('');
 const mathmlText = ref('');
-const mathmlOutput = ref('<!-- No MathML content -->');
+const mathmlOutput = ref(`<!-- ${t('sample.richeditbox.no-mathml')} -->`);
 const customEditor = ref(null);
-const colors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Indigo', 'Violet', 'Gray'];
+const fontColorFlyout = ref(null);
+const colors = computed(() => [
+  { value: 'Red', label: t('text.red') },
+  { value: 'Orange', label: t('sample.orange') },
+  { value: 'Yellow', label: t('text.yellow') },
+  { value: 'Green', label: t('text.green') },
+  { value: 'Blue', label: t('text.blue') },
+  { value: 'Indigo', label: t('sample.indigo') },
+  { value: 'Violet', label: t('sample.violet') },
+  { value: 'Gray', label: t('sample.gray') }
+]);
+
+const customFlyoutPrimaryCommands = computed(() => [
+  {
+    Label: t('sample.richeditbox.share-command'),
+    Icon: 'Share',
+    Command: 'share',
+    ToolTipServiceToolTip: t('sample.richeditbox.share-command')
+  }
+]);
 
 const showFileMessage = (action) => {
   console.log(`${action} clicked`);
 };
 
-const updateMathmlOutput = ({ text }) => {
-  mathmlOutput.value = text.trim() ? `<!-- Web preview content -->\n${text}` : '<!-- No MathML content -->';
+const onCustomFlyoutCommand = (command) => {
+  if (command.Command === 'share') console.log(t('sample.richeditbox.share-clicked'));
+};
+
+const applyEditorColor = (color) => {
+  customEditor.value?.execCommand('foreColor', color);
+  fontColorFlyout.value?.hide?.();
+};
+
+const updateMathmlOutput = () => {
+  const text = mathmlText.value;
+  mathmlOutput.value = text.trim() ? `<!-- ${t('sample.richeditbox.web-preview')} -->\n${text}` : `<!-- ${t('sample.richeditbox.no-mathml')} -->`;
 };
 
 const setSampleFormula = () => {
@@ -119,43 +173,57 @@ const setSampleFormula = () => {
 </math>`;
 };
 
-const example1Template = `<WinRichEditBox
+const example1Template = computed(() => `<WinRichEditBox
   v-model:Text="simpleText"
-  PlaceholderText="Enter rich text" />`;
+  PlaceholderText="${t('text.enter-rich-text')}" />`);
 
-const example2Template = `<WinRichEditBox
-  Header="Editor with custom menu"
-  PlaceholderText="Select text and use the command menu."
+const example2Template = computed(() => `<WinRichEditBox
+  :PrimaryCommands="customFlyoutPrimaryCommands"
   :Width="800"
-  :Height="200" />`;
+  :Height="200"
+  @Command="onCustomFlyoutCommand" />`);
 
-const example3Template = `<div class="custom-editor">
-  <div class="custom-toolbar">
-    <WinButton @click="openFile"><span class="icon">&#xE8E5;</span></WinButton>
-    <WinButton @click="saveFile"><span class="icon">&#xE74E;</span></WinButton>
-    <WinButton @click="editor?.execCommand('bold')"><span class="icon">&#xE8DD;</span></WinButton>
-    <WinButton @click="editor?.execCommand('italic')"><span class="icon">&#xE8DB;</span></WinButton>
+const example3Template = computed(() => `<div class="official-custom-editor">
+  <div class="official-toolbar">
+    <div class="toolbar-start">
+      <WinButton class="toolbar-icon-button" @click="openFile"><span class="icon">&#xE8E5;</span></WinButton>
+      <WinButton class="toolbar-icon-button" @click="saveFile"><span class="icon">&#xE74E;</span></WinButton>
+    </div>
+    <div class="toolbar-end">
+      <WinButton class="toolbar-icon-button" @click="editor?.execCommand('bold')"><span class="icon">&#xE8DD;</span></WinButton>
+      <WinButton class="toolbar-icon-button" @click="editor?.execCommand('italic')"><span class="icon">&#xE8DB;</span></WinButton>
+      <WinFlyout ref="fontColorFlyout" Placement="Bottom" :Theme="pageTheme">
+        <template #trigger>
+          <WinButton class="toolbar-icon-button" @click="fontColorFlyout?.toggle()"><span class="icon">&#xE790;</span></WinButton>
+        </template>
+        <div class="font-color-flyout">
+          <button v-for="color in colors" :key="color.value" class="color-menu-button" @click="applyEditorColor(color.value)">
+            <span class="color-swatch" :style="{ background: color.value }"></span>
+          </button>
+        </div>
+      </WinFlyout>
+    </div>
   </div>
-  <WinRichEditBox ref="editor" v-model:Html="customHtml" />
-  <WinTextBox v-model:Text="findText" PlaceholderText="Enter search text" />
-</div>`;
+  <WinRichEditBox ref="editor" v-model:Html="customHtml" :Height="200" />
+  <WinTextBox v-model:Text="findText" PlaceholderText="${t('sample.richeditbox.search-placeholder')}" />
+</div>`);
 
-const example4Template = `<WinRichEditBox
+const example4Template = computed(() => `<WinRichEditBox
   v-model:Text="mathText"
-  PlaceholderText="Enter math expressions like: 4^2, \\pi"
+  PlaceholderText="${t('sample.richeditbox.math-placeholder')}"
   :ShowFormattingCommands="false"
   :Width="724"
-  :Height="80" />`;
+  :Height="80" />`);
 
-const example5Template = `<WinRichEditBox
+const example5Template = computed(() => `<WinRichEditBox
   v-model:Text="mathmlText"
   :ShowFormattingCommands="false"
   :Height="80"
   @TextChanged="updateMathmlOutput" />
 <pre>{{ mathmlOutput }}</pre>
 <WinButton @click="setSampleFormula">
-  <WinTextBlock Text="Set sample formula" />
-</WinButton>`;
+  <WinTextBlock Text="${t('sample.richeditbox.set-sample-formula')}" />
+</WinButton>`);
 </script>
 
 <style scoped>
@@ -163,11 +231,16 @@ const example5Template = `<WinRichEditBox
 .page-description { font-size: 14px; color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.5; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; align-items: center; }
 .icon { font-size: 16px; }
-.custom-editor, .stack-example { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-.custom-toolbar { display: flex; align-items: center; gap: 4px; }
-.separator { width: 1px; height: 24px; margin: 0 4px; background: var(--divider-stroke); }
-.color-button { width: 24px; height: 24px; border: 1px solid var(--card-stroke); border-radius: 4px; cursor: pointer; }
-.find-row { display: flex; align-items: center; gap: 10px; color: var(--text-primary); }
+.official-custom-editor, .stack-example { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.official-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.toolbar-start, .toolbar-end { display: flex; align-items: center; gap: 8px; }
+.toolbar-icon-button { width: 36px; height: 32px; padding: 0; min-width: 0; border-width: 0; background: transparent; }
+.font-color-flyout { display: grid; grid-template-columns: repeat(3, 32px); gap: 12px; padding: 6px; }
+.color-menu-button { width: 32px; height: 32px; min-width: 0; padding: 0; border: 0; background: transparent; border-radius: 4px; cursor: pointer; }
+.color-menu-button:hover { background: var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)); }
+.color-menu-button:active { background: var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary)); }
+.color-swatch { display: block; width: 32px; height: 32px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--card-stroke); }
+.official-find-row { display: flex; align-items: center; gap: 10px; color: var(--text-primary); }
 .note-text { color: var(--text-primary); font-size: 14px; line-height: 20px; }
 .mathml-title { color: var(--text-primary); font-weight: 600; }
 .mathml-output { margin: 0; padding: 8px; max-height: 450px; border-radius: 4px; background: var(--card-bg-secondary); color: var(--text-primary); }

@@ -1,140 +1,177 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">BreadcrumbBar</h1>
-          <p class="page-description">
-            The BreadcrumbBar control provides the direct path of pages or folders to the current location. It is often used for navigation in file systems, hierarchies, and nested structures.
-          </p>
-          <div class="page-header-actions">
-            <WinButton
-              @click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-              <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
-          </div>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+        <WinTextBlock class="page-header" :Text="$t('text.breadcrumbbar')" />
+        <WinTextBlock
+          class="page-description"
+          :Text="$t('text.breadcrumbbar-description')"
+          TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <WinButton class="header-action" @Click="toggleTheme">
+            <WinTextBlock class="icon" Text="&#xE793;" />
+          </WinButton>
+          <WinToggleButton
+            v-model:IsChecked="isFavoriteState"
+            class="header-action"
+            @update:IsChecked="toggleFavorite">
+            <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
+          </WinToggleButton>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example 1: A BreadcrumbBar control -->
-            <WinControlExample
-              headerText="A BreadcrumbBar control"
-              :theme="pageTheme"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <WinBreadcrumbBar :itemsSource="foldersString" />
-              </template>
-            </WinControlExample>
-
-            <!-- Example 2: BreadcrumbBar Control with Custom DataTemplate -->
-            <WinControlExample
-              headerText="BreadcrumbBar Control with Custom DataTemplate"
-              :theme="pageTheme"
-              :templateCode="example2Template"
-              :vueCode="example2Vue">
-              <template #example>
-                <WinBreadcrumbBar
-                  :itemsSource="folders"
-                  @itemClicked="onBreadcrumbItemClicked">
-                  <template #item="{ item }">
-                    <span>{{ item.name }}</span>
-                  </template>
-                </WinBreadcrumbBar>
-              </template>
-              <template #options>
-                <WinButton @click="resetSample">
-                  Reset sample
-                </WinButton>
-              </template>
-            </WinControlExample>
       </div>
-    </WinScrollViewer>
-  </div>
+
+      <div class="gallery-page-content">
+        <WinStackPanel>
+          <WinControlExample
+            :theme="pageTheme"
+            :vue="BreadcrumbBarControlVue"
+            :headerText="$t('sample.breadcrumbbar.control')">
+            <template #example>
+              <WinBreadcrumbBar :ItemsSource="FoldersString" />
+            </template>
+          </WinControlExample>
+
+          <WinControlExample
+            :theme="pageTheme"
+            :vue="BreadcrumbBarCustomDataTemplateVue"
+            :headerText="$t('sample.breadcrumbbar.custom-data-template')">
+            <template #example>
+              <WinBreadcrumbBar
+                :ItemsSource="Folders"
+                @ItemClicked="BreadcrumbBar2_ItemClicked">
+                <template #ItemTemplate="{ Item }">
+                  <WinTextBlock
+                    :Text="Item.Name"
+                    :aria-label="Item.Name"
+                    v-bind="{ 'AutomationProperties.Name': Item.Name }" />
+                </template>
+              </WinBreadcrumbBar>
+            </template>
+
+            <template #options>
+              <WinButton @Click="ResetSampleButton_Click">
+                <WinTextBlock :Text="$t('sample.breadcrumbbar.reset-sample')" />
+              </WinButton>
+              <WinTextBlock
+                class="accessibility-announcement"
+                :Text="ResetAnnouncement"
+                aria-live="polite"
+                AutomationProperties.LiveSetting="Polite" />
+            </template>
+          </WinControlExample>
+        </WinStackPanel>
+      </div>
+    </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
+import { computed, inject, nextTick, ref } from 'vue';
 import WinBreadcrumbBar from '../../components/WinBreadcrumbBar.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import WinStackPanel from '../../components/WinStackPanel.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'breadcrumbbar');
-
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Example 1: Simple string array
-const foldersString = ref(['Home', 'Documents', 'Design', 'Northwind', 'Images', 'Folder1', 'Folder2', 'Folder3']);
-
-const example1Template = `<WinBreadcrumbBar :itemsSource="foldersString" />`;
-
-const example1Vue = `const foldersString = ref([
-  'Home', 'Documents', 'Design', 'Northwind',
-  'Images', 'Folder1', 'Folder2', 'Folder3'
-]);`;
-
-// Example 2: Object array with custom template
-const initialFolders = [
-  { name: 'Home' },
-  { name: 'Folder1' },
-  { name: 'Folder2' },
-  { name: 'Folder3' }
+const _defaultFolders = [
+  { Name: t('sample.breadcrumbbar.home') },
+  { Name: t('sample.breadcrumbbar.folder-1') },
+  { Name: t('sample.breadcrumbbar.folder-2') },
+  { Name: t('sample.breadcrumbbar.folder-3') }
 ];
 
-const folders = ref([...initialFolders]);
+const Folders = ref([]);
+const ResetAnnouncement = ref('');
+const FoldersString = [
+  t('sample.breadcrumbbar.home'),
+  t('sample.breadcrumbbar.documents'),
+  t('sample.breadcrumbbar.design'),
+  t('sample.breadcrumbbar.northwind'),
+  t('sample.breadcrumbbar.images'),
+  t('sample.breadcrumbbar.folder-1'),
+  t('sample.breadcrumbbar.folder-2'),
+  t('sample.breadcrumbbar.folder-3')
+];
 
-const onBreadcrumbItemClicked = ({ index }) => {
-  // Remove all items after the clicked index
-  folders.value = folders.value.slice(0, index + 1);
+for (const folder of _defaultFolders) {
+  Folders.value.push(folder);
+}
+
+const BreadcrumbBar2_ItemClicked = (sender, args) => {
+  const items = sender.ItemsSource;
+  for (let Index = items.length - 1; Index >= args.Index + 1; Index -= 1) {
+    items.splice(Index, 1);
+  }
 };
 
-const resetSample = () => {
-  folders.value = [...initialFolders];
+const ResetSampleButton_Click = () => {
+  const items = Folders.value;
+  for (const folder of _defaultFolders) {
+    if (!items.includes(folder)) {
+      items.push(folder);
+    }
+  }
+
+  ResetAnnouncement.value = '';
+  nextTick(() => {
+    ResetAnnouncement.value = t('sample.breadcrumbbar.reset-success');
+  });
 };
 
-const example2Template = `<WinBreadcrumbBar
-  :itemsSource="folders"
-  @itemClicked="onBreadcrumbItemClicked">
-  <template #item="{ item }">
-    <span>{{ item.name }}</span>
+const BreadcrumbBarControlVue = `<WinBreadcrumbBar :ItemsSource="FoldersString" />
+
+<script setup>
+const FoldersString = ${JSON.stringify(FoldersString, null, 2)};
+<\/script>`;
+
+const BreadcrumbBarCustomDataTemplateVue = `<WinBreadcrumbBar
+  :ItemsSource="Folders"
+  @ItemClicked="BreadcrumbBar2_ItemClicked">
+  <template #ItemTemplate="{ Item }">
+    <WinTextBlock
+      :Text="Item.Name"
+      v-bind="{ 'AutomationProperties.Name': Item.Name }" />
   </template>
-</WinBreadcrumbBar>`;
+</WinBreadcrumbBar>
 
-const example2Vue = `const folders = ref([
-  { name: 'Home' },
-  { name: 'Folder1' },
-  { name: 'Folder2' },
-  { name: 'Folder3' }
-]);
+<script setup>
+import { ref } from 'vue';
 
-const onBreadcrumbItemClicked = ({ index }) => {
-  // Remove all items after the clicked index
-  folders.value = folders.value.slice(0, index + 1);
-};`;
+const Folders = ref(${JSON.stringify(_defaultFolders, null, 2)});
+
+const BreadcrumbBar2_ItemClicked = (sender, args) => {
+  const items = sender.ItemsSource;
+  for (let Index = items.length - 1; Index >= args.Index + 1; Index -= 1) {
+    items.splice(Index, 1);
+  }
+};
+<\/script>`;
 </script>
 
 <style scoped>
+.page-heading {
+  position: relative;
+}
+
 .page-header {
+  margin: 0 0 8px;
+  color: var(--text-primary);
   font-size: 28px;
   font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
 }
 
 .page-description {
-  font-size: 14px;
+  margin: 0 72px 16px 0;
   color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
 }
 
 .page-header-actions {
@@ -143,10 +180,28 @@ const onBreadcrumbItemClicked = ({ index }) => {
   right: 0;
   display: flex;
   gap: 4px;
-  align-items: center;
+}
+
+.header-action {
+  width: 32px;
+  height: 32px;
+  min-width: 0;
+  padding: 0;
 }
 
 .icon {
+  color: inherit;
+  font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons');
   font-size: 16px;
+  line-height: 16px;
+}
+
+.accessibility-announcement {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>

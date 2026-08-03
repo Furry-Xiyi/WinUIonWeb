@@ -37,8 +37,8 @@
               <template #example>
                 <WinTextBox
                   v-model:Text="nameText"
-                  Header="Enter your name:"
-                  PlaceholderText="Name" />
+                  :Header="$t('sample.textbox.enter-your-name')"
+                  :PlaceholderText="$t('sample.textbox.name-placeholder')" />
               </template>
             </WinControlExample>
 
@@ -49,7 +49,7 @@
               :vue="example3Template">
               <template #example>
                 <WinTextBox
-                  Text="I am super excited to be here!"
+                  :Text="$t('sample.common.excited-text')"
                   :IsReadOnly="true"
                   FontFamily="Arial"
                   :FontSize="24"
@@ -85,9 +85,11 @@ import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'textbox');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -100,20 +102,20 @@ const example1Template = `<WinTextBox v-model:Text="simpleText" />`;
 // Example 2: TextBox with header and placeholder
 const nameText = ref('');
 
-const example2Template = `<WinTextBox
+const example2Template = computed(() => `<WinTextBox
   v-model:Text="nameText"
-  Header="Enter your name:"
-  PlaceholderText="Name" />`;
+  Header="${t('sample.textbox.enter-your-name')}"
+  PlaceholderText="${t('sample.textbox.name-placeholder')}" />`);
 
 // Example 3: Read-only styled TextBox
-const example3Template = `<WinTextBox
-  Text="I am super excited to be here!"
+const example3Template = computed(() => `<WinTextBox
+  Text="${t('sample.common.excited-text')}"
   :IsReadOnly="true"
   FontFamily="Arial"
   :FontSize="24"
   FontStyle="Italic"
   :CharacterSpacing="200"
-  Foreground="#5178BE" />`;
+  Foreground="#5178BE" />`);
 
 const example4Template = `<WinTextBox
   :MinWidth="400"
@@ -152,5 +154,4 @@ const example4Template = `<WinTextBox
   font-size: 16px;
 }
 </style>
-
 

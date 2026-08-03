@@ -34,8 +34,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch } from 'vue';
-import type { ComponentPublicInstance, CSSProperties } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, unref, useSlots, watch } from 'vue';
+import type { ComponentPublicInstance, CSSProperties, Ref } from 'vue';
 import WinTextBlock from './WinTextBlock.vue';
 
 type PlacementKey = 'bottom' | 'left' | 'mouse' | 'right' | 'top';
@@ -83,6 +83,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed', 'Opening', 'Closing', 'tooltip-pointer-enter', 'tooltip-pointer-leave']);
 const slots = useSlots();
+const inheritedTheme = inject<string | Ref<string> | null>('winuiTheme', null);
 const anchorRef = ref<HTMLElement | null>(null);
 const tooltipRef = ref<HTMLElement | null>(null);
 const localIsOpen = ref(false);
@@ -113,8 +114,14 @@ const contentText = computed(() => {
 });
 const placement = computed(() => props.ToolTipServicePlacement || props['ToolTipService.Placement'] || props.Placement || 'Mouse');
 const placementTarget = computed(() => props.ToolTipServicePlacementTarget || props['ToolTipService.PlacementTarget'] || props.PlacementTarget);
-const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark'
-  ? `win-theme-scope theme-${props.Theme}`
+const effectiveTheme = computed(() => {
+  const explicitTheme = String(props.Theme || '').toLowerCase();
+  if (explicitTheme === 'light' || explicitTheme === 'dark') return explicitTheme;
+  const providedTheme = String(unref(inheritedTheme) || '').toLowerCase();
+  return providedTheme === 'light' || providedTheme === 'dark' ? providedTheme : '';
+});
+const themeClass = computed(() => effectiveTheme.value
+  ? `win-theme-scope theme-${effectiveTheme.value}`
   : 'win-tooltip-theme');
 const templateSettings = computed(() => ({
   FromHorizontalOffset: Number(props.HorizontalOffset || 0),

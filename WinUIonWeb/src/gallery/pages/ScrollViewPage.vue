@@ -158,10 +158,10 @@ const horizontalScrollBarVisibility = computed(() => scrollViewScrollBarVisibili
 const verticalScrollBarVisibility = computed(() => scrollViewScrollBarVisibilityItems[verticalScrollBarVisibilityIndex.value]?.Text || 'Auto');
 const verticalAnimation = computed(() => animationItems[verticalAnimationIndex.value]?.Text || 'Default');
 
-const onVerticalVelocityChanged = ({ newValue }) => {
+const onVerticalVelocityChanged = ({ NewValue }) => {
   scrollView2Ref.value?.CancelScrollVelocity?.();
-  if (newValue > 30 || newValue < -30) {
-    scrollView2Ref.value?.AddScrollVelocity?.({ x: 0, y: newValue });
+  if (NewValue > 30 || NewValue < -30) {
+    scrollView2Ref.value?.AddScrollVelocity?.({ x: 0, y: NewValue });
   }
 };
 
