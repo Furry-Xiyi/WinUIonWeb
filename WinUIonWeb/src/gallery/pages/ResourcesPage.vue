@@ -6,9 +6,12 @@
             <div class="page-header">
               <h1 class="page-title">Resources</h1>
               <div class="page-actions">
-                <WinButton @click="toggleTheme" class="theme-toggle-btn">
-                  <span class="icon">{{ isDarkTheme ? '☀️' : '🌙' }}</span>
+                <WinButton @Click="toggleTheme" class="header-action">
+                  <span class="icon">&#xE793;</span>
                 </WinButton>
+                <WinToggleButton :IsChecked="isFavorite" class="header-action" @update:IsChecked="toggleFavorite">
+                  <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
+                </WinToggleButton>
               </div>
             </div>
 
@@ -137,13 +140,29 @@
 import { ref, computed } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
-const isDarkTheme = ref(false);
+const getRootIsDarkTheme = () => {
+  const root = document.documentElement;
+  if (root.classList.contains('theme-dark') || root.getAttribute('data-theme') === 'dark') return true;
+  if (root.classList.contains('theme-light') || root.getAttribute('data-theme') === 'light') return false;
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+};
+
+const isDarkTheme = ref(getRootIsDarkTheme());
+const isFavorite = ref(false);
 
 const toggleTheme = () => {
   isDarkTheme.value = !isDarkTheme.value;
-  document.documentElement.setAttribute('data-theme', isDarkTheme.value ? 'dark' : 'light');
+  const nextTheme = isDarkTheme.value ? 'dark' : 'light';
+  document.documentElement.classList.remove('theme-light', 'theme-dark');
+  document.documentElement.classList.add(`theme-${nextTheme}`);
+  document.documentElement.setAttribute('data-theme', nextTheme);
+};
+
+const toggleFavorite = () => {
+  isFavorite.value = !isFavorite.value;
 };
 
 const themeImageUrl = computed(() => {
@@ -309,12 +328,7 @@ const themeResources = computed(() => {
 
 .page-actions {
   display: flex;
-  gap: 8px;
-}
-
-.theme-toggle-btn {
-  min-width: 40px;
-  padding: 8px 12px;
+  gap: 4px;
 }
 
 .icon {

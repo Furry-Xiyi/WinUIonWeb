@@ -11,20 +11,12 @@
                 </p>
               </div>
               <div class="header-actions">
-                <WinButton @click="toggleTheme">
-                  <template #icon>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                      <path d="M8 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM8 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0-8a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 8 2zm0 10.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5zM2.5 8a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1h1zm11 0h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1zM4.5 3.5a.5.5 0 0 0-.707-.707l-.707.707a.5.5 0 1 0 .707.707l.707-.707zm8 8a.5.5 0 0 0-.707-.707l-.707.707a.5.5 0 0 0 .707.707l.707-.707zm.707-8l.707-.707a.5.5 0 0 0-.707-.707l-.707.707a.5.5 0 1 0 .707.707zM4.5 12.5l-.707.707a.5.5 0 0 0 .707.707l.707-.707a.5.5 0 0 0-.707-.707z"/>
-                    </svg>
-                  </template>
+                <WinButton class="header-action" @Click="toggleTheme">
+                  <span class="icon">&#xE793;</span>
                 </WinButton>
-                <WinButton @click="toggleFavorite">
-                  <template #icon>
-                    <svg width="16" height="16" viewBox="0 0 16 16" :fill="isFavorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5">
-                      <path d="M8 2.5l1.847 3.742 4.153.604-3 2.924.708 4.126L8 12.09l-3.708 1.806.708-4.126-3-2.924 4.153-.604L8 2.5z"/>
-                    </svg>
-                  </template>
-                </WinButton>
+                <WinToggleButton :IsChecked="isFavorite" class="header-action" @update:IsChecked="toggleFavorite">
+                  <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
+                </WinToggleButton>
               </div>
             </div>
 
@@ -75,14 +67,18 @@
 import { ref } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const isFavorite = ref(false);
 
 const toggleTheme = () => {
   const root = document.documentElement;
-  const currentTheme = root.getAttribute('data-theme');
-  root.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+  const isLight = root.classList.contains('theme-light') || root.getAttribute('data-theme') === 'light';
+  const nextTheme = isLight ? 'dark' : 'light';
+  root.classList.remove('theme-light', 'theme-dark');
+  root.classList.add(`theme-${nextTheme}`);
+  root.setAttribute('data-theme', nextTheme);
 };
 
 const toggleFavorite = () => {
@@ -188,7 +184,7 @@ const example2Vue = `<template>
 
 .header-actions {
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
 
 .page-intro {

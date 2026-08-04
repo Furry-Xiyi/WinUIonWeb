@@ -72,8 +72,7 @@
     Placement="Auto"
     ShowMode="Standard"
     :ShowPrimaryLabels="true"
-    @Close="commandBarOpen = false"
-    @Command="onFlyoutCommand" />
+    @Close="commandBarOpen = false" />
 </template>
 
 <script setup lang="ts">
@@ -95,12 +94,11 @@ type CandidateWindowAlignment = 'Default' | 'BottomEdge';
 type HeaderPlacement = 'Top' | 'Left';
 type DisabledFormattingAccelerators = 'None' | 'Bold' | 'Italic' | 'Underline' | 'All' | string;
 type CommandBarFlyoutCommand = {
+  Name?: string;
   Label: string;
   Icon?: string;
-  Name?: string;
-  Command?: string;
-  ToolTip?: string;
-  ToolTipServiceToolTip?: string;
+  Click?: (command: CommandBarFlyoutCommand, event: MouseEvent) => void;
+  'ToolTipService.ToolTip'?: string;
   IsEnabled?: boolean;
   IsToggle?: boolean;
   IsChecked?: boolean;
@@ -140,6 +138,7 @@ const props = withDefaults(defineProps<{
   TextWrapping?: TextWrapping;
   Width?: number | string;
   Height?: number | string;
+  MinHeight?: number | string;
 }>(), {
   Text: '',
   Html: '',
@@ -173,7 +172,8 @@ const props = withDefaults(defineProps<{
   TextReadingOrder: 'DetectFromContent',
   TextWrapping: 'Wrap',
   Width: '',
-  Height: ''
+  Height: '',
+  MinHeight: ''
 });
 
 const emit = defineEmits<{
@@ -193,7 +193,6 @@ const emit = defineEmits<{
   CandidateWindowBoundsChanged: [args: { rect: DOMRect | { x: number; y: number; width: number; height: number } }];
   GotFocus: [];
   LostFocus: [];
-  Command: [command: CommandBarFlyoutCommand];
 }>();
 
 const editorRef = ref<HTMLDivElement | null>(null);
@@ -210,9 +209,33 @@ const isFormattingDisabled = (command: 'bold' | 'italic' | 'underline') => {
 const commandBarPrimaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
   const commands: CommandBarFlyoutCommand[] = [];
   if (props.ShowFormattingCommands) {
-    if (!isFormattingDisabled('bold')) commands.push({ Label: t('text.bold'), Icon: 'Bold', Command: 'bold', IsToggle: true, IsChecked: isCommandActive('bold') });
-    if (!isFormattingDisabled('italic')) commands.push({ Label: t('text.italic'), Icon: 'Italic', Command: 'italic', IsToggle: true, IsChecked: isCommandActive('italic') });
-    if (!isFormattingDisabled('underline')) commands.push({ Label: t('text.underline'), Icon: 'Underline', Command: 'underline', IsToggle: true, IsChecked: isCommandActive('underline') });
+    if (!isFormattingDisabled('bold')) commands.push({
+      Name: 'BoldButton',
+      Label: t('text.bold'),
+      Icon: 'Bold',
+      'ToolTipService.ToolTip': t('text.bold'),
+      Click: () => void runTextCommand('bold'),
+      IsToggle: true,
+      IsChecked: isCommandActive('bold')
+    });
+    if (!isFormattingDisabled('italic')) commands.push({
+      Name: 'ItalicButton',
+      Label: t('text.italic'),
+      Icon: 'Italic',
+      'ToolTipService.ToolTip': t('text.italic'),
+      Click: () => void runTextCommand('italic'),
+      IsToggle: true,
+      IsChecked: isCommandActive('italic')
+    });
+    if (!isFormattingDisabled('underline')) commands.push({
+      Name: 'UnderlineButton',
+      Label: t('text.underline'),
+      Icon: 'Underline',
+      'ToolTipService.ToolTip': t('text.underline'),
+      Click: () => void runTextCommand('underline'),
+      IsToggle: true,
+      IsChecked: isCommandActive('underline')
+    });
   }
   commands.push(...props.PrimaryCommands);
   return commands;
@@ -222,16 +245,16 @@ const commandBarSecondaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
   const selected = getSelectionText();
   const canEdit = !props.IsReadOnly && props.IsEnabled;
   const commands: CommandBarFlyoutCommand[] = [];
-  if (selected && canEdit) commands.push({ Label: t('text.cut'), Icon: 'Cut', Command: 'cut' });
-  if (selected) commands.push({ Label: t('text.copy'), Icon: 'Copy', Command: 'copy' });
-  if (canEdit) commands.push({ Label: t('text.paste'), Icon: 'Paste', Command: 'paste' });
-  commands.push({ Label: t('text.undo'), Icon: 'Undo', Command: 'undo' });
-  commands.push({ Label: t('text.redo'), Icon: 'Redo', Command: 'redo' });
-  commands.push({ Label: t('text.select-all'), Icon: 'SelectAll', Command: 'selectAll' });
+  if (selected && canEdit) commands.push({ Name: 'CutButton', Label: t('text.cut'), Icon: 'Cut', Click: () => void runTextCommand('cut') });
+  if (selected) commands.push({ Name: 'CopyButton', Label: t('text.copy'), Icon: 'Copy', Click: () => void runTextCommand('copy') });
+  if (canEdit) commands.push({ Name: 'PasteButton', Label: t('text.paste'), Icon: 'Paste', Click: () => void runTextCommand('paste') });
+  commands.push({ Name: 'UndoButton', Label: t('text.undo'), Icon: 'Undo', Click: () => void runTextCommand('undo') });
+  commands.push({ Name: 'RedoButton', Label: t('text.redo'), Icon: 'Redo', Click: () => void runTextCommand('redo') });
+  commands.push({ Name: 'SelectAllButton', Label: t('text.select-all'), Icon: 'SelectAll', Click: () => void runTextCommand('selectAll') });
   if (props.ShowFormattingCommands && canEdit) {
-    commands.push({ Label: t('text.bullets'), Icon: '\uE8FD', Command: 'insertUnorderedList' });
-    commands.push({ Label: t('text.numbering'), Icon: '\uE8EF', Command: 'insertOrderedList' });
-    commands.push({ Label: t('text.clear-formatting'), Icon: '\uE894', Command: 'removeFormat' });
+    commands.push({ Name: 'BulletsButton', Label: t('text.bullets'), Icon: '\uE8FD', Click: () => void runTextCommand('insertUnorderedList') });
+    commands.push({ Name: 'NumberingButton', Label: t('text.numbering'), Icon: '\uE8EF', Click: () => void runTextCommand('insertOrderedList') });
+    commands.push({ Name: 'ClearFormattingButton', Label: t('text.clear-formatting'), Icon: '\uE894', Click: () => void runTextCommand('removeFormat') });
   }
   commands.push(...props.SecondaryCommands);
   return commands;
@@ -245,7 +268,7 @@ const rootStyle = computed<CSSProperties & Record<string, string | undefined>>((
 
 const editorScrollStyle = computed<CSSProperties>(() => ({
   height: cssSize(props.Height),
-  minHeight: '118px'
+  minHeight: cssSize(props.MinHeight) || '118px'
 }));
 
 const editorStyle = computed<CSSProperties>(() => ({
@@ -476,16 +499,6 @@ const runTextCommand = async (command: string) => {
   updateSelectionFlyout();
 };
 
-const onFlyoutCommand = (item: CommandBarFlyoutCommand) => {
-  if (!item?.Command) return;
-  const builtInCommands = new Set(['bold', 'italic', 'underline', 'cut', 'copy', 'paste', 'undo', 'redo', 'selectAll', 'insertUnorderedList', 'insertOrderedList', 'removeFormat']);
-  if (builtInCommands.has(item.Command)) void runTextCommand(item.Command);
-  else {
-    commandBarOpen.value = false;
-    emit('Command', item);
-  }
-};
-
 const onEditorFocus = (setTextBoxFocused?: () => void) => {
   setTextBoxFocused?.();
   isFocused.value = true;
@@ -503,9 +516,44 @@ const focus = () => {
   editorRef.value?.focus({ preventScroll: props.PreventKeyboardDisplayOnProgrammaticFocus });
 };
 
+const hasSelection = () => {
+  const selection = window.getSelection();
+  if (selection?.rangeCount && editorRef.value?.contains(selection.anchorNode)) {
+    return !selection.getRangeAt(0).collapsed;
+  }
+  return Boolean(savedSelection.value && !savedSelection.value.collapsed);
+};
+
+const queryCommandState = (command: string) => {
+  focus();
+  restoreSelection();
+  try {
+    return document.queryCommandState(command);
+  } catch {
+    return false;
+  }
+};
+
 const execCommand = (command: string, value?: string) => {
   focus();
+  restoreSelection();
   document.execCommand(command, false, value);
+  saveSelection();
+  onInput();
+};
+
+const setListStyleType = (styleType: string) => {
+  const editor = editorRef.value;
+  if (!editor) return;
+  editor.querySelectorAll('ol, ul').forEach((list) => {
+    if (list instanceof HTMLElement) {
+      list.style.listStyleType = styleType;
+    }
+    if (list instanceof HTMLOListElement) {
+      if (styleType === 'upper-roman') list.type = 'I';
+      else if (styleType === 'decimal') list.type = '1';
+    }
+  });
   onInput();
 };
 
@@ -552,8 +600,11 @@ onBeforeUnmount(() => {
 defineExpose({
   focus,
   execCommand,
+  queryCommandState,
+  hasSelection,
   setText,
   setHtml,
+  setListStyleType,
   getText: plainText,
   getHtml: () => editorRef.value?.innerHTML ?? '',
   Document: {
@@ -616,6 +667,17 @@ defineExpose({
   font-size: 14px;
   line-height: 20px;
   user-select: text;
+}
+
+.win-reb-editor :deep(ul),
+.win-reb-editor :deep(ol) {
+  margin-block: 0;
+  padding-inline-start: 24px;
+}
+
+.win-reb-editor :deep(li) {
+  margin-block: 0;
+  padding-inline-start: 0;
 }
 
 .win-reb-editor:empty::before {

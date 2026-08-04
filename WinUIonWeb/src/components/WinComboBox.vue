@@ -15,7 +15,7 @@
     <div v-if="IsEditable" ref="backgroundRef" class="win-combo-editable">
       <button
         v-if="!isEditing"
-        class="win-btn win-combo-btn win-combo-edit-display"
+        class="win-btn DefaultButtonStyle win-combo-btn win-combo-edit-display"
         type="button"
         role="combobox"
         :aria-controls="listBoxId"
@@ -58,13 +58,14 @@
       <span
         class="icon chevron chevron-animate win-combo-chevron"
         :class="chevronClass"
-        @animationend="onChevronAnimEnd">&#xE70D;</span>
+        aria-hidden="true"
+        @animationend="onChevronAnimEnd"></span>
     </div>
 
     <button
       v-else
       ref="backgroundRef"
-      class="win-btn win-combo-btn"
+      class="win-btn DefaultButtonStyle win-combo-btn"
       type="button"
       role="combobox"
       :aria-controls="listBoxId"
@@ -83,7 +84,8 @@
       <span
         class="icon chevron chevron-animate win-combo-chevron"
         :class="chevronClass"
-        @animationend="onChevronAnimEnd">&#xE70D;</span>
+        aria-hidden="true"
+        @animationend="onChevronAnimEnd"></span>
     </button>
 
     <Teleport to="body">
@@ -319,19 +321,22 @@ const onChevronDown = () => {
 
 const onChevronUp = () => {
   if (!chevronPressed) return;
+  releaseChevron();
+};
+
+const releaseChevron = () => {
+  if (chevronClass.value === '') return;
   chevronPressed = false;
   if (chevronPressDone) chevronClass.value = 'releasing';
 };
 
-const onChevronLeave = () => {
-  chevronPressed = false;
-};
+const onChevronLeave = releaseChevron;
 
-const onChevronAnimEnd = () => {
-  if (chevronClass.value === 'pressing') {
+const onChevronAnimEnd = (event) => {
+  if (chevronClass.value === 'pressing' && event.animationName === 'chevron-press') {
     chevronPressDone = true;
     if (!chevronPressed) chevronClass.value = 'releasing';
-  } else if (chevronClass.value === 'releasing') {
+  } else if (chevronClass.value === 'releasing' && event.animationName === 'chevron-release') {
     chevronClass.value = '';
     chevronPressDone = false;
   }
@@ -1044,7 +1049,7 @@ onBeforeUnmount(() => {
   height: 24px;
   margin: 4px;
   padding: 0;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
@@ -1074,16 +1079,8 @@ onBeforeUnmount(() => {
   justify-content: center;
   pointer-events: none;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 0;
   line-height: 12px;
-}
-
-.win-combo-chevron.pressing {
-  animation: chevron-press 100ms cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
-}
-
-.win-combo-chevron.releasing {
-  animation: chevron-release 167ms cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
 }
 
 .win-combo-box.is-disabled {

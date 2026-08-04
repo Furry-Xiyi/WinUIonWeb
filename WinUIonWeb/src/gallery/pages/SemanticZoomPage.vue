@@ -7,15 +7,13 @@
             The SemanticZoom control lets the user zoom between two different semantic views of the same content. One view is the main view of the content. The second view is a way to quickly navigate that content. For example, when viewing an address book, the user could zoom out to quickly jump to a letter, and zoom in to see the names associated with that letter.
           </p>
           <div class="page-header-actions">
-            <WinButton
-              @Click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+            <WinButton class="header-action" @Click="toggleTheme"
+             >
               <span class="icon">&#xE793;</span>
             </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
+            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+             >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>

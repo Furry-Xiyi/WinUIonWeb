@@ -396,9 +396,13 @@ function onWheel(event, type) {
     --ButtonBackgroundPressed: var(--ctrl-fill-tertiary);
     --ButtonBackgroundDisabled: var(--ctrl-fill-disabled, var(--ctrl-fill-tertiary));
     --ButtonBorderBrush: var(--ctrl-border-rest);
+    --ButtonBorderBrushTop: var(--ButtonBorderBrush);
     --ButtonBorderBrushPointerOver: var(--ctrl-border-rest);
+    --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
     --ButtonBorderBrushPressed: var(--ctrl-border-rest);
+    --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
     --ButtonBorderBrushDisabled: var(--ctrl-border-disabled, var(--ctrl-border-rest));
+    --ButtonBorderBrushDisabledTop: var(--ButtonBorderBrushDisabled);
     --ButtonBorderBrushBottom: var(--ctrl-border-accent);
     --ButtonBorderBrushPointerOverBottom: var(--ctrl-border-accent);
     --ButtonBorderBrushPressedBottom: var(--ctrl-border-rest);

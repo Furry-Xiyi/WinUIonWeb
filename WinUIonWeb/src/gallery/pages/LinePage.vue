@@ -11,12 +11,12 @@
                 </p>
               </div>
               <div class="page-actions">
-                <button class="icon-button" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @click="toggleTheme">
-                  <span class="icon">🌓</span>
-                </button>
-                <button class="icon-button" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @click="toggleFavorite">
-                  <span class="icon">{{ isFavorite ? '★' : '☆' }}</span>
-                </button>
+                <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @Click="toggleTheme">
+                  <span class="icon">&#xE793;</span>
+                </WinButton>
+                <WinToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
+                  <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
+                </WinToggleButton>
               </div>
             </div>
 
@@ -194,7 +194,9 @@
 <script setup>
 import { ref } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinButton from '../../components/WinButton.vue';
 import WinSlider from '../../components/WinSlider.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
 
 // 页面状态
@@ -345,24 +347,7 @@ const ellipseRadiusY = ref(30);
 
 .page-actions {
   display: flex;
-  gap: 8px;
-}
-
-.icon-button {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: var(--ctrl-fill-default);
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.icon-button:hover {
-  background: var(--ctrl-fill-secondary);
+  gap: 4px;
 }
 
 .icon {

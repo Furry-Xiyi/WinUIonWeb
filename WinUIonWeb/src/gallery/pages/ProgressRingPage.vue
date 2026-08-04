@@ -6,15 +6,13 @@
             Progress controls provide feedback to the user that a long-running operation is underway. The ProgressRing can indicate that the user cannot interact with the app when the ring is visible, and can also indicate an approximate wait time when the progress is determinate.
           </p>
           <div class="page-header-actions">
-            <WinButton
-              @click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+            <WinButton class="header-action" @click="toggleTheme"
+             >
               <span class="icon">&#xE793;</span>
             </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
+            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+             >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>

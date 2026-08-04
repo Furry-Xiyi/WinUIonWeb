@@ -12,7 +12,7 @@
             <WinTextBlock class="icon" Text="&#xE793;" />
           </WinButton>
           <WinToggleButton
-            v-model:IsChecked="isFavoriteState"
+            :IsChecked="isFavoriteState"
             class="header-action"
             @update:IsChecked="toggleFavorite">
             <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
@@ -106,13 +106,6 @@ const BasicPivotVue = computed(() => `<WinPivot Title="${EscapeAttribute(t('samp
   right: 0;
   display: flex;
   gap: 4px;
-}
-
-.header-action {
-  width: 32px;
-  height: 32px;
-  min-width: 0;
-  padding: 0;
 }
 
 .icon {

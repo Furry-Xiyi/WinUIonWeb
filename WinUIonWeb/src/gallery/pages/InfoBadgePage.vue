@@ -6,15 +6,13 @@
             Badging is a non-intrusive and intuitive way to display notifications or bring focus to an area within an app - whether that be for notifications, indicating new content, or showing an alert. An InfoBadge is a small piece of UI that can be added into an app and customized to display a number, icon, or a simple dot.
           </p>
           <div class="page-header-actions">
-            <WinButton
-              @click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+            <WinButton class="header-action" @click="toggleTheme"
+             >
               <span class="icon">&#xE793;</span>
             </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
+            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+             >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -96,8 +94,7 @@
               :templateCode="example3Template"
               :vueCode="example3Vue">
               <template #example>
-                <WinButton
-                  style="width: 200px; height: 60px; position: relative;"
+                <WinButton style="width: 200px; height: 60px; position: relative;"
                   aria-label="Refresh required"
                   ToolTipService.ToolTip="Refresh required">
                   <span class="icon" style="font-size: 20px;">&#xE72C;</span>

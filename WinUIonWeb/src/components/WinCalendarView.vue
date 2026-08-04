@@ -2,7 +2,7 @@
   <div class="win-calendar-view">
     <div class="calendar-header">
       <button
-        class="win-btn subtle calendar-title-btn"
+        class="win-btn DefaultButtonStyle subtle calendar-title-btn"
         @click="onLabelClick"
         :disabled="!IsEnabled || viewMode === 2"
       >

@@ -6,7 +6,7 @@
           <WinTextBlock class="page-description" :Text="$t('text.the-treeview-control-is-a-hierarchical-list-patt')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
             <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -232,13 +232,6 @@ const templateSelectorTreeViewVue = `<WinTreeView v-model:ItemsSource="fileTree"
   right: 0;
   display: flex;
   gap: 4px;
-}
-
-.header-action {
-  width: 32px;
-  height: 32px;
-  min-width: 0;
-  padding: 0;
 }
 
 .icon {

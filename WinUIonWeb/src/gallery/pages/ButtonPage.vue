@@ -6,7 +6,7 @@
           <WinTextBlock class="page-description" :Text="$t('text.the-button-control-provides-a-click-event-to-res')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
             <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -14,8 +14,7 @@
       <div class="gallery-page-content">
         <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="buttonSimpleVue" :headerText="$t('text.a-simple-button-with-text-content')">
               <template #example>
-                <WinButton
-                  AutomationProperties.Name="Standard XAML"
+                <WinButton AutomationProperties.Name="Standard XAML"
                   :Content="$t('sample.button.standard-xaml')"
                   :IsEnabled="DisableButton1 !== true"
                   @Click="Button_Click('Button1')" />
@@ -95,8 +94,7 @@ const Button_Click = (name) => {
   if (name === 'Button2') Control2Output.value = t('sample.you-clicked', { name });
 };
 
-const buttonSimpleVue = `<WinButton
-  AutomationProperties.Name="Standard XAML"
+const buttonSimpleVue = `<WinButton AutomationProperties.Name="Standard XAML"
   Content="Standard XAML button"
   :IsEnabled="DisableButton1 !== true"
   @Click="Button_Click('Button1')" />`;
@@ -130,7 +128,6 @@ const buttonWrappingVue = `<div>
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-size: 16px; }
 .pie-image { width: 100%; height: 100%; object-fit: contain; }
 .horizontal-stack { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }

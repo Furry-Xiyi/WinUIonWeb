@@ -5,8 +5,8 @@
           <WinTextBlock class="page-header" :Text="$t('text.richeditbox')" />
           <WinTextBlock class="page-description" :Text="$t('text.the-richeditbox-control-lets-a-user-enter-format')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon"></span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+            <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton class="header-action" :IsChecked="isFavoriteState" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
@@ -21,8 +21,7 @@
                 <WinRichEditBox
                   :PrimaryCommands="customFlyoutPrimaryCommands"
                   :Width="800"
-                  :Height="200"
-                  @Command="onCustomFlyoutCommand" />
+                  :Height="200" />
               </template>
             </WinControlExample>
 
@@ -136,8 +135,8 @@ const customFlyoutPrimaryCommands = computed(() => [
   {
     Label: t('sample.richeditbox.share-command'),
     Icon: 'Share',
-    Command: 'share',
-    ToolTipServiceToolTip: t('sample.richeditbox.share-command')
+    'ToolTipService.ToolTip': t('sample.richeditbox.share-command'),
+    Click: onCustomFlyoutCommand
   }
 ]);
 
@@ -145,8 +144,8 @@ const showFileMessage = (action) => {
   console.log(`${action} clicked`);
 };
 
-const onCustomFlyoutCommand = (command) => {
-  if (command.Command === 'share') console.log(t('sample.richeditbox.share-clicked'));
+const onCustomFlyoutCommand = () => {
+  console.log(t('sample.richeditbox.share-clicked'));
 };
 
 const applyEditorColor = (color) => {
@@ -180,8 +179,7 @@ const example1Template = computed(() => `<WinRichEditBox
 const example2Template = computed(() => `<WinRichEditBox
   :PrimaryCommands="customFlyoutPrimaryCommands"
   :Width="800"
-  :Height="200"
-  @Command="onCustomFlyoutCommand" />`);
+  :Height="200" />`);
 
 const example3Template = computed(() => `<div class="official-custom-editor">
   <div class="official-toolbar">

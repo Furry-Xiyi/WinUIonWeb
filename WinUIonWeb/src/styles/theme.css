@@ -322,6 +322,10 @@
   --ctrl-border-accent: rgba(0, 0, 0, 0.16);
   --accent-border: rgba(255, 255, 255, 0.08);
   --accent-border-accent: rgba(0, 0, 0, 0.40);
+  --ButtonBorderBrushDefaultTop: var(--ctrl-border);
+  --ButtonBorderBrushDefaultBottom: var(--ctrl-border-accent);
+  --AccentButtonBorderBrushDefault: var(--accent-border);
+  --AccentButtonBorderBrushDefaultBottom: var(--accent-border-accent);
   --text-primary: rgba(0, 0, 0, 0.89);
   --text-secondary: rgba(0, 0, 0, 0.62);
   --text-tertiary: rgba(0, 0, 0, 0.45);
@@ -343,6 +347,7 @@
   --ctrl-solid-fill: #FFFFFF;
   --ctrl-elevation-top: rgba(255, 255, 255, 0.08);
   --ctrl-elevation-bottom: rgba(0, 0, 0, 0.16);
+  --ControlElevationBorderBrush: linear-gradient(180deg, var(--ctrl-border) 0px, var(--ctrl-border-accent) 2px, var(--ctrl-border-accent) 100%);
   --accent-base: #0067C0;
   --accent-hover: rgba(0, 103, 192, 0.90);
   --accent-pressed: rgba(0, 103, 192, 0.80);
@@ -391,7 +396,7 @@
   --CardBackgroundFillColorSecondaryBrush: rgba(246, 246, 246, 0.50);
   --DividerStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
   --ControlStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
-  --AccentControlElevationBorderBrush: rgba(255, 255, 255, 0.08);
+  --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border) 0px, var(--accent-border-accent) 2px, var(--accent-border-accent) 100%);
   --AccentControlElevationBorderBottomBrush: rgba(0, 0, 0, 0.40);
   --toggle-border: rgba(0, 0, 0, 0.45);
   --toggle-thumb: rgba(0, 0, 0, 0.61);
@@ -434,10 +439,14 @@
     --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
     --stroke-divider: rgba(255, 255, 255, 0.08);
     --ctrl-border-rest: rgba(0, 0, 0, 0.07);
-    --ctrl-border: rgba(255, 255, 255, 0.07);
-    --ctrl-border-accent: rgba(255, 255, 255, 0.09);
-    --accent-border: rgba(0, 0, 0, 0.14);
-    --accent-border-accent: rgba(255, 255, 255, 0.08);
+    --ctrl-border: rgba(255, 255, 255, 0.0706);
+    --ctrl-border-accent: rgba(255, 255, 255, 0.0941);
+    --accent-border: rgba(0, 0, 0, 0.1373);
+    --accent-border-accent: rgba(255, 255, 255, 0.0784);
+    --ButtonBorderBrushDefaultTop: var(--ctrl-border-accent);
+    --ButtonBorderBrushDefaultBottom: var(--ctrl-border);
+    --AccentButtonBorderBrushDefault: var(--accent-border-accent);
+    --AccentButtonBorderBrushDefaultBottom: var(--accent-border);
     --text-primary: #FFFFFF;
     --text-secondary: rgba(255, 255, 255, 0.77);
     --text-tertiary: rgba(255, 255, 255, 0.53);
@@ -458,8 +467,9 @@
     --ctrl-strong-stroke-disabled: rgba(255, 255, 255, 0.16);
     --ctrl-strong-stroke: rgba(255, 255, 255, 0.54);
     --ctrl-solid-fill: #454545;
-    --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
-    --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
+    --ctrl-elevation-top: rgba(255, 255, 255, 0.0941);
+    --ctrl-elevation-bottom: rgba(255, 255, 255, 0.0706);
+    --ControlElevationBorderBrush: linear-gradient(180deg, var(--ctrl-border-accent) 0px, var(--ctrl-border-accent) 1px, var(--ctrl-border) 3px, var(--ctrl-border) 100%);
     --accent-base: #4CC2FF;
     --accent-hover: rgba(96, 205, 255, 0.90);
     --accent-pressed: rgba(96, 205, 255, 0.80);
@@ -506,9 +516,9 @@
     --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.0512);
     --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
     --DividerStrokeColorDefaultBrush: rgba(255, 255, 255, 0.08);
-    --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.07);
-    --AccentControlElevationBorderBrush: rgba(0, 0, 0, 0.14);
-    --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.08);
+    --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.0706);
+    --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border-accent) 0px, var(--accent-border) 2px, var(--accent-border) 100%);
+    --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.0784);
     --toggle-border: rgba(255, 255, 255, 0.54);
     --toggle-thumb: rgba(255, 255, 255, 0.79);
     --toggle-thumb-hover: #FFFFFF;
@@ -618,6 +628,10 @@ html.theme-light {
   --ctrl-border-accent: rgba(0, 0, 0, 0.16);
   --accent-border: rgba(255, 255, 255, 0.08);
   --accent-border-accent: rgba(0, 0, 0, 0.40);
+  --ButtonBorderBrushDefaultTop: var(--ctrl-border);
+  --ButtonBorderBrushDefaultBottom: var(--ctrl-border-accent);
+  --AccentButtonBorderBrushDefault: var(--accent-border);
+  --AccentButtonBorderBrushDefaultBottom: var(--accent-border-accent);
   --text-primary: rgba(0, 0, 0, 0.89);
   --text-secondary: rgba(0, 0, 0, 0.62);
   --text-tertiary: rgba(0, 0, 0, 0.45);
@@ -640,6 +654,7 @@ html.theme-light {
   --ctrl-solid-fill: #FFFFFF;
   --ctrl-elevation-top: rgba(255, 255, 255, 0.08);
   --ctrl-elevation-bottom: rgba(0, 0, 0, 0.16);
+  --ControlElevationBorderBrush: linear-gradient(180deg, var(--ctrl-border) 0px, var(--ctrl-border-accent) 2px, var(--ctrl-border-accent) 100%);
   --accent-base: #0067C0;
   --accent-hover: rgba(0, 103, 192, 0.90);
   --accent-pressed: rgba(0, 103, 192, 0.80);
@@ -686,7 +701,7 @@ html.theme-light {
   --CardBackgroundFillColorSecondaryBrush: rgba(246, 246, 246, 0.50);
   --DividerStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
   --ControlStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
-  --AccentControlElevationBorderBrush: rgba(255, 255, 255, 0.08);
+  --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border) 0px, var(--accent-border-accent) 2px, var(--accent-border-accent) 100%);
   --AccentControlElevationBorderBottomBrush: rgba(0, 0, 0, 0.40);
   --toggle-border: rgba(0, 0, 0, 0.45);
   --toggle-thumb: rgba(0, 0, 0, 0.61);
@@ -740,10 +755,14 @@ html.theme-dark {
   --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
   --stroke-divider: rgba(255, 255, 255, 0.08);
   --ctrl-border-rest: rgba(0, 0, 0, 0.07);
-  --ctrl-border: rgba(255, 255, 255, 0.07);
-  --ctrl-border-accent: rgba(255, 255, 255, 0.09);
-  --accent-border: rgba(0, 0, 0, 0.14);
-  --accent-border-accent: rgba(255, 255, 255, 0.08);
+  --ctrl-border: rgba(255, 255, 255, 0.0706);
+  --ctrl-border-accent: rgba(255, 255, 255, 0.0941);
+  --accent-border: rgba(0, 0, 0, 0.1373);
+  --accent-border-accent: rgba(255, 255, 255, 0.0784);
+  --ButtonBorderBrushDefaultTop: var(--ctrl-border-accent);
+  --ButtonBorderBrushDefaultBottom: var(--ctrl-border);
+  --AccentButtonBorderBrushDefault: var(--accent-border-accent);
+  --AccentButtonBorderBrushDefaultBottom: var(--accent-border);
   --text-primary: #FFFFFF;
   --text-secondary: rgba(255, 255, 255, 0.77);
   --text-tertiary: rgba(255, 255, 255, 0.53);
@@ -764,8 +783,9 @@ html.theme-dark {
   --ctrl-strong-stroke: rgba(255, 255, 255, 0.54);
   --ctrl-strong-stroke-disabled: rgba(255, 255, 255, 0.16);
   --ctrl-solid-fill: #454545;
-  --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
-  --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
+  --ctrl-elevation-top: rgba(255, 255, 255, 0.0941);
+  --ctrl-elevation-bottom: rgba(255, 255, 255, 0.0706);
+  --ControlElevationBorderBrush: linear-gradient(180deg, var(--ctrl-border-accent) 0px, var(--ctrl-border-accent) 1px, var(--ctrl-border) 3px, var(--ctrl-border) 100%);
   --accent-base: #4CC2FF;
   --accent-hover: rgba(96, 205, 255, 0.90);
   --accent-pressed: rgba(96, 205, 255, 0.80);
@@ -812,9 +832,9 @@ html.theme-dark {
   --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.0512);
   --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
   --DividerStrokeColorDefaultBrush: rgba(255, 255, 255, 0.08);
-  --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.07);
-  --AccentControlElevationBorderBrush: rgba(0, 0, 0, 0.14);
-  --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.08);
+  --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.0706);
+  --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border-accent) 0px, var(--accent-border) 2px, var(--accent-border) 100%);
+  --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.0784);
   --toggle-border: rgba(255, 255, 255, 0.54);
   --toggle-thumb: rgba(255, 255, 255, 0.79);
   --toggle-thumb-hover: #FFFFFF;
@@ -886,9 +906,61 @@ html.theme-dark {
 }
 
 .win-tooltip {
+  z-index: var(--win-tooltip-z-index, var(--win-tip-z-index, 2147483647));
   --win-acrylic-fill: color-mix(
     in srgb,
     var(--ToolTipBackgroundBrush, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg))) 78%,
     transparent
   );
+}
+
+.win-teaching-tip {
+  z-index: var(--win-teaching-tip-z-index, var(--win-tip-z-index, 2147483647));
+}
+
+html .basic-input-example-theme:has(.example-display[data-theme='light']) .example-container {
+  --card-bg: #FEFEFE;
+  --CardBackgroundFillColorDefaultBrush: #FEFEFE;
+}
+
+.example-theme-wrapper.theme-light,
+.win-theme-scope.theme-light,
+html .basic-input-example-theme:has(.example-display[data-theme='light']) .example-container {
+  --accent-text-fill-color-primary: #0D4897;
+}
+
+.example-theme-wrapper.theme-dark,
+.win-theme-scope.theme-dark,
+html .basic-input-example-theme:has(.example-display[data-theme='dark']) .example-container {
+  --accent-text-fill-color-primary: #99EBFF;
+}
+
+html .basic-input-example-theme:has(.example-display[data-theme='light']) .example-options .win-textbox,
+html .basic-input-example-theme:has(.example-display[data-theme='dark']) .example-options .win-textbox {
+  --textbox-background: var(--control-fill-color-default);
+  --textbox-background-pointer-over: var(--control-fill-color-secondary);
+  --textbox-background-pressed: var(--control-fill-color-tertiary);
+  --textbox-background-focused: var(--control-fill-color-input-active);
+  --textbox-background-disabled: var(--control-fill-color-disabled);
+  --textbox-border-top: var(--control-stroke-color-default);
+  --textbox-border-bottom: var(--control-strong-stroke-color-default);
+  --textbox-border-focused: var(--accent-base);
+  --textbox-foreground: var(--text-primary);
+  --textbox-foreground-pointer-over: var(--text-primary);
+  --textbox-foreground-focused: var(--text-primary);
+  --textbox-foreground-disabled: var(--text-disabled);
+  --textbox-placeholder-foreground: var(--text-secondary);
+  --textbox-placeholder-foreground-pointer-over: var(--text-secondary);
+  --textbox-placeholder-foreground-focused: var(--text-secondary);
+  --textbox-placeholder-foreground-disabled: var(--text-disabled);
+  --textbox-button-foreground: var(--text-secondary);
+  --textbox-button-foreground-pointer-over: var(--text-secondary);
+  --textbox-button-foreground-pressed: var(--text-tertiary);
+}
+
+.page-header-actions > .header-action,
+.header-actions > .header-action,
+.page-actions > .header-action {
+  height: 32px;
+  min-height: 32px;
 }

@@ -6,15 +6,13 @@
             AnimatedIcon is a control that displays an animated icon. These icons are created using Adobe AfterEffects and translated into Microsoft.UI.Composition objects using Lottie-Windows. The control automatically manages the animation state based on user interactions like pointer hover.
           </p>
           <div class="page-header-actions">
-            <WinButton
-              @click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+            <WinButton class="header-action" @click="toggleTheme"
+             >
               <span class="icon">&#xE793;</span>
             </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
+            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+             >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -33,8 +31,7 @@
                     The following example is a button that the user hovers over to trigger the animation. The AnimatedIcon consumes the animation created using Adobe AfterEffects and translated into Microsoft.UI.Composition objects using
                     <a href="https://aka.ms/lottie" style="color: var(--accent-base);">Lottie-Windows</a>.
                   </p>
-                  <WinButton
-                    @mouseenter="onButtonPointerEntered"
+                  <WinButton @mouseenter="onButtonPointerEntered"
                     @mouseleave="onButtonPointerExited"
                     style="width: 75px; height: 40px;">
                     <WinAnimatedVisualPlayer
@@ -143,8 +140,7 @@ const onNavItemLeave = () => {
 };
 
 // Code examples
-const example1Template = `<WinButton
-  @mouseenter="onButtonPointerEntered"
+const example1Template = `<WinButton @mouseenter="onButtonPointerEntered"
   @mouseleave="onButtonPointerExited"
   style="width: 75px;">
   <AnimatedIcon x:Name="SearchAnimatedIcon">

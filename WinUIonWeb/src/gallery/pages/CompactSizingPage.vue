@@ -11,12 +11,12 @@
                 </p>
               </div>
               <div class="header-actions">
-                <WinButton class="icon-button" v-bind="{ 'tooltipservice.tooltip': `Switch to ${theme === 'light' ? 'dark' : 'light'} theme` }" @click="toggleTheme">
-                  <span class="icon">{{ theme === 'light' ? '🌙' : '☀️' }}</span>
+                <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': `Switch to ${theme === 'light' ? 'dark' : 'light'} theme` }" @Click="toggleTheme">
+                  <span class="icon">&#xE793;</span>
                 </WinButton>
-                <WinButton class="icon-button" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @click="toggleFavorite">
-                  <span class="icon">{{ isFavorite ? '★' : '☆' }}</span>
-                </WinButton>
+                <WinToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
+                  <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
+                </WinToggleButton>
               </div>
             </div>
 
@@ -103,6 +103,7 @@
 import { ref, computed } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinTextBox from '../../components/WinTextBox.vue';
 import WinPasswordBox from '../../components/WinPasswordBox.vue';
 import WinDatePicker from '../../components/WinDatePicker.vue';
@@ -208,13 +209,7 @@ const chosenDate = ref(new Date());`;
 
 .header-actions {
   display: flex;
-  gap: 8px;
-}
-
-.icon-button {
-  padding: 8px;
-  min-width: 40px;
-  height: 40px;
+  gap: 4px;
 }
 
 .icon {

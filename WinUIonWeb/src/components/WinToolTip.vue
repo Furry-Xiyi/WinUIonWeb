@@ -73,9 +73,6 @@ const props = defineProps({
   Theme: { type: String, default: '' },
   UseNativeToolTip: { type: Boolean, default: true },
   NativeToolTip: { type: [String, Boolean], default: '' },
-  ToolTipServiceToolTip: { type: [String, Number, Object], default: '' },
-  ToolTipServicePlacement: { type: String, default: '' },
-  ToolTipServicePlacementTarget: { type: [Object, String], default: null },
   'ToolTipService.ToolTip': { type: [String, Number, Object], default: '' },
   'ToolTipService.Placement': { type: String, default: '' },
   'ToolTipService.PlacementTarget': { type: [Object, String], default: null }
@@ -102,7 +99,7 @@ let suppressFocusShowUntil = 0;
 const isEnabled = computed(() => props.IsEnabled !== false);
 const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
 const isVisible = computed(() => effectiveIsOpen.value && isEnabled.value);
-const serviceContent = computed(() => props.ToolTipServiceToolTip || props['ToolTipService.ToolTip']);
+const serviceContent = computed(() => props['ToolTipService.ToolTip']);
 const contentValue = computed(() => props.Content !== '' && props.Content !== null ? props.Content : serviceContent.value);
 const contentText = computed(() => {
   const value = contentValue.value;
@@ -112,8 +109,8 @@ const contentText = computed(() => {
   }
   return String(value ?? '');
 });
-const placement = computed(() => props.ToolTipServicePlacement || props['ToolTipService.Placement'] || props.Placement || 'Mouse');
-const placementTarget = computed(() => props.ToolTipServicePlacementTarget || props['ToolTipService.PlacementTarget'] || props.PlacementTarget);
+const placement = computed(() => props['ToolTipService.Placement'] || props.Placement || 'Mouse');
+const placementTarget = computed(() => props['ToolTipService.PlacementTarget'] || props.PlacementTarget);
 const effectiveTheme = computed(() => {
   const explicitTheme = String(props.Theme || '').toLowerCase();
   if (explicitTheme === 'light' || explicitTheme === 'dark') return explicitTheme;
@@ -429,7 +426,7 @@ defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSe
 .win-tooltip-anchor { display: inline-flex; position: relative; }
 .win-tooltip {
   position: fixed;
-  z-index: 1100;
+  z-index: var(--win-tooltip-z-index, var(--win-tip-z-index, 2147483647));
   min-width: max-content;
   max-width: 320px;
   padding: 6px 9px 8px;

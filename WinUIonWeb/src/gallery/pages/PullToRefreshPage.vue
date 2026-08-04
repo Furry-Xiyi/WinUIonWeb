@@ -6,7 +6,7 @@
           <WinTextBlock class="page-description" :Text="$t('text.a-container-that-allows-users-to-refresh-content')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
             <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -88,7 +88,6 @@ const customIconPullToRefreshVue = `<WinPullToRefresh icon="&#xE1E2;" @RefreshRe
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-size: 16px; }
 .refresh-surface { width: 300px; height: 300px; background: var(--card-bg-secondary); border: 1px solid var(--text-primary); }
 .refresh-row { padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }

@@ -1,7 +1,7 @@
 <template>
   <button
     v-bind="buttonAttrs"
-    class="win-btn"
+    class="win-btn DefaultButtonStyle"
     :class="attrs.class"
     :style="buttonStyle"
     :disabled="isDisabled"

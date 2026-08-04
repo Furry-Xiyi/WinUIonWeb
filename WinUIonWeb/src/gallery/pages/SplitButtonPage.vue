@@ -6,7 +6,7 @@
           <WinTextBlock class="page-description" :Text="$t('text.the-splitbutton-is-a-dropdown-button-but-with-an')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
             <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -14,7 +14,7 @@
       <div class="gallery-page-content">
         <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonColorPickerVue" :headerText="$t('sample.splitbutton.color-picker')">
               <template #example>
-                <WinSplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" AutomationProperties.Name="Font color" @Click="applyCurrentColor">
+                <WinSplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" :Theme="pageTheme" AutomationProperties.Name="Font color" @Click="applyCurrentColor">
                   <div class="color-swatch current-swatch" :style="{ backgroundColor: currentColor }"></div>
                   <template #flyout="{ close }">
                     <div class="swatch-grid">
@@ -31,7 +31,7 @@
             </WinControlExample>
             <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonTextVue" :headerText="$t('sample.splitbutton.text')">
               <template #example>
-                <WinSplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" AutomationProperties.Name="Font color with text">
+                <WinSplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" :Theme="pageTheme" AutomationProperties.Name="Font color with text">
                   <WinTextBlock :Text="$t('sample.choose-color')" />
                   <template #flyout="{ close }">
                     <div class="swatch-grid">
@@ -97,7 +97,7 @@ const applyCurrentColor = () => {
   appliedColor.value = currentColor.value;
 };
 
-const splitButtonColorPickerVue = `<WinSplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" AutomationProperties.Name="Font color" @Click="applyCurrentColor">
+const splitButtonColorPickerVue = `<WinSplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" :Theme="pageTheme" AutomationProperties.Name="Font color" @Click="applyCurrentColor">
   <div class="color-swatch" :style="{ backgroundColor: currentColor }"></div>
   <template #flyout>
     <div class="swatch-grid">
@@ -108,7 +108,7 @@ const splitButtonColorPickerVue = `<WinSplitButton MinWidth="0" MinHeight="0" Pa
   </template>
 </WinSplitButton>`;
 
-const splitButtonTextVue = `<WinSplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" AutomationProperties.Name="Font color with text">
+const splitButtonTextVue = `<WinSplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" :Theme="pageTheme" AutomationProperties.Name="Font color with text">
   Choose color
   <template #flyout>
     <div class="swatch-grid">
@@ -125,7 +125,6 @@ const splitButtonTextVue = `<WinSplitButton MinWidth="0" MinHeight="0" Padding="
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-size: 16px; }
 .color-swatch { display: block; width: 32px; height: 32px; border-radius: 4px; }
 .current-swatch { border-radius: 4px 0 0 4px; }

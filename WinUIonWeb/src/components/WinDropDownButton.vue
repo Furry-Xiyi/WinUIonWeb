@@ -2,7 +2,7 @@
   <div class="win-dropdown-btn-wrap" ref="wrap">
     <button
       v-bind="buttonAttrs"
-      class="win-btn win-dropdown-btn"
+      class="win-btn DefaultButtonStyle win-dropdown-btn"
       :class="attrs.class"
       :style="buttonStyle"
       :disabled="isDisabled"
@@ -13,7 +13,8 @@
       <span class="win-dropdown-content"><slot>{{ Content }}</slot></span>
       <span class="icon win-dd-chevron chevron-animate"
             :class="[chevronClass, { open: isOpen }]"
-            @animationend="onChevronAnimEnd"></span>
+            aria-hidden="true"
+            @animationend="onChevronAnimEnd"></span>
     </button>
     <WinMenuFlyout
       :Open="isOpen"
@@ -110,15 +111,19 @@ const onChevronDown = () => {
 };
 const onChevronUp = () => {
   if (!chevronPressed) return;
+  releaseChevron();
+};
+const releaseChevron = () => {
+  if (chevronClass.value === '') return;
   chevronPressed = false;
   if (chevronPressDone) chevronClass.value = 'releasing';
 };
-const onChevronLeave = () => { chevronPressed = false; };
-const onChevronAnimEnd = () => {
-  if (chevronClass.value === 'pressing') {
+const onChevronLeave = releaseChevron;
+const onChevronAnimEnd = (event) => {
+  if (chevronClass.value === 'pressing' && event.animationName === 'chevron-press') {
     chevronPressDone = true;
     if (!chevronPressed) chevronClass.value = 'releasing';
-  } else if (chevronClass.value === 'releasing') {
+  } else if (chevronClass.value === 'releasing' && event.animationName === 'chevron-release') {
     chevronClass.value = '';
     chevronPressDone = false;
   }
@@ -136,8 +141,7 @@ const onSelect = (item) => { emit('Select', item); isOpen.value = false; };
 </script>
 <style>
   .win-dd-chevron {
-    font-size: 12px;
-    display: inline-block;
+    font-size: 0;
   }
 
   .win-dropdown-btn-wrap {

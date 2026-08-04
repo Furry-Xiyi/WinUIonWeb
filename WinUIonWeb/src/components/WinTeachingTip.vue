@@ -227,7 +227,7 @@ defineExpose({ close, updatePosition });
 <style>
 .win-teaching-tip {
   position: fixed;
-  z-index: 980;
+  z-index: var(--win-teaching-tip-z-index, var(--win-tip-z-index, 2147483647));
   width: max-content;
   min-width: min(320px, calc(100vw - 16px));
   max-width: min(336px, calc(100vw - 16px));

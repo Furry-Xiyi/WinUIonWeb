@@ -181,8 +181,11 @@ const onDateSelect = (dates) => {
     border-radius: 4px;
     gap: 0;
     --ButtonBorderBrush: var(--ctrl-border-rest);
+    --ButtonBorderBrushTop: var(--ButtonBorderBrush);
     --ButtonBorderBrushPointerOver: var(--ctrl-border-rest);
+    --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
     --ButtonBorderBrushPressed: var(--ctrl-border);
+    --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
     --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
     --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
     --ButtonBorderBrushPressedBottom: var(--ctrl-border);

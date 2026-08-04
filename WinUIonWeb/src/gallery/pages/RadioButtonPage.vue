@@ -9,7 +9,7 @@
             TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
             <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -130,7 +130,6 @@ const radioButtonStringsVue = `<WinRadioButtons Header="Background" MaxColumns="
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-size: 16px; }
 .radio-stack { display: flex; flex-direction: column; gap: 12px; }
 .control-output { height: 50px; margin: 10px 0; border-width: 10px; border-style: solid; box-sizing: border-box; }

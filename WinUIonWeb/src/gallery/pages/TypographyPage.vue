@@ -7,12 +7,12 @@
                 <h1 class="page-title">Typography</h1>
               </div>
               <div class="header-actions">
-                <button class="icon-button" aria-label="Toggle theme" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @click="toggleTheme">
+                <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @Click="toggleTheme">
                   <span class="icon">&#xE793;</span>
-                </button>
-                <button class="icon-button" aria-label="Toggle favorite" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? 'Remove from favorites' : 'Add to favorites' }" @click="toggleFavorite">
+                </WinButton>
+                <WinToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
                   <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-                </button>
+                </WinToggleButton>
               </div>
             </div>
 
@@ -170,6 +170,8 @@ import { computed, inject, ref } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import TypographyRow from '../../components/TypographyRow.vue';
 import { createPageState } from '../../utils/pageState';
+import WinButton from '../../components/WinButton.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
@@ -238,24 +240,7 @@ const cSharpCode = `<div class="typography-samples">
 
 .header-actions {
   display: flex;
-  gap: 8px;
-}
-
-.icon-button {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 4px;
-  background: var(--ctrl-fill-default);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.icon-button:hover {
-  background: var(--ctrl-fill-secondary);
+  gap: 4px;
 }
 
 .icon {
@@ -456,7 +441,7 @@ const cSharpCode = `<div class="typography-samples">
   border-radius: 8px;
   padding: 12px 16px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  z-index: var(--win-tooltip-z-index, var(--win-tip-z-index, 2147483647));
   pointer-events: none;
   top: 50%;
   left: 50%;

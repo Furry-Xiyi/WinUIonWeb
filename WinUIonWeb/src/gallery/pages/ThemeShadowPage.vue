@@ -6,15 +6,13 @@
             ThemeShadow is a pre-configured shadow effect that can be applied to any XAML element to draw appropriate shadows based on x, y, z coordinates.
           </p>
           <div class="page-header-actions">
-            <WinButton
-              @click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+            <WinButton class="header-action" @click="toggleTheme"
+             >
               <span class="icon">&#xE793;</span>
             </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
+            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+             >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>

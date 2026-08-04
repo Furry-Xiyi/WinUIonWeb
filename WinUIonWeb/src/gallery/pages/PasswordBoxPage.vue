@@ -5,8 +5,8 @@
           <WinTextBlock class="page-header" :Text="$t('text.passwordbox')" />
           <WinTextBlock class="page-description" :Text="$t('text.a-passwordbox-is-a-text-input-box-that-conceals')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton @click="toggleTheme" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon"></span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite" style="width: 32px; height: 32px; padding: 0; min-width: 0;"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+            <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">

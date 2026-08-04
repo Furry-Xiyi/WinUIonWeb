@@ -520,9 +520,13 @@ onBeforeUnmount(() => {
   --ButtonForegroundPressed: var(--text-tertiary);
   --ButtonForegroundDisabled: var(--text-disabled);
   --ButtonBorderBrush: transparent;
+  --ButtonBorderBrushTop: var(--ButtonBorderBrush);
   --ButtonBorderBrushPointerOver: transparent;
+  --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
   --ButtonBorderBrushPressed: transparent;
+  --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
   --ButtonBorderBrushDisabled: transparent;
+  --ButtonBorderBrushDisabledTop: var(--ButtonBorderBrushDisabled);
   --ButtonBorderBrushBottom: transparent;
   --ButtonBorderBrushPointerOverBottom: transparent;
   --ButtonBorderBrushPressedBottom: transparent;
