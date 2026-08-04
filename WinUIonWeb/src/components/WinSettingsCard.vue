@@ -135,8 +135,6 @@ const handleClick = (e) => {
     color: var(--text-primary);
     font: inherit;
     text-align: left;
-    -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-    backdrop-filter: var(--flyout-backdrop, blur(30px));
   }
 
   .win-settings-card-surface::before {

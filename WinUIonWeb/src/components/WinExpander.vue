@@ -212,8 +212,6 @@ const toggleExpanded = () => {
   color: var(--text-primary);
   font-size: 14px;
   text-align: left;
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
 }
 
 .win-expander-header::before {
@@ -365,8 +363,6 @@ const toggleExpanded = () => {
   flex-direction: column;
   background: transparent;
   border-radius: 0 0 3px 3px;
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
 }
 
 .win-expander-content::before {
