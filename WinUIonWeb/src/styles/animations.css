@@ -331,17 +331,17 @@
 @keyframes CommonNavigationTransitionInfo_NavigationTrigger_NavigatingTo {
   0% {
     opacity: 0;
-    transform: perspective(1000px) rotateY(-80deg);
+    transform: perspective(1000px) rotateY(80deg);
   }
 
   23.021% {
     opacity: 0;
-    transform: perspective(1000px) rotateY(-80deg);
+    transform: perspective(1000px) rotateY(80deg);
   }
 
   23.022% {
     opacity: 1;
-    transform: perspective(1000px) rotateY(-80deg);
+    transform: perspective(1000px) rotateY(80deg);
   }
 
   100% {
@@ -358,29 +358,29 @@
 
   99.999% {
     opacity: 1;
-    transform: perspective(1000px) rotateY(50deg);
+    transform: perspective(1000px) rotateY(-50deg);
   }
 
   100% {
     opacity: 0;
-    transform: perspective(1000px) rotateY(50deg);
+    transform: perspective(1000px) rotateY(-50deg);
   }
 }
 
 @keyframes CommonNavigationTransitionInfo_NavigationTrigger_BackNavigatingTo {
   0% {
     opacity: 0;
-    transform: perspective(1000px) rotateY(50deg);
+    transform: perspective(1000px) rotateY(-50deg);
   }
 
   23.021% {
     opacity: 0;
-    transform: perspective(1000px) rotateY(50deg);
+    transform: perspective(1000px) rotateY(-50deg);
   }
 
   23.022% {
     opacity: 1;
-    transform: perspective(1000px) rotateY(50deg);
+    transform: perspective(1000px) rotateY(-50deg);
   }
 
   100% {
@@ -397,12 +397,12 @@
 
   99.999% {
     opacity: 1;
-    transform: perspective(1000px) rotateY(-80deg);
+    transform: perspective(1000px) rotateY(80deg);
   }
 
   100% {
     opacity: 0;
-    transform: perspective(1000px) rotateY(-80deg);
+    transform: perspective(1000px) rotateY(80deg);
   }
 }
 
