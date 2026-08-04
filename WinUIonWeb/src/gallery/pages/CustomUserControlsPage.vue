@@ -6,15 +6,13 @@
             Learn how to create reusable custom controls and UserControls in WinUI applications.
           </p>
           <div class="page-header-actions">
-            <WinButton
-              @click="toggleTheme"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+            <WinButton class="header-action" @click="toggleTheme"
+             >
               <span class="icon">&#xE793;</span>
             </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
+            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
-              style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+             >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -77,8 +75,7 @@
                     :minLength="8"
                     v-model="passwordValue"
                     @validationChanged="onPasswordValidationChanged" />
-                  <WinButton
-                    primary
+                  <WinButton primary
                     :disabled="!isPasswordValid"
                     @click="onSubmitPassword">
                     Submit

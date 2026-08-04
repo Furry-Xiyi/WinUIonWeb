@@ -6,7 +6,7 @@
           <WinTextBlock class="page-description" :Text="$t('text.use-a-contentdialog-to-show-relevant-information')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
             <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -135,7 +135,6 @@ const noDefaultCode = computed(() => `<WinButton @Click="showDialogNoDefault = t
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-size: 16px; }
 .sample-row { display: flex; align-items: center; gap: 16px; }
 .output-text { color: var(--text-secondary); }

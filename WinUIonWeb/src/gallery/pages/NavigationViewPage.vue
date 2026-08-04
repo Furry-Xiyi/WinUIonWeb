@@ -6,7 +6,7 @@
         <WinTextBlock class="page-description" :Text="$t('text.navigationview-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
           <WinButton class="header-action" @Click="toggleTheme"><WinTextBlock class="icon" Text="" /></WinButton>
-          <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
             <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
           </WinToggleButton>
         </div>
@@ -643,7 +643,6 @@ const apiExampleCode = computed(() => `<WinNavigationView
 .page-header { margin: 0 0 8px; color: var(--text-primary); font-size: 28px; font-weight: 600; }
 .page-description { margin: 0 72px 16px 0; color: var(--text-secondary); line-height: 1.5; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-size: 16px; line-height: 16px; }
 .gallery-page-content,
 .sample-layout { width: 100%; min-width: 0; }

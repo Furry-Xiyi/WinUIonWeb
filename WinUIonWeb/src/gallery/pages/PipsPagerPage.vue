@@ -6,7 +6,7 @@
           <WinTextBlock class="page-description" Text="The PipsPager provides a simple and visual way to navigate sequential content." TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
             <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -113,7 +113,6 @@ const example2Code = computed(() => `<WinPipsPager
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-size: 16px; }
 .gallery-flipview { width: min(400px, 100%); height: 270px; max-width: 400px; }
 .gallery-image { width: 100%; height: 100%; object-fit: cover; display: block; }

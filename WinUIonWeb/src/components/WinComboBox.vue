@@ -15,7 +15,7 @@
     <div v-if="IsEditable" ref="backgroundRef" class="win-combo-editable">
       <button
         v-if="!isEditing"
-        class="win-btn win-combo-btn win-combo-edit-display"
+        class="win-btn DefaultButtonStyle win-combo-btn win-combo-edit-display"
         type="button"
         role="combobox"
         :aria-controls="listBoxId"
@@ -64,7 +64,7 @@
     <button
       v-else
       ref="backgroundRef"
-      class="win-btn win-combo-btn"
+      class="win-btn DefaultButtonStyle win-combo-btn"
       type="button"
       role="combobox"
       :aria-controls="listBoxId"

@@ -17,12 +17,12 @@
                 </p>
               </div>
               <div class="page-actions">
-                <WinButton v-bind="{ 'tooltipservice.tooltip': themeButtonTitle }" @click="toggleTheme">
-                  <span class="icon">{{ themeIcon }}</span>
+                <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': themeButtonTitle }" @Click="toggleTheme">
+                  <span class="icon">&#xE793;</span>
                 </WinButton>
-                <WinButton v-bind="{ 'tooltipservice.tooltip': favoriteButtonTitle }" @click="toggleFavorite">
-                  <span class="icon">{{ favoriteIcon }}</span>
-                </WinButton>
+                <WinToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': favoriteButtonTitle }" @update:IsChecked="toggleFavorite">
+                  <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
+                </WinToggleButton>
               </div>
             </div>
 
@@ -176,12 +176,12 @@
 import { ref, computed } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 // Theme management
 const currentTheme = ref('light');
 
-const themeIcon = computed(() => currentTheme.value === 'light' ? '🌙' : '☀️');
 const themeButtonTitle = computed(() => `Switch to ${currentTheme.value === 'light' ? 'dark' : 'light'} theme`);
 
 const toggleTheme = () => {
@@ -190,7 +190,6 @@ const toggleTheme = () => {
 
 // Favorite management
 const isFavorite = ref(false);
-const favoriteIcon = computed(() => isFavorite.value ? '⭐' : '☆');
 const favoriteButtonTitle = computed(() => isFavorite.value ? 'Remove from favorites' : 'Add to favorites');
 
 const toggleFavorite = () => {
@@ -302,7 +301,7 @@ const vueCode = `<div style="border-radius: 8px;">
 
 .page-actions {
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
 
 .icon {

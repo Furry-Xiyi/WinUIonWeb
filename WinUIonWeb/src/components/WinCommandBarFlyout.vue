@@ -1,58 +1,65 @@
 <template>
   <Teleport to="body">
-    <div
-      v-if="isOpen"
-      ref="flyoutRef"
-      class="win-commandbar-flyout"
-      :class="[themeClass, `placement-${actualPlacement.toLowerCase()}`, { 'is-expanded': secondaryOpen, 'opens-up': opensUp }]"
-      :style="flyoutStyle"
-      role="menu"
-      @keydown="onKeydown"
-      @pointerdown.stop>
-      <div class="win-cbf-top">
-        <div v-if="primaryCommands.length" class="win-cbf-primary" role="toolbar">
+    <Transition name="cbf-flyout">
+      <div
+        v-if="isOpen"
+        ref="flyoutRef"
+        class="win-commandbar-flyout"
+        :class="[themeClass, `placement-${actualPlacement.toLowerCase()}`, panelStateClasses]"
+        :style="flyoutStyle"
+        role="menu"
+        @keydown="onKeydown"
+        @pointerdown.stop>
+        <div class="win-cbf-top">
+          <div v-if="primaryCommands.length" class="win-cbf-primary" role="toolbar">
+            <button
+              v-for="command in primaryCommands"
+              :key="commandKey(command)"
+              class="win-cbf-appbar-button"
+              :class="{ 'is-toggle': command.IsToggle, 'is-checked': command.IsChecked }"
+              type="button"
+              role="menuitem"
+              :aria-pressed="command.IsToggle ? Boolean(command.IsChecked) : undefined"
+              v-bind="{ 'tooltipservice.tooltip': commandToolTip(command) }"
+              :disabled="command.IsEnabled === false"
+              @click="invoke(command)">
+              <span v-if="command.Icon" class="win-cbf-icon">{{ iconGlyph(command.Icon) }}</span>
+              <span v-if="showPrimaryLabels" class="win-cbf-primary-label">{{ command.Label }}</span>
+            </button>
+          </div>
+
           <button
-            v-for="command in primaryCommands"
-            :key="commandKey(command)"
-            class="win-cbf-appbar-button"
-            :class="{ 'is-toggle': command.IsToggle, 'is-checked': command.IsChecked }"
+            v-if="secondaryCommands.length && !AlwaysExpanded"
+            class="win-cbf-more-button"
             type="button"
-            role="menuitem"
-            :aria-pressed="command.IsToggle ? Boolean(command.IsChecked) : undefined"
-            v-bind="{ 'tooltipservice.tooltip': command.ToolTipServiceToolTip || command.ToolTip || command.Label }"
-            :disabled="command.IsEnabled === false"
-            @click="invoke(command)">
-            <span v-if="command.Icon" class="win-cbf-icon">{{ iconGlyph(command.Icon) }}</span>
-            <span v-if="showPrimaryLabels" class="win-cbf-primary-label">{{ command.Label }}</span>
+            :aria-label="t('text.more')"
+            v-bind="{ 'tooltipservice.tooltip': t('text.more') }"
+            :aria-expanded="secondaryOpen"
+            @click="toggleSecondary">
+            <span class="win-cbf-icon"></span>
           </button>
         </div>
 
-        <button
-          v-if="secondaryCommands.length"
-          class="win-cbf-more-button"
-          type="button"
-          :aria-label="t('text.more')"
-          v-bind="{ 'tooltipservice.tooltip': t('text.more') }"
-          :aria-expanded="secondaryOpen"
-          @click="secondaryOpen = !secondaryOpen">
-          <span class="win-cbf-icon"></span>
-        </button>
+        <div v-if="secondaryPanelVisible" class="win-cbf-secondary" role="menu">
+          <button
+            v-for="command in secondaryCommands"
+            :key="commandKey(command)"
+            class="win-cbf-overflow-button"
+            :class="secondaryCommandClasses(command)"
+            type="button"
+            role="menuitem"
+            :aria-pressed="command.IsToggle ? Boolean(command.IsChecked) : undefined"
+            :disabled="command.IsEnabled === false"
+            @click="invoke(command)">
+            <span v-if="command.IsToggle" class="win-cbf-overflow-check" aria-hidden="true">&#xE73E;</span>
+            <span v-if="command.Icon" class="win-cbf-overflow-icon">{{ iconGlyph(command.Icon) }}</span>
+            <span class="win-cbf-overflow-label">{{ command.Label }}</span>
+            <span v-if="command.KeyboardAcceleratorTextOverride" class="win-cbf-overflow-accelerator">{{ command.KeyboardAcceleratorTextOverride }}</span>
+            <span v-if="command.Flyout" class="win-cbf-overflow-chevron" aria-hidden="true">&#xE76C;</span>
+          </button>
+        </div>
       </div>
-
-      <div v-if="secondaryOpen && secondaryCommands.length" class="win-cbf-secondary" role="menu">
-        <button
-          v-for="command in secondaryCommands"
-          :key="commandKey(command)"
-          class="win-cbf-overflow-button"
-          type="button"
-          role="menuitem"
-          :disabled="command.IsEnabled === false"
-          @click="invoke(command)">
-          <span v-if="command.Icon" class="win-cbf-overflow-icon">{{ iconGlyph(command.Icon) }}</span>
-          <span class="win-cbf-overflow-label">{{ command.Label }}</span>
-        </button>
-      </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -85,8 +92,9 @@ type CommandBarFlyoutCommand = {
   Icon?: string;
   Name?: string;
   Command?: string;
-  ToolTip?: string;
-  ToolTipServiceToolTip?: string;
+  'ToolTipService.ToolTip'?: string;
+  KeyboardAcceleratorTextOverride?: string;
+  Flyout?: unknown;
   IsEnabled?: boolean;
   IsToggle?: boolean;
   IsChecked?: boolean;
@@ -128,20 +136,66 @@ const emit = defineEmits<{
 const flyoutRef = ref<HTMLElement | null>(null);
 const isOpen = ref(props.Open);
 const secondaryOpen = ref(props.AlwaysExpanded);
+const secondaryRendered = ref(props.AlwaysExpanded);
+const panelAnimation = ref<'expanding-setup' | 'expanding' | 'collapsing' | ''>('');
+const collapsedClip = ref({ right: '0px', bottom: '0px', moreOffset: '0px' });
 const anchorRect = ref<AnchorRect | null>(props.AnchorRect);
 const actualPlacement = ref<Placement>(props.Placement);
 const position = ref({ top: 0, left: 0 });
-const opensUp = computed(() => actualPlacement.value.includes('Top'));
 const primaryCommands = computed(() => props.PrimaryCommands ?? []);
 const secondaryCommands = computed(() => props.SecondaryCommands ?? []);
+const AlwaysExpanded = computed(() => props.AlwaysExpanded);
 const showPrimaryLabels = computed(() => props.ShowPrimaryLabels);
 const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
+let secondaryAnimationTimer = 0;
+
+const secondaryPanelVisible = computed(() => secondaryCommands.value.length > 0 && secondaryRendered.value);
+const panelStateClasses = computed(() => ({
+  'is-expanded': secondaryRendered.value,
+  'is-panel-expanding-setup': panelAnimation.value === 'expanding-setup',
+  'is-panel-expanding': panelAnimation.value === 'expanding',
+  'is-panel-collapsing': panelAnimation.value === 'collapsing'
+}));
 
 const flyoutStyle = computed<CSSProperties>(() => ({
   top: `${position.value.top}px`,
   left: `${position.value.left}px`,
-  minWidth: props.MinWidth ? `${props.MinWidth}px` : undefined
-}));
+  minWidth: props.MinWidth ? `${props.MinWidth}px` : undefined,
+  '--cbf-collapsed-right': collapsedClip.value.right,
+  '--cbf-collapsed-bottom': collapsedClip.value.bottom,
+  '--cbf-more-offset': collapsedClip.value.moreOffset
+} as CSSProperties & Record<string, string | undefined>));
+
+const outerWidth = (element: HTMLElement | null) => {
+  if (!element) return 0;
+  const style = window.getComputedStyle(element);
+  return element.offsetWidth + Number.parseFloat(style.marginLeft || '0') + Number.parseFloat(style.marginRight || '0');
+};
+
+const collapsedSize = () => {
+  const flyout = flyoutRef.value;
+  if (!flyout) return { width: 0, height: 0 };
+  const top = flyout.querySelector<HTMLElement>('.win-cbf-top');
+  const primary = flyout.querySelector<HTMLElement>('.win-cbf-primary');
+  const more = flyout.querySelector<HTMLElement>('.win-cbf-more-button');
+  const topStyle = top ? window.getComputedStyle(top) : null;
+  const horizontalBorder = topStyle
+    ? Number.parseFloat(topStyle.borderLeftWidth || '0') + Number.parseFloat(topStyle.borderRightWidth || '0')
+    : 0;
+  return {
+    width: Math.max(1, outerWidth(primary) + outerWidth(more) + horizontalBorder),
+    height: Math.max(1, top?.offsetHeight ?? 0)
+  };
+};
+
+const setCollapsedClipFromSize = (expandedRect: DOMRect, size = collapsedSize()) => {
+  const widthDelta = Math.max(0, expandedRect.width - size.width);
+  collapsedClip.value = {
+    right: `${widthDelta}px`,
+    bottom: `${Math.max(0, expandedRect.height - size.height)}px`,
+    moreOffset: `${-widthDelta}px`
+  };
+};
 
 const iconMap: Record<string, string> = {
   Share: '\uE72D',
@@ -159,7 +213,38 @@ const iconMap: Record<string, string> = {
 };
 
 const commandKey = (command: CommandBarFlyoutCommand) => command.Name || command.Command || command.Label;
+const commandToolTip = (command: CommandBarFlyoutCommand) => command['ToolTipService.ToolTip'] || command.Label;
 const iconGlyph = (icon: string) => iconMap[icon] ?? icon;
+const secondaryCommandClasses = (command: CommandBarFlyoutCommand) => ({
+  'is-toggle': command.IsToggle,
+  'is-checked': command.IsChecked,
+  'has-check': command.IsToggle,
+  'has-menu-icon': Boolean(command.Icon),
+  'has-keyboard-accelerator': Boolean(command.KeyboardAcceleratorTextOverride),
+  'has-flyout': Boolean(command.Flyout)
+});
+
+const clearSecondaryAnimationTimer = () => {
+  if (!secondaryAnimationTimer) return;
+  window.clearTimeout(secondaryAnimationTimer);
+  secondaryAnimationTimer = 0;
+};
+
+const finishSecondaryAnimation = () => {
+  if (panelAnimation.value === 'collapsing') {
+    secondaryRendered.value = false;
+  }
+  panelAnimation.value = '';
+  secondaryAnimationTimer = 0;
+  void nextTick(updatePosition);
+};
+
+const scheduleSecondaryAnimationEnd = (duration = 200) => {
+  clearSecondaryAnimationTimer();
+  secondaryAnimationTimer = window.setTimeout(finishSecondaryAnimation, duration);
+};
+
+const nextAnimationFrame = () => new Promise<void>(resolve => window.requestAnimationFrame(() => resolve()));
 
 const choosePlacement = (rect: AnchorRect, requested: Placement) => {
   if (requested !== 'Auto') return requested;
@@ -218,6 +303,8 @@ const openAt = async (rect: AnchorRect, options: { Placement?: Placement; ShowMo
   anchorRect.value = rect;
   actualPlacement.value = options.Placement ?? props.Placement;
   secondaryOpen.value = props.AlwaysExpanded;
+  secondaryRendered.value = props.AlwaysExpanded;
+  panelAnimation.value = '';
   emit('Opening');
   isOpen.value = true;
   await nextTick();
@@ -235,10 +322,37 @@ const showAt = async (target: HTMLElement, options: { Placement?: Placement; Sho
 const hide = () => {
   if (!isOpen.value) return;
   emit('Closing');
+  clearSecondaryAnimationTimer();
   isOpen.value = false;
   secondaryOpen.value = props.AlwaysExpanded;
+  secondaryRendered.value = props.AlwaysExpanded;
+  panelAnimation.value = '';
   emit('Close');
   emit('Closed');
+};
+
+const toggleSecondary = async () => {
+  if (!secondaryCommands.value.length || props.AlwaysExpanded) return;
+
+  if (secondaryOpen.value) {
+    const flyout = flyoutRef.value;
+    if (flyout) setCollapsedClipFromSize(flyout.getBoundingClientRect());
+    secondaryOpen.value = false;
+    panelAnimation.value = 'collapsing';
+    scheduleSecondaryAnimationEnd(167);
+    return;
+  }
+
+  const startSize = collapsedSize();
+  secondaryRendered.value = true;
+  secondaryOpen.value = true;
+  await nextTick();
+  await updatePosition();
+  if (flyoutRef.value) setCollapsedClipFromSize(flyoutRef.value.getBoundingClientRect(), startSize);
+  panelAnimation.value = 'expanding-setup';
+  await nextAnimationFrame();
+  panelAnimation.value = 'expanding';
+  scheduleSecondaryAnimationEnd(200);
 };
 
 const invoke = (command: CommandBarFlyoutCommand) => {
@@ -276,6 +390,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  clearSecondaryAnimationTimer();
   document.removeEventListener('pointerdown', onPointerDown);
   window.removeEventListener('resize', updatePosition);
   window.removeEventListener('scroll', updatePosition, true);
@@ -291,39 +406,60 @@ defineExpose({ showAt, hide, openAt, isOpen });
   display: flex;
   flex-direction: column;
   color: var(--text-primary);
+  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
+  font-size: var(--ControlContentThemeFontSize, var(--muxc-body-font-size, 14px));
+  font-weight: 400;
   --win-acrylic-fill: var(--flyout-background, var(--layer-fill-color-default));
   isolation: isolate;
   background: transparent;
-  border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--control-stroke-color-default)));
-  border-radius: 8px;
+  border-radius: var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px));
+  border: 0;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
   backdrop-filter: var(--flyout-backdrop, blur(30px));
   overflow: hidden;
-  animation: cbf-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, cbf-fade 83ms linear both;
-}
-
-.win-commandbar-flyout.opens-up {
-  animation-name: cbf-open-up, cbf-fade;
+  max-width: 440px;
+  transform-origin: top left;
+  clip-path: inset(0);
+  will-change: clip-path, opacity;
 }
 
 .win-cbf-top {
   display: flex;
   align-items: stretch;
+  align-self: flex-start;
+  background: var(--CommandBarFlyoutBackground, var(--flyout-background, var(--layer-fill-color-default)));
+  border: 1px solid var(--CommandBarFlyoutBorderBrush, var(--control-stroke-color-default, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))));
+  border-radius: inherit;
   min-height: 46px;
+  min-width: 0;
+}
+
+.win-commandbar-flyout.is-expanded .win-cbf-top {
+  align-self: stretch;
+  border-radius: var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px)) var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px)) 0 0;
+}
+
+.win-commandbar-flyout.is-expanded .win-cbf-primary {
+  flex: 1 1 auto;
 }
 
 .win-cbf-primary {
-  min-height: 40px;
+  height: 40px;
   margin: 3px 0 3px 3px;
   display: flex;
   align-items: stretch;
+  min-width: 0;
 }
 
 .win-cbf-more-button {
-  min-width: 40px;
-  height: 40px;
+  min-width: 44px;
+  width: 44px;
+  min-height: 40px;
+  height: auto;
   margin: 3px 3px 3px 0;
+  font-weight: 600;
+  font-size: var(--ControlContentThemeFontSize, 14px);
 }
 
 .win-cbf-appbar-button,
@@ -336,24 +472,81 @@ defineExpose({ showAt, hide, openAt, isOpen });
   color: inherit;
   font: inherit;
   cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.win-cbf-appbar-button::before,
+.win-cbf-overflow-button::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: 0;
+  border-radius: inherit;
+  background: transparent;
+  transition: background-color 83ms linear;
+}
+
+.win-cbf-more-button::before {
+  content: '';
+  position: absolute;
+  inset: 2px 6px 2px 2px;
+  z-index: 0;
+  border-radius: inherit;
+  background: transparent;
+  transition: background-color 83ms linear;
+}
+
+.win-cbf-appbar-button > *,
+.win-cbf-more-button > *,
+.win-cbf-overflow-button > * {
+  position: relative;
+  z-index: 1;
 }
 
 .win-cbf-appbar-button {
+  width: 40px;
   min-width: 40px;
   height: 40px;
-  padding: 0 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.win-cbf-appbar-button:focus-visible,
+.win-cbf-more-button:focus-visible,
+.win-cbf-overflow-button:focus-visible {
+  outline: 2px solid var(--focus-stroke-color-outer, var(--accent-default, #005FB8));
+  outline-offset: -2px;
+}
+
+.win-cbf-appbar-button .win-cbf-icon {
+  display: grid;
+  place-items: center;
+  height: 16px;
+  min-width: 16px;
+}
+
+.win-commandbar-flyout:has(.win-cbf-primary-label) .win-cbf-primary {
+  min-height: 52px;
+  height: auto;
 }
 
 .win-commandbar-flyout:has(.win-cbf-primary-label) .win-cbf-appbar-button {
-  min-width: 64px;
+  width: 60px;
+  min-width: 60px;
   height: 52px;
-  flex-direction: column;
-  gap: 2px;
-  padding: 4px 8px;
+  grid-template-rows: 16px auto;
+  align-content: start;
+  justify-content: center;
+  padding: 9px 0 0;
+}
+
+.win-commandbar-flyout:has(.win-cbf-primary-label) .win-cbf-primary-label {
+  width: 60px;
+  margin: 6px 0 2px;
 }
 
 .win-commandbar-flyout:has(.win-cbf-primary-label) .win-cbf-top {
@@ -361,8 +554,9 @@ defineExpose({ showAt, hide, openAt, isOpen });
 }
 
 .win-commandbar-flyout:has(.win-cbf-primary-label) .win-cbf-more-button {
-  height: 52px;
-  min-width: 52px;
+  width: 44px;
+  min-width: 44px;
+  min-height: 40px;
 }
 
 .win-cbf-more-button {
@@ -373,28 +567,59 @@ defineExpose({ showAt, hide, openAt, isOpen });
 .win-cbf-appbar-button:hover,
 .win-cbf-more-button:hover,
 .win-cbf-overflow-button:hover {
-  background: var(--subtle-fill-color-secondary, var(--subtle-secondary));
+  background: transparent;
+  color: var(--CommandBarFlyoutAppBarButtonForegroundPointerOver, var(--text-primary));
+}
+
+.win-cbf-appbar-button:hover::before,
+.win-cbf-more-button:hover::before,
+.win-cbf-overflow-button:hover::before {
+  background: var(--CommandBarFlyoutAppBarButtonBackgroundPointerOver, var(--subtle-fill-color-secondary, var(--subtle-secondary)));
 }
 
 .win-cbf-appbar-button.is-checked {
-  background: var(--accent-base);
-  color: var(--accent-text);
+  background: transparent;
+  color: var(--CommandBarFlyoutAppBarButtonForegroundChecked, var(--accent-text));
+}
+
+.win-cbf-appbar-button.is-checked::before {
+  background: var(--CommandBarFlyoutAppBarButtonBackgroundChecked, var(--accent-base));
 }
 
 .win-cbf-appbar-button.is-checked:hover {
-  background: var(--accent-hover, var(--accent-base));
+  background: transparent;
+  color: var(--CommandBarFlyoutAppBarButtonForegroundCheckedPointerOver, var(--accent-text));
+}
+
+.win-cbf-appbar-button.is-checked:hover::before {
+  background: var(--CommandBarFlyoutAppBarButtonBackgroundCheckedPointerOver, var(--accent-hover, var(--accent-base)));
+}
+
+.win-cbf-appbar-button.is-checked:active {
+  color: var(--CommandBarFlyoutAppBarButtonForegroundCheckedPressed, var(--accent-text));
+}
+
+.win-cbf-appbar-button.is-checked:active::before {
+  background: var(--CommandBarFlyoutAppBarButtonBackgroundCheckedPressed, var(--accent-pressed, var(--accent-base)));
 }
 
 .win-cbf-appbar-button:active,
 .win-cbf-more-button:active,
 .win-cbf-overflow-button:active {
-  background: var(--subtle-fill-color-tertiary, var(--subtle-tertiary));
-  color: var(--text-secondary);
+  background: transparent;
+  color: var(--CommandBarFlyoutAppBarButtonForegroundPressed, var(--text-secondary));
+}
+
+.win-cbf-appbar-button:active::before,
+.win-cbf-more-button:active::before,
+.win-cbf-overflow-button:active::before {
+  background: var(--CommandBarFlyoutAppBarButtonBackgroundPressed, var(--subtle-fill-color-tertiary, var(--subtle-tertiary)));
 }
 
 .win-cbf-appbar-button:disabled,
+.win-cbf-more-button:disabled,
 .win-cbf-overflow-button:disabled {
-  color: var(--text-disabled);
+  color: var(--CommandBarFlyoutAppBarButtonForegroundDisabled, var(--text-disabled));
   cursor: default;
 }
 
@@ -406,51 +631,208 @@ defineExpose({ showAt, hide, openAt, isOpen });
 
 .win-cbf-primary-label {
   font-size: 12px;
-  line-height: 14px;
+  line-height: 16px;
+  text-align: center;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 .win-cbf-secondary {
-  min-width: 200px;
-  padding: 4px;
-  border-top: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--divider-stroke)));
+  min-width: 136px;
+  max-width: 440px;
+  max-height: 480px;
+  box-sizing: border-box;
+  padding: 3px;
+  background: var(--CommandBarFlyoutButtonBackground, var(--flyout-background, var(--layer-fill-color-default)));
+  border: solid var(--CommandBarFlyoutBorderBrush, var(--control-stroke-color-default, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))));
+  border-width: 0 1px 1px;
+  border-radius: 0 0 var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px)) var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px));
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
+  overflow: auto;
+  transform-origin: top left;
+  will-change: clip-path, opacity;
 }
 
 .win-cbf-overflow-button {
-  min-height: 32px;
+  min-height: 33px;
   width: 100%;
-  padding: 6px 12px;
-  display: flex;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 12px;
   text-align: left;
+}
+
+.win-cbf-overflow-button.has-check,
+.win-cbf-overflow-button.has-menu-icon {
+  grid-template-columns: 39px minmax(0, 1fr) auto auto;
+}
+
+.win-cbf-overflow-button.has-check.has-menu-icon {
+  grid-template-columns: 39px 28px minmax(0, 1fr) auto auto;
+}
+
+.win-cbf-overflow-check {
+  width: 39px;
+  margin: 4px 0;
+  display: grid;
+  place-items: center;
+  color: inherit;
+  font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets');
+  font-size: 12px;
+  line-height: 16px;
+  opacity: 0;
+}
+
+.win-cbf-overflow-button.is-checked .win-cbf-overflow-check {
+  opacity: 1;
 }
 
 .win-cbf-overflow-icon {
   width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
   text-align: center;
+}
+
+.win-cbf-overflow-button.has-menu-icon:not(.has-check) .win-cbf-overflow-icon {
+  margin: 0 11px 0 12px;
+}
+
+.win-cbf-overflow-button.has-check.has-menu-icon .win-cbf-overflow-icon {
+  margin: 0 12px 0 0;
 }
 
 .win-cbf-overflow-label {
   flex: 1;
   min-width: 0;
   font-size: 14px;
+  line-height: 20px;
+  margin: 0 12px;
+  padding: 6px 0 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
-@keyframes cbf-fade {
+.win-cbf-overflow-button.has-check .win-cbf-overflow-label,
+.win-cbf-overflow-button.has-menu-icon .win-cbf-overflow-label {
+  margin-left: 0;
+}
+
+.win-cbf-overflow-button.has-check.has-menu-icon .win-cbf-overflow-label {
+  margin-left: 0;
+}
+
+.win-cbf-overflow-accelerator {
+  min-width: 0;
+  margin: 0 12px 0 24px;
+  color: var(--CommandBarFlyoutAppBarButtonKeyboardTextLabelForeground, var(--text-secondary));
+  font-size: 12px;
+  line-height: 16px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.win-cbf-overflow-chevron {
+  margin: 0 12px;
+  color: var(--CommandBarFlyoutAppBarButtonSubItemChevronForeground, var(--text-secondary));
+  font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets');
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.win-cbf-overflow-button:hover .win-cbf-overflow-accelerator {
+  color: var(--CommandBarFlyoutAppBarButtonKeyboardTextLabelForegroundPointerOver, var(--text-secondary));
+}
+
+.win-cbf-overflow-button:active .win-cbf-overflow-accelerator {
+  color: var(--CommandBarFlyoutAppBarButtonKeyboardTextLabelForegroundPressed, var(--text-tertiary, var(--text-secondary)));
+}
+
+.win-cbf-overflow-button:hover .win-cbf-overflow-chevron {
+  color: var(--CommandBarFlyoutAppBarButtonSubItemChevronPointerOverForeground, var(--text-secondary));
+}
+
+.win-cbf-overflow-button:active .win-cbf-overflow-chevron {
+  color: var(--CommandBarFlyoutAppBarButtonSubItemChevronPressedForeground, var(--text-tertiary, var(--text-secondary)));
+}
+
+.cbf-flyout-enter-active { animation: cbf-flyout-fade-in 83ms linear both; }
+.cbf-flyout-leave-active { animation: cbf-flyout-fade-out 83ms linear both; }
+
+.win-commandbar-flyout.is-panel-expanding-setup {
+  clip-path: inset(0 var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) 0);
+}
+
+.win-commandbar-flyout.is-panel-expanding-setup .win-cbf-more-button {
+  transform: translateX(var(--cbf-more-offset));
+}
+
+.win-commandbar-flyout.is-panel-expanding {
+  animation: cbf-panel-expand 200ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.win-commandbar-flyout.is-panel-expanding .win-cbf-more-button {
+  animation: cbf-more-button-expand 200ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.win-commandbar-flyout.is-panel-collapsing {
+  animation: cbf-panel-collapse 167ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  pointer-events: none;
+}
+
+.win-commandbar-flyout.is-panel-collapsing .win-cbf-more-button {
+  animation: cbf-more-button-collapse 167ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+@keyframes cbf-flyout-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes cbf-open-down {
-  from { clip-path: inset(0 0 calc(100% - 1px) 0); transform: translateY(-8px); }
-  to { clip-path: inset(0); transform: translateY(0); }
+@keyframes cbf-flyout-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
-@keyframes cbf-open-up {
-  from { clip-path: inset(calc(100% - 1px) 0 0 0); transform: translateY(8px); }
-  to { clip-path: inset(0); transform: translateY(0); }
+@keyframes cbf-panel-expand {
+  from {
+    clip-path: inset(0 var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes cbf-panel-collapse {
+  from {
+    clip-path: inset(0);
+  }
+  to {
+    clip-path: inset(0 var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) 0);
+  }
+}
+
+@keyframes cbf-more-button-expand {
+  from {
+    transform: translateX(var(--cbf-more-offset));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes cbf-more-button-collapse {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--cbf-more-offset));
+  }
 }
 </style>

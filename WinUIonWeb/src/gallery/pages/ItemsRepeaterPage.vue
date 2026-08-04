@@ -6,7 +6,7 @@
           <WinTextBlock class="page-description" :Text="$t('text.itemsrepeater-description')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
             <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -355,7 +355,6 @@ const contentHeavyRepeaterVue = `<WinItemsRepeater :ItemsSource="visibleRecipes"
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 1.5; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; align-items: center; }
-.header-action { width: 32px; height: 32px; padding: 0; min-width: 0; }
 .icon { font-size: 16px; }
 .sample-stack { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .scroll-host { max-width: 100%; }

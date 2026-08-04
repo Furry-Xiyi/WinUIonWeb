@@ -171,13 +171,13 @@ provide('winuiTheme', resolvedTheme);
   --control-fill-input-active: var(--ctrl-fill-input-active);
 
   --ctrl-border-rest: rgba(0, 0, 0, 0.07);
-  --ctrl-border: rgba(255, 255, 255, 0.07);
-  --ctrl-border-accent: rgba(255, 255, 255, 0.09);
-  --accent-border: rgba(0, 0, 0, 0.14);
-  --accent-border-accent: rgba(255, 255, 255, 0.08);
-  --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
-  --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
-  --ctrl-stroke-default: rgba(255, 255, 255, 0.0698);
+  --ctrl-border: rgba(255, 255, 255, 0.0706);
+  --ctrl-border-accent: rgba(255, 255, 255, 0.0941);
+  --accent-border: rgba(0, 0, 0, 0.1373);
+  --accent-border-accent: rgba(255, 255, 255, 0.0784);
+  --ctrl-elevation-top: rgba(255, 255, 255, 0.0941);
+  --ctrl-elevation-bottom: rgba(255, 255, 255, 0.0706);
+  --ctrl-stroke-default: rgba(255, 255, 255, 0.0706);
   --ctrl-strong-stroke: rgba(255, 255, 255, 0.5442);
   --ctrl-strong-stroke-disabled: rgba(255, 255, 255, 0.1581);
 

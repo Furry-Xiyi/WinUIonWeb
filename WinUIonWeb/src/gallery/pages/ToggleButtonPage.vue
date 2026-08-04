@@ -15,7 +15,7 @@
               <span class="icon"></span>
             </WinButton>
             <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
+              :IsChecked="isFavoriteState"
               class="header-action"
               @update:IsChecked="toggleFavorite"
               >
@@ -30,8 +30,7 @@
               :theme="pageTheme"
               :vue="toggleButtonVue">
               <template #example>
-                <WinToggleButton
-                  v-model:IsChecked="Toggle1"
+                <WinToggleButton v-model:IsChecked="Toggle1"
                   :Content="$t('text.togglebutton')"
                   :IsEnabled="DisableToggle1 !== true"
                   @Checked="ToggleButton_Checked"
@@ -76,8 +75,7 @@ const ToggleButton_Unchecked = () => {
   Control1Output.value = 'Off';
 };
 
-const toggleButtonVue = `<WinToggleButton
-  v-model:IsChecked="Toggle1"
+const toggleButtonVue = `<WinToggleButton v-model:IsChecked="Toggle1"
   Content="ToggleButton"
   :IsEnabled="DisableToggle1 !== true"
   @Checked="ToggleButton_Checked"
@@ -107,13 +105,6 @@ const toggleButtonVue = `<WinToggleButton
   display: flex;
   gap: 4px;
   align-items: center;
-}
-
-.header-action {
-  width: 32px;
-  height: 32px;
-  min-width: 0;
-  padding: 0;
 }
 
 .icon {

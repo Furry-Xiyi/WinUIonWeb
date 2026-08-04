@@ -800,9 +800,13 @@ defineExpose({
   --ButtonForegroundPressed: var(--PivotHeaderItemForegroundUnselectedPressed, var(--SystemControlHighlightAltBaseMediumHighBrush));
   --ButtonForegroundDisabled: var(--PivotHeaderItemForegroundDisabled, var(--SystemControlDisabledBaseMediumLowBrush));
   --ButtonBorderBrush: transparent;
+  --ButtonBorderBrushTop: var(--ButtonBorderBrush);
   --ButtonBorderBrushPointerOver: transparent;
+  --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
   --ButtonBorderBrushPressed: transparent;
+  --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
   --ButtonBorderBrushDisabled: transparent;
+  --ButtonBorderBrushDisabledTop: var(--ButtonBorderBrushDisabled);
   --ButtonBorderBrushBottom: transparent;
   --ButtonBorderBrushPointerOverBottom: transparent;
   --ButtonBorderBrushPressedBottom: transparent;
@@ -889,8 +893,11 @@ defineExpose({
   --ButtonForegroundPointerOver: var(--PivotNextButtonForegroundPointerOver, var(--text-primary));
   --ButtonForegroundPressed: var(--PivotNextButtonForegroundPressed, var(--text-primary));
   --ButtonBorderBrush: var(--PivotNextButtonBorderBrush, transparent);
+  --ButtonBorderBrushTop: var(--ButtonBorderBrush);
   --ButtonBorderBrushPointerOver: var(--PivotNextButtonBorderBrushPointerOver, transparent);
+  --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
   --ButtonBorderBrushPressed: var(--PivotNextButtonBorderBrushPressed, transparent);
+  --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
   --ButtonBorderBrushBottom: var(--PivotNextButtonBorderBrush, transparent);
   --ButtonBorderBrushPointerOverBottom: var(--PivotNextButtonBorderBrushPointerOver, transparent);
   --ButtonBorderBrushPressedBottom: var(--PivotNextButtonBorderBrushPressed, transparent);
@@ -910,8 +917,11 @@ defineExpose({
   --ButtonForegroundPointerOver: var(--PivotPreviousButtonForegroundPointerOver, var(--text-primary));
   --ButtonForegroundPressed: var(--PivotPreviousButtonForegroundPressed, var(--text-primary));
   --ButtonBorderBrush: var(--PivotPreviousButtonBorderBrush, transparent);
+  --ButtonBorderBrushTop: var(--ButtonBorderBrush);
   --ButtonBorderBrushPointerOver: var(--PivotPreviousButtonBorderBrushPointerOver, transparent);
+  --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
   --ButtonBorderBrushPressed: var(--PivotPreviousButtonBorderBrushPressed, transparent);
+  --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
   --ButtonBorderBrushBottom: var(--PivotPreviousButtonBorderBrush, transparent);
   --ButtonBorderBrushPointerOverBottom: var(--PivotPreviousButtonBorderBrushPointerOver, transparent);
   --ButtonBorderBrushPressedBottom: var(--PivotPreviousButtonBorderBrushPressed, transparent);

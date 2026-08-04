@@ -434,10 +434,10 @@
     --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
     --stroke-divider: rgba(255, 255, 255, 0.08);
     --ctrl-border-rest: rgba(0, 0, 0, 0.07);
-    --ctrl-border: rgba(255, 255, 255, 0.07);
-    --ctrl-border-accent: rgba(255, 255, 255, 0.09);
-    --accent-border: rgba(0, 0, 0, 0.14);
-    --accent-border-accent: rgba(255, 255, 255, 0.08);
+    --ctrl-border: rgba(255, 255, 255, 0.0706);
+    --ctrl-border-accent: rgba(255, 255, 255, 0.0941);
+    --accent-border: rgba(0, 0, 0, 0.1373);
+    --accent-border-accent: rgba(255, 255, 255, 0.0784);
     --text-primary: #FFFFFF;
     --text-secondary: rgba(255, 255, 255, 0.77);
     --text-tertiary: rgba(255, 255, 255, 0.53);
@@ -458,8 +458,8 @@
     --ctrl-strong-stroke-disabled: rgba(255, 255, 255, 0.16);
     --ctrl-strong-stroke: rgba(255, 255, 255, 0.54);
     --ctrl-solid-fill: #454545;
-    --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
-    --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
+    --ctrl-elevation-top: rgba(255, 255, 255, 0.0941);
+    --ctrl-elevation-bottom: rgba(255, 255, 255, 0.0706);
     --accent-base: #4CC2FF;
     --accent-hover: rgba(96, 205, 255, 0.90);
     --accent-pressed: rgba(96, 205, 255, 0.80);
@@ -506,9 +506,9 @@
     --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.0512);
     --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
     --DividerStrokeColorDefaultBrush: rgba(255, 255, 255, 0.08);
-    --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.07);
-    --AccentControlElevationBorderBrush: rgba(0, 0, 0, 0.14);
-    --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.08);
+    --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.0706);
+    --AccentControlElevationBorderBrush: rgba(0, 0, 0, 0.1373);
+    --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.0784);
     --toggle-border: rgba(255, 255, 255, 0.54);
     --toggle-thumb: rgba(255, 255, 255, 0.79);
     --toggle-thumb-hover: #FFFFFF;
@@ -740,10 +740,10 @@ html.theme-dark {
   --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
   --stroke-divider: rgba(255, 255, 255, 0.08);
   --ctrl-border-rest: rgba(0, 0, 0, 0.07);
-  --ctrl-border: rgba(255, 255, 255, 0.07);
-  --ctrl-border-accent: rgba(255, 255, 255, 0.09);
-  --accent-border: rgba(0, 0, 0, 0.14);
-  --accent-border-accent: rgba(255, 255, 255, 0.08);
+  --ctrl-border: rgba(255, 255, 255, 0.0706);
+  --ctrl-border-accent: rgba(255, 255, 255, 0.0941);
+  --accent-border: rgba(0, 0, 0, 0.1373);
+  --accent-border-accent: rgba(255, 255, 255, 0.0784);
   --text-primary: #FFFFFF;
   --text-secondary: rgba(255, 255, 255, 0.77);
   --text-tertiary: rgba(255, 255, 255, 0.53);
@@ -764,8 +764,8 @@ html.theme-dark {
   --ctrl-strong-stroke: rgba(255, 255, 255, 0.54);
   --ctrl-strong-stroke-disabled: rgba(255, 255, 255, 0.16);
   --ctrl-solid-fill: #454545;
-  --ctrl-elevation-top: rgba(255, 255, 255, 0.09);
-  --ctrl-elevation-bottom: rgba(0, 0, 0, 0.14);
+  --ctrl-elevation-top: rgba(255, 255, 255, 0.0941);
+  --ctrl-elevation-bottom: rgba(255, 255, 255, 0.0706);
   --accent-base: #4CC2FF;
   --accent-hover: rgba(96, 205, 255, 0.90);
   --accent-pressed: rgba(96, 205, 255, 0.80);
@@ -812,9 +812,9 @@ html.theme-dark {
   --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.0512);
   --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
   --DividerStrokeColorDefaultBrush: rgba(255, 255, 255, 0.08);
-  --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.07);
-  --AccentControlElevationBorderBrush: rgba(0, 0, 0, 0.14);
-  --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.08);
+  --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.0706);
+  --AccentControlElevationBorderBrush: rgba(0, 0, 0, 0.1373);
+  --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.0784);
   --toggle-border: rgba(255, 255, 255, 0.54);
   --toggle-thumb: rgba(255, 255, 255, 0.79);
   --toggle-thumb-hover: #FFFFFF;
@@ -886,9 +886,38 @@ html.theme-dark {
 }
 
 .win-tooltip {
+  z-index: var(--win-tooltip-z-index, var(--win-tip-z-index, 2147483647));
   --win-acrylic-fill: color-mix(
     in srgb,
     var(--ToolTipBackgroundBrush, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg))) 78%,
     transparent
   );
+}
+
+.win-teaching-tip {
+  z-index: var(--win-teaching-tip-z-index, var(--win-tip-z-index, 2147483647));
+}
+
+html .basic-input-example-theme:has(.example-display[data-theme='light']) .example-container {
+  --card-bg: #FEFEFE;
+  --CardBackgroundFillColorDefaultBrush: #FEFEFE;
+}
+
+.example-theme-wrapper.theme-light,
+.win-theme-scope.theme-light,
+html .basic-input-example-theme:has(.example-display[data-theme='light']) .example-container {
+  --accent-text-fill-color-primary: #0D4897;
+}
+
+.example-theme-wrapper.theme-dark,
+.win-theme-scope.theme-dark,
+html .basic-input-example-theme:has(.example-display[data-theme='dark']) .example-container {
+  --accent-text-fill-color-primary: #99EBFF;
+}
+
+.page-header-actions > .header-action,
+.header-actions > .header-action,
+.page-actions > .header-action {
+  height: 32px;
+  min-height: 32px;
 }

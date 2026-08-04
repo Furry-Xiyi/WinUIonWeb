@@ -3,11 +3,10 @@
     <div class="page-header page-heading">
           <h1 class="page-title">Capture Element / Camera Preview</h1>
           <div class="page-header-actions">
-            <WinButton @click="toggleTheme">
+            <WinButton class="header-action" @click="toggleTheme">
               <span class="icon">&#xE793;</span>
             </WinButton>
-            <WinToggleButton
-              v-model:IsChecked="isFavoriteState"
+            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
@@ -37,8 +36,7 @@
                   onContent="On"
                   offContent="Off"
                 />
-                <WinButton
-                  :isEnabled="cameraReady"
+                <WinButton :isEnabled="cameraReady"
                   @click="capturePhoto"
                   style="margin-top: 12px;"
                 >

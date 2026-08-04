@@ -4,17 +4,15 @@
       <h1 class="page-header">{{ $t('text.richtextblock') }}</h1>
       <p class="page-description">{{ $t('sample.richtextblock.description') }}</p>
       <div class="page-header-actions">
-        <WinButton
-          v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }"
+        <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }"
           @click="toggleTheme"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+         >
           <span class="icon">&#xE793;</span>
         </WinButton>
-        <WinToggleButton
-          v-model:IsChecked="isFavoriteState"
+        <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
           v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }"
           @update:IsChecked="toggleFavorite"
-          style="width: 32px; height: 32px; padding: 0; min-width: 0;">
+         >
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
         </WinToggleButton>
       </div>

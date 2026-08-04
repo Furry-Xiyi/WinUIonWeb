@@ -6,7 +6,7 @@
           <WinTextBlock class="page-description" :Text="$t('text.the-gridview-lets-people-browse-and-select-from')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
             <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
           </div>
@@ -213,7 +213,6 @@ const contentGridViewVue = `<WinGridView
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-size: 16px; }
 .sample-stack { display: flex; flex-direction: column; gap: 15px; width: 100%; }
 .basic-grid-view, .overlay-grid-view, .content-grid-view { max-width: 650px; }

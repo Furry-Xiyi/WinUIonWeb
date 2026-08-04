@@ -2,7 +2,7 @@
   <div class="win-dropdown-btn-wrap" ref="wrap">
     <button
       v-bind="buttonAttrs"
-      class="win-btn win-dropdown-btn"
+      class="win-btn DefaultButtonStyle win-dropdown-btn"
       :class="attrs.class"
       :style="buttonStyle"
       :disabled="isDisabled"

@@ -95,10 +95,11 @@ const buttonStyle = computed(() => {
   if (props.Foreground) style.color = props.Foreground;
   if (props.BorderBrush) {
     style['--ButtonBorderBrush'] = props.BorderBrush;
+    style['--ButtonBorderBrushTop'] = props.BorderBrush;
     style['--ButtonBorderBrushBottom'] = props.BorderBrush;
   }
   if (props.BorderThickness !== '') style['--ButtonBorderThemeThickness'] = cssLength(props.BorderThickness);
-  if (props.Padding) style.padding = props.Padding;
+  if (props.Padding) style.padding = xamlThickness(props.Padding);
   if (props.Margin) style.margin = xamlThickness(props.Margin);
   if (props.Width !== '') style.width = cssLength(props.Width);
   if (props.Height !== '') style.height = cssLength(props.Height);
@@ -153,9 +154,13 @@ const onClick = (event) => {
     --ButtonForegroundPressed: var(--text-secondary);
     --ButtonForegroundDisabled: var(--text-disabled);
     --ButtonBorderBrush: var(--ctrl-border);
+    --ButtonBorderBrushTop: var(--ButtonBorderBrush);
     --ButtonBorderBrushPointerOver: var(--ctrl-border);
+    --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
     --ButtonBorderBrushPressed: var(--ctrl-border);
+    --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
     --ButtonBorderBrushDisabled: var(--ctrl-border);
+    --ButtonBorderBrushDisabledTop: var(--ButtonBorderBrushDisabled);
     --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
     --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
     --ButtonBorderBrushPressedBottom: var(--ctrl-border);
@@ -168,6 +173,7 @@ const onClick = (event) => {
       inset: 0;
       border-radius: inherit;
       border: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrush);
+      border-top-color: var(--ButtonBorderBrushTop);
       border-bottom-color: var(--ButtonBorderBrushBottom);
       pointer-events: none;
     }
@@ -179,6 +185,7 @@ const onClick = (event) => {
 
     .win-btn:hover::after {
       border-color: var(--ButtonBorderBrushPointerOver);
+      border-top-color: var(--ButtonBorderBrushPointerOverTop);
       border-bottom-color: var(--ButtonBorderBrushPointerOverBottom);
     }
 
@@ -189,6 +196,7 @@ const onClick = (event) => {
 
     .win-btn:active::after {
       border-color: var(--ButtonBorderBrushPressed);
+      border-top-color: var(--ButtonBorderBrushPressedTop);
       border-bottom-color: var(--ButtonBorderBrushPressedBottom);
     }
 
@@ -201,6 +209,7 @@ const onClick = (event) => {
 
     .win-btn:disabled::after {
       border-color: var(--ButtonBorderBrushDisabled);
+      border-top-color: var(--ButtonBorderBrushDisabledTop);
       border-bottom-color: var(--ButtonBorderBrushDisabledBottom);
     }
 
@@ -214,9 +223,13 @@ const onClick = (event) => {
       --ButtonForegroundPressed: var(--AccentButtonForegroundPressed);
       --ButtonForegroundDisabled: var(--AccentButtonForegroundDisabled);
       --ButtonBorderBrush: var(--AccentButtonBorderBrush);
+      --ButtonBorderBrushTop: var(--AccentButtonBorderBrushTop);
       --ButtonBorderBrushPointerOver: var(--AccentButtonBorderBrushPointerOver);
+      --ButtonBorderBrushPointerOverTop: var(--AccentButtonBorderBrushPointerOverTop);
       --ButtonBorderBrushPressed: var(--AccentButtonBorderBrushPressed);
+      --ButtonBorderBrushPressedTop: var(--AccentButtonBorderBrushPressed);
       --ButtonBorderBrushDisabled: var(--AccentButtonBorderBrushDisabled);
+      --ButtonBorderBrushDisabledTop: var(--AccentButtonBorderBrushDisabled);
       --ButtonBorderBrushBottom: var(--AccentButtonBorderBrushBottom);
       --ButtonBorderBrushPointerOverBottom: var(--AccentButtonBorderBrushPointerOverBottom);
       --ButtonBorderBrushPressedBottom: var(--AccentButtonBorderBrushPressed);
@@ -230,8 +243,10 @@ const onClick = (event) => {
       --AccentButtonForegroundPressed: var(--accent-text-secondary);
       --AccentButtonForegroundDisabled: var(--text-disabled);
       --AccentButtonBorderBrush: var(--accent-border);
+      --AccentButtonBorderBrushTop: var(--accent-border);
       --AccentButtonBorderBrushBottom: var(--accent-border-accent);
       --AccentButtonBorderBrushPointerOver: var(--accent-border);
+      --AccentButtonBorderBrushPointerOverTop: var(--accent-border);
       --AccentButtonBorderBrushPointerOverBottom: var(--accent-border-accent);
       --AccentButtonBorderBrushPressed: transparent;
       --AccentButtonBorderBrushDisabled: transparent;
@@ -280,21 +295,89 @@ const onClick = (event) => {
     white-space: nowrap;
   }
 
-  .example-theme-wrapper.theme-dark .win-btn {
-    --ButtonBorderBrush: rgba(255, 255, 255, 0.05);
-    --ButtonBorderBrushPointerOver: rgba(255, 255, 255, 0.05);
-    --ButtonBorderBrushBottom: rgba(255, 255, 255, 0.0075);
-    --ButtonBorderBrushPointerOverBottom: rgba(255, 255, 255, 0.0075);
+  @media (prefers-color-scheme: dark) {
+    html:not(.theme-light) .win-btn.DefaultButtonStyle {
+      --ButtonBorderBrush: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushTop: var(--ctrl-elevation-top);
+      --ButtonBorderBrushPointerOver: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushPointerOverTop: var(--ctrl-elevation-top);
+      --ButtonBorderBrushPressed: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushPressedTop: var(--ctrl-elevation-top);
+      --ButtonBorderBrushDisabled: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushDisabledTop: var(--ctrl-elevation-top);
+      --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushPressedBottom: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushDisabledBottom: var(--ctrl-elevation-bottom);
+    }
+
+    html:not(.theme-light) .win-btn.AccentButtonStyle {
+      --AccentButtonBorderBrushTop: var(--accent-border-accent);
+      --AccentButtonBorderBrushPointerOverTop: var(--accent-border-accent);
+      --AccentButtonBorderBrushBottom: var(--accent-border);
+      --AccentButtonBorderBrushPointerOverBottom: var(--accent-border);
+    }
   }
 
-  .example-theme-wrapper.theme-dark .win-btn:active,
-  .example-theme-wrapper.theme-dark .win-btn:disabled {
-    --ButtonBorderBrushBottom: var(--ctrl-border);
+  html.theme-dark .win-btn.DefaultButtonStyle,
+  .example-theme-wrapper.theme-dark .win-btn.DefaultButtonStyle,
+  .win-theme-scope.theme-dark .win-btn.DefaultButtonStyle {
+    --ButtonBorderBrush: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushTop: var(--ctrl-elevation-top);
+    --ButtonBorderBrushPointerOver: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPointerOverTop: var(--ctrl-elevation-top);
+    --ButtonBorderBrushPressed: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPressedTop: var(--ctrl-elevation-top);
+    --ButtonBorderBrushDisabled: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushDisabledTop: var(--ctrl-elevation-top);
+    --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPressedBottom: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushDisabledBottom: var(--ctrl-elevation-bottom);
+  }
+
+  html.theme-dark .win-btn.AccentButtonStyle,
+  .example-theme-wrapper.theme-dark .win-btn.AccentButtonStyle,
+  .win-theme-scope.theme-dark .win-btn.AccentButtonStyle {
+    --AccentButtonBorderBrushTop: var(--accent-border-accent);
+    --AccentButtonBorderBrushPointerOverTop: var(--accent-border-accent);
+    --AccentButtonBorderBrushBottom: var(--accent-border);
+    --AccentButtonBorderBrushPointerOverBottom: var(--accent-border);
+  }
+
+  .example-theme-wrapper.theme-light .win-btn.DefaultButtonStyle,
+  .win-theme-scope.theme-light .win-btn.DefaultButtonStyle {
+    --ButtonBorderBrush: var(--ctrl-border);
+    --ButtonBorderBrushTop: var(--ButtonBorderBrush);
+    --ButtonBorderBrushPointerOver: var(--ctrl-border);
+    --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
+    --ButtonBorderBrushPressed: var(--ctrl-border);
+    --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
+    --ButtonBorderBrushDisabled: var(--ctrl-border);
+    --ButtonBorderBrushDisabledTop: var(--ButtonBorderBrushDisabled);
+    --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPressedBottom: var(--ctrl-border);
+    --ButtonBorderBrushDisabledBottom: var(--ctrl-border);
+  }
+
+  .example-theme-wrapper.theme-light .win-btn.AccentButtonStyle,
+  .win-theme-scope.theme-light .win-btn.AccentButtonStyle {
+    --AccentButtonBorderBrushTop: var(--accent-border);
+    --AccentButtonBorderBrushPointerOverTop: var(--accent-border);
+    --AccentButtonBorderBrushPressedTop: var(--AccentButtonBorderBrushPressed);
+    --AccentButtonBorderBrushDisabledTop: var(--AccentButtonBorderBrushDisabled);
+    --AccentButtonBorderBrushBottom: var(--accent-border-accent);
+    --AccentButtonBorderBrushPointerOverBottom: var(--accent-border-accent);
+    --AccentButtonBorderBrushPressedBottom: var(--AccentButtonBorderBrushPressed);
+    --AccentButtonBorderBrushDisabledBottom: var(--AccentButtonBorderBrushDisabled);
   }
 
   .example-theme-wrapper.theme-dark .win-btn.AccentButtonStyle {
     --ButtonBorderBrush: var(--AccentButtonBorderBrush);
+    --ButtonBorderBrushTop: var(--AccentButtonBorderBrushTop);
     --ButtonBorderBrushPointerOver: var(--AccentButtonBorderBrushPointerOver);
+    --ButtonBorderBrushPointerOverTop: var(--AccentButtonBorderBrushPointerOverTop);
     --ButtonBorderBrushBottom: var(--AccentButtonBorderBrushBottom);
     --ButtonBorderBrushPointerOverBottom: var(--AccentButtonBorderBrushPointerOverBottom);
   }

@@ -1,19 +1,19 @@
 <template>
-  <button
+  <WinButton
     v-bind="buttonAttrs"
     class="win-toggle-button"
     :class="[stateClasses, attrs.class]"
     :style="buttonStyle"
-    :disabled="isDisabled"
-    :aria-pressed="ariaPressed"
-    @click="onClick">
+    :IsEnabled="props.IsEnabled"
+    @Click="onClick">
     <slot>{{ Content }}</slot>
-  </button>
+  </WinButton>
 </template>
 
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import type { CSSProperties } from 'vue';
+import WinButton from './WinButton.vue';
 
 defineOptions({
   inheritAttrs: false
@@ -87,7 +87,7 @@ const attrs = useAttrs();
 
 const buttonAttrs = computed(() => {
   const { class: _class, style: _style, disabled: _disabled, ...rest } = attrs;
-  return rest;
+  return { ...rest, 'aria-pressed': ariaPressed.value };
 });
 
 const isDisabled = computed(() => props.IsEnabled === false);
@@ -129,11 +129,15 @@ const xamlThickness = (value: string | number | undefined) => {
 const buttonStyle = computed(() => {
   const style: CSSProperties & Record<string, string | number | undefined> = {};
 
-  if (props.Background) style['--ToggleButtonBackground'] = props.Background;
-  if (props.Foreground) style['--ToggleButtonForeground'] = props.Foreground;
-  if (props.BorderBrush) style['--ToggleButtonBorderBrush'] = props.BorderBrush;
-  if (props.BorderThickness !== '') style['--ToggleButtonBorderThemeThickness'] = cssLength(props.BorderThickness);
-  if (props.Padding) style.padding = props.Padding;
+  if (props.Background) style['--ButtonBackground'] = props.Background;
+  if (props.Foreground) style['--ButtonForeground'] = props.Foreground;
+  if (props.BorderBrush) {
+    style['--ButtonBorderBrush'] = props.BorderBrush;
+    style['--ButtonBorderBrushTop'] = props.BorderBrush;
+    style['--ButtonBorderBrushBottom'] = props.BorderBrush;
+  }
+  if (props.BorderThickness !== '') style['--ButtonBorderThemeThickness'] = cssLength(props.BorderThickness);
+  if (props.Padding) style.padding = xamlThickness(props.Padding);
   if (props.Margin) style.margin = xamlThickness(props.Margin);
   if (props.Width !== '') style.width = cssLength(props.Width);
   if (props.Height !== '') style.height = cssLength(props.Height);
@@ -177,203 +181,80 @@ const onClick = (event: MouseEvent) => {
 
 <style scoped>
 .win-toggle-button {
-  --ToggleButtonBorderThemeThickness: 1px;
   --ToggleButtonCheckedStateBackgroundSizing: OuterBorderEdge;
-  --ToggleButtonBackground: var(--control-fill-color-default, var(--ctrl-fill-default));
-  --ToggleButtonBackgroundPointerOver: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
-  --ToggleButtonBackgroundPressed: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary));
-  --ToggleButtonBackgroundDisabled: var(--control-fill-color-disabled, var(--ctrl-fill-disabled));
   --ToggleButtonBackgroundChecked: var(--accent-base);
   --ToggleButtonBackgroundCheckedPointerOver: var(--accent-hover);
   --ToggleButtonBackgroundCheckedPressed: var(--accent-pressed);
   --ToggleButtonBackgroundCheckedDisabled: var(--accent-fill-disabled);
-  --ToggleButtonBackgroundIndeterminate: var(--control-fill-color-default, var(--ctrl-fill-default));
-  --ToggleButtonBackgroundIndeterminatePointerOver: var(--control-fill-color-secondary, var(--ctrl-fill-secondary));
-  --ToggleButtonBackgroundIndeterminatePressed: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary));
-  --ToggleButtonBackgroundIndeterminateDisabled: var(--control-fill-color-disabled, var(--ctrl-fill-disabled));
-  --ToggleButtonForeground: var(--text-fill-color-primary, var(--text-primary));
-  --ToggleButtonForegroundPointerOver: var(--text-fill-color-primary, var(--text-primary));
-  --ToggleButtonForegroundPressed: var(--text-fill-color-secondary, var(--text-secondary));
-  --ToggleButtonForegroundDisabled: var(--text-fill-color-disabled, var(--text-disabled));
   --ToggleButtonForegroundChecked: var(--accent-text);
   --ToggleButtonForegroundCheckedPointerOver: var(--accent-text);
   --ToggleButtonForegroundCheckedPressed: var(--accent-text-secondary);
   --ToggleButtonForegroundCheckedDisabled: var(--text-disabled);
-  --ToggleButtonForegroundIndeterminate: var(--text-fill-color-primary, var(--text-primary));
-  --ToggleButtonForegroundIndeterminatePointerOver: var(--text-fill-color-primary, var(--text-primary));
-  --ToggleButtonForegroundIndeterminatePressed: var(--text-fill-color-secondary, var(--text-secondary));
-  --ToggleButtonForegroundIndeterminateDisabled: var(--text-fill-color-disabled, var(--text-disabled));
-  --ToggleButtonBorderBrush: var(--control-elevation-border-brush, var(--ctrl-border));
-  --ToggleButtonBorderBrushPointerOver: var(--control-elevation-border-brush, var(--ctrl-border));
-  --ToggleButtonBorderBrushPressed: var(--ctrl-border);
-  --ToggleButtonBorderBrushDisabled: var(--ctrl-border);
   --ToggleButtonBorderBrushChecked: var(--accent-border);
+  --ToggleButtonBorderBrushCheckedTop: var(--ToggleButtonBorderBrushChecked);
   --ToggleButtonBorderBrushCheckedPointerOver: var(--accent-border);
+  --ToggleButtonBorderBrushCheckedPointerOverTop: var(--ToggleButtonBorderBrushCheckedPointerOver);
   --ToggleButtonBorderBrushCheckedPressed: transparent;
+  --ToggleButtonBorderBrushCheckedPressedTop: var(--ToggleButtonBorderBrushCheckedPressed);
   --ToggleButtonBorderBrushCheckedDisabled: transparent;
-  --ToggleButtonBorderBrushIndeterminate: var(--control-elevation-border-brush, var(--ctrl-border));
-  --ToggleButtonBorderBrushIndeterminatePointerOver: var(--control-elevation-border-brush, var(--ctrl-border));
-  --ToggleButtonBorderBrushIndeterminatePressed: var(--ctrl-border);
-  --ToggleButtonBorderBrushIndeterminateDisabled: var(--ctrl-border);
-  --ToggleButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
-  --ToggleButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
-  --ToggleButtonBorderBrushPressedBottom: var(--ctrl-border);
+  --ToggleButtonBorderBrushCheckedDisabledTop: var(--ToggleButtonBorderBrushCheckedDisabled);
   --ToggleButtonBorderBrushCheckedBottom: var(--accent-border-accent);
   --ToggleButtonBorderBrushCheckedPointerOverBottom: var(--accent-border-accent);
-  appearance: none;
-  position: relative;
-  min-height: 32px;
-  min-width: 0;
-  padding: var(--ButtonPadding, 5px 11px 6px);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: var(--ToggleButtonForeground);
-  background: var(--ToggleButtonBackground);
-  border: 0;
-  border-radius: var(--ControlCornerRadius, 4px);
-  cursor: pointer;
-  font-family: var(--ContentControlThemeFontFamily, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif);
-  font-size: var(--ControlContentThemeFontSize, 14px);
-  font-weight: normal;
-  line-height: 20px;
-  user-select: none;
-  white-space: nowrap;
-  transition:
-    background var(--faster-duration, 83ms),
-    color var(--fast-duration, 167ms);
-}
-
-.win-toggle-button::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: var(--ToggleButtonBorderThemeThickness) solid var(--ToggleButtonBorderBrush);
-  border-bottom-color: var(--ToggleButtonBorderBrushBottom);
-  border-radius: inherit;
-  pointer-events: none;
-}
-
-.win-toggle-button:hover {
-  color: var(--ToggleButtonForegroundPointerOver);
-  background: var(--ToggleButtonBackgroundPointerOver);
-}
-
-.win-toggle-button:hover::after {
-  border-color: var(--ToggleButtonBorderBrushPointerOver);
-  border-bottom-color: var(--ToggleButtonBorderBrushPointerOverBottom);
-}
-
-.win-toggle-button:active {
-  color: var(--ToggleButtonForegroundPressed);
-  background: var(--ToggleButtonBackgroundPressed);
-}
-
-.win-toggle-button:active::after {
-  border-color: var(--ToggleButtonBorderBrushPressed);
-  border-bottom-color: var(--ToggleButtonBorderBrushPressedBottom);
+  --ToggleButtonBorderBrushCheckedPressedBottom: var(--ToggleButtonBorderBrushCheckedPressed);
+  --ToggleButtonBorderBrushCheckedDisabledBottom: var(--ToggleButtonBorderBrushCheckedDisabled);
 }
 
 .win-toggle-button.is-checked {
-  color: var(--ToggleButtonForegroundChecked);
-  background: var(--ToggleButtonBackgroundChecked);
+  --ButtonBackground: var(--ToggleButtonBackgroundChecked);
+  --ButtonBackgroundPointerOver: var(--ToggleButtonBackgroundCheckedPointerOver);
+  --ButtonBackgroundPressed: var(--ToggleButtonBackgroundCheckedPressed);
+  --ButtonBackgroundDisabled: var(--ToggleButtonBackgroundCheckedDisabled);
+  --ButtonForeground: var(--ToggleButtonForegroundChecked);
+  --ButtonForegroundPointerOver: var(--ToggleButtonForegroundCheckedPointerOver);
+  --ButtonForegroundPressed: var(--ToggleButtonForegroundCheckedPressed);
+  --ButtonForegroundDisabled: var(--ToggleButtonForegroundCheckedDisabled);
+  --ButtonBorderBrush: var(--ToggleButtonBorderBrushChecked);
+  --ButtonBorderBrushTop: var(--ToggleButtonBorderBrushCheckedTop);
+  --ButtonBorderBrushPointerOver: var(--ToggleButtonBorderBrushCheckedPointerOver);
+  --ButtonBorderBrushPointerOverTop: var(--ToggleButtonBorderBrushCheckedPointerOverTop);
+  --ButtonBorderBrushPressed: var(--ToggleButtonBorderBrushCheckedPressed);
+  --ButtonBorderBrushPressedTop: var(--ToggleButtonBorderBrushCheckedPressedTop);
+  --ButtonBorderBrushDisabled: var(--ToggleButtonBorderBrushCheckedDisabled);
+  --ButtonBorderBrushDisabledTop: var(--ToggleButtonBorderBrushCheckedDisabledTop);
+  --ButtonBorderBrushBottom: var(--ToggleButtonBorderBrushCheckedBottom);
+  --ButtonBorderBrushPointerOverBottom: var(--ToggleButtonBorderBrushCheckedPointerOverBottom);
+  --ButtonBorderBrushPressedBottom: var(--ToggleButtonBorderBrushCheckedPressedBottom);
+  --ButtonBorderBrushDisabledBottom: var(--ToggleButtonBorderBrushCheckedDisabledBottom);
 }
 
-.win-toggle-button.is-checked::after {
-  border-color: var(--ToggleButtonBorderBrushChecked);
-  border-bottom-color: var(--ToggleButtonBorderBrushCheckedBottom);
+@media (prefers-color-scheme: dark) {
+  :global(html:not(.theme-light)) .win-toggle-button.is-checked {
+    --ToggleButtonBorderBrushCheckedTop: var(--accent-border-accent);
+    --ToggleButtonBorderBrushCheckedPointerOverTop: var(--accent-border-accent);
+    --ToggleButtonBorderBrushCheckedBottom: var(--accent-border);
+    --ToggleButtonBorderBrushCheckedPointerOverBottom: var(--accent-border);
+  }
 }
 
-.win-toggle-button.is-checked:hover {
-  color: var(--ToggleButtonForegroundCheckedPointerOver);
-  background: var(--ToggleButtonBackgroundCheckedPointerOver);
+:global(html.theme-dark) .win-toggle-button.is-checked,
+:global(.example-theme-wrapper.theme-dark) .win-toggle-button.is-checked,
+:global(.win-theme-scope.theme-dark) .win-toggle-button.is-checked {
+  --ToggleButtonBorderBrushCheckedTop: var(--accent-border-accent);
+  --ToggleButtonBorderBrushCheckedPointerOverTop: var(--accent-border-accent);
+  --ToggleButtonBorderBrushCheckedBottom: var(--accent-border);
+  --ToggleButtonBorderBrushCheckedPointerOverBottom: var(--accent-border);
 }
 
-.win-toggle-button.is-checked:hover::after {
-  border-color: var(--ToggleButtonBorderBrushCheckedPointerOver);
-  border-bottom-color: var(--ToggleButtonBorderBrushCheckedPointerOverBottom);
-}
-
-.win-toggle-button.is-checked:active {
-  color: var(--ToggleButtonForegroundCheckedPressed);
-  background: var(--ToggleButtonBackgroundCheckedPressed);
-}
-
-.win-toggle-button.is-checked:active::after {
-  border-color: var(--ToggleButtonBorderBrushCheckedPressed);
-  border-bottom-color: var(--ToggleButtonBorderBrushCheckedPressed);
-}
-
-.win-toggle-button.is-indeterminate {
-  color: var(--ToggleButtonForegroundIndeterminate);
-  background: var(--ToggleButtonBackgroundIndeterminate);
-}
-
-.win-toggle-button.is-indeterminate::after {
-  border-color: var(--ToggleButtonBorderBrushIndeterminate);
-}
-
-.win-toggle-button.is-indeterminate:hover {
-  color: var(--ToggleButtonForegroundIndeterminatePointerOver);
-  background: var(--ToggleButtonBackgroundIndeterminatePointerOver);
-}
-
-.win-toggle-button.is-indeterminate:hover::after {
-  border-color: var(--ToggleButtonBorderBrushIndeterminatePointerOver);
-}
-
-.win-toggle-button.is-indeterminate:active {
-  color: var(--ToggleButtonForegroundIndeterminatePressed);
-  background: var(--ToggleButtonBackgroundIndeterminatePressed);
-}
-
-.win-toggle-button.is-indeterminate:active::after {
-  border-color: var(--ToggleButtonBorderBrushIndeterminatePressed);
-}
-
-.win-toggle-button:disabled {
-  cursor: default;
-  pointer-events: none;
-}
-
-.win-toggle-button.is-disabled {
-  color: var(--ToggleButtonForegroundDisabled);
-  background: var(--ToggleButtonBackgroundDisabled);
-}
-
-.win-toggle-button.is-disabled::after {
-  border-color: var(--ToggleButtonBorderBrushDisabled);
-}
-
-.win-toggle-button.is-checked.is-disabled {
-  color: var(--ToggleButtonForegroundCheckedDisabled);
-  background: var(--ToggleButtonBackgroundCheckedDisabled);
-}
-
-.win-toggle-button.is-checked.is-disabled::after {
-  border-color: var(--ToggleButtonBorderBrushCheckedDisabled);
-}
-
-.win-toggle-button.is-indeterminate.is-disabled {
-  color: var(--ToggleButtonForegroundIndeterminateDisabled);
-  background: var(--ToggleButtonBackgroundIndeterminateDisabled);
-}
-
-.win-toggle-button.is-indeterminate.is-disabled::after {
-  border-color: var(--ToggleButtonBorderBrushIndeterminateDisabled);
-}
-
-.win-toggle-button.use-system-focus-visuals:focus-visible {
-  outline: 2px solid var(--focus-stroke-color-outer, var(--text-primary));
-  outline-offset: 2px;
-}
-
-:global(.example-theme-wrapper.theme-dark) .win-toggle-button {
-  --ToggleButtonBorderBrush: rgba(255, 255, 255, 0.05);
-  --ToggleButtonBorderBrushPointerOver: rgba(255, 255, 255, 0.05);
-  --ToggleButtonBorderBrushBottom: rgba(255, 255, 255, 0.0075);
-  --ToggleButtonBorderBrushPointerOverBottom: rgba(255, 255, 255, 0.0075);
+:global(.example-theme-wrapper.theme-light) .win-toggle-button.is-checked,
+:global(.win-theme-scope.theme-light) .win-toggle-button.is-checked {
+  --ToggleButtonBorderBrushCheckedTop: var(--accent-border);
+  --ToggleButtonBorderBrushCheckedPointerOverTop: var(--accent-border);
+  --ToggleButtonBorderBrushCheckedPressedTop: var(--ToggleButtonBorderBrushCheckedPressed);
+  --ToggleButtonBorderBrushCheckedDisabledTop: var(--ToggleButtonBorderBrushCheckedDisabled);
+  --ToggleButtonBorderBrushCheckedBottom: var(--accent-border-accent);
+  --ToggleButtonBorderBrushCheckedPointerOverBottom: var(--accent-border-accent);
+  --ToggleButtonBorderBrushCheckedPressedBottom: var(--ToggleButtonBorderBrushCheckedPressed);
+  --ToggleButtonBorderBrushCheckedDisabledBottom: var(--ToggleButtonBorderBrushCheckedDisabled);
 }
 
 </style>

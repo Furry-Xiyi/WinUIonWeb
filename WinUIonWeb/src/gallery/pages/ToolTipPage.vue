@@ -9,7 +9,7 @@
             <WinButton class="header-action" @Click="toggleTheme"><WinTextBlock class="icon" Text="&#xE793;" /></WinButton>
           </WinToolTip>
           <WinToolTip :Content="$t('text.favorites')" :Theme="pageTheme">
-            <WinToggleButton v-model:IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <WinTextBlock class="icon" :Text="isFavoriteState ? '&#xE735;' : '&#xE734;'" />
             </WinToggleButton>
           </WinToolTip>
@@ -86,7 +86,6 @@ const imageToolTipCode = `<WinToolTip Content="Non-occluding ToolTip." Placement
 .page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.header-action { width: 32px; height: 32px; min-width: 0; padding: 0; }
 .icon { font-size: 16px; }
 .sample-text { max-width: 280px; color: var(--text-primary); }
 </style>

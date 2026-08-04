@@ -1,17 +1,25 @@
 <template>
-  <div class="win-split-button" :class="attrs.class" :style="rootStyle" ref="wrap">
-    <WinButton class="win-split-main-button" :IsEnabled="!isDisabled" @Click="onClick"><slot>{{ Content }}</slot></WinButton>
+  <div class="win-split-button" :class="[attrs.class, { 'is-open': isOpen }]" :style="rootStyle" ref="wrap">
+    <slot name="main" :isDisabled="isDisabled" :onClick="onClick">
+      <WinButton class="win-split-main-button" :IsEnabled="!isDisabled" @Click="onClick"><slot>{{ Content }}</slot></WinButton>
+    </slot>
     <div class="win-btn-separator"></div>
-    <button class="win-btn win-btn-chevron"
-            :disabled="isDisabled"
-            @click="toggleFlyout"
+    <WinButton class="win-btn-chevron"
+            :IsEnabled="!isDisabled"
+            Width="35"
+            MinWidth="35"
+            Padding="0,0,12,0"
+            @Click="toggleFlyout"
             @mousedown="onChevronDown"
             @mouseup="onChevronUp"
-            @mouseleave="onChevronLeave">
+            @mouseleave="releaseChevron"
+            @pointercancel="releaseChevron"
+            @lostpointercapture="releaseChevron"
+            @blur="releaseChevron">
       <span class="icon chevron-animate"
             :class="chevronClass"
             @animationend="onChevronAnimEnd"></span>
-    </button>
+    </WinButton>
     <WinMenuFlyout :Open="isOpen" :AnchorRect="anchorRect" :Items="flyoutItems" :Placement="flyoutPlacement" :Theme="Theme" @Close="isOpen = false" @Select="onSelect">
       <slot name="flyout" :close="closeFlyout"></slot>
     </WinMenuFlyout>
@@ -83,10 +91,15 @@ const onChevronDown = () => {
 };
 const onChevronUp = () => {
   if (!chevronPressed) return;
-  chevronPressed = false;
-  if (chevronPressDone) chevronClass.value = 'releasing';
+  releaseChevron();
 };
-const onChevronLeave = () => { chevronPressed = false; };
+const releaseChevron = () => {
+  if (!chevronPressed && chevronClass.value !== 'pressing') return;
+  chevronPressed = false;
+  if (chevronPressDone) {
+    chevronClass.value = 'releasing';
+  }
+};
 const onChevronAnimEnd = () => {
   if (chevronClass.value === 'pressing') {
     chevronPressDone = true;
@@ -123,16 +136,49 @@ const onSelect = (item) => {
     border-radius: 4px;
     overflow: hidden;
     border: none;
-    height: 32px;
+    min-height: 32px;
+    height: auto;
     background: transparent;
+    --SplitButtonPadding: 6px 11px 7px;
     --ButtonBorderBrush: var(--ctrl-border);
+    --ButtonBorderBrushTop: var(--ButtonBorderBrush);
     --ButtonBorderBrushPointerOver: var(--ctrl-border);
+    --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
     --ButtonBorderBrushPressed: var(--ctrl-border);
+    --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
+    --ButtonBorderBrushDisabled: var(--ctrl-border);
+    --ButtonBorderBrushDisabledTop: var(--ButtonBorderBrushDisabled);
     --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
     --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
     --ButtonBorderBrushPressedBottom: var(--ctrl-border);
+    --ButtonBorderBrushDisabledBottom: var(--ctrl-border);
     --SplitButtonBorderBrush: var(--ButtonBorderBrush);
+    --SplitButtonBorderBrushTop: var(--ButtonBorderBrushTop);
     --SplitButtonBorderBrushBottom: var(--ButtonBorderBrushBottom);
+    --SplitButtonBorderBrushDivider: var(--ctrl-border);
+    --SplitButtonBorderBrushCheckedDivider: rgba(0, 0, 0, 0.2157);
+  }
+
+  .win-split-button.is-checked {
+    --ButtonBorderBrush: var(--accent-border);
+    --ButtonBorderBrushTop: var(--accent-border);
+    --ButtonBorderBrushPointerOver: var(--accent-border);
+    --ButtonBorderBrushPointerOverTop: var(--accent-border);
+    --ButtonBorderBrushPressed: transparent;
+    --ButtonBorderBrushPressedTop: transparent;
+    --ButtonBorderBrushBottom: var(--accent-border-accent);
+    --ButtonBorderBrushPointerOverBottom: var(--accent-border-accent);
+    --ButtonBorderBrushPressedBottom: transparent;
+    --SplitButtonBorderBrushDivider: var(--SplitButtonBorderBrushCheckedDivider);
+  }
+
+  .win-split-button.is-checked .win-btn:not(.win-toggle-button) {
+    --ButtonBackground: var(--accent-base);
+    --ButtonBackgroundPointerOver: var(--accent-hover);
+    --ButtonBackgroundPressed: var(--accent-pressed);
+    --ButtonForeground: var(--accent-text);
+    --ButtonForegroundPointerOver: var(--accent-text);
+    --ButtonForegroundPressed: var(--accent-text-secondary);
   }
 
     .win-split-button::after {
@@ -141,6 +187,7 @@ const onSelect = (item) => {
       inset: 0;
       border-radius: 4px;
       border: 1px solid var(--SplitButtonBorderBrush);
+      border-top-color: var(--SplitButtonBorderBrushTop);
       border-bottom-color: var(--SplitButtonBorderBrushBottom);
       pointer-events: none;
     }
@@ -148,25 +195,37 @@ const onSelect = (item) => {
     .win-split-button .win-btn {
       border: none;
       border-radius: 0;
-      background: var(--ButtonBackground);
-      height: 100%;
+      min-height: 32px;
       position: static;
-      padding: var(--SplitButtonPadding, 5px 11px 6px);
+      padding: var(--SplitButtonPadding);
+    }
+
+    .win-split-button .win-btn:not(.win-toggle-button) {
       --ButtonBackground: var(--ctrl-fill-default);
       --ButtonBackgroundPointerOver: var(--ctrl-fill-secondary);
       --ButtonBackgroundPressed: var(--ctrl-fill-tertiary);
+    }
+
+    .win-split-button .win-btn:not(.win-toggle-button) {
       --ButtonBorderBrush: transparent;
+      --ButtonBorderBrushTop: transparent;
       --ButtonBorderBrushBottom: transparent;
       --ButtonBorderBrushPointerOver: transparent;
+      --ButtonBorderBrushPointerOverTop: transparent;
       --ButtonBorderBrushPointerOverBottom: transparent;
+      --ButtonBorderBrushPressed: transparent;
+      --ButtonBorderBrushPressedTop: transparent;
+      --ButtonBorderBrushPressedBottom: transparent;
     }
 
     .win-split-button .win-split-main-button {
-      min-width: 0;
+      min-width: 35px;
     }
 
       .win-split-button .win-btn::after {
         border-color: transparent;
+        border-top-color: transparent;
+        border-bottom-color: transparent;
       }
 
       .win-split-button .win-btn:hover {
@@ -185,12 +244,16 @@ const onSelect = (item) => {
 
     .win-split-button .win-btn-separator {
       width: 1px;
-      background: var(--ctrl-border);
+      background: var(--SplitButtonBorderBrushDivider);
       margin: 0;
     }
 
     .win-split-button .win-btn-chevron {
-      padding: 0 8px;
+      flex: 0 0 35px;
+      width: 35px;
+      min-width: 35px;
+      padding: 0 12px 0 0;
+      justify-content: flex-end;
     }
 
       .win-split-button .win-btn-chevron .icon {
@@ -204,28 +267,147 @@ const onSelect = (item) => {
 
   .win-split-button:has(.win-btn:hover)::after {
     border-color: var(--ButtonBorderBrushPointerOver);
+    border-top-color: var(--ButtonBorderBrushPointerOverTop);
     border-bottom-color: var(--ButtonBorderBrushPointerOverBottom);
   }
 
   .win-split-button:has(.win-btn:active)::after {
     border-color: var(--ButtonBorderBrushPressed);
+    border-top-color: var(--ButtonBorderBrushPressedTop);
     border-bottom-color: var(--ButtonBorderBrushPressedBottom);
   }
 
-  .example-theme-wrapper.theme-dark .win-split-button {
-    --ButtonBorderBrush: rgba(255, 255, 255, 0.05);
-    --ButtonBorderBrushPointerOver: rgba(255, 255, 255, 0.05);
-    --ButtonBorderBrushBottom: rgba(255, 255, 255, 0.0075);
-    --ButtonBorderBrushPointerOverBottom: rgba(255, 255, 255, 0.0075);
+  .win-split-button.is-open::after {
+    border-color: var(--ButtonBorderBrushPressed);
+    border-top-color: var(--ButtonBorderBrushPressedTop);
+    border-bottom-color: var(--ButtonBorderBrushPressedBottom);
   }
 
-  .example-theme-wrapper.theme-dark .win-split-button:has(.win-btn:active) {
+  .win-split-button.is-open .win-btn:not(.win-toggle-button) {
+    --ButtonBackground: var(--ctrl-fill-tertiary);
+    --ButtonBackgroundPointerOver: var(--ctrl-fill-tertiary);
+    --ButtonForeground: var(--text-secondary);
+    --ButtonForegroundPointerOver: var(--text-secondary);
+  }
+
+  .win-split-button.is-checked.is-open {
+    --ButtonBorderBrush: transparent;
+    --ButtonBorderBrushTop: transparent;
+    --ButtonBorderBrushBottom: transparent;
+    --ButtonBorderBrushPointerOver: transparent;
+    --ButtonBorderBrushPointerOverTop: transparent;
+    --ButtonBorderBrushPointerOverBottom: transparent;
+  }
+
+  .win-split-button.is-checked.is-open .win-btn:not(.win-toggle-button) {
+    --ButtonBackground: var(--accent-pressed);
+    --ButtonBackgroundPointerOver: var(--accent-pressed);
+    --ButtonForeground: var(--accent-text-secondary);
+    --ButtonForegroundPointerOver: var(--accent-text-secondary);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not(.theme-light) .win-split-button {
+      --ButtonBorderBrush: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushTop: var(--ctrl-elevation-top);
+      --ButtonBorderBrushPointerOver: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushPointerOverTop: var(--ctrl-elevation-top);
+      --ButtonBorderBrushPressed: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushPressedTop: var(--ctrl-elevation-top);
+      --ButtonBorderBrushDisabled: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushDisabledTop: var(--ctrl-elevation-top);
+      --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushPressedBottom: var(--ctrl-elevation-bottom);
+      --ButtonBorderBrushDisabledBottom: var(--ctrl-elevation-bottom);
+    }
+
+    html:not(.theme-light) .win-split-button.is-checked {
+      --ButtonBorderBrushTop: var(--accent-border-accent);
+      --ButtonBorderBrushPointerOverTop: var(--accent-border-accent);
+      --ButtonBorderBrushBottom: var(--accent-border);
+      --ButtonBorderBrushPointerOverBottom: var(--accent-border);
+    }
+  }
+
+  html.theme-dark .win-split-button,
+  .example-theme-wrapper.theme-dark .win-split-button,
+  .win-theme-scope.theme-dark .win-split-button {
+    --ButtonBorderBrush: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushTop: var(--ctrl-elevation-top);
+    --ButtonBorderBrushPointerOver: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPointerOverTop: var(--ctrl-elevation-top);
+    --ButtonBorderBrushPressed: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPressedTop: var(--ctrl-elevation-top);
+    --ButtonBorderBrushDisabled: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushDisabledTop: var(--ctrl-elevation-top);
+    --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPressedBottom: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushDisabledBottom: var(--ctrl-elevation-bottom);
+  }
+
+  html.theme-dark .win-split-button.is-checked,
+  .example-theme-wrapper.theme-dark .win-split-button.is-checked,
+  .win-theme-scope.theme-dark .win-split-button.is-checked {
+    --ButtonBorderBrushTop: var(--accent-border-accent);
+    --ButtonBorderBrushPointerOverTop: var(--accent-border-accent);
+    --ButtonBorderBrushBottom: var(--accent-border);
+    --ButtonBorderBrushPointerOverBottom: var(--accent-border);
+  }
+
+  .example-theme-wrapper.theme-light .win-split-button,
+  .win-theme-scope.theme-light .win-split-button {
+    --ButtonBorderBrush: var(--ctrl-border);
+    --ButtonBorderBrushTop: var(--ButtonBorderBrush);
+    --ButtonBorderBrushPointerOver: var(--ctrl-border);
+    --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
+    --ButtonBorderBrushPressed: var(--ctrl-border);
+    --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
+    --ButtonBorderBrushDisabled: var(--ctrl-border);
+    --ButtonBorderBrushDisabledTop: var(--ButtonBorderBrushDisabled);
+    --ButtonBorderBrushBottom: var(--ctrl-elevation-bottom);
+    --ButtonBorderBrushPointerOverBottom: var(--ctrl-elevation-bottom);
     --ButtonBorderBrushPressedBottom: var(--ctrl-border);
+    --ButtonBorderBrushDisabledBottom: var(--ctrl-border);
+  }
+
+  .example-theme-wrapper.theme-light .win-split-button.is-checked,
+  .win-theme-scope.theme-light .win-split-button.is-checked {
+    --ButtonBorderBrushTop: var(--accent-border);
+    --ButtonBorderBrushPointerOverTop: var(--accent-border);
+    --ButtonBorderBrushBottom: var(--accent-border-accent);
+    --ButtonBorderBrushPointerOverBottom: var(--accent-border-accent);
   }
 
   .example-theme-wrapper.theme-dark .win-split-button::after {
     border-color: var(--SplitButtonBorderBrush);
+    border-top-color: var(--SplitButtonBorderBrushTop);
     border-bottom-color: var(--SplitButtonBorderBrushBottom);
+  }
+
+  html.theme-dark .win-split-button.is-checked.is-open,
+  .example-theme-wrapper.theme-dark .win-split-button.is-checked.is-open,
+  .win-theme-scope.theme-dark .win-split-button.is-checked.is-open,
+  .example-theme-wrapper.theme-light .win-split-button.is-checked.is-open,
+  .win-theme-scope.theme-light .win-split-button.is-checked.is-open {
+    --ButtonBorderBrush: transparent;
+    --ButtonBorderBrushTop: transparent;
+    --ButtonBorderBrushBottom: transparent;
+    --ButtonBorderBrushPointerOver: transparent;
+    --ButtonBorderBrushPointerOverTop: transparent;
+    --ButtonBorderBrushPointerOverBottom: transparent;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not(.theme-light) .win-split-button.is-checked.is-open {
+      --ButtonBorderBrush: transparent;
+      --ButtonBorderBrushTop: transparent;
+      --ButtonBorderBrushBottom: transparent;
+      --ButtonBorderBrushPointerOver: transparent;
+      --ButtonBorderBrushPointerOverTop: transparent;
+      --ButtonBorderBrushPointerOverBottom: transparent;
+    }
   }
 
 </style>
