@@ -1,5 +1,5 @@
 <template>
-  <div class="win-nav-shell" :class="shellClasses" :style="paneStyle" ref="shellRef">
+  <div class="win-nav-shell" :class="shellClasses" :style="navigationStyle" ref="shellRef">
     <nav v-if="isTopNavigation" class="win-nav-top-bar" ref="navRef" @keydown="onNavigationKeydown" @focusin="onNavigationFocusIn" @pointerdown.capture="onNavigationPointerDown" @touchstart.capture="onNavigationPointerDown">
       <div class="win-nav-indicator-track" ref="indicatorTrack">
         <div class="win-nav-indicator" :style="indicatorStyle"></div>
@@ -18,11 +18,13 @@
           <div v-else-if="!item.children" class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span v-if="item.icon" class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
+            <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-child-selected': isChildOfGroup(item) }">
             <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
               <span v-if="item.icon" class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
+              <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onGroupChevronClick(item)"></span>
             </div>
           </div>
@@ -42,6 +44,7 @@
           <div v-else class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span v-if="item.icon" class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
+            <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
           </div>
         </template>
         <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" role="button" :class="{ 'is-selected': selectedValue === settingsValue }" tabindex="0" v-bind="{ 'tooltipservice.tooltip': resolvedSettingsLabel }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
@@ -56,6 +59,7 @@
           <div v-else class="win-nav-item" :data-value="item.value">
             <span v-if="item.icon" class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
+            <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
             <span v-if="item.children" class="icon win-nav-group-chevron">&#xE70D;</span>
           </div>
         </template>
@@ -109,11 +113,13 @@
               <div v-else-if="!item.children" class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
                 <span v-if="item.icon" class="icon">{{ item.icon }}</span>
                 <WinTextBlock class="label" :Text="item.label" />
+                <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
               </div>
               <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
                 <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
                   <span v-if="item.icon" class="icon">{{ item.icon }}</span>
                   <WinTextBlock class="label" :Text="item.label" />
+                  <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
                   <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onGroupChevronClick(item)">&#xE70D;</span>
                 </div>
                 <div v-if="!isClosedCompact" class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? (groupHeights[item.value] || 0) + 'px' : '0px' }">
@@ -121,6 +127,7 @@
                     <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" role="button" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
                       <span v-if="child.icon" class="icon">{{ child.icon }}</span>
                       <WinTextBlock class="label" :Text="child.label" />
+                      <WinInfoBadge v-if="child.infoBadge" class="win-nav-infobadge" v-bind="child.infoBadge" />
                     </div>
                   </div>
                 </div>
@@ -136,6 +143,7 @@
             <div v-else class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
               <span v-if="item.icon" class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
+              <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
             </div>
           </template>
           <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" role="button" :class="{ 'is-selected': selectedValue === settingsValue }" tabindex="0" v-bind="(isTopNavigation || isClosedCompact) ? { 'tooltipservice.tooltip': resolvedSettingsLabel } : {}" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
@@ -161,11 +169,13 @@
           <div v-else-if="!item.children" class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreItemClick(item)">
             <span v-if="item.icon" class="icon">{{ item.icon }}</span>
             <WinTextBlock class="label" :Text="item.label" />
+            <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
             <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreGroupHeaderClick(item)">
               <span v-if="item.icon" class="icon">{{ item.icon }}</span>
               <WinTextBlock class="label" :Text="item.label" />
+              <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onMoreGroupChevronClick(item)">&#xE70D;</span>
             </div>
             <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 36) + 'px' : '0px' }">
@@ -173,6 +183,7 @@
                 <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" role="button" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onMoreChildClick(item, child)">
                   <span v-if="child.icon" class="icon">{{ child.icon }}</span>
                   <WinTextBlock class="label" :Text="child.label" />
+                  <WinInfoBadge v-if="child.infoBadge" class="win-nav-infobadge" v-bind="child.infoBadge" />
                 </div>
               </div>
             </div>
@@ -186,6 +197,7 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick, useSlots, toRaw } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
 import WinScrollViewer from './WinScrollViewer.vue';
+import WinInfoBadge from './WinInfoBadge.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import { useI18n } from './i18n/index';
 import {
@@ -230,7 +242,42 @@ const officialProps = defineProps({
   SelectionFollowsFocus: { type: String, default: 'Disabled' },
   ShoulderNavigationEnabled: { type: String, default: 'Never' },
   OverflowLabelMode: { type: String, default: 'NoLabel' },
+  Width: { type: [String, Number], default: '' },
+  Height: { type: [String, Number], default: '' },
+  MinWidth: { type: [String, Number], default: '' },
+  MinHeight: { type: [String, Number], default: '' },
+  MaxWidth: { type: [String, Number], default: '' },
+  MaxHeight: { type: [String, Number], default: '' },
+  Margin: { type: [String, Number], default: '' },
+  HorizontalAlignment: { type: String, default: '' },
+  VerticalAlignment: { type: String, default: '' },
 });
+
+const cssLength = (value) => {
+  if (value === '' || value === undefined || value === null) return '';
+  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) {
+    return `${Number(value.trim())}px`;
+  }
+  return typeof value === 'number' ? `${value}px` : value;
+};
+
+const xamlThickness = (value) => {
+  if (value === '' || value === undefined || value === null) return '';
+  const parts = String(value).split(',').map((part) => cssLength(part.trim()));
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
+  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
+  return String(value);
+};
+
+const selfAlignment = (value) => ({
+  Left: 'start',
+  Center: 'center',
+  Right: 'end',
+  Stretch: 'stretch',
+  Top: 'start',
+  Bottom: 'end'
+}[value] ?? '');
 
 const getItemTag = item => item && typeof item === 'object'
   ? (item.Tag ?? item.Value ?? item.Name ?? item.value)
@@ -262,6 +309,8 @@ const normalizeItem = (item, fallbackKey = 'item') => {
     tag: getItemTag(item),
     label: item?.Content ?? item?.Name ?? item?.Text ?? item?.label ?? '',
     icon: item?.Icon ?? item?.Glyph ?? item?.icon ?? '',
+    infoBadge: item?.InfoBadge ?? null,
+    automationName: item?.['AutomationProperties.Name'] ?? item?.AutomationProperties?.Name ?? '',
     tooltip: item?.ToolTip ?? item?.Tooltip ?? item?.tooltip ?? '',
     type,
     children: Array.isArray(children)
@@ -376,6 +425,7 @@ const itemToolTipAttrs = (item) => {
   const toolTip = item?.tooltip || (!isTopNavigation.value && isClosedCompact.value ? item?.label : '');
   return {
     tabindex: item?.isEnabled === false ? -1 : 0,
+    ...(item?.automationName ? { 'aria-label': item.automationName } : {}),
     ...(toolTip ? { 'tooltipservice.tooltip': toolTip } : {})
   };
 };
@@ -452,6 +502,19 @@ const paneStyle = computed(() => ({
   '--win-nav-pane-close-duration': `${paneTransitionSpec.value.closeDurationMs}ms`,
   '--win-nav-pane-easing': paneTransitionSpec.value.easing
 }));
+const navigationStyle = computed(() => {
+  const style = { ...paneStyle.value };
+  if (officialProps.Width !== '') style.width = cssLength(officialProps.Width);
+  if (officialProps.Height !== '') style.height = cssLength(officialProps.Height);
+  if (officialProps.MinWidth !== '') style.minWidth = cssLength(officialProps.MinWidth);
+  if (officialProps.MinHeight !== '') style.minHeight = cssLength(officialProps.MinHeight);
+  if (officialProps.MaxWidth !== '') style.maxWidth = cssLength(officialProps.MaxWidth);
+  if (officialProps.MaxHeight !== '') style.maxHeight = cssLength(officialProps.MaxHeight);
+  if (officialProps.Margin !== '') style.margin = xamlThickness(officialProps.Margin);
+  if (officialProps.HorizontalAlignment) style.justifySelf = selfAlignment(officialProps.HorizontalAlignment);
+  if (officialProps.VerticalAlignment) style.alignSelf = selfAlignment(officialProps.VerticalAlignment);
+  return style;
+});
 const shellClasses = computed(() => [
   isTopNavigation.value ? 'is-top' : 'is-left',
   isLeftOverlayMode.value ? 'is-overlay-left' : '',
@@ -636,8 +699,9 @@ const measureTopItemWidth = (value) => {
   if (!item) return 84;
   const labelWidth = String(item.label || '').length * 7.5;
   const itemChromeWidth = item.icon ? 56 : 32;
+  const badgeWidth = item.infoBadge ? 28 : 0;
   const chevronWidth = item.children ? (item.icon ? 24 : 28) : 0;
-  return Math.ceil(labelWidth + itemChromeWidth + chevronWidth);
+  return Math.ceil(labelWidth + itemChromeWidth + badgeWidth + chevronWidth);
 };
 
 const getTopItemsWidth = (values) => {
@@ -2865,6 +2929,10 @@ watch(() => props.selectedValue, (val) => {
     color: inherit;
   }
 
+  .win-nav-item .win-nav-infobadge {
+    margin-left: auto;
+  }
+
   .win-nav-item-header {
     box-sizing: border-box;
     height: 40px;
@@ -2906,6 +2974,13 @@ watch(() => props.selectedValue, (val) => {
     min-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
     max-width: calc(var(--win-nav-compact-pane-length, 48px) - 8px);
     overflow: hidden;
+  }
+
+  .win-nav-left-panel.is-closed-compact .win-nav-item > .win-nav-infobadge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    margin: 0;
   }
 
   .win-nav-left-panel.is-closed-compact .win-nav-item-header {
@@ -2966,7 +3041,7 @@ watch(() => props.selectedValue, (val) => {
     margin: 2px 4px;
     padding: 0;
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
     justify-content: start;
   }
@@ -2984,6 +3059,14 @@ watch(() => props.selectedValue, (val) => {
   .win-nav-top-measure .win-nav-item:not(.win-nav-more-button) > .label {
     grid-column: 2;
     margin: 0 12px;
+  }
+
+  .win-nav-top-bar .win-nav-item:not(.win-nav-more-button):not(.win-nav-settings-item) > .win-nav-infobadge,
+  .win-nav-top-measure .win-nav-item:not(.win-nav-more-button) > .win-nav-infobadge {
+    grid-column: 3;
+    margin: 0 2px 13px -16px;
+    align-self: center;
+    justify-self: center;
   }
 
   .win-nav-top-bar .win-nav-item:has(> .icon:not(.win-nav-group-chevron)):not(.win-nav-more-button):not(.win-nav-settings-item) > .label,
@@ -3163,7 +3246,7 @@ watch(() => props.selectedValue, (val) => {
 
   .win-nav-top-bar .win-nav-group-header > .win-nav-group-chevron,
   .win-nav-top-measure .win-nav-item > .win-nav-group-chevron {
-    grid-column: 3;
+    grid-column: 4;
     width: 40px;
     min-width: 40px;
     height: 40px;
@@ -3247,6 +3330,11 @@ watch(() => props.selectedValue, (val) => {
 
   .win-nav-more-panel .win-nav-item:has(> .icon:not(.win-nav-group-chevron)) > .label {
     margin-left: 12px;
+  }
+
+  .win-nav-more-panel .win-nav-item > .win-nav-infobadge {
+    grid-column: 3;
+    margin: 0 12px 0 0;
   }
 
   .win-nav-more-panel .win-nav-group-header > .win-nav-group-chevron {

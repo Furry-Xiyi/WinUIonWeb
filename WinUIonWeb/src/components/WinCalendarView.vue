@@ -33,7 +33,7 @@
             class="calendar-scroll"
             ref="dayScrollEl"
             VerticalScrollMode="Auto"
-            VerticalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Hidden"
             HorizontalScrollMode="Disabled"
             HorizontalScrollBarVisibility="Disabled"
             @ViewChanged="onDayScroll">
@@ -79,7 +79,7 @@
             class="calendar-scroll large-scroll"
             ref="monthScrollEl"
             VerticalScrollMode="Auto"
-            VerticalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Hidden"
             HorizontalScrollMode="Disabled"
             HorizontalScrollBarVisibility="Disabled"
             @ViewChanged="onMonthScroll">
@@ -124,7 +124,7 @@
             class="calendar-scroll large-scroll"
             ref="yearScrollEl"
             VerticalScrollMode="Auto"
-            VerticalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Hidden"
             HorizontalScrollMode="Disabled"
             HorizontalScrollBarVisibility="Disabled"
             @ViewChanged="onYearScroll">
@@ -203,6 +203,7 @@ const transitionDir = ref("out");
 const dayScrollEl = ref(null);
 const monthScrollEl = ref(null);
 const yearScrollEl = ref(null);
+const pendingViewTarget = ref(null);
 
 const headerMonth = ref(todayMonth);
 const headerYear = ref(todayYear);
@@ -531,6 +532,12 @@ const onYearScroll = (args) => {
 };
 
 const scrollViewerElement = (viewer) => viewer?.scrollViewerRef?.value ?? viewer?.scrollViewerRef ?? null;
+const afterScrollLayout = (callback) => {
+  nextTick(() => {
+    const raf = globalThis.requestAnimationFrame ?? ((fn) => globalThis.setTimeout(fn, 0));
+    raf(() => raf(callback));
+  });
+};
 
 const setViewerTop = (viewer, top, smooth = false) => {
   const element = scrollViewerElement(viewer);
@@ -538,7 +545,7 @@ const setViewerTop = (viewer, top, smooth = false) => {
     element.scrollTo({ top, behavior: "smooth" });
     return;
   }
-  if (viewer?.ChangeView) viewer.ChangeView(null, top, null, true);
+  if (viewer?.ChangeView) viewer.ChangeView(null, top, null);
   else viewer?.ScrollTo?.(0, top);
 };
 
@@ -549,7 +556,7 @@ const scrollDayTo = (y, m, smooth = false) => {
   const meta = monthMeta.data[idx];
   if (!meta) return;
   const top = meta.startRow * ROW_H;
-  nextTick(() => {
+  afterScrollLayout(() => {
     if (!dayScrollEl.value) return;
     if (smooth) setViewerTop(dayScrollEl.value, top, true);
     else {
@@ -563,7 +570,7 @@ const scrollDayTo = (y, m, smooth = false) => {
 const scrollMonthTo = (y, smooth = false) => {
   const pageIdx = y - MIN_YEAR;
   const top = pageIdx * MONTH_PAGE_H;
-  nextTick(() => {
+  afterScrollLayout(() => {
     if (!monthScrollEl.value) return;
     if (smooth) setViewerTop(monthScrollEl.value, top, true);
     else {
@@ -580,7 +587,7 @@ const scrollYearTo = (dec, smooth = false) => {
     Math.min(totalYearRows - 1, Math.floor((dec - MIN_YEAR) / YEARS_PER_ROW)),
   );
   const top = row * LARGE_ROW_H;
-  nextTick(() => {
+  afterScrollLayout(() => {
     if (!yearScrollEl.value) return;
     if (smooth) setViewerTop(yearScrollEl.value, top, true);
     else {
@@ -610,13 +617,17 @@ const onNav = (dir) => {
 
 const onLabelClick = () => {
   if (viewMode.value === 0) {
+    const targetYear = headerYear.value;
     transitionDir.value = "out";
+    pendingViewTarget.value = { mode: 1, year: targetYear };
     viewMode.value = 1;
-    nextTick(() => scrollMonthTo(headerYear.value));
+    scrollMonthTo(targetYear);
   } else if (viewMode.value === 1) {
+    const targetDecade = Math.floor(headerYear.value / DECADE_SIZE) * DECADE_SIZE;
     transitionDir.value = "out";
+    pendingViewTarget.value = { mode: 2, decade: targetDecade };
     viewMode.value = 2;
-    nextTick(() => scrollYearTo(headerDecade.value));
+    scrollYearTo(targetDecade);
   }
 };
 
@@ -624,12 +635,14 @@ const onSelectMonth = (item) => {
   transitionDir.value = "in";
   headerMonth.value = item.month;
   headerYear.value = item.year;
+  pendingViewTarget.value = { mode: 0, year: item.year, month: item.month };
   viewMode.value = 0;
 };
 
 const onSelectYear = (item) => {
   transitionDir.value = "in";
   headerYear.value = item.year;
+  pendingViewTarget.value = { mode: 1, year: item.year };
   viewMode.value = 1;
 };
 
@@ -688,11 +701,17 @@ const onEnter = (el, done) => {
   };
   el.addEventListener("animationend", finish, { once: true });
   setTimeout(finish, 333);
-  nextTick(() => {
-    if (viewMode.value === 0) scrollDayTo(headerYear.value, headerMonth.value);
-    else if (viewMode.value === 1) scrollMonthTo(headerYear.value);
-    else scrollYearTo(headerDecade.value);
-  });
+  const target = pendingViewTarget.value;
+  if (target?.mode === viewMode.value) {
+    pendingViewTarget.value = null;
+    if (target.mode === 0) scrollDayTo(target.year, target.month);
+    else if (target.mode === 1) scrollMonthTo(target.year);
+    else scrollYearTo(target.decade);
+    return;
+  }
+  if (viewMode.value === 0) scrollDayTo(headerYear.value, headerMonth.value);
+  else if (viewMode.value === 1) scrollMonthTo(headerYear.value);
+  else scrollYearTo(headerDecade.value);
 };
 const onBeforeLeave = (el) => {
   el.style.position = "absolute";

@@ -134,5 +134,10 @@ export default {
   "text.value": "明度",
   "text.volume": "音量",
   "text.vue": "Vue",
-  "text.xaml": "XAML"
+  "text.xaml": "XAML",
+  "control.infobadge.value": "{value} 条通知",
+  "control.infobadge.icon": "通知",
+  "control.infobadge.dot": "新通知",
+  "control.infobar.close-button-name": "关闭",
+  "control.infobar.close-button-tooltip": "关闭"
 };

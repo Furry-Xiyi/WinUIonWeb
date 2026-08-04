@@ -363,8 +363,10 @@ watch([() => props.IsEnabled, () => props.IsThumbToolTipEnabled], ([isEnabled, i
   height: 22px;
   border-radius: 50%;
   background: var(--SliderOuterThumbBackground, var(--control-solid-fill-color-default, var(--ctrl-solid-fill)));
-  border: 1px solid var(--SliderThumbBorderBrush, var(--ctrl-elevation-bottom));
-  border-top-color: var(--SliderThumbBorderBrushTop, var(--ctrl-elevation-top));
+  border-left: 1px solid var(--ControlStrokeColorDefaultBrush, var(--ctrl-border));
+  border-top: 1px solid var(--ButtonBorderBrushDefaultTop, var(--ControlStrokeColorDefaultBrush, var(--ctrl-border)));
+  border-right: 1px solid var(--ControlStrokeColorDefaultBrush, var(--ctrl-border));
+  border-bottom: 1px solid var(--ButtonBorderBrushDefaultBottom, var(--ctrl-border-accent));
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   display: grid;
   place-items: center;
@@ -449,15 +451,11 @@ watch([() => props.IsEnabled, () => props.IsThumbToolTipEnabled], ([isEnabled, i
 .example-theme-wrapper.theme-light .win-slider,
 .win-theme-scope.theme-light .win-slider {
   --SliderOuterThumbBackground: #ffffff;
-  --SliderThumbBorderBrush: rgba(0, 0, 0, 0.08);
-  --SliderThumbBorderBrushTop: rgba(255, 255, 255, 0.65);
 }
 
 .example-theme-wrapper.theme-dark .win-slider,
 .win-theme-scope.theme-dark .win-slider {
   --SliderOuterThumbBackground: #454545;
-  --SliderThumbBorderBrush: rgba(0, 0, 0, 0.35);
-  --SliderThumbBorderBrushTop: rgba(255, 255, 255, 0.10);
 }
 
 .win-slider-root.is-disabled {

@@ -134,5 +134,10 @@ export default {
   "text.value": "Value",
   "text.volume": "Volume",
   "text.vue": "Vue",
-  "text.xaml": "XAML"
+  "text.xaml": "XAML",
+  "control.infobadge.value": "{value} notifications",
+  "control.infobadge.icon": "Notification",
+  "control.infobadge.dot": "New notification",
+  "control.infobar.close-button-name": "Close",
+  "control.infobar.close-button-tooltip": "Close"
 };

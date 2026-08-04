@@ -22,7 +22,6 @@
                     Height="266"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    ContentOrientation="None"
                     :IsTabStop="true"
                     :ZoomMode="zoomMode"
                     :ZoomFactor="zoomFactor"
@@ -198,7 +197,7 @@ const scrollWithAnimation = () => {
   requestAnimationFrame(frame);
 };
 
-const contentInsideScrollViewCode = computed(() => `<WinScrollViewer Height="266" Width="400" ContentOrientation="None"
+const contentInsideScrollViewCode = computed(() => `<WinScrollViewer Height="266" Width="400"
   ZoomMode="${zoomMode.value}" IsTabStop="True"
   HorizontalScrollMode="${horizontalScrollMode.value}" HorizontalScrollBarVisibility="${horizontalScrollBarVisibility.value}"
   VerticalScrollMode="${verticalScrollMode.value}" VerticalScrollBarVisibility="${verticalScrollBarVisibility.value}">

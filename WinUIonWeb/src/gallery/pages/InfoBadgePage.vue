@@ -1,286 +1,324 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">InfoBadge</h1>
-          <p class="page-description">
-            Badging is a non-intrusive and intuitive way to display notifications or bring focus to an area within an app - whether that be for notifications, indicating new content, or showing an alert. An InfoBadge is a small piece of UI that can be added into an app and customized to display a number, icon, or a simple dot.
-          </p>
-          <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"
-             >
-              <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-             >
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
-          </div>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+        <WinTextBlock class="page-header" :Text="$t('text.infobadge')" />
+        <WinTextBlock
+          class="page-description"
+          :Text="$t('sample.infobadge.description')"
+          TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <WinButton
+            class="header-action"
+            v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }"
+            @Click="toggleTheme">
+            <WinTextBlock class="icon" Text="&#xE793;" />
+          </WinButton>
+          <WinToggleButton
+            class="header-action"
+            :IsChecked="isFavoriteState"
+            v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }"
+            @update:IsChecked="toggleFavorite">
+            <WinTextBlock class="icon" :Text="isFavoriteState ? '&#xE735;' : '&#xE734;'" />
+          </WinToggleButton>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example 1: InfoBadge embedded in NavigationView -->
-            <WinControlExample
-              headerText="An InfoBadge embedded in a NavigationView"
-              :theme="pageTheme"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <div style="width: 100%; height: 300px;">
-                  <WinNavigationView
-                    :MenuItems="navigationMenuItems"
-                    SelectedItem="inbox"
-                    PaneDisplayMode="Left"
-                    :IsSettingsVisible="false"
-                    :IsPaneToggleButtonVisible="false">
-                  </WinNavigationView>
-                </div>
-              </template>
-              <template #options>
-                <div style="display: flex; flex-direction: column; gap: 12px; width: 160px;">
-                  <WinToggleSwitch
-                    v-model="infoBadgeVisible"
-                    header="InfoBadge Opacity">
-                  </WinToggleSwitch>
-                  <WinComboBox
-                    v-model:SelectedValue="displayModeValue"
-                    Header="Display Mode"
-                    :ItemsSource="displayModeOptions"
-                    DisplayMemberPath="label"
-                    SelectedValuePath="value">
-                  </WinComboBox>
-                </div>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 2: Different InfoBadge styles -->
-            <WinControlExample
-              headerText="Different InfoBadge styles"
-              :theme="pageTheme"
-              :templateCode="example2Template"
-              :vueCode="example2Vue">
-              <template #example>
-                <div style="display: flex; gap: 20px; align-items: center; justify-content: center; height: 100px;">
-                  <WinInfoBadge
-                    :styleVariant="badgeStyle"
-                    iconSource="E7BA">
-                  </WinInfoBadge>
-                  <WinInfoBadge
-                    :styleVariant="badgeStyle"
-                    :value="10">
-                  </WinInfoBadge>
-                  <WinInfoBadge
-                    :styleVariant="badgeStyle"
-                    :value="-1">
-                  </WinInfoBadge>
-                </div>
-
-                <div style="width: 160px;">
-                  <WinComboBox
-                    v-model:SelectedValue="badgeStyle"
-                    Header="Styles"
-                    :ItemsSource="styleOptions"
-                    DisplayMemberPath="label"
-                    SelectedValuePath="value">
-                  </WinComboBox>
-                </div>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 3: InfoBadge placed inside a Button -->
-            <WinControlExample
-              headerText="An InfoBadge placed inside a Button"
-              :theme="pageTheme"
-              :templateCode="example3Template"
-              :vueCode="example3Vue">
-              <template #example>
-                <WinButton style="width: 200px; height: 60px; position: relative;"
-                  aria-label="Refresh required"
-                  ToolTipService.ToolTip="Refresh required">
-                  <span class="icon" style="font-size: 20px;">&#xE72C;</span>
-                  <WinInfoBadge
-                    iconSource="E7BA"
-                    background="#C42B1C"
-                    style="position: absolute; top: 4px; right: 4px;">
-                  </WinInfoBadge>
-                </WinButton>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 4: InfoBadge with dynamic value -->
-            <WinControlExample
-              headerText="An InfoBadge with a dynamic integer value"
-              :theme="pageTheme"
-              :templateCode="example4Template"
-              :vueCode="example4Vue">
-              <template #example>
-                <div style="display: flex; justify-content: center; align-items: center; height: 80px;">
-                  <WinInfoBadge :value="dynamicValue"></WinInfoBadge>
-                </div>
-
-                <div style="width: 160px;">
-                  <div class="number-input-container">
-                    <label class="number-input-label">InfoBadge Value</label>
-                    <input
-                      type="number"
-                      v-model.number="dynamicValue"
-                      :min="-1"
-                      class="number-input"
-                    />
-                  </div>
-                </div>
-              </template>
-            </WinControlExample>
       </div>
-    </WinScrollViewer>
-  </div>
+
+      <WinStackPanel class="gallery-page-content" Spacing="0">
+        <WinControlExample
+          class="basic-input-example-theme"
+          horizontalContentAlignment="Stretch"
+          :headerText="$t('sample.infobadge.embedded-navigationview')"
+          :theme="pageTheme"
+          :vue="example1Code">
+          <template #example>
+            <WinGrid
+              Width="100%"
+              RowDefinitions="Auto"
+              HorizontalAlignment="Stretch">
+              <WinNavigationView
+                Height="300"
+                :MenuItems="navigationMenuItems"
+                :PaneDisplayMode="navigationPaneDisplayMode"
+                :IsPaneOpen="navigationIsPaneOpen"
+                HorizontalAlignment="Stretch">
+                <WinGrid />
+              </WinNavigationView>
+            </WinGrid>
+          </template>
+          <template #options>
+            <WinStackPanel Width="160">
+              <WinToggleSwitch
+                v-model:IsOn="infoBadgeOpacityOn"
+                :Header="$t('sample.infobadge.opacity')" />
+              <WinComboBox
+                v-model:SelectedValue="navigationDisplayMode"
+                :Header="$t('sample.infobadge.display-mode')"
+                :ItemsSource="navigationDisplayModeItems"
+                DisplayMemberPath="Text"
+                SelectedValuePath="Value" />
+            </WinStackPanel>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          class="basic-input-example-theme"
+          horizontalContentAlignment="Stretch"
+          :headerText="$t('sample.infobadge.different-styles')"
+          :theme="pageTheme"
+          :vue="example2Code">
+          <template #example>
+            <WinStackPanel
+              HorizontalAlignment="Center"
+              Orientation="Horizontal"
+              Spacing="20">
+              <WinInfoBadge
+                HorizontalAlignment="Right"
+                :Style="iconInfoBadgeStyle" />
+              <WinInfoBadge
+                HorizontalAlignment="Right"
+                :Style="valueInfoBadgeStyle"
+                :Value="10" />
+              <WinInfoBadge
+                VerticalAlignment="Center"
+                :Style="dotInfoBadgeStyle" />
+            </WinStackPanel>
+          </template>
+          <template #options>
+            <WinStackPanel Width="160">
+              <WinComboBox
+                v-model:SelectedValue="infoBadgeStyle"
+                :Header="$t('sample.infobadge.styles')"
+                :ItemsSource="infoBadgeStyleItems"
+                DisplayMemberPath="Text"
+                SelectedValuePath="Value" />
+            </WinStackPanel>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          class="basic-input-example-theme"
+          horizontalContentAlignment="Stretch"
+          :headerText="$t('sample.infobadge.inside-another-control')"
+          :theme="pageTheme"
+          :vue="example3Code">
+          <template #example>
+            <WinButton
+              Width="200"
+              Height="60"
+              Padding="0"
+              HorizontalAlignment="Center"
+              HorizontalContentAlignment="Stretch"
+              VerticalContentAlignment="Stretch"
+              v-bind="{ 'tooltipservice.tooltip': $t('sample.infobadge.refresh-required') }">
+              <WinGrid
+                class="badge-button-grid"
+                Width="Auto"
+                Height="Auto"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+                <WinTextBlock
+                  class="sample-sync-icon icon"
+                  Text="&#xE895;"
+                  FontFamily="WinUIonWebIcons"
+                  HorizontalTextAlignment="Center" />
+                <WinInfoBadge
+                  Background="#C42B1C"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Top"
+                  :IconSource="{ Glyph: '\uF13C', FontFamily: 'WinUIOnWebIcons' }" />
+              </WinGrid>
+            </WinButton>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          class="basic-input-example-theme"
+          horizontalContentAlignment="Stretch"
+          :headerText="$t('sample.infobadge.dynamic-value')"
+          :theme="pageTheme"
+          :vue="example4Code">
+          <template #example>
+            <WinInfoBadge HorizontalAlignment="Center" :Value="dynamicValue" />
+          </template>
+          <template #options>
+            <WinStackPanel Width="160">
+              <WinNumberBox
+                v-model:Value="dynamicValue"
+                :Header="$t('sample.infobadge.value')"
+                :Minimum="-1"
+                SpinButtonPlacementMode="Inline"
+                @ValueChanged="onDynamicValueChanged" />
+            </WinStackPanel>
+          </template>
+        </WinControlExample>
+      </WinStackPanel>
+    </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
+import WinButton from '../../components/WinButton.vue';
+import WinComboBox from '../../components/WinComboBox.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinGrid from '../../components/WinGrid.vue';
 import WinInfoBadge from '../../components/WinInfoBadge.vue';
 import WinNavigationView from '../../components/WinNavigationView.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
+import WinNumberBox from '../../components/WinNumberBox.vue';
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import WinStackPanel from '../../components/WinStackPanel.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'infobadge');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Example 1: NavigationView with InfoBadge
-const infoBadgeVisible = ref(true);
-const displayModeValue = ref('LeftExpanded');
-const displayModeOptions = [
-  { label: 'LeftExpanded', value: 'LeftExpanded' },
-  { label: 'LeftCompact', value: 'LeftCompact' },
-  { label: 'Top', value: 'Top' }
-];
-
+const infoBadgeOpacityOn = ref(true);
+const navigationDisplayMode = ref('LeftExpanded');
+const navigationDisplayModeItems = computed(() => [
+  { Text: t('sample.infobadge.left-expanded'), Value: 'LeftExpanded' },
+  { Text: t('sample.infobadge.left-compact'), Value: 'LeftCompact' },
+  { Text: t('sample.infobadge.top'), Value: 'Top' }
+]);
+const navigationPaneDisplayMode = computed(() => {
+  if (navigationDisplayMode.value === 'LeftCompact') return 'LeftCompact';
+  if (navigationDisplayMode.value === 'Top') return 'Top';
+  return 'Left';
+});
+const navigationIsPaneOpen = computed(() => navigationDisplayMode.value !== 'LeftCompact');
+const infoBadgeOpacity = computed(() => infoBadgeOpacityOn.value ? 1 : 0);
 const navigationMenuItems = computed(() => [
+  { Content: t('text.home'), Icon: '\uE80F', Tag: 'Home' },
+  { Content: t('text.account'), Icon: '\uE77B', Tag: 'Account' },
   {
-    label: 'Home',
-    value: 'home',
-    icon: ''
-  },
-  {
-    label: 'Account',
-    value: 'account',
-    icon: ''
-  },
-  {
-    label: 'Inbox',
-    value: 'inbox',
-    icon: '',
-    badge: {
-      value: 5,
-      opacity: infoBadgeVisible.value ? 1.0 : 0.0
+    Content: t('sample.infobadge.inbox'),
+    Icon: '\uE715',
+    Tag: 'Inbox',
+    'AutomationProperties.Name': t('sample.infobadge.inbox-notifications', { value: 5 }),
+    InfoBadge: {
+      Value: 5,
+      Opacity: infoBadgeOpacity.value
     }
   }
 ]);
 
-const example1Template = `<WinNavigationView
-  :MenuItems="menuItems"
-  SelectedItem="inbox"
-  PaneDisplayMode="Left">
-  <!-- NavigationViewItem with InfoBadge -->
-</WinNavigationView>`;
-
-const example1Vue = `const menuItems = [
-  {
-    label: 'Home',
-    value: 'home',
-    icon: '\\uE80F'
-  },
-  {
-    label: 'Inbox',
-    value: 'inbox',
-    icon: '\\uE715',
-    badge: { value: 5 }
-  }
-];`;
-
-// Example 2: Different InfoBadge styles
-const badgeStyle = ref('attention');
-const styleOptions = [
-  { label: 'Attention', value: 'attention' },
-  { label: 'Informational', value: 'informational' },
-  { label: 'Success', value: 'success' },
-  { label: 'Critical', value: 'critical' }
-];
-
-const example2Template = `<div style="display: flex; gap: 20px;">
-  <WinInfoBadge
-    :styleVariant="badgeStyle"
-    iconSource="E7BA">
-  </WinInfoBadge>
-  <WinInfoBadge
-    :styleVariant="badgeStyle"
-    :value="10">
-  </WinInfoBadge>
-  <WinInfoBadge
-    :styleVariant="badgeStyle"
-    :value="-1">
-  </WinInfoBadge>
-</div>`;
-
-const example2Vue = `const badgeStyle = ref('attention');
-
-// Icon badge
-<WinInfoBadge styleVariant="attention" iconSource="E7BA" />
-
-// Value badge
-<WinInfoBadge styleVariant="attention" :value="10" />
-
-// Dot badge
-<WinInfoBadge styleVariant="attention" :value="-1" />`;
-
-// Example 3: InfoBadge inside Button
-const example3Template = `<WinButton style="position: relative; width: 200px; height: 60px;">
-  <span class="icon">&#xE72C;</span>
-  <WinInfoBadge
-    iconSource="E7BA"
-    background="#C42B1C"
-    style="position: absolute; top: 4px; right: 4px;">
-  </WinInfoBadge>
-</WinButton>`;
-
-const example3Vue = `<WinButton style="position: relative;">
-  <span class="icon">&#xE72C;</span>
-  <WinInfoBadge
-    iconSource="E7BA"
-    background="#C42B1C"
-    style="position: absolute; top: 4px; right: 4px;">
-  </WinInfoBadge>
-</WinButton>`;
-
-// Example 4: Dynamic value
+const infoBadgeStyle = ref('Attention');
+const infoBadgeStyleItems = computed(() => [
+  { Text: t('sample.infobadge.attention'), Value: 'Attention' },
+  { Text: t('sample.infobadge.informational'), Value: 'Informational' },
+  { Text: t('sample.infobadge.success'), Value: 'Success' },
+  { Text: t('sample.infobadge.critical'), Value: 'Critical' }
+]);
+const iconInfoBadgeStyle = computed(() => `{StaticResource ${infoBadgeStyle.value}IconInfoBadgeStyle}`);
+const valueInfoBadgeStyle = computed(() => `{StaticResource ${infoBadgeStyle.value}ValueInfoBadgeStyle}`);
+const dotInfoBadgeStyle = computed(() => `{StaticResource ${infoBadgeStyle.value}DotInfoBadgeStyle}`);
 const dynamicValue = ref(1);
 
-const example4Template = `<WinInfoBadge :value="dynamicValue"></WinInfoBadge>`;
+const onDynamicValueChanged = (args) => {
+  if (args.NewValue < -1) {
+    dynamicValue.value = -1;
+  }
+};
 
-const example4Vue = `const dynamicValue = ref(1);
+const example1Code = computed(() => `<WinGrid
+  Width="100%"
+  RowDefinitions="Auto"
+  HorizontalAlignment="Stretch">
+  <WinNavigationView
+    Height="300"
+    PaneDisplayMode="${navigationPaneDisplayMode.value}"
+    :IsPaneOpen="${navigationIsPaneOpen.value}"
+    :MenuItems="[
+      { Content: '${t('text.home')}', Icon: '\\uE80F', Tag: 'Home' },
+      { Content: '${t('text.account')}', Icon: '\\uE77B', Tag: 'Account' },
+      {
+        Content: '${t('sample.infobadge.inbox')}',
+        Icon: '\\uE715',
+        Tag: 'Inbox',
+         'AutomationProperties.Name': '${t('sample.infobadge.inbox-notifications', { value: 5 })}',
+         InfoBadge: { Value: 5, Opacity: ${infoBadgeOpacity.value} }
+       }
+     ]"
+     HorizontalAlignment="Stretch">
+    <WinGrid />
+  </WinNavigationView>
+</WinGrid>`);
 
-<WinInfoBadge :value="dynamicValue"></WinInfoBadge>`;
+const example2Code = computed(() => `<WinStackPanel
+  HorizontalAlignment="Center"
+  Orientation="Horizontal"
+  Spacing="20">
+  <WinInfoBadge
+    Style="{StaticResource ${infoBadgeStyle.value}IconInfoBadgeStyle}"
+    HorizontalAlignment="Right" />
+  <WinInfoBadge
+    Style="{StaticResource ${infoBadgeStyle.value}ValueInfoBadgeStyle}"
+    HorizontalAlignment="Right"
+    :Value="10" />
+  <WinInfoBadge
+    Style="{StaticResource ${infoBadgeStyle.value}DotInfoBadgeStyle}"
+    VerticalAlignment="Center" />
+</WinStackPanel>`);
+
+const example3Code = computed(() => `<WinButton
+  Padding="0"
+  Width="200"
+  Height="60"
+  HorizontalAlignment="Center"
+  HorizontalContentAlignment="Stretch"
+  VerticalContentAlignment="Stretch"
+  ToolTipService.ToolTip="${t('sample.infobadge.refresh-required')}">
+  <WinGrid
+    Width="Auto"
+    Height="Auto"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch">
+    <WinTextBlock
+      Text="&#xE895;"
+      FontFamily="WinUIOnWebIcons"
+      HorizontalTextAlignment="Center" />
+    <WinInfoBadge
+      Background="#C42B1C"
+      HorizontalAlignment="Right"
+      VerticalAlignment="Top"
+      :IconSource="{ Glyph: '\\uF13C', FontFamily: 'WinUIOnWebIcons' }" />
+  </WinGrid>
+</WinButton>`);
+
+const example4Code = computed(() => `<WinInfoBadge
+  HorizontalAlignment="Center"
+  :Value="dynamicValue" />
+
+<WinNumberBox
+  v-model:Value="dynamicValue"
+  Header="${t('sample.infobadge.value')}"
+  :Minimum="-1"
+  SpinButtonPlacementMode="Inline"
+  @ValueChanged="onDynamicValueChanged" />`);
 </script>
 
 <style scoped>
+.page-heading {
+  position: relative;
+}
+
 .page-header {
   font-size: 28px;
   font-weight: 600;
-  margin: 0 0 8px 0;
+  margin: 0 0 8px;
   color: var(--text-primary);
 }
 
 .page-description {
-  font-size: 14px;
   color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
+  margin: 0 72px 16px 0;
+  line-height: 20px;
 }
 
 .page-header-actions {
@@ -289,45 +327,40 @@ const example4Vue = `const dynamicValue = ref(1);
   right: 0;
   display: flex;
   gap: 4px;
-  align-items: center;
 }
 
 .icon {
   font-size: 16px;
 }
 
-.number-input-container {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+:deep(.example-display > .example-theme-wrapper > .win-stack-panel),
+:deep(.example-display > .example-theme-wrapper > .win-btn),
+:deep(.example-display > .example-theme-wrapper > .win-infobadge) {
+  margin-inline: auto;
 }
 
-.number-input-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.number-input {
-  height: 32px;
-  padding: 0 8px;
-  border: 1px solid var(--ctrl-border-rest);
-  border-radius: 4px;
-  background: var(--ctrl-fill-default);
+.badge-button-grid :deep(.sample-sync-icon) {
+  align-self: center;
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 20px;
   color: var(--text-primary);
-  font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
-  font-size: 14px;
-  transition: all var(--fast-duration) var(--fast-out-slow-in);
 }
 
-.number-input:hover {
-  border-color: var(--ctrl-border-hover);
-  background: var(--ctrl-fill-secondary);
+.badge-button-grid {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-auto-flow: initial;
+  align-self: stretch;
 }
 
-.number-input:focus {
-  outline: none;
-  border-color: var(--accent-base);
-  background: var(--ctrl-fill-input-active);
+.badge-button-grid > * {
+  grid-column: 1;
+  grid-row: 1;
 }
+
 </style>

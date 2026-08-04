@@ -2,7 +2,14 @@
   <button
     v-bind="buttonAttrs"
     class="win-btn"
-    :class="[styleClass, attrs.class]"
+    :class="[
+      styleClass,
+      {
+        'content-horizontal-stretch': HorizontalContentAlignment === 'Stretch',
+        'content-vertical-stretch': VerticalContentAlignment === 'Stretch'
+      },
+      attrs.class
+    ]"
     :style="buttonStyle"
     :disabled="isDisabled"
     @click="onClick">
@@ -35,6 +42,8 @@ const props = defineProps({
   MinHeight: { type: [String, Number], default: '' },
   HorizontalAlignment: { type: String, default: '' },
   VerticalAlignment: { type: String, default: '' },
+  HorizontalContentAlignment: { type: String, default: '' },
+  VerticalContentAlignment: { type: String, default: '' },
   FontFamily: { type: String, default: '' },
   FontWeight: { type: String, default: '' },
   FontSize: { type: [String, Number], default: '' },
@@ -53,6 +62,15 @@ const buttonAttrs = computed(() => {
 });
 
 const isDisabled = computed(() => props.IsEnabled === false);
+
+const contentAlignment = (value) => ({
+  Left: 'flex-start',
+  Center: 'center',
+  Right: 'flex-end',
+  Stretch: 'stretch',
+  Top: 'flex-start',
+  Bottom: 'flex-end'
+}[value] ?? '');
 
 const styleClass = computed(() => {
   return {
@@ -109,6 +127,12 @@ const buttonStyle = computed(() => {
   if (props.MinHeight !== '') style.minHeight = cssLength(props.MinHeight);
   if (props.HorizontalAlignment) style.justifySelf = props.HorizontalAlignment.toLowerCase();
   if (props.VerticalAlignment) style.alignSelf = props.VerticalAlignment.toLowerCase();
+  if (props.HorizontalContentAlignment) {
+    style.justifyContent = props.HorizontalContentAlignment === 'Stretch'
+      ? 'flex-start'
+      : contentAlignment(props.HorizontalContentAlignment);
+  }
+  if (props.VerticalContentAlignment) style.alignItems = contentAlignment(props.VerticalContentAlignment);
   if (props.FontFamily) style.fontFamily = props.FontFamily;
   if (props.FontWeight) style.fontWeight = props.FontWeight;
   if (props.FontSize !== '') style.fontSize = cssLength(props.FontSize);
@@ -240,9 +264,18 @@ const onClick = (event) => {
       --AccentButtonBorderBrushDisabled: var(--ControlFillColorTransparentBrush, transparent);
     }
 
-    .win-btn .win-text-block {
+  .win-btn .win-text-block {
       color: inherit;
     }
+
+  .win-btn.content-horizontal-stretch > * {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .win-btn.content-vertical-stretch > * {
+    align-self: stretch;
+  }
 
     .win-btn.SubtleButtonStyle {
       --ButtonBackground: var(--SubtleButtonBackground);

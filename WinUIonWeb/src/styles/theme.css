@@ -365,6 +365,7 @@
   --SystemControlHighlightAltBaseMediumHighBrush: rgba(0, 0, 0, 0.80);
   --SystemControlHighlightAltBaseHighBrush: #000000;
   --SystemControlDisabledBaseMediumLowBrush: rgba(0, 0, 0, 0.40);
+  --TextFillColorInverseBrush: #FFFFFF;
   --TextOnAccentFillColorPrimaryBrush: #FFFFFF;
   --TextOnAccentFillColorSecondaryBrush: rgba(255, 255, 255, 0.70);
   --TextOnAccentFillColorDisabledBrush: #FFFFFF;
@@ -391,6 +392,17 @@
   --AccentFillColorSecondaryBrush: rgba(0, 103, 192, 0.90);
   --AccentFillColorTertiaryBrush: rgba(0, 103, 192, 0.80);
   --AccentFillColorDisabledBrush: rgba(0, 0, 0, 0.22);
+  --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
+  --SystemFillColorAttentionBrush: #0067C0;
+  --SystemFillColorSuccessBrush: #0F7B0F;
+  --SystemFillColorCautionBrush: #9D5D00;
+  --SystemFillColorCriticalBrush: #C42B1C;
+  --SystemFillColorSolidNeutralBrush: #8A8A8A;
+  --SystemFillColorAttentionBackgroundBrush: rgba(246, 246, 246, 0.50);
+  --SystemFillColorSuccessBackgroundBrush: #DFF6DD;
+  --SystemFillColorCautionBackgroundBrush: #FFF4CE;
+  --SystemFillColorCriticalBackgroundBrush: #FDE7E9;
+  --SystemFillColorSolidNeutralBackgroundBrush: #F3F3F3;
   --SolidBackgroundFillColorBaseBrush: #F3F3F3;
   --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.70);
   --CardBackgroundFillColorSecondaryBrush: rgba(246, 246, 246, 0.50);
@@ -486,6 +498,7 @@
     --SystemControlHighlightAltBaseMediumHighBrush: rgba(255, 255, 255, 0.80);
     --SystemControlHighlightAltBaseHighBrush: #FFFFFF;
     --SystemControlDisabledBaseMediumLowBrush: rgba(255, 255, 255, 0.40);
+    --TextFillColorInverseBrush: rgba(0, 0, 0, 0.89);
     --TextOnAccentFillColorPrimaryBrush: #000000;
     --TextOnAccentFillColorSecondaryBrush: rgba(0, 0, 0, 0.50);
     --TextOnAccentFillColorDisabledBrush: rgba(255, 255, 255, 0.53);
@@ -512,6 +525,17 @@
     --AccentFillColorSecondaryBrush: rgba(76, 194, 255, 0.90);
     --AccentFillColorTertiaryBrush: rgba(76, 194, 255, 0.80);
     --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
+    --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
+    --SystemFillColorAttentionBrush: #4CC2FF;
+    --SystemFillColorSuccessBrush: #6CCB5F;
+    --SystemFillColorCautionBrush: #FCE100;
+    --SystemFillColorCriticalBrush: #FF99A4;
+    --SystemFillColorSolidNeutralBrush: #9D9D9D;
+    --SystemFillColorAttentionBackgroundBrush: rgba(255, 255, 255, 0.0314);
+    --SystemFillColorSuccessBackgroundBrush: #393D1B;
+    --SystemFillColorCautionBackgroundBrush: #433519;
+    --SystemFillColorCriticalBackgroundBrush: #442726;
+    --SystemFillColorSolidNeutralBackgroundBrush: #2E2E2E;
     --SolidBackgroundFillColorBaseBrush: #202020;
     --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.0512);
     --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
@@ -670,6 +694,7 @@ html.theme-light {
   --SystemControlHighlightAltBaseMediumHighBrush: rgba(0, 0, 0, 0.80);
   --SystemControlHighlightAltBaseHighBrush: #000000;
   --SystemControlDisabledBaseMediumLowBrush: rgba(0, 0, 0, 0.40);
+  --TextFillColorInverseBrush: #FFFFFF;
   --TextOnAccentFillColorPrimaryBrush: #FFFFFF;
   --TextOnAccentFillColorSecondaryBrush: rgba(255, 255, 255, 0.70);
   --TextOnAccentFillColorDisabledBrush: #FFFFFF;
@@ -696,6 +721,17 @@ html.theme-light {
   --AccentFillColorSecondaryBrush: rgba(0, 103, 192, 0.90);
   --AccentFillColorTertiaryBrush: rgba(0, 103, 192, 0.80);
   --AccentFillColorDisabledBrush: rgba(0, 0, 0, 0.22);
+  --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
+  --SystemFillColorAttentionBrush: #0067C0;
+  --SystemFillColorSuccessBrush: #0F7B0F;
+  --SystemFillColorCautionBrush: #9D5D00;
+  --SystemFillColorCriticalBrush: #C42B1C;
+  --SystemFillColorSolidNeutralBrush: #8A8A8A;
+  --SystemFillColorAttentionBackgroundBrush: rgba(246, 246, 246, 0.50);
+  --SystemFillColorSuccessBackgroundBrush: #DFF6DD;
+  --SystemFillColorCautionBackgroundBrush: #FFF4CE;
+  --SystemFillColorCriticalBackgroundBrush: #FDE7E9;
+  --SystemFillColorSolidNeutralBackgroundBrush: #F3F3F3;
   --SolidBackgroundFillColorBaseBrush: #F3F3F3;
   --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.70);
   --CardBackgroundFillColorSecondaryBrush: rgba(246, 246, 246, 0.50);
@@ -802,6 +838,7 @@ html.theme-dark {
   --SystemControlHighlightAltBaseMediumHighBrush: rgba(255, 255, 255, 0.80);
   --SystemControlHighlightAltBaseHighBrush: #FFFFFF;
   --SystemControlDisabledBaseMediumLowBrush: rgba(255, 255, 255, 0.40);
+  --TextFillColorInverseBrush: rgba(0, 0, 0, 0.89);
   --TextOnAccentFillColorPrimaryBrush: #000000;
   --TextOnAccentFillColorSecondaryBrush: rgba(0, 0, 0, 0.50);
   --TextOnAccentFillColorDisabledBrush: rgba(255, 255, 255, 0.53);
@@ -828,6 +865,17 @@ html.theme-dark {
   --AccentFillColorSecondaryBrush: rgba(76, 194, 255, 0.90);
   --AccentFillColorTertiaryBrush: rgba(76, 194, 255, 0.80);
   --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
+  --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
+  --SystemFillColorAttentionBrush: #4CC2FF;
+  --SystemFillColorSuccessBrush: #6CCB5F;
+  --SystemFillColorCautionBrush: #FCE100;
+  --SystemFillColorCriticalBrush: #FF99A4;
+  --SystemFillColorSolidNeutralBrush: #9D9D9D;
+  --SystemFillColorAttentionBackgroundBrush: rgba(255, 255, 255, 0.0314);
+  --SystemFillColorSuccessBackgroundBrush: #393D1B;
+  --SystemFillColorCautionBackgroundBrush: #433519;
+  --SystemFillColorCriticalBackgroundBrush: #442726;
+  --SystemFillColorSolidNeutralBackgroundBrush: #2E2E2E;
   --SolidBackgroundFillColorBaseBrush: #202020;
   --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.0512);
   --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
@@ -933,29 +981,6 @@ html .basic-input-example-theme:has(.example-display[data-theme='light']) .examp
 .win-theme-scope.theme-dark,
 html .basic-input-example-theme:has(.example-display[data-theme='dark']) .example-container {
   --accent-text-fill-color-primary: #99EBFF;
-}
-
-html .basic-input-example-theme:has(.example-display[data-theme='light']) .example-options .win-textbox,
-html .basic-input-example-theme:has(.example-display[data-theme='dark']) .example-options .win-textbox {
-  --textbox-background: var(--control-fill-color-default);
-  --textbox-background-pointer-over: var(--control-fill-color-secondary);
-  --textbox-background-pressed: var(--control-fill-color-tertiary);
-  --textbox-background-focused: var(--control-fill-color-input-active);
-  --textbox-background-disabled: var(--control-fill-color-disabled);
-  --textbox-border-top: var(--control-stroke-color-default);
-  --textbox-border-bottom: var(--control-strong-stroke-color-default);
-  --textbox-border-focused: var(--accent-base);
-  --textbox-foreground: var(--text-primary);
-  --textbox-foreground-pointer-over: var(--text-primary);
-  --textbox-foreground-focused: var(--text-primary);
-  --textbox-foreground-disabled: var(--text-disabled);
-  --textbox-placeholder-foreground: var(--text-secondary);
-  --textbox-placeholder-foreground-pointer-over: var(--text-secondary);
-  --textbox-placeholder-foreground-focused: var(--text-secondary);
-  --textbox-placeholder-foreground-disabled: var(--text-disabled);
-  --textbox-button-foreground: var(--text-secondary);
-  --textbox-button-foreground-pointer-over: var(--text-secondary);
-  --textbox-button-foreground-pressed: var(--text-tertiary);
 }
 
 .page-header-actions > .header-action,

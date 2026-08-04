@@ -23,31 +23,41 @@
             :class="{ wide: !YearVisible }"
             @mouseenter="hoverCol = 'month'"
             @mouseleave="hoverCol = ''">
-            <button
+            <WinButton
               v-show="hoverCol === 'month'"
+              Style="SubtleButtonStyle"
               class="picker-arrow picker-arrow-up"
-              :class="{ pressed: pressedKey === 'month-up' }"
+              Padding="0"
+              MinWidth="0"
+              MinHeight="0"
+              CornerRadius="0"
+              FontSize="8"
               @pointerdown="startRepeating('month', -1)"
               @pointerup="stopRepeating"
               @pointercancel="stopRepeating"
               @pointerleave="stopRepeating"
-              @click="scrollUp('month')">
+              @Click="scrollUp('month')">
               <span class="icon" aria-hidden="true">&#xEDDB;</span>
-            </button>
+            </WinButton>
             <div class="picker-column" @wheel.prevent="onWheel($event, 'month')">
               <div v-for="(item, i) in monthDisplay" :key="'m' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
             </div>
-            <button
+            <WinButton
               v-show="hoverCol === 'month'"
+              Style="SubtleButtonStyle"
               class="picker-arrow picker-arrow-down"
-              :class="{ pressed: pressedKey === 'month-down' }"
+              Padding="0"
+              MinWidth="0"
+              MinHeight="0"
+              CornerRadius="0"
+              FontSize="8"
               @pointerdown="startRepeating('month', 1)"
               @pointerup="stopRepeating"
               @pointercancel="stopRepeating"
               @pointerleave="stopRepeating"
-              @click="scrollDown('month')">
+              @Click="scrollDown('month')">
               <span class="icon" aria-hidden="true">&#xEDDC;</span>
-            </button>
+            </WinButton>
           </div>
 
           <div v-if="MonthVisible && DayVisible" class="picker-col-divider"></div>
@@ -57,31 +67,41 @@
             class="picker-col-wrapper picker-day"
             @mouseenter="hoverCol = 'day'"
             @mouseleave="hoverCol = ''">
-            <button
+            <WinButton
               v-show="hoverCol === 'day'"
+              Style="SubtleButtonStyle"
               class="picker-arrow picker-arrow-up"
-              :class="{ pressed: pressedKey === 'day-up' }"
+              Padding="0"
+              MinWidth="0"
+              MinHeight="0"
+              CornerRadius="0"
+              FontSize="8"
               @pointerdown="startRepeating('day', -1)"
               @pointerup="stopRepeating"
               @pointercancel="stopRepeating"
               @pointerleave="stopRepeating"
-              @click="scrollUp('day')">
+              @Click="scrollUp('day')">
               <span class="icon" aria-hidden="true">&#xEDDB;</span>
-            </button>
+            </WinButton>
             <div class="picker-column" @wheel.prevent="onWheel($event, 'day')">
               <div v-for="(item, i) in dayDisplay" :key="'d' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
             </div>
-            <button
+            <WinButton
               v-show="hoverCol === 'day'"
+              Style="SubtleButtonStyle"
               class="picker-arrow picker-arrow-down"
-              :class="{ pressed: pressedKey === 'day-down' }"
+              Padding="0"
+              MinWidth="0"
+              MinHeight="0"
+              CornerRadius="0"
+              FontSize="8"
               @pointerdown="startRepeating('day', 1)"
               @pointerup="stopRepeating"
               @pointercancel="stopRepeating"
               @pointerleave="stopRepeating"
-              @click="scrollDown('day')">
+              @Click="scrollDown('day')">
               <span class="icon" aria-hidden="true">&#xEDDC;</span>
-            </button>
+            </WinButton>
           </div>
 
           <template v-if="YearVisible">
@@ -90,39 +110,49 @@
               class="picker-col-wrapper picker-year"
               @mouseenter="hoverCol = 'year'"
               @mouseleave="hoverCol = ''">
-              <button
+              <WinButton
                 v-show="hoverCol === 'year'"
+                Style="SubtleButtonStyle"
                 class="picker-arrow picker-arrow-up"
-                :class="{ pressed: pressedKey === 'year-up' }"
+                Padding="0"
+                MinWidth="0"
+                MinHeight="0"
+                CornerRadius="0"
+                FontSize="8"
                 @pointerdown="startRepeating('year', -1)"
                 @pointerup="stopRepeating"
                 @pointercancel="stopRepeating"
                 @pointerleave="stopRepeating"
-                @click="scrollUp('year')">
+                @Click="scrollUp('year')">
                 <span class="icon" aria-hidden="true">&#xEDDB;</span>
-              </button>
+              </WinButton>
               <div class="picker-column" @wheel.prevent="onWheel($event, 'year')">
                 <div v-for="(item, i) in yearDisplay" :key="'y' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
               </div>
-              <button
+              <WinButton
                 v-show="hoverCol === 'year'"
+                Style="SubtleButtonStyle"
                 class="picker-arrow picker-arrow-down"
-                :class="{ pressed: pressedKey === 'year-down' }"
+                Padding="0"
+                MinWidth="0"
+                MinHeight="0"
+                CornerRadius="0"
+                FontSize="8"
                 @pointerdown="startRepeating('year', 1)"
                 @pointerup="stopRepeating"
                 @pointercancel="stopRepeating"
                 @pointerleave="stopRepeating"
-                @click="scrollDown('year')">
+                @Click="scrollDown('year')">
                 <span class="icon" aria-hidden="true">&#xEDDC;</span>
-              </button>
+              </WinButton>
             </div>
           </template>
 
           <div class="picker-highlight"></div>
         </div>
         <div class="picker-actions">
-          <button class="picker-action-btn" :aria-label="t('text.accept')" v-bind="{ 'tooltipservice.tooltip': t('text.accept') }" @click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></button>
-          <button class="picker-action-btn" :aria-label="t('text.cancel')" v-bind="{ 'tooltipservice.tooltip': t('text.cancel') }" @click="close(false)"><span class="icon" aria-hidden="true">&#xE711;</span></button>
+          <WinButton Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.accept')" v-bind="{ 'tooltipservice.tooltip': t('text.accept') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></WinButton>
+          <WinButton Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.cancel')" v-bind="{ 'tooltipservice.tooltip': t('text.cancel') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(false)"><span class="icon" aria-hidden="true">&#xE711;</span></WinButton>
         </div>
       </div>
     </Teleport>
@@ -166,7 +196,6 @@ const containerRef = ref(null);
 const flyoutRef = ref(null);
 const flyoutStyle = ref({});
 const hoverCol = ref('');
-const pressedKey = ref('');
 let repeatDelayTimer = 0;
 let repeatTimer = 0;
 
@@ -289,7 +318,6 @@ function repeatStep(type, direction) {
 
 function startRepeating(type, direction) {
   stopRepeating();
-  pressedKey.value = `${type}-${direction < 0 ? 'up' : 'down'}`;
   repeatDelayTimer = window.setTimeout(() => {
     repeatStep(type, direction);
     repeatTimer = window.setInterval(() => repeatStep(type, direction), 80);
@@ -301,7 +329,6 @@ function stopRepeating() {
   window.clearInterval(repeatTimer);
   repeatDelayTimer = 0;
   repeatTimer = 0;
-  pressedKey.value = '';
 }
 
 const clampDate = (date) => {
@@ -391,21 +418,6 @@ function onWheel(event, type) {
     border-radius: 4px;
     font-size: 14px;
     gap: 0;
-    --ButtonBackground: var(--ctrl-fill-default);
-    --ButtonBackgroundPointerOver: var(--ctrl-fill-secondary);
-    --ButtonBackgroundPressed: var(--ctrl-fill-tertiary);
-    --ButtonBackgroundDisabled: var(--ctrl-fill-disabled, var(--ctrl-fill-tertiary));
-    --ButtonBorderBrush: var(--ctrl-border-rest);
-    --ButtonBorderBrushTop: var(--ButtonBorderBrush);
-    --ButtonBorderBrushPointerOver: var(--ctrl-border-rest);
-    --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushPointerOver);
-    --ButtonBorderBrushPressed: var(--ctrl-border-rest);
-    --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
-    --ButtonBorderBrushDisabled: var(--ctrl-border-disabled, var(--ctrl-border-rest));
-    --ButtonBorderBrushDisabledTop: var(--ButtonBorderBrushDisabled);
-    --ButtonBorderBrushBottom: var(--ctrl-border-accent);
-    --ButtonBorderBrushPointerOverBottom: var(--ctrl-border-accent);
-    --ButtonBorderBrushPressedBottom: var(--ctrl-border-rest);
   }
 
   .picker-btn.has-no-date {
@@ -577,17 +589,14 @@ function onWheel(event, type) {
     left: 0;
     right: 0;
     height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--ctrl-solid-fill);
-    border: none;
-    color: var(--text-secondary);
-    font-size: 8px;
-    cursor: pointer;
     z-index: 3;
-    border-radius: 0;
-    transition: color var(--fast-duration);
+    --SubtleButtonBackground: var(--ctrl-solid-fill);
+    --SubtleButtonBackgroundPointerOver: var(--ctrl-solid-fill);
+    --SubtleButtonBackgroundPressed: var(--ctrl-solid-fill);
+    --SubtleButtonBackgroundDisabled: var(--ctrl-solid-fill);
+    --SubtleButtonForeground: var(--text-secondary);
+    --SubtleButtonForegroundPointerOver: var(--text-primary);
+    --SubtleButtonForegroundPressed: var(--text-primary);
   }
 
   .picker-arrow-up {
@@ -598,20 +607,6 @@ function onWheel(event, type) {
     bottom: 0;
   }
 
-  .picker-arrow:hover {
-    background: var(--ctrl-solid-fill);
-    color: var(--text-secondary);
-  }
-
-  .picker-arrow.pressed {
-    background: var(--ctrl-solid-fill);
-  }
-
-  .picker-arrow.pressed .icon {
-    display: inline-flex;
-    transform: scale(0.875);
-  }
-
   .picker-actions {
     display: flex;
     height: 41px;
@@ -620,23 +615,5 @@ function onWheel(event, type) {
 
   .picker-action-btn {
     flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 4px;
-    border-radius: 4px;
   }
-
-    .picker-action-btn:hover {
-      background: var(--subtle-secondary);
-    }
-
-    .picker-action-btn:active {
-      background: var(--subtle-tertiary);
-    }
 </style>

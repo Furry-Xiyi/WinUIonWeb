@@ -52,7 +52,6 @@
             HorizontalScrollBarVisibility="Hidden"
             VerticalScrollMode="Disabled"
             VerticalScrollBarVisibility="Disabled"
-            ContentOrientation="Horizontal"
             ZoomMode="Disabled"
             :IsTabStop="false"
             @ViewChanged="UpdateNavigationButtons">

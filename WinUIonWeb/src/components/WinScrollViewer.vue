@@ -22,7 +22,7 @@
       :style="viewportStyle"
       :tabindex="effectiveIsTabStop ? 0 : -1"
       @scroll="handleScroll"
-      @wheel.passive="handleWheel"
+      @wheel="handleWheel"
       @touchstart.passive="handleTouchStart"
       @touchmove.passive="handleTouchMove"
       @touchend.passive="handleTouchEnd"
@@ -86,7 +86,6 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 type ZoomMode = 'Disabled' | 'Enabled'
 type ScrollMode = 'Disabled' | 'Enabled' | 'Auto'
 type ScrollBarVisibility = 'Disabled' | 'Auto' | 'Hidden' | 'Visible'
-type ContentOrientation = 'None' | 'Horizontal' | 'Vertical' | 'Both'
 type HorizontalAlignment = 'Left' | 'Center' | 'Right' | 'Stretch'
 type VerticalAlignment = 'Top' | 'Center' | 'Bottom' | 'Stretch'
 
@@ -100,7 +99,6 @@ interface Props {
   VerticalScrollMode?: ScrollMode
   HorizontalScrollBarVisibility?: ScrollBarVisibility
   VerticalScrollBarVisibility?: ScrollBarVisibility
-  ContentOrientation?: ContentOrientation
   IsVerticalScrollChainingEnabled?: boolean
   IsHorizontalScrollChainingEnabled?: boolean
   IsTabStop?: boolean
@@ -119,7 +117,6 @@ const props = withDefaults(defineProps<Props>(), {
   VerticalScrollMode: 'Auto',
   HorizontalScrollBarVisibility: 'Auto',
   VerticalScrollBarVisibility: 'Auto',
-  ContentOrientation: 'Vertical',
   IsVerticalScrollChainingEnabled: true,
   IsHorizontalScrollChainingEnabled: true,
   IsTabStop: false,
@@ -217,7 +214,6 @@ const effectiveHorizontalScrollMode = computed<ScrollMode>(() => props.Horizonta
 const effectiveVerticalScrollMode = computed<ScrollMode>(() => props.VerticalScrollMode)
 const effectiveHorizontalScrollBarVisibility = computed<ScrollBarVisibility>(() => props.HorizontalScrollBarVisibility)
 const effectiveVerticalScrollBarVisibility = computed<ScrollBarVisibility>(() => props.VerticalScrollBarVisibility)
-const effectiveContentOrientation = computed<ContentOrientation>(() => props.ContentOrientation)
 const effectiveIsVerticalScrollChainingEnabled = computed(() => props.IsVerticalScrollChainingEnabled)
 const effectiveIsHorizontalScrollChainingEnabled = computed(() => props.IsHorizontalScrollChainingEnabled)
 const effectiveIsTabStop = computed(() => props.IsTabStop)
@@ -278,17 +274,9 @@ const contentStyle = computed(() => {
     styles.transformOrigin = 'top left'
   }
 
-  if (effectiveContentOrientation.value === 'Horizontal') {
-    styles.display = 'inline-flex'
-    styles.minWidth = 'max-content'
-  } else if (effectiveContentOrientation.value === 'Both' || effectiveContentOrientation.value === 'None') {
-    styles.display = 'inline-block'
-    styles.minWidth = 'max-content'
-  } else {
-    styles.display = 'block'
-    styles.width = '100%'
-    styles.minWidth = '0'
-  }
+  styles.display = 'block'
+  styles.width = '100%'
+  styles.minWidth = '0'
 
   return styles
 })

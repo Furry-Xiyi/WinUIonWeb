@@ -618,8 +618,6 @@ onUnmounted(() => {
   color: inherit;
   background: transparent;
   border-radius: 8px;
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
 }
 
 .control-item-surface::before {

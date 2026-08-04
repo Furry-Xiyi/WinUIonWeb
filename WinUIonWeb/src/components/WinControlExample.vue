@@ -23,7 +23,9 @@
         </div>
 
         <aside v-if="hasOptions" class="example-options">
-          <slot name="options">{{ options }}</slot>
+          <WinThemeWrapper :theme="theme">
+            <slot name="options">{{ options }}</slot>
+          </WinThemeWrapper>
         </aside>
       </div>
 
@@ -55,7 +57,7 @@
                 class="copy-code-button"
                 v-bind="{ 'tooltipservice.tooltip': t('text.copy') }"
                 @Click="copyActiveCode">
-                <span class="icon"></span>
+                <WinTextBlock class="icon" Text="&#xE8C8;" />
               </WinButton>
             </div>
           </div>

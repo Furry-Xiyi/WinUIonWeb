@@ -39,6 +39,9 @@ const rootStyle = computed(() => {
   const style = {
     flexDirection: props.Orientation === 'Horizontal' ? 'row' : 'column',
     gap: cssLength(props.Spacing),
+    justifyContent: props.Orientation === 'Horizontal'
+      ? ({ Left: 'flex-start', Center: 'center', Right: 'flex-end', Stretch: 'stretch' }[props.HorizontalContentAlignment] ?? 'flex-start')
+      : 'flex-start',
     alignItems: props.Orientation === 'Horizontal'
       ? 'center'
       : ({ Left: 'flex-start', Center: 'center', Right: 'flex-end', Stretch: 'stretch' }[props.HorizontalContentAlignment] ?? 'stretch')
