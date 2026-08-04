@@ -349,10 +349,10 @@ const navMenuItems = [
     { Tag: 'semanticzoom', Icon: '\uE8A7', Content: t('text.semanticzoom') }
   ]},
   { Tag: 'statusandinfo', Icon: '\uE8F2', Content: t('text.status-and-info'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'infobadge', Icon: '\uF4AA', Content: t('text.infobadge') },
-    { Tag: 'infobar', Icon: '\uE946', Content: t('text.infobar') },
-    { Tag: 'progressbar', Icon: '\uE895', Content: t('text.progressbar') },
-    { Tag: 'progressring', Icon: '\uE895', Content: t('text.progressring') },
+    { Tag: 'infobadge', Icon: '\uEDAF', Content: t('text.infobadge') },
+    { Tag: 'infobar', Icon: '\uF167', Content: t('text.infobar') },
+    { Tag: 'progressbar', Icon: '\uE76F', Content: t('text.progressbar') },
+    { Tag: 'progressring', Icon: '\uF16A', Content: t('text.progressring') },
     { Tag: 'tooltip', Icon: '\uE946', Content: t('text.tooltip') }
   ]},
   { Tag: 'text', Icon: '\uE8D2', Content: t('text.text'), SelectsOnInvoked: false, MenuItems: [

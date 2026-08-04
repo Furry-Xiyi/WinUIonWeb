@@ -1,161 +1,133 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">ProgressBar</h1>
-          <p class="page-description">
-            The ProgressBar has two different visual representations: Determinate (shows specific progress toward completion), and Indeterminate (shows that an operation is underway, but doesn't block user interaction).
-          </p>
-          <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"
-             >
-              <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-             >
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
-          </div>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+        <WinTextBlock class="page-header" :Text="$t('text.progressbar')" />
+        <WinTextBlock
+          class="page-description"
+          :Text="$t('text.progressbar-description')"
+          TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+          <WinToggleButton
+            :IsChecked="isFavoriteState"
+            class="header-action"
+            @update:IsChecked="toggleFavorite">
+            <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+          </WinToggleButton>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example 1: An indeterminate progress bar -->
-            <WinControlExample
-              headerText="An indeterminate progress bar"
-              :theme="pageTheme"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <WinProgressBar
-                  :width="130"
-                  :isIndeterminate="true"
-                  :showError="progressState === 'error'"
-                  :showPaused="progressState === 'paused'" />
-              </template>
-              <template #options>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                  <p style="margin: 0 0 4px 0; font-weight: 600; font-size: 14px;">Progress state</p>
-                  <WinRadioButton
-                    v-model="progressState"
-                    value="running">
-                    Running
-                  </WinRadioButton>
-                  <WinRadioButton
-                    v-model="progressState"
-                    value="paused">
-                    Paused
-                  </WinRadioButton>
-                  <WinRadioButton
-                    v-model="progressState"
-                    value="error">
-                    Error
-                  </WinRadioButton>
-                </div>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 2: A determinate progress bar -->
-            <WinControlExample
-              headerText="A determinate progress bar"
-              :theme="pageTheme"
-              :templateCode="example2Template"
-              :vueCode="example2Vue">
-              <template #example>
-                <div style="display: flex; align-items: center; gap: 16px;">
-                  <WinProgressBar
-                    :width="130"
-                    :value="progressValue" />
-                  <span class="output-text">{{ progressValue }}%</span>
-                </div>
-
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <label style="margin: 0; font-size: 14px; color: var(--text-primary);">Progress</label>
-                  <WinNumberBox
-                    v-model="progressValue"
-                    :minimum="0"
-                    :maximum="100"
-                    :spinButtonPlacementMode="'Inline'"
-                    style="width: 120px;" />
-                </div>
-              </template>
-            </WinControlExample>
       </div>
-    </WinScrollViewer>
-  </div>
+
+      <div class="gallery-page-content">
+        <WinControlExample
+          class="basic-input-example-theme"
+          :theme="pageTheme"
+          :vue="indeterminateExampleCode"
+          :headerText="$t('sample.progressbar.indeterminate')">
+          <template #example>
+            <WinProgressBar
+              Width="130"
+              Margin="10,10,0,0"
+              VerticalAlignment="Top"
+              IsIndeterminate="True"
+              :ShowError="ProgressBarState.ShowError"
+              :ShowPaused="ProgressBarState.ShowPaused" />
+          </template>
+          <template #options>
+            <WinRadioButtons
+              v-model:SelectedIndex="progressStateIndex"
+              :Header="$t('sample.progressbar.progress-state')"
+              :ItemsSource="progressStateItems" />
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          class="basic-input-example-theme"
+          :theme="pageTheme"
+          :vue="determinateExampleCode"
+          :headerText="$t('sample.progressbar.determinate')">
+          <template #example>
+            <div class="determinate-example">
+              <WinProgressBar
+                Width="130"
+                :Value="progressValue"
+                AutomationProperties.Name="Determinate ProgressBar example" />
+              <WinTextBlock
+                Width="60"
+                aria-hidden="true"
+                style="width: 60px; min-width: 60px; flex: 0 0 60px;" />
+              <WinTextBlock
+                Margin="0,0,10,0"
+                VerticalAlignment="Center"
+                :Text="$t('sample.progressbar.progress')" />
+              <WinNumberBox
+                v-model:Value="progressValue"
+                AutomationProperties.LabeledBy="ProgressLabel"
+                AutomationProperties.Name="NumberBox controlling ProgressBar2 value"
+                :Maximum="100"
+                :Minimum="0"
+                SpinButtonPlacementMode="Inline"
+                :Width="120"
+                @ValueChanged="onProgressValueChanged" />
+            </div>
+          </template>
+        </WinControlExample>
+      </div>
+    </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
-import WinProgressBar from '../../components/WinProgressBar.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
 import WinNumberBox from '../../components/WinNumberBox.vue';
+import WinProgressBar from '../../components/WinProgressBar.vue';
+import WinRadioButtons from '../../components/WinRadioButtons.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinToggleButton from '../../components/WinToggleButton.vue';
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'progressbar');
-
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Example 1: Indeterminate ProgressBar with states
-const progressState = ref('running');
+const progressStateIndex = ref(0);
+const progressStateItems = computed(() => [
+  { Text: t('sample.progressbar.running'), Value: 'Running' },
+  { Text: t('sample.progressbar.paused'), Value: 'Paused' },
+  { Text: t('sample.progressbar.error'), Value: 'Error' }
+]);
+const ProgressBarState = computed(() => ({
+  ShowPaused: progressStateIndex.value === 1 ? 'True' : 'False',
+  ShowError: progressStateIndex.value === 2 ? 'True' : 'False'
+}));
 
-const example1Template = `<WinProgressBar
-  :width="130"
-  :isIndeterminate="true"
-  :showError="progressState === 'error'"
-  :showPaused="progressState === 'paused'" />`;
-
-const example1Vue = `const progressState = ref('running');`;
-
-// Example 2: Determinate ProgressBar
 const progressValue = ref(0);
 
-const example2Template = `<div style="display: flex; align-items: center; gap: 16px;">
-  <WinProgressBar
-    :width="130"
-    :value="progressValue" />
-  <span>{{ progressValue }}%</span>
-</div>`;
+const onProgressValueChanged = ({ NewValue }) => {
+  if (Number.isNaN(NewValue)) progressValue.value = 0;
+};
 
-const example2Vue = `const progressValue = ref(0);`;
+const indeterminateExampleCode = computed(() => `<WinProgressBar
+  Width="130"
+  Margin="10,10,0,0"
+  VerticalAlignment="Top"
+  IsIndeterminate="True"
+  ShowPaused="${ProgressBarState.value.ShowPaused}"
+  ShowError="${ProgressBarState.value.ShowError}" />`);
+
+const determinateExampleCode = computed(() => `<WinProgressBar Width="130" :Value="progressValue" />`);
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-}
-
-.output-text {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  margin: 0;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.icon { font-size: 16px; }
+.determinate-example { display: flex; align-items: center; flex-wrap: nowrap; gap: 0; width: 100%; }
 </style>

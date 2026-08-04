@@ -233,7 +233,9 @@ export default {
   "text.pivot-description": "Pivot is not recommended for Windows 11 design patterns. Please use the SelectorBar and SelectorBarItem. A Pivot allows you to show a collection of items from different sources in a tabbed view.",
   "text.popup-with-offset-positioning": "Popup with offset positioning.",
   "text.progressbar": "ProgressBar",
+  "text.progressbar-description": "The ProgressBar has two different visual representations: Indeterminate shows that a task is ongoing, while Determinate shows how much progress has been made on a known amount of work.",
   "text.progressring": "ProgressRing",
+  "text.progressring-description": "The ProgressRing has two different visual representations: Indeterminate shows that a task is ongoing, but blocks user interaction. Determinate shows how much progress has been made on a known amount of work.",
   "text.pull-down-to-refresh": "Pull down to refresh",
   "text.pulltorefresh": "PullToRefresh",
   "text.itemsrepeater-description": "The ItemsRepeater is a light-weight control for displaying repeating data. It's highly customizable through flexible layout options and supports virtualizing layout. Use ItemsRepeater when you need more control over layout than what you get from a ListView or GridView.",
@@ -901,4 +903,19 @@ export default {
      ,"sample.infobar.hyperlink": "Hyperlink"
      ,"sample.infobar.action": "Action"
      ,"sample.infobar.informational-link": "Informational link"
+     ,"sample.progressbar.indeterminate": "An indeterminate progress bar."
+     ,"sample.progressbar.determinate": "A determinate progress bar."
+     ,"sample.progressbar.progress-state": "Progress state"
+     ,"sample.progressbar.running": "Running"
+     ,"sample.progressbar.paused": "Paused"
+     ,"sample.progressbar.error": "Error"
+     ,"sample.progressbar.progress": "Progress"
+     ,"sample.progressring.indeterminate": "An indeterminate progress ring."
+     ,"sample.progressring.determinate": "A determinate progress ring."
+     ,"sample.progressring.progress-options": "Progress Options"
+     ,"sample.progressring.working": "Working"
+     ,"sample.progressring.do-work": "Do work"
+     ,"sample.progressring.background-color": "Background color"
+     ,"sample.progressring.pick-color": "Pick a color"
+     ,"sample.progressring.progress": "Progress"
   };

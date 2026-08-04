@@ -1,167 +1,152 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">ProgressRing</h1>
-          <p class="page-description">
-            Progress controls provide feedback to the user that a long-running operation is underway. The ProgressRing can indicate that the user cannot interact with the app when the ring is visible, and can also indicate an approximate wait time when the progress is determinate.
-          </p>
-          <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"
-             >
-              <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-             >
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
-          </div>
+  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+        <WinTextBlock class="page-header" :Text="$t('text.progressring')" />
+        <WinTextBlock
+          class="page-description"
+          :Text="$t('text.progressring-description')"
+          TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
+          <WinToggleButton
+            :IsChecked="isFavoriteState"
+            class="header-action"
+            @update:IsChecked="toggleFavorite">
+            <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+          </WinToggleButton>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example 1: An indeterminate progress ring -->
-            <WinControlExample
-              headerText="An indeterminate progress ring"
-              :theme="pageTheme"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <WinProgressRing
-                  Width="60"
-                  Height="60"
-                  :IsActive="isActive" />
-              </template>
-              <template #options>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                  <WinToggleSwitch
-                    v-model="isActive"
-                    header="Progress Options"
-                    onContent="Working"
-                    offContent="Do work"
-                  />
-                  <WinComboBox
-                    v-model:SelectedValue="selectedBackground1"
-                    Header="Background color"
-                    PlaceholderText="Pick a color"
-                    :ItemsSource="backgroundOptions"
-                    DisplayMemberPath="label"
-                    SelectedValuePath="value"
-                    style="width: 200px;"
-                  />
-                </div>
-              </template>
-            </WinControlExample>
-
-            <!-- Example 2: A determinate progress ring -->
-            <WinControlExample
-              headerText="A determinate progress ring"
-              :theme="pageTheme"
-              :templateCode="example2Template"
-              :vueCode="example2Vue">
-              <template #example>
-                <div style="display: flex; align-items: center; gap: 60px;">
-                  <WinProgressRing Width="60" Height="60" />
-                  <div style="display: flex; flex-direction: column; gap: 8px; min-width: 120px;">
-                    <label style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Progress</label>
-                    <WinSlider
-                      v-model="progressValue"
-                      :min="0"
-                      :max="100"
-                      style="width: 200px;"
-                    />
-                    <div style="font-size: 14px; color: var(--text-primary);">
-                      {{ Math.round(progressValue) }}
-                    </div>
-                  </div>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                  <WinComboBox
-                    v-model:SelectedValue="selectedBackground2"
-                    Header="Background color"
-                    PlaceholderText="Pick a color"
-                    :ItemsSource="backgroundOptions"
-                    DisplayMemberPath="label"
-                    SelectedValuePath="value"
-                    style="width: 200px;"
-                  />
-                </div>
-              </template>
-            </WinControlExample>
       </div>
-    </WinScrollViewer>
-  </div>
+
+      <div class="gallery-page-content">
+        <WinControlExample
+          class="basic-input-example-theme"
+          :theme="pageTheme"
+          :vue="indeterminateExampleCode"
+          :headerText="$t('sample.progressring.indeterminate')">
+          <template #example>
+            <WinProgressRing
+              Width="60"
+              Height="60"
+              Margin="10,10,0,0"
+              VerticalAlignment="Top"
+              AutomationProperties.Name="Progress image"
+              :IsActive="isActive"
+              :Background="backgroundBrush(selectedBackground1)" />
+          </template>
+          <template #options>
+            <div class="progress-ring-options">
+              <WinToggleSwitch
+                v-model:IsOn="isActive"
+                :Header="$t('sample.progressring.progress-options')"
+                :OnContent="$t('sample.progressring.working')"
+                :OffContent="$t('sample.progressring.do-work')" />
+              <WinComboBox
+                v-model:SelectedValue="selectedBackground1"
+                Width="200"
+                :Header="$t('sample.progressring.background-color')"
+                :PlaceholderText="$t('sample.progressring.pick-color')"
+                :ItemsSource="backgroundOptions" />
+            </div>
+          </template>
+        </WinControlExample>
+
+        <WinControlExample
+          class="basic-input-example-theme"
+          :theme="pageTheme"
+          :vue="determinateExampleCode"
+          :headerText="$t('sample.progressring.determinate')">
+          <template #example>
+            <div class="determinate-example">
+              <WinProgressRing
+                Width="60"
+                Height="60"
+                Margin="0,0,60,0"
+                AutomationProperties.Name="Progress image"
+                IsIndeterminate="False"
+                :Value="progressValue"
+                :Background="backgroundBrush(selectedBackground2)" />
+              <WinNumberBox
+                MinWidth="120"
+                VerticalAlignment="Center"
+                AutomationProperties.Name="Progress amount"
+                :Header="$t('sample.progressring.progress')"
+                Maximum="100"
+                Minimum="0"
+                SpinButtonPlacementMode="Inline"
+                v-model:Value="progressValue"
+                @ValueChanged="onProgressValueChanged" />
+            </div>
+          </template>
+          <template #options>
+            <div class="progress-ring-options">
+              <WinComboBox
+                v-model:SelectedValue="selectedBackground2"
+                Width="200"
+                :Header="$t('sample.progressring.background-color')"
+                :PlaceholderText="$t('sample.progressring.pick-color')"
+                :ItemsSource="backgroundOptions" />
+            </div>
+          </template>
+        </WinControlExample>
+      </div>
+    </div>
+  </WinScrollViewer>
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
-import WinProgressRing from '../../components/WinProgressRing.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
+import WinComboBox from '../../components/WinComboBox.vue';
+import WinControlExample from '../../components/WinControlExample.vue';
+import WinNumberBox from '../../components/WinNumberBox.vue';
+import WinProgressRing from '../../components/WinProgressRing.vue';
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinSlider from '../../components/WinSlider.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'progressring');
-
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-// Background options
-const backgroundOptions = [
-  { value: 'transparent', label: 'Transparent' },
-  { value: 'lightgray', label: 'LightGray' }
-];
-
-// Example 1: Indeterminate ProgressRing
+const backgroundOptions = ['Transparent', 'LightGray'];
+const selectedBackground1 = ref();
+const selectedBackground2 = ref();
 const isActive = ref(true);
-const selectedBackground1 = ref('transparent');
-
-const example1Template = `<WinProgressRing :IsActive="isActive" Width="60" Height="60" />`;
-
-const example1Vue = `const isActive = ref(true);
-
-// Toggle isActive to start/stop the ring`;
-
-// Example 2: Determinate ProgressRing
 const progressValue = ref(0);
-const selectedBackground2 = ref('transparent');
 
-const example2Template = `<WinProgressRing Width="60" Height="60" />`;
+const backgroundBrush = (value) => value === 'LightGray' ? 'LightGray' : 'Transparent';
+const backgroundMarkup = (value) => value ? `\n  Background="${value}"` : '';
 
-const example2Vue = `const progressValue = ref(0);
+const onProgressValueChanged = ({ NewValue }) => {
+  if (Number.isNaN(NewValue)) progressValue.value = 0;
+};
 
-// Use WinSlider to control progressValue (0-100)`;
+const indeterminateExampleCode = computed(() => `<WinProgressRing
+  Width="60"
+  Height="60"
+  Margin="10,10,0,0"
+  VerticalAlignment="Top"
+  IsActive="${isActive.value ? 'True' : 'False'}"${backgroundMarkup(selectedBackground1.value)}
+  />`);
+
+const determinateExampleCode = computed(() => `<WinProgressRing
+  Width="60"
+  Height="60"
+  Margin="0,0,60,0"
+  IsIndeterminate="False"
+  :Value="progressValue"${backgroundMarkup(selectedBackground2.value)}
+  />`);
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.icon { font-size: 16px; }
+.progress-ring-options { display: flex; flex-direction: column; gap: 12px; }
+.determinate-example { display: flex; align-items: center; flex-wrap: nowrap; width: 100%; }
 </style>

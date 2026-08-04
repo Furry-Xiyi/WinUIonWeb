@@ -233,7 +233,9 @@ export default {
   "text.pivot-description": "不建议在 Windows 11 设计模式中使用 Pivot。请改用 SelectorBar 和 SelectorBarItem。Pivot 可在选项卡视图中显示来自不同来源的项目集合。",
   "text.popup-with-offset-positioning": "带偏移定位的弹出控件。",
   "text.progressbar": "进度条",
+  "text.progressbar-description": "ProgressBar 有两种不同的视觉表示形式：不确定状态表示任务正在进行，确定状态表示已知工作量的完成进度。",
   "text.progressring": "进度环",
+  "text.progressring-description": "ProgressRing 有两种不同的视觉表示形式：不确定状态表示任务正在进行，但会阻止用户交互；确定状态表示已知工作量的完成进度。",
   "text.pull-down-to-refresh": "下拉刷新",
   "text.pulltorefresh": "下拉刷新",
   "text.itemsrepeater-description": "ItemsRepeater 是用于显示重复数据的轻量控件。它可通过灵活的布局选项高度自定义，并支持虚拟化布局。当你需要比 ListView 或 GridView 更强的布局控制时，可以使用 ItemsRepeater。",
@@ -901,4 +903,19 @@ export default {
      ,"sample.infobar.hyperlink": "超链接"
      ,"sample.infobar.action": "操作"
      ,"sample.infobar.informational-link": "信息链接"
+     ,"sample.progressbar.indeterminate": "不确定进度条。"
+     ,"sample.progressbar.determinate": "确定进度条。"
+     ,"sample.progressbar.progress-state": "进度状态"
+     ,"sample.progressbar.running": "运行中"
+     ,"sample.progressbar.paused": "已暂停"
+     ,"sample.progressbar.error": "错误"
+     ,"sample.progressbar.progress": "进度"
+     ,"sample.progressring.indeterminate": "不确定进度环。"
+     ,"sample.progressring.determinate": "确定进度环。"
+     ,"sample.progressring.progress-options": "进度选项"
+     ,"sample.progressring.working": "工作中"
+     ,"sample.progressring.do-work": "执行工作"
+     ,"sample.progressring.background-color": "背景颜色"
+     ,"sample.progressring.pick-color": "选择颜色"
+     ,"sample.progressring.progress": "进度"
   };

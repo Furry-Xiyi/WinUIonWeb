@@ -87,6 +87,12 @@ const props = withDefaults(defineProps<{
   AcceptsExpression?: boolean;
   IsEnabled?: boolean;
   TextAlignment?: TextAlignment;
+  MinWidth?: number | string;
+  MinHeight?: number | string;
+  MaxWidth?: number | string;
+  MaxHeight?: number | string;
+  VerticalAlignment?: string;
+  HorizontalAlignment?: string;
   Width?: number | string;
 }>(), {
   Value: Number.NaN,
@@ -111,6 +117,12 @@ const props = withDefaults(defineProps<{
   AcceptsExpression: false,
   IsEnabled: true,
   TextAlignment: 'Left',
+  MinWidth: 64,
+  MinHeight: '',
+  MaxWidth: '',
+  MaxHeight: '',
+  VerticalAlignment: 'Stretch',
+  HorizontalAlignment: 'Stretch',
   Width: ''
 });
 
@@ -139,8 +151,23 @@ const compactPopupThemeClass = computed(() => {
   const theme = inheritedTheme?.value || anchorTheme.value;
   return theme === 'light' || theme === 'dark' ? `theme-${theme}` : '';
 });
+const alignmentStyle = (alignment: string, axis: 'vertical' | 'horizontal') => {
+  const value = String(alignment || '').toLowerCase();
+  if (axis === 'vertical') {
+    const values: Record<string, string> = { center: 'center', top: 'flex-start', bottom: 'flex-end', stretch: 'stretch' };
+    return values[value] || 'stretch';
+  }
+  const values: Record<string, string> = { left: 'flex-start', center: 'center', right: 'flex-end', stretch: 'stretch' };
+  return values[value] || 'stretch';
+};
 const rootStyle = computed<CSSProperties>(() => ({
-  width: props.Width === '' ? undefined : typeof props.Width === 'number' ? `${props.Width}px` : props.Width
+  width: props.Width === '' ? undefined : typeof props.Width === 'number' ? `${props.Width}px` : props.Width,
+  minWidth: typeof props.MinWidth === 'number' ? `${props.MinWidth}px` : props.MinWidth,
+  minHeight: props.MinHeight === '' ? undefined : typeof props.MinHeight === 'number' ? `${props.MinHeight}px` : props.MinHeight,
+  maxWidth: props.MaxWidth === '' ? undefined : typeof props.MaxWidth === 'number' ? `${props.MaxWidth}px` : props.MaxWidth,
+  maxHeight: props.MaxHeight === '' ? undefined : typeof props.MaxHeight === 'number' ? `${props.MaxHeight}px` : props.MaxHeight,
+  alignSelf: alignmentStyle(props.VerticalAlignment, 'vertical'),
+  justifySelf: alignmentStyle(props.HorizontalAlignment, 'horizontal')
 }));
 const canIncrease = computed(() => props.IsEnabled && (Number.isNaN(props.Value) || props.Value + props.SmallChange <= props.Maximum));
 const canDecrease = computed(() => props.IsEnabled && (Number.isNaN(props.Value) || props.Value - props.SmallChange >= props.Minimum));
