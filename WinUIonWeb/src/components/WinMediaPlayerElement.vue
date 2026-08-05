@@ -873,7 +873,7 @@ defineExpose({ MediaPlayer: videoRef });
   justify-content: center;
   width: 20px;
   height: 16px;
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif;
+  font-family: 'WinUIOnWebIcons';
   font-size: 16px;
   font-weight: 400;
   line-height: 16px;
