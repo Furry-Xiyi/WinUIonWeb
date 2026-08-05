@@ -726,8 +726,7 @@ onUnmounted(() => {
   .picker-mask-item.settled::before {
     display: block;
     inset: 2px 8px;
-    background: rgba(255, 255, 255, 0.18);
-    background: color-mix(in srgb, var(--accent-aa-text) 22%, transparent);
+    background: rgba(255, 255, 255, 0.14);
   }
 
   .picker-col-root:first-child .picker-mask-item.settled::before {
