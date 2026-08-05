@@ -13,7 +13,7 @@
         v-if="showFlyout"
         ref="flyoutRef"
         class="picker-flyout"
-        :class="flyoutAnimClass"
+        :class="{ 'picker-flyout-closing': isClosing }"
         :style="flyoutStyle"
         @animationend="onFlyoutAnimEnd">
         <div class="picker-columns">
@@ -66,6 +66,7 @@ import WinButton from './WinButton.vue';
 import WinPickerColumn from './WinPickerColumn.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import { useI18n } from './i18n/index';
+import { useFlyoutAnimation } from './useFlyoutAnimation';
 
 const props = defineProps({
   CalendarIdentifier: { type: String, default: 'GregorianCalendar' },
@@ -100,6 +101,8 @@ const flyoutStyle = ref({});
 const monthColRef = ref(null);
 const dayColRef = ref(null);
 const yearColRef = ref(null);
+
+const flyoutAnimation = useFlyoutAnimation(flyoutRef, { Origin: 'center' });
 
 const tempMonth = ref(1);
 const tempDay = ref(1);
@@ -138,12 +141,6 @@ const years = computed(() => {
   const min = Math.min(minYearValue.value, maxYearValue.value);
   const max = Math.max(minYearValue.value, maxYearValue.value);
   return Array.from({ length: max - min + 1 }, (_, i) => min + i);
-});
-
-const flyoutAnimClass = computed(() => {
-  if (isClosing.value) return 'picker-flyout-closing';
-  if (isOpen.value) return 'picker-flyout-animate';
-  return '';
 });
 
 const daysInTempMonth = computed(() => new globalThis.Date(tempYear.value, tempMonth.value, 0).getDate());
@@ -238,11 +235,14 @@ const toggleOpen = async () => {
     top: `${top}px`,
     left: `${left}px`,
     width: `${rect.width}px`,
-    transformOrigin: `center ${buttonCenter - top}px`
+    transformOrigin: 'center center'
   };
+  await nextTick();
+  flyoutAnimation.play();
 };
 
 const close = (accept) => {
+  flyoutAnimation.cancel();
   if (accept) {
     monthColRef.value?.flush();
     dayColRef.value?.flush();

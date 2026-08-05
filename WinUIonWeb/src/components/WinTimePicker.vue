@@ -13,7 +13,7 @@
         v-if="showFlyout"
         ref="flyoutRef"
         class="picker-flyout"
-        :class="flyoutAnimClass"
+        :class="{ 'picker-flyout-closing': isClosing }"
         :style="flyoutStyle"
         @animationend="onFlyoutAnimEnd">
         <div class="picker-columns">
@@ -63,6 +63,7 @@ import WinButton from './WinButton.vue';
 import WinPickerColumn from './WinPickerColumn.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import { useI18n } from './i18n/index';
+import { useFlyoutAnimation } from './useFlyoutAnimation';
 
 const props = defineProps({
   ClockIdentifier: { type: String, default: '12HourClock' },
@@ -92,6 +93,8 @@ const flyoutStyle = ref({});
 const hourColRef = ref(null);
 const minuteColRef = ref(null);
 const ampmColRef = ref(null);
+
+const flyoutAnimation = useFlyoutAnimation(flyoutRef, { Origin: 'center' });
 
 const tempHour = ref(0);
 const tempMinute = ref(0);
@@ -132,12 +135,6 @@ const hours = computed(() => {
 const minutes = computed(() => {
   const count = Math.ceil(60 / normalizedMinuteIncrement.value);
   return Array.from({ length: count }, (_, i) => Math.min(59, i * normalizedMinuteIncrement.value));
-});
-
-const flyoutAnimClass = computed(() => {
-  if (isClosing.value) return 'picker-flyout-closing';
-  if (isOpen.value) return 'picker-flyout-animate';
-  return '';
 });
 
 const hourText = computed(() => {
@@ -216,11 +213,14 @@ const toggleOpen = async () => {
     top: `${top}px`,
     left: `${left}px`,
     width: `${rect.width}px`,
-    transformOrigin: `center ${buttonCenter - top}px`
+    transformOrigin: 'center center'
   };
+  await nextTick();
+  flyoutAnimation.play();
 };
 
 const close = (accept) => {
+  flyoutAnimation.cancel();
   if (accept) {
     hourColRef.value?.flush();
     minuteColRef.value?.flush();

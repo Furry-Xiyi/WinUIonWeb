@@ -2,7 +2,7 @@
 // 矩形展开到完整弹层矩形，可用于任何自带弹出层的控件。
 import { onBeforeUnmount, ref, type Ref } from 'vue';
 
-export type FlyoutAnimationOrigin = 'element' | 'edge' | 'rect';
+export type FlyoutAnimationOrigin = 'element' | 'edge' | 'rect' | 'center';
 export type FlyoutAnimationDirection = 'top' | 'bottom' | 'left' | 'right';
 export type FlyoutAnimationRect = { left: number; right: number; top: number; bottom: number };
 export type FlyoutAnimationOriginElement = HTMLElement | string | Ref<HTMLElement | null> | null;
@@ -80,6 +80,17 @@ const getEdgeStartRect = (
   }
 };
 
+// 正中间起始矩形：从弹层垂直中心的一条横带沿 Y 轴展开，宽度不参与动画。
+const getCenterStartRect = (targetRect: DOMRect): FlyoutAnimationRect => {
+  const stripHeight = 2;
+  return {
+    left: 0,
+    right: targetRect.width,
+    top: targetRect.height / 2 - stripHeight / 2,
+    bottom: targetRect.height / 2 + stripHeight / 2
+  };
+};
+
 // 元素对齐起始矩形：取目标内部某元素相对目标的矩形并 clamp 到目标边界。
 const getElementStartRect = (
   target: HTMLElement | null,
@@ -122,6 +133,8 @@ const resolveStartRect = (
     ? getElementStartRect(target, targetRect, options.OriginElement)
     : origin === 'rect'
       ? getRectStartRect(targetRect, options.StartRect)
+      : origin === 'center'
+        ? getCenterStartRect(targetRect)
       : null;
   return startRect ?? getEdgeStartRect(
     targetRect,
