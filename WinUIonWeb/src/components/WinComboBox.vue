@@ -665,14 +665,23 @@ const playFlyoutEnterAnimation = () => {
     bottom: flyoutRect.height + margin
   };
 
-  flyoutEnterAnimation = flyout.animate(
+  const animation = flyout.animate(
     [
       { clipPath: getFlyoutClipPolygon(startRect) },
       { clipPath: getFlyoutClipPolygon(endRect) }
     ],
     { duration: ComboBoxFlyoutEnterDuration, easing: ComboBoxFlyoutEnterEasing, fill: 'forwards' }
   );
+  flyoutEnterAnimation = animation;
   flyoutEnterPlayed = true;
+  animation.onfinish = () => {
+    if (flyoutEnterAnimation !== animation) return;
+    flyoutEnterAnimation.cancel();
+    flyoutEnterAnimation = null;
+    // clip-path clips the box-shadow as well; remove it once the reveal
+    // finishes so the popup shadow is rendered fully.
+    flyout.style.clipPath = '';
+  };
 };
 
 const positionFlyout = async () => {
@@ -1197,7 +1206,7 @@ onBeforeUnmount(() => {
   background: transparent;
   border: 1px solid var(--stroke-surface-flyout);
   border-radius: 8px;
-  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);
 }
