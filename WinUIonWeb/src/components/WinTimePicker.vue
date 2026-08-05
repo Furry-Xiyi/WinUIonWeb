@@ -13,126 +13,40 @@
         v-if="showFlyout"
         ref="flyoutRef"
         class="picker-flyout"
-        :class="flyoutAnimClass"
+        :class="{ 'picker-flyout-closing': isClosing }"
         :style="flyoutStyle"
         @animationend="onFlyoutAnimEnd">
         <div class="picker-columns">
-          <div class="picker-col-wrapper" @mouseenter="hoverCol = 'hour'" @mouseleave="hoverCol = ''">
-            <WinButton
-              v-show="hoverCol === 'hour'"
-              Style="SubtleButtonStyle"
-              class="picker-arrow picker-arrow-up"
-              Padding="0"
-              MinWidth="0"
-              MinHeight="0"
-              CornerRadius="0"
-              FontSize="8"
-              @pointerdown="startRepeating('hour', -1)"
-              @pointerup="stopRepeating"
-              @pointercancel="stopRepeating"
-              @pointerleave="stopRepeating"
-              @Click="scrollUp('hour')">
-              <span class="icon" aria-hidden="true">&#xEDDB;</span>
-            </WinButton>
-            <div class="picker-column" @wheel.prevent="onWheel($event, 'hour')">
-              <div v-for="(item, i) in hourDisplay" :key="'h' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
-            </div>
-            <WinButton
-              v-show="hoverCol === 'hour'"
-              Style="SubtleButtonStyle"
-              class="picker-arrow picker-arrow-down"
-              Padding="0"
-              MinWidth="0"
-              MinHeight="0"
-              CornerRadius="0"
-              FontSize="8"
-              @pointerdown="startRepeating('hour', 1)"
-              @pointerup="stopRepeating"
-              @pointercancel="stopRepeating"
-              @pointerleave="stopRepeating"
-              @Click="scrollDown('hour')">
-              <span class="icon" aria-hidden="true">&#xEDDC;</span>
-            </WinButton>
-          </div>
+          <WinPickerColumn
+            ref="hourColRef"
+            class="picker-col-flex"
+            :items="hourItems"
+            :value="hourIndex"
+            :wrap="true"
+            :aria-label="t('control.timepicker.hour')"
+            @change="onHourChange" />
           <div class="picker-col-divider"></div>
-          <div class="picker-col-wrapper" @mouseenter="hoverCol = 'minute'" @mouseleave="hoverCol = ''">
-            <WinButton
-              v-show="hoverCol === 'minute'"
-              Style="SubtleButtonStyle"
-              class="picker-arrow picker-arrow-up"
-              Padding="0"
-              MinWidth="0"
-              MinHeight="0"
-              CornerRadius="0"
-              FontSize="8"
-              @pointerdown="startRepeating('minute', -1)"
-              @pointerup="stopRepeating"
-              @pointercancel="stopRepeating"
-              @pointerleave="stopRepeating"
-              @Click="scrollUp('minute')">
-              <span class="icon" aria-hidden="true">&#xEDDB;</span>
-            </WinButton>
-            <div class="picker-column" @wheel.prevent="onWheel($event, 'minute')">
-              <div v-for="(item, i) in minuteDisplay" :key="'m' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
-            </div>
-            <WinButton
-              v-show="hoverCol === 'minute'"
-              Style="SubtleButtonStyle"
-              class="picker-arrow picker-arrow-down"
-              Padding="0"
-              MinWidth="0"
-              MinHeight="0"
-              CornerRadius="0"
-              FontSize="8"
-              @pointerdown="startRepeating('minute', 1)"
-              @pointerup="stopRepeating"
-              @pointercancel="stopRepeating"
-              @pointerleave="stopRepeating"
-              @Click="scrollDown('minute')">
-              <span class="icon" aria-hidden="true">&#xEDDC;</span>
-            </WinButton>
-          </div>
+          <WinPickerColumn
+            ref="minuteColRef"
+            class="picker-col-flex"
+            :items="minuteItems"
+            :value="minuteIndex"
+            :wrap="true"
+            :aria-label="t('control.timepicker.minute')"
+            @change="onMinuteChange" />
           <template v-if="ClockIdentifier === '12HourClock'">
             <div class="picker-col-divider"></div>
-            <div class="picker-col-wrapper" @mouseenter="hoverCol = 'ampm'" @mouseleave="hoverCol = ''">
-              <WinButton
-                v-show="hoverCol === 'ampm' && tempAmPm === 'PM'"
-                Style="SubtleButtonStyle"
-                class="picker-arrow picker-arrow-up"
-                Padding="0"
-                MinWidth="0"
-                MinHeight="0"
-                CornerRadius="0"
-                FontSize="8"
-                @pointerdown="startRepeating('ampm', -1)"
-                @pointerup="stopRepeating"
-                @pointercancel="stopRepeating"
-                @pointerleave="stopRepeating"
-                @Click="scrollUp('ampm')">
-                <span class="icon" aria-hidden="true">&#xEDDB;</span>
-              </WinButton>
-              <div class="picker-column" @wheel.prevent="onWheel($event, 'ampm')">
-                <div v-for="(item, i) in ampmDisplay" :key="'ap' + i" class="picker-item" :class="{ active: item.active, empty: !item.label }">{{ item.label }}</div>
-              </div>
-              <WinButton
-                v-show="hoverCol === 'ampm' && tempAmPm === 'AM'"
-                Style="SubtleButtonStyle"
-                class="picker-arrow picker-arrow-down"
-                Padding="0"
-                MinWidth="0"
-                MinHeight="0"
-                CornerRadius="0"
-                FontSize="8"
-                @pointerdown="startRepeating('ampm', 1)"
-                @pointerup="stopRepeating"
-                @pointercancel="stopRepeating"
-                @pointerleave="stopRepeating"
-                @Click="scrollDown('ampm')">
-                <span class="icon" aria-hidden="true">&#xEDDC;</span>
-              </WinButton>
-            </div>
+            <WinPickerColumn
+              ref="ampmColRef"
+              class="picker-col-flex"
+              :items="ampmItems"
+              :value="ampmIndex"
+              :wrap="false"
+              :can-scroll-up="ampmIndex > 0"
+              :can-scroll-down="ampmIndex < ampmItems.length - 1"
+              :aria-label="`${t('control.timepicker.am')}/${t('control.timepicker.pm')}`"
+              @change="onAmpmChange" />
           </template>
-          <div class="picker-highlight"></div>
         </div>
         <div class="picker-actions">
           <WinButton Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.accept')" v-bind="{ 'tooltipservice.tooltip': t('text.accept') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></WinButton>
@@ -146,8 +60,10 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue';
 import WinButton from './WinButton.vue';
+import WinPickerColumn from './WinPickerColumn.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import { useI18n } from './i18n/index';
+import { useFlyoutAnimation } from './useFlyoutAnimation';
 
 const props = defineProps({
   ClockIdentifier: { type: String, default: '12HourClock' },
@@ -174,9 +90,11 @@ const isClosing = ref(false);
 const containerRef = ref(null);
 const flyoutRef = ref(null);
 const flyoutStyle = ref({});
-const hoverCol = ref('');
-let repeatDelayTimer = 0;
-let repeatTimer = 0;
+const hourColRef = ref(null);
+const minuteColRef = ref(null);
+const ampmColRef = ref(null);
+
+const flyoutAnimation = useFlyoutAnimation(flyoutRef, { Origin: 'center' });
 
 const tempHour = ref(0);
 const tempMinute = ref(0);
@@ -219,12 +137,6 @@ const minutes = computed(() => {
   return Array.from({ length: count }, (_, i) => Math.min(59, i * normalizedMinuteIncrement.value));
 });
 
-const flyoutAnimClass = computed(() => {
-  if (isClosing.value) return 'picker-flyout-closing';
-  if (isOpen.value) return 'picker-flyout-animate';
-  return '';
-});
-
 const hourText = computed(() => {
   if (!hasSelectedTime.value) return t('control.timepicker.hour');
   const h = timeValue.value.hour;
@@ -244,84 +156,30 @@ function normalizeTime(value) {
   };
 }
 
-function loopingWindow(items, currentIndex, count) {
-  const half = Math.floor(count / 2);
-  const result = [];
-  for (let offset = -half; offset <= half; offset++) {
-    let idx = (currentIndex + offset) % items.length;
-    if (idx < 0) idx += items.length;
-    result.push({ label: items[idx], active: offset === 0 });
-  }
-  return result;
-}
-
-const hourDisplay = computed(() => {
-  const items = hours.value.map((h) => props.ClockIdentifier === '12HourClock' ? String(h) : String(h).padStart(2, '0'));
+const hourItems = computed(() => hours.value.map((h) => props.ClockIdentifier === '12HourClock' ? String(h) : String(h).padStart(2, '0')));
+const hourIndex = computed(() => {
   const idx = hours.value.indexOf(tempHour.value);
-  return loopingWindow(items, idx >= 0 ? idx : 0, VISIBLE_ITEMS);
+  return idx >= 0 ? idx : 0;
 });
-
-const minuteDisplay = computed(() => {
-  const items = minutes.value.map((m) => String(m).padStart(2, '0'));
+const minuteItems = computed(() => minutes.value.map((m) => String(m).padStart(2, '0')));
+const minuteIndex = computed(() => {
   const idx = minutes.value.indexOf(tempMinute.value);
-  return loopingWindow(items, idx >= 0 ? idx : 0, VISIBLE_ITEMS);
+  return idx >= 0 ? idx : 0;
 });
+const ampmItems = computed(() => [amLabel.value, pmLabel.value]);
+const ampmIndex = computed(() => tempAmPm.value === 'PM' ? 1 : 0);
 
-const ampmDisplay = computed(() => {
-  const items = [amLabel.value, pmLabel.value];
-  const idx = tempAmPm.value === 'PM' ? 1 : 0;
-  const half = Math.floor(VISIBLE_ITEMS / 2);
-  const result = [];
-  for (let offset = -half; offset <= half; offset++) {
-    const i = idx + offset;
-    result.push(i < 0 || i >= items.length ? { label: '', active: false } : { label: items[i], active: offset === 0 });
-  }
-  return result;
-});
+const onHourChange = (index) => {
+  tempHour.value = hours.value[index];
+};
 
-function scrollUp(type) {
-  if (type === 'hour') {
-    const idx = hours.value.indexOf(tempHour.value);
-    tempHour.value = hours.value[(idx - 1 + hours.value.length) % hours.value.length];
-  }
-  if (type === 'minute') {
-    const idx = minutes.value.indexOf(tempMinute.value);
-    tempMinute.value = minutes.value[(idx - 1 + minutes.value.length) % minutes.value.length];
-  }
-  if (type === 'ampm' && tempAmPm.value === 'PM') tempAmPm.value = 'AM';
-}
+const onMinuteChange = (index) => {
+  tempMinute.value = minutes.value[index];
+};
 
-function scrollDown(type) {
-  if (type === 'hour') {
-    const idx = hours.value.indexOf(tempHour.value);
-    tempHour.value = hours.value[(idx + 1) % hours.value.length];
-  }
-  if (type === 'minute') {
-    const idx = minutes.value.indexOf(tempMinute.value);
-    tempMinute.value = minutes.value[(idx + 1) % minutes.value.length];
-  }
-  if (type === 'ampm' && tempAmPm.value === 'AM') tempAmPm.value = 'PM';
-}
-
-function repeatStep(type, direction) {
-  if (direction < 0) scrollUp(type);
-  else scrollDown(type);
-}
-
-function startRepeating(type, direction) {
-  stopRepeating();
-  repeatDelayTimer = window.setTimeout(() => {
-    repeatStep(type, direction);
-    repeatTimer = window.setInterval(() => repeatStep(type, direction), 80);
-  }, 400);
-}
-
-function stopRepeating() {
-  window.clearTimeout(repeatDelayTimer);
-  window.clearInterval(repeatTimer);
-  repeatDelayTimer = 0;
-  repeatTimer = 0;
-}
+const onAmpmChange = (index) => {
+  tempAmPm.value = index === 1 ? 'PM' : 'AM';
+};
 
 const toggleOpen = async () => {
   if (!props.IsEnabled) return;
@@ -355,12 +213,18 @@ const toggleOpen = async () => {
     top: `${top}px`,
     left: `${left}px`,
     width: `${rect.width}px`,
-    transformOrigin: `center ${buttonCenter - top}px`
+    transformOrigin: 'center center'
   };
+  await nextTick();
+  flyoutAnimation.play();
 };
 
 const close = (accept) => {
+  flyoutAnimation.cancel();
   if (accept) {
+    hourColRef.value?.flush();
+    minuteColRef.value?.flush();
+    ampmColRef.value?.flush();
     const oldTime = timeValue.value;
     let finalHour = tempHour.value;
     if (props.ClockIdentifier === '12HourClock') {
@@ -384,11 +248,6 @@ const onFlyoutAnimEnd = () => {
     isClosing.value = false;
   }
 };
-
-function onWheel(event, type) {
-  if (event.deltaY > 0) scrollDown(type);
-  else scrollUp(type);
-}
 </script>
 
 <style scoped>
@@ -466,119 +325,39 @@ function onWheel(event, type) {
     overflow: hidden;
   }
 
-  .picker-col-wrapper {
-    flex: 1;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .picker-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-
-  .picker-col-divider {
-    width: 1px;
-    align-self: stretch;
-    background: var(--divider-stroke-default, var(--stroke-divider));
-    pointer-events: none;
-    position: relative;
-    z-index: 3;
-  }
-
-  .picker-item {
-    height: 40px;
-    min-height: 40px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: var(--text-secondary);
-    width: 100%;
-    margin: 0;
-    padding: 3px 0 6px;
-    border-radius: 4px;
-    position: relative;
-    z-index: 1;
-    isolation: isolate;
-    transition: color 0.1s, font-size 0.1s;
-  }
-
-  .picker-item:hover {
-    color: var(--text-primary);
-  }
-
-  .picker-item::before {
+  .picker-columns::before {
     content: '';
-    position: absolute;
-    inset: 2px 4px;
-    border-radius: 4px;
-    z-index: -1;
-  }
-
-  .picker-item:hover::before {
-    background: var(--subtle-secondary);
-  }
-
-  .picker-item.empty {
-    pointer-events: none;
-  }
-
-  .picker-item.empty::before {
-    display: none;
-  }
-
-  .picker-item.active::before {
-    background: rgba(255, 255, 255, 0.14);
-  }
-
-    .picker-item.active {
-      color: var(--accent-text, var(--accent-aa-text));
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-  .picker-highlight {
     position: absolute;
     left: 4px;
     right: 4px;
     top: 50%;
     transform: translateY(-50%);
     height: 40px;
-    background: var(--accent-base, var(--accent-aa-fill));
     border-radius: 4px;
+    background: var(--accent-base, var(--accent-aa-fill));
     pointer-events: none;
     z-index: 0;
   }
 
-  .picker-arrow {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 34px;
+  .picker-col-flex {
+    flex: 1 1 0;
+  }
+
+  .picker-col-divider {
+    width: 1px;
+    align-self: stretch;
+    background: linear-gradient(
+      to bottom,
+      var(--divider-stroke-default, var(--stroke-divider)) 0,
+      var(--divider-stroke-default, var(--stroke-divider)) calc(50% - 20px),
+      transparent calc(50% - 20px),
+      transparent calc(50% + 20px),
+      var(--divider-stroke-default, var(--stroke-divider)) calc(50% + 20px),
+      var(--divider-stroke-default, var(--stroke-divider)) 100%
+    );
+    pointer-events: none;
+    position: relative;
     z-index: 3;
-    --SubtleButtonBackground: var(--ctrl-solid-fill);
-    --SubtleButtonBackgroundPointerOver: var(--ctrl-solid-fill);
-    --SubtleButtonBackgroundPressed: var(--ctrl-solid-fill);
-    --SubtleButtonBackgroundDisabled: var(--ctrl-solid-fill);
-    --SubtleButtonForeground: var(--text-secondary);
-    --SubtleButtonForegroundPointerOver: var(--text-primary);
-    --SubtleButtonForegroundPressed: var(--text-primary);
-  }
-
-  .picker-arrow-up {
-    top: 0;
-  }
-
-  .picker-arrow-down {
-    bottom: 0;
   }
 
   .picker-actions {

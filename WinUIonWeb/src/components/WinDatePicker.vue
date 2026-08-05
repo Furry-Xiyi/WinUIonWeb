@@ -13,142 +13,43 @@
         v-if="showFlyout"
         ref="flyoutRef"
         class="picker-flyout"
-        :class="flyoutAnimClass"
+        :class="{ 'picker-flyout-closing': isClosing }"
         :style="flyoutStyle"
         @animationend="onFlyoutAnimEnd">
         <div class="picker-columns">
-          <div
+          <WinPickerColumn
+            ref="monthColRef"
             v-if="MonthVisible"
-            class="picker-col-wrapper picker-month"
-            :class="{ wide: !YearVisible }"
-            @mouseenter="hoverCol = 'month'"
-            @mouseleave="hoverCol = ''">
-            <WinButton
-              v-show="hoverCol === 'month'"
-              Style="SubtleButtonStyle"
-              class="picker-arrow picker-arrow-up"
-              Padding="0"
-              MinWidth="0"
-              MinHeight="0"
-              CornerRadius="0"
-              FontSize="8"
-              @pointerdown="startRepeating('month', -1)"
-              @pointerup="stopRepeating"
-              @pointercancel="stopRepeating"
-              @pointerleave="stopRepeating"
-              @Click="scrollUp('month')">
-              <span class="icon" aria-hidden="true">&#xEDDB;</span>
-            </WinButton>
-            <div class="picker-column" @wheel.prevent="onWheel($event, 'month')">
-              <div v-for="(item, i) in monthDisplay" :key="'m' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
-            </div>
-            <WinButton
-              v-show="hoverCol === 'month'"
-              Style="SubtleButtonStyle"
-              class="picker-arrow picker-arrow-down"
-              Padding="0"
-              MinWidth="0"
-              MinHeight="0"
-              CornerRadius="0"
-              FontSize="8"
-              @pointerdown="startRepeating('month', 1)"
-              @pointerup="stopRepeating"
-              @pointercancel="stopRepeating"
-              @pointerleave="stopRepeating"
-              @Click="scrollDown('month')">
-              <span class="icon" aria-hidden="true">&#xEDDC;</span>
-            </WinButton>
-          </div>
+            class="picker-month"
+            :items="monthItems"
+            :value="monthIndex"
+            :wrap="true"
+            :aria-label="t('control.datepicker.month')"
+            @change="onMonthChange" />
 
           <div v-if="MonthVisible && DayVisible" class="picker-col-divider"></div>
 
-          <div
+          <WinPickerColumn
+            ref="dayColRef"
             v-if="DayVisible"
-            class="picker-col-wrapper picker-day"
-            @mouseenter="hoverCol = 'day'"
-            @mouseleave="hoverCol = ''">
-            <WinButton
-              v-show="hoverCol === 'day'"
-              Style="SubtleButtonStyle"
-              class="picker-arrow picker-arrow-up"
-              Padding="0"
-              MinWidth="0"
-              MinHeight="0"
-              CornerRadius="0"
-              FontSize="8"
-              @pointerdown="startRepeating('day', -1)"
-              @pointerup="stopRepeating"
-              @pointercancel="stopRepeating"
-              @pointerleave="stopRepeating"
-              @Click="scrollUp('day')">
-              <span class="icon" aria-hidden="true">&#xEDDB;</span>
-            </WinButton>
-            <div class="picker-column" @wheel.prevent="onWheel($event, 'day')">
-              <div v-for="(item, i) in dayDisplay" :key="'d' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
-            </div>
-            <WinButton
-              v-show="hoverCol === 'day'"
-              Style="SubtleButtonStyle"
-              class="picker-arrow picker-arrow-down"
-              Padding="0"
-              MinWidth="0"
-              MinHeight="0"
-              CornerRadius="0"
-              FontSize="8"
-              @pointerdown="startRepeating('day', 1)"
-              @pointerup="stopRepeating"
-              @pointercancel="stopRepeating"
-              @pointerleave="stopRepeating"
-              @Click="scrollDown('day')">
-              <span class="icon" aria-hidden="true">&#xEDDC;</span>
-            </WinButton>
-          </div>
+            class="picker-day"
+            :items="dayItems"
+            :value="dayIndex"
+            :wrap="true"
+            :aria-label="t('control.datepicker.day')"
+            @change="onDayChange" />
 
           <template v-if="YearVisible">
             <div v-if="MonthVisible || DayVisible" class="picker-col-divider"></div>
-            <div
-              class="picker-col-wrapper picker-year"
-              @mouseenter="hoverCol = 'year'"
-              @mouseleave="hoverCol = ''">
-              <WinButton
-                v-show="hoverCol === 'year'"
-                Style="SubtleButtonStyle"
-                class="picker-arrow picker-arrow-up"
-                Padding="0"
-                MinWidth="0"
-                MinHeight="0"
-                CornerRadius="0"
-                FontSize="8"
-                @pointerdown="startRepeating('year', -1)"
-                @pointerup="stopRepeating"
-                @pointercancel="stopRepeating"
-                @pointerleave="stopRepeating"
-                @Click="scrollUp('year')">
-                <span class="icon" aria-hidden="true">&#xEDDB;</span>
-              </WinButton>
-              <div class="picker-column" @wheel.prevent="onWheel($event, 'year')">
-                <div v-for="(item, i) in yearDisplay" :key="'y' + i" class="picker-item" :class="{ active: item.active }">{{ item.label }}</div>
-              </div>
-              <WinButton
-                v-show="hoverCol === 'year'"
-                Style="SubtleButtonStyle"
-                class="picker-arrow picker-arrow-down"
-                Padding="0"
-                MinWidth="0"
-                MinHeight="0"
-                CornerRadius="0"
-                FontSize="8"
-                @pointerdown="startRepeating('year', 1)"
-                @pointerup="stopRepeating"
-                @pointercancel="stopRepeating"
-                @pointerleave="stopRepeating"
-                @Click="scrollDown('year')">
-                <span class="icon" aria-hidden="true">&#xEDDC;</span>
-              </WinButton>
-            </div>
+            <WinPickerColumn
+              ref="yearColRef"
+              class="picker-year"
+              :items="yearItems"
+              :value="yearIndex"
+              :wrap="true"
+              :aria-label="t('control.datepicker.year')"
+              @change="onYearChange" />
           </template>
-
-          <div class="picker-highlight"></div>
         </div>
         <div class="picker-actions">
           <WinButton Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.accept')" v-bind="{ 'tooltipservice.tooltip': t('text.accept') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></WinButton>
@@ -160,10 +61,12 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, watch } from 'vue';
 import WinButton from './WinButton.vue';
+import WinPickerColumn from './WinPickerColumn.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import { useI18n } from './i18n/index';
+import { useFlyoutAnimation } from './useFlyoutAnimation';
 
 const props = defineProps({
   CalendarIdentifier: { type: String, default: 'GregorianCalendar' },
@@ -195,9 +98,11 @@ const isClosing = ref(false);
 const containerRef = ref(null);
 const flyoutRef = ref(null);
 const flyoutStyle = ref({});
-const hoverCol = ref('');
-let repeatDelayTimer = 0;
-let repeatTimer = 0;
+const monthColRef = ref(null);
+const dayColRef = ref(null);
+const yearColRef = ref(null);
+
+const flyoutAnimation = useFlyoutAnimation(flyoutRef, { Origin: 'center' });
 
 const tempMonth = ref(1);
 const tempDay = ref(1);
@@ -238,12 +143,6 @@ const years = computed(() => {
   return Array.from({ length: max - min + 1 }, (_, i) => min + i);
 });
 
-const flyoutAnimClass = computed(() => {
-  if (isClosing.value) return 'picker-flyout-closing';
-  if (isOpen.value) return 'picker-flyout-animate';
-  return '';
-});
-
 const daysInTempMonth = computed(() => new globalThis.Date(tempYear.value, tempMonth.value, 0).getDate());
 
 const formatMonth = (date) => {
@@ -272,64 +171,36 @@ const monthText = computed(() => hasSelectedDate.value ? formatMonth(currentDate
 const dayText = computed(() => hasSelectedDate.value ? formatDay(currentDate.value) : t('control.datepicker.day'));
 const yearText = computed(() => hasSelectedDate.value ? formatYear(currentDate.value) : t('control.datepicker.year'));
 
-function loopingWindow(items, currentIndex, count) {
-  const half = Math.floor(count / 2);
-  const result = [];
-  for (let offset = -half; offset <= half; offset++) {
-    let idx = (currentIndex + offset) % items.length;
-    if (idx < 0) idx += items.length;
-    result.push({ label: items[idx], active: offset === 0 });
-  }
-  return result;
-}
-
-const monthDisplay = computed(() => loopingWindow(monthNames.value, tempMonth.value - 1, VISIBLE_ITEMS));
-const dayDisplay = computed(() => {
-  const items = Array.from({ length: daysInTempMonth.value }, (_, i) => formatDay(new globalThis.Date(tempYear.value, tempMonth.value - 1, i + 1)));
-  return loopingWindow(items, tempDay.value - 1, VISIBLE_ITEMS);
-});
-const yearDisplay = computed(() => {
+const monthItems = computed(() => monthNames.value);
+const monthIndex = computed(() => Math.max(0, tempMonth.value - 1));
+const dayItems = computed(() => Array.from(
+  { length: daysInTempMonth.value },
+  (_, i) => formatDay(new globalThis.Date(tempYear.value, tempMonth.value - 1, i + 1))
+));
+const dayIndex = computed(() => Math.min(tempDay.value - 1, dayItems.value.length - 1));
+const yearItems = computed(() => years.value.map(String));
+const yearIndex = computed(() => {
   const idx = years.value.indexOf(tempYear.value);
-  return loopingWindow(years.value.map(String), idx >= 0 ? idx : 0, VISIBLE_ITEMS);
+  return idx >= 0 ? idx : 0;
 });
 
-function scrollUp(type) {
-  if (type === 'month') tempMonth.value = tempMonth.value <= 1 ? 12 : tempMonth.value - 1;
-  if (type === 'day') tempDay.value = tempDay.value <= 1 ? daysInTempMonth.value : tempDay.value - 1;
-  if (type === 'year') {
-    const idx = years.value.indexOf(tempYear.value);
-    tempYear.value = years.value[(idx - 1 + years.value.length) % years.value.length];
+const onMonthChange = (index) => {
+  tempMonth.value = index + 1;
+};
+
+const onDayChange = (index) => {
+  tempDay.value = index + 1;
+};
+
+const onYearChange = (index) => {
+  tempYear.value = years.value[index];
+};
+
+watch([tempMonth, tempYear], () => {
+  if (tempDay.value > daysInTempMonth.value) {
+    tempDay.value = daysInTempMonth.value;
   }
-}
-
-function scrollDown(type) {
-  if (type === 'month') tempMonth.value = tempMonth.value >= 12 ? 1 : tempMonth.value + 1;
-  if (type === 'day') tempDay.value = tempDay.value >= daysInTempMonth.value ? 1 : tempDay.value + 1;
-  if (type === 'year') {
-    const idx = years.value.indexOf(tempYear.value);
-    tempYear.value = years.value[(idx + 1) % years.value.length];
-  }
-}
-
-function repeatStep(type, direction) {
-  if (direction < 0) scrollUp(type);
-  else scrollDown(type);
-}
-
-function startRepeating(type, direction) {
-  stopRepeating();
-  repeatDelayTimer = window.setTimeout(() => {
-    repeatStep(type, direction);
-    repeatTimer = window.setInterval(() => repeatStep(type, direction), 80);
-  }, 400);
-}
-
-function stopRepeating() {
-  window.clearTimeout(repeatDelayTimer);
-  window.clearInterval(repeatTimer);
-  repeatDelayTimer = 0;
-  repeatTimer = 0;
-}
+});
 
 const clampDate = (date) => {
   if (isValidDate(props.MinYear) && date < props.MinYear) return new globalThis.Date(props.MinYear);
@@ -364,12 +235,18 @@ const toggleOpen = async () => {
     top: `${top}px`,
     left: `${left}px`,
     width: `${rect.width}px`,
-    transformOrigin: `center ${buttonCenter - top}px`
+    transformOrigin: 'center center'
   };
+  await nextTick();
+  flyoutAnimation.play();
 };
 
 const close = (accept) => {
+  flyoutAnimation.cancel();
   if (accept) {
+    monthColRef.value?.flush();
+    dayColRef.value?.flush();
+    yearColRef.value?.flush();
     const finalDay = Math.min(tempDay.value, new globalThis.Date(tempYear.value, tempMonth.value, 0).getDate());
     const oldDate = currentDate.value;
     const newDate = clampDate(new globalThis.Date(tempYear.value, tempMonth.value - 1, finalDay));
@@ -389,11 +266,6 @@ const onFlyoutAnimEnd = () => {
     isClosing.value = false;
   }
 };
-
-function onWheel(event, type) {
-  if (event.deltaY > 0) scrollDown(type);
-  else scrollUp(type);
-}
 </script>
 
 <style scoped>
@@ -482,129 +354,47 @@ function onWheel(event, type) {
     overflow: hidden;
   }
 
-  .picker-col-wrapper {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .picker-month {
-    flex: 132 1 0;
-  }
-
-  .picker-day,
-  .picker-year {
-    flex: 78 1 0;
-  }
-
-  .picker-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-
-  .picker-col-divider {
-    width: 1px;
-    align-self: stretch;
-    background: var(--divider-stroke-default, var(--stroke-divider));
-    pointer-events: none;
-    position: relative;
-    z-index: 3;
-  }
-
-  .picker-item {
-    height: 40px;
-    min-height: 40px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    font-size: 14px;
-    color: var(--text-secondary);
-    width: 100%;
-    margin: 0;
-    padding: 3px 0 6px;
-    border-radius: 4px;
-    position: relative;
-    z-index: 1;
-    isolation: isolate;
-    transition: color 0.1s, font-size 0.1s;
-  }
-
-  .picker-item:hover {
-    color: var(--text-primary);
-  }
-
-  .picker-item::before {
+  .picker-columns::before {
     content: '';
-    position: absolute;
-    inset: 2px 4px;
-    border-radius: 4px;
-    z-index: -1;
-  }
-
-  .picker-item:hover::before {
-    background: var(--subtle-secondary);
-  }
-
-  .picker-item.active::before {
-    background: rgba(255, 255, 255, 0.14);
-  }
-
-  .picker-month .picker-item {
-    padding-left: 9px;
-  }
-
-  .picker-day .picker-item,
-  .picker-year .picker-item {
-    justify-content: center;
-    padding-left: 0;
-  }
-
-  .picker-item.active {
-      color: var(--accent-text, var(--accent-aa-text));
-      font-weight: 600;
-      font-size: 14px;
-  }
-
-  .picker-highlight {
     position: absolute;
     left: 4px;
     right: 4px;
     top: 50%;
     transform: translateY(-50%);
     height: 40px;
-    background: var(--accent-base, var(--accent-aa-fill));
     border-radius: 4px;
+    background: var(--accent-base, var(--accent-aa-fill));
     pointer-events: none;
     z-index: 0;
   }
 
-  .picker-arrow {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 34px;
+  .picker-month {
+    flex: 132 1 0;
+    --picker-item-justify: flex-start;
+    --picker-item-padding-left: 9px;
+  }
+
+  .picker-day,
+  .picker-year {
+    flex: 78 1 0;
+    --picker-item-justify: center;
+  }
+
+  .picker-col-divider {
+    width: 1px;
+    align-self: stretch;
+    background: linear-gradient(
+      to bottom,
+      var(--divider-stroke-default, var(--stroke-divider)) 0,
+      var(--divider-stroke-default, var(--stroke-divider)) calc(50% - 20px),
+      transparent calc(50% - 20px),
+      transparent calc(50% + 20px),
+      var(--divider-stroke-default, var(--stroke-divider)) calc(50% + 20px),
+      var(--divider-stroke-default, var(--stroke-divider)) 100%
+    );
+    pointer-events: none;
+    position: relative;
     z-index: 3;
-    --SubtleButtonBackground: var(--ctrl-solid-fill);
-    --SubtleButtonBackgroundPointerOver: var(--ctrl-solid-fill);
-    --SubtleButtonBackgroundPressed: var(--ctrl-solid-fill);
-    --SubtleButtonBackgroundDisabled: var(--ctrl-solid-fill);
-    --SubtleButtonForeground: var(--text-secondary);
-    --SubtleButtonForegroundPointerOver: var(--text-primary);
-    --SubtleButtonForegroundPressed: var(--text-primary);
-  }
-
-  .picker-arrow-up {
-    top: 0;
-  }
-
-  .picker-arrow-down {
-    bottom: 0;
   }
 
   .picker-actions {

@@ -11,7 +11,8 @@
     @keydown.space.prevent="toggle"
     @keydown.enter.prevent="toggle">
     <span class="checkbox-box" aria-hidden="true">
-      <span v-if="isIndeterminate" class="checkbox-glyph">{{ indeterminateGlyph }}</span>
+      <span class="checkbox-glyph check-glyph" :class="{ checked: isChecked, hidden: isIndeterminate }">&#xE73E;</span>
+      <span v-if="isIndeterminate" class="checkbox-glyph indeterminate-glyph">{{ indeterminateGlyph }}</span>
     </span>
     <span class="checkbox-content">
       <slot>{{ Content }}</slot>
@@ -149,6 +150,7 @@ const toggle = () => {
   width: 20px;
   height: 20px;
   min-width: 20px;
+  position: relative;
   box-sizing: border-box;
   border: 1px solid var(--CheckBoxCheckBackgroundStroke, var(--ctrl-strong-stroke));
   border-radius: 4px;
@@ -162,6 +164,46 @@ const toggle = () => {
   font-size: 12px;
   line-height: 1;
   color: var(--CheckBoxCheckGlyphForeground, var(--accent-text));
+}
+
+.indeterminate-glyph {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.check-glyph {
+  font-weight: bold;
+  animation: glyph-close 0.2s ease-in-out forwards;
+}
+
+.check-glyph.checked {
+  animation: glyph-open 0.2s ease-in-out forwards;
+}
+
+.check-glyph.hidden {
+  visibility: hidden;
+}
+
+@keyframes glyph-open {
+  0% {
+    clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);
+  }
+
+  100% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  }
+}
+
+@keyframes glyph-close {
+  0% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  }
+
+  100% {
+    clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%);
+  }
 }
 
 .checkbox-content {
@@ -190,15 +232,6 @@ const toggle = () => {
   --CheckBoxCheckBackgroundFill: var(--accent-base);
   --CheckBoxCheckBackgroundStroke: var(--accent-base);
   --CheckBoxCheckGlyphForeground: var(--accent-text);
-}
-
-.win-checkbox.is-checked .checkbox-box::after {
-  content: "";
-  width: 9px;
-  height: 5px;
-  border-left: 1.6px solid var(--CheckBoxCheckGlyphForeground, var(--accent-text));
-  border-bottom: 1.6px solid var(--CheckBoxCheckGlyphForeground, var(--accent-text));
-  transform: translateY(-1px) rotate(-45deg);
 }
 
 .win-checkbox.is-checked:hover,
