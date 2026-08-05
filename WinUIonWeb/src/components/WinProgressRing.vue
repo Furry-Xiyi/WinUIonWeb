@@ -344,7 +344,6 @@ onBeforeUnmount(() => {
   stroke-dasharray: 100;
   transform: rotate(-90deg);
   transform-origin: center;
-  transition: stroke-dashoffset 2s linear;
 }
 
 .ProgressRingIndeterminateIndicator {
@@ -364,11 +363,5 @@ onBeforeUnmount(() => {
 
 .is-inactive .ProgressRingIndeterminateIndicator {
   display: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ProgressRingDeterminateIndicator {
-    transition-duration: 0.001ms;
-  }
 }
 </style>
