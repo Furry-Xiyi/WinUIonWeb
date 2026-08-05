@@ -14,7 +14,7 @@
     <slot name="target"><slot></slot></slot>
   </span>
 
-  <Teleport to="body">
+  <Teleport :to="teleportTarget">
     <Transition name="win-tooltip">
       <div
         v-if="isVisible"
@@ -91,6 +91,7 @@ const position = ref({ top: 0, left: 0 });
 const isPositioned = ref(false);
 const isSuppressedUntilPointerLeave = ref(false);
 const actualPlacement = ref('Mouse');
+const teleportTarget = ref<HTMLElement | string>('body');
 const tooltipId = `win-tooltip-${Math.random().toString(36).slice(2, 10)}`;
 let openTimer: number | undefined;
 let closeTimer: number | undefined;
@@ -408,15 +409,23 @@ function onViewportChanged() {
   if (isVisible.value) void updatePosition();
 }
 
+function onFullscreenChanged() {
+  teleportTarget.value = document.fullscreenElement || 'body';
+  if (isVisible.value) void updatePosition();
+}
+
 onMounted(() => {
+  teleportTarget.value = document.fullscreenElement || 'body';
   window.addEventListener('resize', onViewportChanged);
   window.addEventListener('scroll', onViewportChanged, true);
+  document.addEventListener('fullscreenchange', onFullscreenChanged);
   if (isVisible.value) void updatePosition();
 });
 onBeforeUnmount(() => {
   clearTimers();
   window.removeEventListener('resize', onViewportChanged);
   window.removeEventListener('scroll', onViewportChanged, true);
+  document.removeEventListener('fullscreenchange', onFullscreenChanged);
 });
 
 defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSettings: templateSettings });

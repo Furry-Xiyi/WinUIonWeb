@@ -463,8 +463,15 @@ const showBackButtonResolved = computed(() => {
   // rather than being limited to the minimal responsive state.
   return true;
 });
+// In native Minimal, the back button is hidden while the overlay pane is
+// open, but its command row remains reserved so the hamburger keeps its
+// position during the transition.
+const backButtonVisuallyVisible = computed(() => (
+  showBackButtonResolved.value &&
+  !isTopNavigation.value &&
+  (!isLeftMinimalMode.value || isCompact.value)
+));
 const showBackButtonInLeftNav = computed(() => showBackButtonResolved.value && !isTopNavigation.value);
-const backButtonVisuallyVisible = computed(() => showBackButtonResolved.value);
 // Keep the three left-pane modes on the same transition contracts as the
 // native NavigationView/SplitView template. Left uses CompactInline; the
 // other two modes use the overlay transitions.
@@ -493,10 +500,13 @@ const paneTransitionDurationMs = (compact, mode = paneTransitionSpec.value) => (
 const paneStyle = computed(() => ({
   '--win-nav-open-pane-length': `${props.openPaneLength}px`,
   '--win-nav-compact-pane-length': `${props.compactPaneLength}px`,
-  // NavigationViewMinimalHeaderMargin is -24,44,0,0 in the native theme.
-  // The command buttons live in their own overlay row and must not change
-  // the content header's left inset when Minimal is entered.
-  '--win-nav-header-margin-left': `${isLeftMinimalMode.value ? -24 : 56}px`,
+  // NavigationViewMinimalHeaderMargin is -24,44,0,0 in the native theme and
+  // follows the command-row padding in ContentLeftPadding. The page header
+  // is a direct child here, so apply the resulting effective inset instead
+  // of the raw negative XAML margin.
+  '--win-nav-header-margin-left': `${isLeftMinimalMode.value
+    ? (isPaneToggleButtonVisible.value ? 40 : 0) + (showBackButtonInLeftNav.value ? 40 : 0) - 24
+    : 56}px`,
   '--win-nav-pane-duration': `${paneTransitionDurationMs(isCompact.value)}ms`,
   '--win-nav-pane-open-duration': `${paneTransitionSpec.value.openDurationMs}ms`,
   '--win-nav-pane-close-duration': `${paneTransitionSpec.value.closeDurationMs}ms`,
@@ -2096,11 +2106,15 @@ watch(() => props.selectedValue, (val) => {
 
   .win-nav-content {
     position: relative;
-    flex: 1;
+    box-sizing: border-box;
+    width: 100%;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     min-width: 0;
     min-height: 0;
+    margin: 0;
+    padding: 0;
     background: var(--layer-default);
     overflow: hidden;
     overflow-x: hidden;
@@ -2124,6 +2138,15 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-content {
+    /* Minimal uses the native overlay composition: ContentGrid remains the
+       full root surface while the pane is layered above it. Keeping this
+       layer out of the flex width negotiation prevents pane open/close from
+       changing the hosted page's available width or its own gutters. */
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    flex: none;
     border-left: 0;
     border-radius: 0;
   }
@@ -2134,9 +2157,12 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-content-inner {
+    box-sizing: border-box;
+    width: 100%;
     flex: 1 1 auto;
     height: auto;
     min-height: 0;
+    margin: 0;
     padding: 0;
     overflow: hidden;
   }

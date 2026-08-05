@@ -81,6 +81,7 @@ export default {
   "text.allows-users-to-view-and-set-ratings": "允许用户查看和设置评级。",
   "text.an-expander-with-text-in-the-header-and-content": "标题和内容中都包含文本的展开器。",
   "text.animatedvisualplayer": "动画视觉播放器",
+  "text.animatedvisualplayer-description": "用于呈现动态图形并控制其播放的元素。",
   "text.animation-style-when-switching-pages": "切换页面时的动画样式",
   "text.appearance": "外观",
   "text.arabic-ar-sa": "阿拉伯语（ar-SA）",
@@ -98,6 +99,8 @@ export default {
   "text.calendardatepicker-with-a-header-and-placeholder": "带标题和占位文本的日历日期选取器。",
   "text.calendarview": "日历视图",
   "text.capture-element-camera": "捕获元素 / 相机",
+  "text.capture-element-camera-preview": "捕获元素 / 相机预览",
+  "text.capture-element-description": "可以使用 MediaPlayerElement 控件和 MediaCapture 对象显示相机预览。",
   "text.captures-media-from-a-camera": "从相机捕获媒体。",
   "text.checkbox": "复选框",
   "text.checkbox-controls-let-the-user-select-a-combinat": "复选框控件允许用户选择二进制选项的组合。相比之下，单选按钮控件允许用户从互斥选项中选择。不确定状态用于表示某个选项对部分子选项生效，但不是全部。不要允许用户直接设置不确定状态来表示第三种选项。",
@@ -170,6 +173,7 @@ export default {
   "text.hyperlinkbutton": "超链接按钮",
   "text.i-am-a-textblock": "我是一个文本块。",
   "text.image": "图像",
+  "text.image-description": "可以使用 Image 控件显示和缩放图像。",
   "text.infobadge": "信息徽章",
   "text.infobar": "信息栏",
   "text.inline": "内联",
@@ -194,6 +198,7 @@ export default {
   "text.material": "材质",
   "text.media": "媒体",
   "text.mediaplayerelement": "媒体播放器元素",
+  "text.mediaplayerelement-description": "可以使用 MediaPlayerElement 控件播放视频和显示图像。可以显示传输控件或使视频自动播放。",
   "text.menubar": "菜单栏",
   "text.menuflyout": "菜单浮出面板",
   "text.menus-and-toolbars": "菜单和工具栏",
@@ -224,6 +229,7 @@ export default {
   "text.passwordbox": "密码框",
   "text.persiancalendar": "波斯历",
   "text.personpicture": "人物头像",
+  "text.personpicture-description": "显示人员或联系人的图片。",
   "text.pick-a-date": "选择日期",
   "text.plays-animated-content": "播放动画内容。",
   "text.plays-media-content": "播放媒体内容。",
@@ -703,6 +709,7 @@ export default {
   ,"text.pause": "暂停"
   ,"text.stop": "停止"
   ,"text.volume": "音量"
+  ,"text.mute": "静音"
   ,"text.unmute": "取消静音"
   ,"text.cast": "投放"
   ,"text.aspect-ratio": "纵横比"

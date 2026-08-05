@@ -2,29 +2,24 @@
   <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.capture-element-camera')" />
-          <WinTextBlock class="page-description" :Text="$t('text.captures-media-from-a-camera')" TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
-          </div>
+        <WinTextBlock class="page-header" :Text="$t('text.capture-element-camera-preview')" />
+        <WinTextBlock class="page-description" :Text="$t('text.capture-element-description')" TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
+          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
         </div>
+      </div>
+
       <div class="gallery-page-content">
         <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.capture.preview')" :theme="pageTheme" :vue="captureCode">
-              <template #example>
-                <WinCaptureElementPreview ref="previewRef" :mirrored="mirrored" @ready="onCameraReady" />
-              </template>
-              <template #options>
-                <div class="capture-options">
-                  <WinToggleSwitch v-model:IsOn="mirrored" :Header="$t('sample.capture.mirror-preview')" v-bind="{ 'tooltipservice.tooltip': $t('sample.capture.mirror-tooltip') }" />
-                  <WinButton :IsEnabled="cameraReady" @Click="capture">
-                    <WinTextBlock :Text="$t('sample.capture.capture-photo')" />
-                  </WinButton>
-                </div>
-              </template>
-            </WinControlExample>
+          <template #example>
+            <WinCaptureElement ref="captureRef" />
+          </template>
+          <template #options>
+            <WinToggleSwitch :IsOn="mirrorPreview" :Header="$t('sample.capture.mirror-preview')" v-bind="{ 'tooltipservice.tooltip': $t('sample.capture.mirror-tooltip') }" @update:IsOn="onMirrorChanged" />
+            <WinButton @Click="capturePhoto">{{ $t('sample.capture.capture-photo') }}</WinButton>
+          </template>
+        </WinControlExample>
       </div>
     </div>
   </WinScrollViewer>
@@ -33,43 +28,45 @@
 <script setup>
 import { computed, inject, onMounted, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
-import WinCaptureElementPreview from '../../components/WinCaptureElementPreview.vue';
+import WinCaptureElement from '../../components/WinCaptureElement.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinScrollViewer from '../../components/WinScrollViewer.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
-import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'captureelement');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const mirrored = ref(false);
-const previewRef = ref(null);
-const cameraReady = ref(false);
+const captureRef = ref(null);
+const mirrorPreview = ref(false);
 
-const capture = () => previewRef.value?.capture();
-const onCameraReady = (ready) => { cameraReady.value = ready; };
+const onMirrorChanged = (value) => {
+  mirrorPreview.value = Boolean(value);
+  captureRef.value?.SetMirrorPreview(mirrorPreview.value);
+};
+const capturePhoto = () => captureRef.value?.CapturePhoto();
 
-onMounted(() => {
-  previewRef.value?.start();
-});
+onMounted(() => captureRef.value?.StartCaptureElement());
 
-const captureCode = computed(() => `<Grid RowDefinitions="Auto,*" ColumnDefinitions="*,100" MinWidth="400" MinHeight="300" RowSpacing="10" ColumnSpacing="4">
-  <TextBlock x:Name="frameSourceName" />
-  <MediaPlayerElement x:Name="captureElement" Stretch="Uniform" AutoPlay="True" />
-  <TextBlock x:Name="capturedText" Text="${t('text.captured')}:" Visibility="Collapsed" />
-</Grid>`);
+const captureCode = computed(() => `<WinGrid RowDefinitions="Auto,*" ColumnDefinitions="*,100" MinWidth="400" MinHeight="300" RowSpacing="10" ColumnSpacing="4">
+  <WinTextBlock x:Name="frameSourceName" />
+  <WinMediaPlayerElement x:Name="captureElement" Stretch="Uniform" AutoPlay="True" />
+  <WinTextBlock x:Name="capturedText" Text="Captured:" Visibility="Collapsed" />
+  <WinGrid Grid.Row="1" Grid.Column="1">
+    <WinScrollViewer VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto">
+      <WinStackPanel Spacing="2" />
+    </WinScrollViewer>
+  </WinGrid>
+</WinGrid>`);
 </script>
 
 <style scoped>
 .page-heading { position: relative; }
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header { margin: 0 0 8px; color: var(--text-primary); font-size: 28px; font-weight: 600; }
+.page-description { margin: 0 72px 16px 0; color: var(--text-secondary); line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .icon { font-size: 16px; }
-.capture-options { width: 196px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
 </style>

@@ -81,6 +81,7 @@ export default {
   "text.allows-users-to-view-and-set-ratings": "Allows users to view and set ratings.",
   "text.an-expander-with-text-in-the-header-and-content": "An Expander with text in the header and content.",
   "text.animatedvisualplayer": "AnimatedVisualPlayer",
+  "text.animatedvisualplayer-description": "An element to render and control playback of motion graphics.",
   "text.animation-style-when-switching-pages": "Animation style when switching pages",
   "text.appearance": "Appearance",
   "text.arabic-ar-sa": "Arabic (ar-SA)",
@@ -98,6 +99,8 @@ export default {
   "text.calendardatepicker-with-a-header-and-placeholder": "CalendarDatePicker with a header and placeholder text.",
   "text.calendarview": "CalendarView",
   "text.capture-element-camera": "Capture Element / Camera",
+  "text.capture-element-camera-preview": "Capture Element / Camera Preview",
+  "text.capture-element-description": "You can use a MediaPlayerElement control to show a camera preview with a MediaCapture object.",
   "text.captures-media-from-a-camera": "Captures media from a camera.",
   "text.checkbox": "CheckBox",
   "text.checkbox-controls-let-the-user-select-a-combinat": "CheckBox controls let the user select a combination of binary options. In contrast, RadioButton controls allow the user to select from mutually exclusive options. The indeterminate state is used to indicate that an option is set for some, but not all, child options. Don't allow users to set an indeterminate state directly to indicate a third option.",
@@ -170,6 +173,7 @@ export default {
   "text.hyperlinkbutton": "HyperlinkButton",
   "text.i-am-a-textblock": "I am a TextBlock.",
   "text.image": "Image",
+  "text.image-description": "You can use an Image control to show and scale images.",
   "text.infobadge": "InfoBadge",
   "text.infobar": "InfoBar",
   "text.inline": "Inline",
@@ -194,6 +198,7 @@ export default {
   "text.material": "Material",
   "text.media": "Media",
   "text.mediaplayerelement": "MediaPlayerElement",
+  "text.mediaplayerelement-description": "You can use a MediaPlayerElement control to playback videos and show images. You can show transport controls or make the video autoplay.",
   "text.menubar": "MenuBar",
   "text.menuflyout": "MenuFlyout",
   "text.menus-and-toolbars": "Menus & toolbars",
@@ -224,6 +229,7 @@ export default {
   "text.passwordbox": "PasswordBox",
   "text.persiancalendar": "PersianCalendar",
   "text.personpicture": "PersonPicture",
+  "text.personpicture-description": "Displays the picture of a person/contact.",
   "text.pick-a-date": "Pick a date",
   "text.plays-animated-content": "Plays animated content.",
   "text.plays-media-content": "Plays media content.",
@@ -703,6 +709,7 @@ export default {
   ,"text.pause": "Pause"
   ,"text.stop": "Stop"
   ,"text.volume": "Volume"
+  ,"text.mute": "Mute"
   ,"text.unmute": "Unmute"
   ,"text.cast": "Cast"
   ,"text.aspect-ratio": "Aspect ratio"

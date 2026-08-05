@@ -61,12 +61,12 @@ import WinScrollViewer from '../../components/WinScrollViewer.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinToolTip from '../../components/WinToolTip.vue';
-import cliffImage from '../../assets/SampleMedia/cliff.jpg';
 import { createPageState } from '../../utils/pageState';
 
 const currentPage = inject<Ref<string>>('currentPage');
 const pageKey = computed(() => currentPage?.value || 'tooltip');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const cliffImage = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg';
 
 const simpleToolTipCode = `<WinButton ToolTipService.ToolTip="Simple ToolTip">
   <WinTextBlock Text="Button with a simple ToolTip." />
@@ -77,7 +77,7 @@ const serviceToolTipCode = `<WinToolTip Content="Offset ToolTip." VerticalOffset
 </WinToolTip>`;
 
 const imageToolTipCode = `<WinToolTip Content="Non-occluding ToolTip." Placement="Right" PlacementRect="0,0,400,266">
-  <WinImage Source="/Assets/SampleMedia/cliff.jpg" Width="400" Height="266" />
+  <WinImage Source="${cliffImage}" Width="400" Height="266" />
 </WinToolTip>`;
 </script>
 

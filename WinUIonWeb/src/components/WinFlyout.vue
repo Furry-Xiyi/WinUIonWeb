@@ -1,7 +1,7 @@
 <template>
   <span class="win-flyout-anchor" ref="anchorRef">
     <slot name="trigger"></slot>
-    <Teleport to="body">
+    <Teleport :to="teleportTarget">
       <div v-if="effectiveIsOpen" class="win-flyout-dismiss-layer" @pointerdown="onLightDismiss"></div>
       <div
         v-if="effectiveIsOpen"
@@ -23,7 +23,7 @@
   </span>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import WinScrollViewer from './WinScrollViewer.vue';
 
@@ -46,6 +46,7 @@ const flyoutRef = ref(null);
 const localIsOpen = ref(false);
 const position = ref({ top: 0, left: 0, maxHeight: 0, minWidth: 0 });
 const openDirection = ref('down');
+const teleportTarget = ref('body');
 
 const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
 const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
@@ -146,14 +147,22 @@ const onViewportChanged = () => {
   if (effectiveIsOpen.value) void updatePosition();
 };
 
+const onFullscreenChanged = () => {
+  teleportTarget.value = document.fullscreenElement || 'body';
+  if (effectiveIsOpen.value) void updatePosition();
+};
+
 onMounted(() => {
+  teleportTarget.value = document.fullscreenElement || 'body';
   window.addEventListener('resize', onViewportChanged);
   window.addEventListener('scroll', onViewportChanged, true);
+  document.addEventListener('fullscreenchange', onFullscreenChanged);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onViewportChanged);
   window.removeEventListener('scroll', onViewportChanged, true);
+  document.removeEventListener('fullscreenchange', onFullscreenChanged);
 });
 
 defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
