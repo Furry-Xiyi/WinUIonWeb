@@ -410,12 +410,12 @@ function onViewportChanged() {
 }
 
 function onFullscreenChanged() {
-  teleportTarget.value = document.fullscreenElement || 'body';
+  teleportTarget.value = (document.fullscreenElement as HTMLElement | null) || 'body';
   if (isVisible.value) void updatePosition();
 }
 
 onMounted(() => {
-  teleportTarget.value = document.fullscreenElement || 'body';
+  teleportTarget.value = (document.fullscreenElement as HTMLElement | null) || 'body';
   window.addEventListener('resize', onViewportChanged);
   window.addEventListener('scroll', onViewportChanged, true);
   document.addEventListener('fullscreenchange', onFullscreenChanged);

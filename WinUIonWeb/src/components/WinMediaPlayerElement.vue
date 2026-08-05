@@ -19,7 +19,7 @@
         :autoplay="AutoPlay"
         crossorigin="anonymous"
         preload="metadata"
-        :style="{ objectFit: stretchValue }"
+        :style="videoStyle"
         playsinline
         @loadedmetadata="syncFromVideo"
         @timeupdate="syncFromVideo"
@@ -210,10 +210,10 @@ const props = defineProps({
 const emit = defineEmits(['MediaOpened', 'MediaFailed', 'IsFullWindowChanged']);
 const { t } = useI18n();
 const inheritedTheme = inject('winuiTheme', null);
-const rootRef = ref(null);
-const videoRef = ref(null);
-const volumeFlyoutRef = ref(null);
-const controlPanelRef = ref(null);
+const rootRef = ref<HTMLElement | null>(null);
+const videoRef = ref<HTMLVideoElement | null>(null);
+const volumeFlyoutRef = ref<{ toggle?: () => void } | null>(null);
+const controlPanelRef = ref<HTMLElement | null>(null);
 const activeStretch = ref(props.Stretch);
 const isPlaying = ref(false);
 const muted = ref(false);
@@ -231,19 +231,19 @@ const controlPanelPointerPressed = ref(false);
 const controlPanelHasFocus = ref(false);
 const rootPointerPressed = ref(false);
 const anchorTheme = ref('');
-let hideControlsTimer = null;
-let pointerMoveEndTimer = null;
-let themeObserver = null;
-let mediaLoadTimer = null;
+let hideControlsTimer: number | null = null;
+let pointerMoveEndTimer: number | null = null;
+let themeObserver: MutationObserver | null = null;
+let mediaLoadTimer: number | null = null;
 
-const cssLength = (value) => {
+const cssLength = (value: unknown) => {
   if (value === '' || value === null || value === undefined) return undefined;
   return typeof value === 'number' || /^-?\d+(\.\d+)?$/.test(String(value).trim())
     ? `${value}px`
     : String(value);
 };
 
-const mediaUri = (value) => {
+const mediaUri = (value: unknown) => {
   if (typeof value === 'string') return value;
   if (value && typeof value === 'object') return value.UriSource || '';
   return '';
@@ -289,6 +289,7 @@ const stretchValue = computed(() => ({
   Uniform: 'contain',
   UniformToFill: 'cover'
 }[activeStretch.value] || 'contain'));
+const videoStyle = computed(() => ({ objectFit: stretchValue.value as 'none' | 'fill' | 'contain' | 'cover' }));
 const isFullWindowActive = computed(() => fullWindowState.value || props.IsFullWindow);
 const rootStyle = computed(() => ({
   width: cssLength(props.Width),
@@ -351,7 +352,7 @@ const onBufferingEnded = () => {
   startControlPanelHideTimer();
 };
 
-const onMediaError = (event) => {
+const onMediaError = (event: Event | { type: string; target: HTMLVideoElement | null }) => {
   clearMediaLoadTimer();
   mediaError.value = true;
   isBuffering.value = false;
@@ -394,7 +395,7 @@ const toggleMute = () => {
   }
 };
 
-const setVolume = (value) => {
+const setVolume = (value: unknown) => {
   const video = videoRef.value;
   if (!video) return;
   const nextValue = Math.max(0, Math.min(100, Number(value?.NewValue ?? value)));
@@ -414,7 +415,7 @@ const onFullscreenChanged = () => {
   emit('IsFullWindowChanged', fullWindowState.value);
 };
 
-const seekTo = (value) => {
+const seekTo = (value: unknown) => {
   const video = videoRef.value;
   if (!video) return;
   video.currentTime = Number(value?.NewValue ?? value);
@@ -471,7 +472,7 @@ const onControlPanelReleased = () => {
   startControlPanelHideTimer();
 };
 
-const onControlPanelCaptureLost = (event) => {
+const onControlPanelCaptureLost = (event: PointerEvent) => {
   rootPointerPressed.value = false;
   controlPanelPointerPressed.value = false;
   const point = event && Number.isFinite(event.clientX) && Number.isFinite(event.clientY) ? event : null;
@@ -523,7 +524,7 @@ const onEnded = () => {
   controlsVisible.value = true;
 };
 
-const formatTime = (value) => {
+const formatTime = (value: unknown) => {
   const safe = Math.max(0, Math.floor(Number(value) || 0));
   const hours = Math.floor(safe / 3600);
   const minutes = Math.floor((safe % 3600) / 60);
@@ -545,7 +546,7 @@ watch(sourceUri, async () => {
   }
 });
 
-watch(() => props.AutoPlay, (value) => {
+watch(() => props.AutoPlay, (value: boolean) => {
   if (value) videoRef.value?.play().catch(() => {});
   else videoRef.value?.pause();
 });
@@ -565,7 +566,7 @@ watch(showAndHideAutomatically, (enabled) => {
   }
 });
 
-watch(() => props.Stretch, (value) => {
+watch(() => props.Stretch, (value: string) => {
   activeStretch.value = value;
 });
 

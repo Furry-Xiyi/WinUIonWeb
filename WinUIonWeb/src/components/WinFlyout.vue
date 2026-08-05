@@ -41,12 +41,12 @@ const props = defineProps({
 
 const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed', 'Opening', 'Closing']);
 
-const anchorRef = ref(null);
-const flyoutRef = ref(null);
+const anchorRef = ref<HTMLElement | null>(null);
+const flyoutRef = ref<HTMLElement | null>(null);
 const localIsOpen = ref(false);
 const position = ref({ top: 0, left: 0, maxHeight: 0, minWidth: 0 });
 const openDirection = ref('down');
-const teleportTarget = ref('body');
+const teleportTarget = ref<string | HTMLElement>('body');
 
 const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
 const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
@@ -59,7 +59,7 @@ const flyoutStyle = computed(() => ({
   maxHeight: position.value.maxHeight ? `${position.value.maxHeight}px` : undefined
 }));
 
-const setOpen = (value) => {
+const setOpen = (value: boolean) => {
   if (value === effectiveIsOpen.value && props.IsOpen !== undefined) return;
   localIsOpen.value = value;
   emit('update:IsOpen', value);
@@ -135,7 +135,7 @@ const onLightDismiss = () => {
   if (props.IsLightDismissEnabled) hide();
 };
 
-watch(() => props.IsOpen, async (value) => {
+watch(() => props.IsOpen, async (value: boolean | undefined) => {
   if (value) {
     await nextTick();
     await updatePosition();
@@ -148,12 +148,12 @@ const onViewportChanged = () => {
 };
 
 const onFullscreenChanged = () => {
-  teleportTarget.value = document.fullscreenElement || 'body';
+  teleportTarget.value = (document.fullscreenElement as HTMLElement | null) || 'body';
   if (effectiveIsOpen.value) void updatePosition();
 };
 
 onMounted(() => {
-  teleportTarget.value = document.fullscreenElement || 'body';
+  teleportTarget.value = (document.fullscreenElement as HTMLElement | null) || 'body';
   window.addEventListener('resize', onViewportChanged);
   window.addEventListener('scroll', onViewportChanged, true);
   document.addEventListener('fullscreenchange', onFullscreenChanged);

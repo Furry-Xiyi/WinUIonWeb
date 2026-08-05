@@ -6,5 +6,8 @@
   },
   "categories": {
     "correctness": "error"
+  },
+  "rules": {
+    "no-useless-escape": "off"
   }
 }

@@ -150,14 +150,12 @@ import { useI18n } from './i18n/index';
 import WinScrollViewer from './WinScrollViewer.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import WinTextBox from './WinTextBox.vue';
+import { useFlyoutAnimation } from './useFlyoutAnimation';
 
 const ComboBoxPopupMaxNumberOfItems = 9;
 const ComboBoxPopupMaxNumberOfItemsThatCanBeShownOnOneSide = 4;
 const ComboBoxDropdownContentMargin = { Top: 4, Bottom: 4 };
 const DefaultComboBoxItemHeight = 36;
-const ComboBoxFlyoutClipMargin = 15;
-const ComboBoxFlyoutEnterDuration = 750;
-const ComboBoxFlyoutEnterEasing = 'cubic-bezier(0.102, 0.700, 0.000, 1.007)';
 
 const { t } = useI18n();
 const props = defineProps({
@@ -212,6 +210,17 @@ const anchorTheme = ref('');
 const inheritedTheme = inject('winuiTheme', null);
 const listBoxId = `win-combo-box-${Math.random().toString(36).slice(2)}`;
 
+const flyoutAnimation = useFlyoutAnimation(flyoutRef, {
+  Origin: () => (props.IsEditable ? 'edge' : 'element'),
+  OriginElement: () => {
+    if (props.IsEditable || props.ItemsSource.length === 0) return null;
+    const index = currentSelectedIndex.value >= 0 ? currentSelectedIndex.value : Math.floor(props.ItemsSource.length / 2);
+    return itemRefs.value[index] ?? null;
+  },
+  Direction: () => (openedUp.value ? 'bottom' : 'top'),
+  StripSize: DefaultComboBoxItemHeight
+});
+
 const chevronClass = ref('');
 let chevronPressed = false;
 let chevronPressDone = false;
@@ -219,8 +228,6 @@ let resizeObserver = null;
 let themeObserver = null;
 let positionFrame = 0;
 let lastInputDeviceType = 'Mouse';
-let flyoutEnterAnimation = null;
-let flyoutEnterPlayed = false;
 
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
@@ -604,91 +611,11 @@ const UpdateIsPopupPannable = (itemCount, maxAllowedPopupHeight, availableSize) 
   return childHeight > maxAllowedPopupHeight;
 };
 
-const cancelFlyoutEnterAnimation = () => {
-  if (flyoutEnterAnimation) {
-    flyoutEnterAnimation.cancel();
-    flyoutEnterAnimation = null;
-  }
-};
-
-// Non-editable popups align the selected item (or the middle item when there
-// is no selection) with the combo box, so the reveal starts from that row.
-const getAlignedClipStartRect = () => {
-  const flyout = flyoutRef.value;
-  const itemCount = props.ItemsSource.length;
-  if (!flyout || itemCount === 0) return null;
-  const index = currentSelectedIndex.value >= 0 ? currentSelectedIndex.value : Math.floor(itemCount / 2);
-  const item = itemRefs.value[index];
-  if (!item) return null;
-
-  const flyoutRect = flyout.getBoundingClientRect();
-  const itemRect = item.getBoundingClientRect();
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const left = clamp(itemRect.left - flyoutRect.left, 0, flyoutRect.width);
-  const right = clamp(itemRect.right - flyoutRect.left, left, flyoutRect.width);
-  const top = clamp(itemRect.top - flyoutRect.top, 0, flyoutRect.height);
-  const bottom = clamp(itemRect.bottom - flyoutRect.top, top, flyoutRect.height);
-  return bottom - top > 0 && right - left > 0 ? { left, right, top, bottom } : null;
-};
-
-// Editable popups are plain drop-downs (open down/up without aligning an
-// item), so the reveal must grow from the edge facing the combo box instead
-// of expanding from the middle of the list.
-const getDirectionalClipStartRect = () => {
-  const flyout = flyoutRef.value;
-  if (!flyout) return null;
-  const flyoutRect = flyout.getBoundingClientRect();
-  const stripHeight = Math.min(DefaultComboBoxItemHeight, flyoutRect.height);
-  return openedUp.value
-    ? { left: 0, right: flyoutRect.width, top: flyoutRect.height - stripHeight, bottom: flyoutRect.height }
-    : { left: 0, right: flyoutRect.width, top: 0, bottom: stripHeight };
-};
-
-const getFlyoutClipPolygon = (rect) => (
-  `polygon(${rect.left}px ${rect.top}px, ${rect.right}px ${rect.top}px, ${rect.right}px ${rect.bottom}px, ${rect.left}px ${rect.bottom}px)`
-);
-
-const playFlyoutEnterAnimation = () => {
-  if (flyoutEnterPlayed || !flyoutRef.value || props.ItemsSource.length === 0) return;
-  cancelFlyoutEnterAnimation();
-
-  const flyout = flyoutRef.value;
-  const flyoutRect = flyout.getBoundingClientRect();
-  const startRect = props.IsEditable
-    ? getDirectionalClipStartRect()
-    : (getAlignedClipStartRect() ?? getDirectionalClipStartRect());
-  const margin = ComboBoxFlyoutClipMargin;
-  const endRect = {
-    left: -margin,
-    right: flyoutRect.width + margin,
-    top: -margin,
-    bottom: flyoutRect.height + margin
-  };
-
-  const animation = flyout.animate(
-    [
-      { clipPath: getFlyoutClipPolygon(startRect) },
-      { clipPath: getFlyoutClipPolygon(endRect) }
-    ],
-    { duration: ComboBoxFlyoutEnterDuration, easing: ComboBoxFlyoutEnterEasing, fill: 'forwards' }
-  );
-  flyoutEnterAnimation = animation;
-  flyoutEnterPlayed = true;
-  animation.onfinish = () => {
-    if (flyoutEnterAnimation !== animation) return;
-    flyoutEnterAnimation.cancel();
-    flyoutEnterAnimation = null;
-    // clip-path clips the box-shadow as well; remove it once the reveal
-    // finishes so the popup shadow is rendered fully.
-    flyout.style.clipPath = '';
-  };
-};
-
 const positionFlyout = async () => {
   if (!isOpen.value || !backgroundRef.value || !flyoutRef.value) return;
   // A re-position (scroll/resize) must not leave the enter clip at stale
   // coordinates or sizes; cancel it so the flyout shows fully again.
-  if (flyoutEnterPlayed) cancelFlyoutEnterAnimation();
+  flyoutAnimation.cancel();
 
   await nextTick();
   const comboBoxRect = backgroundRef.value.getBoundingClientRect();
@@ -771,7 +698,7 @@ const positionFlyout = async () => {
     scrollViewerRef.value?.ChangeView(null, verticalOffset, null);
   }
   flyoutReady.value = true;
-  playFlyoutEnterAnimation();
+  if (props.ItemsSource.length > 0) flyoutAnimation.play();
 };
 
 const schedulePositionFlyout = () => {
@@ -793,8 +720,7 @@ const setOpen = async (value) => {
   emit('update:IsDropDownOpen', value);
 
   if (value) {
-    cancelFlyoutEnterAnimation();
-    flyoutEnterPlayed = false;
+    flyoutAnimation.cancel();
     inputDeviceTypeUsedToOpen.value = lastInputDeviceType;
     anchorTheme.value = ResolveAnchorTheme();
     flyoutReady.value = false;
@@ -802,8 +728,7 @@ const setOpen = async (value) => {
     await nextTick();
     await positionFlyout();
   } else {
-    cancelFlyoutEnterAnimation();
-    flyoutEnterPlayed = false;
+    flyoutAnimation.cancel();
     flyoutReady.value = false;
     emit('DropDownClosed');
   }
@@ -1035,7 +960,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
   themeObserver?.disconnect();
-  cancelFlyoutEnterAnimation();
+  flyoutAnimation.cancel();
   window.removeEventListener('resize', schedulePositionFlyout);
   window.removeEventListener('scroll', onWindowScroll, true);
   document.removeEventListener('pointerdown', onDocumentPointerDown);
