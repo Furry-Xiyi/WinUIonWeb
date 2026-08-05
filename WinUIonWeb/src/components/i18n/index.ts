@@ -33,12 +33,12 @@ const format = (value: string, values?: I18nValues) => {
 export const createI18n = (locale = navigator.language, extraResources?: Partial<ResourceBundle>): I18n => {
   const currentLocale = normalizeLocale(locale);
   const currentResources = {
-    ...(componentResources[currentLocale] ?? {}),
-    ...(extraResources?.[currentLocale] ?? {})
+    ...componentResources[currentLocale],
+    ...extraResources?.[currentLocale]
   };
   const fallbackResources = {
     ...componentResources['en-US'],
-    ...(extraResources?.['en-US'] ?? {})
+    ...extraResources?.['en-US']
   };
 
   const t = (key: string, values?: I18nValues) => {
