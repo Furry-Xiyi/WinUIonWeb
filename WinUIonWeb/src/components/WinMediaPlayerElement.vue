@@ -245,7 +245,7 @@ const cssLength = (value: unknown) => {
 
 const mediaUri = (value: unknown) => {
   if (typeof value === 'string') return value;
-  if (value && typeof value === 'object') return value.UriSource || '';
+  if (value && typeof value === 'object') return String((value as { UriSource?: unknown }).UriSource || '');
   return '';
 };
 
@@ -340,7 +340,8 @@ const onMediaLoaded = () => {
 
 const onBufferingStarted = () => {
   isBuffering.value = true;
-  if (videoRef.value?.readyState >= 2) isMediaLoading.value = false;
+  const video = videoRef.value;
+  if (video && video.readyState >= 2) isMediaLoading.value = false;
   showControls();
   if (hideControlsTimer) window.clearTimeout(hideControlsTimer);
 };
@@ -398,7 +399,9 @@ const toggleMute = () => {
 const setVolume = (value: unknown) => {
   const video = videoRef.value;
   if (!video) return;
-  const nextValue = Math.max(0, Math.min(100, Number(value?.NewValue ?? value)));
+  const nextValue = Math.max(0, Math.min(100, Number(
+    value && typeof value === 'object' && 'NewValue' in value ? value.NewValue : value
+  )));
   video.volume = nextValue / 100;
   video.muted = nextValue === 0;
   volumePercent.value = nextValue;
@@ -418,7 +421,7 @@ const onFullscreenChanged = () => {
 const seekTo = (value: unknown) => {
   const video = videoRef.value;
   if (!video) return;
-  video.currentTime = Number(value?.NewValue ?? value);
+  video.currentTime = Number(value && typeof value === 'object' && 'NewValue' in value ? value.NewValue : value);
   syncFromVideo();
 };
 

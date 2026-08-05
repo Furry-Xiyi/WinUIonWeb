@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, ref, type Ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinMediaPlayerElement from '../../components/WinMediaPlayerElement.vue';
@@ -45,21 +45,22 @@ import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-const currentPage = inject('currentPage');
+const currentPage = inject<Ref<string | undefined>>('currentPage');
 const pageKey = computed(() => currentPage?.value || 'mediaplayerelement');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const officialGalleryMediaRoot = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia';
 const officialVideo = `${officialGalleryMediaRoot}/ladybug.wmv`;
 const officialAutoplayVideo = `${officialGalleryMediaRoot}/fishes.wmv`;
-const fileInput = ref(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 const player1Source = ref(officialVideo);
 const player2Source = officialAutoplayVideo;
 let objectUrl = '';
 
 const openFile = () => fileInput.value?.click();
-const onFileSelected = (event) => {
-  const file = event.target.files?.[0];
+const onFileSelected = (event: Event) => {
+  const input = event.target as HTMLInputElement | null;
+  const file = input?.files?.[0];
   if (!file) return;
   if (objectUrl) URL.revokeObjectURL(objectUrl);
   objectUrl = URL.createObjectURL(file);

@@ -15,7 +15,7 @@
           class="example-display"
           :data-theme="theme"
           :style="displayStyle">
-          <WinThemeWrapper :theme="theme">
+            <WinThemeWrapper :theme="themeValue">
             <slot name="example">
               <slot></slot>
             </slot>
@@ -23,7 +23,7 @@
         </div>
 
         <aside v-if="hasOptions" class="example-options">
-          <WinThemeWrapper :theme="theme">
+          <WinThemeWrapper :theme="themeValue">
             <slot name="options">{{ options }}</slot>
           </WinThemeWrapper>
         </aside>
@@ -67,7 +67,7 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, useSlots, watch } from 'vue';
 import WinExpander from './WinExpander.vue';
 import WinButton from './WinButton.vue';
@@ -79,6 +79,11 @@ import WinThemeWrapper from './WinThemeWrapper.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
+defineSlots<{
+  default?: () => unknown;
+  example?: () => unknown;
+  options?: () => unknown;
+}>();
 const props = defineProps({
   headerText: { type: String, default: '' },
   exampleHeight: { type: [String, Number], default: 'auto' },
@@ -97,10 +102,12 @@ const props = defineProps({
   substitutions: { type: Array, default: () => [] }
 });
 
+const themeValue = computed(() => props.theme as 'light' | 'dark' | 'system');
+
 const selectedCodeTab = ref(0);
 const slots = useSlots();
 
-const hasSlottedContent = (slotName) => {
+const hasSlottedContent = (slotName: string) => {
   const nodes = slots[slotName]?.() ?? [];
   return nodes.some((node) => {
     if (typeof node.children === 'string') {
@@ -110,11 +117,11 @@ const hasSlottedContent = (slotName) => {
   });
 };
 
-const normalizeCssLength = (value) => {
+const normalizeCssLength = (value: unknown): string | undefined => {
   if (value === 'auto' || value === null || value === undefined || value === '') {
     return undefined;
   }
-  return typeof value === 'number' ? `${value}px` : value;
+  return typeof value === 'number' ? `${value}px` : String(value);
 };
 
 const codeTabs = computed(() => {
@@ -159,7 +166,7 @@ const displayStyle = computed(() => ({
   alignItems: 'flex-start'
 }));
 
-const onCodeTabChanged = (sender) => {
+const onCodeTabChanged = (sender: { Items?: unknown[]; SelectedItem?: unknown }) => {
   const selectedIndex = sender?.Items?.indexOf(sender?.SelectedItem) ?? 0;
   selectedCodeTab.value = Math.max(0, selectedIndex);
 };
