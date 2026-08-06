@@ -2102,6 +2102,7 @@ watch(() => props.selectedValue, (val) => {
 
   .win-nav-content {
     position: relative;
+    isolation: isolate;
     box-sizing: border-box;
     width: 100%;
     flex: 1 1 auto;
@@ -2111,16 +2112,27 @@ watch(() => props.selectedValue, (val) => {
     min-height: 0;
     margin: 0;
     padding: 0;
-    background: var(--layer-default);
+    background: transparent;
     overflow: hidden;
     overflow-x: hidden;
     transition: background var(--normal-duration) var(--fast-out-slow-in);
   }
 
+  .win-nav-content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: var(--NavigationViewContentBackground, var(--layer-fill-color-default, var(--layer-default)));
+    transition: background var(--normal-duration) var(--fast-out-slow-in);
+  }
+
   .win-nav-shell.is-left > .win-nav-content {
     border-radius: 8px 0 0 0;
-    border-top: 1px solid var(--ctrl-border-rest);
-    border-left: 1px solid var(--ctrl-border-rest);
+    border-top: 1px solid var(--NavigationViewContentGridBorderBrush, var(--CardStrokeColorDefaultBrush, var(--card-stroke)));
+    border-left: 1px solid var(--NavigationViewContentGridBorderBrush, var(--CardStrokeColorDefaultBrush, var(--card-stroke)));
   }
 
   .win-nav-shell.is-overlay-left > .win-nav-content {
@@ -2148,7 +2160,7 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-shell.is-top > .win-nav-content {
-    border-top: 1px solid var(--ctrl-border-rest);
+    border-top: 1px solid var(--NavigationViewContentGridBorderBrush, var(--CardStrokeColorDefaultBrush, var(--card-stroke)));
     border-radius: 0;
   }
 
@@ -2297,15 +2309,11 @@ watch(() => props.selectedValue, (val) => {
     }
 
     .win-nav-shell.is-left-compact > .win-nav-left-panel::before {
-      content: none;
-    }
-
-    .win-nav-shell.is-left-compact > .win-nav-left-panel::after {
       content: '';
       position: absolute;
-      inset: 0 auto 0 0;
+      inset: 0;
       z-index: 1;
-      width: var(--win-nav-open-pane-length, 320px);
+      width: 100%;
       pointer-events: none;
       background: var(--win-nav-pane-fill, var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg)));
       border-radius: 0 8px 8px 0;
@@ -2314,6 +2322,19 @@ watch(() => props.selectedValue, (val) => {
       transition: opacity var(--win-nav-pane-duration, 350ms) linear;
     }
 
+    .win-nav-shell.is-left-compact > .win-nav-left-panel::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      border: 1px solid var(--NavigationViewItemSeparatorForeground, var(--DividerStrokeColorDefaultBrush, var(--stroke-divider)));
+      border-radius: 0 8px 8px 0;
+      opacity: 1;
+      transition: opacity var(--win-nav-pane-duration, 350ms) linear;
+    }
+
+    .win-nav-shell.is-left-compact > .win-nav-left-panel.is-compact::before,
     .win-nav-shell.is-left-compact > .win-nav-left-panel.is-compact::after {
       opacity: 0;
     }
@@ -2432,6 +2453,16 @@ watch(() => props.selectedValue, (val) => {
     pointer-events: none;
     border-radius: inherit;
     background: var(--win-nav-pane-fill);
+  }
+
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    border: 1px solid var(--NavigationViewItemSeparatorForeground, var(--DividerStrokeColorDefaultBrush, var(--stroke-divider)));
+    border-radius: inherit;
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-left-panel.has-back-button > .win-nav-pane-surface,

@@ -71,7 +71,7 @@
           Padding="11,2,11,0"
           v-bind="{ 'automationproperties.name': t('gallery.page-header.copy-link'), 'tooltipservice.tooltip': t('gallery.page-header.copy-link') }"
           @Click="OnCopyLinkButtonClick">
-          <WinTextBlock class="icon" Text="&#xE71B;" />
+          <WinTextBlock class="icon" FontSize="16" Text="&#xE71B;" />
         </WinButton>
         <WinToggleButton
           class="win-page-header-action win-page-header-favorite-button"
@@ -364,8 +364,7 @@ onBeforeUnmount(() => {
 }
 
 .win-page-header-favorite-button {
-  padding-left: 9px;
-  padding-right: 9px;
+  padding: 5px 11px 6px;
 }
 
 .win-page-header-drop-down :deep(.win-dropdown-content) {
@@ -388,12 +387,6 @@ onBeforeUnmount(() => {
   min-width: 0;
   height: 1px;
   margin: 0 -12px;
-}
-
-.win-page-header-separator.win-appbar-separator {
-  width: 1px;
-  height: 32px;
-  margin: 0 4px;
 }
 
 @media (max-width: 640px) {

@@ -234,10 +234,10 @@ const navMenuItems = [
     { Tag: 'selectorbar', Icon: '\uE8AB', Content: t('text.selectorbar') }
   ]},
   { Tag: 'scrolling', Icon: '\uE174', Content: t('text.scrolling'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'pipspager', Icon: '\uE8A7', Content: t('text.pipspager') },
-    { Tag: 'scrollview', Icon: '\uE7F4', Content: t('text.scrollview') },
-    { Tag: 'scrollviewer', Icon: '\uE7F4', Content: t('text.scrollviewer') },
-    { Tag: 'semanticzoom', Icon: '\uE8A7', Content: t('text.semanticzoom') }
+    { Tag: 'pipspager', Icon: '\uE712', Content: t('text.pipspager') },
+    { Tag: 'scrollview', Icon: '\uECE7', Content: t('text.scrollview') },
+    { Tag: 'scrollviewer', Icon: '\uEC8F', Content: t('text.scrollviewer') },
+    { Tag: 'semanticzoom', Icon: '\uE773', Content: t('text.semanticzoom') }
   ]},
   { Tag: 'statusandinfo', Icon: '\uE8F2', Content: t('text.status-and-info'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'infobadge', Icon: '\uEDAF', Content: t('text.infobadge') },
@@ -572,6 +572,7 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
     --card-bg-secondary: rgba(246, 246, 246, 0.50);
     --card-stroke: rgba(0, 0, 0, 0.06);
     --stroke-divider: rgba(0, 0, 0, 0.06);
+    --NavigationViewItemSeparatorForeground: var(--stroke-divider);
     --stroke-surface-flyout: rgba(0, 0, 0, 0.06);
     --flyout-bg: rgba(252, 252, 252, 0.92);
     --flyout-backdrop: blur(30px) saturate(160%) brightness(1.02);
@@ -625,6 +626,8 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
     --AccentFillColorDefaultBrush: #0067C0;
     --TextFillColorInverseBrush: #FFFFFF;
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
+    --NavigationViewContentGridBorderBrush: #E5E5E5;
+    --NavigationViewContentBackground: var(--layer-fill-color-default);
     --SystemFillColorAttentionBrush: #0067C0;
     --SystemFillColorSuccessBrush: #0F7B0F;
     --SystemFillColorCautionBrush: #9D5D00;
@@ -657,11 +660,12 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
     --SystemControlHighlightAltBaseMediumHighBrush: rgba(255, 255, 255, 0.80);
     --SystemControlHighlightAltBaseHighBrush: #FFFFFF;
     --SystemControlDisabledBaseMediumLowBrush: rgba(255, 255, 255, 0.40);
-    --layer-default: rgba(58, 58, 58, 0.50);
+    --layer-default: rgba(58, 58, 58, 0.30);
     --card-bg: #2B2B2B;
     --card-bg-secondary: #252525;
     --card-stroke: rgba(0, 0, 0, 0.10);
     --stroke-divider: rgba(255, 255, 255, 0.08);
+    --NavigationViewItemSeparatorForeground: var(--stroke-divider);
     --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
     --flyout-bg: rgba(44, 44, 44, 0.86);
     --flyout-backdrop: blur(44px) saturate(190%) brightness(1.22) contrast(1.05);
@@ -715,6 +719,8 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
     --AccentFillColorDefaultBrush: #4CC2FF;
     --TextFillColorInverseBrush: rgba(0, 0, 0, 0.89);
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
+    --NavigationViewContentGridBorderBrush: #1D1D1D;
+    --NavigationViewContentBackground: var(--layer-fill-color-default);
     --SystemFillColorAttentionBrush: #4CC2FF;
     --SystemFillColorSuccessBrush: #6CCB5F;
     --SystemFillColorCautionBrush: #FCE100;

@@ -943,6 +943,7 @@ export default {
      ,"text.theme-shadow": "ThemeShadow"
      ,"text.typography": "Typography"
      ,"text.about": "About"
+     ,"text.open-code-repository": "Open code repository"
      ,"text.about-copyright": "© {year} {author}. {rights}"
      ,"text.all-rights-reserved": "All rights reserved."
      ,"text.qq-group": "QQ Group"

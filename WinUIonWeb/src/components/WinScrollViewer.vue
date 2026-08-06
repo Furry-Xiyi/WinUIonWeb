@@ -744,15 +744,6 @@ function handleWheel(event: WheelEvent) {
     return
   }
 
-  // Keep wheel scrolling deterministic for custom viewports. Native wheel
-  // chaining is inconsistent when a viewer is nested inside a gallery page.
-  const { deltaX, deltaY } = normalizeWheelDelta(event)
-  if (requestScrollByOffset(deltaX, deltaY, true)) {
-    event.preventDefault()
-    event.stopPropagation()
-    return
-  }
-
   // Handle scroll chaining
   if (!effectiveIsVerticalScrollChainingEnabled.value && scrollViewerRef.value) {
     const atTop = scrollViewerRef.value.scrollTop === 0

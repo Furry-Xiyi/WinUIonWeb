@@ -77,7 +77,12 @@
                     <WinTextBlock :Text="appTitle" FontSize="14.4" />
                     <WinTextBlock :Text="copyrightText" FontSize="12" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
                   </div>
-                  <WinTextBlock :Text="versionText" FontSize="14.4" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
+                  <div class="about-header-actions">
+                    <WinButton
+                      @Click="openRepository"
+                      :Content="$t('text.open-code-repository')" />
+                    <WinTextBlock :Text="versionText" FontSize="14.4" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
+                  </div>
                 </div>
               </template>
               <div class="about-content">
@@ -108,6 +113,7 @@ import WinRadioButtons from '../../components/WinRadioButtons.vue';
 import WinSettingsCard from '../../components/WinSettingsCard.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinButton from '../../components/WinButton.vue';
 import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
 import WinGrid from '../../components/WinGrid.vue';
 import appManifest from '../../manifest.json';
@@ -201,6 +207,9 @@ const copyrightText = computed(() => t('text.about-copyright', {
   rights: t('text.all-rights-reserved')
 }));
 const versionText = t(appManifest.version ?? 'app.version');
+const openRepository = () => {
+  window.open('http://github.com/Furry-Xiyi/WinUIonWeb/', '_blank', 'noopener,noreferrer');
+};
 </script>
 
 <style scoped>
@@ -275,6 +284,18 @@ const versionText = t(appManifest.version ?? 'app.version');
   gap: 0;
   flex: 1;
   min-width: 0;
+}
+
+.about-header-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 8px;
+  min-width: 0;
+}
+
+.about-header-actions :deep(.win-btn) {
+  white-space: nowrap;
 }
 
 .about-content {

@@ -3,11 +3,13 @@
     class="win-expander"
     :class="{ 'is-expanded': isExpandedState, 'expand-up': ExpandDirection === 'Up' }"
     :style="rootStyle">
-    <button
+    <div
       class="win-expander-header"
-      @click="toggleExpanded"
+      @click="onHeaderClick"
+      @keydown="onHeaderKeyDown"
       :aria-expanded="isExpandedState"
-      type="button">
+      role="button"
+      tabindex="0">
       <div class="win-expander-header-main">
         <span v-if="hasHeaderIcon" class="win-expander-header-icon icon" aria-hidden="true">
           <slot name="HeaderIcon">
@@ -40,7 +42,7 @@
       <span class="win-expander-chevron" aria-hidden="true">
         <span class="icon win-expander-arrow"></span>
       </span>
-    </button>
+    </div>
     <div class="win-expander-grid">
       <div class="win-expander-inner">
         <div class="win-expander-content" :style="contentStyle"><slot></slot></div>
@@ -172,6 +174,51 @@ const rootStyle = computed(() => {
 watch(() => props.IsExpanded, (newVal) => {
   isExpandedState.value = newVal;
 });
+
+const interactiveHeaderSelector = [
+  'button',
+  'a[href]',
+  'input',
+  'select',
+  'textarea',
+  'summary',
+  '[contenteditable=""]',
+  '[contenteditable="true"]',
+  '[role="button"]',
+  '[role="checkbox"]',
+  '[role="link"]',
+  '[role="menuitem"]',
+  '[role="menuitemcheckbox"]',
+  '[role="menuitemradio"]',
+  '[role="option"]',
+  '[role="radio"]',
+  '[role="switch"]',
+  '[role="tab"]',
+  '[role="textbox"]',
+  '[tabindex]:not([tabindex="-1"])'
+].join(',');
+
+const isInteractiveHeaderChild = (event) => {
+  const target = event.target;
+  const currentTarget = event.currentTarget;
+  if (!target?.closest || !currentTarget?.contains) return false;
+
+  const interactiveElement = target.closest(interactiveHeaderSelector);
+  return Boolean(interactiveElement && interactiveElement !== currentTarget && currentTarget.contains(interactiveElement));
+};
+
+const onHeaderClick = (event) => {
+  if (event.defaultPrevented || isInteractiveHeaderChild(event)) return;
+  toggleExpanded();
+};
+
+const onHeaderKeyDown = (event) => {
+  if (event.defaultPrevented || isInteractiveHeaderChild(event)) return;
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+
+  event.preventDefault();
+  toggleExpanded();
+};
 
 const toggleExpanded = () => {
   const nextValue = !isExpandedState.value;

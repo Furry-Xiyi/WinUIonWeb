@@ -43,26 +43,26 @@ const props = defineProps({
 <style scoped>
 .win-appbar-separator {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   flex-shrink: 0;
-  /* 默认竖直分隔线，用于横向CommandBar */
-  width: 1px;
-  height: 40px;
-  margin: 8px 12px;
+  /* Official AppBarSeparatorMargin is 2,8,2,8 around a 1px line. */
+  width: 5px;
+  height: 32px;
+  margin: 0;
   transition: opacity var(--fast-duration) var(--fast-out-slow-in);
 }
 
 /* 紧凑模式：更小的高度和边距 */
 .win-appbar-separator.is-compact {
   height: 32px;
-  margin: 4px 8px;
 }
 
 /* 分隔线本身 */
 .separator-line {
-  width: 100%;
-  height: 100%;
+  width: 1px;
+  height: auto;
+  margin: 8px 2px;
   background: var(--divider-stroke-color-default);
   opacity: 0.6;
   transition: background var(--fast-duration) var(--fast-out-slow-in);
@@ -85,6 +85,7 @@ const props = defineProps({
 .win-appbar-separator.is-horizontal .separator-line {
   width: 100%;
   height: 1px;
+  margin: 0 4px;
 }
 
 /* 浅色主题微调 */

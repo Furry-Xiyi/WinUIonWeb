@@ -393,6 +393,8 @@
   --AccentFillColorTertiaryBrush: rgba(0, 103, 192, 0.80);
   --AccentFillColorDisabledBrush: rgba(0, 0, 0, 0.22);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
+  --NavigationViewContentGridBorderBrush: var(--CardStrokeColorDefaultBrush);
+  --NavigationViewContentBackground: var(--layer-fill-color-default);
   --SystemFillColorAttentionBrush: #0067C0;
   --SystemFillColorSuccessBrush: #0F7B0F;
   --SystemFillColorCautionBrush: #9D5D00;
@@ -407,6 +409,7 @@
   --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.70);
   --CardBackgroundFillColorSecondaryBrush: rgba(246, 246, 246, 0.50);
   --DividerStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
+  --NavigationViewItemSeparatorForeground: var(--DividerStrokeColorDefaultBrush);
   --ControlStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
   --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border) 0px, var(--accent-border-accent) 2px, var(--accent-border-accent) 100%);
   --AccentControlElevationBorderBottomBrush: rgba(0, 0, 0, 0.40);
@@ -431,7 +434,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --app-bg: #202020;
-    --layer-default: rgba(58, 58, 58, 0.50);
+    --layer-default: rgba(58, 58, 58, 0.30);
     --dialog-background: #2C2C2C;
     --dialog-content-bg: rgba(43, 43, 43, 0);
     --dialog-overlay: rgba(0, 0, 0, 0.30);
@@ -526,6 +529,8 @@
     --AccentFillColorTertiaryBrush: rgba(76, 194, 255, 0.80);
     --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
+    --NavigationViewContentGridBorderBrush: #1D1D1D;
+    --NavigationViewContentBackground: var(--layer-fill-color-default);
     --SystemFillColorAttentionBrush: #4CC2FF;
     --SystemFillColorSuccessBrush: #6CCB5F;
     --SystemFillColorCautionBrush: #FCE100;
@@ -540,6 +545,7 @@
     --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.0512);
     --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
     --DividerStrokeColorDefaultBrush: rgba(255, 255, 255, 0.08);
+    --NavigationViewItemSeparatorForeground: var(--DividerStrokeColorDefaultBrush);
     --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.0706);
     --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border-accent) 0px, var(--accent-border) 2px, var(--accent-border) 100%);
     --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.0784);
@@ -704,6 +710,7 @@ html.theme-light {
   --accent-aa-text: #FFFFFF;
   --accent-text: #FFFFFF;
   --accent-text-secondary: rgba(255, 255, 255, 0.70);
+  --accent-text-fill-color-primary: #0D4897;
   --TextFillColorPrimaryBrush: rgba(0, 0, 0, 0.89);
   --TextFillColorSecondaryBrush: rgba(0, 0, 0, 0.62);
   --TextFillColorDisabledBrush: rgba(0, 0, 0, 0.36);
@@ -739,6 +746,8 @@ html.theme-light {
   --AccentFillColorTertiaryBrush: rgba(0, 103, 192, 0.80);
   --AccentFillColorDisabledBrush: rgba(0, 0, 0, 0.22);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
+  --NavigationViewContentGridBorderBrush: var(--CardStrokeColorDefaultBrush);
+  --NavigationViewContentBackground: var(--layer-fill-color-default);
   --SystemFillColorAttentionBrush: #0067C0;
   --SystemFillColorSuccessBrush: #0F7B0F;
   --SystemFillColorCautionBrush: #9D5D00;
@@ -753,6 +762,7 @@ html.theme-light {
   --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.70);
   --CardBackgroundFillColorSecondaryBrush: rgba(246, 246, 246, 0.50);
   --DividerStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
+  --NavigationViewItemSeparatorForeground: var(--DividerStrokeColorDefaultBrush);
   --ControlStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
   --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border) 0px, var(--accent-border-accent) 2px, var(--accent-border-accent) 100%);
   --AccentControlElevationBorderBottomBrush: rgba(0, 0, 0, 0.40);
@@ -788,7 +798,7 @@ html.theme-light {
 
 html.theme-dark {
   --app-bg: #202020;
-  --layer-default: rgba(58, 58, 58, 0.50);
+  --layer-default: rgba(58, 58, 58, 0.30);
   --dialog-background: #2C2C2C;
   --flyout-bg: rgba(44, 44, 44, 0.86);
   --flyout-border: rgba(255, 255, 255, 0.10);
@@ -883,6 +893,8 @@ html.theme-dark {
   --AccentFillColorTertiaryBrush: rgba(76, 194, 255, 0.80);
   --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
+  --NavigationViewContentGridBorderBrush: #1D1D1D;
+  --NavigationViewContentBackground: var(--layer-fill-color-default);
   --SystemFillColorAttentionBrush: #4CC2FF;
   --SystemFillColorSuccessBrush: #6CCB5F;
   --SystemFillColorCautionBrush: #FCE100;
@@ -897,6 +909,7 @@ html.theme-dark {
   --CardBackgroundFillColorDefaultBrush: rgba(255, 255, 255, 0.0512);
   --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
   --DividerStrokeColorDefaultBrush: rgba(255, 255, 255, 0.08);
+  --NavigationViewItemSeparatorForeground: var(--DividerStrokeColorDefaultBrush);
   --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.0706);
   --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border-accent) 0px, var(--accent-border) 2px, var(--accent-border) 100%);
   --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.0784);
