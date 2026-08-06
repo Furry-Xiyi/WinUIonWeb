@@ -426,10 +426,11 @@ defineExpose({ showAt, hide, openAt, isOpen });
   background: transparent;
   border-radius: var(--OverlayCornerRadius, var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px)));
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+  --win-cbf-shadow-bleed: 24px;
   -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
   backdrop-filter: var(--flyout-backdrop, blur(30px));
   overflow: hidden;
-  clip-path: inset(0);
+  clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)));
   will-change: clip-path, opacity;
 }
 
@@ -804,7 +805,7 @@ defineExpose({ showAt, hide, openAt, isOpen });
 .cbf-flyout-leave-active { animation: cbf-flyout-fade-out 83ms linear both; }
 
 .win-commandbar-flyout.is-panel-expanding-setup {
-  clip-path: inset(0 var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) 0);
+  clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)) var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) calc(-1 * var(--win-cbf-shadow-bleed)));
 }
 
 .win-commandbar-flyout.is-panel-expanding {
@@ -828,19 +829,19 @@ defineExpose({ showAt, hide, openAt, isOpen });
 
 @keyframes cbf-panel-expand {
   from {
-    clip-path: inset(0 var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) 0);
+    clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)) var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) calc(-1 * var(--win-cbf-shadow-bleed)));
   }
   to {
-    clip-path: inset(0);
+    clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)));
   }
 }
 
 @keyframes cbf-panel-collapse {
   from {
-    clip-path: inset(0);
+    clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)));
   }
   to {
-    clip-path: inset(0 var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) 0);
+    clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)) var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) calc(-1 * var(--win-cbf-shadow-bleed)));
   }
 }
 </style>
