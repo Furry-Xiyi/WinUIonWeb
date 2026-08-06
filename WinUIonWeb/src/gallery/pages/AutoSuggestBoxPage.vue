@@ -72,7 +72,7 @@ const pageKey = computed(() => currentPage?.value || 'autosuggestbox');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const cats = ['Abyssinian', 'Aegean', 'American Bobtail', 'American Curl', 'American Shorthair', 'Bengal', 'Birman', 'British Shorthair', 'Burmese', 'Chartreux', 'Devon Rex', 'Egyptian Mau', 'Maine Coon', 'Persian', 'Ragdoll', 'Russian Blue', 'Siamese', 'Sphynx', 'Turkish Angora'];
-const noResultsText = computed(() => t('sample.autosuggestbox.no-results'));
+const noResultsText = computed(() => t('text.no-results-found'));
 const controls = computed(() => [
   { title: 'AutoSuggestBox', subtitle: t('sample.autosuggestbox.subtitle.autosuggestbox') },
   { title: 'Button', subtitle: t('sample.autosuggestbox.subtitle.button') },

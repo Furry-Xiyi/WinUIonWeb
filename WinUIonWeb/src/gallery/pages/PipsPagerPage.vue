@@ -21,6 +21,7 @@
                 Height="270"
                 MaxWidth="400"
                 :ItemsSource="Pictures">
+                <!-- @vue-ignore the legacy JS component does not expose slot types -->
                 <template #item="slotProps">
                   <WinImage class="gallery-image" :Source="getPictureFromSlot(slotProps)" Stretch="Uniform" />
                 </template>

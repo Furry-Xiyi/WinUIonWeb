@@ -1,4 +1,5 @@
 <template>
+  <!-- 对应官方 Microsoft.UI.Xaml.Controls.AutoSuggestBox（ref/microsoft-ui-xaml-main/controls/dev/AutoSuggestBox） -->
   <div
     ref="rootRef"
     class="win-auto-suggest-box"
@@ -55,21 +56,25 @@
           VerticalScrollBarVisibility="Auto"
           HorizontalScrollMode="Disabled"
           HorizontalScrollBarVisibility="Disabled">
-          <button
-            v-for="(item, index) in suggestionItems"
-            :key="`${getItemText(item)}-${index}`"
-            class="win-asb-item"
-            :class="{ 'is-highlighted': highlightedIndex === index, 'is-disabled': isNoResultsItem(item) }"
-            type="button"
-            role="option"
-            :disabled="isNoResultsItem(item)"
-            :aria-selected="highlightedIndex === index"
-            @mouseenter="highlightedIndex = isNoResultsItem(item) ? highlightedIndex : index"
-            @pointerdown.prevent
-            @click="chooseSuggestion(index)">
-            <span class="win-asb-item-title">{{ getItemText(item) }}</span>
-            <span v-if="getItemSubtitle(item)" class="win-asb-item-subtitle">{{ getItemSubtitle(item) }}</span>
-          </button>
+          <Transition name="asb-results" mode="out-in">
+            <div :key="resultsKey" class="win-asb-results">
+              <button
+                v-for="(item, index) in suggestionItems"
+                :key="`${getItemText(item)}-${index}`"
+                class="win-asb-item"
+                :class="{ 'is-highlighted': highlightedIndex === index, 'is-disabled': isNoResultsItem(item) }"
+                type="button"
+                role="option"
+                :disabled="isNoResultsItem(item)"
+                :aria-selected="highlightedIndex === index"
+                @mouseenter="highlightedIndex = isNoResultsItem(item) ? highlightedIndex : index"
+                @pointerdown.prevent
+                @click="chooseSuggestion(index)">
+                <span class="win-asb-item-title">{{ getItemText(item) }}</span>
+                <span v-if="getItemSubtitle(item)" class="win-asb-item-subtitle">{{ getItemSubtitle(item) }}</span>
+              </button>
+            </div>
+          </Transition>
         </WinScrollViewer>
       </div>
     </Teleport>
@@ -82,6 +87,7 @@ import { useI18n } from './i18n/index';
 import type { ComputedRef, CSSProperties } from 'vue';
 import WinScrollViewer from './WinScrollViewer.vue';
 import WinTextBox from './WinTextBox.vue';
+import { useFlyoutAnimation } from './useFlyoutAnimation';
 
 const { t } = useI18n();
 
@@ -106,6 +112,7 @@ const props = withDefaults(defineProps<{
   KeepInteriorCornersSquare?: boolean;
   IsEnabled?: boolean;
   Width?: number | string;
+  OpenOnFocus?: boolean;
 }>(), {
   Text: '',
   PlaceholderText: '',
@@ -123,7 +130,8 @@ const props = withDefaults(defineProps<{
   TextBoxStyle: undefined,
   KeepInteriorCornersSquare: false,
   IsEnabled: true,
-  Width: ''
+  Width: '',
+  OpenOnFocus: true
 });
 
 const emit = defineEmits<{
@@ -139,10 +147,17 @@ const anchorRef = ref<HTMLElement | null>(null);
 const popupRef = ref<HTMLElement | null>(null);
 const localText = ref(props.Text);
 const localOpen = ref(props.IsSuggestionListOpen);
+const hasInputChangedAfterFocus = ref(false);
 const highlightedIndex = ref(-1);
+const resultsKey = ref(0);
 const popupStyle = ref<CSSProperties & Record<string, string>>({});
 const openDirection = ref<'up' | 'down'>('down');
 const candidateWindowGap = ref(0);
+const flyoutAnimation = useFlyoutAnimation(popupRef, {
+  Origin: 'edge',
+  Direction: () => (openDirection.value === 'up' ? 'bottom' : 'top'),
+  StripSize: 32
+});
 const inheritedTheme = inject<ComputedRef<'light' | 'dark'> | null>('winuiTheme', null);
 const anchorTheme = ref<'light' | 'dark' | ''>('');
 
@@ -150,6 +165,7 @@ const isOpen = computed(() => localOpen.value && props.IsEnabled);
 const suggestionItems = computed(() => props.ItemsSource ?? []);
 const currentText = computed(() => props.Text ?? localText.value);
 const resolvedQueryIcon = computed(() => props.QueryIcon === 'Find' ? '\uE721' : props.QueryIcon);
+const localizedNoResultsText = computed(() => t('text.no-results-found'));
 const popupThemeClass = computed(() => {
   const theme = inheritedTheme?.value || anchorTheme.value;
   return theme === 'light' || theme === 'dark' ? `theme-${theme}` : '';
@@ -172,19 +188,45 @@ const getItemSubtitle = (item: Suggestion) => {
   return '';
 };
 
-const isNoResultsItem = (item: Suggestion) => getItemText(item).trim().toLowerCase() === 'no results found';
+let lastResultsSignature = '';
+watch(() => suggestionItems.value.map((item) => getItemText(item)).join('|'), (signature) => {
+  if (signature !== lastResultsSignature) {
+    lastResultsSignature = signature;
+    resultsKey.value += 1;
+  }
+}, { immediate: true });
+
+const isNoResultsItem = (item: Suggestion) => {
+  if (item && typeof item === 'object' && item.noResults === true) return true;
+  const text = getItemText(item).trim();
+  return text.toLowerCase() === 'no results found'
+    || text === localizedNoResultsText.value.trim();
+};
 
 const selectableIndexes = computed(() => suggestionItems.value
   .map((item, index) => isNoResultsItem(item) ? -1 : index)
   .filter((index) => index >= 0));
 
 const setOpen = async (value: boolean) => {
-  localOpen.value = value && suggestionItems.value.length > 0;
-  emit('update:IsSuggestionListOpen', localOpen.value);
-  if (localOpen.value) {
+  const wasOpen = localOpen.value;
+  const nextOpen = value && suggestionItems.value.length > 0;
+  if (nextOpen) {
     highlightedIndex.value = -1;
-    await nextTick();
+    // 打开前先按当前锚点尺寸定位，弹层首帧就带正确宽度
     updatePopupPosition();
+    localOpen.value = true;
+    emit('update:IsSuggestionListOpen', true);
+    await nextTick();
+    // 弹层挂载后再校正一次位置/宽度
+    updatePopupPosition();
+    // 等样式真正刷到 DOM 再读取矩形，避免首次打开宽度不对
+    await nextTick();
+    // 展开动画只在弹层真正打开时播放；已打开后内容更新不重放。
+    if (!wasOpen) flyoutAnimation.play();
+  } else {
+    localOpen.value = false;
+    emit('update:IsSuggestionListOpen', false);
+    flyoutAnimation.cancel();
   }
 };
 
@@ -192,14 +234,21 @@ const onTextInput = (value: string) => {
   localText.value = value;
   emit('update:Text', value);
   emit('TextChanged', { Reason: 'UserInput' });
-  void setOpen(suggestionItems.value.length > 0);
+  const firstChangeAfterFocus = !hasInputChangedAfterFocus.value;
+  hasInputChangedAfterFocus.value = true;
+  // 默认聚焦即展开；OpenOnFocus=false 时只等聚焦后的第一次输入变更再展开。
+  if (props.OpenOnFocus || firstChangeAfterFocus) {
+    void setOpen(suggestionItems.value.length > 0);
+  }
 };
 
 const onFocus = () => {
-  if (suggestionItems.value.length) void setOpen(true);
+  hasInputChangedAfterFocus.value = false;
+  if (props.OpenOnFocus && suggestionItems.value.length) void setOpen(true);
 };
 
 const onBlur = () => {
+  hasInputChangedAfterFocus.value = false;
   window.setTimeout(() => setOpen(false), 120);
 };
 
@@ -414,10 +463,8 @@ onBeforeUnmount(() => {
   border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--card-stroke)));
   border-radius: var(--asb-popup-radius, 8px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  --win-asb-shadow-bleed: 24px;
   -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
   backdrop-filter: var(--flyout-backdrop, blur(30px));
-  animation: asb-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, asb-opacity 83ms linear both;
 }
 
 .win-asb-popup-scroll {
@@ -435,23 +482,34 @@ onBeforeUnmount(() => {
   flex-direction: column;
 }
 
-.win-asb-popup.opens-up {
-  animation-name: asb-open-up, asb-opacity;
+.win-asb-results {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes asb-opacity {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.asb-results-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
-@keyframes asb-open-down {
-  from { clip-path: inset(0 0 calc(100% - 1px) 0); transform: translateY(-16px); }
-  to { clip-path: inset(calc(-1 * var(--win-asb-shadow-bleed))); transform: translateY(0); }
+.asb-results-enter-active {
+  transition: opacity 150ms cubic-bezier(0.092, 1.003, 0.028, 0.997), transform 150ms cubic-bezier(0.092, 1.003, 0.028, 0.997);
 }
 
-@keyframes asb-open-up {
-  from { clip-path: inset(calc(100% - 1px) 0 0 0); transform: translateY(16px); }
-  to { clip-path: inset(calc(-1 * var(--win-asb-shadow-bleed))); transform: translateY(0); }
+.asb-results-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.asb-results-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.asb-results-leave-active {
+  transition: opacity 120ms ease, transform 120ms ease;
 }
 
 .win-asb-item {
