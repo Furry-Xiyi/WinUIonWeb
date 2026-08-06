@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import App from './gallery/App.vue'
+import router from './gallery/router'
 import './styles/theme.css'
 import manifestTemplate from './manifest.json'
 import appIconUrl from './assets/AppIcon.ico?url'
@@ -55,6 +56,7 @@ manifestLink.href = URL.createObjectURL(new Blob(
 document.head.appendChild(manifestLink)
 
 const app = createApp(App)
+app.use(router)
 app.provide(i18nKey, i18n)
 app.config.globalProperties.$t = i18n.t
 app.mount('#app')

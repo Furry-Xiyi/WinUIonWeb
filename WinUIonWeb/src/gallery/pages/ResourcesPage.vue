@@ -77,7 +77,7 @@
             <div class="description-block">
               <p>
                 WinUI 3 includes built-in theme resources for commonly used colors. See all brushes on the
-                <a href="#/colors" class="hyperlink">Color page</a>.
+                <RouterLink to="/colors" class="hyperlink">Color page</RouterLink>.
               </p>
             </div>
 
