@@ -63,6 +63,7 @@
                   :IsItemClickEnabled="true"
                   SelectionMode="None"
                   @ItemClick="onZoomedOutGroupClick">
+                  <!-- @vue-ignore the legacy JS component does not expose slot types -->
                   <template #item="slotProps">
                     <WinTextBlock
                       class="zoomed-out-group-title"

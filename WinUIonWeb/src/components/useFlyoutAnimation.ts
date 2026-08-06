@@ -1,5 +1,7 @@
 // 公共的 flyout 裁剪展开动画：通过 Web Animations API 把 clip-path 从起始
 // 矩形展开到完整弹层矩形，可用于任何自带弹出层的控件。
+// 对应官方 WinUI Flyout/AutoSuggestBox/ComboBox 等弹层的裁剪展开动画行为；
+// 属于 Web 公共动画工具，官方没有同名文件。
 import { onBeforeUnmount, ref, type Ref } from 'vue';
 
 export type FlyoutAnimationOrigin = 'element' | 'edge' | 'rect' | 'center';
@@ -22,6 +24,7 @@ export interface FlyoutAnimationOptions {
 
 export interface FlyoutAnimationHandle {
   play: () => void;
+  playReverse: () => void;
   cancel: () => void;
   isPlaying: Ref<boolean>;
 }
@@ -166,7 +169,7 @@ export const useFlyoutAnimation = (
     isPlaying.value = false;
   };
 
-  const play = () => {
+  const run = (reverse: boolean) => {
     cancel();
 
     const target = getTarget();
@@ -193,10 +196,15 @@ export const useFlyoutAnimation = (
     const easing = resolveValue(options.Easing) ?? FlyoutAnimationDefaults.Easing;
 
     const current = target.animate(
-      [
-        { clipPath: getClipPolygon(startRect) },
-        { clipPath: getClipPolygon(endRect) }
-      ],
+      reverse
+        ? [
+            { clipPath: getClipPolygon(endRect) },
+            { clipPath: getClipPolygon(startRect) }
+          ]
+        : [
+            { clipPath: getClipPolygon(startRect) },
+            { clipPath: getClipPolygon(endRect) }
+          ],
       // 不用 forwards 填充：结束帧本来就覆盖整个弹层（含 margin），动画
       // 结束后让效果自然失效即可，避免残留 clip-path 裁掉阴影外圈。
       { duration, easing, fill: 'none' }
@@ -220,7 +228,10 @@ export const useFlyoutAnimation = (
     };
   };
 
+  const play = () => run(false);
+  const playReverse = () => run(true);
+
   onBeforeUnmount(cancel);
 
-  return { play, cancel, isPlaying };
+  return { play, playReverse, cancel, isPlaying };
 };

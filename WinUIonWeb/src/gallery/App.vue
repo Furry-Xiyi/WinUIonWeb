@@ -1,133 +1,62 @@
 <template>
-  <WinTitleBar :title="appTitle" :theme="themeSetting" />
+  <!-- 对应官方 WinUIGallery/MainWindow.xaml(.cs)：Gallery 主窗口壳（TitleBar + NavigationView + 搜索 + 页面导航） -->
   <WinToolTipService />
-  <div class="gallery-app-content" :class="{ 'has-titlebar': titleBarActive || isHostedInUwpWebView }">
-    <WinNavigationView :SelectedItem="selectedNavigationItem"
-                     :PaneDisplayMode="navPosition"
-                     :MenuItems="navMenuItems"
-                     :FooterMenuItems="[]"
-                     IsBackButtonVisible="Visible"
-                     :IsBackEnabled="isBackEnabled"
-                     @ItemInvoked="onNavigationItemInvoked"
-                     @BackRequested="onBackRequested">
-      <Transition
-        appear
-        :enter-active-class="pageTransitionEnter"
-        :leave-active-class="pageTransitionLeave">
-        <div
-          v-if="pageComponent"
-          :key="currentPage"
-          class="page-view active"
-          :class="{ 'has-page-header': currentPage !== 'home' && currentPage !== 'settings' }">
-          <WinPageHeader
-            v-if="currentPage !== 'home' && currentPage !== 'settings'"
-            :Item="currentPageItem"
-            :PageName="pageName"
-            :CopyLinkAction="copyCurrentPageLink"
-            :ToggleThemeAction="toggleCurrentPageTheme" />
-          <component :is="pageComponent" />
-        </div>
-      </Transition>
-    </WinNavigationView>
+  <WinTitleBar
+    :Title="t('app.title')"
+    :IsBackButtonVisible="canGoBack"
+    :IsPaneToggleButtonVisible="!isTopNavMode"
+    TitleBarContentHorizontalAlignment="Stretch"
+    :IconSource="appIcon"
+    @BackRequested="onBackRequested"
+    @PaneToggleRequested="onTopBarToggle">
+    <WinAutoSuggestBox
+      ref="searchBoxRef"
+      v-model:Text="searchQuery"
+      :ItemsSource="searchResults"
+      TextMemberPath="title"
+      :PlaceholderText="t('search.placeholder')"
+      QueryIcon="Find"
+      :OpenOnFocus="false"
+      class="gallery-titlebar-search"
+      @QuerySubmitted="onSearchQuerySubmitted" />
+  </WinTitleBar>
+  <div class="gallery-app-content" :class="{ 'has-titlebar': isHostedInUwpWebView, 'wco-titlebar': !isHostedInUwpWebView }">
+    <div class="gallery-nav-host">
+      <WinNavigationView :SelectedItem="selectedNavigationItem"
+                       :PaneDisplayMode="navPosition"
+                       :MenuItems="navMenuItems"
+                       :FooterMenuItems="[]"
+                       v-model:IsPaneOpen="isPaneOpen"
+                       IsBackButtonVisible="Collapsed"
+                       :IsPaneToggleButtonVisible="false"
+                       :IsBackEnabled="canGoBack"
+                       @ItemInvoked="onNavigationItemInvoked"
+                       @BackRequested="onBackRequested">
+        <router-view v-slot="{ Component }">
+          <Transition
+            appear
+            :enter-active-class="pageTransitionEnter"
+            :leave-active-class="pageTransitionLeave">
+            <div v-if="Component" :key="route.fullPath" class="page-view active">
+              <component :is="Component" />
+            </div>
+          </Transition>
+        </router-view>
+      </WinNavigationView>
+    </div>
   </div>
 </template>
 
-<!-- eslint-disable vue/block-lang -->
 <script setup>
-import { ref, watch, provide, computed, onMounted } from 'vue';
+import { ref, watch, provide, computed, onMounted, onBeforeUnmount } from 'vue';
 import WinTitleBar from '../components/WinTitleBar.vue';
 import WinNavigationView from '../components/WinNavigationView.vue';
 import WinToolTipService from '../components/WinToolTipService.vue';
-import WinPageHeader from './components/WinPageHeader.vue';
-import appManifest from '../manifest.json';
-
-import HomePage from './pages/HomePage.vue';
-import ButtonPage from './pages/ButtonPage.vue';
-import BorderPage from './pages/BorderPage.vue';
-import CalendarViewPage from './pages/CalendarViewPage.vue';
-import CalendarDatePickerPage from './pages/CalendarDatePickerPage.vue';
-import DatePickerPage from './pages/DatePickerPage.vue';
-import DropDownButtonPage from './pages/DropDownButtonPage.vue';
-import HyperlinkButtonPage from './pages/HyperlinkButtonPage.vue';
-import RepeatButtonPage from './pages/RepeatButtonPage.vue';
-import ToggleButtonPage from './pages/ToggleButtonPage.vue';
-import SplitButtonPage from './pages/SplitButtonPage.vue';
-import ToggleSplitButtonPage from './pages/ToggleSplitButtonPage.vue';
-import CheckBoxPage from './pages/CheckBoxPage.vue';
-import ColorPickerPage from './pages/ColorPickerPage.vue';
-import ComboBoxPage from './pages/ComboBoxPage.vue';
-import RadioButtonPage from './pages/RadioButtonPage.vue';
-import RatingPage from './pages/RatingPage.vue';
-import SliderPage from './pages/SliderPage.vue';
-import ToggleSwitchPage from './pages/ToggleSwitchPage.vue';
-import CanvasPage from './pages/CanvasPage.vue';
-import ExpanderPage from './pages/ExpanderPage.vue';
-import GridPage from './pages/GridPage.vue';
-import ParallaxViewPage from './pages/ParallaxViewPage.vue';
-import RelativePanelPage from './pages/RelativePanelPage.vue';
-import ScrollViewPage from './pages/ScrollViewPage.vue';
-import ScrollViewerPage from './pages/ScrollViewerPage.vue';
-import SplitViewPage from './pages/SplitViewPage.vue';
-import StackPanelPage from './pages/StackPanelPage.vue';
-import VariableSizedWrapGridPage from './pages/VariableSizedWrapGridPage.vue';
-import ViewboxPage from './pages/ViewboxPage.vue';
-import FlipViewPage from './pages/FlipViewPage.vue';
-import GridViewPage from './pages/GridViewPage.vue';
-import ItemsRepeaterPage from './pages/ItemsRepeaterPage.vue';
-import ItemsViewPage from './pages/ItemsViewPage.vue';
-import ListBoxPage from './pages/ListBoxPage.vue';
-import ListViewPage from './pages/ListViewPage.vue';
-import PullToRefreshPage from './pages/PullToRefreshPage.vue';
-import TreeViewPage from './pages/TreeViewPage.vue';
-import PipsPagerPage from './pages/PipsPagerPage.vue';
-import SemanticZoomPage from './pages/SemanticZoomPage.vue';
-import TimePickerPage from './pages/TimePickerPage.vue';
-import AnimatedVisualPlayerPage from './pages/AnimatedVisualPlayerPage.vue';
-import CaptureElementPage from './pages/CaptureElementPage.vue';
-import ImagePage from './pages/ImagePage.vue';
-import MediaPlayerElementPage from './pages/MediaPlayerElementPage.vue';
-import PersonPicturePage from './pages/PersonPicturePage.vue';
-import CommandBarPage from './pages/CommandBarPage.vue';
-import ContentDialogPage from './pages/ContentDialogPage.vue';
-import CommandBarFlyoutPage from './pages/CommandBarFlyoutPage.vue';
-import FlyoutPage from './pages/FlyoutPage.vue';
-import MenuBarPage from './pages/MenuBarPage.vue';
-import MenuFlyoutPage from './pages/MenuFlyoutPage.vue';
-import SwipeControlPage from './pages/SwipeControlPage.vue';
-import StandardUICommandPage from './pages/StandardUICommandPage.vue';
-import XamlUICommandPage from './pages/XamlUICommandPage.vue';
-import AcrylicBrushPage from './pages/AcrylicBrushPage.vue';
-import AnimatedIconPage from './pages/AnimatedIconPage.vue';
-import CompactSizingPage from './pages/CompactSizingPage.vue';
-import GeometryPage from './pages/GeometryPage.vue';
-import IconElementPage from './pages/IconElementPage.vue';
-import IconographyPage from './pages/IconographyPage.vue';
-import LinePage from './pages/LinePage.vue';
-import RadialGradientBrushPage from './pages/RadialGradientBrushPage.vue';
-import ResourcesPage from './pages/ResourcesPage.vue';
-import StylePage from './pages/StylePage.vue';
-import SystemBackdropsPage from './pages/SystemBackdrops(MicaAcrylic)Page.vue';
-import ThemeShadowPage from './pages/ThemeShadowPage.vue';
-import TypographyPage from './pages/TypographyPage.vue';
-import PopupPage from './pages/PopupPage.vue';
-import TeachingTipPage from './pages/TeachingTipPage.vue';
-import ToolTipPage from './pages/ToolTipPage.vue';
-import InfoBadgePage from './pages/InfoBadgePage.vue';
-import InfoBarPage from './pages/InfoBarPage.vue';
-import ProgressBarPage from './pages/ProgressBarPage.vue';
-import ProgressRingPage from './pages/ProgressRingPage.vue';
-import BreadcrumbBarPage from './pages/BreadcrumbBarPage.vue';
-import NavigationViewPage from './pages/NavigationViewPage.vue';
-import PivotPage from './pages/PivotPage.vue';
-import SelectorBarPage from './pages/SelectorBarPage.vue';
-import SettingsPage from './pages/SettingsPage.vue';
-import TextBoxPage from './pages/TextBoxPage.vue';
-import TextBlockPage from './pages/TextBlockPage.vue';
-import AutoSuggestBoxPage from './pages/AutoSuggestBoxPage.vue';
-import NumberBoxPage from './pages/NumberBoxPage.vue';
-import PasswordBoxPage from './pages/PasswordBoxPage.vue';
-import RichEditBoxPage from './pages/RichEditBoxPage.vue';
-import RichTextBlockPage from './pages/RichTextBlockPage.vue';
+import WinAutoSuggestBox from '../components/WinAutoSuggestBox.vue';
+import appIcon from '../assets/AppIcon.ico';
+import { useRoute, useRouter } from 'vue-router';
+import { pageTags } from './router';
+import { searchAll } from './searchIndex';
 
 import { useI18n } from '../components/i18n/index';
 import {
@@ -142,99 +71,21 @@ import {
   stringifyNavigationTransitionInfo
 } from '../utils/navigationTransitionInfo';
 
-const { t } = useI18n();
-const pageMap = {
-  home: HomePage,
-  button: ButtonPage,
-  calendardatepicker: CalendarDatePickerPage,
-  calendarview: CalendarViewPage,
-  datepicker: DatePickerPage,
-  dropdownbutton: DropDownButtonPage,
-  hyperlinkbutton: HyperlinkButtonPage,
-  repeatbutton: RepeatButtonPage,
-  togglebutton: ToggleButtonPage,
-  splitbutton: SplitButtonPage,
-  togglesplitbutton: ToggleSplitButtonPage,
-  checkbox: CheckBoxPage,
-  colorpicker: ColorPickerPage,
-  combobox: ComboBoxPage,
-  radiobutton: RadioButtonPage,
-  rating: RatingPage,
-  slider: SliderPage,
-  timepicker: TimePickerPage,
-  toggleswitch: ToggleSwitchPage,
-  border: BorderPage,
-  canvas: CanvasPage,
-  expander: ExpanderPage,
-  grid: GridPage,
-  parallaxview: ParallaxViewPage,
-  relativepanel: RelativePanelPage,
-  scrollview: ScrollViewPage,
-  scrollviewer: ScrollViewerPage,
-  splitview: SplitViewPage,
-  stackpanel: StackPanelPage,
-  variablesizedwrapgrid: VariableSizedWrapGridPage,
-  viewbox: ViewboxPage,
-  flipview: FlipViewPage,
-  gridview: GridViewPage,
-  itemsrepeater: ItemsRepeaterPage,
-  itemsview: ItemsViewPage,
-  listbox: ListBoxPage,
-  listview: ListViewPage,
-  pulltorefresh: PullToRefreshPage,
-  treeview: TreeViewPage,
-  pipspager: PipsPagerPage,
-  semanticzoom: SemanticZoomPage,
-  animatedvisualplayer: AnimatedVisualPlayerPage,
-  captureelement: CaptureElementPage,
-  image: ImagePage,
-  mediaplayerelement: MediaPlayerElementPage,
-  personpicture: PersonPicturePage,
-  commandbar: CommandBarPage,
-  contentdialog: ContentDialogPage,
-  commandbarflyout: CommandBarFlyoutPage,
-  flyout: FlyoutPage,
-  menubar: MenuBarPage,
-  menuflyout: MenuFlyoutPage,
-  swipecontrol: SwipeControlPage,
-  standarduicommand: StandardUICommandPage,
-  xamluicommand: XamlUICommandPage,
-  popup: PopupPage,
-  teachingtip: TeachingTipPage,
-  tooltip: ToolTipPage,
-  infobadge: InfoBadgePage,
-  infobar: InfoBarPage,
-  progressbar: ProgressBarPage,
-  progressring: ProgressRingPage,
-  breadcrumbbar: BreadcrumbBarPage,
-  navigationview: NavigationViewPage,
-  pivot: PivotPage,
-  selectorbar: SelectorBarPage,
-  autosuggestbox: AutoSuggestBoxPage,
-  numberbox: NumberBoxPage,
-  passwordbox: PasswordBoxPage,
-  richeditbox: RichEditBoxPage,
-  richtextblock: RichTextBlockPage,
-  textbox: TextBoxPage,
-  textblock: TextBlockPage,
-  settings: SettingsPage,
-  xamlresources: ResourcesPage,
-  xamlstyles: StylePage,
-  geometry: GeometryPage,
-  iconography: IconographyPage,
-  typography: TypographyPage,
-  acrylic: AcrylicBrushPage,
-  animatedicon: AnimatedIconPage,
-  compactsizing: CompactSizingPage,
-  iconelement: IconElementPage,
-  line: LinePage,
-  radialgradientbrush: RadialGradientBrushPage,
-  systembackdrops: SystemBackdropsPage,
-  themeshadow: ThemeShadowPage
-};
+const { t, locale } = useI18n();
 
-const titleBarActive = ref(false);
-provide('winTitleBarVisible', titleBarActive);
+const searchBoxRef = ref(null);
+const searchQuery = ref('');
+const searchResults = computed(() => {
+  const query = searchQuery.value.trim();
+  const items = searchAll(searchQuery.value, locale);
+  if (query !== '' && items.length === 0) {
+    return [{ title: t('search.no-results-found'), tag: '', noResults: true }];
+  }
+  return items.map((item) => ({
+    title: locale === 'zh-CN' ? item.zh : item.en,
+    tag: item.tag
+  }));
+});
 
 const readStoredSetting = (key, fallback, allowedValues) => {
   const value = localStorage.getItem(key);
@@ -258,14 +109,33 @@ const persistNavigationTransitionInfo = (source) => {
   }, { immediate: true });
 };
 
-const currentPage = ref('home');
+const route = useRoute();
+const router = useRouter();
+const currentPage = computed(() => (typeof route.name === 'string' ? route.name : 'home'));
 const navPosition = ref(readStoredSetting('winui-nav-position', 'Auto', ['Auto', 'Top', 'Left', 'LeftCompact', 'LeftMinimal']));
+const isTopNavMode = computed(() => navPosition.value === 'Top');
+const isPaneOpen = ref(true);
 const themeSetting = ref(readStoredSetting('winui-theme-setting', 'system', ['system', 'light', 'dark']));
 const materialSetting = ref(readStoredSetting('winui-material-setting', 'mica', ['mica', 'acrylic']));
 const navigationTransitionInfo = ref(readStoredNavigationTransitionInfo());
 const pageTransitionEnter = ref(getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationTrigger_NavigatingTo));
 const pageTransitionLeave = ref(getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationTrigger_NavigatingAway));
 const isHostedInUwpWebView = ref(false);
+const canGoBack = ref(Boolean(router.options.history.state?.back));
+
+router.afterEach((to, from) => {
+  const historyState = router.options.history.state;
+  const isBack = historyState?.forward === from.fullPath;
+  const NavigationTrigger = isBack
+    ? NavigationTrigger_BackNavigatingTo
+    : NavigationTrigger_NavigatingTo;
+  const NavigationLeaveTrigger = isBack
+    ? NavigationTrigger_BackNavigatingAway
+    : NavigationTrigger_NavigatingAway;
+  pageTransitionEnter.value = getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationTrigger);
+  pageTransitionLeave.value = getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationLeaveTrigger);
+  canGoBack.value = Boolean(historyState?.back);
+});
 
 provide('themeSetting', themeSetting);
 provide('materialSetting', materialSetting);
@@ -273,9 +143,6 @@ provide('navigationTransitionInfo', navigationTransitionInfo);
 provide('navPosition', navPosition);
 provide('currentPage', currentPage);
 provide('isHostedInUwpWebView', isHostedInUwpWebView);
-
-const pageComponent = computed(() => pageMap[currentPage.value] || HomePage);
-const appTitle = computed(() => t(appManifest.resources?.title ?? 'app.title'));
 
 const navMenuItems = [
   { Tag: 'home', Icon: '\uE80F', Content: t('text.home') },
@@ -330,6 +197,7 @@ const navMenuItems = [
     { Tag: 'viewbox', Icon: '\uE8A7', Content: t('text.viewbox') }
   ]},
   { Tag: 'media', Icon: '\uE173', Content: t('text.media'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'animatedvisualplayer', Icon: '\uF5B0', Content: t('text.animatedvisualplayer') },
     { Tag: 'captureelement', Icon: '\uE722', Content: t('text.capture-element-camera') },
     { Tag: 'image', Icon: '\uE8B9', Content: t('text.image') },
     { Tag: 'mediaplayerelement', Icon: '\uE714', Content: t('text.mediaplayerelement') },
@@ -395,57 +263,19 @@ const selectedNavigationItem = computed({
   }
 });
 
-const pageName = computed(() => {
-  const componentName = pageComponent.value?.__name;
-  if (componentName) return componentName.replace(/Page$/, 'Page');
-  return `${currentPage.value.charAt(0).toUpperCase()}${currentPage.value.slice(1)}Page`;
-});
-
-const currentPageItem = computed(() => {
-  const selected = selectedNavigationItem.value;
-  const pageSourceUri = `https://github.com/Furry-Xiyi/WinUIonWeb/tree/main/WinUIonWeb/src/gallery/pages/${pageName.value}.vue`;
-  return {
-    ...(selected || {}),
-    Title: selected?.Content || currentPage.value,
-    UniqueId: currentPage.value,
-    ApiNamespace: selected?.ApiNamespace || '',
-    BaseClasses: selected?.BaseClasses || [],
-    Docs: selected?.Docs?.length ? selected.Docs : [{
-      Title: 'WinUI on Web',
-      Uri: 'https://github.com/Furry-Xiyi/WinUIonWeb/'
-    }],
-    SourceLink: 'https://github.com/Furry-Xiyi/WinUIonWeb/',
-    PageMarkupUri: pageSourceUri,
-    PageCodeUri: pageSourceUri
-  };
-});
-
-const copyCurrentPageLink = () => {
-  const url = new URL(window.location.href);
-  url.hash = currentPage.value;
-  void navigator.clipboard?.writeText(url.toString());
-};
-
-const toggleCurrentPageTheme = () => {
-  window.dispatchEvent(new CustomEvent('win-gallery-theme-toggle', { detail: currentPage.value }));
-};
-
-const navigationHistory = ref([]);
-const isBackEnabled = computed(() => navigationHistory.value.length > 0);
-const suppressHistoryPush = ref(false);
 const navigate = (
   tag,
   NavigationTransitionInfo = navigationTransitionInfo.value,
   NavigationTrigger = NavigationTrigger_NavigatingTo
 ) => {
-  if (!tag || tag === currentPage.value) return;
+  if (!tag || tag === currentPage.value || !pageTags.has(tag)) return;
   const normalizedNavigationTransitionInfo = normalizeNavigationTransitionInfo(NavigationTransitionInfo);
-  const navigationLeaveTrigger = NavigationTrigger === NavigationTrigger_BackNavigatingTo
+  const NavigationLeaveTrigger = NavigationTrigger === NavigationTrigger_BackNavigatingTo
     ? NavigationTrigger_BackNavigatingAway
     : NavigationTrigger_NavigatingAway;
   pageTransitionEnter.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationTrigger);
-  pageTransitionLeave.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, navigationLeaveTrigger);
-  currentPage.value = tag;
+  pageTransitionLeave.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationLeaveTrigger);
+  router.push({ name: tag });
 };
 provide('navigate', navigate);
 const onNavigationItemInvoked = args => {
@@ -455,10 +285,37 @@ const onNavigationItemInvoked = args => {
   if (tag) navigate(tag, navigationTransitionInfo.value);
 };
 const onBackRequested = () => {
-  const previousPage = navigationHistory.value.pop();
-  if (previousPage) {
-    suppressHistoryPush.value = true;
-    navigate(previousPage, navigationTransitionInfo.value, NavigationTrigger_BackNavigatingTo);
+  if (canGoBack.value) router.back();
+};
+const onTopBarToggle = () => {
+  isPaneOpen.value = !isPaneOpen.value;
+};
+const onSearchQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
+  const query = String(QueryText ?? '').trim();
+  if (!query) return;
+  if (ChosenSuggestion?.tag && pageTags.has(ChosenSuggestion.tag)) {
+    router.push({ name: ChosenSuggestion.tag });
+    return;
+  }
+  const items = searchAll(query, locale);
+  if (items.length === 0) {
+    router.push({ path: '/search', query: { q: query } });
+    return;
+  }
+  const nameKey = locale === 'zh-CN' ? 'zh' : 'en';
+  const lower = query.toLowerCase();
+  const exact = items.find((item) => (
+    item.tag.toLowerCase() === lower || item[nameKey].toLowerCase() === lower
+  ));
+  router.push({ name: (exact ?? items[0]).tag });
+};
+const focusSearchBox = () => {
+  searchBoxRef.value?.$el?.querySelector('input')?.focus({ preventScroll: true });
+};
+const onWindowKeydown = (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') {
+    event.preventDefault();
+    focusSearchBox();
   }
 };
 
@@ -475,6 +332,27 @@ persistSetting('winui-theme-setting', themeSetting);
 persistSetting('winui-material-setting', materialSetting);
 persistNavigationTransitionInfo(navigationTransitionInfo);
 
+const updateThemeColor = () => {
+  const mode = themeSetting.value;
+  const isDark = mode === 'dark' || (
+    mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+  const color = isDark ? '#202020' : '#f3f3f3';
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute('content', color);
+};
+const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+const onSystemThemeChange = () => {
+  if (themeSetting.value === 'system') updateThemeColor();
+};
+watch(themeSetting, () => updateThemeColor(), { immediate: true });
+systemThemeQuery.addEventListener('change', onSystemThemeChange);
+
 function postUwpSetting(key, value) {
   if (!isHostedInUwpWebView.value || !window.chrome?.webview?.postMessage) return;
   window.chrome.webview.postMessage({
@@ -489,22 +367,20 @@ onMounted(() => {
   // WebView2 exposes window.chrome.webview in every host. Only the explicit
   // marker identifies the UWP host that owns the custom title bar.
   isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__);
+  window.addEventListener('keydown', onWindowKeydown);
   postUwpSetting('theme', themeSetting.value);
   postUwpSetting('material', materialSetting.value);
   postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(navigationTransitionInfo.value));
 });
 
+onBeforeUnmount(() => {
+  systemThemeQuery.removeEventListener('change', onSystemThemeChange);
+  window.removeEventListener('keydown', onWindowKeydown);
+});
+
 watch(themeSetting, (value) => postUwpSetting('theme', value));
 watch(materialSetting, (value) => postUwpSetting('material', value));
 watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(value)));
-
-watch(currentPage, (newVal, oldVal) => {
-  if (suppressHistoryPush.value) {
-    suppressHistoryPush.value = false;
-  } else if (oldVal && oldVal !== newVal && navigationHistory.value[navigationHistory.value.length - 1] !== oldVal) {
-    navigationHistory.value.push(oldVal);
-  }
-});
 </script>
 
 <style>
@@ -516,12 +392,37 @@ watch(currentPage, (newVal, oldVal) => {
     height: 100%;
     min-width: 0;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gallery-nav-host {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+  }
+
+  .gallery-nav-host > .win-nav-shell {
+    width: 100%;
+    height: 100%;
   }
 
   .gallery-app-content.has-titlebar {
-    --gallery-titlebar-height: var(--win-titlebar-height, env(titlebar-area-height, 32px));
+    --gallery-titlebar-height: env(titlebar-area-height, 32px);
     height: calc(100% - var(--gallery-titlebar-height));
     margin-top: var(--gallery-titlebar-height);
+  }
+
+  .gallery-app-content.wco-titlebar {
+    box-sizing: border-box;
+    padding-top: 48px;
+    padding-top: max(env(titlebar-area-height, 0px), 48px);
+  }
+
+  .gallery-titlebar-search {
+    width: 100%;
+    max-width: 350px;
   }
 
   @font-face {
@@ -802,44 +703,6 @@ watch(currentPage, (newVal, oldVal) => {
     .page-view.active > .gallery-home-scroll {
       flex: 1 1 auto;
       min-height: 0;
-    }
-
-    .page-view.active > .win-page-header {
-      flex: 0 0 auto;
-    }
-
-    .page-view.active.has-page-header > :deep(.gallery-item-page) {
-      flex: 1 1 auto;
-      height: 100%;
-      min-height: 0;
-      padding-top: 0;
-      overflow: hidden;
-    }
-
-    .page-view.active.has-page-header > :deep(.gallery-page-scroll) {
-      flex: 1 1 auto;
-      min-height: 0;
-    }
-
-    .page-view.active.has-page-header :deep(.page-heading.page-header) {
-      display: none;
-    }
-
-    .page-view.active.has-page-header :deep(.page-heading) {
-      margin: 0;
-      padding: 0;
-      border: 0;
-    }
-
-    .page-view.active.has-page-header :deep(.page-heading > .page-header),
-    .page-view.active.has-page-header :deep(.page-heading > h1.page-header),
-    .page-view.active.has-page-header :deep(.page-heading .page-title),
-    .page-view.active.has-page-header :deep(.page-heading .page-header-actions),
-    .page-view.active.has-page-header :deep(.page-heading .header-actions),
-    .page-view.active.has-page-header :deep(.page-heading .page-actions),
-    .page-view.active.has-page-header :deep(.gallery-page-content > .win-text-block.page-header),
-    .page-view.active.has-page-header :deep(.gallery-page-content > h1.page-header) {
-      display: none;
     }
 
   .win-nav-content-inner {

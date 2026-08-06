@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /winuionweb/winuionweb.esproj
 /WinUIonWeb/WinUIonWeb.esproj
+
+/ref

@@ -1,4 +1,5 @@
 <template>
+  <!-- 对应官方 Microsoft.UI.Xaml.Controls.NavigationView（ref/microsoft-ui-xaml-main/controls/dev/NavigationView） -->
   <div class="win-nav-shell" :class="shellClasses" :style="navigationStyle" ref="shellRef">
     <nav v-if="isTopNavigation" class="win-nav-top-bar" ref="navRef" @keydown="onNavigationKeydown" @focusin="onNavigationFocusIn" @pointerdown.capture="onNavigationPointerDown" @touchstart.capture="onNavigationPointerDown">
       <div class="win-nav-indicator-track" ref="indicatorTrack">
@@ -1448,6 +1449,9 @@ const onDocumentPointerDown = (event) => {
   const target = event.target;
   if (navRef.value?.contains(target)) return;
   if (target?.closest?.('.win-menu-flyout-wrap')) return;
+  // 标题栏的展开/收起按钮（TitleBar.PaneToggleRequested）属于面板切换控件，
+  // 不应被当成“点击外部关闭面板”处理，否则关闭后按钮 click 又会把它重新打开。
+  if (target?.closest?.('[data-nav-pane-toggle]')) return;
   setCompact(true);
 };
 
