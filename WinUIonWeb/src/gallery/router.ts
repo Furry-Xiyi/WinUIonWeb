@@ -1,0 +1,118 @@
+// 对应官方 MainWindow.xaml.cs 的 Frame 导航（Navigate/GoBack），Web 版用 vue-router 实现。
+import { createRouter, createWebHashHistory } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
+
+const pageLoaders = {
+  home: () => import('./pages/HomePage.vue'),
+  button: () => import('./pages/ButtonPage.vue'),
+  calendardatepicker: () => import('./pages/CalendarDatePickerPage.vue'),
+  calendarview: () => import('./pages/CalendarViewPage.vue'),
+  datepicker: () => import('./pages/DatePickerPage.vue'),
+  dropdownbutton: () => import('./pages/DropDownButtonPage.vue'),
+  hyperlinkbutton: () => import('./pages/HyperlinkButtonPage.vue'),
+  repeatbutton: () => import('./pages/RepeatButtonPage.vue'),
+  togglebutton: () => import('./pages/ToggleButtonPage.vue'),
+  splitbutton: () => import('./pages/SplitButtonPage.vue'),
+  togglesplitbutton: () => import('./pages/ToggleSplitButtonPage.vue'),
+  checkbox: () => import('./pages/CheckBoxPage.vue'),
+  colorpicker: () => import('./pages/ColorPickerPage.vue'),
+  combobox: () => import('./pages/ComboBoxPage.vue'),
+  radiobutton: () => import('./pages/RadioButtonPage.vue'),
+  rating: () => import('./pages/RatingPage.vue'),
+  slider: () => import('./pages/SliderPage.vue'),
+  timepicker: () => import('./pages/TimePickerPage.vue'),
+  toggleswitch: () => import('./pages/ToggleSwitchPage.vue'),
+  border: () => import('./pages/BorderPage.vue'),
+  canvas: () => import('./pages/CanvasPage.vue'),
+  expander: () => import('./pages/ExpanderPage.vue'),
+  grid: () => import('./pages/GridPage.vue'),
+  parallaxview: () => import('./pages/ParallaxViewPage.vue'),
+  relativepanel: () => import('./pages/RelativePanelPage.vue'),
+  scrollview: () => import('./pages/ScrollViewPage.vue'),
+  scrollviewer: () => import('./pages/ScrollViewerPage.vue'),
+  splitview: () => import('./pages/SplitViewPage.vue'),
+  stackpanel: () => import('./pages/StackPanelPage.vue'),
+  variablesizedwrapgrid: () => import('./pages/VariableSizedWrapGridPage.vue'),
+  viewbox: () => import('./pages/ViewboxPage.vue'),
+  flipview: () => import('./pages/FlipViewPage.vue'),
+  gridview: () => import('./pages/GridViewPage.vue'),
+  itemsrepeater: () => import('./pages/ItemsRepeaterPage.vue'),
+  itemsview: () => import('./pages/ItemsViewPage.vue'),
+  listbox: () => import('./pages/ListBoxPage.vue'),
+  listview: () => import('./pages/ListViewPage.vue'),
+  pulltorefresh: () => import('./pages/PullToRefreshPage.vue'),
+  treeview: () => import('./pages/TreeViewPage.vue'),
+  pipspager: () => import('./pages/PipsPagerPage.vue'),
+  semanticzoom: () => import('./pages/SemanticZoomPage.vue'),
+  animatedvisualplayer: () => import('./pages/AnimatedVisualPlayerPage.vue'),
+  captureelement: () => import('./pages/CaptureElementPage.vue'),
+  image: () => import('./pages/ImagePage.vue'),
+  mediaplayerelement: () => import('./pages/MediaPlayerElementPage.vue'),
+  personpicture: () => import('./pages/PersonPicturePage.vue'),
+  commandbar: () => import('./pages/CommandBarPage.vue'),
+  contentdialog: () => import('./pages/ContentDialogPage.vue'),
+  commandbarflyout: () => import('./pages/CommandBarFlyoutPage.vue'),
+  flyout: () => import('./pages/FlyoutPage.vue'),
+  menubar: () => import('./pages/MenuBarPage.vue'),
+  menuflyout: () => import('./pages/MenuFlyoutPage.vue'),
+  swipecontrol: () => import('./pages/SwipeControlPage.vue'),
+  standarduicommand: () => import('./pages/StandardUICommandPage.vue'),
+  xamluicommand: () => import('./pages/XamlUICommandPage.vue'),
+  popup: () => import('./pages/PopupPage.vue'),
+  teachingtip: () => import('./pages/TeachingTipPage.vue'),
+  tooltip: () => import('./pages/ToolTipPage.vue'),
+  infobadge: () => import('./pages/InfoBadgePage.vue'),
+  infobar: () => import('./pages/InfoBarPage.vue'),
+  progressbar: () => import('./pages/ProgressBarPage.vue'),
+  progressring: () => import('./pages/ProgressRingPage.vue'),
+  breadcrumbbar: () => import('./pages/BreadcrumbBarPage.vue'),
+  navigationview: () => import('./pages/NavigationViewPage.vue'),
+  pivot: () => import('./pages/PivotPage.vue'),
+  selectorbar: () => import('./pages/SelectorBarPage.vue'),
+  autosuggestbox: () => import('./pages/AutoSuggestBoxPage.vue'),
+  numberbox: () => import('./pages/NumberBoxPage.vue'),
+  passwordbox: () => import('./pages/PasswordBoxPage.vue'),
+  richeditbox: () => import('./pages/RichEditBoxPage.vue'),
+  richtextblock: () => import('./pages/RichTextBlockPage.vue'),
+  textbox: () => import('./pages/TextBoxPage.vue'),
+  textblock: () => import('./pages/TextBlockPage.vue'),
+  settings: () => import('./pages/SettingsPage.vue'),
+  xamlresources: () => import('./pages/ResourcesPage.vue'),
+  xamlstyles: () => import('./pages/StylePage.vue'),
+  geometry: () => import('./pages/GeometryPage.vue'),
+  iconography: () => import('./pages/IconographyPage.vue'),
+  typography: () => import('./pages/TypographyPage.vue'),
+  acrylic: () => import('./pages/AcrylicBrushPage.vue'),
+  animatedicon: () => import('./pages/AnimatedIconPage.vue'),
+  compactsizing: () => import('./pages/CompactSizingPage.vue'),
+  iconelement: () => import('./pages/IconElementPage.vue'),
+  line: () => import('./pages/LinePage.vue'),
+  radialgradientbrush: () => import('./pages/RadialGradientBrushPage.vue'),
+  systembackdrops: () => import('./pages/SystemBackdrops(MicaAcrylic)Page.vue'),
+  themeshadow: () => import('./pages/ThemeShadowPage.vue'),
+  colors: () => import('./pages/ColorPage.vue')
+};
+
+export const pageTags = new Set(Object.keys(pageLoaders));
+
+const galleryRoutes: RouteRecordRaw[] = [
+  { path: '/', redirect: '/home' },
+  ...Object.entries(pageLoaders).map(([name, component]) => ({
+    path: `/${name}`,
+    name,
+    component
+  })),
+  {
+    path: '/search',
+    name: 'search',
+    component: () => import('./pages/SearchResultsPage.vue')
+  },
+  { path: '/:pathMatch(.*)*', redirect: '/home' }
+];
+
+const router = createRouter({
+  history: createWebHashHistory(import.meta.env.BASE_URL),
+  routes: galleryRoutes
+});
+
+export default router;
