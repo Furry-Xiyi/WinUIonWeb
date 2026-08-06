@@ -70,7 +70,7 @@
       </div>
     </nav>
     <nav v-else class="win-nav-left-panel" :class="['win-nav-left-panel', { 'is-compact': isCompact, 'is-closed-compact': isClosedCompact, 'is-minimal': isLeftMinimalMode, 'has-back-button': showBackButtonInLeftNav, 'has-pane-toggle-button': isPaneToggleButtonVisible }, paneTransition ? `is-pane-${paneTransition}` : '']" :style="paneStyle" ref="navRef" @keydown="onNavigationKeydown" @focusin="onNavigationFocusIn" @pointerdown.capture="onNavigationPointerDown" @touchstart.capture="onNavigationPointerDown">
-      <button v-if="showBackButtonInLeftNav" class="win-nav-back-button" :class="{ 'is-minimal-pane-open-hidden': !backButtonVisuallyVisible }" :disabled="!canGoBack || !backButtonVisuallyVisible" :aria-hidden="backButtonVisuallyVisible ? undefined : 'true'" :aria-label="t('text.back')" v-bind="{ 'tooltipservice.tooltip': t('text.back') }" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
+      <button v-if="showBackButtonInLeftNav" class="win-nav-back-button" :disabled="!canGoBack" :aria-label="t('text.back')" v-bind="{ 'tooltipservice.tooltip': t('text.back') }" @click="onBackClick" @mousedown="onBackDown" @mouseup="onBackUp" @mouseleave="onBackLeave">
         <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
       </button>
       <div v-if="isPaneToggleButtonVisible" class="win-nav-pane-command-row">
@@ -463,14 +463,6 @@ const showBackButtonResolved = computed(() => {
   // rather than being limited to the minimal responsive state.
   return true;
 });
-// In native Minimal, the back button is hidden while the overlay pane is
-// open, but its command row remains reserved so the hamburger keeps its
-// position during the transition.
-const backButtonVisuallyVisible = computed(() => (
-  showBackButtonResolved.value &&
-  !isTopNavigation.value &&
-  (!isLeftMinimalMode.value || isCompact.value)
-));
 const showBackButtonInLeftNav = computed(() => showBackButtonResolved.value && !isTopNavigation.value);
 // Keep the three left-pane modes on the same transition contracts as the
 // native NavigationView/SplitView template. Left uses CompactInline; the
@@ -2723,14 +2715,6 @@ watch(() => props.selectedValue, (val) => {
     cursor: pointer;
     background: transparent;
     transition: background var(--fast-duration) var(--fast-out-slow-in);
-  }
-
-  /* Minimal keeps the top command rows at their native positions while the
-     pane is open. The back button is replaced by the pane command in that
-     state, but its row remains reserved so the hamburger never shifts. */
-  .win-nav-back-button.is-minimal-pane-open-hidden {
-    visibility: hidden;
-    pointer-events: none;
   }
 
     .win-nav-hamburger .icon {

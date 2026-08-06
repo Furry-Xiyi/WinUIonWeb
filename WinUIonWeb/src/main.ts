@@ -4,6 +4,8 @@ import './styles/theme.css'
 import manifestTemplate from './manifest.json'
 import appIconUrl from './assets/AppIcon.ico?url'
 import appIcon180Url from './assets/AppIcon-180.png?url'
+import appIcon192Url from './assets/AppIcon-192.png?url'
+import appIcon512Url from './assets/AppIcon-512.png?url'
 import { createI18n, i18nKey } from './components/i18n/index'
 import galleryEnUS from './gallery/Strings/en-US/Resources'
 import galleryZhCN from './gallery/Strings/zh-CN/Resources'
@@ -20,20 +22,27 @@ const appVersionKey = manifestTemplate.version ?? 'app.version'
 document.documentElement.lang = i18n.locale
 document.title = i18n.t(appTitleKey)
 
+// The manifest is served from a blob URL, so root-relative values would be
+// resolved against the blob and rejected by browsers. Resolve every URL
+// against the page URL before serializing the manifest.
+const resolveManifestUrl = (value: string) => new URL(value, window.location.href).href
+const manifestIconUrls: Record<string, string> = {
+  '@app-icon': appIconUrl,
+  '@app-icon-180': appIcon180Url,
+  '@app-icon-192': appIcon192Url,
+  '@app-icon-512': appIcon512Url
+}
+
 const resolvedManifest = {
   ...manifestTemplate,
   name: i18n.t(manifestResources.name ?? appTitleKey),
   short_name: i18n.t(manifestResources.shortName ?? 'app.shortTitle'),
   author: i18n.t(appAuthorKey),
   version: i18n.t(appVersionKey),
-  start_url: import.meta.env.BASE_URL,
+  start_url: resolveManifestUrl(import.meta.env.BASE_URL),
   icons: manifestTemplate.icons.map((icon) => ({
     ...icon,
-    src: icon.src === '@app-icon'
-      ? appIconUrl
-      : icon.src === '@app-icon-180'
-        ? appIcon180Url
-        : icon.src
+    src: resolveManifestUrl(manifestIconUrls[icon.src] ?? icon.src)
   }))
 }
 

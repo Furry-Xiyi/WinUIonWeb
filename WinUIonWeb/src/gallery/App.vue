@@ -440,7 +440,9 @@ function postUwpSetting(key, value) {
 }
 
 onMounted(() => {
-  isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__ || window.chrome?.webview);
+  // WebView2 exposes window.chrome.webview in every host. Only the explicit
+  // marker identifies the UWP host that owns the custom title bar.
+  isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__);
   postUwpSetting('theme', themeSetting.value);
   postUwpSetting('material', materialSetting.value);
   postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(navigationTransitionInfo.value));
