@@ -192,26 +192,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinSlider from '../../components/WinSlider.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
+import { createPageState } from '../../utils/pageState';
 
 // 页面状态
-const currentTheme = ref('system');
-const isFavorite = ref(false);
-
-const toggleTheme = () => {
-  const themes = ['system', 'light', 'dark'];
-  const currentIndex = themes.indexOf(currentTheme.value);
-  currentTheme.value = themes[(currentIndex + 1) % themes.length];
-};
-
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-};
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'line');
+const { pageTheme: currentTheme, isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Line 示例状态
 const lineX1 = ref(0);

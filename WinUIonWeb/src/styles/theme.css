@@ -617,6 +617,23 @@ html, body, #app {
   padding: 0;
 }
 
+/* WinPageHeader owns the page title and actions. Keep each page's description. */
+.page-view.has-page-header .page-heading.page-header,
+.page-view.has-page-header .page-heading > .page-header,
+.page-view.has-page-header .page-heading > h1.page-header,
+.page-view.has-page-header .page-heading .page-title,
+.page-view.has-page-header .page-heading .page-header-actions,
+.page-view.has-page-header .page-heading .header-actions,
+.page-view.has-page-header .page-heading .page-actions,
+.page-view.has-page-header .gallery-page-content > .win-text-block.page-header,
+.page-view.has-page-header .gallery-page-content > h1.page-header {
+  display: none !important;
+}
+
+.page-view.has-page-header .gallery-item-page {
+  padding-top: 0 !important;
+}
+
 @media (max-width: 640px) {
   .gallery-item-page {
     padding: 12px 16px 16px;

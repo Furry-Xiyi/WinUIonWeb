@@ -3,6 +3,22 @@ export default {
   "app.title": "WinUI on Web 图库",
   "app.version": "1.0.0-Insider",
   "app.author": "惜忆想睡觉",
+  "gallery.page-header.api-details": "API 详细信息",
+  "gallery.page-header.api-tooltip": "API 命名空间和继承关系",
+  "gallery.page-header.documentation": "文档",
+  "gallery.page-header.source": "源代码",
+  "gallery.page-header.source-code": "源代码",
+  "gallery.page-header.source-code-tooltip": "此示例页的源代码",
+  "gallery.page-header.control-source": "控件源代码",
+  "gallery.page-header.sample-page-source": "示例页源代码",
+  "gallery.page-header.toggle-theme": "切换主题",
+  "gallery.page-header.copy-link": "复制链接",
+  "gallery.page-header.favorite": "收藏示例",
+  "gallery.page-header.namespace": "命名空间",
+  "gallery.page-header.inheritance": "继承关系",
+  "gallery.page-header.this-control": "此控件",
+  "gallery.page-header.this-sample-page": "此示例页",
+  "gallery.page-header.source-code-of": "源代码：",
   "text.a-2-state-checkbox": "双状态复选框",
   "text.a-basic-autosuggestbox": "基本自动建议框",
   "text.a-basic-calendar-view": "基本日历视图。",
@@ -809,8 +825,8 @@ export default {
   ,"text.relativepanel": "RelativePanel"
   ,"text.variablesizedwrapgrid": "VariableSizedWrapGrid"
   ,"text.viewbox": "Viewbox"
-  ,"text.scrollviewer": "ScrollViewer"
-  ,"text.scrollview": "ScrollView"
+  ,"text.scrollviewer": "滚动器"
+  ,"text.scrollview": "滚动"
   ,"text.parallaxview": "ParallaxView"
   ,"text.canvas-description": "定义一个区域，你可以在其中使用相对于 Canvas 区域的坐标显式定位子元素。"
   ,"text.grid-description": "Grid 是一个布局面板，支持按行和列排列子元素。"
@@ -818,8 +834,58 @@ export default {
   ,"text.relativepanel-description": "一个面板，可让你相对于其他子元素或父面板定位和对齐子元素。"
   ,"text.variablesizedwrapgrid-description": "按顺序定位子元素，从左到右排列，并在到达容器边缘时换到下一行。"
   ,"text.viewbox-description": "一个容器控件，可缩放其内容以填充可用空间。"
-  ,"text.scrollviewer-description": "ScrollViewer 中的内容。"
-  ,"text.scrollview-description": "ScrollView 控件提供用于查看可滚动内容的视口，支持水平和垂直滚动、缩放、滚动速度和编程滚动动画。"
+  ,"text.scrollviewer-description": "ScrollViewer 允许用户通过滚动、平移和缩放查看超出可视区域的内容。许多内容控件（如 ListView）在控件模板中内置了 ScrollViewer，以提供自动滚动。"
+  ,"text.scrollview-description": "ScrollView 允许用户通过滚动、平移和缩放查看超出可视区域的内容。ItemsView 在控件模板中内置了 ScrollView，以提供自动滚动。"
+  ,"text.scrolling-container-description": "允许用户平移和缩放内容的容器控件。"
+  ,"text.pipspager-description": "PipsPager 允许用户在分页集合中导航，并且独立于所显示的内容。当布局中的内容没有明确按相关性排序，或需要使用字形表示编号页面时，请使用此控件。PipsPager 常用于照片查看器、应用列表、轮播以及显示空间有限的场景。"
+  ,"text.semanticzoom-description": "SemanticZoom 可用两种不同方式显示分组数据，适合快速浏览大型数据集。"
+  ,"text.orientation": "方向"
+  ,"text.previous-button-visibility": "上一页按钮可见性"
+  ,"text.next-button-visibility": "下一页按钮可见性"
+  ,"text.zoom-mode": "ZoomMode"
+  ,"text.zoom-factor": "ZoomFactor"
+  ,"text.zoom": "缩放"
+  ,"text.scroll-mode": "ScrollMode"
+  ,"text.scrollbar-visibility": "ScrollbarVisibility"
+  ,"text.horizontal": "水平"
+  ,"text.vertical": "垂直"
+  ,"text.vertical-velocity": "垂直速度"
+  ,"text.animation-duration-msec": "动画持续时间（毫秒）"
+  ,"text.scroll-with-animation": "带动画滚动"
+  ,"text.enabled": "已启用"
+  ,"text.disabled": "已禁用"
+  ,"text.auto": "自动"
+  ,"text.visible": "可见"
+  ,"text.hidden": "隐藏"
+  ,"text.collapsed": "折叠"
+  ,"text.visible-on-pointer-over": "指针悬停时可见"
+  ,"text.default": "默认"
+  ,"text.accordion": "手风琴"
+  ,"text.teleportation": "瞬移"
+  ,"text.accessibility": "辅助功能"
+  ,"text.windowing": "窗口"
+  ,"text.system": "系统"
+  ,"text.shell": "系统外壳"
+  ,"text.binding": "绑定"
+  ,"text.templates": "模板"
+  ,"text.xaml-conditions": "XAML 条件"
+  ,"text.scratch-pad": "草稿板"
+  ,"text.previous-page": "上一页"
+  ,"text.next-page": "下一页"
+  ,"text.page-number": "第 {page} 页"
+  ,"text.page-selection-announcement": "已选择第 {page} 页，共 {total} 页"
+  ,"text.zoom-out": "缩小"
+  ,"text.cliff": "悬崖"
+  ,"text.zoom-mode-automation-name": "缩放模式"
+  ,"text.zoom-factor-automation-name": "缩放因子"
+  ,"text.horizontal-scroll-mode-automation-name": "水平滚动模式"
+  ,"text.vertical-scroll-mode-automation-name": "垂直滚动模式"
+  ,"text.horizontal-scrollbar-visibility-automation-name": "水平滚动条可见性"
+  ,"text.vertical-scrollbar-visibility-automation-name": "垂直滚动条可见性"
+  ,"text.vertical-velocity-automation-name": "垂直速度"
+  ,"text.vertical-animation-options-automation-name": "垂直动画选项"
+  ,"text.animation-duration-automation-name": "动画持续时间"
+  ,"text.scroll-with-animation-automation-name": "带动画滚动"
   ,"text.parallaxview-description": "ParallaxView 控件可创建一种视觉效果，使靠近观看者的项目比背景中的项目移动得更快。"
   ,"sample.canvas.control": "一个 Canvas 控件。"
   ,"sample.grid.3x3": "一个 3x3 Grid 控件。"
@@ -846,6 +912,17 @@ export default {
   ,"sample.scrollview.programmatic-animation": "带自定义动画的编程滚动。"
   ,"sample.scrollview.animation-note": "选择动画类型和持续时间，然后点击右侧按钮启动编程滚动。"
   ,"sample.scrollview.scroll-with-animation": "带动画滚动"
+  ,"sample.pipspager.integrated-flipview": "与 FlipView 集成的 PipsPager"
+  ,"sample.pipspager.options": "可更改方向和按钮可见性的 PipsPager。"
+  ,"sample.semanticzoom.simple": "简单的 SemanticZoom"
+  ,"sample.semanticzoom.resources-description": "用于共享值的可重用定义，以确保一致性和可维护性。"
+  ,"sample.semanticzoom.style-description": "XAML 样式是一组可重用的属性设置，用于定义一致的界面设计元素。"
+  ,"sample.semanticzoom.binding-description": "将界面元素连接到数据，以实现自动同步和更新。"
+  ,"sample.semanticzoom.templates-description": "在 XAML 中自定义控件外观、项目布局和数据呈现。"
+  ,"sample.semanticzoom.custom-controls-description": "创建具有自定义功能和外观的可重用界面组件。"
+  ,"sample.semanticzoom.xaml-conditions-description": "定义在解析时通过 IXamlCondition 求值的自定义 XAML 条件。"
+  ,"sample.semanticzoom.scratch-pad-description": "用于测试简单 XAML 标记的草稿板。"
+  ,"sample.semanticzoom.item-description": "WinUI 控件示例，可用于浏览此分组内容。"
   ,"text.animated-icon": "动画图标"
   ,"text.color": "颜色"
   ,"text.compact-sizing": "紧凑尺寸"

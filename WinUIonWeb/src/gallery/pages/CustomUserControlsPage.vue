@@ -115,34 +115,20 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed } from 'vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import CounterControl from '../../components/examples/CounterControl.vue';
 import ValidatedPasswordBox from '../../components/examples/ValidatedPasswordBox.vue';
 import TemperatureConverter from '../../components/examples/TemperatureConverter.vue';
-import { useFavorites } from '../composables/useFavorites';
-import { usePageTheme } from '../composables/usePageTheme';
+import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'customusercontrols');
 
-const { isFavorite: checkFavorite, toggleFavorite: toggleFav } = useFavorites();
-const isFavorite = computed(() => checkFavorite(pageKey.value));
-const isFavoriteState = ref(isFavorite.value);
-
-watch(isFavorite, (newVal) => {
-  isFavoriteState.value = newVal;
-});
-
-const toggleFavorite = () => {
-  toggleFav(pageKey.value);
-};
-
-const { pageTheme, toggleTheme: doToggleTheme } = usePageTheme('system');
-const toggleTheme = () => doToggleTheme();
+const { pageTheme, isFavoriteState, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Example 2: Password validation
 const passwordValue = ref('');

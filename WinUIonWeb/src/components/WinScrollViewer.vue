@@ -83,29 +83,29 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
 // Enums
-type ZoomMode = 'Disabled' | 'Enabled'
-type ScrollMode = 'Disabled' | 'Enabled' | 'Auto'
-type ScrollBarVisibility = 'Disabled' | 'Auto' | 'Hidden' | 'Visible'
-type HorizontalAlignment = 'Left' | 'Center' | 'Right' | 'Stretch'
-type VerticalAlignment = 'Top' | 'Center' | 'Bottom' | 'Stretch'
+type ScrollViewerZoomMode = 'Disabled' | 'Enabled'
+type ScrollViewerScrollMode = 'Disabled' | 'Enabled' | 'Auto'
+type ScrollViewerScrollBarVisibility = 'Disabled' | 'Auto' | 'Hidden' | 'Visible'
+type ScrollViewerHorizontalAlignment = 'Left' | 'Center' | 'Right' | 'Stretch'
+type ScrollViewerVerticalAlignment = 'Top' | 'Center' | 'Bottom' | 'Stretch'
 
 // Props - 100% aligned with official WinUI API
 interface Props {
-  ZoomMode?: ZoomMode
+  ZoomMode?: ScrollViewerZoomMode
   MinZoomFactor?: number
   MaxZoomFactor?: number
   ZoomFactor?: number
-  HorizontalScrollMode?: ScrollMode
-  VerticalScrollMode?: ScrollMode
-  HorizontalScrollBarVisibility?: ScrollBarVisibility
-  VerticalScrollBarVisibility?: ScrollBarVisibility
+  HorizontalScrollMode?: ScrollViewerScrollMode
+  VerticalScrollMode?: ScrollViewerScrollMode
+  HorizontalScrollBarVisibility?: ScrollViewerScrollBarVisibility
+  VerticalScrollBarVisibility?: ScrollViewerScrollBarVisibility
   IsVerticalScrollChainingEnabled?: boolean
   IsHorizontalScrollChainingEnabled?: boolean
   IsTabStop?: boolean
   Width?: number | string
   Height?: number | string
-  HorizontalAlignment?: HorizontalAlignment
-  VerticalAlignment?: VerticalAlignment
+  HorizontalAlignment?: ScrollViewerHorizontalAlignment
+  VerticalAlignment?: ScrollViewerVerticalAlignment
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -127,17 +127,27 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 // Events - 100% aligned with official WinUI API
+interface ScrollViewerView {
+  HorizontalOffset: number
+  VerticalOffset: number
+  ZoomFactor: number
+}
+
 interface ViewChangedEventArgs {
-  isIntermediate: boolean
-  horizontalOffset: number
-  verticalOffset: number
-  zoomFactor: number
+  IsIntermediate: boolean
+}
+
+interface ViewChangingEventArgs {
+  NextView: ScrollViewerView
+  FinalView: ScrollViewerView
+  IsInertial: boolean
 }
 
 const emit = defineEmits<{
   ViewChanged: [args: ViewChangedEventArgs]
-  ViewChanging: [args: ViewChangedEventArgs]
-  ManipulationCompleted: [void]
+  ViewChanging: [args: ViewChangingEventArgs]
+  DirectManipulationStarted: [args: Record<string, never>]
+  DirectManipulationCompleted: [args: Record<string, never>]
 }>()
 
 // Refs
@@ -159,11 +169,11 @@ const velocityAnimationFrame = ref<number>()
 const velocityExpectedLeft = ref<number | null>(null)
 const velocityExpectedTop = ref<number | null>(null)
 const isWheelScrolling = ref(false)
+const isDirectManipulationActive = ref(false)
 
 // Touch/Gesture state
 const touchStartDistance = ref(0)
 const touchStartZoom = ref(1)
-const lastScrollTime = ref(0)
 const scrollTimer = ref<number>()
 const verticalHoverExpandTimer = ref<number>()
 const horizontalHoverExpandTimer = ref<number>()
@@ -197,7 +207,6 @@ const overflowRevision = ref(0)
 const scrollRevision = ref(0)
 let resizeObserver: ResizeObserver | undefined
 
-const scrollBarExpandBeginTime = 400
 const scrollBarContractDelay = 0
 const scrollBarContractBeginTime = 500
 const scrollBarContractDuration = 167
@@ -206,21 +215,21 @@ const scrollControllerInertiaDecayRate = 0.9995
 const scrollControllerVelocityNeededPerPixel = 7.600855902349023
 const scrollControllerMinMaxEpsilon = 0.001
 
-const effectiveZoomMode = computed<ZoomMode>(() => props.ZoomMode)
+const effectiveZoomMode = computed<ScrollViewerZoomMode>(() => props.ZoomMode)
 const effectiveMinZoomFactor = computed(() => props.MinZoomFactor)
 const effectiveMaxZoomFactor = computed(() => props.MaxZoomFactor)
 const effectiveZoomFactor = computed(() => props.ZoomFactor)
-const effectiveHorizontalScrollMode = computed<ScrollMode>(() => props.HorizontalScrollMode)
-const effectiveVerticalScrollMode = computed<ScrollMode>(() => props.VerticalScrollMode)
-const effectiveHorizontalScrollBarVisibility = computed<ScrollBarVisibility>(() => props.HorizontalScrollBarVisibility)
-const effectiveVerticalScrollBarVisibility = computed<ScrollBarVisibility>(() => props.VerticalScrollBarVisibility)
+const effectiveHorizontalScrollMode = computed<ScrollViewerScrollMode>(() => props.HorizontalScrollMode)
+const effectiveVerticalScrollMode = computed<ScrollViewerScrollMode>(() => props.VerticalScrollMode)
+const effectiveHorizontalScrollBarVisibility = computed<ScrollViewerScrollBarVisibility>(() => props.HorizontalScrollBarVisibility)
+const effectiveVerticalScrollBarVisibility = computed<ScrollViewerScrollBarVisibility>(() => props.VerticalScrollBarVisibility)
 const effectiveIsVerticalScrollChainingEnabled = computed(() => props.IsVerticalScrollChainingEnabled)
 const effectiveIsHorizontalScrollChainingEnabled = computed(() => props.IsHorizontalScrollChainingEnabled)
 const effectiveIsTabStop = computed(() => props.IsTabStop)
 const effectiveWidth = computed(() => props.Width)
 const effectiveHeight = computed(() => props.Height)
-const effectiveHorizontalAlignment = computed<HorizontalAlignment>(() => props.HorizontalAlignment)
-const effectiveVerticalAlignment = computed<VerticalAlignment>(() => props.VerticalAlignment)
+const effectiveHorizontalAlignment = computed<ScrollViewerHorizontalAlignment>(() => props.HorizontalAlignment)
+const effectiveVerticalAlignment = computed<ScrollViewerVerticalAlignment>(() => props.VerticalAlignment)
 
 const hasCssSize = (value: number | string | undefined) => (
   value !== undefined &&
@@ -230,7 +239,9 @@ const hasCssSize = (value: number | string | undefined) => (
 )
 
 const cssSize = (value: number | string | undefined) => (
-  typeof value === 'number' ? `${value}px` : value
+  typeof value === 'number' || (typeof value === 'string' && /^-?\d+(?:\.\d+)?$/.test(value.trim()))
+    ? `${Number(value)}px`
+    : value
 )
 
 // Computed styles
@@ -244,12 +255,21 @@ const scrollViewerStyle = computed(() => {
     styles.height = cssSize(effectiveHeight.value) ?? ''
   }
 
-  // Alignment
-  if (effectiveHorizontalAlignment.value !== 'Stretch') {
-    styles.justifySelf = effectiveHorizontalAlignment.value.toLowerCase()
-  }
+  const horizontalAlignment = {
+    Left: 'flex-start',
+    Center: 'center',
+    Right: 'flex-end',
+    Stretch: 'stretch'
+  }[effectiveHorizontalAlignment.value]
+  styles.justifySelf = horizontalAlignment
+  styles.alignSelf = horizontalAlignment
+
   if (effectiveVerticalAlignment.value !== 'Stretch') {
-    styles.alignSelf = effectiveVerticalAlignment.value.toLowerCase()
+    styles.verticalAlign = {
+      Top: 'top',
+      Center: 'middle',
+      Bottom: 'bottom'
+    }[effectiveVerticalAlignment.value] ?? 'top'
   }
 
   return styles
@@ -268,11 +288,11 @@ const viewportStyle = computed(() => {
 const contentStyle = computed(() => {
   const styles: Record<string, string> = {}
 
-  if (effectiveZoomMode.value === 'Enabled') {
-    const zoom = Math.max(effectiveMinZoomFactor.value, Math.min(effectiveMaxZoomFactor.value, currentZoomFactor.value))
-    styles.transform = `scale(${zoom})`
-    styles.transformOrigin = 'top left'
-  }
+  // CSS zoom participates in layout, so extent and scrollbar geometry follow the
+  // same scaled content size as ScrollPresenter instead of merely painting a
+  // transform over an unscaled extent.
+  const zoom = Math.max(effectiveMinZoomFactor.value, Math.min(effectiveMaxZoomFactor.value, currentZoomFactor.value))
+  styles.zoom = String(zoom)
 
   styles.display = 'block'
   styles.width = '100%'
@@ -343,7 +363,7 @@ const horizontalThumbStyle = computed(() => {
 })
 
 // Helper functions
-function getOverflowValue(scrollMode: ScrollMode, visibility: ScrollBarVisibility): string {
+function getOverflowValue(scrollMode: ScrollViewerScrollMode, visibility: ScrollViewerScrollBarVisibility): string {
   if (scrollMode === 'Disabled' || visibility === 'Disabled') return 'hidden'
   if (visibility === 'Hidden') return 'scroll'
   if (visibility === 'Visible') return 'scroll'
@@ -353,15 +373,32 @@ function getOverflowValue(scrollMode: ScrollMode, visibility: ScrollBarVisibilit
 function emitViewChanged(isIntermediate: boolean) {
   if (!scrollViewerRef.value) return
 
-  const args = {
-    isIntermediate,
-    horizontalOffset: scrollViewerRef.value.scrollLeft,
-    verticalOffset: scrollViewerRef.value.scrollTop,
-    zoomFactor: currentZoomFactor.value
+  const view: ScrollViewerView = {
+    HorizontalOffset: scrollViewerRef.value.scrollLeft,
+    VerticalOffset: scrollViewerRef.value.scrollTop,
+    ZoomFactor: currentZoomFactor.value
   }
 
-  if (isIntermediate) emit('ViewChanging', args)
-  emit('ViewChanged', args)
+  if (isIntermediate) {
+    emit('ViewChanging', {
+      NextView: view,
+      FinalView: view,
+      IsInertial: false
+    })
+  }
+  emit('ViewChanged', { IsIntermediate: isIntermediate })
+}
+
+function beginDirectManipulation() {
+  if (isDirectManipulationActive.value) return
+  isDirectManipulationActive.value = true
+  emit('DirectManipulationStarted', {})
+}
+
+function completeDirectManipulation() {
+  if (!isDirectManipulationActive.value) return
+  isDirectManipulationActive.value = false
+  emit('DirectManipulationCompleted', {})
 }
 
 function getScrollBarMetrics(orientation: 'vertical' | 'horizontal') {
@@ -384,15 +421,13 @@ function getScrollBarMetrics(orientation: 'vertical' | 'horizontal') {
 }
 
 // Scroll handling
-function handleScroll(event: Event) {
+function handleScroll() {
   stopSmoothWheelScrollIfExternalScroll()
   stopScrollVelocityIfExternalScroll()
 
-  const now = Date.now()
-  const isIntermediate = now - lastScrollTime.value < 100
-  lastScrollTime.value = now
   scrollRevision.value += 1
 
+  beginDirectManipulation()
   isScrolling.value = true
 
   // Clear previous timer
@@ -407,7 +442,7 @@ function handleScroll(event: Event) {
   scrollTimer.value = window.setTimeout(() => {
     isScrolling.value = false
     emitViewChanged(false)
-      emit('ManipulationCompleted')
+    completeDirectManipulation()
   }, 150)
 
   // Update scrollbar visibility
@@ -699,13 +734,23 @@ function cancelLineScroll(shouldScheduleContract: boolean) {
 function handleWheel(event: WheelEvent) {
   cancelPendingAnimatedScrollForDirectInput()
 
-  if (effectiveZoomMode.value === 'Disabled') return
-
   // Ctrl+Wheel for zoom (standard browser behavior)
-  if (event.ctrlKey) {
+  if (event.ctrlKey && effectiveZoomMode.value !== 'Disabled') {
     const delta = -event.deltaY
     const zoomDelta = delta > 0 ? 1.1 : 0.9
     zoomToFactor(currentZoomFactor.value * zoomDelta)
+    event.preventDefault()
+    event.stopPropagation()
+    return
+  }
+
+  // Keep wheel scrolling deterministic for custom viewports. Native wheel
+  // chaining is inconsistent when a viewer is nested inside a gallery page.
+  const { deltaX, deltaY } = normalizeWheelDelta(event)
+  if (requestScrollByOffset(deltaX, deltaY, true)) {
+    event.preventDefault()
+    event.stopPropagation()
+    return
   }
 
   // Handle scroll chaining
@@ -891,6 +936,7 @@ function handleTouchStart(event: TouchEvent) {
   cancelPendingAnimatedScrollForDirectInput()
 
   if (effectiveZoomMode.value === 'Disabled' || event.touches.length !== 2) return
+  beginDirectManipulation()
 
   const touch1 = event.touches[0]
   const touch2 = event.touches[1]
@@ -923,14 +969,12 @@ function handleTouchEnd() {
   if (isZooming.value) {
     isZooming.value = false
     emitViewChanged(false)
-      emit('ManipulationCompleted')
+    completeDirectManipulation()
   }
 }
 
 // Public methods (exposed for programmatic control)
 function zoomToFactor(factor: number) {
-  if (effectiveZoomMode.value === 'Disabled') return
-
   const clampedFactor = Math.max(effectiveMinZoomFactor.value, Math.min(effectiveMaxZoomFactor.value, factor))
   currentZoomFactor.value = clampedFactor
   overflowRevision.value += 1
@@ -1004,6 +1048,11 @@ function stopScrollVelocityIfExternalScroll() {
 
 function ZoomTo(zoomFactor: number) {
   zoomToFactor(zoomFactor)
+  return 0
+}
+
+function ZoomBy(zoomFactorDelta: number) {
+  zoomToFactor(currentZoomFactor.value + zoomFactorDelta)
   return 0
 }
 
@@ -1165,6 +1214,19 @@ defineExpose({
   zoomToFactor,
   ChangeView,
   ZoomTo,
+  ZoomBy,
+  ZoomToFactor: ZoomTo,
+  ZoomFactor: computed(() => currentZoomFactor.value),
+  HorizontalOffset: computed(() => scrollViewerRef.value?.scrollLeft || 0),
+  VerticalOffset: computed(() => scrollViewerRef.value?.scrollTop || 0),
+  ViewportWidth: computed(() => scrollViewerRef.value?.clientWidth || 0),
+  ViewportHeight: computed(() => scrollViewerRef.value?.clientHeight || 0),
+  ExtentWidth: computed(() => scrollViewerRef.value?.scrollWidth || 0),
+  ExtentHeight: computed(() => scrollViewerRef.value?.scrollHeight || 0),
+  ScrollableWidth: computed(() => Math.max(0, (scrollViewerRef.value?.scrollWidth || 0) - (scrollViewerRef.value?.clientWidth || 0))),
+  ScrollableHeight: computed(() => Math.max(0, (scrollViewerRef.value?.scrollHeight || 0) - (scrollViewerRef.value?.clientHeight || 0))),
+  ComputedHorizontalScrollBarVisibility: computed(() => hasHorizontalScrollBar.value ? 'Visible' : 'Collapsed'),
+  ComputedVerticalScrollBarVisibility: computed(() => hasVerticalScrollBar.value ? 'Visible' : 'Collapsed'),
   ScrollTo,
   ScrollBy,
   AddScrollVelocity,
@@ -1252,7 +1314,7 @@ onBeforeUnmount(() => {
 .scroll-content {
   width: 100%;
   min-width: 0;
-  min-height: min-content;
+  min-height: max-content;
   transition: transform 0.1s ease-out;
   will-change: transform;
 }

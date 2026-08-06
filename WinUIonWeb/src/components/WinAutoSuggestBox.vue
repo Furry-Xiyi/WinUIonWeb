@@ -414,6 +414,7 @@ onBeforeUnmount(() => {
   border: 1px solid var(--flyout-border, var(--surface-stroke-color-flyout, var(--card-stroke)));
   border-radius: var(--asb-popup-radius, 8px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+  --win-asb-shadow-bleed: 24px;
   -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
   backdrop-filter: var(--flyout-backdrop, blur(30px));
   animation: asb-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, asb-opacity 83ms linear both;
@@ -445,12 +446,12 @@ onBeforeUnmount(() => {
 
 @keyframes asb-open-down {
   from { clip-path: inset(0 0 calc(100% - 1px) 0); transform: translateY(-16px); }
-  to { clip-path: inset(0 0 0 0); transform: translateY(0); }
+  to { clip-path: inset(calc(-1 * var(--win-asb-shadow-bleed))); transform: translateY(0); }
 }
 
 @keyframes asb-open-up {
   from { clip-path: inset(calc(100% - 1px) 0 0 0); transform: translateY(16px); }
-  to { clip-path: inset(0 0 0 0); transform: translateY(0); }
+  to { clip-path: inset(calc(-1 * var(--win-asb-shadow-bleed))); transform: translateY(0); }
 }
 
 .win-asb-item {

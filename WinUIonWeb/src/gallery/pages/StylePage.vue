@@ -64,26 +64,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
-const isFavorite = ref(false);
-
-const toggleTheme = () => {
-  const root = document.documentElement;
-  const isLight = root.classList.contains('theme-light') || root.getAttribute('data-theme') === 'light';
-  const nextTheme = isLight ? 'dark' : 'light';
-  root.classList.remove('theme-light', 'theme-dark');
-  root.classList.add(`theme-${nextTheme}`);
-  root.setAttribute('data-theme', nextTheme);
-};
-
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-};
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'xamlstyles');
+const { isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // 示例1代码
 const example1Template = `<StackPanel Spacing="8">

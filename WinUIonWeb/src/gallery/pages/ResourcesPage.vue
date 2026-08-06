@@ -137,10 +137,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const getRootIsDarkTheme = () => {
@@ -150,20 +151,10 @@ const getRootIsDarkTheme = () => {
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
 };
 
-const isDarkTheme = ref(getRootIsDarkTheme());
-const isFavorite = ref(false);
-
-const toggleTheme = () => {
-  isDarkTheme.value = !isDarkTheme.value;
-  const nextTheme = isDarkTheme.value ? 'dark' : 'light';
-  document.documentElement.classList.remove('theme-light', 'theme-dark');
-  document.documentElement.classList.add(`theme-${nextTheme}`);
-  document.documentElement.setAttribute('data-theme', nextTheme);
-};
-
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-};
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'xamlresources');
+const { pageTheme, isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const isDarkTheme = computed(() => pageTheme.value === 'dark');
 
 const themeImageUrl = computed(() => {
   return isDarkTheme.value

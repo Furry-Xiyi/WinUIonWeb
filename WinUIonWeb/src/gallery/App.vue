@@ -14,7 +14,17 @@
         appear
         :enter-active-class="pageTransitionEnter"
         :leave-active-class="pageTransitionLeave">
-        <div v-if="pageComponent" :key="currentPage" class="page-view active">
+        <div
+          v-if="pageComponent"
+          :key="currentPage"
+          class="page-view active"
+          :class="{ 'has-page-header': currentPage !== 'home' && currentPage !== 'settings' }">
+          <WinPageHeader
+            v-if="currentPage !== 'home' && currentPage !== 'settings'"
+            :Item="currentPageItem"
+            :PageName="pageName"
+            :CopyLinkAction="copyCurrentPageLink"
+            :ToggleThemeAction="toggleCurrentPageTheme" />
           <component :is="pageComponent" />
         </div>
       </Transition>
@@ -22,11 +32,13 @@
   </div>
 </template>
 
+<!-- eslint-disable vue/block-lang -->
 <script setup>
 import { ref, watch, provide, computed, onMounted } from 'vue';
 import WinTitleBar from '../components/WinTitleBar.vue';
 import WinNavigationView from '../components/WinNavigationView.vue';
 import WinToolTipService from '../components/WinToolTipService.vue';
+import WinPageHeader from './components/WinPageHeader.vue';
 import appManifest from '../manifest.json';
 
 import HomePage from './pages/HomePage.vue';
@@ -318,7 +330,6 @@ const navMenuItems = [
     { Tag: 'viewbox', Icon: '\uE8A7', Content: t('text.viewbox') }
   ]},
   { Tag: 'media', Icon: '\uE173', Content: t('text.media'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'animatedvisualplayer', Icon: '\uF5B0', Content: t('text.animatedvisualplayer') },
     { Tag: 'captureelement', Icon: '\uE722', Content: t('text.capture-element-camera') },
     { Tag: 'image', Icon: '\uE8B9', Content: t('text.image') },
     { Tag: 'mediaplayerelement', Icon: '\uE714', Content: t('text.mediaplayerelement') },
@@ -384,6 +395,41 @@ const selectedNavigationItem = computed({
   }
 });
 
+const pageName = computed(() => {
+  const componentName = pageComponent.value?.__name;
+  if (componentName) return componentName.replace(/Page$/, 'Page');
+  return `${currentPage.value.charAt(0).toUpperCase()}${currentPage.value.slice(1)}Page`;
+});
+
+const currentPageItem = computed(() => {
+  const selected = selectedNavigationItem.value;
+  const pageSourceUri = `https://github.com/Furry-Xiyi/WinUIonWeb/tree/main/WinUIonWeb/src/gallery/pages/${pageName.value}.vue`;
+  return {
+    ...(selected || {}),
+    Title: selected?.Content || currentPage.value,
+    UniqueId: currentPage.value,
+    ApiNamespace: selected?.ApiNamespace || '',
+    BaseClasses: selected?.BaseClasses || [],
+    Docs: selected?.Docs?.length ? selected.Docs : [{
+      Title: 'WinUI on Web',
+      Uri: 'https://github.com/Furry-Xiyi/WinUIonWeb/'
+    }],
+    SourceLink: 'https://github.com/Furry-Xiyi/WinUIonWeb/',
+    PageMarkupUri: pageSourceUri,
+    PageCodeUri: pageSourceUri
+  };
+});
+
+const copyCurrentPageLink = () => {
+  const url = new URL(window.location.href);
+  url.hash = currentPage.value;
+  void navigator.clipboard?.writeText(url.toString());
+};
+
+const toggleCurrentPageTheme = () => {
+  window.dispatchEvent(new CustomEvent('win-gallery-theme-toggle', { detail: currentPage.value }));
+};
+
 const navigationHistory = ref([]);
 const isBackEnabled = computed(() => navigationHistory.value.length > 0);
 const suppressHistoryPush = ref(false);
@@ -394,11 +440,11 @@ const navigate = (
 ) => {
   if (!tag || tag === currentPage.value) return;
   const normalizedNavigationTransitionInfo = normalizeNavigationTransitionInfo(NavigationTransitionInfo);
-  const NavigationLeaveTrigger = NavigationTrigger === NavigationTrigger_BackNavigatingTo
+  const navigationLeaveTrigger = NavigationTrigger === NavigationTrigger_BackNavigatingTo
     ? NavigationTrigger_BackNavigatingAway
     : NavigationTrigger_NavigatingAway;
   pageTransitionEnter.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationTrigger);
-  pageTransitionLeave.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationLeaveTrigger);
+  pageTransitionLeave.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, navigationLeaveTrigger);
   currentPage.value = tag;
 };
 provide('navigate', navigate);
@@ -756,6 +802,44 @@ watch(currentPage, (newVal, oldVal) => {
     .page-view.active > .gallery-home-scroll {
       flex: 1 1 auto;
       min-height: 0;
+    }
+
+    .page-view.active > .win-page-header {
+      flex: 0 0 auto;
+    }
+
+    .page-view.active.has-page-header > :deep(.gallery-item-page) {
+      flex: 1 1 auto;
+      height: 100%;
+      min-height: 0;
+      padding-top: 0;
+      overflow: hidden;
+    }
+
+    .page-view.active.has-page-header > :deep(.gallery-page-scroll) {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .page-view.active.has-page-header :deep(.page-heading.page-header) {
+      display: none;
+    }
+
+    .page-view.active.has-page-header :deep(.page-heading) {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    .page-view.active.has-page-header :deep(.page-heading > .page-header),
+    .page-view.active.has-page-header :deep(.page-heading > h1.page-header),
+    .page-view.active.has-page-header :deep(.page-heading .page-title),
+    .page-view.active.has-page-header :deep(.page-heading .page-header-actions),
+    .page-view.active.has-page-header :deep(.page-heading .header-actions),
+    .page-view.active.has-page-header :deep(.page-heading .page-actions),
+    .page-view.active.has-page-header :deep(.gallery-page-content > .win-text-block.page-header),
+    .page-view.active.has-page-header :deep(.gallery-page-content > h1.page-header) {
+      display: none;
     }
 
   .win-nav-content-inner {

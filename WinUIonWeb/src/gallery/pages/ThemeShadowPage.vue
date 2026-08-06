@@ -56,26 +56,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, inject } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinSlider from '../../components/WinSlider.vue';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import { createPageState } from '../../utils/pageState';
 // Theme management
-const pageTheme = ref('system');
-const toggleTheme = () => {
-  const themes = ['system', 'light', 'dark'];
-  const currentIndex = themes.indexOf(pageTheme.value);
-  pageTheme.value = themes[(currentIndex + 1) % themes.length];
-};
-
-// Favorite management
-const isFavoriteState = ref(false);
-const toggleFavorite = (value) => {
-  console.log('Favorite toggled:', value);
-};
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'themeshadow');
+const { pageTheme, isFavoriteState, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // Shadow state
 const zTranslation = ref(32);

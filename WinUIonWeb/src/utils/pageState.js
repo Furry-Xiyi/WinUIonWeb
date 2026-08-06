@@ -29,6 +29,10 @@ export const createPageState = (pageKey) => {
     pageTheme.value = pageTheme.value === 'dark' ? 'light' : 'dark';
   };
 
+  const onGalleryThemeToggle = (event) => {
+    if (event?.detail === pageKey) toggleTheme();
+  };
+
   const toggleFavorite = () => {
     const current = readFavorites();
     const next = current.includes(pageKey)
@@ -47,10 +51,12 @@ export const createPageState = (pageKey) => {
 
   window.addEventListener('storage', syncFavorites);
   window.addEventListener('winui-favorites-changed', syncFavorites);
+  window.addEventListener('win-gallery-theme-toggle', onGalleryThemeToggle);
 
   onUnmounted(() => {
     window.removeEventListener('storage', syncFavorites);
     window.removeEventListener('winui-favorites-changed', syncFavorites);
+    window.removeEventListener('win-gallery-theme-toggle', onGalleryThemeToggle);
   });
 
   watch(favorites, () => {

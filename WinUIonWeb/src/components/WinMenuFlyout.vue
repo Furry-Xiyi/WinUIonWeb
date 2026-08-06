@@ -125,6 +125,7 @@ const MenuFlyoutItems = defineComponent({
 
     const renderMenuItem = (item, index) => {
       const kind = getItemKind(item);
+      const itemForeground = item.Foreground && !isItemDisabled(item) ? item.Foreground : '';
       if (kind === 'MenuFlyoutSeparator') {
         return h('div', {
           key: index,
@@ -154,7 +155,11 @@ const MenuFlyoutItems = defineComponent({
           }
         }, [
           item.Icon ? h('span', { class: 'icon win-menu-flyout-icon' }, item.Icon) : null,
-          h(WinTextBlock, { class: 'win-menu-flyout-label', Text: item.Text || String(item) }),
+          h(WinTextBlock, {
+            class: 'win-menu-flyout-label',
+            Foreground: itemForeground,
+            Text: item.Text || String(item)
+          }),
           isSplit ? h('span', { class: 'win-menu-flyout-split-divider', 'aria-hidden': true }) : null,
           h('button', {
             class: 'win-menu-flyout-chevron-button',
@@ -180,13 +185,18 @@ const MenuFlyoutItems = defineComponent({
         type: 'button',
         role: 'menuitem',
         disabled: isItemDisabled(item),
+        style: itemForeground ? { color: itemForeground } : undefined,
         onPointerenter: closeSubmenu,
         onClick: () => selectItem(item, index)
       }, [
         item.Icon ? h('span', { class: 'icon win-menu-flyout-icon' }, item.Icon) : null,
         !item.Icon && isItemChecked(item) ? h('span', { class: 'icon win-menu-flyout-check' }, kind === 'RadioMenuFlyoutItem' ? '\uE915' : '\uE73E') : null,
         !item.Icon && !isItemChecked(item) && (kind === 'ToggleMenuFlyoutItem' || kind === 'RadioMenuFlyoutItem') ? h('span', { class: 'win-menu-flyout-check-placeholder' }) : null,
-        h(WinTextBlock, { class: 'win-menu-flyout-label', Text: item.Text || String(item) }),
+        h(WinTextBlock, {
+          class: 'win-menu-flyout-label',
+          Foreground: itemForeground,
+          Text: item.Text || String(item)
+        }),
         acceleratorText ? h(WinTextBlock, { class: 'win-menu-flyout-accelerator', Text: acceleratorText }) : null
       ]);
     };

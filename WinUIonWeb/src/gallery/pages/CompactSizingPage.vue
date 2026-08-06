@@ -100,16 +100,18 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import WinTextBox from '../../components/WinTextBox.vue';
 import WinPasswordBox from '../../components/WinPasswordBox.vue';
 import WinDatePicker from '../../components/WinDatePicker.vue';
+import { createPageState } from '../../utils/pageState';
 
-const theme = ref('light');
-const isFavorite = ref(false);
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'compactsizing');
+const { pageTheme: theme, isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 const sizingMode = ref('standard');
 const isCompact = computed(() => sizingMode.value === 'compact');
 
@@ -119,14 +121,6 @@ const lastName = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const chosenDate = ref(new Date());
-
-const toggleTheme = () => {
-  theme.value = theme.value === 'light' ? 'dark' : 'light';
-};
-
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-};
 
 const onSizingChanged = () => {
   // 切换时保留表单状态（数据已通过v-model保持）

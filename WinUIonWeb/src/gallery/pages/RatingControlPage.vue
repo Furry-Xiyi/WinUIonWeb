@@ -70,12 +70,16 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinRating from '../../components/WinRating.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinCheckBox from '../../components/WinCheckBox.vue';
+import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'ratingcontrol');
+const { pageTheme, isFavoriteState, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 const rating1 = ref(0);
 const rating2 = ref(0);
 const rating3 = ref(3);

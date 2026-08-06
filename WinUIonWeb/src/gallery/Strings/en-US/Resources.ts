@@ -3,6 +3,22 @@ export default {
   "app.title": "WinUI on Web Gallery",
   "app.version": "1.0.0-Insider",
   "app.author": "惜忆想睡觉",
+  "gallery.page-header.api-details": "API details",
+  "gallery.page-header.api-tooltip": "API namespace and inheritance",
+  "gallery.page-header.documentation": "Documentation",
+  "gallery.page-header.source": "Source",
+  "gallery.page-header.source-code": "Source code",
+  "gallery.page-header.source-code-tooltip": "Source code of this sample page",
+  "gallery.page-header.control-source": "Control source code",
+  "gallery.page-header.sample-page-source": "Sample page source code",
+  "gallery.page-header.toggle-theme": "Toggle theme",
+  "gallery.page-header.copy-link": "Copy link",
+  "gallery.page-header.favorite": "Favorite sample",
+  "gallery.page-header.namespace": "Namespace",
+  "gallery.page-header.inheritance": "Inheritance",
+  "gallery.page-header.this-control": "this control",
+  "gallery.page-header.this-sample-page": "this sample page",
+  "gallery.page-header.source-code-of": "Source code of",
   "text.a-2-state-checkbox": "A 2-state CheckBox",
   "text.a-basic-autosuggestbox": "A basic AutoSuggestBox",
   "text.a-basic-calendar-view": "A basic calendar view.",
@@ -818,8 +834,58 @@ export default {
   ,"text.relativepanel-description": "A panel that allows you to position and align child elements in relation to each other or the parent panel."
   ,"text.variablesizedwrapgrid-description": "Positions child elements in sequential position from left to right, breaking content to the next line at the edge of the containing box."
   ,"text.viewbox-description": "A container control that scales its content to fill the available space."
-  ,"text.scrollviewer-description": "Content inside of a ScrollViewer."
-  ,"text.scrollview-description": "The ScrollView control provides a viewport for viewing scrollable content. It supports horizontal and vertical scrolling, zooming, scroll velocity, and programmatic scroll animations."
+  ,"text.scrollviewer-description": "A ScrollViewer lets a user scroll, pan, and zoom to see content that's larger than the viewable area. Many content controls, like ListView, have ScrollViewers built into their control templates to provide automatic scrolling."
+  ,"text.scrollview-description": "A ScrollView lets a user scroll, pan, and zoom to see content that's larger than the viewable area. The ItemsView has a ScrollView built into its control template to provide automatic scrolling."
+  ,"text.scrolling-container-description": "A container control that lets the user pan and zoom its content."
+  ,"text.pipspager-description": "A PipsPager allows the user to navigate through a paginated collection and is independent of the content shown. Use this control when the content in the layout is not explicitly ordered by relevancy or you desire a glyph-based representation of numbered pages. PipsPagers are commonly used in photo viewers, app lists, carousels, and when display space is limited."
+  ,"text.semanticzoom-description": "The SemanticZoom lets you show grouped data in two different ways, and is useful for quickly navigating through large sets of data."
+  ,"text.orientation": "Orientation"
+  ,"text.previous-button-visibility": "Previous Button Visibility"
+  ,"text.next-button-visibility": "Next Button Visibility"
+  ,"text.zoom-mode": "ZoomMode"
+  ,"text.zoom-factor": "ZoomFactor"
+  ,"text.zoom": "Zoom"
+  ,"text.scroll-mode": "ScrollMode"
+  ,"text.scrollbar-visibility": "ScrollbarVisibility"
+  ,"text.horizontal": "Horizontal"
+  ,"text.vertical": "Vertical"
+  ,"text.vertical-velocity": "Vertical velocity"
+  ,"text.animation-duration-msec": "Animation duration (msec)"
+  ,"text.scroll-with-animation": "Scroll with animation"
+  ,"text.enabled": "Enabled"
+  ,"text.disabled": "Disabled"
+  ,"text.auto": "Auto"
+  ,"text.visible": "Visible"
+  ,"text.hidden": "Hidden"
+  ,"text.collapsed": "Collapsed"
+  ,"text.visible-on-pointer-over": "VisibleOnPointerOver"
+  ,"text.default": "Default"
+  ,"text.accordion": "Accordion"
+  ,"text.teleportation": "Teleportation"
+  ,"text.accessibility": "Accessibility"
+  ,"text.windowing": "Windowing"
+  ,"text.system": "System"
+  ,"text.shell": "Shell"
+  ,"text.binding": "Binding"
+  ,"text.templates": "Templates"
+  ,"text.xaml-conditions": "XAML Conditions"
+  ,"text.scratch-pad": "Scratch Pad"
+  ,"text.previous-page": "Previous page"
+  ,"text.next-page": "Next page"
+  ,"text.page-number": "Page {page}"
+  ,"text.page-selection-announcement": "Page {page} of {total} selected"
+  ,"text.zoom-out": "Zoom out"
+  ,"text.cliff": "cliff"
+  ,"text.zoom-mode-automation-name": "zoom mode"
+  ,"text.zoom-factor-automation-name": "zoom factor"
+  ,"text.horizontal-scroll-mode-automation-name": "horizontal scroll mode"
+  ,"text.vertical-scroll-mode-automation-name": "vertical scroll mode"
+  ,"text.horizontal-scrollbar-visibility-automation-name": "horizontal scroll bar visibility"
+  ,"text.vertical-scrollbar-visibility-automation-name": "vertical scroll bar visibility"
+  ,"text.vertical-velocity-automation-name": "vertical velocity"
+  ,"text.vertical-animation-options-automation-name": "vertical animation options"
+  ,"text.animation-duration-automation-name": "animation duration"
+  ,"text.scroll-with-animation-automation-name": "scroll with animation"
   ,"text.parallaxview-description": "The ParallaxView control lets you create a visual effect where an item closer to the viewer moves faster than an item in the background."
   ,"sample.canvas.control": "A Canvas control."
   ,"sample.grid.3x3": "A 3x3 Grid control."
@@ -846,6 +912,17 @@ export default {
   ,"sample.scrollview.programmatic-animation": "Programmatic scroll with custom animation."
   ,"sample.scrollview.animation-note": "Pick an animation type and its duration and then click the button on the right to launch a programmatic scroll."
   ,"sample.scrollview.scroll-with-animation": "Scroll with animation"
+  ,"sample.pipspager.integrated-flipview": "PipsPager integrated with a FlipView"
+  ,"sample.pipspager.options": "PipsPager with options to change its orientation and button visibility."
+  ,"sample.semanticzoom.simple": "A simple SemanticZoom"
+  ,"sample.semanticzoom.resources-description": "Reusable definitions for shared values to ensure consistency and maintainability."
+  ,"sample.semanticzoom.style-description": "A XAML style is a reusable set of property settings that defines consistent UI design elements."
+  ,"sample.semanticzoom.binding-description": "Connecting UI elements to data for automatic synchronization and updates."
+  ,"sample.semanticzoom.templates-description": "Customize controls' visuals, item layouts, and data presentation in XAML."
+  ,"sample.semanticzoom.custom-controls-description": "Create reusable UI components with custom functionality and appearance."
+  ,"sample.semanticzoom.xaml-conditions-description": "Define custom XAML conditions evaluated at parse time using IXamlCondition."
+  ,"sample.semanticzoom.scratch-pad-description": "Scratch pad for testing simple XAML markup."
+  ,"sample.semanticzoom.item-description": "WinUI sample for browsing {title}."
   ,"text.animated-icon": "AnimatedIcon"
   ,"text.color": "Color"
   ,"text.compact-sizing": "Compact sizing"

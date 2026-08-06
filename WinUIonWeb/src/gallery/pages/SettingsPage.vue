@@ -1,9 +1,21 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      
-      <div class="gallery-page-content">
-        <WinTextBlock class="page-header" :Text="$t('text.settings')" />
+  <WinGrid class="settings-page-root" RowDefinitions="Auto,*">
+    <WinTextBlock
+      class="settings-page-header"
+      AutomationProperties.HeadingLevel="Level1"
+      FontSize="28"
+      FontWeight="600"
+      LineHeight="36"
+      Margin="36,24,36,30"
+      Style="{StaticResource TitleTextBlockStyle}"
+      TextWrapping="NoWrap"
+      :Text="$t('text.settings')" />
+    <WinScrollViewer
+      class="settings-page-scroll"
+      VerticalScrollBarVisibility="Auto"
+      VerticalScrollMode="Auto">
+      <div class="gallery-item-page settings-page-body">
+        <div class="gallery-page-content">
           <WinTextBlock class="settings-section-title" :Text="$t('text.appearance')" />
           <div class="settings-controls">
             <WinExpander
@@ -82,9 +94,10 @@
               </div>
             </WinExpander>
           </div>
+        </div>
       </div>
-    </div>
-  </WinScrollViewer>
+    </WinScrollViewer>
+  </WinGrid>
 </template>
 
 <script setup>
@@ -96,6 +109,7 @@ import WinSettingsCard from '../../components/WinSettingsCard.vue';
 import WinComboBox from '../../components/WinComboBox.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
+import WinGrid from '../../components/WinGrid.vue';
 import appManifest from '../../manifest.json';
 import appIcon from '../../assets/AppIcon.ico';
 import { useI18n } from '../../components/i18n/index';
@@ -190,6 +204,29 @@ const versionText = t(appManifest.version ?? 'app.version');
 </script>
 
 <style scoped>
+.settings-page-root {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.settings-page-header {
+  max-width: 1064px;
+}
+
+.settings-page-scroll {
+  grid-row: 2;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.settings-page-body {
+  padding-top: 0;
+}
+
 .settings-section-title {
   font-size: 14px;
   font-weight: 600;
@@ -245,4 +282,5 @@ const versionText = t(appManifest.version ?? 'app.version');
   flex-direction: column;
   gap: 8px;
 }
+
 </style>

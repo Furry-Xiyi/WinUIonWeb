@@ -94,6 +94,7 @@ const SNAP_IDLE_MS = 80;
 const SNAP_POLL_MS = 50;
 const MOMENTUM_GAP_MS = 40;
 const NO_MOMENTUM_SNAP_IDLE_MS = 800;
+const TOUCH_LIFT_SNAP_GRACE_MS = 120;
 const GESTURE_RESET_MS = 400;
 const REPEAT_DELAY_MS = 400;
 const REPEAT_INTERVAL_MS = 80;
@@ -143,7 +144,7 @@ const listItems = computed(() => {
   return out;
 });
 
-let gestureMode = 'none'; // 'none' | 'mouse' | 'trackpad'
+let gestureMode = 'none'; // 'none' | 'mouse' | 'trackpad' | 'touch'
 let lastWheelTime = 0;
 let lastScrollTime = 0;
 let eventCount = 0;
@@ -321,7 +322,11 @@ const cancelSnap = () => {
 const onScroll = () => {
   const now = performance.now();
   lastScrollTime = now;
-  if (gestureMode === 'trackpad' && now - lastWheelTime > MOMENTUM_GAP_MS) {
+  if (gestureMode === 'touch') {
+    // Native touch momentum: scroll events that keep arriving after the
+    // finger lifts mean the browser is still flinging the list.
+    if (fingerOffConfirmed) momentumDetected = true;
+  } else if (gestureMode === 'trackpad' && now - lastWheelTime > MOMENTUM_GAP_MS) {
     momentumDetected = true;
   }
   if (!animating && !scrollEndActive) {
@@ -342,7 +347,8 @@ const onScroll = () => {
 };
 
 const maybeSnap = () => {
-  if (gestureMode !== 'trackpad' || animating || !scrollEl.value || itemCount.value === 0) return;
+  const isFlingGesture = gestureMode === 'trackpad' || gestureMode === 'touch';
+  if (!isFlingGesture || animating || !scrollEl.value || itemCount.value === 0) return;
   const now = performance.now();
   if (touchContactActive && now - lastTouchPointerTime > 3000) {
     touchContactActive = false;
@@ -352,10 +358,17 @@ const maybeSnap = () => {
     ? (momentumDetected ? SNAP_IDLE_MS : 0)
     : (momentumDetected ? SNAP_IDLE_MS : NO_MOMENTUM_SNAP_IDLE_MS);
   const quiet = now - lastScrollTime >= idleNeeded && now - lastWheelTime >= idleNeeded;
-  if (fingerStillDown || !quiet) {
+  // For touch, wait a short grace period after the finger lifts so a fling's
+  // first momentum scroll event has a chance to arrive before snapping.
+  const touchLiftGrace = gestureMode === 'touch' && fingerOffConfirmed && !momentumDetected
+    ? now - lastScrollTime >= TOUCH_LIFT_SNAP_GRACE_MS
+    : true;
+  if (fingerStillDown || !quiet || !touchLiftGrace) {
     snapTimer = window.setTimeout(maybeSnap, SNAP_POLL_MS);
     return;
   }
+  // scrollend may already have snapped the column; don't run a second snap.
+  if (settled.value && selectedIndex() === lastEmitted) return;
   const target = props.wrap
     ? base.value + Math.round(rawFloat()) * ITEM_HEIGHT
     : scrollTopForIndex(selectedIndex());
@@ -514,6 +527,11 @@ const onPointerDown = (event) => {
   lastTouchPointerTime = performance.now();
   touchContactActive = true;
   touchContact = true;
+  fingerOffConfirmed = false;
+  momentumDetected = false;
+  if (event.pointerType === 'touch' || event.pointerType === 'pen') {
+    gestureMode = 'touch';
+  }
 };
 
 const onPointerMove = (event) => {
@@ -532,7 +550,7 @@ const onPointerUp = (event) => {
   touchContact = false;
   fingerOffConfirmed = true;
   cancelBackstop();
-  if (!scrollEndActive && gestureMode === 'trackpad') {
+  if (gestureMode === 'touch' || (!scrollEndActive && gestureMode === 'trackpad')) {
     scheduleSnap();
   }
 };
@@ -634,6 +652,7 @@ onUnmounted(() => {
     overflow-x: hidden;
     scrollbar-width: none;
     overscroll-behavior: contain;
+    touch-action: pan-y;
     outline: none;
   }
 

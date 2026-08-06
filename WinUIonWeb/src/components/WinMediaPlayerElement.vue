@@ -235,6 +235,7 @@ let hideControlsTimer: number | null = null;
 let pointerMoveEndTimer: number | null = null;
 let themeObserver: MutationObserver | null = null;
 let mediaLoadTimer: number | null = null;
+let remotePlayback: RemotePlayback | null = null;
 
 const cssLength = (value: unknown) => {
   if (value === '' || value === null || value === undefined) return undefined;
@@ -290,7 +291,7 @@ const stretchValue = computed(() => ({
   UniformToFill: 'cover'
 }[activeStretch.value] || 'contain'));
 const videoStyle = computed(() => ({ objectFit: stretchValue.value as 'none' | 'fill' | 'contain' | 'cover' }));
-const isFullWindowActive = computed(() => fullWindowState.value || props.IsFullWindow);
+const isFullWindowActive = computed(() => fullWindowState.value);
 const rootStyle = computed(() => ({
   width: cssLength(props.Width),
   height: cssLength(props.Height),
@@ -408,15 +409,47 @@ const setVolume = (value: unknown) => {
   muted.value = video.muted;
 };
 
-const toggleFullWindow = () => {
-  if (document.fullscreenElement === rootRef.value) document.exitFullscreen?.();
-  else rootRef.value?.requestFullscreen?.();
+const isRootFullscreen = () => {
+  const root = rootRef.value;
+  return Boolean(root && (document.fullscreenElement === root || root.matches(':fullscreen')));
 };
 
-const onFullscreenChanged = () => {
-  fullWindowState.value = document.fullscreenElement === rootRef.value;
-  emit('IsFullWindowChanged', fullWindowState.value);
+const syncFullscreenState = () => {
+  const nextState = isRootFullscreen();
+  fullWindowState.value = nextState;
+  if (!nextState) isVolumeFlyoutOpen.value = false;
+  emit('IsFullWindowChanged', nextState);
 };
+
+const enterFullWindow = async () => {
+  const root = rootRef.value;
+  if (!root?.requestFullscreen) return;
+  try {
+    await root.requestFullscreen();
+  } catch {
+    fullWindowState.value = false;
+  } finally {
+    syncFullscreenState();
+  }
+};
+
+const exitFullWindow = async () => {
+  try {
+    if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+  } catch {
+    // The browser may already have left fullscreen (for example through Esc).
+  } finally {
+    fullWindowState.value = false;
+    syncFullscreenState();
+  }
+};
+
+const toggleFullWindow = () => {
+  if (isRootFullscreen()) void exitFullWindow();
+  else void enterFullWindow();
+};
+
+const onFullscreenChanged = () => syncFullscreenState();
 
 const seekTo = (value: unknown) => {
   const video = videoRef.value;
@@ -430,8 +463,49 @@ const toggleStretch = () => {
   activeStretch.value = values[(values.indexOf(activeStretch.value) + 1) % values.length];
 };
 
-const onCastRequested = () => {
-  // Casting is not available in the browser, but the command remains in the same slot as WinUI.
+const postCastRequestToWebView = () => {
+  const hostWindow = window as Window & {
+    chrome?: { webview?: { postMessage?: (message: unknown) => void } };
+  };
+  const webview = hostWindow.chrome?.webview;
+  if (!webview?.postMessage) return false;
+  webview.postMessage({
+    source: 'WinUIonWeb',
+    type: 'mediaCastRequested',
+    sourceUri: videoRef.value?.currentSrc || sourceUri.value
+  });
+  return true;
+};
+
+const onCastRequested = async () => {
+  const video = videoRef.value;
+  const remote = video?.remote;
+  if (remote?.prompt) {
+    try {
+      await remote.prompt();
+      return;
+    } catch {
+      // Fall through to the WebView2 host bridge when native casting is unavailable.
+    }
+  }
+  postCastRequestToWebView();
+};
+
+const attachRemotePlayback = () => {
+  const video = videoRef.value;
+  if (!video || !('remote' in video)) return;
+  remotePlayback = video.remote;
+  remotePlayback.onconnecting = () => showControls();
+  remotePlayback.onconnect = () => showControls();
+  remotePlayback.ondisconnect = () => showControls();
+};
+
+const detachRemotePlayback = () => {
+  if (!remotePlayback) return;
+  remotePlayback.onconnecting = null;
+  remotePlayback.onconnect = null;
+  remotePlayback.ondisconnect = null;
+  remotePlayback = null;
 };
 
 const showControls = () => {
@@ -554,6 +628,11 @@ watch(() => props.AutoPlay, (value: boolean) => {
   else videoRef.value?.pause();
 });
 
+watch(() => props.IsFullWindow, (value: boolean) => {
+  if (value && !isRootFullscreen()) void enterFullWindow();
+  else if (!value && isRootFullscreen()) void exitFullWindow();
+});
+
 watch(isVolumeFlyoutOpen, (isOpen) => {
   if (isOpen) showControls();
   else startControlPanelHideTimer();
@@ -575,6 +654,7 @@ watch(() => props.Stretch, (value: string) => {
 
 onMounted(() => {
   document.addEventListener('fullscreenchange', onFullscreenChanged);
+  document.addEventListener('webkitfullscreenchange', onFullscreenChanged as EventListener);
   anchorTheme.value = resolveAnchorTheme();
   themeObserver = new MutationObserver(() => {
     anchorTheme.value = resolveAnchorTheme();
@@ -591,12 +671,16 @@ onMounted(() => {
     videoRef.value.load();
     videoRef.value.muted = false;
     videoRef.value.volume = 0.5;
+    attachRemotePlayback();
     if (props.AutoPlay) videoRef.value.play().catch(() => {});
   }
+  if (props.IsFullWindow) void enterFullWindow();
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', onFullscreenChanged);
+  document.removeEventListener('webkitfullscreenchange', onFullscreenChanged as EventListener);
+  detachRemotePlayback();
   themeObserver?.disconnect();
   if (hideControlsTimer) window.clearTimeout(hideControlsTimer);
   if (pointerMoveEndTimer) window.clearTimeout(pointerMoveEndTimer);
@@ -607,6 +691,12 @@ defineExpose({ MediaPlayer: videoRef });
 </script>
 
 <style>
+@font-face {
+  font-family: 'WinUIOnWebIcons';
+  src: url('../assets/Fonts/SEGOEICONS.TTF') format('truetype');
+  font-display: block;
+}
+
 .win-media-player-element {
   position: relative;
   display: block;

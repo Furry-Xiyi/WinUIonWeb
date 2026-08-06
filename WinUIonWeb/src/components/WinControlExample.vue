@@ -239,7 +239,8 @@ const copyActiveCode = async () => {
 }
 
 .example-options {
-  width: min(320px, 32vw);
+  width: 320px;
+  max-width: 100%;
   padding: 16px;
   display: flex;
   flex-direction: column;

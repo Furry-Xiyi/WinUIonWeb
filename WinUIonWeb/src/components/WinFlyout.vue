@@ -193,6 +193,7 @@ defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
   border: 1px solid var(--surface-stroke-color-flyout, var(--flyout-border));
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --win-flyout-shadow-bleed: 32px;
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);
 }
@@ -226,7 +227,7 @@ defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
     transform: translateY(-16px);
   }
   to {
-    clip-path: inset(0);
+    clip-path: inset(calc(-1 * var(--win-flyout-shadow-bleed)));
     transform: translateY(0);
   }
 }
@@ -237,7 +238,7 @@ defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
     transform: translateY(16px);
   }
   to {
-    clip-path: inset(0);
+    clip-path: inset(calc(-1 * var(--win-flyout-shadow-bleed)));
     transform: translateY(0);
   }
 }

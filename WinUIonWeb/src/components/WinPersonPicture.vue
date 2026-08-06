@@ -16,7 +16,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -42,7 +42,7 @@ const props = defineProps({
   HorizontalAlignment: { type: String, default: '' }
 });
 
-const cssLength = (value) => {
+const cssLength = (value: unknown): string | undefined => {
   if (value === '' || value === null || value === undefined) return undefined;
   return typeof value === 'number' || /^-?\d+(\.\d+)?$/.test(String(value).trim())
     ? `${value}px`
@@ -50,15 +50,15 @@ const cssLength = (value) => {
 };
 
 const contactDisplayName = computed(() => props.Contact?.DisplayName || props.DisplayName || '');
-const imageUri = (value) => {
+const imageUri = (value: unknown): string => {
   if (typeof value === 'string') return value;
-  if (value && typeof value === 'object') return value.UriSource || '';
+  if (value && typeof value === 'object') return String((value as { UriSource?: unknown }).UriSource || '');
   return '';
 };
 const imageSource = computed(() => imageUri(props.ProfilePicture) || imageUri(props.Contact?.ProfilePicture));
 const badgeImageSource = computed(() => imageUri(props.BadgeImageSource));
 
-const firstCharacter = (value) => {
+const firstCharacter = (value: unknown): string => {
   const match = String(value || '').trim().match(/[\p{L}\p{N}]/u);
   return match?.[0] || '';
 };
@@ -74,15 +74,17 @@ const actualInitials = computed(() => {
 
 const badgeVisible = computed(() => Boolean(badgeImageSource.value) || props.BadgeNumber > 0 || Boolean(props.BadgeGlyph));
 
+const pictureDimension = (value: unknown): string => {
+  const dimension = cssLength(value);
+  return dimension && dimension !== 'auto' ? dimension : '96px';
+};
+
+// WinUI keeps PersonPicture circular by applying the smaller arranged dimension
+// to both axes. CSS min() preserves that rule for numeric and relative sizes.
 const pictureSize = computed(() => {
-  const width = Number.parseFloat(String(props.Width));
-  const height = Number.parseFloat(String(props.Height));
-  const widthIsDefault = Number.isFinite(width) && width === 96;
-  const heightIsDefault = Number.isFinite(height) && height === 96;
-  if (widthIsDefault && !heightIsDefault) return props.Height;
-  if (heightIsDefault && !widthIsDefault) return props.Width;
-  if (Number.isFinite(width) && Number.isFinite(height)) return Math.min(width, height);
-  return props.Width || props.Height || 96;
+  const width = pictureDimension(props.Width);
+  const height = pictureDimension(props.Height);
+  return width === height ? width : `min(${width}, ${height})`;
 });
 
 const rootStyle = computed(() => ({
@@ -110,6 +112,7 @@ const automationLabel = computed(() => {
   position: relative;
   display: inline-grid;
   place-items: center;
+  container-type: size;
   flex: 0 0 auto;
   overflow: visible;
   border-style: solid;
@@ -129,14 +132,16 @@ const automationLabel = computed(() => {
 
 .win-person-picture-initials {
   display: block;
-  font-size: calc(var(--win-person-picture-size, 96px) * .42);
+  font-size: 40px;
+  font-size: 42cqi;
   line-height: 1;
   text-align: center;
   white-space: nowrap;
 }
 
 .win-person-picture-placeholder {
-  font-size: calc(var(--win-person-picture-size, 96px) * .42);
+  font-size: 40px;
+  font-size: 42cqi;
   line-height: 1;
 }
 
@@ -147,15 +152,18 @@ const automationLabel = computed(() => {
   z-index: 1;
   display: grid;
   place-items: center;
-  min-width: 24%;
-  min-height: 24%;
-  padding: 0 5px;
+  width: 50%;
+  height: 50%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
   box-sizing: border-box;
   border: 2px solid var(--ControlFillColorTransparentBrush, transparent);
   border-radius: 999px;
   background: var(--PersonPictureEllipseBadgeFillThemeBrush, var(--accent-base));
   color: var(--PersonPictureEllipseBadgeForegroundThemeBrush, var(--accent-text));
-  font-size: 14px;
+  font-size: 29px;
+  font-size: 30cqi;
   font-weight: 600;
   line-height: 1;
 }

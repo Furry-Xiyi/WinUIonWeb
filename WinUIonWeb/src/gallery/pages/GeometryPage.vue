@@ -173,28 +173,21 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
 import WinControlExample from '../../components/WinControlExample.vue';
 import WinButton from '../../components/WinButton.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
+import { createPageState } from '../../utils/pageState';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 // Theme management
-const currentTheme = ref('light');
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'geometry');
+const { pageTheme: currentTheme, isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const themeButtonTitle = computed(() => `Switch to ${currentTheme.value === 'light' ? 'dark' : 'light'} theme`);
 
-const toggleTheme = () => {
-  currentTheme.value = currentTheme.value === 'light' ? 'dark' : 'light';
-};
-
-// Favorite management
-const isFavorite = ref(false);
 const favoriteButtonTitle = computed(() => isFavorite.value ? 'Remove from favorites' : 'Add to favorites');
-
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-};
 
 // Geometry image based on theme
 const geometryImage = computed(() => {

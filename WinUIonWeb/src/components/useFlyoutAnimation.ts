@@ -29,8 +29,8 @@ export interface FlyoutAnimationHandle {
 export const FlyoutAnimationDefaults = {
   Origin: 'edge',
   Direction: 'top',
-  Duration: 750,
-  Easing: 'cubic-bezier(0.102, 0.700, 0.000, 1.007)',
+  Duration: 800,
+  Easing: 'cubic-bezier(0.092,1.003,0.028,0.997)',
   Margin: 15,
   StripSize: 36,
   RespectReducedMotion: true
@@ -197,7 +197,9 @@ export const useFlyoutAnimation = (
         { clipPath: getClipPolygon(startRect) },
         { clipPath: getClipPolygon(endRect) }
       ],
-      { duration, easing, fill: 'forwards' }
+      // 不用 forwards 填充：结束帧本来就覆盖整个弹层（含 margin），动画
+      // 结束后让效果自然失效即可，避免残留 clip-path 裁掉阴影外圈。
+      { duration, easing, fill: 'none' }
     );
     animation = current;
     isPlaying.value = true;

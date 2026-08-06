@@ -2,12 +2,6 @@
   <div class="gallery-item-page">
     <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
-            <WinPageHeader
-              title="Iconography"
-              :showFavoriteButton="true"
-              :showThemeButton="true"
-            />
-
             <div class="page-description">
               <p>Browse and search the Fluent System Icons library. Click any icon to see usage details.</p>
             </div>
@@ -126,12 +120,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import WinPageHeader from '../../components/WinPageHeader.vue';
+import { ref, computed, onMounted, inject } from 'vue';
 import WinAutoSuggestBox from '../../components/WinAutoSuggestBox.vue';
 import WinItemsView from '../../components/WinItemsView.vue';
 
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import { createPageState } from '../../utils/pageState';
+const currentPage = inject('currentPage');
+const pageKey = computed(() => currentPage?.value || 'iconography');
+const { pageTheme, isFavoriteState, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 const searchText = ref('');
 const selectedItems = ref([]);
 const allIcons = ref([]);

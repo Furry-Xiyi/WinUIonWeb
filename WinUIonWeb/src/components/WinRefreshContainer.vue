@@ -47,7 +47,7 @@ interface Props {
   // 官方属性：拉取阈值
   pullThreshold?: number
   // 官方属性：RefreshVisualizer 实例（通过 slot 实现）
-  visualizer?: any
+  visualizer?: unknown
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -83,7 +83,7 @@ enum RefreshVisualizerState {
 
 // State
 const containerRef = ref<HTMLElement | null>(null)
-const contentRef = ref<HTMLElement | null>(null)
+const contentRef = ref<InstanceType<typeof WinScrollViewer>>()
 const contentScrollTop = ref(0)
 const currentRefreshState = ref<RefreshVisualizerState>(RefreshVisualizerState.Idle)
 const isRefreshing = ref(false)
@@ -237,8 +237,8 @@ const resetPull = () => {
   currentRefreshState.value = RefreshVisualizerState.Idle
 }
 
-const onContentViewChanged = (args: { verticalOffset?: number }) => {
-  contentScrollTop.value = args.verticalOffset ?? 0
+const onContentViewChanged = () => {
+  contentScrollTop.value = Number(contentRef.value?.VerticalOffset ?? 0)
 }
 
 // RefreshStateChanged 事件处理

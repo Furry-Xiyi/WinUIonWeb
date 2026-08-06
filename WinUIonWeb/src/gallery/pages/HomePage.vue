@@ -34,8 +34,9 @@
             :SelectedItem="filterItems[selectedFilterIndex]"
             @SelectionChanged="OnFilterChanged" />
 
-          <main class="switch-presenter">
-            <section v-if="selectedFilter === 'Recent'" key="Recent" class="sample-panel EntranceNavigationTransitionInfo">
+          <WinSwitchPresenter class="switch-presenter" :Value="selectedFilter">
+            <WinCase Value="Recent">
+              <section class="sample-panel">
               <template v-if="RecentlyVisitedSamplesList.length > 0">
                 <WinTextBlock class="sample-panel-title" :Text="$t('text.recently-visited')" />
                 <WinHorizontalScrollContainer class="recently-visited-container">
@@ -77,7 +78,10 @@
               </div>
             </section>
 
-            <section v-else key="Favorites" class="sample-panel EntranceNavigationTransitionInfo">
+            </WinCase>
+
+            <WinCase Value="Favorites">
+              <section class="sample-panel">
               <div v-if="FavoriteSamplesList.length > 0" class="grid-view">
                 <button
                   v-for="item in FavoriteSamplesList"
@@ -102,8 +106,9 @@
                   Text="Favorite samples by clicking the star icon on the sample page."
                   TextAlignment="Center" />
               </div>
-            </section>
-          </main>
+              </section>
+            </WinCase>
+          </WinSwitchPresenter>
         </div>
     </div>
   </WinScrollViewer>
@@ -115,6 +120,8 @@ import WinHomeHeaderTile from '../components/WinHomeHeaderTile.vue';
 import WinHorizontalScrollContainer from '../../components/WinHorizontalScrollContainer.vue';
 import WinSelectorBar from '../../components/WinSelectorBar.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
+import WinCase from '../../components/WinCase.vue';
+import WinSwitchPresenter from '../../components/WinSwitchPresenter.vue';
 import appIcon from '../../assets/AppIcon.ico';
 import splashDark from '../../assets/HomePage/Splash-Dark.png';
 import splashLight from '../../assets/HomePage/Splash-Light.png';
@@ -547,6 +554,7 @@ onUnmounted(() => {
 }
 
 .switch-presenter {
+  position: relative;
   min-width: 0;
   margin: 0 36px 36px 36px;
 }
