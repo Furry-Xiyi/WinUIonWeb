@@ -2223,7 +2223,8 @@ watch(() => props.selectedValue, (val) => {
     flex-direction: column;
     padding: 4px 4px;
     margin-right: 0;
-    clip-path: inset(0 0 0 0);
+    --win-nav-shadow-bleed: 30px;
+    clip-path: inset(calc(-1 * var(--win-nav-shadow-bleed)));
     transition: clip-path var(--win-nav-pane-duration, 200ms) var(--win-nav-pane-easing, cubic-bezier(0, 0.35, 0.15, 1)), background var(--normal-duration) var(--fast-out-slow-in);
     flex-shrink: 0;
     overflow: hidden;
@@ -2247,7 +2248,7 @@ watch(() => props.selectedValue, (val) => {
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
       border-radius: 0 8px 8px 0;
       width: var(--win-nav-open-pane-length, 320px);
-      clip-path: inset(0 0 0 0);
+      clip-path: inset(calc(-1 * var(--win-nav-shadow-bleed)));
       transition: clip-path var(--win-nav-pane-duration, 350ms) var(--win-nav-pane-easing, cubic-bezier(0.1, 0.9, 0.2, 1)), background var(--normal-duration) var(--fast-out-slow-in), box-shadow var(--win-nav-pane-duration, 350ms) linear;
     }
 
