@@ -1,8 +1,13 @@
+// Web 版本地化资源，对应官方 WinUI 的 .resw 资源文件。
 export default {
+  "app.brand": "WinUI on Web",
   "app.shortTitle": "WinUI on Web Gallery",
   "app.title": "WinUI on Web Gallery",
   "app.version": "1.0.0-Insider",
   "app.author": "惜忆想睡觉",
+  "search.placeholder": "Search controls and samples...",
+  "search.no-results": "No results match your search.",
+  "search.no-results-found": "No results found",
   "text.a-2-state-checkbox": "A 2-state CheckBox",
   "text.a-basic-autosuggestbox": "A basic AutoSuggestBox",
   "text.a-basic-calendar-view": "A basic calendar view.",

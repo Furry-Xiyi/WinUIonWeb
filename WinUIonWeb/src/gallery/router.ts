@@ -1,3 +1,4 @@
+// 对应官方 MainWindow.xaml.cs 的 Frame 导航（Navigate/GoBack），Web 版用 vue-router 实现。
 import { createRouter, createWebHashHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 
@@ -101,6 +102,11 @@ const galleryRoutes: RouteRecordRaw[] = [
     name,
     component
   })),
+  {
+    path: '/search',
+    name: 'search',
+    component: () => import('./pages/SearchResultsPage.vue')
+  },
   { path: '/:pathMatch(.*)*', redirect: '/home' }
 ];
 

@@ -1,37 +1,62 @@
 <template>
-  <WinTitleBar :title="appTitle" :theme="themeSetting" />
+  <!-- 对应官方 WinUIGallery/MainWindow.xaml(.cs)：Gallery 主窗口壳（TitleBar + NavigationView + 搜索 + 页面导航） -->
   <WinToolTipService />
-  <div class="gallery-app-content" :class="{ 'has-titlebar': titleBarActive || isHostedInUwpWebView }">
-    <WinNavigationView :SelectedItem="selectedNavigationItem"
-                     :PaneDisplayMode="navPosition"
-                     :MenuItems="navMenuItems"
-                     :FooterMenuItems="[]"
-                     IsBackButtonVisible="Visible"
-                     :IsBackEnabled="canGoBack"
-                     @ItemInvoked="onNavigationItemInvoked"
-                     @BackRequested="onBackRequested">
-      <router-view v-slot="{ Component }">
-        <Transition
-          appear
-          :enter-active-class="pageTransitionEnter"
-          :leave-active-class="pageTransitionLeave">
-          <div v-if="Component" :key="route.fullPath" class="page-view active">
-            <component :is="Component" />
-          </div>
-        </Transition>
-      </router-view>
-    </WinNavigationView>
+  <WinTitleBar
+    :Title="t('app.title')"
+    :IsBackButtonVisible="canGoBack"
+    :IsPaneToggleButtonVisible="!isTopNavMode"
+    TitleBarContentHorizontalAlignment="Stretch"
+    :IconSource="appIcon"
+    @BackRequested="onBackRequested"
+    @PaneToggleRequested="onTopBarToggle">
+    <WinAutoSuggestBox
+      ref="searchBoxRef"
+      v-model:Text="searchQuery"
+      :ItemsSource="searchResults"
+      TextMemberPath="title"
+      :PlaceholderText="t('search.placeholder')"
+      QueryIcon="Find"
+      :OpenOnFocus="false"
+      class="gallery-titlebar-search"
+      @QuerySubmitted="onSearchQuerySubmitted" />
+  </WinTitleBar>
+  <div class="gallery-app-content" :class="{ 'has-titlebar': isHostedInUwpWebView, 'wco-titlebar': !isHostedInUwpWebView }">
+    <div class="gallery-nav-host">
+      <WinNavigationView :SelectedItem="selectedNavigationItem"
+                       :PaneDisplayMode="navPosition"
+                       :MenuItems="navMenuItems"
+                       :FooterMenuItems="[]"
+                       v-model:IsPaneOpen="isPaneOpen"
+                       IsBackButtonVisible="Collapsed"
+                       :IsPaneToggleButtonVisible="false"
+                       :IsBackEnabled="canGoBack"
+                       @ItemInvoked="onNavigationItemInvoked"
+                       @BackRequested="onBackRequested">
+        <router-view v-slot="{ Component }">
+          <Transition
+            appear
+            :enter-active-class="pageTransitionEnter"
+            :leave-active-class="pageTransitionLeave">
+            <div v-if="Component" :key="route.fullPath" class="page-view active">
+              <component :is="Component" />
+            </div>
+          </Transition>
+        </router-view>
+      </WinNavigationView>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, provide, computed, onMounted } from 'vue';
+import { ref, watch, provide, computed, onMounted, onBeforeUnmount } from 'vue';
 import WinTitleBar from '../components/WinTitleBar.vue';
 import WinNavigationView from '../components/WinNavigationView.vue';
 import WinToolTipService from '../components/WinToolTipService.vue';
-import appManifest from '../manifest.json';
+import WinAutoSuggestBox from '../components/WinAutoSuggestBox.vue';
+import appIcon from '../assets/AppIcon.ico';
 import { useRoute, useRouter } from 'vue-router';
 import { pageTags } from './router';
+import { searchAll } from './searchIndex';
 
 import { useI18n } from '../components/i18n/index';
 import {
@@ -46,10 +71,21 @@ import {
   stringifyNavigationTransitionInfo
 } from '../utils/navigationTransitionInfo';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
-const titleBarActive = ref(false);
-provide('winTitleBarVisible', titleBarActive);
+const searchBoxRef = ref(null);
+const searchQuery = ref('');
+const searchResults = computed(() => {
+  const query = searchQuery.value.trim();
+  const items = searchAll(searchQuery.value, locale);
+  if (query !== '' && items.length === 0) {
+    return [{ title: t('search.no-results-found'), tag: '', noResults: true }];
+  }
+  return items.map((item) => ({
+    title: locale === 'zh-CN' ? item.zh : item.en,
+    tag: item.tag
+  }));
+});
 
 const readStoredSetting = (key, fallback, allowedValues) => {
   const value = localStorage.getItem(key);
@@ -77,6 +113,8 @@ const route = useRoute();
 const router = useRouter();
 const currentPage = computed(() => (typeof route.name === 'string' ? route.name : 'home'));
 const navPosition = ref(readStoredSetting('winui-nav-position', 'Auto', ['Auto', 'Top', 'Left', 'LeftCompact', 'LeftMinimal']));
+const isTopNavMode = computed(() => navPosition.value === 'Top');
+const isPaneOpen = ref(true);
 const themeSetting = ref(readStoredSetting('winui-theme-setting', 'system', ['system', 'light', 'dark']));
 const materialSetting = ref(readStoredSetting('winui-material-setting', 'mica', ['mica', 'acrylic']));
 const navigationTransitionInfo = ref(readStoredNavigationTransitionInfo());
@@ -105,8 +143,6 @@ provide('navigationTransitionInfo', navigationTransitionInfo);
 provide('navPosition', navPosition);
 provide('currentPage', currentPage);
 provide('isHostedInUwpWebView', isHostedInUwpWebView);
-
-const appTitle = computed(() => t(appManifest.resources?.title ?? 'app.title'));
 
 const navMenuItems = [
   { Tag: 'home', Icon: '\uE80F', Content: t('text.home') },
@@ -251,6 +287,37 @@ const onNavigationItemInvoked = args => {
 const onBackRequested = () => {
   if (canGoBack.value) router.back();
 };
+const onTopBarToggle = () => {
+  isPaneOpen.value = !isPaneOpen.value;
+};
+const onSearchQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
+  const query = String(QueryText ?? '').trim();
+  if (!query) return;
+  if (ChosenSuggestion?.tag && pageTags.has(ChosenSuggestion.tag)) {
+    router.push({ name: ChosenSuggestion.tag });
+    return;
+  }
+  const items = searchAll(query, locale);
+  if (items.length === 0) {
+    router.push({ path: '/search', query: { q: query } });
+    return;
+  }
+  const nameKey = locale === 'zh-CN' ? 'zh' : 'en';
+  const lower = query.toLowerCase();
+  const exact = items.find((item) => (
+    item.tag.toLowerCase() === lower || item[nameKey].toLowerCase() === lower
+  ));
+  router.push({ name: (exact ?? items[0]).tag });
+};
+const focusSearchBox = () => {
+  searchBoxRef.value?.$el?.querySelector('input')?.focus({ preventScroll: true });
+};
+const onWindowKeydown = (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') {
+    event.preventDefault();
+    focusSearchBox();
+  }
+};
 
 function applyTheme(mode) {
   const html = document.documentElement;
@@ -264,6 +331,27 @@ persistSetting('winui-nav-position', navPosition);
 persistSetting('winui-theme-setting', themeSetting);
 persistSetting('winui-material-setting', materialSetting);
 persistNavigationTransitionInfo(navigationTransitionInfo);
+
+const updateThemeColor = () => {
+  const mode = themeSetting.value;
+  const isDark = mode === 'dark' || (
+    mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+  const color = isDark ? '#202020' : '#f3f3f3';
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute('content', color);
+};
+const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+const onSystemThemeChange = () => {
+  if (themeSetting.value === 'system') updateThemeColor();
+};
+watch(themeSetting, () => updateThemeColor(), { immediate: true });
+systemThemeQuery.addEventListener('change', onSystemThemeChange);
 
 function postUwpSetting(key, value) {
   if (!isHostedInUwpWebView.value || !window.chrome?.webview?.postMessage) return;
@@ -279,9 +367,15 @@ onMounted(() => {
   // WebView2 exposes window.chrome.webview in every host. Only the explicit
   // marker identifies the UWP host that owns the custom title bar.
   isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__);
+  window.addEventListener('keydown', onWindowKeydown);
   postUwpSetting('theme', themeSetting.value);
   postUwpSetting('material', materialSetting.value);
   postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(navigationTransitionInfo.value));
+});
+
+onBeforeUnmount(() => {
+  systemThemeQuery.removeEventListener('change', onSystemThemeChange);
+  window.removeEventListener('keydown', onWindowKeydown);
 });
 
 watch(themeSetting, (value) => postUwpSetting('theme', value));
@@ -298,12 +392,37 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
     height: 100%;
     min-width: 0;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gallery-nav-host {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+  }
+
+  .gallery-nav-host > .win-nav-shell {
+    width: 100%;
+    height: 100%;
   }
 
   .gallery-app-content.has-titlebar {
-    --gallery-titlebar-height: var(--win-titlebar-height, env(titlebar-area-height, 32px));
+    --gallery-titlebar-height: env(titlebar-area-height, 32px);
     height: calc(100% - var(--gallery-titlebar-height));
     margin-top: var(--gallery-titlebar-height);
+  }
+
+  .gallery-app-content.wco-titlebar {
+    box-sizing: border-box;
+    padding-top: 48px;
+    padding-top: max(env(titlebar-area-height, 0px), 48px);
+  }
+
+  .gallery-titlebar-search {
+    width: 100%;
+    max-width: 350px;
   }
 
   @font-face {
