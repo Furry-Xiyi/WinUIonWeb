@@ -2434,8 +2434,8 @@ watch(() => props.selectedValue, (val) => {
 
     .win-nav-shell.is-left-compact > .win-nav-left-panel:not(.is-compact),
     html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-compact > .win-nav-left-panel:not(.is-compact) {
-      -webkit-backdrop-filter: var(--flyout-backdrop);
-      backdrop-filter: var(--flyout-backdrop);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
 
     .win-nav-shell.is-left-compact > .win-nav-left-panel::before {
@@ -2448,8 +2448,9 @@ watch(() => props.selectedValue, (val) => {
       background: var(--win-nav-pane-fill, var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg)));
       border-radius: 0 8px 8px 0;
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+      -webkit-backdrop-filter: var(--flyout-backdrop);
+      backdrop-filter: var(--flyout-backdrop);
       opacity: 1;
-      transition: opacity var(--win-nav-pane-duration, 350ms) linear;
     }
 
     .win-nav-shell.is-left-compact > .win-nav-left-panel::after {
@@ -2461,12 +2462,16 @@ watch(() => props.selectedValue, (val) => {
       border: 1px solid var(--NavigationViewItemSeparatorForeground, var(--DividerStrokeColorDefaultBrush, var(--stroke-divider)));
       border-radius: 0 8px 8px 0;
       opacity: 1;
-      transition: opacity var(--win-nav-pane-duration, 350ms) linear;
     }
 
     .win-nav-shell.is-left-compact > .win-nav-left-panel.is-compact::before,
     .win-nav-shell.is-left-compact > .win-nav-left-panel.is-compact::after {
       opacity: 0;
+    }
+
+    .win-nav-shell.is-left-compact > .win-nav-left-panel.is-compact.is-pane-closing::before,
+    .win-nav-shell.is-left-compact > .win-nav-left-panel.is-compact.is-pane-closing::after {
+      opacity: 1;
     }
 
     .win-nav-shell.is-left-compact > .win-nav-left-panel > .win-nav-back-button,
@@ -2566,7 +2571,7 @@ watch(() => props.selectedValue, (val) => {
     overflow: hidden;
     --win-nav-pane-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
     isolation: isolate;
-    background: transparent;
+    background: var(--win-nav-pane-fill);
     -webkit-backdrop-filter: var(--flyout-backdrop);
     backdrop-filter: var(--flyout-backdrop);
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
@@ -2576,13 +2581,7 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    border-radius: inherit;
-    background: var(--win-nav-pane-fill);
+    content: none;
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface::after {

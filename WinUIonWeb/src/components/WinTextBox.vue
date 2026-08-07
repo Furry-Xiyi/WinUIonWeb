@@ -413,6 +413,10 @@ const onFocus = () => {
 };
 
 const onBlur = () => {
+  // A TextBox context menu is a logical child of the control even though its
+  // flyout is teleported to body. Keep the TextBox focused until that flyout
+  // closes and restores DOM focus to the editing field.
+  if (contextMenuOpen.value || isRestoringContextMenuFocus.value) return;
   isFocused.value = false;
   emit('LostFocus');
 };

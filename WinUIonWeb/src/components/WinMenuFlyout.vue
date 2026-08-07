@@ -347,7 +347,7 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 <style>
 .win-menu-flyout-wrap {
   position: fixed;
-  z-index: 1000;
+  z-index: var(--win-menu-flyout-z-index, 10001);
   border-radius: 8px;
   overflow: visible;
   box-shadow: 0 0 0 rgba(0, 0, 0, 0);
@@ -538,7 +538,7 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 }
 
 .win-menu-submenu-wrap {
-  z-index: 1002;
+  z-index: var(--win-menu-flyout-submenu-z-index, 10002);
 }
 
 .win-menu-flyout-separator {
@@ -550,7 +550,7 @@ const isItemChecked = (item) => Boolean(item?.IsChecked);
 .win-menu-flyout-overlay {
   position: fixed;
   inset: 0;
-  z-index: 999;
+  z-index: var(--win-menu-flyout-overlay-z-index, 10000);
 }
 
 .win-menu-flyout-overlay.allows-anchor-hover {

@@ -396,12 +396,16 @@ const onCompactSearchButtonClick = () => {
 const onDocumentClickForCompactSearch = (event) => {
   const target = event.target;
   if (target?.closest?.('.gallery-titlebar-search-button')) return;
+  if (compactSearchRef.value?.contains(target)) return;
+  if (target?.closest?.('.win-asb-popup, .win-menu-flyout-wrap')) return;
   compactSearchOpen.value = false;
 };
 const onDocumentPointerDownForCompactSearch = (event) => {
   const target = event.target;
   if (target?.closest?.('.gallery-titlebar-search-button')) return;
   if (!compactSearchOpen.value) return;
+  if (compactSearchRef.value?.contains(target)) return;
+  if (target?.closest?.('.win-asb-popup, .win-menu-flyout-wrap')) return;
   // Let a suggestion's click handler finish before v-if removes the popup.
   window.setTimeout(() => {
     compactSearchOpen.value = false;
@@ -422,7 +426,7 @@ const onDocumentFocusOutForCompactSearch = (event) => {
   const relatedTarget = event.relatedTarget;
   if (!compactSearchRef.value?.contains(target)) return;
   if (compactSearchRef.value?.contains(relatedTarget)) return;
-  if (relatedTarget?.closest?.('.win-asb-popup')) return;
+  if (relatedTarget?.closest?.('.win-asb-popup, .win-menu-flyout-wrap')) return;
   compactSearchOpen.value = false;
 };
 const onSearchQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
@@ -693,6 +697,23 @@ watch(titlebarCompact, (compact) => {
 
   .gallery-compact-search {
     width: 100%;
+  }
+
+  /* The compact title-bar search is the only Gallery search surface that
+     uses an Acrylic input fill. Replace WinTextBox's normal translucent
+     control layer in every interaction state so it does not stack over the
+     Acrylic backdrop. */
+  .gallery-compact-search.win-auto-suggest-box .win-textbox {
+    --textbox-background: var(--AcrylicInAppFillColorDefaultBrush);
+    --textbox-background-pointer-over: var(--AcrylicInAppFillColorDefaultBrush);
+    --textbox-background-pressed: var(--AcrylicInAppFillColorDefaultBrush);
+    --textbox-background-focused: var(--AcrylicInAppFillColorDefaultBrush);
+    isolation: isolate;
+  }
+
+  .gallery-compact-search.win-auto-suggest-box .win-textbox-border {
+    -webkit-backdrop-filter: var(--flyout-backdrop);
+    backdrop-filter: var(--flyout-backdrop);
   }
 
   @font-face {
