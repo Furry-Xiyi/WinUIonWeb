@@ -637,18 +637,14 @@ watch(titlebarNarrow, (narrow) => {
   /* 搜索框默认 20px 圆角；弹出层展开后为 20px 20px 0 0，
      顶部保留圆角、底部变直角与弹出层衔接，弹出层自身圆角保持不变。
      弹出状态下使用纯色背景，避免透出下层内容；
-     系统默认/浅色主题下使用应用浅色背景（#F3F3F3），仅显式深色主题使用 #2B2B2B。 */
+     背景跟随主题：显式浅色/深色与系统默认（prefers-color-scheme）都使用 --app-bg。 */
   .gallery-compact-search.win-auto-suggest-box .win-textbox-border {
     border-radius: 20px;
-    background: #F3F3F3 !important;
-  }
-
-  html.theme-dark .gallery-compact-search.win-auto-suggest-box .win-textbox-border {
-    background: #2B2B2B !important;
+    background: var(--app-bg) !important;
   }
 
   .gallery-compact-search.win-auto-suggest-box.is-suggestion-open-down .win-textbox-border {
-    border-radius: 20px 20px 0 0 !important;
+    border-radius: 15px 15px 0 0 !important;
   }
 
   @font-face {
