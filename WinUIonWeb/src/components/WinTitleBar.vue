@@ -157,11 +157,13 @@ const rootRef = ref(null);
 const contentAreaRef = ref(null);
 const isDeactivated = ref(false);
 const isCompact = ref(false);
+const isNarrow = ref(false);
 const dragRegionRevision = ref(0);
 
 let compactModeThresholdWidth = 0;
 let contentDesiredWidth = 240;
 const COMPACT_EXIT_HYSTERESIS = 32;
+const NARROW_TITLEBAR_WIDTH = 480;
 let defaultDocumentTitle = '';
 let lastAppliedTitle = '';
 let focusHandler = null;
@@ -182,6 +184,7 @@ const rootClasses = computed(() => ({
   'is-compact-height': !hasExpandedHeight.value,
   'is-compact': isCompact.value,
   'is-deactivated': isDeactivated.value,
+  'is-narrow': isNarrow.value,
   'is-negative-inset-spacing': isNegativeInsetSpacing.value
 }));
 
@@ -355,6 +358,9 @@ const updateCompactMode = () => {
 
   const available = content.clientWidth;
   const rootWidth = root.getBoundingClientRect().width;
+  // 标题栏实际宽度过窄时标记 is-narrow（不依赖视口媒体查询），
+  // 让 PWA overlay / WebView2 里标题栏区域比视口窄的情况也能隐藏搜索框、保住标题。
+  isNarrow.value = rootWidth < NARROW_TITLEBAR_WIDTH;
   const overflows = available < contentDesiredWidth - 1;
 
   if (!isCompact.value) {
