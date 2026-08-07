@@ -10,18 +10,20 @@
       'is-disabled': !IsEnabled
     }"
     :style="rootStyle"
-    :tabindex="IsEnabled ? 0 : -1"
+    :tabindex="IsEnabled && IsTabStop ? 0 : -1"
     @keydown="onKeyDown"
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"
     @pointerup="onPointerEnd"
     @pointercancel="onPointerEnd"
+    @semanticzoomrequest="onSemanticZoomRequest"
     @wheel="onWheel">
     <div class="semantic-zoom-scroll-viewer">
       <div class="semantic-zoom-surface" :style="surfaceStyle">
         <div
           ref="zoomedInPresenterRef"
           class="semantic-zoom-presenter zoomed-in-presenter"
+          :class="zoomedInTransitionClass"
           :style="zoomedInPresenterStyle"
           :aria-hidden="!isZoomedIn"
           :inert="isZoomedIn ? undefined : true">
@@ -33,6 +35,7 @@
         <div
           ref="zoomedOutPresenterRef"
           class="semantic-zoom-presenter zoomed-out-presenter"
+          :class="zoomedOutTransitionClass"
           :style="zoomedOutPresenterStyle"
           :aria-hidden="isZoomedIn"
           :inert="isZoomedIn ? true : undefined">
@@ -44,12 +47,12 @@
     </div>
 
     <button
+      v-if="IsZoomOutButtonEnabled && isZoomOutButtonVisible"
       class="zoom-out-button"
       :class="{ visible: isZoomOutButtonVisible }"
       type="button"
       tabindex="-1"
       :disabled="!IsEnabled"
-      :aria-hidden="!isZoomOutButtonVisible"
       :aria-label="t('text.zoom-out')"
       @click="onZoomOutButtonClick">
       <span aria-hidden="true">&#xE0B8;</span>
@@ -58,10 +61,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch, type Component, type CSSProperties } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch, type Component, type CSSProperties } from 'vue'
 import { useI18n } from './i18n/index'
+import {
+  createDrillInNavigationTransitionInfo,
+  getNavigationTransitionInfoClassName,
+  NavigationTrigger_BackNavigatingAway,
+  NavigationTrigger_BackNavigatingTo,
+  NavigationTrigger_NavigatingAway,
+  NavigationTrigger_NavigatingTo
+} from '../utils/navigationTransitionInfo'
 
 type ScrollViewerZoomMode = 'Disabled' | 'Enabled'
+type ScrollViewerScrollMode = 'Disabled' | 'Enabled' | 'Auto'
 
 interface Props {
   ZoomedInView?: Component | string
@@ -70,12 +82,18 @@ interface Props {
   CanChangeViews?: boolean
   IsZoomOutButtonEnabled?: boolean
   IsEnabled?: boolean
+  IsTabStop?: boolean
+  TabNavigation?: 'Local' | 'Cycle' | 'Once'
   Width?: number | string
   Height?: number | string
   Background?: string
   BorderBrush?: string
   BorderThickness?: number | string
   Padding?: number | string
+  'ScrollViewer.HorizontalScrollMode'?: ScrollViewerScrollMode
+  'ScrollViewer.IsHorizontalRailEnabled'?: boolean
+  'ScrollViewer.VerticalScrollMode'?: ScrollViewerScrollMode
+  'ScrollViewer.IsVerticalRailEnabled'?: boolean
   'ScrollViewer.ZoomMode'?: ScrollViewerZoomMode
 }
 
@@ -97,16 +115,27 @@ interface SemanticZoomViewChangedEventArgs {
   DestinationItem: SemanticZoomLocation
 }
 
+interface SemanticZoomToggleRequest {
+  Item?: unknown
+  OriginalSource?: HTMLElement
+}
+
 const props = withDefaults(defineProps<Props>(), {
   IsZoomedInViewActive: true,
   CanChangeViews: true,
   IsZoomOutButtonEnabled: false,
   IsEnabled: true,
+  IsTabStop: false,
+  TabNavigation: 'Once',
   Background: 'transparent',
   BorderBrush: 'transparent',
   BorderThickness: 0,
   Padding: 0,
-  'ScrollViewer.ZoomMode': 'Enabled'
+  'ScrollViewer.HorizontalScrollMode': 'Disabled',
+  'ScrollViewer.IsHorizontalRailEnabled': false,
+  'ScrollViewer.VerticalScrollMode': 'Disabled',
+  'ScrollViewer.IsVerticalRailEnabled': false,
+  'ScrollViewer.ZoomMode': 'Disabled'
 })
 
 const emit = defineEmits<{
@@ -123,19 +152,22 @@ const isZoomedIn = ref(props.IsZoomedInViewActive)
 const isChangingView = ref(false)
 const isZoomOutButtonVisible = ref(false)
 const gestureFactor = ref<number | null>(null)
-const transformOrigin = ref({ x: 50, y: 50 })
 const activePointers = new Map<number, { x: number, y: number }>()
 
-let viewChangeTimer: number | undefined
 let zoomOutButtonTimer: number | undefined
 let gestureReturnTimer: number | undefined
 let gestureStartDistance = 0
 let gestureStartFactor = 1
 let gestureStartedZoomedIn = true
 let gestureActive = false
-let queuedTarget: boolean | undefined
+let viewChangeSequence = 0
+let runningViewAnimations: Animation[] = []
+let queuedChange: { targetIsZoomedInView: boolean, request?: SemanticZoomToggleRequest } | undefined
 
-const viewTransitionDuration = 167
+const fadeTransitionDuration = 167
+const drillInTransition = createDrillInNavigationTransitionInfo()
+const zoomedInTransitionClass = ref('')
+const zoomedOutTransitionClass = ref('')
 const upperThresholdLow = 0.9
 const lowerThresholdHigh = 0.6
 
@@ -173,29 +205,26 @@ const surfaceStyle = computed<CSSProperties>(() => ({
 }))
 
 const effectiveZoomFactor = computed(() => gestureFactor.value ?? (isZoomedIn.value ? 1 : 0.5))
-const presenterTransformOrigin = computed(() => `${transformOrigin.value.x}% ${transformOrigin.value.y}%`)
 const zoomedInPresenterStyle = computed<CSSProperties>(() => ({
-  transform: `scale(${effectiveZoomFactor.value})`,
-  transformOrigin: presenterTransformOrigin.value
+  transform: gestureFactor.value === null ? 'none' : `scale(${effectiveZoomFactor.value})`
 }))
 const zoomedOutPresenterStyle = computed<CSSProperties>(() => ({
-  transform: `scale(${effectiveZoomFactor.value * 2})`,
-  transformOrigin: presenterTransformOrigin.value
+  transform: gestureFactor.value === null ? 'none' : `scale(${effectiveZoomFactor.value * 2})`
 }))
 const isManipulating = computed(() => gestureFactor.value !== null && !isChangingView.value)
 
 const animationDuration = () => (
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ? 0
-    : viewTransitionDuration
+    : fadeTransitionDuration
 )
 
-const makeLocation = (element: HTMLElement | undefined): SemanticZoomLocation => {
+const makeLocation = (element: HTMLElement | undefined, item: unknown = null): SemanticZoomLocation => {
   const rootBounds = rootRef.value?.getBoundingClientRect()
   const bounds = element?.getBoundingClientRect()
 
   return {
-    Item: null,
+    Item: item,
     Bounds: {
       X: bounds && rootBounds ? bounds.left - rootBounds.left : 0,
       Y: bounds && rootBounds ? bounds.top - rootBounds.top : 0,
@@ -205,16 +234,36 @@ const makeLocation = (element: HTMLElement | undefined): SemanticZoomLocation =>
   }
 }
 
-const createEventArgs = (sourceIsZoomedInView: boolean): SemanticZoomViewChangedEventArgs => ({
+const createEventArgs = (
+  sourceIsZoomedInView: boolean,
+  request?: SemanticZoomToggleRequest
+): SemanticZoomViewChangedEventArgs => ({
   IsSourceZoomedInView: sourceIsZoomedInView,
-  SourceItem: makeLocation(sourceIsZoomedInView ? zoomedInPresenterRef.value : zoomedOutPresenterRef.value),
+  SourceItem: makeLocation(
+    request?.OriginalSource ?? (sourceIsZoomedInView ? zoomedInPresenterRef.value : zoomedOutPresenterRef.value),
+    request?.Item
+  ),
   DestinationItem: makeLocation(sourceIsZoomedInView ? zoomedOutPresenterRef.value : zoomedInPresenterRef.value)
 })
 
-const clearViewChangeTimer = () => {
-  if (viewChangeTimer === undefined) return
-  window.clearTimeout(viewChangeTimer)
-  viewChangeTimer = undefined
+const clearViewAnimations = () => {
+  for (const animation of runningViewAnimations) animation.cancel()
+  runningViewAnimations = []
+}
+
+const runViewChangeAnimation = (targetIsZoomedInView: boolean) => {
+  if (animationDuration() === 0) return Promise.resolve()
+
+  const source = targetIsZoomedInView ? zoomedOutPresenterRef.value : zoomedInPresenterRef.value
+  const destination = targetIsZoomedInView ? zoomedInPresenterRef.value : zoomedOutPresenterRef.value
+  if (!source || !destination || typeof source.animate !== 'function') return Promise.resolve()
+
+  const animations = [
+    ...source.getAnimations(),
+    ...destination.getAnimations()
+  ]
+  runningViewAnimations = animations
+  return Promise.all(animations.map(animation => animation.finished.catch(() => undefined))).then(() => undefined)
 }
 
 const hideZoomOutButton = () => {
@@ -223,37 +272,57 @@ const hideZoomOutButton = () => {
   isZoomOutButtonVisible.value = false
 }
 
-const beginViewChange = (targetIsZoomedInView: boolean) => {
+const beginViewChange = (targetIsZoomedInView: boolean, request?: SemanticZoomToggleRequest) => {
   if (!props.CanChangeViews || targetIsZoomedInView === isZoomedIn.value) return false
   if (isChangingView.value) {
-    queuedTarget = targetIsZoomedInView
-    return false
+    queuedChange = { targetIsZoomedInView, request }
+    return true
   }
 
-  const args = createEventArgs(isZoomedIn.value)
-  clearViewChangeTimer()
+  const args = createEventArgs(isZoomedIn.value, request)
+  clearViewAnimations()
   hideZoomOutButton()
   isChangingView.value = true
   gestureFactor.value = null
+  const drillInClass = (trigger: string) => getNavigationTransitionInfoClassName(drillInTransition, trigger)
+  if (targetIsZoomedInView) {
+    zoomedInTransitionClass.value = drillInClass(NavigationTrigger_NavigatingTo)
+    zoomedOutTransitionClass.value = drillInClass(NavigationTrigger_NavigatingAway)
+  } else {
+    zoomedInTransitionClass.value = drillInClass(NavigationTrigger_BackNavigatingAway)
+    zoomedOutTransitionClass.value = drillInClass(NavigationTrigger_BackNavigatingTo)
+  }
   emit('ViewChangeStarted', args)
   isZoomedIn.value = targetIsZoomedInView
   emit('update:IsZoomedInViewActive', targetIsZoomedInView)
 
-  viewChangeTimer = window.setTimeout(() => {
-    viewChangeTimer = undefined
+  const sequence = ++viewChangeSequence
+  void nextTick().then(() => runViewChangeAnimation(targetIsZoomedInView)).then(() => {
+    if (sequence !== viewChangeSequence) return
+    clearViewAnimations()
     isChangingView.value = false
+    zoomedInTransitionClass.value = ''
+    zoomedOutTransitionClass.value = ''
     emit('ViewChangeCompleted', args)
 
-    const nextTarget = queuedTarget
-    queuedTarget = undefined
-    if (nextTarget !== undefined && nextTarget !== isZoomedIn.value) beginViewChange(nextTarget)
-  }, animationDuration())
+    const nextChange = queuedChange
+    queuedChange = undefined
+    if (nextChange && nextChange.targetIsZoomedInView !== isZoomedIn.value) {
+      beginViewChange(nextChange.targetIsZoomedInView, nextChange.request)
+    }
+  })
 
   return true
 }
 
-const ToggleActiveView = () => {
-  beginViewChange(!isZoomedIn.value)
+const ToggleActiveView = (request?: SemanticZoomToggleRequest) => {
+  beginViewChange(!isZoomedIn.value, request)
+}
+
+const onSemanticZoomRequest = (event: Event) => {
+  const requestEvent = event as CustomEvent<SemanticZoomToggleRequest>
+  ToggleActiveView(requestEvent.detail)
+  event.stopPropagation()
 }
 
 const showZoomOutButton = () => {
@@ -269,15 +338,6 @@ const showZoomOutButton = () => {
   zoomOutButtonTimer = window.setTimeout(hideZoomOutButton, animationDuration() + 3000)
 }
 
-const setTransformOrigin = (clientX: number, clientY: number) => {
-  const bounds = rootRef.value?.getBoundingClientRect()
-  if (!bounds || bounds.width === 0 || bounds.height === 0) return
-  transformOrigin.value = {
-    x: Math.max(0, Math.min(100, ((clientX - bounds.left) / bounds.width) * 100)),
-    y: Math.max(0, Math.min(100, ((clientY - bounds.top) / bounds.height) * 100))
-  }
-}
-
 const pointerDistance = () => {
   const points = [...activePointers.values()]
   if (points.length < 2) return 0
@@ -285,8 +345,13 @@ const pointerDistance = () => {
 }
 
 const startPinchGesture = () => {
-  if (!props.IsEnabled || !props.CanChangeViews || isChangingView.value || activePointers.size !== 2) return
-  const points = [...activePointers.values()]
+  if (
+    !props.IsEnabled ||
+    !props.CanChangeViews ||
+    props['ScrollViewer.ZoomMode'] === 'Disabled' ||
+    isChangingView.value ||
+    activePointers.size !== 2
+  ) return
   gestureStartDistance = pointerDistance()
   if (gestureStartDistance <= 0) return
 
@@ -294,7 +359,6 @@ const startPinchGesture = () => {
   gestureStartFactor = gestureStartedZoomedIn ? 1 : 0.5
   gestureFactor.value = gestureStartFactor
   gestureActive = true
-  setTransformOrigin((points[0].x + points[1].x) / 2, (points[0].y + points[1].y) / 2)
 }
 
 const updatePinchGesture = (event: PointerEvent) => {
@@ -351,11 +415,11 @@ const onWheel = (event: WheelEvent) => {
     props['ScrollViewer.ZoomMode'] === 'Disabled'
   ) return
 
-  // WinUI maps a positive wheel delta to zoom-in and a negative delta to
-  // zoom-out, matching ScrollViewer's keyboard/pointer direction.
-  const targetIsZoomedInView = event.deltaY > 0
+  // Browser deltaY is negative for wheel-up. WinUI's mouse wheel delta is
+  // positive for wheel-up, which switches from the zoomed-out view to the
+  // zoomed-in view.
+  const targetIsZoomedInView = event.deltaY < 0
   if (targetIsZoomedInView === isZoomedIn.value) return
-  setTransformOrigin(event.clientX, event.clientY)
   if (beginViewChange(targetIsZoomedInView)) event.preventDefault()
 }
 
@@ -367,7 +431,6 @@ const onKeyDown = (event: KeyboardEvent) => {
 
   const targetIsZoomedInView = isZoomInKey
   if (targetIsZoomedInView === isZoomedIn.value) return
-  transformOrigin.value = { x: 50, y: 50 }
   if (beginViewChange(targetIsZoomedInView)) {
     event.preventDefault()
     event.stopPropagation()
@@ -376,7 +439,6 @@ const onKeyDown = (event: KeyboardEvent) => {
 
 const onZoomOutButtonClick = () => {
   if (!props.IsEnabled) return
-  transformOrigin.value = { x: 50, y: 50 }
   beginViewChange(false)
 }
 
@@ -398,7 +460,8 @@ watch(
 )
 
 onBeforeUnmount(() => {
-  clearViewChangeTimer()
+  viewChangeSequence += 1
+  clearViewAnimations()
   hideZoomOutButton()
   if (gestureReturnTimer !== undefined) window.clearTimeout(gestureReturnTimer)
   activePointers.clear()
@@ -450,10 +513,10 @@ defineExpose({ ToggleActiveView })
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  will-change: opacity, transform;
+  transform-origin: 50% 50%;
+  will-change: opacity;
   transition:
-    opacity 167ms linear,
-    transform 167ms cubic-bezier(0.1, 0.9, 0.2, 1),
+    opacity 167ms cubic-bezier(0.17, 0.17, 0, 1),
     visibility 0ms linear 167ms;
 }
 
@@ -463,12 +526,17 @@ defineExpose({ ToggleActiveView })
   visibility: visible;
   pointer-events: auto;
   transition:
-    opacity 167ms linear,
-    transform 167ms cubic-bezier(0.1, 0.9, 0.2, 1),
+    opacity 167ms cubic-bezier(0.17, 0.17, 0, 1),
     visibility 0ms linear 0ms;
 }
 
+.is-changing-view .semantic-zoom-presenter {
+  visibility: visible;
+  transition: none;
+}
+
 .is-manipulating .semantic-zoom-presenter {
+  will-change: opacity, transform;
   transition: none;
 }
 
@@ -491,7 +559,7 @@ defineExpose({ ToggleActiveView })
   border-radius: 0;
   background: var(--ButtonBackground, var(--ctrl-fill-default, rgba(255, 255, 255, 0.2)));
   color: var(--ButtonForeground, var(--text-primary, #fff));
-  font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets');
+  font-family: 'WinUIOnWebIcons';
   font-size: 4px;
   font-weight: 400;
   line-height: 1;

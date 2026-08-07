@@ -3,7 +3,37 @@
        @dragover.prevent="onContainerDragOver"
        @drop="onContainerDrop"
        @dragleave="onContainerDragLeave">
-    <TransitionGroup name="grid-flip" tag="div" class="win-grid-view-inner" ref="innerRef">
+    <div v-if="isGrouped" class="win-grid-groups">
+      <section
+        v-for="(group, groupIndex) in items"
+        :key="getGroupKey(group, groupIndex)"
+        :ref="element => setGroupElement(group, element)"
+        class="win-grid-group">
+        <button
+          class="win-grid-group-header"
+          type="button"
+          @click="onGroupHeaderClick($event, group)">
+          <slot name="groupHeader" :group="group" :index="groupIndex">
+            {{ getGroupTitle(group) }}
+          </slot>
+          <span class="win-grid-group-divider" aria-hidden="true"></span>
+        </button>
+        <div class="win-grid-view-inner win-grid-group-items">
+          <div
+            v-for="(item, itemIndex) in getGroupItems(group)"
+            :key="'group-' + groupIndex + '-' + getItemKey(item, itemIndex)"
+            class="win-grid-item"
+            :class="{ selected: isSelected(item), clickEnabled: isItemClickEnabled }"
+            @click="onItemClick($event, item, itemIndex)">
+            <div class="grid-item-inner">
+              <slot name="item" :item="item" :index="itemIndex" :group="group"></slot>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <TransitionGroup v-else name="grid-flip" tag="div" class="win-grid-view-inner" ref="innerRef">
       <div v-for="entry in flatList" :key="entry.key"
            :class="entry.type === 'placeholder' ? 'win-grid-drop-placeholder' : {
              'win-grid-item': true,
@@ -38,8 +68,10 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, nextTick } from 'vue';
+<script setup lang="ts">
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck Legacy JavaScript implementation; public casing is preserved for WinUI compatibility.
+import { ref, computed, nextTick, useSlots } from 'vue';
 import WinCheckBox from './WinCheckBox.vue';
 
 const props = defineProps({
@@ -72,8 +104,11 @@ const dragItemHeight = ref(0);
 let anchorIndex = null;
 let lastSlotUpdateTime = 0;
 let cachedRects = [];
+const groupElements = new Map();
 
+const slots = useSlots();
 const items = computed(() => props.ItemsSource ?? props.items);
+const isGrouped = computed(() => Boolean(slots.groupHeader) && items.value.some(item => Array.isArray(item?.Items) || Array.isArray(item?.items)));
 const isItemClickEnabled = computed(() => props.IsItemClickEnabled ?? props.isItemClickEnabled);
 const canDragItems = computed(() => props.CanDragItems ?? props.canDragItems);
 const canReorderItems = computed(() => props.CanReorderItems ?? props.canReorderItems);
@@ -81,8 +116,43 @@ const allowDrop = computed(() => props.AllowDrop ?? props.allowDrop);
 const selectionMode = computed(() => props.SelectionMode ?? props.selectionMode);
 const selectedItems = computed(() => props.SelectedItems ?? props.selectedItems);
 
-const getItemKey = (item, index) => item.id || item.title || index;
+const getItemKey = (item, index) => item.id || item.title || item.Title || index;
+const getGroupItems = (group) => group?.Items ?? group?.items ?? [];
+const getGroupKey = (group, index) => group?.id || group?.key || group?.title || group?.Title || index;
+const getGroupTitle = (group) => group?.title || group?.Title || group?.key || '';
 const isSelected = (item) => selectedItems.value.includes(item);
+
+const setGroupElement = (group, element) => {
+  if (element) groupElements.set(group, element);
+  else groupElements.delete(group);
+};
+
+const ScrollIntoGroup = (group) => {
+  const groupElement = groupElements.get(group);
+  if (!groupElement) return false;
+
+  // Keep semantic-zoom navigation inside its own view. scrollIntoView() also
+  // moves the Gallery page's outer ScrollViewer, which shifts the control
+  // itself when a group near the bottom is selected.
+  const viewport = groupElement.closest('.win-scroll-viewer-viewport');
+  if (viewport instanceof HTMLElement) {
+    const groupBounds = groupElement.getBoundingClientRect();
+    const viewportBounds = viewport.getBoundingClientRect();
+    const targetTop = viewport.scrollTop + groupBounds.top - viewportBounds.top;
+    const maximumTop = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+    viewport.scrollTop = Math.max(0, Math.min(maximumTop, targetTop));
+    return true;
+  }
+
+  return false;
+};
+
+const onGroupHeaderClick = (event, group) => {
+  event.currentTarget.dispatchEvent(new CustomEvent('semanticzoomrequest', {
+    bubbles: true,
+    detail: { Item: group, OriginalSource: event.currentTarget }
+  }));
+};
 
 const emitSelection = (newSel) => {
   emit('update:SelectedItems', newSel);
@@ -92,7 +162,7 @@ const emitSelection = (newSel) => {
 };
 
 const onCheckboxToggle = (val, item) => {
-  let newSel = [...selectedItems.value];
+  const newSel = [...selectedItems.value];
   const pos = newSel.indexOf(item);
   if (val && pos === -1) newSel.push(item);
   else if (!val && pos > -1) newSel.splice(pos, 1);
@@ -117,7 +187,7 @@ const onItemClick = (e, item, index) => {
     return;
   }
   if (selectionMode.value === 'Multiple') {
-    let newSel = [...selectedItems.value];
+    const newSel = [...selectedItems.value];
     const pos = newSel.indexOf(item);
     if (pos > -1) newSel.splice(pos, 1);
     else newSel.push(item);
@@ -347,12 +417,61 @@ const resetDrag = () => {
 const onDragEnd = () => {
   resetDrag();
 };
+
+defineExpose({ ScrollIntoGroup });
 </script>
 
 <style>
   .win-grid-view {
     display: flex;
     flex-direction: column;
+  }
+
+  .win-grid-groups,
+  .win-grid-group {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .win-grid-group-header {
+    appearance: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    margin: 0 0 4px;
+    padding: 8px 12px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 0;
+    text-align: left;
+    cursor: default;
+  }
+
+  .win-grid-group-header:focus-visible {
+    outline: 2px solid var(--FocusStrokeColorOuterBrush, var(--accent-base));
+    outline-offset: -2px;
+  }
+
+  .win-grid-group-divider {
+    display: block;
+    flex: 0 0 1px;
+    width: 100%;
+    height: 1px;
+    margin-top: 8px;
+    background: transparent;
+  }
+
+  .win-grid-group-items {
+    padding-bottom: 4px;
   }
 
   .win-grid-view-inner {

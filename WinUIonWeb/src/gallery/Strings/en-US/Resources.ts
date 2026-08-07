@@ -270,6 +270,7 @@ export default {
   "text.radiobuttons-are-used-to-select-a-single-option": "RadioButtons are used to select a single option from a group of related options. The RadioButtons control provides a modern layout and interaction model, while individual RadioButton elements can be used for more custom layouts.",
   "text.ratingcontrol": "RatingControl",
   "text.recent": "Recent",
+  "text.recently-added-or-updated": "Recently added or updated",
   "text.recently-visited": "Recently visited",
   "text.red": "Red",
   "text.refresh-content-with-a-pulling-gesture": "Refresh content with a pulling gesture.",

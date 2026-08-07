@@ -17,9 +17,7 @@
           <template #example>
             <WinSemanticZoom
               ref="semanticZoomRef"
-              v-model:IsZoomedInViewActive="IsZoomedInViewActive"
-              Height="500"
-              @ViewChangeCompleted="onViewChangeCompleted">
+              Height="500">
               <template #zoomedInView>
                 <WinScrollViewer
                   class="semantic-view-scroll"
@@ -28,31 +26,34 @@
                   VerticalScrollMode="Auto"
                   VerticalScrollBarVisibility="Auto"
                   :IsHorizontalScrollChainingEnabled="false">
-                  <div class="zoomed-in-groups">
-                    <section
-                      v-for="group in Groups"
-                      :key="group.Title"
-                      :ref="element => setGroupElement(group.Title, element)"
-                      class="control-info-group">
-                      <WinTextBlock class="zoomed-in-group-header" :Text="group.Title" />
-                      <div class="zoomed-in-items">
-                        <WinStackPanel
-                          v-for="item in group.Items"
-                          :key="item.Title"
-                          class="zoomed-in-item"
-                          MinWidth="200"
-                          Margin="12,6,12,6">
-                          <WinTextBlock class="zoomed-in-title" :Text="item.Title" />
-                          <WinTextBlock
-                            Width="300"
-                            HorizontalAlignment="Left"
-                            class="zoomed-in-subtitle"
-                            :Text="item.Subtitle"
-                            TextWrapping="Wrap" />
-                        </WinStackPanel>
-                      </div>
-                    </section>
-                  </div>
+                  <WinGridView
+                    ref="zoomedInGridRef"
+                    class="zoomed-in-grid"
+                    :ItemsSource="Groups"
+                    :IsItemClickEnabled="false"
+                    SelectionMode="None">
+                    <!-- @vue-ignore the legacy JS component does not expose slot types -->
+                    <template #groupHeader="slotProps">
+                      <WinTextBlock
+                        class="zoomed-in-group-title"
+                        :Text="getGridGroupFromSlot(slotProps).Title" />
+                    </template>
+                    <!-- @vue-ignore the legacy JS component does not expose slot types -->
+                    <template #item="slotProps">
+                      <WinStackPanel
+                        class="zoomed-in-item"
+                        MinWidth="200"
+                        Margin="12,6,12,6">
+                        <WinTextBlock class="zoomed-in-title" :Text="getGridItemFromSlot(slotProps).Title" />
+                        <WinTextBlock
+                          Width="300"
+                          HorizontalAlignment="Left"
+                          class="zoomed-in-subtitle"
+                          :Text="getGridItemFromSlot(slotProps).Subtitle"
+                          TextWrapping="Wrap" />
+                      </WinStackPanel>
+                    </template>
+                  </WinGridView>
                 </WinScrollViewer>
               </template>
 
@@ -81,8 +82,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, nextTick, onMounted, ref } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 import WinControlExample from '../../components/WinControlExample.vue'
+import WinGridView from '../../components/WinGridView.vue'
 import WinListView from '../../components/WinListView.vue'
 import WinScrollViewer from '../../components/WinScrollViewer.vue'
 import WinSemanticZoom from '../../components/WinSemanticZoom.vue'
@@ -136,6 +138,8 @@ const localizeGroupTitle = (title: string) => {
 }
 
 const getGroupFromSlot = (slotProps: unknown) => (slotProps as { item: ControlInfoGroup }).item
+const getGridGroupFromSlot = (slotProps: unknown) => (slotProps as { group: ControlInfoGroup }).group
+const getGridItemFromSlot = (slotProps: unknown) => (slotProps as { item: ControlInfoItem }).item
 
 // The official data file is intentionally language-neutral. Map its stable
 // UniqueId values to the Gallery resource names before presenting it so the
@@ -239,6 +243,82 @@ const itemTitleResourceKeys: Record<string, string> = {
   ParallaxView: 'text.parallaxview'
 }
 
+const itemSubtitleResourceKeys: Record<string, string> = {
+  XamlResources: 'sample.semanticzoom.resources-description',
+  XamlStyles: 'sample.semanticzoom.style-description',
+  Binding: 'sample.semanticzoom.binding-description',
+  Templates: 'sample.semanticzoom.templates-description',
+  CustomUserControls: 'sample.semanticzoom.custom-controls-description',
+  CustomXamlConditionals: 'sample.semanticzoom.xaml-conditions-description',
+  ScratchPad: 'sample.semanticzoom.scratch-pad-description',
+  CommandBar: 'text.a-command-bar-with-labels-on-the-side-free-float',
+  CommandBarFlyout: 'text.the-commandbarflyout-lets-you-provide-users-with',
+  MenuBar: 'text.the-menubar-simplifies-the-creation-of-basic-men',
+  MenuFlyout: 'text.a-menuflyout-displays-a-lightweight-menu-of-comm',
+  FlipView: 'text.the-flipview-lets-you-flip-through-a-collection',
+  GridView: 'text.the-gridview-lets-people-browse-and-select-from',
+  ItemsRepeater: 'text.itemsrepeater-description',
+  ItemsView: 'text.itemsview-description',
+  ListView: 'text.a-listview-displays-data-in-a-vertical-list-with',
+  PullToRefresh: 'text.a-container-that-allows-users-to-refresh-content',
+  TreeView: 'text.the-treeview-control-is-a-hierarchical-list-patt',
+  CalendarDatePicker: 'text.the-calendardatepicker-is-a-drop-down-control-th',
+  CalendarView: 'text.the-calendarview-gives-a-standardized-way-to-let',
+  DatePicker: 'text.use-a-datepicker-to-let-users-set-a-date-in-your',
+  TimePicker: 'text.use-a-timepicker-to-let-users-set-a-time-in-your',
+  Button: 'text.the-button-control-provides-a-click-event-to-res',
+  DropDownButton: 'text.a-dropdownbutton-is-a-button-that-displays-a-che',
+  HyperlinkButton: 'text.a-button-that-appears-as-a-hyperlink',
+  RepeatButton: 'text.a-button-that-raises-its-click-event-repeatedly-ecf7f2',
+  ToggleButton: 'text.a-togglebutton-looks-like-a-button-but-works-lik',
+  SplitButton: 'text.the-splitbutton-is-a-dropdown-button-but-with-an',
+  ToggleSplitButton: 'text.a-button-that-can-be-toggled-on-off-with-additio',
+  CheckBox: 'text.checkbox-controls-let-the-user-select-a-combinat',
+  ColorPicker: 'text.a-control-that-lets-users-pick-a-color-from-a-sp',
+  ComboBox: 'text.use-a-combobox-also-known-as-a-drop-down-list-to',
+  RadioButton: 'text.radiobutton-description',
+  RatingControl: 'text.the-ratingcontrol-allows-users-to-view-and-set-r',
+  Slider: 'text.use-a-slider-to-let-users-set-a-value-by-moving',
+  ToggleSwitch: 'text.use-toggleswitch-controls-to-present-users-with',
+  InfoBadge: 'sample.infobadge.description',
+  InfoBar: 'sample.infobar.description',
+  ProgressBar: 'text.progressbar-description',
+  ProgressRing: 'text.progressring-description',
+  ToolTip: 'text.tooltip-description',
+  ContentDialog: 'text.use-a-contentdialog-to-show-relevant-information',
+  Flyout: 'text.a-flyout-displays-lightweight-ui-that-is-either',
+  Popup: 'text.displays-content-on-top-of-existing-content-with',
+  TeachingTip: 'text.a-teaching-tip-is-a-notification-flyout-used-to',
+  PipsPager: 'text.pipspager-description',
+  ScrollView: 'text.scrollview-description',
+  ScrollViewer: 'text.scrollviewer-description',
+  SemanticZoom: 'text.semanticzoom-description',
+  Canvas: 'text.canvas-description',
+  Expander: 'text.the-expander-control-lets-you-show-or-hide-less',
+  Grid: 'text.grid-description',
+  RelativePanel: 'text.relativepanel-description',
+  SplitView: 'text.a-container-with-two-views-one-view-for-the-main',
+  StackPanel: 'text.stackpanel-description',
+  VariableSizedWrapGrid: 'text.variablesizedwrapgrid-description',
+  Viewbox: 'text.viewbox-description',
+  BreadcrumbBar: 'text.breadcrumbbar-description',
+  Pivot: 'text.pivot-description',
+  SelectorBar: 'text.selectorbar-description',
+  AnimatedVisualPlayer: 'text.animatedvisualplayer-description',
+  CaptureElementPreview: 'text.capture-element-description',
+  Image: 'text.image-description',
+  MediaPlayerElement: 'text.mediaplayerelement-description',
+  PersonPicture: 'text.personpicture-description',
+  AutoSuggestBox: 'text.use-an-autosuggestbox-to-provide-a-list-of-sugge',
+  NumberBox: 'text.the-numberbox-control-allows-users-to-enter-numb',
+  PasswordBox: 'text.a-passwordbox-is-a-text-input-box-that-conceals',
+  RichEditBox: 'text.the-richeditbox-control-lets-a-user-enter-format',
+  RichTextBlock: 'sample.richtextblock.description',
+  TextBlock: 'text.the-textblock-control-provides-flexible-text-dis',
+  TextBox: 'text.use-a-textbox-to-let-a-user-enter-simple-text-in',
+  ParallaxView: 'text.parallaxview-description'
+}
+
 const itemTitleFallbacks: Record<string, string> = {
   AccessibilityColorContrast: '颜色对比度',
   AccessibilityKeyboard: '键盘导航',
@@ -289,26 +369,14 @@ const itemTitleFallbacks: Record<string, string> = {
 }
 
 const localizeItem = (item: ControlInfoItem & { UniqueId?: string }): ControlInfoItem => {
-  if (locale === 'en-US') return item
-  const key = item.UniqueId ? itemTitleResourceKeys[item.UniqueId] : undefined
-  const translatedTitle = key ? t(key) : item.Title
-  const localizedFallback = itemTitleFallbacks[item.UniqueId || '']
-  const title = localizedFallback || (translatedTitle === key ? item.Title : translatedTitle)
-  const subtitle = item.UniqueId && item.UniqueId === 'XamlResources'
-    ? t('sample.semanticzoom.resources-description')
-    : item.UniqueId && item.UniqueId === 'XamlStyles'
-      ? t('sample.semanticzoom.style-description')
-      : item.UniqueId && item.UniqueId === 'Binding'
-        ? t('sample.semanticzoom.binding-description')
-        : item.UniqueId && item.UniqueId === 'Templates'
-          ? t('sample.semanticzoom.templates-description')
-          : item.UniqueId && item.UniqueId === 'CustomUserControls'
-            ? t('sample.semanticzoom.custom-controls-description')
-            : item.UniqueId && item.UniqueId === 'CustomXamlConditionals'
-              ? t('sample.semanticzoom.xaml-conditions-description')
-              : item.UniqueId && item.UniqueId === 'ScratchPad'
-                ? t('sample.semanticzoom.scratch-pad-description')
-                : t('sample.semanticzoom.item-description', { title })
+  const uniqueId = item.UniqueId || ''
+  const titleKey = itemTitleResourceKeys[uniqueId]
+  const translatedTitle = titleKey ? t(titleKey) : item.Title
+  const localizedFallback = locale === 'zh-CN' ? itemTitleFallbacks[uniqueId] : undefined
+  const title = localizedFallback || (translatedTitle === titleKey ? item.Title : translatedTitle)
+  const subtitleKey = itemSubtitleResourceKeys[uniqueId]
+  const translatedSubtitle = subtitleKey ? t(subtitleKey) : item.Subtitle
+  const subtitle = translatedSubtitle === subtitleKey ? item.Subtitle : translatedSubtitle
   return { ...item, Title: title, Subtitle: subtitle }
 }
 
@@ -1017,24 +1085,22 @@ const Groups = ref<ControlInfoGroup[]>(officialFallbackGroups.map(group => ({
 })))
 
 const semanticZoomRef = ref<InstanceType<typeof WinSemanticZoom>>()
-const IsZoomedInViewActive = ref(true)
-const pendingGroupTitle = ref('')
-const groupElements = new Map<string, Element>()
+const zoomedInGridRef = ref<{ ScrollIntoGroup: (group: ControlInfoGroup) => boolean }>()
 
-const setGroupElement = (title: string, element: unknown) => {
-  if (element instanceof Element) groupElements.set(title, element)
-}
+const onZoomedOutGroupClick = ({
+  ClickedItem,
+  OriginalSource
+}: {
+  ClickedItem: ControlInfoGroup
+  OriginalSource?: HTMLElement
+}) => {
+  if (!ClickedItem) return
 
-const onZoomedOutGroupClick = ({ ClickedItem }: { ClickedItem: ControlInfoGroup }) => {
-  pendingGroupTitle.value = ClickedItem.Title
-  semanticZoomRef.value?.ToggleActiveView()
-}
-
-const onViewChangeCompleted = async ({ IsSourceZoomedInView }: { IsSourceZoomedInView: boolean }) => {
-  if (IsSourceZoomedInView || !pendingGroupTitle.value) return
-  await nextTick()
-  groupElements.get(pendingGroupTitle.value)?.scrollIntoView({ block: 'start' })
-  pendingGroupTitle.value = ''
+  // Prepare the hidden destination view before the official fade state runs.
+  // This mirrors ListViewBase's semantic-zoom mapping and prevents a visible
+  // jump after the zoomed-in presenter has already appeared.
+  zoomedInGridRef.value?.ScrollIntoGroup(ClickedItem)
+  semanticZoomRef.value?.ToggleActiveView({ Item: ClickedItem, OriginalSource })
 }
 
 onMounted(async () => {
@@ -1054,26 +1120,26 @@ onMounted(async () => {
   }
 })
 
-const simpleSemanticZoomCode = `<WinSemanticZoom Height="500">
+const simpleSemanticZoomCode = `<WinSemanticZoom ref="semanticZoomRef" Height="500">
   <template #zoomedInView>
     <WinScrollViewer
       VerticalScrollMode="Auto"
       VerticalScrollBarVisibility="Auto"
       HorizontalScrollMode="Disabled"
       HorizontalScrollBarVisibility="Disabled">
-      <div v-for="group in Groups" :key="group.Title">
-        <WinTextBlock :Text="group.Title" />
-        <div>
-          <WinStackPanel
-            v-for="item in group.Items"
-            :key="item.Title"
-            MinWidth="200"
-            Margin="12,6,12,6">
-            <WinTextBlock :Text="item.Title" />
-            <WinTextBlock Width="300" :Text="item.Subtitle" TextWrapping="Wrap" />
+      <WinGridView
+        :ItemsSource="Groups"
+        SelectionMode="None">
+        <template #groupHeader="{ group }">
+          <WinTextBlock :Text="group.Title" FontSize="20" FontWeight="Normal" />
+        </template>
+        <template #item="{ item }">
+          <WinStackPanel MinWidth="200" Margin="12,6,12,6">
+            <WinTextBlock :Text="item.Title" FontSize="14" FontWeight="SemiBold" />
+            <WinTextBlock Width="300" :Text="item.Subtitle" FontSize="14" FontWeight="Normal" TextWrapping="Wrap" />
           </WinStackPanel>
-        </div>
-      </div>
+        </template>
+      </WinGridView>
     </WinScrollViewer>
   </template>
 
@@ -1081,7 +1147,8 @@ const simpleSemanticZoomCode = `<WinSemanticZoom Height="500">
     <WinListView
       :ItemsSource="Groups"
       :IsItemClickEnabled="true"
-      SelectionMode="None">
+      SelectionMode="None"
+      @ItemClick="onZoomedOutGroupClick">
       <template #item="{ item }">
         <WinTextBlock :Text="item.Title" TextWrapping="Wrap" />
       </template>
@@ -1093,13 +1160,22 @@ const simpleSemanticZoomCode = `<WinSemanticZoom Height="500">
 <style scoped>
 .page-description { margin: 0 72px 16px 0; color: var(--text-secondary); }
 .semantic-view-scroll { width: 100%; height: 100%; }
-.zoomed-in-groups { box-sizing: border-box; width: 100%; padding: 6px 0 18px; }
-.control-info-group { width: 100%; margin: 0; }
-.zoomed-in-group-header { margin: 12px; color: var(--text-primary); font-size: 20px; font-weight: 600; line-height: 28px; }
-.zoomed-in-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); align-items: start; }
-.zoomed-in-item { box-sizing: border-box; width: 320px; max-width: 100%; min-width: 200px; }
-.zoomed-in-title,
-.zoomed-in-subtitle { color: var(--text-primary); font-size: 14px; line-height: 20px; }
-.zoomed-out-list { width: 100%; height: 100%; }
-.zoomed-out-group-title { color: var(--text-primary); font-size: 20px; font-weight: 600; line-height: 28px; }
+.gallery-item-page :deep(.zoomed-in-grid) { width: 100%; }
+.gallery-item-page :deep(.zoomed-in-grid .win-grid-item) { border-width: 0; }
+.gallery-item-page :deep(.zoomed-in-group-title),
+.gallery-item-page :deep(.zoomed-out-group-title) {
+  color: var(--text-primary);
+  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0;
+}
+.gallery-item-page :deep(.zoomed-in-item) { min-width: 200px; }
+.gallery-item-page :deep(.zoomed-in-title) { color: var(--text-primary); font-size: 14px; font-weight: 600; line-height: 20px; }
+.gallery-item-page :deep(.zoomed-in-subtitle) { color: var(--text-primary); font-size: 14px; font-weight: 400; line-height: 20px; }
+.gallery-item-page :deep(.zoomed-out-list) { width: 100%; min-width: 88px; height: 100%; overflow: hidden; animation: none; }
+.gallery-item-page :deep(.zoomed-out-list .win-list-item) { min-width: 88px; min-height: 40px; padding: 0 12px; gap: 0; border-radius: 0; }
+.gallery-item-page :deep(.zoomed-out-list .win-list-item.clickEnabled:hover) { background: transparent; }
+.gallery-item-page :deep(.zoomed-out-list .list-indicator) { display: none; }
 </style>

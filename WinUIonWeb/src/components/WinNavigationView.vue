@@ -195,7 +195,7 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick, useSlots, toRaw } from 'vue';
+import { ref, reactive, computed, getCurrentInstance, onMounted, onBeforeUnmount, watch, nextTick, useSlots, toRaw } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
 import WinScrollViewer from './WinScrollViewer.vue';
 import WinInfoBadge from './WinInfoBadge.vue';
@@ -253,6 +253,10 @@ const officialProps = defineProps({
   HorizontalAlignment: { type: String, default: '' },
   VerticalAlignment: { type: String, default: '' },
 });
+
+const componentInstance = getCurrentInstance();
+const isSelectedItemControlled = Object.keys(componentInstance?.vnode.props ?? {})
+  .some(key => key.replace(/-/g, '').toLowerCase() === 'selecteditem');
 
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
@@ -536,8 +540,10 @@ let layoutObserver = null;
 let layoutObserverFrame = null;
 let skipTransition = false;
 let indicatorAnimationId = 0;
-let compactTransitionTimer = null;
 let paneTransitionTimer = null;
+// Mirrors NavigationView::m_wasForceClosed: adaptive resize closes do not
+// count as a user close, so Auto can reopen the pane on Expanded.
+let wasForceClosed = officialProps.IsPaneOpen === false;
 let suppressNextTopChildWatcherMove = false;
 let lastNavigationPointerDownTime = Number.NEGATIVE_INFINITY;
 let lastResizeShellWidth = 0;
@@ -572,6 +578,51 @@ const makeStretchIndicatorKeyframes = (axis, from, to) => {
   ];
 };
 
+// Navigation transitions can apply perspective transforms to an ancestor.
+// Screen-space rectangles cannot be converted back with a single scale value,
+// so measure in layout space and account for scrolling explicitly.
+const getLayoutPosition = (element) => {
+  let left = 0;
+  let top = 0;
+  let offsetNode = element;
+  while (offsetNode) {
+    left += offsetNode.offsetLeft || 0;
+    top += offsetNode.offsetTop || 0;
+    offsetNode = offsetNode.offsetParent;
+  }
+
+  let parent = element?.parentElement;
+  while (parent) {
+    left -= parent.scrollLeft || 0;
+    top -= parent.scrollTop || 0;
+    parent = parent.parentElement;
+  }
+
+  return { left, top };
+};
+
+const getTrackMetrics = (track) => {
+  const position = getLayoutPosition(track);
+  return {
+    left: position.left,
+    top: position.top,
+    width: track.offsetWidth || 1,
+    height: track.offsetHeight || 1
+  };
+};
+
+const getTrackRelativeRect = (element, track, metrics = getTrackMetrics(track)) => {
+  const position = getLayoutPosition(element);
+  const left = position.left - metrics.left;
+  const top = position.top - metrics.top;
+  return {
+    left,
+    right: left + element.offsetWidth,
+    top,
+    bottom: top + element.offsetHeight
+  };
+};
+
 const clearIndicatorMask = (track) => {
   track.style.maskImage = '';
   track.style.maskSize = '';
@@ -588,8 +639,8 @@ const clearIndicatorMask = (track) => {
 // bounds without the self-intersecting clip polygon that WebKit rasterizes
 // inconsistently while the indicator is stretching.
 const setIndicatorVisibility = (track, axis, targetRect, sourceRect = null) => {
-  const trackRect = track.getBoundingClientRect();
-  const extent = axis === 'x' ? trackRect.width : trackRect.height;
+  const trackMetrics = getTrackMetrics(track);
+  const extent = axis === 'x' ? trackMetrics.width : trackMetrics.height;
   const startKey = axis === 'x' ? 'left' : 'top';
   const endKey = axis === 'x' ? 'right' : 'bottom';
   const clampRect = (rect) => {
@@ -813,7 +864,9 @@ const createRecommendedNavigationTransitionInfo = (value, isSettings = false) =>
   return createSlideNavigationTransitionInfo(newIndex > oldIndex ? 'FromRight' : 'FromLeft');
 };
 
-const commitNavigationValue = (value, { invoked = true, isSettings = false } = {}) => {
+let pendingSelectionRequest = null;
+
+const commitNavigationValue = (value, { invoked = true, isSettings = false, collapsePane = false } = {}) => {
   const normalizedItem = isSettings ? null : findNormalizedItem(value);
   const item = isSettings ? createSettingsItem() : normalizedItem?.source;
   if (!item) return false;
@@ -832,7 +885,11 @@ const commitNavigationValue = (value, { invoked = true, isSettings = false } = {
   if (!isSettings && (item.SelectsOnInvoked ?? item.selectsOnInvoked) === false) return false;
   if (selectedValue.value === value) return true;
 
-  internalSelectedItem.value = item;
+  if (isSelectedItemControlled) {
+    pendingSelectionRequest = { value, collapsePane };
+  } else {
+    internalSelectedItem.value = item;
+  }
   emit('update:SelectedItem', typeof officialProps.SelectedItem === 'object' ? item : getItemTag(item));
   emit('SelectionChanged', {
     SelectedItem: item,
@@ -924,7 +981,7 @@ const collapseOverlayAfterNavigation = () => {
   if (!isLeftOverlayMode.value || isCompact.value) return;
   requestAnimationFrame(() => {
     if (isLeftOverlayMode.value && !isCompact.value) {
-      setCompact(true);
+      ClosePane();
     }
   });
 };
@@ -950,7 +1007,7 @@ const prepareSelectionTarget = (value) => {
   }
 };
 
-const syncIndicatorForSelectedItem = (value) => {
+const syncIndicatorForSelectedItem = (value, { collapsePane = false } = {}) => {
   if (value === null || value === undefined || value === '') {
     lastSelectedEl = null;
     lastIsChild = false;
@@ -971,12 +1028,17 @@ const syncIndicatorForSelectedItem = (value) => {
         return;
       }
       moveIndicatorTo(target.value, target.isChild);
+      if (collapsePane) collapseOverlayAfterNavigation();
     });
   });
 };
 
 const selectNavigationValue = (value, isChild = null, { collapsePane = true } = {}) => {
-  if (!commitNavigationValue(value)) return;
+  if (!commitNavigationValue(value, { collapsePane })) return;
+  if (isSelectedItemControlled) {
+    if (selectedValue.value === value && collapsePane) collapseOverlayAfterNavigation();
+    return;
+  }
   prepareSelectionTarget(value);
   nextTick(() => {
     updateTopNavigationLayout();
@@ -1064,12 +1126,12 @@ const updateTopNavigationLayout = () => {
   const measureEl = topMeasureRef.value;
   if (!navEl) return;
 
-  const navWidth = navEl.getBoundingClientRect().width;
-  const footerWidth = footerEl?.getBoundingClientRect().width || 0;
-  const topBackWidth = topBackEl?.getBoundingClientRect().width || 0;
+  const navWidth = navEl.clientWidth || navEl.offsetWidth;
+  const footerWidth = footerEl?.offsetWidth || 0;
+  const topBackWidth = topBackEl?.offsetWidth || 0;
   const fixedContentWidth = Array.from(navEl.children)
     .filter(el => el.classList.contains('win-nav-top-fixed'))
-    .reduce((width, el) => width + el.getBoundingClientRect().width, 0);
+    .reduce((width, el) => width + el.offsetWidth, 0);
   const nextAvailableWidth = Math.max(0, navWidth - footerWidth - topBackWidth - fixedContentWidth);
   if (Math.abs(topAvailableWidth.value - nextAvailableWidth) >= 0.5) {
     topAvailableWidth.value = nextAvailableWidth;
@@ -1081,7 +1143,7 @@ const updateTopNavigationLayout = () => {
       const value = el.getAttribute('data-value');
       const style = getComputedStyle(el);
       const marginWidth = Number.parseFloat(style.marginLeft || '0') + Number.parseFloat(style.marginRight || '0');
-      const width = Math.ceil(el.getBoundingClientRect().width + marginWidth);
+      const width = Math.ceil(el.offsetWidth + marginWidth);
       if (value === '__more') {
         topMoreButtonWidth.value = width;
       } else if (value) {
@@ -1148,30 +1210,51 @@ const onMoreGroupChevronClick = (item) => {
 
 const toggleLeftGroup = (item) => {
   const wasExpanded = groupExpanded[item.value];
+  const selectedChild = isChildOfGroup(item);
+  const track = indicatorTrack.value;
+  const source = selectedChild && !wasExpanded ? itemRefs[item.value] : null;
+  const sourceRect = source && track ? getTrackRelativeRect(source, track) : null;
+  const sourceY = sourceRect
+    ? sourceRect.top + (sourceRect.bottom - sourceRect.top) / 2 - 8
+    : null;
+
   if (wasExpanded) Collapse(item.source); else Expand(item.source);
   nextTick(() => measureGroup(item.value));
-  if (wasExpanded && isChildOfGroup(item)) {
-    const header = itemRefs[item.value];
-    if (header) {
-      prevSelectedEl = lastSelectedEl;
-      lastSelectedEl = header;
-      lastIsChild = false;
-      skipTransition = false;
-      calcIndicator();
-    }
-  } else if (!wasExpanded && isChildOfGroup(item)) {
+  if (selectedChild) {
     nextTick(() => {
       measureGroup(item.value);
-      setTimeout(() => {
-        const sel = itemRefs[props.selectedValue];
-        if (sel) {
-          prevSelectedEl = lastSelectedEl;
-          lastSelectedEl = sel;
-          lastIsChild = true;
-          skipTransition = false;
+      const target = wasExpanded ? itemRefs[item.value] : itemRefs[props.selectedValue];
+      if (!target) return;
+      prevSelectedEl = lastSelectedEl;
+      lastSelectedEl = target;
+      lastIsChild = !wasExpanded;
+      if (wasExpanded) {
+        if (!animatePaneIndicatorTransition({
+          sourceY,
+          sourceRect,
+          sourceIsChild: true,
+          target,
+          targetIsChild: false,
+          hideSourceImmediately: true
+        })) {
+          skipTransition = true;
           calcIndicator();
+          requestAnimationFrame(() => { skipTransition = false; });
         }
-      }, 300);
+        return;
+      }
+      if (!animatePaneIndicatorTransition({
+        sourceY,
+        sourceRect,
+        sourceIsChild: false,
+        target,
+        targetIsChild: true,
+        expandDown: true
+      })) {
+        skipTransition = true;
+        calcIndicator();
+        requestAnimationFrame(() => { skipTransition = false; });
+      }
     });
   } else {
     trackIndicatorDuringTransition();
@@ -1280,13 +1363,8 @@ const trackIndicatorDuringTransition = () => {
       trackingRaf = null;
       return;
     }
-    const trackRect = track.getBoundingClientRect();
-    const elRect = lastSelectedEl.getBoundingClientRect();
-    const newY = elRect.top - trackRect.top + elRect.height / 2 - 8;
-    const targetRect = {
-      top: elRect.top - trackRect.top,
-      bottom: elRect.bottom - trackRect.top
-    };
+    const targetRect = getTrackRelativeRect(lastSelectedEl, track);
+    const newY = targetRect.top + (targetRect.bottom - targetRect.top) / 2 - 8;
     setIndicatorVisibility(track, 'y', targetRect);
     indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' };
     if (performance.now() - startTime < duration) {
@@ -1312,10 +1390,14 @@ const onFlyoutSelect = (item) => {
   const movesTopChildToGroup = isTopNavigation.value && flyoutGroupValue.value && !isHeader;
   if (movesTopChildToGroup) suppressNextTopChildWatcherMove = true;
 
-  if (!commitNavigationValue(itemValue)) return;
+  if (!commitNavigationValue(itemValue, { collapsePane: true })) return;
   flyoutOpen.value = false;
   if (flyoutGroupValue.value) {
     groupChevrons[flyoutGroupValue.value] = 'chevron-close';
+  }
+  if (isSelectedItemControlled) {
+    if (selectedValue.value === itemValue) collapseOverlayAfterNavigation();
+    return;
   }
   nextTick(() => {
     if (isTopNavigation.value) {
@@ -1361,7 +1443,11 @@ const onBackClick = () => {
 
 const selectSettings = () => {
   if (!isSettingsVisible.value) return;
-  if (!commitNavigationValue(settingsValue.value, { isSettings: true })) return;
+  if (!commitNavigationValue(settingsValue.value, { isSettings: true, collapsePane: true })) return;
+  if (isSelectedItemControlled) {
+    if (selectedValue.value === settingsValue.value) collapseOverlayAfterNavigation();
+    return;
+  }
   nextTick(() => {
     moveIndicatorTo(settingsValue.value, false);
     collapseOverlayAfterNavigation();
@@ -1369,7 +1455,13 @@ const selectSettings = () => {
 };
 
 const toggleCompact = () => {
-  setCompact(!isCompact.value);
+  if (isCompact.value) {
+    wasForceClosed = false;
+    OpenPane();
+  } else {
+    wasForceClosed = true;
+    ClosePane();
+  }
 };
 
 const setCompact = (compact, emitUpdate = true) => {
@@ -1394,9 +1486,13 @@ const setCompact = (compact, emitUpdate = true) => {
   if (emitUpdate) emit('update:IsPaneOpen', !compact);
 };
 
+const OpenPane = (emitUpdate = true) => setCompact(false, emitUpdate);
+const ClosePane = (emitUpdate = true) => setCompact(true, emitUpdate);
+
 const onPaneSearchButtonClick = () => {
   if (!isClosedCompact.value) return;
-  setCompact(false);
+  wasForceClosed = false;
+  OpenPane();
   nextTick(() => {
     requestAnimationFrame(() => {
       const presenter = paneAutoSuggestPresenterRef.value;
@@ -1419,6 +1515,13 @@ const syncDisplayMode = () => {
       emit('update:IsPaneOpen', false);
       nextTick(() => restoreIndicatorAfterPaneLayout());
     }
+    return;
+  }
+
+  if (automaticMode && resolvedPaneDisplayMode.value === 'Left') {
+    // NavigationView::UpdateAdaptiveLayout calls OpenPane when Auto returns
+    // to Expanded, unless the user explicitly closed the pane.
+    if (!wasForceClosed) OpenPane();
     return;
   }
 
@@ -1452,7 +1555,7 @@ const onDocumentPointerDown = (event) => {
   // 标题栏的展开/收起按钮（TitleBar.PaneToggleRequested）属于面板切换控件，
   // 不应被当成“点击外部关闭面板”处理，否则关闭后按钮 click 又会把它重新打开。
   if (target?.closest?.('[data-nav-pane-toggle]')) return;
-  setCompact(true);
+  ClosePane();
 };
 
 const onGearDown = () => { gearPressed = true; gearRewindDone = false; gearClass.value = 'gear-rewind'; };
@@ -1505,6 +1608,7 @@ const getScrollAreaElement = () => scrollArea.value?.scrollViewerRef?.value ?? s
 
 const calcIndicator = () => {
   const sourceEl = prevSelectedEl && prevSelectedEl !== lastSelectedEl ? prevSelectedEl : null;
+  const sourceWasChild = indicatorIsChild.value;
   prevSelectedEl = lastSelectedEl;
   if (!navRef.value || !lastSelectedEl) return;
   if (!navRef.value.contains(lastSelectedEl)) return;
@@ -1513,13 +1617,8 @@ const calcIndicator = () => {
   const indicatorEl = track?.querySelector('.win-nav-indicator');
   if (!track || !indicatorEl) return;
 
-  const trackRect = track.getBoundingClientRect();
-  const elRect = lastSelectedEl.getBoundingClientRect();
-
-  const getItemRectRelTrack = (el) => {
-    const r = el.getBoundingClientRect();
-    return { left: r.left - trackRect.left, right: r.right - trackRect.left, top: r.top - trackRect.top, bottom: r.bottom - trackRect.top };
-  };
+  const trackMetrics = getTrackMetrics(track);
+  const getItemRectRelTrack = el => getTrackRelativeRect(el, track, trackMetrics);
 
   const targetRect = getItemRectRelTrack(lastSelectedEl);
   const sourceRect = sourceEl && navRef.value.contains(sourceEl) ? getItemRectRelTrack(sourceEl) : null;
@@ -1539,21 +1638,14 @@ const calcIndicator = () => {
   const snapToFinal = (finalTransform, dimension, finalSize) => {
     requestAnimationFrame(() => {
       if (!lastSelectedEl || !navRef.value || !navRef.value.contains(lastSelectedEl)) return;
-      const freshTrackRect = track.getBoundingClientRect();
-      const freshElRect = lastSelectedEl.getBoundingClientRect();
-      const freshTargetRect = {
-        left: freshElRect.left - freshTrackRect.left,
-        right: freshElRect.right - freshTrackRect.left,
-        top: freshElRect.top - freshTrackRect.top,
-        bottom: freshElRect.bottom - freshTrackRect.top
-      };
+      const freshTargetRect = getTrackRelativeRect(lastSelectedEl, track);
       let expectedPos;
       if (dimension === 'x') {
-        expectedPos = freshElRect.left - freshTrackRect.left + freshElRect.width / 2 - 8;
+        expectedPos = freshTargetRect.left + (freshTargetRect.right - freshTargetRect.left) / 2 - 8;
         setIndicatorVisibility(track, 'x', freshTargetRect);
         setIndicatorRestingStyle(indicatorEl, { transform: `translateX(${expectedPos}px)`, width: '16px', opacity: '1', transition: 'none' });
       } else {
-        expectedPos = freshElRect.top - freshTrackRect.top + freshElRect.height / 2 - 8;
+        expectedPos = freshTargetRect.top + (freshTargetRect.bottom - freshTargetRect.top) / 2 - 8;
         setIndicatorVisibility(track, 'y', freshTargetRect);
         setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${expectedPos}px)`, height: '16px', opacity: '1', transition: 'none' });
       }
@@ -1565,7 +1657,7 @@ const calcIndicator = () => {
   };
 
   if (isTopNavigation.value) {
-    const newX = elRect.left - trackRect.left + elRect.width / 2 - 8;
+    const newX = targetRect.left + (targetRect.right - targetRect.left) / 2 - 8;
     if (skipTransition || indicatorStyle.value.opacity === '0') {
       nextIndicatorAnimation(indicatorEl);
       setIndicatorVisibility(track, 'x', targetRect);
@@ -1614,21 +1706,21 @@ const calcIndicator = () => {
     };
 
   } else {
-    const newY = elRect.top - trackRect.top + elRect.height / 2 - 8;
+    const newY = targetRect.top + (targetRect.bottom - targetRect.top) / 2 - 8;
 
     const scrollEl = getScrollAreaElement();
     let visibleTop = 0;
-    let visibleBottom = trackRect.height;
+    let visibleBottom = trackMetrics.height;
     if (scrollEl) {
-      const scrollRect = scrollEl.getBoundingClientRect();
-      visibleTop = scrollRect.top - trackRect.top;
-      visibleBottom = scrollRect.bottom - trackRect.top;
+      const scrollRect = getTrackRelativeRect(scrollEl, track, trackMetrics);
+      visibleTop = scrollRect.top;
+      visibleBottom = scrollRect.bottom;
     }
 
     const isInFooter = !scrollEl || !scrollEl.contains(lastSelectedEl);
     if (isInFooter) {
       visibleTop = 0;
-      visibleBottom = trackRect.height;
+      visibleBottom = trackMetrics.height;
     }
 
     const clampedTargetRect = {
@@ -1669,36 +1761,27 @@ const calcIndicator = () => {
       }
     }
 
+    const movingDown = newY > oldY;
+    const changesItemDepth = !!sourceRect && sourceWasChild !== lastIsChild;
+    if (changesItemDepth && animatePaneIndicatorTransition({
+      sourceY: oldY,
+      sourceRect: clampedSourceRect ?? sourceRect,
+      sourceIsChild: sourceWasChild,
+      target: lastSelectedEl,
+      targetIsChild: lastIsChild,
+      expandDown: movingDown
+    })) {
+      return;
+    }
+
     setIndicatorVisibility(track, 'y', clampedTargetRect, clampedSourceRect);
     setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${newY}px)`, height: '16px', opacity: '1', transition: 'none' });
     const animationId = nextIndicatorAnimation(indicatorEl);
 
     indicatorIsChild.value = lastIsChild;
-    const movingDown = newY > oldY;
-    const sourceRegion = sourceEl ? getRegion(sourceEl) : getRegion(lastSelectedEl);
-    const targetRegion = getRegion(lastSelectedEl);
-    const forceMove = sourceRegion !== targetRegion;
-    // A long-distance collapse/expand is reserved for crossing the menu/footer
-    // boundary. Items within the same region use the continuous stretch motion.
-    const useStretchMove = !forceMove;
+    // Left menu and footer items share the normal same-level stretch motion.
+    // Only the explicit depth transition above uses the parent/child motion.
     const dur = 600;
-
-    if (!useStretchMove) {
-      const collapseKf = movingDown
-        ? [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateY(${oldY + 16}px)`, height: '0px', offset: 1 }]
-        : [{ transform: `translateY(${oldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE }, { transform: `translateY(${oldY}px)`, height: '0px', offset: 1 }];
-      const expandKf = movingDown
-        ? [{ transform: `translateY(${newY}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }]
-        : [{ transform: `translateY(${newY + 16}px)`, height: '0px', offset: 0, easing: EASE_OUT }, { transform: `translateY(${newY}px)`, height: '16px', offset: 1 }];
-      const collapseAnim = indicatorEl.animate(collapseKf, { duration: 300, fill: 'forwards' });
-      collapseAnim.onfinish = () => {
-        if (animationId !== indicatorAnimationId) return;
-        collapseAnim.cancel();
-        const expandAnim = indicatorEl.animate(expandKf, { duration: 300, fill: 'forwards' });
-        expandAnim.onfinish = () => { if (animationId === indicatorAnimationId) snapToFinal(`translateY(${newY}px)`, 'y', '16px'); };
-      };
-      return;
-    }
 
     const keyframes = makeStretchIndicatorKeyframes('y', oldY, newY);
     const anim = indicatorEl.animate(keyframes, { duration: dur, fill: 'forwards' });
@@ -1733,7 +1816,7 @@ const restoreIndicatorAfterPaneLayout = () => {
 
 let resizeTimer = null;
 const onResize = () => {
-  const nextShellWidth = shellRef.value?.getBoundingClientRect().width || window.innerWidth;
+  const nextShellWidth = shellRef.value?.clientWidth || shellRef.value?.offsetWidth || window.innerWidth;
   const shellWidthChanged = Math.abs(nextShellWidth - lastResizeShellWidth) >= 0.5;
   lastResizeShellWidth = nextShellWidth;
   // Width participates in display-mode resolution only for Auto. Fixed Left,
@@ -1830,6 +1913,15 @@ const refreshAfterPositionChange = () => {
 
 const initIndicator = () => {
   skipTransition = true;
+  const settleInitialIndicator = () => {
+    requestAnimationFrame(() => {
+      restoreIndicatorAfterPaneLayout();
+      requestAnimationFrame(() => {
+        restoreIndicatorAfterPaneLayout();
+        skipTransition = false;
+      });
+    });
+  };
   nextTick(() => {
     measureAllGroups();
     updateTopNavigationLayout();
@@ -1847,7 +1939,7 @@ const initIndicator = () => {
                 lastIsChild = true;
                 indicatorIsChild.value = true;
                 calcIndicator();
-                requestAnimationFrame(() => { skipTransition = false; });
+                settleInitialIndicator();
               });
             });
             return;
@@ -1865,12 +1957,12 @@ const initIndicator = () => {
       }
       calcIndicator();
     }
-    requestAnimationFrame(() => { skipTransition = false; });
+    settleInitialIndicator();
   });
 };
 
 onMounted(() => {
-  containerWidth.value = shellRef.value?.getBoundingClientRect().width || window.innerWidth;
+  containerWidth.value = shellRef.value?.clientWidth || shellRef.value?.offsetWidth || window.innerWidth;
   lastResizeShellWidth = containerWidth.value;
   syncDisplayMode();
   rebindRo();
@@ -1892,7 +1984,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', onDocumentPointerDown, true);
 });
 
-watch(() => props.paneDisplayMode, () => {
+watch(() => props.paneDisplayMode, (value, oldValue) => {
+  if (value !== oldValue) wasForceClosed = false;
   syncDisplayMode();
 });
 
@@ -1909,17 +2002,32 @@ watch(resolvedPaneDisplayMode, (value, oldValue) => {
 });
 
 watch(() => props.isPaneOpen, (value) => {
-  setCompact(!value, false);
+  const compact = !value;
+  // An external IsPaneOpen write is an explicit customer request. An
+  // adaptive close has already updated isCompact before its v-model event
+  // reaches this watcher, so it deliberately does not set the force flag.
+  if (compact !== isCompact.value) wasForceClosed = compact;
+  if (compact) ClosePane(false); else OpenPane(false);
 });
 
 watch(() => officialProps.SelectedItem, (item) => {
   const previousValue = resolveSelectedValue(internalSelectedItem.value);
   const nextValue = resolveSelectedValue(item);
+  const confirmedSelectionRequest = pendingSelectionRequest?.value === nextValue
+    ? pendingSelectionRequest
+    : null;
+  if (confirmedSelectionRequest || previousValue !== nextValue) {
+    pendingSelectionRequest = null;
+  }
   if (previousValue !== nextValue && isTopNavigation.value && findParentGroup(nextValue)) {
     suppressNextTopChildWatcherMove = true;
   }
   internalSelectedItem.value = item;
-  if (previousValue !== nextValue) syncIndicatorForSelectedItem(nextValue);
+  if (previousValue !== nextValue) {
+    syncIndicatorForSelectedItem(nextValue, {
+      collapsePane: confirmedSelectionRequest?.collapsePane === true
+    });
+  }
 });
 
 watch(isSettingsVisible, (visible) => {
@@ -1930,15 +2038,69 @@ watch(isSettingsVisible, (visible) => {
   }
 });
 
-watch(isCompact, (compact) => {
-  const activeIndicator = indicatorTrack.value?.querySelector('.win-nav-indicator');
-  nextIndicatorAnimation(activeIndicator);
+const animatePaneIndicatorTransition = ({
+  sourceY,
+  sourceRect,
+  sourceIsChild,
+  target,
+  targetIsChild,
+  expandDown = false,
+  hideSourceImmediately = false,
+  onComplete
+}) => {
+  const track = indicatorTrack.value;
+  const indicatorEl = track?.querySelector('.win-nav-indicator');
+  if (!track || !indicatorEl || !target || (!hideSourceImmediately && !Number.isFinite(sourceY))) return false;
 
-  if (compactTransitionTimer) {
-    clearTimeout(compactTransitionTimer);
-    compactTransitionTimer = null;
+  const animationId = nextIndicatorAnimation(indicatorEl);
+  const animateTarget = (collapseAnim = null) => {
+    if (animationId !== indicatorAnimationId) return;
+    const targetRect = getTrackRelativeRect(target, track);
+    const targetY = targetRect.top + (targetRect.bottom - targetRect.top) / 2 - 8;
+    const targetStartY = targetY + (expandDown ? 0 : 16);
+    indicatorIsChild.value = targetIsChild;
+    setIndicatorVisibility(track, 'y', targetRect);
+    setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${targetStartY}px)`, height: '0px', opacity: '1', transition: 'none' });
+    collapseAnim?.cancel();
+
+    const expandAnim = indicatorEl.animate([
+      { transform: `translateY(${targetStartY}px)`, height: '0px', offset: 0, easing: EASE_OUT },
+      { transform: `translateY(${targetY}px)`, height: '16px', offset: 1 }
+    ], { duration: 300, fill: 'forwards' });
+
+    expandAnim.onfinish = () => {
+      if (animationId !== indicatorAnimationId) return;
+      const finalRect = getTrackRelativeRect(target, track);
+      const finalY = finalRect.top + (finalRect.bottom - finalRect.top) / 2 - 8;
+      setIndicatorVisibility(track, 'y', finalRect);
+      setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${finalY}px)`, height: '16px', opacity: '1', transition: 'none' });
+      nextIndicatorAnimation(indicatorEl);
+      onComplete?.();
+    };
+  };
+
+  if (hideSourceImmediately) {
+    // The child repeater is disappearing. Drop its indicator without an
+    // outgoing animation, then retain the parent's original incoming motion.
+    animateTarget();
+    return true;
   }
 
+  const sourceClip = sourceRect ?? { top: sourceY, bottom: sourceY + 16 };
+  indicatorIsChild.value = sourceIsChild;
+  setIndicatorVisibility(track, 'y', sourceClip);
+  indicatorStyle.value = { transform: `translateY(${sourceY}px)`, height: '16px', opacity: '1', transition: 'none' };
+
+  const collapseAnim = indicatorEl.animate([
+    { transform: `translateY(${sourceY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE },
+    { transform: `translateY(${sourceY + (expandDown ? 16 : 0)}px)`, height: '0px', offset: 1 }
+  ], { duration: 200, fill: 'forwards' });
+
+  collapseAnim.onfinish = () => animateTarget(collapseAnim);
+  return true;
+};
+
+watch(isCompact, (compact) => {
   // LeftMinimal uses an overlay pane, not ClosedCompact. Keep its complete
   // menu (including expanded children and the child indicator) intact while
   // the pane surface plays the reverse opening animation.
@@ -1960,95 +2122,63 @@ watch(isCompact, (compact) => {
 
   if (compact) {
     const parentGroup = findParentGroup(props.selectedValue);
-    const track = indicatorTrack.value;
-    const indicatorEl = track?.querySelector('.win-nav-indicator');
-    const childEl = parentGroup ? itemRefs[props.selectedValue] : null;
-    const savedOldY = parentGroup && childEl && track
-      ? childEl.getBoundingClientRect().top - track.getBoundingClientRect().top + childEl.getBoundingClientRect().height / 2 - 8
-      : null;
-    const wasChild = lastIsChild;
     for (const item of props.menuItems) {
       if (item.children && groupExpanded[item.value]) {
         groupExpanded[item.value] = false;
       }
     }
     if (parentGroup) {
-      let animating = false;
       nextTick(() => {
         const header = itemRefs[parentGroup.value];
         if (header) {
+          prevSelectedEl = lastSelectedEl;
           lastSelectedEl = header;
           lastIsChild = false;
-          if (savedOldY !== null && wasChild && track && indicatorEl) {
-            animating = true;
-            const animationId = nextIndicatorAnimation(indicatorEl);
-            const trackRect = track.getBoundingClientRect();
-            const childRect = childEl?.getBoundingClientRect();
-            const childClip = childRect
-              ? { top: childRect.top - trackRect.top, bottom: childRect.bottom - trackRect.top }
-              : { top: savedOldY, bottom: savedOldY + 16 };
-            indicatorIsChild.value = true;
-            setIndicatorVisibility(track, 'y', childClip);
-            indicatorStyle.value = { transform: `translateY(${savedOldY}px)`, height: '16px', opacity: '1', transition: 'none' };
-
-            const collapseAnim = indicatorEl.animate([
-              { transform: `translateY(${savedOldY}px)`, height: '16px', offset: 0, easing: EASE_COLLAPSE },
-              { transform: `translateY(${savedOldY}px)`, height: '0px', offset: 1 }
-            ], { duration: 200, fill: 'forwards' });
-
-            collapseAnim.onfinish = () => {
-              if (animationId !== indicatorAnimationId) return;
-              const freshTrackRect = track.getBoundingClientRect();
-              const freshHeaderRect = header.getBoundingClientRect();
-              const freshNewY = freshHeaderRect.top - freshTrackRect.top + freshHeaderRect.height / 2 - 8;
-              const freshTargetR = { top: freshHeaderRect.top - freshTrackRect.top, bottom: freshHeaderRect.bottom - freshTrackRect.top };
-              indicatorIsChild.value = false;
-              setIndicatorVisibility(track, 'y', freshTargetR);
-              setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${freshNewY}px)`, height: '16px', opacity: '1', transition: 'none' });
-              collapseAnim.cancel();
-
-              const expandAnim = indicatorEl.animate([
-                { transform: `translateY(${freshNewY + 16}px)`, height: '0px', offset: 0, easing: EASE_OUT },
-                { transform: `translateY(${freshNewY}px)`, height: '16px', offset: 1 }
-              ], { duration: 300, fill: 'forwards' });
-
-              expandAnim.onfinish = () => {
-                if (animationId !== indicatorAnimationId) return;
-                animating = false;
-                const ft = track.getBoundingClientRect();
-                const fh = header.getBoundingClientRect();
-                const fy = fh.top - ft.top + fh.height / 2 - 8;
-                const ftr = { top: fh.top - ft.top, bottom: fh.bottom - ft.top };
-                setIndicatorVisibility(track, 'y', ftr);
-                setIndicatorRestingStyle(indicatorEl, { transform: `translateY(${fy}px)`, height: '16px', opacity: '1', transition: 'none' });
-                nextIndicatorAnimation(indicatorEl);
-              };
-            };
-          } else {
+          if (!animatePaneIndicatorTransition({
+            sourceY: null,
+            sourceRect: null,
+            sourceIsChild: true,
+            target: header,
+            targetIsChild: false,
+            hideSourceImmediately: true
+          })) {
             skipTransition = true;
             calcIndicator();
             requestAnimationFrame(() => { skipTransition = false; });
           }
         }
-        requestAnimationFrame(() => { if (!animating) calcIndicator(); });
       });
     }
   } else {
     const parentGroup = findParentGroup(props.selectedValue);
     if (parentGroup) {
+      const track = indicatorTrack.value;
+      const header = itemRefs[parentGroup.value];
+      const headerRect = header && track ? getTrackRelativeRect(header, track) : null;
+      const sourceY = headerRect
+        ? headerRect.top + (headerRect.bottom - headerRect.top) / 2 - 8
+        : null;
+      const sourceRect = headerRect;
       groupExpanded[parentGroup.value] = true;
       nextTick(() => {
         measureGroup(parentGroup.value);
-        compactTransitionTimer = setTimeout(() => {
-          const sel = itemRefs[props.selectedValue];
-          if (sel) {
-            prevSelectedEl = lastSelectedEl;
-            lastSelectedEl = sel;
-            lastIsChild = true;
-            skipTransition = false;
-            calcIndicator();
-          }
-        }, 300);
+        const sel = itemRefs[props.selectedValue];
+        if (!sel) return;
+        prevSelectedEl = lastSelectedEl;
+        lastSelectedEl = sel;
+        lastIsChild = true;
+        if (!animatePaneIndicatorTransition({
+          sourceY,
+          sourceRect,
+          sourceIsChild: false,
+          target: sel,
+          targetIsChild: true,
+          expandDown: true
+        })) {
+          skipTransition = true;
+          calcIndicator();
+          requestAnimationFrame(() => { skipTransition = false; });
+        }
       });
     }
   }

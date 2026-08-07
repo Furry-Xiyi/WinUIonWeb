@@ -38,7 +38,12 @@
             <WinCase Value="Recent">
               <section class="sample-panel">
               <template v-if="RecentlyVisitedSamplesList.length > 0">
-                <WinTextBlock class="sample-panel-title" :Text="$t('text.recently-visited')" />
+                <WinTextBlock
+                  class="sample-panel-title"
+                  :Text="$t('text.recently-visited')"
+                  FontSize="16"
+                  FontWeight="600"
+                  LineHeight="20" />
                 <WinHorizontalScrollContainer class="recently-visited-container">
                   <div class="single-row-grid-view">
                     <button
@@ -59,7 +64,13 @@
                 </WinHorizontalScrollContainer>
               </template>
 
-              <WinTextBlock class="sample-panel-title recently-added-title" Text="Recently added or updated" />
+              <WinTextBlock
+                class="sample-panel-title recently-added-title"
+                :Text="$t('text.recently-added-or-updated')"
+                FontSize="16"
+                FontWeight="600"
+                LineHeight="20"
+                Margin="0,12,0,0" />
               <div class="grid-view">
                 <button
                   v-for="item in RecentlyAddedOrUpdatedSamplesList"
@@ -354,15 +365,20 @@ onUnmounted(() => {
 
 .home-page-header {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr;
   min-height: 400px;
   overflow: hidden;
 }
 
 .home-header-image-mask {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  grid-column: 1;
+  grid-row: 1 / 4;
   height: 400px;
-  mask-image: linear-gradient(to bottom, #000 0%, #000 88%, rgba(0, 0, 0, 0) 96%, transparent 100%);
+  align-self: stretch;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 75%, transparent 85%, transparent 100%);
   overflow: hidden;
 }
 
@@ -370,7 +386,7 @@ onUnmounted(() => {
   position: absolute;
   inset: -100px 0 0 0;
   height: 500px;
-  background: #CED8E4;
+  background: linear-gradient(to bottom, #CED8E4 0%, #D5DBE3 100%);
 }
 
 :global(html.theme-dark) .home-header-image-grid {
@@ -382,11 +398,11 @@ onUnmounted(() => {
   height: 100%;
   object-fit: cover;
   object-position: center top;
-  opacity: 1;
+  opacity: 0.9;
 }
 
 :global(html.theme-dark) .home-header-image {
-  opacity: 1;
+  opacity: 0.8;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -395,12 +411,15 @@ onUnmounted(() => {
   }
 
   :global(html:not(.theme-light)) .home-header-image {
-    opacity: 1;
+    opacity: 0.8;
   }
 }
 
 .home-header-copy {
   position: relative;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
   z-index: 1;
   margin: 48px 0 0 36px;
   display: flex;
@@ -417,12 +436,16 @@ onUnmounted(() => {
 
 .home-header-tiles-scroll {
   position: relative;
+  grid-column: 1;
+  grid-row: 3;
+  align-self: start;
   z-index: 1;
-  margin-top: 68px;
+  /* CSS Grid includes the header copy row in the track size; this matches the XAML header's visual tile position. */
+  margin-top: 76px;
+  height: 172px;
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  padding-bottom: 16px;
 }
 
 .home-header-tiles {
@@ -436,7 +459,7 @@ onUnmounted(() => {
   align-self: center;
   width: max-content;
   max-width: 100%;
-  margin: 24px 0 16px 0;
+  margin: 24px 0 16px 36px;
 }
 
 .token-filter-bar {
@@ -568,7 +591,7 @@ onUnmounted(() => {
 .sample-panel-title {
   font-size: 16px;
   font-weight: 600;
-  line-height: 22px;
+  line-height: 20px;
   color: var(--text-primary);
 }
 
@@ -578,7 +601,6 @@ onUnmounted(() => {
 
 .recently-visited-container {
   margin: 0 -36px 12px -36px;
-  padding-bottom: 12px;
   min-width: 0;
   max-width: calc(100% + 72px);
   box-sizing: border-box;
@@ -721,30 +743,6 @@ onUnmounted(() => {
 }
 
 @media (max-width: 640px) {
-  .home-page {
-    width: 100%;
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  .home-header-copy {
-    margin-left: 24px;
-  }
-
-  .filter-bar {
-    margin-left: 0;
-  }
-
-  .switch-presenter {
-    margin-left: 24px;
-    margin-right: 24px;
-  }
-
-  .recently-visited-container {
-    margin-left: -24px;
-    margin-right: -24px;
-  }
-
   .grid-view {
     grid-template-columns: minmax(0, 1fr);
   }

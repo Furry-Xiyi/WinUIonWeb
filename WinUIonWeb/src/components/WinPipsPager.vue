@@ -275,7 +275,7 @@ defineExpose({
   border-radius: 4px;
   background: transparent;
   color: var(--ctrl-strong-fill, var(--text-primary));
-  font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets');
+  font-family: 'WinUIOnWebIcons';
   line-height: 1;
 }
 

@@ -2,7 +2,9 @@
   <!-- 对应官方 WinUIGallery/MainWindow.xaml(.cs)：Gallery 主窗口壳（TitleBar + NavigationView + 搜索 + 页面导航） -->
   <WinToolTipService />
   <WinTitleBar
+    ref="titleBarRef"
     class="gallery-titlebar"
+    :class="{ 'is-uwp-webview': isHostedInUwpWebView }"
     :Title="t('app.title')"
     :IsBackButtonVisible="canGoBack"
     :IsPaneToggleButtonVisible="!isTopNavMode"
@@ -20,6 +22,14 @@
       :OpenOnFocus="false"
       class="gallery-titlebar-search"
       @QuerySubmitted="onSearchQuerySubmitted" />
+    <button
+      type="button"
+      class="gallery-titlebar-search-button"
+      :aria-label="t('text.submit-query')"
+      v-bind="{ 'tooltipservice.tooltip': t('text.submit-query') }"
+      @click="onCompactSearchButtonClick">
+      <span class="gallery-titlebar-search-button-icon" aria-hidden="true">&#xE721;</span>
+    </button>
   </WinTitleBar>
   <div class="gallery-app-content" :class="{ 'has-titlebar': isHostedInUwpWebView, 'wco-titlebar': !isHostedInUwpWebView }">
     <div class="gallery-nav-host">
@@ -56,10 +66,29 @@
       </WinNavigationView>
     </div>
   </div>
+
+  <Teleport to="body">
+    <div
+      v-if="compactSearchOpen"
+      ref="compactSearchRef"
+      class="gallery-compact-search-popup"
+      role="search">
+      <WinAutoSuggestBox
+        ref="compactSearchBoxRef"
+        v-model:Text="searchQuery"
+        :ItemsSource="searchResults"
+        TextMemberPath="title"
+        :PlaceholderText="t('search.placeholder')"
+        QueryIcon="Find"
+        :OpenOnFocus="false"
+        class="gallery-compact-search"
+        @QuerySubmitted="onSearchQuerySubmitted" />
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
-import { ref, watch, provide, computed, onMounted, onBeforeUnmount } from 'vue';
+import { nextTick, ref, watch, provide, computed, onMounted, onBeforeUnmount } from 'vue';
 import WinTitleBar from '../components/WinTitleBar.vue';
 import WinNavigationView from '../components/WinNavigationView.vue';
 import WinToolTipService from '../components/WinToolTipService.vue';
@@ -85,7 +114,12 @@ import {
 
 const { t, locale } = useI18n();
 
+const titleBarRef = ref(null);
 const searchBoxRef = ref(null);
+const compactSearchOpen = ref(false);
+const compactSearchRef = ref(null);
+const compactSearchBoxRef = ref(null);
+const titlebarNarrow = computed(() => Boolean(titleBarRef.value?.isNarrow));
 const searchQuery = ref('');
 const searchResults = computed(() => {
   const query = searchQuery.value.trim();
@@ -132,7 +166,9 @@ const materialSetting = ref(readStoredSetting('winui-material-setting', 'mica', 
 const navigationTransitionInfo = ref(readStoredNavigationTransitionInfo());
 const pageTransitionEnter = ref(getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationTrigger_NavigatingTo));
 const pageTransitionLeave = ref(getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationTrigger_NavigatingAway));
-const isHostedInUwpWebView = ref(false);
+const isHostedInUwpWebView = ref(
+  typeof window !== 'undefined' && Boolean(window.__WINUI_ON_WEB_UWP_APP__)
+);
 const canGoBack = ref(Boolean(router.options.history.state?.back));
 
 router.afterEach((to, from) => {
@@ -348,7 +384,26 @@ const onBackRequested = () => {
 const onTopBarToggle = () => {
   isPaneOpen.value = !isPaneOpen.value;
 };
+const onCompactSearchButtonClick = () => {
+  compactSearchOpen.value = !compactSearchOpen.value;
+  if (compactSearchOpen.value) {
+    void nextTick(() => {
+      compactSearchRef.value?.querySelector('input')?.focus({ preventScroll: true });
+    });
+  }
+};
+const onDocumentPointerDownForCompactSearch = (event) => {
+  const target = event.target;
+  if (compactSearchRef.value?.contains(target)) return;
+  if (target?.closest?.('.win-asb-popup')) return;
+  if (target?.closest?.('.gallery-titlebar-search-button')) return;
+  compactSearchOpen.value = false;
+};
+const onDocumentKeydownForCompactSearch = (event) => {
+  if (event.key === 'Escape') compactSearchOpen.value = false;
+};
 const onSearchQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
+  compactSearchOpen.value = false;
   const query = String(QueryText ?? '').trim();
   if (!query) return;
   if (ChosenSuggestion?.tag && pageTags.has(ChosenSuggestion.tag)) {
@@ -368,13 +423,27 @@ const onSearchQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
   router.push({ name: (exact ?? items[0]).tag });
 };
 const focusSearchBox = () => {
-  searchBoxRef.value?.$el?.querySelector('input')?.focus({ preventScroll: true });
+  const isCompactTitleBar = titleBarRef.value?.$el?.classList.contains('is-compact');
+  if (titlebarNarrow.value || isCompactTitleBar) {
+    if (!compactSearchOpen.value) compactSearchOpen.value = true;
+    void nextTick(() => {
+      compactSearchRef.value?.querySelector('input')?.focus({ preventScroll: true });
+    });
+  } else {
+    searchBoxRef.value?.$el?.querySelector('input')?.focus({ preventScroll: true });
+  }
 };
 const onWindowKeydown = (event) => {
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') {
     event.preventDefault();
     focusSearchBox();
   }
+};
+const onWindowResize = () => {
+  void nextTick(() => {
+    const isCompactTitleBar = titleBarRef.value?.$el?.classList.contains('is-compact');
+    if (!titlebarNarrow.value && !isCompactTitleBar) compactSearchOpen.value = false;
+  });
 };
 
 function applyTheme(mode) {
@@ -426,19 +495,35 @@ onMounted(() => {
   // marker identifies the UWP host that owns the custom title bar.
   isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__);
   window.addEventListener('keydown', onWindowKeydown);
+  window.addEventListener('resize', onWindowResize);
   postUwpSetting('theme', themeSetting.value);
   postUwpSetting('material', materialSetting.value);
   postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(navigationTransitionInfo.value));
 });
 
 onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', onDocumentPointerDownForCompactSearch, true);
+  document.removeEventListener('keydown', onDocumentKeydownForCompactSearch);
   systemThemeQuery.removeEventListener('change', onSystemThemeChange);
   window.removeEventListener('keydown', onWindowKeydown);
+  window.removeEventListener('resize', onWindowResize);
 });
 
 watch(themeSetting, (value) => postUwpSetting('theme', value));
 watch(materialSetting, (value) => postUwpSetting('material', value));
 watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(value)));
+watch(compactSearchOpen, (open) => {
+  if (open) {
+    document.addEventListener('pointerdown', onDocumentPointerDownForCompactSearch, true);
+    document.addEventListener('keydown', onDocumentKeydownForCompactSearch);
+  } else {
+    document.removeEventListener('pointerdown', onDocumentPointerDownForCompactSearch, true);
+    document.removeEventListener('keydown', onDocumentKeydownForCompactSearch);
+  }
+});
+watch(titlebarNarrow, (narrow) => {
+  if (!narrow) compactSearchOpen.value = false;
+});
 </script>
 
 <style>
@@ -480,21 +565,102 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
   }
 
   .gallery-titlebar-search {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    z-index: 1;
-    width: min(350px, calc(100% - 96px));
+    width: 100%;
     max-width: 350px;
-    transform: translate(-50%, -50%);
-    flex: none;
   }
 
-  /* Keep the search anchor centered against the whole titlebar, not the
-     remaining grid column after the left-side buttons and title. */
+  /* The UWP WebView host owns the caption buttons outside the web content.
+     Its browser shell does not expose AppWindow.TitleBar.RightInset, so keep
+     the standard three-button 138px inset. WinTitleBar already reserves the
+     official 48px minimum drag region beside it (186px total). */
+  .gallery-titlebar.is-uwp-webview {
+    --TitleBarRightPaddingWidth: 138px;
+  }
+
+  /* 搜索框在标题右侧的内容列内居中；内容列会随窗口收缩，
+     不会像绝对居中那样盖住左侧的图标和标题。 */
   .gallery-titlebar .win-titlebar-content {
     position: static;
     overflow: visible;
+  }
+
+  /* 标题栏实际宽度过窄时优先保留标题，隐藏搜索框；
+     由 WinTitleBar 根据自身宽度添加 is-narrow，不依赖视口媒体查询，
+     这样 PWA overlay / WebView2 中标题栏区域比视口窄时也能生效。 */
+  .gallery-titlebar.is-narrow .gallery-titlebar-search,
+  .gallery-titlebar.is-compact .gallery-titlebar-search {
+    display: none !important;
+  }
+
+  /* 窄标题栏时标题后的搜索按钮：样式与返回/汉堡按钮保持一致 */
+  .gallery-titlebar-search-button {
+    display: none;
+    box-sizing: border-box;
+    width: 40px;
+    margin: 2px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--ControlCornerRadius, 4px);
+    flex: 0 0 auto !important;
+    align-self: stretch;
+    align-items: center;
+    justify-content: center;
+    color: var(--TitleBarForegroundBrush, var(--text-primary));
+    background: var(--TitleBarBackButtonBackground, transparent);
+    cursor: pointer;
+    font-family: var(--SymbolThemeFontFamily, 'WinUIOnWebIcons');
+    font-size: 16px;
+    transition: background var(--fast-duration) var(--fast-out-slow-in), color var(--fast-duration) var(--fast-out-slow-in);
+  }
+
+  .gallery-titlebar.is-narrow .gallery-titlebar-search-button,
+  .gallery-titlebar.is-compact .gallery-titlebar-search-button {
+    display: flex;
+  }
+
+  .gallery-titlebar-search-button:hover {
+    background: var(--TitleBarBackButtonBackgroundPointerOver, var(--subtle-secondary));
+  }
+
+  .gallery-titlebar-search-button:active {
+    background: var(--TitleBarBackButtonBackgroundPressed, var(--subtle-tertiary));
+    color: var(--text-secondary);
+  }
+
+  .gallery-titlebar-search-button-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    line-height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 窄标题栏时内容列左对齐，让搜索按钮紧跟标题 */
+  .gallery-titlebar.is-narrow .win-titlebar-content,
+  .gallery-titlebar.is-compact .win-titlebar-content {
+    justify-content: flex-start;
+    padding: var(--TitleBarCompactContentMargin, 0 16px 0 0);
+  }
+
+  /* 弹出的单个搜索框：位于标题栏下方，距视口左侧 16px */
+  .gallery-compact-search-popup {
+    position: fixed;
+    top: max(env(titlebar-area-height, 0px), 48px);
+    left: 16px;
+    width: min(350px, calc(100vw - 32px));
+    z-index: 10000;
+  }
+
+  .gallery-compact-search {
+    width: 100%;
+  }
+
+  /* 弹出状态下使用纯色背景，避免透出下层内容；圆角和建议列表
+     衔接由 WinAutoSuggestBox 的默认样式负责。 */
+  .gallery-compact-search.win-auto-suggest-box .win-textbox-border {
+    background: var(--app-bg) !important;
   }
 
   @font-face {
@@ -627,7 +793,7 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
     --TextFillColorInverseBrush: #FFFFFF;
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
     --NavigationViewContentGridBorderBrush: #E5E5E5;
-    --NavigationViewContentBackground: var(--layer-fill-color-default);
+    --NavigationViewContentBackground: rgba(249, 249, 249, 0.50);
     --SystemFillColorAttentionBrush: #0067C0;
     --SystemFillColorSuccessBrush: #0F7B0F;
     --SystemFillColorCautionBrush: #9D5D00;
@@ -720,7 +886,7 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
     --TextFillColorInverseBrush: rgba(0, 0, 0, 0.89);
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
     --NavigationViewContentGridBorderBrush: #1D1D1D;
-    --NavigationViewContentBackground: var(--layer-fill-color-default);
+    --NavigationViewContentBackground: rgba(48, 48, 48, 0.30);
     --SystemFillColorAttentionBrush: #4CC2FF;
     --SystemFillColorSuccessBrush: #6CCB5F;
     --SystemFillColorCautionBrush: #FCE100;

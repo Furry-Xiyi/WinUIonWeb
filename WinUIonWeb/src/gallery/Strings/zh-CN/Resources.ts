@@ -270,6 +270,7 @@ export default {
   "text.radiobuttons-are-used-to-select-a-single-option": "单选按钮用于从一组相关选项中选择单个选项。单选按钮控件提供现代布局和交互模型，而单个单选按钮元素可用于更自定义的布局。",
   "text.ratingcontrol": "评级控件",
   "text.recent": "最近",
+  "text.recently-added-or-updated": "最近添加或更新",
   "text.recently-visited": "最近访问",
   "text.red": "红色",
   "text.refresh-content-with-a-pulling-gesture": "通过下拉手势刷新内容。",

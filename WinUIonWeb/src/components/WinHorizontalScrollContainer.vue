@@ -195,7 +195,7 @@ onBeforeUnmount(() => {
   top: 50%;
   width: 16px;
   height: 38px;
-  margin: -16px 0 0 0;
+  margin: 0;
   padding: 0;
   display: flex;
   align-items: center;
@@ -211,6 +211,7 @@ onBeforeUnmount(() => {
   backdrop-filter: var(--flyout-backdrop);
   cursor: pointer;
   z-index: 2;
+  transform: translateY(-50%);
   transition: background var(--fast-duration), border-color var(--fast-duration), color var(--fast-duration);
 }
 

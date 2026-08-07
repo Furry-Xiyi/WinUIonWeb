@@ -393,8 +393,8 @@
   --AccentFillColorTertiaryBrush: rgba(0, 103, 192, 0.80);
   --AccentFillColorDisabledBrush: rgba(0, 0, 0, 0.22);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
-  --NavigationViewContentGridBorderBrush: var(--CardStrokeColorDefaultBrush);
-  --NavigationViewContentBackground: var(--layer-fill-color-default);
+  --NavigationViewContentGridBorderBrush: #E5E5E5;
+  --NavigationViewContentBackground: rgba(249, 249, 249, 0.50);
   --SystemFillColorAttentionBrush: #0067C0;
   --SystemFillColorSuccessBrush: #0F7B0F;
   --SystemFillColorCautionBrush: #9D5D00;
@@ -530,7 +530,7 @@
     --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
     --NavigationViewContentGridBorderBrush: #1D1D1D;
-    --NavigationViewContentBackground: var(--layer-fill-color-default);
+    --NavigationViewContentBackground: rgba(48, 48, 48, 0.30);
     --SystemFillColorAttentionBrush: #4CC2FF;
     --SystemFillColorSuccessBrush: #6CCB5F;
     --SystemFillColorCautionBrush: #FCE100;
@@ -746,8 +746,8 @@ html.theme-light {
   --AccentFillColorTertiaryBrush: rgba(0, 103, 192, 0.80);
   --AccentFillColorDisabledBrush: rgba(0, 0, 0, 0.22);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
-  --NavigationViewContentGridBorderBrush: var(--CardStrokeColorDefaultBrush);
-  --NavigationViewContentBackground: var(--layer-fill-color-default);
+  --NavigationViewContentGridBorderBrush: #E5E5E5;
+  --NavigationViewContentBackground: rgba(249, 249, 249, 0.50);
   --SystemFillColorAttentionBrush: #0067C0;
   --SystemFillColorSuccessBrush: #0F7B0F;
   --SystemFillColorCautionBrush: #9D5D00;
@@ -894,7 +894,7 @@ html.theme-dark {
   --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
   --NavigationViewContentGridBorderBrush: #1D1D1D;
-  --NavigationViewContentBackground: var(--layer-fill-color-default);
+  --NavigationViewContentBackground: rgba(48, 48, 48, 0.30);
   --SystemFillColorAttentionBrush: #4CC2FF;
   --SystemFillColorSuccessBrush: #6CCB5F;
   --SystemFillColorCautionBrush: #FCE100;
