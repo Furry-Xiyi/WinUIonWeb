@@ -634,8 +634,10 @@ watch(titlebarNarrow, (narrow) => {
     width: 100%;
   }
 
-  /* 搜索框默认完全圆角（胶囊）；弹开时底部变为直角与弹出层衔接，
-     弹出层自身的圆角保持不变。弹出状态下使用纯色背景，避免透出下层内容。 */
+  /* 搜索框默认完全圆角（胶囊）；弹出层打开后不再使用大圆角，
+     顶部恢复普通圆角、底部变为直角与弹出层衔接（由组件自身规则处理），
+     弹出层自身的圆角保持不变。弹出状态下使用纯色背景，避免透出下层内容；
+     系统默认/浅色主题下保持浅色背景（#FFFFFF），仅显式深色主题使用 #2B2B2B。 */
   .gallery-compact-search.win-auto-suggest-box .win-textbox-border {
     border-radius: 999px;
     background: #FFFFFF !important;
@@ -643,11 +645,6 @@ watch(titlebarNarrow, (narrow) => {
 
   html.theme-dark .gallery-compact-search.win-auto-suggest-box .win-textbox-border {
     background: #2B2B2B !important;
-  }
-
-  /* 弹开时：顶部保持胶囊圆角，底部变为直角与弹出层衔接 */
-  .gallery-compact-search.win-auto-suggest-box.is-suggestion-open-down .win-textbox-border {
-    border-radius: 999px 999px 0 0 !important;
   }
 
   @font-face {
