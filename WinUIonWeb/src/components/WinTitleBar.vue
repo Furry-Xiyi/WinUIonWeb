@@ -171,8 +171,10 @@ let contentObserver = null;
 
 const hasContent = computed(() => Boolean(slots.Content || slots.default));
 const hasExpandedHeight = computed(() => hasContent.value || Boolean(slots.LeftHeader || slots.RightHeader));
-const showTitle = computed(() => props.Title !== '' && !isCompact.value);
-const showSubtitle = computed(() => props.Subtitle !== '' && !isCompact.value);
+// 标题/副标题始终跟随图标显示，不随紧凑模式隐藏；
+// 空间不足时由网格收缩 + 省略号处理，而不是直接丢掉标题。
+const showTitle = computed(() => props.Title !== '');
+const showSubtitle = computed(() => props.Subtitle !== '');
 const isNegativeInsetSpacing = computed(() => props.IsBackButtonVisible !== props.IsPaneToggleButtonVisible);
 
 const rootClasses = computed(() => ({

@@ -480,18 +480,12 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
   }
 
   .gallery-titlebar-search {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    z-index: 1;
-    width: min(350px, calc(100% - 96px));
+    width: 100%;
     max-width: 350px;
-    transform: translate(-50%, -50%);
-    flex: none;
   }
 
-  /* Keep the search anchor centered against the whole titlebar, not the
-     remaining grid column after the left-side buttons and title. */
+  /* 搜索框在标题右侧的内容列内居中；内容列会随窗口收缩，
+     不会像绝对居中那样盖住左侧的图标和标题。 */
   .gallery-titlebar .win-titlebar-content {
     position: static;
     overflow: visible;
