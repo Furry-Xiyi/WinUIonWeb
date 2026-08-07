@@ -552,6 +552,7 @@ watch(hasContent, (has) => {
 
 defineExpose({
   RecomputeDragRegions: recomputeDragRegions,
+  isCompact,
   isNarrow,
   setIsDragRegion,
   getIsDragRegion,

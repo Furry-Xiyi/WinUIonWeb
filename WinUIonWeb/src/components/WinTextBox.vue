@@ -689,7 +689,7 @@ defineExpose({
 
 <style scoped>
 .win-textbox {
-  --textbox-background: var(--TextControlBackground, var(--ControlFillColorDefaultBrush, var(--control-fill-color-default, var(--ctrl-fill-default))));
+  --textbox-background: var(--TextControlBackground, var(--ControlFillColorDefaultBrush, var(--control-fill-color-default, var(--ctrl-fill-default, rgba(255, 255, 255, 0.70)))));
   --textbox-background-pointer-over: var(--TextControlBackgroundPointerOver, var(--ControlFillColorSecondaryBrush, var(--control-fill-color-secondary, var(--ctrl-fill-secondary))));
   --textbox-background-pressed: var(--ControlFillColorTertiaryBrush, var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary)));
   --textbox-background-focused: var(--TextControlBackgroundFocused, var(--ControlFillColorInputActiveBrush, var(--control-fill-color-input-active, var(--ctrl-fill-input-active))));

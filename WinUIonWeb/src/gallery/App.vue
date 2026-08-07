@@ -119,6 +119,7 @@ const searchBoxRef = ref(null);
 const compactSearchOpen = ref(false);
 const compactSearchRef = ref(null);
 const compactSearchBoxRef = ref(null);
+const titlebarCompact = computed(() => Boolean(titleBarRef.value?.isCompact));
 const titlebarNarrow = computed(() => Boolean(titleBarRef.value?.isNarrow));
 const searchQuery = ref('');
 const searchResults = computed(() => {
@@ -392,15 +393,37 @@ const onCompactSearchButtonClick = () => {
     });
   }
 };
-const onDocumentPointerDownForCompactSearch = (event) => {
+const onDocumentClickForCompactSearch = (event) => {
   const target = event.target;
-  if (compactSearchRef.value?.contains(target)) return;
-  if (target?.closest?.('.win-asb-popup')) return;
   if (target?.closest?.('.gallery-titlebar-search-button')) return;
   compactSearchOpen.value = false;
 };
+const onDocumentPointerDownForCompactSearch = (event) => {
+  const target = event.target;
+  if (target?.closest?.('.gallery-titlebar-search-button')) return;
+  if (!compactSearchOpen.value) return;
+  // Let a suggestion's click handler finish before v-if removes the popup.
+  window.setTimeout(() => {
+    compactSearchOpen.value = false;
+  }, 0);
+};
 const onDocumentKeydownForCompactSearch = (event) => {
   if (event.key === 'Escape') compactSearchOpen.value = false;
+};
+const onWindowBlurForCompactSearch = () => {
+  compactSearchOpen.value = false;
+};
+const onDocumentVisibilityChangeForCompactSearch = () => {
+  if (document.visibilityState !== 'visible') compactSearchOpen.value = false;
+};
+const onDocumentFocusOutForCompactSearch = (event) => {
+  if (!compactSearchOpen.value) return;
+  const target = event.target;
+  const relatedTarget = event.relatedTarget;
+  if (!compactSearchRef.value?.contains(target)) return;
+  if (compactSearchRef.value?.contains(relatedTarget)) return;
+  if (relatedTarget?.closest?.('.win-asb-popup')) return;
+  compactSearchOpen.value = false;
 };
 const onSearchQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
   compactSearchOpen.value = false;
@@ -423,8 +446,7 @@ const onSearchQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
   router.push({ name: (exact ?? items[0]).tag });
 };
 const focusSearchBox = () => {
-  const isCompactTitleBar = titleBarRef.value?.$el?.classList.contains('is-compact');
-  if (titlebarNarrow.value || isCompactTitleBar) {
+  if (titlebarNarrow.value || titlebarCompact.value) {
     if (!compactSearchOpen.value) compactSearchOpen.value = true;
     void nextTick(() => {
       compactSearchRef.value?.querySelector('input')?.focus({ preventScroll: true });
@@ -441,8 +463,12 @@ const onWindowKeydown = (event) => {
 };
 const onWindowResize = () => {
   void nextTick(() => {
-    const isCompactTitleBar = titleBarRef.value?.$el?.classList.contains('is-compact');
-    if (!titlebarNarrow.value && !isCompactTitleBar) compactSearchOpen.value = false;
+    const titleBarElement = titleBarRef.value?.$el;
+    const searchElement = titleBarElement?.querySelector('.gallery-titlebar-search');
+    const searchVisible = searchElement && getComputedStyle(searchElement).display !== 'none';
+    if ((!titlebarNarrow.value && !titlebarCompact.value) || searchVisible) {
+      compactSearchOpen.value = false;
+    }
   });
 };
 
@@ -496,17 +522,22 @@ onMounted(() => {
   isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__);
   window.addEventListener('keydown', onWindowKeydown);
   window.addEventListener('resize', onWindowResize);
+  window.addEventListener('blur', onWindowBlurForCompactSearch);
+  document.addEventListener('visibilitychange', onDocumentVisibilityChangeForCompactSearch);
   postUwpSetting('theme', themeSetting.value);
   postUwpSetting('material', materialSetting.value);
   postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(navigationTransitionInfo.value));
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('pointerdown', onDocumentPointerDownForCompactSearch, true);
+  document.removeEventListener('click', onDocumentClickForCompactSearch, true);
   document.removeEventListener('keydown', onDocumentKeydownForCompactSearch);
   systemThemeQuery.removeEventListener('change', onSystemThemeChange);
   window.removeEventListener('keydown', onWindowKeydown);
   window.removeEventListener('resize', onWindowResize);
+  window.removeEventListener('blur', onWindowBlurForCompactSearch);
+  document.removeEventListener('visibilitychange', onDocumentVisibilityChangeForCompactSearch);
+  document.removeEventListener('focusout', onDocumentFocusOutForCompactSearch, true);
 });
 
 watch(themeSetting, (value) => postUwpSetting('theme', value));
@@ -515,14 +546,21 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
 watch(compactSearchOpen, (open) => {
   if (open) {
     document.addEventListener('pointerdown', onDocumentPointerDownForCompactSearch, true);
+    document.addEventListener('click', onDocumentClickForCompactSearch, true);
+    document.addEventListener('focusout', onDocumentFocusOutForCompactSearch, true);
     document.addEventListener('keydown', onDocumentKeydownForCompactSearch);
   } else {
     document.removeEventListener('pointerdown', onDocumentPointerDownForCompactSearch, true);
+    document.removeEventListener('click', onDocumentClickForCompactSearch, true);
+    document.removeEventListener('focusout', onDocumentFocusOutForCompactSearch, true);
     document.removeEventListener('keydown', onDocumentKeydownForCompactSearch);
   }
 });
 watch(titlebarNarrow, (narrow) => {
   if (!narrow) compactSearchOpen.value = false;
+});
+watch(titlebarCompact, (compact) => {
+  if (!compact) compactSearchOpen.value = false;
 });
 </script>
 
@@ -655,12 +693,6 @@ watch(titlebarNarrow, (narrow) => {
 
   .gallery-compact-search {
     width: 100%;
-  }
-
-  /* 弹出状态下使用纯色背景，避免透出下层内容；圆角和建议列表
-     衔接由 WinAutoSuggestBox 的默认样式负责。 */
-  .gallery-compact-search.win-auto-suggest-box .win-textbox-border {
-    background: var(--app-bg) !important;
   }
 
   @font-face {
@@ -835,9 +867,9 @@ watch(titlebarNarrow, (narrow) => {
     --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
     --flyout-bg: rgba(44, 44, 44, 0.86);
     --flyout-backdrop: blur(44px) saturate(190%) brightness(1.22) contrast(1.05);
-    --ctrl-fill-default: #2D2D2D;
-    --ctrl-fill-secondary: #333333;
-    --ctrl-fill-tertiary: #272727;
+    --ctrl-fill-default: rgba(255, 255, 255, 0.0605);
+    --ctrl-fill-secondary: rgba(255, 255, 255, 0.0837);
+    --ctrl-fill-tertiary: rgba(255, 255, 255, 0.0326);
     --ctrl-fill-disabled: rgba(255, 255, 255, 0.04);
     --ctrl-fill-input-active: rgba(30, 30, 30, 0.70);
     --control-fill-color-default: var(--ctrl-fill-default);

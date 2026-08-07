@@ -334,6 +334,7 @@
   --subtle-secondary: rgba(0, 0, 0, 0.0373);
   --subtle-tertiary: rgba(0, 0, 0, 0.0241);
   --subtle-pressed: rgba(0, 0, 0, 0.06);
+  --ctrl-fill-default: rgba(255, 255, 255, 0.70);
   --ctrl-fill-disabled: rgba(249, 249, 249, 0.30);
   --ctrl-fill-secondary: rgba(249, 249, 249, 0.50);
   --ctrl-fill-tertiary: rgba(249, 249, 249, 0.30);
