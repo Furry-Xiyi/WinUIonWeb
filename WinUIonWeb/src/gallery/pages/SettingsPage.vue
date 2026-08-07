@@ -67,23 +67,17 @@
           <WinTextBlock class="about-section-title" :Text="$t('text.about')" />
           <div class="about-controls">
             <WinExpander
+              :Header="appTitle"
+              :Description="copyrightText"
               Height="70">
               <template #HeaderIcon>
                 <img class="about-app-icon" :src="appIcon" alt="App Icon" />
               </template>
-              <template #Header>
-                <div class="about-header-container">
-                  <div class="about-header-text">
-                    <WinTextBlock :Text="appTitle" FontSize="14.4" />
-                    <WinTextBlock :Text="copyrightText" FontSize="12" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
-                  </div>
-                  <div class="about-header-actions">
-                    <WinButton
-                      @Click="openRepository"
-                      :Content="$t('text.open-code-repository')" />
-                    <WinTextBlock :Text="versionText" FontSize="14.4" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
-                  </div>
-                </div>
+              <template #HeaderControls>
+                <WinButton
+                  @Click="openRepository"
+                  :Content="$t('text.open-code-repository')" />
+                <WinTextBlock :Text="versionText" FontSize="14.4" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
               </template>
               <div class="about-content">
                 <WinHyperlinkButton
@@ -270,31 +264,7 @@ const openRepository = () => {
   height: 20px;
 }
 
-.about-header-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 16px;
-}
-
-.about-header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  flex: 1;
-  min-width: 0;
-}
-
-.about-header-actions {
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  gap: 8px;
-  min-width: 0;
-}
-
-.about-header-actions :deep(.win-btn) {
+.about-controls :deep(.win-expander-header-controls .win-btn) {
   white-space: nowrap;
 }
 

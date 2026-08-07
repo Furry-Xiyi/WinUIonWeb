@@ -1,7 +1,12 @@
 <template>
   <div
     class="win-expander"
-    :class="{ 'is-expanded': isExpandedState, 'expand-up': ExpandDirection === 'Up' }"
+    :class="{
+      'is-expanded': isExpandedState,
+      'expand-up': ExpandDirection === 'Up',
+      'has-header-content': hasHeaderContent,
+      'has-header-controls': hasHeaderControls
+    }"
     :style="rootStyle">
     <div
       class="win-expander-header"
@@ -38,6 +43,9 @@
               TextWrapping="Wrap" />
           </slot>
         </div>
+      </div>
+      <div v-if="hasHeaderControls" class="win-expander-header-controls">
+        <slot name="HeaderControls"></slot>
       </div>
       <span class="win-expander-chevron" aria-hidden="true">
         <span class="icon win-expander-arrow"></span>
@@ -79,6 +87,15 @@ const emit = defineEmits(['update:IsExpanded', 'Expanding', 'Collapsed']);
 const isExpandedState = ref(props.IsExpanded);
 const slots = useSlots();
 const hasHeaderIcon = computed(() => Boolean(props.HeaderIcon) || Boolean(slots.HeaderIcon));
+const hasHeaderControls = computed(() => Boolean(slots.HeaderControls));
+const hasHeaderContent = computed(() => (
+  Boolean(props.Header)
+  || Boolean(props.Description)
+  || hasHeaderIcon.value
+  || Boolean(slots.Header)
+  || Boolean(slots.Description)
+  || hasHeaderControls.value
+));
 const isHeaderIconMarkup = computed(() => props.HeaderIcon.trim().startsWith('<'));
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
@@ -251,6 +268,7 @@ const toggleExpanded = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   cursor: pointer;
   background: transparent;
   border: none;
@@ -300,6 +318,20 @@ const toggleExpanded = () => {
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+
+.win-expander-header-content :slotted(*) {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.win-expander-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .win-expander-header-text {
@@ -424,5 +456,38 @@ const toggleExpanded = () => {
 
 .win-expander.expand-up .win-expander-content {
   border-radius: 3px 3px 0 0;
+}
+
+@media (max-width: 640px) {
+  .win-expander.has-header-content.has-header-controls .win-expander-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 16px;
+    row-gap: 8px;
+    height: auto;
+    min-height: var(--win-expander-header-height, 48px);
+    padding-top: 16px;
+    padding-bottom: 16px;
+    align-items: center;
+  }
+
+  .win-expander.has-header-content.has-header-controls .win-expander-header-main {
+    grid-column: 1;
+    grid-row: 1;
+    align-items: flex-start;
+  }
+
+  .win-expander.has-header-controls .win-expander-header-controls {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .win-expander.has-header-content.has-header-controls .win-expander-chevron {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
 }
 </style>
