@@ -491,6 +491,14 @@ watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionI
     overflow: visible;
   }
 
+  /* 窗口过窄时优先保留标题，隐藏搜索框；
+     避免搜索框被压到 0 宽后反而把标题文字挤到隐藏。 */
+  @media (max-width: 480px) {
+    .gallery-titlebar-search {
+      display: none !important;
+    }
+  }
+
   @font-face {
     font-family: 'WinUIOnWebIcons';
     src: url('../assets/Fonts/SEGOEICONS.TTF') format('truetype');
