@@ -79,7 +79,7 @@
         TextMemberPath="title"
         :PlaceholderText="t('search.placeholder')"
         QueryIcon="Find"
-        :OpenOnFocus="true"
+        :OpenOnFocus="false"
         class="gallery-compact-search"
         @QuerySubmitted="onSearchQuerySubmitted" />
     </div>
