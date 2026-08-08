@@ -5,7 +5,8 @@
       'is-readonly': IsReadOnly,
       'is-disabled': isDisabled,
       'is-focused': isFocused,
-      'is-hovered': isHovered
+      'is-hovered': isHovered,
+      'candidate-window-bottom-edge': DesiredCandidateWindowAlignment === 'BottomEdge'
     }"
     :style="rootStyle">
     <div v-if="Header || $slots.header" class="win-textbox-header">
@@ -48,9 +49,9 @@
             @select="onSelect"
             @cut="onCuttingToClipboard"
             @copy="onCopyingToClipboard"
-            @compositionstart="emit('TextCompositionStarted')"
-            @compositionupdate="emit('TextCompositionChanged')"
-            @compositionend="emit('TextCompositionEnded')"
+            @compositionstart="onCompositionStart"
+            @compositionupdate="onCompositionChanged"
+            @compositionend="onCompositionEnd"
             @pointerenter="onPointerEnter"
             @pointerleave="onPointerLeave" />
 
@@ -79,9 +80,9 @@
             @select="onSelect"
             @cut="onCuttingToClipboard"
             @copy="onCopyingToClipboard"
-            @compositionstart="emit('TextCompositionStarted')"
-            @compositionupdate="emit('TextCompositionChanged')"
-            @compositionend="emit('TextCompositionEnded')"
+            @compositionstart="onCompositionStart"
+            @compositionupdate="onCompositionChanged"
+            @compositionend="onCompositionEnd"
             @pointerenter="onPointerEnter"
             @pointerleave="onPointerLeave" />
         </slot>
@@ -119,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import WinMenuFlyout from './WinMenuFlyout.vue';
 import { useI18n } from './i18n/index';
@@ -129,6 +130,7 @@ const { t } = useI18n();
 type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
 type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
 type CharacterCasing = 'Normal' | 'Lower' | 'Upper';
+type CandidateWindowAlignment = 'Default' | 'BottomEdge';
 type TextBoxMenuCommand = 'cut' | 'copy' | 'paste' | 'undo' | 'redo' | 'selectAll';
 type TextBoxMenuItem = {
   Text?: string;
@@ -152,7 +154,7 @@ const props = withDefaults(defineProps<{
   InputScope?: string;
   CharacterCasing?: CharacterCasing;
   SelectionHighlightColor?: string;
-  DesiredCandidateWindowAlignment?: string;
+  DesiredCandidateWindowAlignment?: CandidateWindowAlignment;
   IsColorFontEnabled?: boolean;
   PreventKeyboardDisplayOnProgrammaticFocus?: boolean;
   ShowDeleteButton?: boolean;
@@ -210,7 +212,7 @@ const emit = defineEmits<{
   Paste: [args: { Handled: boolean }];
   CuttingToClipboard: [args: { Handled: boolean }];
   CopyingToClipboard: [args: { Handled: boolean }];
-  CandidateWindowBoundsChanged: [args: { rect: DOMRect | { x: number; y: number; width: number; height: number } }];
+  CandidateWindowBoundsChanged: [args: { Bounds: DOMRectReadOnly }];
   TextCompositionStarted: [];
   TextCompositionChanged: [];
   TextCompositionEnded: [];
@@ -408,6 +410,7 @@ const onInput = (event: Event) => {
 
 const onFocus = () => {
   isFocused.value = true;
+  requestCandidateWindowAlignment();
   emit('GotFocus');
   resizeTextarea();
 };
@@ -418,8 +421,75 @@ const onBlur = () => {
   // closes and restores DOM focus to the editing field.
   if (contextMenuOpen.value || isRestoringContextMenuFocus.value) return;
   isFocused.value = false;
+  requestCandidateWindowAlignment('Default');
   emit('LostFocus');
 };
+
+const applyLegacyCandidateWindowAlignment = () => {
+  const field = fieldRef.value;
+  if (!field) return;
+  field.style.setProperty(
+    '-ms-ime-align',
+    props.DesiredCandidateWindowAlignment === 'BottomEdge' ? 'after' : 'auto'
+  );
+};
+
+const requestCandidateWindowAlignment = (
+  alignment: CandidateWindowAlignment = props.DesiredCandidateWindowAlignment
+) => {
+  applyLegacyCandidateWindowAlignment();
+  const field = fieldRef.value;
+  if (!field) return;
+  const border = field.closest('.win-textbox-border') as HTMLElement | null;
+  const rect = (border ?? field).getBoundingClientRect();
+  const textEditControlBounds = {
+    x: rect.x,
+    y: rect.y,
+    top: rect.top,
+    bottom: rect.bottom,
+    left: rect.left,
+    right: rect.right,
+    width: rect.width,
+    height: rect.height
+  };
+
+  const hostWindow = window as Window & {
+    chrome?: { webview?: { postMessage?: (message: unknown) => void } };
+  };
+  hostWindow.chrome?.webview?.postMessage?.({
+    source: 'WinUIonWeb',
+    type: 'desiredCandidateWindowAlignmentChanged',
+    DesiredCandidateWindowAlignment: alignment,
+    TextEditControlBounds: textEditControlBounds,
+    devicePixelRatio: window.devicePixelRatio,
+    visualViewport: window.visualViewport ? {
+      offsetLeft: window.visualViewport.offsetLeft,
+      offsetTop: window.visualViewport.offsetTop,
+      scale: window.visualViewport.scale
+    } : null
+  });
+};
+
+const onCompositionStart = () => {
+  requestCandidateWindowAlignment();
+  emit('TextCompositionStarted');
+};
+
+const onCompositionChanged = () => {
+  requestCandidateWindowAlignment();
+  emit('TextCompositionChanged');
+};
+
+const onCompositionEnd = () => {
+  emit('TextCompositionEnded');
+};
+
+watch(() => props.DesiredCandidateWindowAlignment, () => {
+  void nextTick(() => {
+    applyLegacyCandidateWindowAlignment();
+    if (isFocused.value) requestCandidateWindowAlignment();
+  });
+});
 
 const onPointerEnter = () => {
   isHovered.value = true;
@@ -653,7 +723,10 @@ const cutContextSelectionToClipboard = () => {
   replaceTextRange(contextSelection.value.start, contextSelection.value.length, '');
 };
 
+onMounted(applyLegacyCandidateWindowAlignment);
+
 onBeforeUnmount(() => {
+  if (isFocused.value) requestCandidateWindowAlignment('Default');
   undoStack.value = [];
   redoStack.value = [];
   contextMenuOpen.value = false;
@@ -811,6 +884,10 @@ defineExpose({
   font-size: 14px;
   line-height: 20px;
   user-select: text;
+}
+
+.win-textbox.candidate-window-bottom-edge .win-textbox-field {
+  -ms-ime-align: after;
 }
 
 .win-textbox-textarea {

@@ -16,6 +16,7 @@
         :PlaceholderText="PlaceholderText"
         :IsEnabled="IsEnabled"
         :Description="''"
+        :DesiredCandidateWindowAlignment="DesiredCandidateWindowAlignment"
         @update:Text="onTextInput"
         @GotFocus="onFocus"
         @LostFocus="onBlur"
@@ -152,7 +153,7 @@ const highlightedIndex = ref(-1);
 const resultsKey = ref(0);
 const popupStyle = ref<CSSProperties & Record<string, string>>({});
 const openDirection = ref<'up' | 'down'>('down');
-const candidateWindowGap = ref(0);
+const isComposing = ref(false);
 const flyoutAnimation = useFlyoutAnimation(popupRef, {
   Origin: 'edge',
   Direction: () => (openDirection.value === 'up' ? 'bottom' : 'top'),
@@ -249,6 +250,7 @@ const onFocus = () => {
 
 const onBlur = () => {
   hasInputChangedAfterFocus.value = false;
+  isComposing.value = false;
   window.setTimeout(() => setOpen(false), 120);
 };
 
@@ -304,19 +306,27 @@ const resolveAnchorTheme = () => {
 
 const updatePopupPosition = () => {
   anchorTheme.value = resolveAnchorTheme();
-  const rect = anchorRef.value?.getBoundingClientRect() ?? rootRef.value?.getBoundingClientRect();
+  const textBoxBorder = anchorRef.value?.querySelector<HTMLElement>('.win-textbox-border');
+  const rect = textBoxBorder?.getBoundingClientRect()
+    ?? anchorRef.value?.getBoundingClientRect()
+    ?? rootRef.value?.getBoundingClientRect();
   if (!rect) return;
+  const visualViewport = window.visualViewport;
+  const viewportTop = visualViewport?.offsetTop ?? 0;
+  const viewportBottom = viewportTop + (visualViewport?.height ?? window.innerHeight);
   const maxHeight = typeof props.MaxSuggestionListHeight === 'number' ? props.MaxSuggestionListHeight : Number(props.MaxSuggestionListHeight) || 300;
-  const estimatedImeHeight = candidateWindowGap.value;
-  const gap = estimatedImeHeight;
-  const spaceBelow = window.innerHeight - rect.bottom - gap - 8;
-  const spaceAbove = rect.top - gap - 8;
-  openDirection.value = spaceBelow >= Math.min(maxHeight, 160) || spaceBelow >= spaceAbove ? 'down' : 'up';
+  const alignCandidateWindowToBottom = isComposing.value && props.DesiredCandidateWindowAlignment === 'BottomEdge';
+  const candidateWindowGap = alignCandidateWindowToBottom ? 40 : 0;
+  const spaceBelow = viewportBottom - rect.bottom - candidateWindowGap - 8;
+  const spaceAbove = rect.top - viewportTop - candidateWindowGap - 8;
+  openDirection.value = alignCandidateWindowToBottom
+    ? 'down'
+    : (spaceBelow >= Math.min(maxHeight, 160) || spaceBelow >= spaceAbove ? 'down' : 'up');
 
   if (openDirection.value === 'up') {
     popupStyle.value = {
       left: `${rect.left}px`,
-      bottom: `${window.innerHeight - rect.top + gap}px`,
+      bottom: `${window.innerHeight - rect.top + candidateWindowGap}px`,
       width: `${rect.width}px`,
       maxHeight: `${props.AutoMaximizeSuggestionArea ? Math.max(120, spaceAbove) : Math.min(maxHeight, Math.max(80, spaceAbove))}px`,
       '--asb-input-bottom-radius': '4px',
@@ -327,7 +337,7 @@ const updatePopupPosition = () => {
 
   popupStyle.value = {
     left: `${rect.left}px`,
-    top: `${rect.bottom + gap}px`,
+    top: `${rect.bottom + candidateWindowGap}px`,
     width: `${rect.width}px`,
     maxHeight: `${props.AutoMaximizeSuggestionArea ? Math.max(120, spaceBelow) : Math.min(maxHeight, Math.max(80, spaceBelow))}px`,
     '--asb-input-bottom-radius': localOpen.value ? '0' : '4px',
@@ -335,26 +345,14 @@ const updatePopupPosition = () => {
   };
 };
 
-const updateCandidateWindowGap = () => {
-  if (!window.visualViewport) {
-    candidateWindowGap.value = 0;
-    return;
-  }
-  const occluded = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
-  candidateWindowGap.value = Math.max(0, Math.min(occluded, 96));
-  if (isOpen.value) updatePopupPosition();
-};
-
 const onCompositionStart = () => {
-  candidateWindowGap.value = Math.max(candidateWindowGap.value, 40);
+  isComposing.value = true;
   if (isOpen.value) updatePopupPosition();
 };
 
 const onCompositionEnd = () => {
-  window.setTimeout(() => {
-    updateCandidateWindowGap();
-    if (candidateWindowGap.value === 0 && isOpen.value) updatePopupPosition();
-  }, 180);
+  isComposing.value = false;
+  if (isOpen.value) requestAnimationFrame(updatePopupPosition);
 };
 
 const onDocumentPointerDown = (event: PointerEvent) => {
@@ -377,16 +375,16 @@ onMounted(() => {
   document.addEventListener('pointerdown', onDocumentPointerDown);
   window.addEventListener('resize', updatePopupPosition);
   window.addEventListener('scroll', updatePopupPosition, true);
-  window.visualViewport?.addEventListener('resize', updateCandidateWindowGap);
-  window.visualViewport?.addEventListener('scroll', updateCandidateWindowGap);
+  window.visualViewport?.addEventListener('resize', updatePopupPosition);
+  window.visualViewport?.addEventListener('scroll', updatePopupPosition);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', onDocumentPointerDown);
   window.removeEventListener('resize', updatePopupPosition);
   window.removeEventListener('scroll', updatePopupPosition, true);
-  window.visualViewport?.removeEventListener('resize', updateCandidateWindowGap);
-  window.visualViewport?.removeEventListener('scroll', updateCandidateWindowGap);
+  window.visualViewport?.removeEventListener('resize', updatePopupPosition);
+  window.visualViewport?.removeEventListener('scroll', updatePopupPosition);
 });
 </script>
 
