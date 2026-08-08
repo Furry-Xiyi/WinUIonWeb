@@ -540,6 +540,7 @@ let layoutObserver = null;
 let layoutObserverFrame = null;
 let skipTransition = false;
 let indicatorAnimationId = 0;
+let indicatorHiddenByScroll = false;
 let paneTransitionTimer = null;
 // Mirrors NavigationView::m_wasForceClosed: adaptive resize closes do not
 // count as a user close, so Auto can reopen the pane on Expanded.
@@ -1011,6 +1012,7 @@ const syncIndicatorForSelectedItem = (value, { collapsePane = false } = {}) => {
   if (value === null || value === undefined || value === '') {
     lastSelectedEl = null;
     lastIsChild = false;
+    indicatorHiddenByScroll = false;
     indicatorStyle.value = { opacity: '0', transition: 'none' };
     return;
   }
@@ -1024,6 +1026,7 @@ const syncIndicatorForSelectedItem = (value, { collapsePane = false } = {}) => {
         lastSelectedEl = itemRefs[target.value] || null;
         lastIsChild = target.isChild;
         indicatorIsChild.value = target.isChild;
+        indicatorHiddenByScroll = false;
         indicatorStyle.value = { opacity: '0', transition: 'none' };
         return;
       }
@@ -1429,7 +1432,7 @@ const moveIndicatorToEl = (el, isChild) => {
   prevSelectedEl = lastSelectedEl;
   lastSelectedEl = el;
   lastIsChild = isChild;
-  calcIndicator();
+  calcIndicator({ animateSelectionChange: true });
 };
 
 const goBack = () => {
@@ -1606,7 +1609,7 @@ const queueLayoutRefresh = () => {
 
 const getScrollAreaElement = () => scrollArea.value?.scrollViewerRef?.value ?? scrollArea.value?.scrollViewerRef ?? scrollArea.value ?? null;
 
-const calcIndicator = () => {
+const calcIndicator = ({ animateSelectionChange = false } = {}) => {
   const sourceEl = prevSelectedEl && prevSelectedEl !== lastSelectedEl ? prevSelectedEl : null;
   const sourceWasChild = indicatorIsChild.value;
   prevSelectedEl = lastSelectedEl;
@@ -1657,8 +1660,9 @@ const calcIndicator = () => {
   };
 
   if (isTopNavigation.value) {
+    indicatorHiddenByScroll = false;
     const newX = targetRect.left + (targetRect.right - targetRect.left) / 2 - 8;
-    if (skipTransition || indicatorStyle.value.opacity === '0') {
+    if ((!animateSelectionChange && skipTransition) || indicatorStyle.value.opacity === '0') {
       nextIndicatorAnimation(indicatorEl);
       setIndicatorVisibility(track, 'x', targetRect);
       indicatorStyle.value = { transition: 'none', transform: `translateX(${newX}px)`, width: '16px', opacity: '1' };
@@ -1732,18 +1736,29 @@ const calcIndicator = () => {
 
     if (clampedTargetRect.top >= clampedTargetRect.bottom) {
       nextIndicatorAnimation(indicatorEl);
-      indicatorStyle.value = { opacity: '0', transition: 'none' };
+      // Preserve the off-screen source geometry for the next selection move.
+      indicatorHiddenByScroll = true;
+      setIndicatorRestingStyle(indicatorEl, {
+        transform: `translateY(${newY}px)`,
+        height: '16px',
+        opacity: '0',
+        transition: 'none'
+      });
       return;
     }
 
-    if (skipTransition || indicatorStyle.value.opacity === '0') {
+    const wasHiddenByScroll = indicatorHiddenByScroll;
+    indicatorHiddenByScroll = false;
+    if ((!animateSelectionChange && skipTransition) || (indicatorStyle.value.opacity === '0' && !wasHiddenByScroll)) {
       nextIndicatorAnimation(indicatorEl);
       setIndicatorVisibility(track, 'y', clampedTargetRect);
       indicatorStyle.value = { transition: 'none', transform: `translateY(${newY}px)`, height: '16px', opacity: '1' };
       indicatorIsChild.value = lastIsChild;
       return;
     }
-    const oldY = readTranslate(indicatorEl, 'y', newY);
+    const oldY = wasHiddenByScroll && sourceRect
+      ? sourceRect.top + (sourceRect.bottom - sourceRect.top) / 2 - 8
+      : readTranslate(indicatorEl, 'y', newY);
     const dist = Math.abs(newY - oldY);
     if (dist < 1) { setIndicatorVisibility(track, 'y', clampedTargetRect); indicatorStyle.value = { transform: `translateY(${newY}px)`, height: '16px', opacity: '1' }; indicatorIsChild.value = lastIsChild; return; }
 
