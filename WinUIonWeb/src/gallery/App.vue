@@ -1,6 +1,9 @@
 <template>
   <!-- 对应官方 WinUIGallery/MainWindow.xaml(.cs)：Gallery 主窗口壳（TitleBar + NavigationView + 搜索 + 页面导航） -->
   <WinToolTipService />
+  <Teleport to="body">
+    <div v-if="isNavigationFrozen" class="gallery-navigation-freeze" aria-hidden="true"></div>
+  </Teleport>
   <WinTitleBar
     ref="titleBarRef"
     class="gallery-titlebar"
@@ -171,8 +174,49 @@ const isHostedInUwpWebView = ref(
   typeof window !== 'undefined' && Boolean(window.__WINUI_ON_WEB_UWP_APP__)
 );
 const canGoBack = ref(Boolean(router.options.history.state?.back));
+const isNavigationFrozen = ref(false);
+let navigationReleaseSequence = 0;
+let navigationReleaseFrame = null;
 
-router.afterEach((to, from) => {
+const freezeNavigation = () => {
+  navigationReleaseSequence += 1;
+  if (navigationReleaseFrame) cancelAnimationFrame(navigationReleaseFrame);
+  navigationReleaseFrame = null;
+  isNavigationFrozen.value = true;
+};
+
+const releaseNavigation = () => {
+  const sequence = ++navigationReleaseSequence;
+  if (navigationReleaseFrame) cancelAnimationFrame(navigationReleaseFrame);
+  void nextTick(() => {
+    navigationReleaseFrame = requestAnimationFrame(() => {
+      if (sequence === navigationReleaseSequence) {
+        isNavigationFrozen.value = false;
+        navigationReleaseFrame = null;
+      }
+    });
+  });
+};
+
+const syncNavigationFreezeState = (frozen) => {
+  const appRoot = document.getElementById('app');
+  if (!appRoot) return;
+  appRoot.toggleAttribute('inert', frozen);
+  if (frozen) appRoot.setAttribute('aria-busy', 'true');
+  else appRoot.removeAttribute('aria-busy');
+};
+
+watch(isNavigationFrozen, syncNavigationFreezeState, { flush: 'post' });
+
+const removeNavigationBeforeEach = router.beforeEach(() => {
+  freezeNavigation();
+});
+
+const removeNavigationAfterEach = router.afterEach((to, from, failure) => {
+  if (failure) {
+    releaseNavigation();
+    return;
+  }
   const historyState = router.options.history.state;
   const isBack = historyState?.forward === from.fullPath;
   const NavigationTrigger = isBack
@@ -184,7 +228,10 @@ router.afterEach((to, from) => {
   pageTransitionEnter.value = getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationTrigger);
   pageTransitionLeave.value = getNavigationTransitionInfoClassName(navigationTransitionInfo.value, NavigationLeaveTrigger);
   canGoBack.value = Boolean(historyState?.back);
+  releaseNavigation();
 });
+
+const removeNavigationErrorHandler = router.onError(() => releaseNavigation());
 
 provide('themeSetting', themeSetting);
 provide('materialSetting', materialSetting);
@@ -308,7 +355,7 @@ const selectedNavigationItem = computed({
     return find(navMenuItems);
   },
   set: item => {
-    if (item?.Tag) navigate(item.Tag, navigationTransitionInfo.value);
+    if (item?.Tag) void navigate(item.Tag, navigationTransitionInfo.value);
   }
 });
 
@@ -358,29 +405,69 @@ const toggleCurrentPageTheme = () => {
   window.dispatchEvent(new CustomEvent('win-gallery-theme-toggle', { detail: currentPage.value }));
 };
 
-const navigate = (
+const navigateToRoute = async (location, prepareTransition = null) => {
+  if (isNavigationFrozen.value) return false;
+
+  let target;
+  try {
+    target = router.resolve(location);
+  } catch (error) {
+    console.error('Unable to resolve navigation target.', error);
+    return false;
+  }
+  if (target.fullPath === route.fullPath) return false;
+
+  const previousTransition = {
+    enter: pageTransitionEnter.value,
+    leave: pageTransitionLeave.value
+  };
+  prepareTransition?.();
+  freezeNavigation();
+
+  try {
+    const failure = await router.push(location);
+    if (failure) {
+      pageTransitionEnter.value = previousTransition.enter;
+      pageTransitionLeave.value = previousTransition.leave;
+      return false;
+    }
+    return true;
+  } catch (error) {
+    pageTransitionEnter.value = previousTransition.enter;
+    pageTransitionLeave.value = previousTransition.leave;
+    console.error('Navigation failed.', error);
+    return false;
+  } finally {
+    releaseNavigation();
+  }
+};
+
+const navigate = async (
   tag,
   NavigationTransitionInfo = navigationTransitionInfo.value,
   NavigationTrigger = NavigationTrigger_NavigatingTo
 ) => {
-  if (!tag || tag === currentPage.value || !pageTags.has(tag)) return;
-  const normalizedNavigationTransitionInfo = normalizeNavigationTransitionInfo(NavigationTransitionInfo);
-  const NavigationLeaveTrigger = NavigationTrigger === NavigationTrigger_BackNavigatingTo
-    ? NavigationTrigger_BackNavigatingAway
-    : NavigationTrigger_NavigatingAway;
-  pageTransitionEnter.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationTrigger);
-  pageTransitionLeave.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationLeaveTrigger);
-  router.push({ name: tag });
+  if (!tag || tag === currentPage.value || !pageTags.has(tag)) return false;
+  return navigateToRoute({ name: tag }, () => {
+    const normalizedNavigationTransitionInfo = normalizeNavigationTransitionInfo(NavigationTransitionInfo);
+    const NavigationLeaveTrigger = NavigationTrigger === NavigationTrigger_BackNavigatingTo
+      ? NavigationTrigger_BackNavigatingAway
+      : NavigationTrigger_NavigatingAway;
+    pageTransitionEnter.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationTrigger);
+    pageTransitionLeave.value = getNavigationTransitionInfoClassName(normalizedNavigationTransitionInfo, NavigationLeaveTrigger);
+  });
 };
 provide('navigate', navigate);
 const onNavigationItemInvoked = args => {
   const item = args?.InvokedItemContainer;
   if (!item || item.SelectsOnInvoked === false) return;
   const tag = item.Tag;
-  if (tag) navigate(tag, navigationTransitionInfo.value);
+  if (tag) void navigate(tag, navigationTransitionInfo.value);
 };
 const onBackRequested = () => {
-  if (canGoBack.value) router.back();
+  if (!canGoBack.value || isNavigationFrozen.value) return;
+  freezeNavigation();
+  router.back();
 };
 const onTopBarToggle = () => {
   isPaneOpen.value = !isPaneOpen.value;
@@ -434,12 +521,12 @@ const onSearchQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
   const query = String(QueryText ?? '').trim();
   if (!query) return;
   if (ChosenSuggestion?.tag && pageTags.has(ChosenSuggestion.tag)) {
-    router.push({ name: ChosenSuggestion.tag });
+    void navigate(ChosenSuggestion.tag, navigationTransitionInfo.value);
     return;
   }
   const items = searchAll(query, locale);
   if (items.length === 0) {
-    router.push({ path: '/search', query: { q: query } });
+    void navigateToRoute({ path: '/search', query: { q: query } });
     return;
   }
   const nameKey = locale === 'zh-CN' ? 'zh' : 'en';
@@ -447,7 +534,7 @@ const onSearchQuerySubmitted = ({ QueryText, ChosenSuggestion }) => {
   const exact = items.find((item) => (
     item.tag.toLowerCase() === lower || item[nameKey].toLowerCase() === lower
   ));
-  router.push({ name: (exact ?? items[0]).tag });
+  void navigate((exact ?? items[0]).tag, navigationTransitionInfo.value);
 };
 const focusSearchBox = () => {
   if (titlebarNarrow.value || titlebarCompact.value) {
@@ -524,6 +611,7 @@ onMounted(() => {
   // WebView2 exposes window.chrome.webview in every host. Only the explicit
   // marker identifies the UWP host that owns the custom title bar.
   isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__);
+  syncNavigationFreezeState(isNavigationFrozen.value);
   window.addEventListener('keydown', onWindowKeydown);
   window.addEventListener('resize', onWindowResize);
   window.addEventListener('blur', onWindowBlurForCompactSearch);
@@ -534,6 +622,12 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  if (navigationReleaseFrame) cancelAnimationFrame(navigationReleaseFrame);
+  removeNavigationBeforeEach();
+  removeNavigationAfterEach();
+  removeNavigationErrorHandler();
+  document.getElementById('app')?.removeAttribute('inert');
+  document.getElementById('app')?.removeAttribute('aria-busy');
   document.removeEventListener('click', onDocumentClickForCompactSearch, true);
   document.removeEventListener('keydown', onDocumentKeydownForCompactSearch);
   systemThemeQuery.removeEventListener('change', onSystemThemeChange);
@@ -571,6 +665,14 @@ watch(titlebarCompact, (compact) => {
 <style>
   @import '../styles/theme.css';
   @import '../styles/animations.css';
+
+  .gallery-navigation-freeze {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483646;
+    cursor: progress;
+    touch-action: none;
+  }
 
   .gallery-app-content {
     width: 100%;
