@@ -69,8 +69,7 @@
                 :disabled="isNoResultsItem(item)"
                 :aria-selected="highlightedIndex === index"
                 @mouseenter="highlightedIndex = isNoResultsItem(item) ? highlightedIndex : index"
-                @pointerdown.prevent
-                @click="chooseSuggestion(index)">
+                @click="onSuggestionClick(index)">
                 <span class="win-asb-item-title">{{ getItemText(item) }}</span>
                 <span v-if="getItemSubtitle(item)" class="win-asb-item-subtitle">{{ getItemSubtitle(item) }}</span>
               </button>
@@ -269,6 +268,11 @@ const chooseSuggestion = (index: number) => {
     emit('TextChanged', { Reason: 'SuggestionChosen' });
   }
   submitQuery(item, text);
+};
+
+const onSuggestionClick = (index: number) => {
+  chooseSuggestion(index);
+  anchorRef.value?.querySelector<HTMLInputElement | HTMLTextAreaElement>('input, textarea')?.blur();
 };
 
 const submitQuery = (chosenSuggestion: Suggestion | null = null, queryText = currentText.value) => {
