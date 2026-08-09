@@ -148,7 +148,8 @@ const anchorRef = ref<HTMLElement | null>(null);
 const popupRef = ref<HTMLElement | null>(null);
 const localText = ref(props.Text);
 const localOpen = ref(props.IsSuggestionListOpen);
-const hasInputChangedAfterFocus = ref(false);
+const isTextBoxFocused = ref(false);
+const shouldOpenForUserInput = ref(false);
 const highlightedIndex = ref(-1);
 const resultsKey = ref(0);
 const popupStyle = ref<CSSProperties & Record<string, string>>({});
@@ -235,21 +236,24 @@ const onTextInput = (value: string) => {
   localText.value = value;
   emit('update:Text', value);
   emit('TextChanged', { Reason: 'UserInput' });
-  const firstChangeAfterFocus = !hasInputChangedAfterFocus.value;
-  hasInputChangedAfterFocus.value = true;
-  // 默认聚焦即展开；OpenOnFocus=false 时只等聚焦后的第一次输入变更再展开。
-  if (props.OpenOnFocus || firstChangeAfterFocus) {
-    void setOpen(suggestionItems.value.length > 0);
-  }
+  shouldOpenForUserInput.value = true;
+  // Like the native control, update visibility after TextChanged consumers
+  // have had a chance to replace ItemsSource.
+  void nextTick(() => {
+    if (isTextBoxFocused.value && shouldOpenForUserInput.value) {
+      void setOpen(suggestionItems.value.length > 0);
+    }
+  });
 };
 
 const onFocus = () => {
-  hasInputChangedAfterFocus.value = false;
+  isTextBoxFocused.value = true;
   if (props.OpenOnFocus && suggestionItems.value.length) void setOpen(true);
 };
 
 const onBlur = () => {
-  hasInputChangedAfterFocus.value = false;
+  isTextBoxFocused.value = false;
+  shouldOpenForUserInput.value = false;
   isComposing.value = false;
   window.setTimeout(() => setOpen(false), 120);
 };
@@ -268,6 +272,7 @@ const chooseSuggestion = (index: number) => {
 };
 
 const submitQuery = (chosenSuggestion: Suggestion | null = null, queryText = currentText.value) => {
+  shouldOpenForUserInput.value = false;
   emit('QuerySubmitted', { QueryText: queryText, ChosenSuggestion: chosenSuggestion });
   void setOpen(false);
 };
@@ -293,6 +298,7 @@ const onKeydown = (event: KeyboardEvent) => {
     highlightedIndex.value >= 0 ? chooseSuggestion(highlightedIndex.value) : submitQuery();
   } else if (event.key === 'Escape') {
     event.preventDefault();
+    shouldOpenForUserInput.value = false;
     void setOpen(false);
   }
 };
@@ -358,6 +364,7 @@ const onCompositionEnd = () => {
 const onDocumentPointerDown = (event: PointerEvent) => {
   const target = event.target as Node;
   if (rootRef.value?.contains(target) || popupRef.value?.contains(target)) return;
+  shouldOpenForUserInput.value = false;
   void setOpen(false);
 };
 
@@ -368,7 +375,9 @@ watch(() => props.Text, (value) => {
 
 watch(() => props.IsSuggestionListOpen, (value) => setOpen(Boolean(value)));
 watch(() => props.ItemsSource, () => {
-  if (isOpen.value) void setOpen(suggestionItems.value.length > 0);
+  if (isOpen.value || (isTextBoxFocused.value && shouldOpenForUserInput.value)) {
+    void setOpen(suggestionItems.value.length > 0);
+  }
 }, { deep: true });
 
 onMounted(() => {
