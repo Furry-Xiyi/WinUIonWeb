@@ -27,7 +27,7 @@
       <WinStackPanel class="gallery-page-content" Spacing="0">
         <WinControlExample
           class="basic-input-example-theme"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :headerText="$t('sample.infobar.closable-options-change')"
           :theme="pageTheme"
           :vue="example1Code">
@@ -56,7 +56,7 @@
 
         <WinControlExample
           class="basic-input-example-theme"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :headerText="$t('sample.infobar.long-short-message-buttons')"
           :theme="pageTheme"
           :vue="example2Code">
@@ -100,7 +100,7 @@
 
         <WinControlExample
           class="basic-input-example-theme"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :headerText="$t('sample.infobar.display-options')"
           :theme="pageTheme"
           :vue="example3Code">

@@ -45,6 +45,14 @@ provide('winuiTheme', resolvedTheme);
 /* Light theme overrides */
 .example-theme-wrapper.theme-light,
 .win-theme-scope.theme-light {
+  --TeachingTipBackgroundBrush: #F9F9F9;
+  --SolidBackgroundFillColorTertiaryBrush: #F9F9F9;
+  --TeachingTipBorderBrush: rgba(117, 117, 117, 0.4);
+  --SurfaceStrokeColorDefaultBrush: rgba(117, 117, 117, 0.4);
+  --TeachingTipTransientBackground: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
+  --TeachingTipForegroundBrush: rgba(0, 0, 0, 0.8956);
+  --TeachingTipTitleForegroundBrush: rgba(0, 0, 0, 0.8956);
+  --TeachingTipSubtitleForegroundBrush: rgba(0, 0, 0, 0.8956);
   --text-primary: rgba(0, 0, 0, 0.8956);
   --text-secondary: rgba(0, 0, 0, 0.6063);
   --text-tertiary: rgba(0, 0, 0, 0.4458);
@@ -79,6 +87,8 @@ provide('winuiTheme', resolvedTheme);
   --ctrl-strong-fill: rgba(0, 0, 0, 0.45);
   --ctrl-strong-fill-disabled: rgba(0, 0, 0, 0.32);
   --ctrl-solid-fill: #FFFFFF;
+  --SolidBackgroundFillColorBaseBrush: #F3F3F3;
+  --control-example-display-bg: #FFFFFF;
   --accent-border: rgba(255, 255, 255, 0.08);
   --accent-border-accent: rgba(0, 0, 0, 0.40);
   --ButtonBorderBrushDefaultTop: var(--ctrl-border);
@@ -170,6 +180,14 @@ provide('winuiTheme', resolvedTheme);
 /* Dark theme overrides */
 .example-theme-wrapper.theme-dark,
 .win-theme-scope.theme-dark {
+  --TeachingTipBackgroundBrush: #282828;
+  --SolidBackgroundFillColorTertiaryBrush: #282828;
+  --TeachingTipBorderBrush: rgba(117, 117, 117, 0.4);
+  --SurfaceStrokeColorDefaultBrush: rgba(117, 117, 117, 0.4);
+  --TeachingTipTransientBackground: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
+  --TeachingTipForegroundBrush: rgba(255, 255, 255, 1);
+  --TeachingTipTitleForegroundBrush: rgba(255, 255, 255, 1);
+  --TeachingTipSubtitleForegroundBrush: rgba(255, 255, 255, 1);
   --text-primary: rgba(255, 255, 255, 1);
   --text-secondary: rgba(255, 255, 255, 0.786);
   --text-tertiary: rgba(255, 255, 255, 0.5442);
@@ -204,6 +222,8 @@ provide('winuiTheme', resolvedTheme);
   --ctrl-strong-fill: rgba(255, 255, 255, 0.54);
   --ctrl-strong-fill-disabled: rgba(255, 255, 255, 0.25);
   --ctrl-solid-fill: #202020;
+  --SolidBackgroundFillColorBaseBrush: #202020;
+  --control-example-display-bg: #202020;
   --accent-border: rgba(0, 0, 0, 0.1373);
   --accent-border-accent: rgba(255, 255, 255, 0.0784);
   --ButtonBorderBrushDefaultTop: var(--ctrl-border-accent);

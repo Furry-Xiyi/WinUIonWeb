@@ -62,7 +62,8 @@
         </WinButton>
         <WinAppBarSeparator
           v-if="ThemeButtonVisibility !== 'Collapsed' && ThemeButtonVisibility !== 'Hidden'"
-          class="win-page-header-separator" />
+          class="win-page-header-separator"
+          Visibility="Visible" />
         <WinButton
           ref="copyLinkButton"
           class="win-page-header-action win-page-header-copy-button"
@@ -97,7 +98,8 @@
         </WinStackPanel>
         <WinAppBarSeparator
           v-if="item.ApiNamespace && item.BaseClasses?.length"
-          class="win-page-header-separator-line is-horizontal" />
+          class="win-page-header-separator-line is-horizontal"
+          UseOverflowStyle="True" />
         <WinStackPanel v-if="item.BaseClasses?.length" Spacing="4">
           <WinTextBlock class="win-page-header-secondary-label" :Text="t('gallery.page-header.inheritance')" />
           <WinBreadcrumbBar :ItemsSource="item.BaseClasses" IsEnabled="false" />

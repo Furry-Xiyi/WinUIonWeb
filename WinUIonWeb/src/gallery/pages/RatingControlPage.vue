@@ -8,7 +8,7 @@
             </p>
 
             <!-- Example 1: A simple RatingControl -->
-            <WinControlExample headerText="A simple RatingControl.">
+            <WinControlExample :theme="pageTheme" headerText="A simple RatingControl.">
               <template #example>
                 <WinRating v-model="rating1" />
               </template>
@@ -18,7 +18,7 @@
             </WinControlExample>
 
             <!-- Example 2: RatingControl with custom max value -->
-            <WinControlExample headerText="A RatingControl with custom maximum rating.">
+            <WinControlExample :theme="pageTheme" headerText="A RatingControl with custom maximum rating.">
               <template #example>
                 <WinRating v-model="rating2" :max="10" />
 
@@ -27,7 +27,7 @@
             </WinControlExample>
 
             <!-- Example 3: Read-only RatingControl -->
-            <WinControlExample headerText="A RatingControl with read-only option.">
+            <WinControlExample :theme="pageTheme" headerText="A RatingControl with read-only option.">
               <template #example>
                 <div style="display: flex; flex-direction: column; gap: 16px;">
                   <WinRating v-model="rating3" :disabled="isReadOnly" />
@@ -42,7 +42,7 @@
             </WinControlExample>
 
             <!-- Example 4: Multiple RatingControls -->
-            <WinControlExample headerText="Multiple RatingControls with different initial values.">
+            <WinControlExample :theme="pageTheme" headerText="Multiple RatingControls with different initial values.">
               <template #example>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <div style="display: flex; align-items: center; gap: 12px;">

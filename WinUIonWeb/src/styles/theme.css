@@ -304,7 +304,23 @@
   --dialog-overlay: rgba(0, 0, 0, 0.30);
   --dialog-divider: rgba(0, 0, 0, 0.06);
   --dialog-button-bg: #F3F3F3;
-  --TeachingTipBackgroundBrush: #F9F9F9;
+  --TeachingTipBackgroundBrush: var(--SolidBackgroundFillColorTertiaryBrush, #F9F9F9);
+  --TeachingTipBorderBrush: var(--SurfaceStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, var(--flyout-border)));
+  --TeachingTipTransientBackground: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
+  --TeachingTipForegroundBrush: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --TeachingTipTitleForegroundBrush: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --TeachingTipSubtitleForegroundBrush: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --TeachingTipAlternateCloseButtonSize: 40px;
+  --TeachingTipAlternateCloseButtonGlyphSize: 16px;
+  --TeachingTipAlternateCloseButtonBackground: transparent;
+  --TeachingTipAlternateCloseButtonBackgroundPointerOver: var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary));
+  --TeachingTipAlternateCloseButtonBackgroundPressed: var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary));
+  --TeachingTipAlternateCloseButtonForeground: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --TeachingTipAlternateCloseButtonBorderBrush: transparent;
+  --TeachingTipAlternateCloseButtonBorderBrushPointerOver: var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary));
+  --TeachingTipAlternateCloseButtonBorderBrushPressed: var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary));
+  --SolidBackgroundFillColorTertiaryBrush: #F9F9F9;
+  --SurfaceStrokeColorDefaultBrush: rgba(117, 117, 117, 0.4);
   --flyout-bg: rgba(252, 252, 252, 0.92);
   --flyout-border: rgba(0, 0, 0, 0.06);
   --flyout-backdrop: blur(30px) saturate(160%) brightness(1.02);
@@ -375,6 +391,7 @@
   --ControlStrongFillColorDisabledBrush: rgba(0, 0, 0, 0.32);
   --SubtleFillColorTransparentBrush: transparent;
   --SubtleFillColorSecondaryBrush: rgba(0, 0, 0, 0.04);
+  --SubtleFillColorTertiaryBrush: var(--subtle-tertiary);
   --ScrollBarBackground: var(--SubtleFillColorTransparentBrush);
   --ScrollBarBackgroundPointerOver: var(--SubtleFillColorTransparentBrush);
   --ScrollBarButtonBackground: var(--SubtleFillColorTransparentBrush);
@@ -441,7 +458,8 @@
     --dialog-overlay: rgba(0, 0, 0, 0.30);
     --dialog-divider: rgba(0, 0, 0, 0.20);
     --dialog-button-bg: #202020;
-    --TeachingTipBackgroundBrush: #2D2D2D;
+    --TeachingTipBackgroundBrush: #282828;
+    --SolidBackgroundFillColorTertiaryBrush: #282828;
     --flyout-bg: rgba(44, 44, 44, 0.86);
     --flyout-border: rgba(255, 255, 255, 0.10);
     --flyout-backdrop: blur(44px) saturate(190%) brightness(1.22) contrast(1.05);
@@ -812,7 +830,7 @@ html.theme-dark {
   --dialog-overlay: rgba(0, 0, 0, 0.30);
   --dialog-divider: rgba(0, 0, 0, 0.20);
   --dialog-button-bg: #202020;
-  --TeachingTipBackgroundBrush: #2D2D2D;
+  --TeachingTipBackgroundBrush: #282828;
   --card-bg: rgba(255, 255, 255, 0.0512);
   --card-stroke: rgba(0, 0, 0, 0.10);
   --card-bg-secondary: rgba(255, 255, 255, 0.0326);
@@ -994,7 +1012,7 @@ html.theme-dark {
 }
 
 .win-teaching-tip {
-  z-index: var(--win-teaching-tip-z-index, var(--win-tip-z-index, 2147483647));
+  z-index: var(--win-teaching-tip-z-index, var(--win-tip-z-index, 2147483646));
 }
 
 html .basic-input-example-theme:has(.example-display[data-theme='light']) .example-container {

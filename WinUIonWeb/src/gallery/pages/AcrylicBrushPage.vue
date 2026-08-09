@@ -27,7 +27,7 @@
             </div>
 
             <!-- Example 1: Default Acrylic -->
-            <WinControlExample headerText="Default In-App Acrylic">
+            <WinControlExample :theme="pageTheme" headerText="Default In-App Acrylic">
               <template #example>
                 <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
                   <div class="background-shapes">
@@ -41,7 +41,7 @@
             </WinControlExample>
 
             <!-- Example 2: Custom Acrylic with Options -->
-            <WinControlExample headerText="Custom In-App Acrylic">
+            <WinControlExample :theme="pageTheme" headerText="Custom In-App Acrylic">
               <template #example>
                 <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
                   <div class="background-shapes">
@@ -77,7 +77,7 @@
             </WinControlExample>
 
             <!-- Example 3: Luminosity Acrylic -->
-            <WinControlExample headerText="Luminosity In-App Acrylic">
+            <WinControlExample :theme="pageTheme" headerText="Luminosity In-App Acrylic">
               <template #example>
                 <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
                   <div class="background-shapes">

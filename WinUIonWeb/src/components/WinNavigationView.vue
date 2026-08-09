@@ -116,14 +116,18 @@
                 <WinTextBlock class="label" :Text="item.label" />
                 <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
               </div>
-              <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
+              <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value] && isPaneGroupChildrenVisible, 'is-child-selected': isChildOfGroup(item) }">
                 <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
                   <span v-if="item.icon" class="icon">{{ item.icon }}</span>
                   <WinTextBlock class="label" :Text="item.label" />
                   <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
                   <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onGroupChevronClick(item)">&#xE70D;</span>
                 </div>
-                <div v-if="!isClosedCompact" class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? (groupHeights[item.value] || 0) + 'px' : '0px' }">
+                <div
+                  class="win-nav-group-children"
+                  :style="{ height: groupExpanded[item.value] && isPaneGroupChildrenVisible ? (groupHeights[item.value] || 0) + 'px' : '0px' }"
+                  :aria-hidden="isPaneGroupChildrenVisible ? undefined : 'true'"
+                  :inert="isPaneGroupChildrenVisible ? undefined : ''">
                   <div class="win-nav-group-children-inner" :ref="el => setChildrenRef(item.value, el)">
                     <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" role="button" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
                       <span v-if="child.icon" class="icon">{{ child.icon }}</span>
@@ -219,6 +223,7 @@ const officialProps = defineProps({
   IsBackButtonVisible: { type: String, default: 'Auto' },
   IsBackEnabled: { type: Boolean, default: false },
   IsSettingsVisible: { type: Boolean, default: true },
+  IsNavigationPending: { type: Boolean, default: false },
   IsPaneToggleButtonVisible: { type: Boolean, default: true },
   IsPaneOpen: { type: Boolean, default: true },
   IsPaneVisible: { type: Boolean, default: true },
@@ -398,6 +403,7 @@ const topBackButtonRef = ref(null);
 const indicatorStyle = ref({ opacity: '0' });
 const indicatorIsChild = ref(false);
 const groupExpanded = reactive({});
+const manuallyCollapsedGroups = reactive({});
 const groupHeights = reactive({});
 const groupChevrons = reactive({});
 const flyoutOpen = ref(false);
@@ -426,6 +432,11 @@ const isLeftCompactMode = computed(() => resolvedPaneDisplayMode.value === 'Left
 const isLeftOverlayMode = computed(() => isLeftMinimalMode.value || isLeftCompactMode.value);
 const isLeftPaneContentVisible = computed(() => !isLeftMinimalMode.value || !isCompact.value || paneTransition.value === 'closing');
 const isClosedCompact = computed(() => !isTopNavigation.value && isCompact.value && !isLeftMinimalMode.value);
+// Preserve expansion state while closed, but animate expanded child presenters
+// out of the layout using the same height transition as a normal group toggle.
+const isPaneGroupChildrenVisible = computed(() => (
+  !isClosedCompact.value && (!isLeftMinimalMode.value || !isCompact.value)
+));
 const itemToolTipAttrs = (item) => {
   const toolTip = item?.tooltip || (!isTopNavigation.value && isClosedCompact.value ? item?.label : '');
   return {
@@ -548,12 +559,17 @@ let wasForceClosed = officialProps.IsPaneOpen === false;
 let suppressNextTopChildWatcherMove = false;
 let lastNavigationPointerDownTime = Number.NEGATIVE_INFINITY;
 let lastResizeShellWidth = 0;
+let expandedPaneVerticalOffset = 0;
+let paneLayoutSyncFrame = null;
+let isRestoringPaneScroll = false;
 
 const gearClass = ref('');
 const hamburgerClass = ref('');
 const backClass = ref('');
 let gearPressed = false;
 let gearRewindDone = false;
+let gearAwaitingSettingsNavigation = false;
+let gearNavigationHeld = false;
 let hamburgerPressed = false;
 let hamburgerPressDone = false;
 let backPressed = false;
@@ -931,8 +947,13 @@ const setChildrenRef = (value, el) => {
 const Expand = (item) => {
   const value = resolveSelectedValue(item);
   const normalizedItem = findNormalizedItem(value);
-  if (!normalizedItem?.children || groupExpanded[value]) return;
+  if (!normalizedItem?.children) return;
+  if (groupExpanded[value]) {
+    delete manuallyCollapsedGroups[value];
+    return;
+  }
   emit('Expanding', { ExpandingItemContainer: normalizedItem.source, ExpandingItem: normalizedItem.source });
+  delete manuallyCollapsedGroups[value];
   groupExpanded[value] = true;
   nextTick(() => measureGroup(value));
 };
@@ -941,6 +962,7 @@ const Collapse = (item) => {
   const value = resolveSelectedValue(item);
   const normalizedItem = findNormalizedItem(value);
   if (!normalizedItem?.children || !groupExpanded[value]) return;
+  manuallyCollapsedGroups[value] = true;
   groupExpanded[value] = false;
   emit('Collapsed', { CollapsedItemContainer: normalizedItem.source, CollapsedItem: normalizedItem.source });
 };
@@ -1003,6 +1025,7 @@ const moveIndicatorForValue = (value) => {
 const prepareSelectionTarget = (value) => {
   const parentGroup = findParentGroup(value);
   if (parentGroup && !isTopNavigation.value && !isClosedCompact.value && !groupExpanded[parentGroup.value]) {
+    delete manuallyCollapsedGroups[parentGroup.value];
     groupExpanded[parentGroup.value] = true;
     nextTick(() => measureGroup(parentGroup.value));
   }
@@ -1221,7 +1244,13 @@ const toggleLeftGroup = (item) => {
     ? sourceRect.top + (sourceRect.bottom - sourceRect.top) / 2 - 8
     : null;
 
-  if (wasExpanded) Collapse(item.source); else Expand(item.source);
+  if (wasExpanded) {
+    manuallyCollapsedGroups[item.value] = true;
+    Collapse(item.source);
+  } else {
+    delete manuallyCollapsedGroups[item.value];
+    Expand(item.source);
+  }
   nextTick(() => measureGroup(item.value));
   if (selectedChild) {
     nextTick(() => {
@@ -1446,7 +1475,18 @@ const onBackClick = () => {
 
 const selectSettings = () => {
   if (!isSettingsVisible.value) return;
-  if (!commitNavigationValue(settingsValue.value, { isSettings: true, collapsePane: true })) return;
+  gearAwaitingSettingsNavigation = true;
+  if (!commitNavigationValue(settingsValue.value, { isSettings: true, collapsePane: true })) {
+    gearAwaitingSettingsNavigation = false;
+    return;
+  }
+  void nextTick(() => {
+    // ItemInvoked is synchronous. If the host did not begin navigation during
+    // this update, leave the normal press/release animation untouched.
+    if (gearAwaitingSettingsNavigation && !officialProps.IsNavigationPending) {
+      gearAwaitingSettingsNavigation = false;
+    }
+  });
   if (isSelectedItemControlled) {
     if (selectedValue.value === settingsValue.value) collapseOverlayAfterNavigation();
     return;
@@ -1586,6 +1626,11 @@ const onBackAnimEnd = (event) => {
 };
 
 const onScroll = () => {
+  if (isRestoringPaneScroll) return;
+  const scrollElement = getScrollAreaElement();
+  if (scrollElement && !isCompact.value) {
+    expandedPaneVerticalOffset = scrollElement.scrollTop;
+  }
   if (lastSelectedEl && navRef.value && navRef.value.contains(lastSelectedEl)) {
     skipTransition = true;
     calcIndicator();
@@ -1608,6 +1653,69 @@ const queueLayoutRefresh = () => {
 };
 
 const getScrollAreaElement = () => scrollArea.value?.scrollViewerRef?.value ?? scrollArea.value?.scrollViewerRef ?? scrollArea.value ?? null;
+
+const synchronizePaneLayoutTransition = ({ restoreScrollOffset = false } = {}) => {
+  if (paneLayoutSyncFrame) cancelAnimationFrame(paneLayoutSyncFrame);
+  const startTime = performance.now();
+  // The panel transition and the parent/child indicator transition run in
+  // parallel. Keep syncing until both contracts have had time to settle.
+  const duration = Math.max(400, paneTransitionDurationMs(isCompact.value) + 200);
+  let settlingFrames = 0;
+  let trackedIndicatorTarget = null;
+  let trackedIndicatorTargetY = null;
+  // Suppress scroll-driven indicator recalculation for the complete pane
+  // transition. The viewport can be clamped while child groups animate to
+  // zero; restoring the saved offset happens only on the opening leg.
+  isRestoringPaneScroll = true;
+  skipTransition = true;
+
+  const synchronize = (timestamp) => {
+    const scrollElement = getScrollAreaElement();
+    if (restoreScrollOffset && scrollElement) {
+      const maximumOffset = Math.max(0, scrollElement.scrollHeight - scrollElement.clientHeight);
+      scrollElement.scrollTop = Math.min(expandedPaneVerticalOffset, maximumOffset);
+    }
+
+    const indicatorElement = indicatorTrack.value?.querySelector('.win-nav-indicator');
+    const indicatorIsAnimating = indicatorElement?.getAnimations()
+      .some(animation => animation.playState === 'running');
+    if (indicatorIsAnimating && lastSelectedEl && indicatorTrack.value) {
+      const targetRect = getTrackRelativeRect(lastSelectedEl, indicatorTrack.value);
+      const targetY = targetRect.top + (targetRect.bottom - targetRect.top) / 2 - 8;
+      if (trackedIndicatorTarget !== lastSelectedEl) {
+        trackedIndicatorTarget = lastSelectedEl;
+        trackedIndicatorTargetY = targetY;
+      }
+      indicatorElement.style.translate = `0 ${targetY - trackedIndicatorTargetY}px`;
+    } else {
+      if (indicatorElement) indicatorElement.style.translate = '';
+      trackedIndicatorTarget = null;
+      trackedIndicatorTargetY = null;
+      restoreIndicatorAfterPaneLayout();
+    }
+
+    if (timestamp - startTime < duration || settlingFrames < 2) {
+      if (timestamp - startTime >= duration) settlingFrames += 1;
+      paneLayoutSyncFrame = requestAnimationFrame(synchronize);
+      return;
+    }
+
+    if (restoreScrollOffset && scrollElement) {
+      const maximumOffset = Math.max(0, scrollElement.scrollHeight - scrollElement.clientHeight);
+      scrollElement.scrollTop = Math.min(expandedPaneVerticalOffset, maximumOffset);
+    }
+    paneLayoutSyncFrame = requestAnimationFrame(() => {
+      paneLayoutSyncFrame = null;
+      isRestoringPaneScroll = false;
+      const indicatorElement = indicatorTrack.value?.querySelector('.win-nav-indicator');
+      if (indicatorElement) indicatorElement.style.translate = '';
+      restoreIndicatorAfterPaneLayout();
+      skipTransition = false;
+    });
+  };
+
+  paneLayoutSyncFrame = requestAnimationFrame(synchronize);
+};
 
 const calcIndicator = ({ animateSelectionChange = false } = {}) => {
   const sourceEl = prevSelectedEl && prevSelectedEl !== lastSelectedEl ? prevSelectedEl : null;
@@ -1811,7 +1919,8 @@ const restoreIndicatorAfterPaneLayout = () => {
   const value = props.selectedValue;
   if (!value || !navRef.value) return;
   const parentGroup = findParentGroup(value);
-  const target = parentGroup && isClosedCompact.value
+  const selectedGroupCollapsed = parentGroup && !groupExpanded[parentGroup.value];
+  const target = parentGroup && (isClosedCompact.value || selectedGroupCollapsed)
     ? itemRefs[parentGroup.value]
     : itemRefs[value] || (value === settingsValue.value ? itemRefs[settingsValue.value] : null);
   const indicatorEl = indicatorTrack.value?.querySelector('.win-nav-indicator');
@@ -1821,7 +1930,7 @@ const restoreIndicatorAfterPaneLayout = () => {
   // item. Always snap/recalculate after the layout settles so the indicator
   // cannot remain at a stale position or stay hidden after a fold.
   lastSelectedEl = target;
-  lastIsChild = !!parentGroup && !isClosedCompact.value;
+  lastIsChild = !!parentGroup && !isClosedCompact.value && !selectedGroupCollapsed;
   indicatorIsChild.value = lastIsChild;
   skipTransition = true;
   nextIndicatorAnimation(indicatorEl);
@@ -1994,6 +2103,7 @@ onBeforeUnmount(() => {
   if (ro) ro.disconnect();
   if (layoutObserver) layoutObserver.disconnect();
   if (layoutObserverFrame) cancelAnimationFrame(layoutObserverFrame);
+  if (paneLayoutSyncFrame) cancelAnimationFrame(paneLayoutSyncFrame);
   if (paneTransitionTimer) clearTimeout(paneTransitionTimer);
   window.removeEventListener('resize', onResize);
   document.removeEventListener('pointerdown', onDocumentPointerDown, true);
@@ -2042,6 +2152,21 @@ watch(() => officialProps.SelectedItem, (item) => {
     syncIndicatorForSelectedItem(nextValue, {
       collapsePane: confirmedSelectionRequest?.collapsePane === true
     });
+  }
+});
+
+watch(() => officialProps.IsNavigationPending, (pending, wasPending) => {
+  if (pending) {
+    if (!gearAwaitingSettingsNavigation) return;
+    gearAwaitingSettingsNavigation = false;
+    gearNavigationHeld = true;
+    gearClass.value = 'gear-navigation-hold';
+    return;
+  }
+
+  if (wasPending && gearNavigationHeld) {
+    gearNavigationHeld = false;
+    gearClass.value = 'gear-spin';
   }
 });
 
@@ -2116,6 +2241,10 @@ const animatePaneIndicatorTransition = ({
 };
 
 watch(isCompact, (compact) => {
+  const scrollElement = getScrollAreaElement();
+  if (compact && scrollElement) expandedPaneVerticalOffset = scrollElement.scrollTop;
+  nextTick(() => synchronizePaneLayoutTransition({ restoreScrollOffset: !compact }));
+
   // LeftMinimal uses an overlay pane, not ClosedCompact. Keep its complete
   // menu (including expanded children and the child indicator) intact while
   // the pane surface plays the reverse opening animation.
@@ -2123,11 +2252,18 @@ watch(isCompact, (compact) => {
     if (!compact) {
       const parentGroup = findParentGroup(props.selectedValue);
       if (parentGroup) {
-        groupExpanded[parentGroup.value] = true;
-        nextTick(() => {
-          measureGroup(parentGroup.value);
-          requestAnimationFrame(() => restoreIndicatorAfterPaneLayout());
-        });
+        if (manuallyCollapsedGroups[parentGroup.value]) {
+          nextTick(() => {
+            measureAllGroups();
+            restoreIndicatorAfterPaneLayout();
+          });
+        } else {
+          groupExpanded[parentGroup.value] = true;
+          nextTick(() => {
+            measureGroup(parentGroup.value);
+            requestAnimationFrame(() => restoreIndicatorAfterPaneLayout());
+          });
+        }
       } else {
         requestAnimationFrame(() => restoreIndicatorAfterPaneLayout());
       }
@@ -2137,12 +2273,16 @@ watch(isCompact, (compact) => {
 
   if (compact) {
     const parentGroup = findParentGroup(props.selectedValue);
-    for (const item of props.menuItems) {
-      if (item.children && groupExpanded[item.value]) {
-        groupExpanded[item.value] = false;
-      }
-    }
-    if (parentGroup) {
+    // ClosedCompact collapses child presenters to height zero, but it must not
+    // discard their expansion state. Native NavigationView restores every
+    // group that was open when the pane is opened again, rather than reopening
+    // only the selected item's parent.
+    if (parentGroup && manuallyCollapsedGroups[parentGroup.value]) {
+      // The selected child was already moved to its parent by the manual
+      // group collapse. The pane fold only changes visibility; do not replay
+      // the child-to-parent indicator collapse animation.
+      nextTick(() => restoreIndicatorAfterPaneLayout());
+    } else if (parentGroup) {
       nextTick(() => {
         const header = itemRefs[parentGroup.value];
         if (header) {
@@ -2166,7 +2306,14 @@ watch(isCompact, (compact) => {
     }
   } else {
     const parentGroup = findParentGroup(props.selectedValue);
-    if (parentGroup) {
+    if (parentGroup && manuallyCollapsedGroups[parentGroup.value]) {
+      // Keep a manually collapsed selected group closed when the pane opens.
+      // Recalculate the parent indicator after the pane layout settles.
+      nextTick(() => {
+        measureAllGroups();
+        restoreIndicatorAfterPaneLayout();
+      });
+    } else if (parentGroup) {
       const track = indicatorTrack.value;
       const header = itemRefs[parentGroup.value];
       const headerRect = header && track ? getTrackRelativeRect(header, track) : null;
@@ -2176,6 +2323,7 @@ watch(isCompact, (compact) => {
       const sourceRect = headerRect;
       groupExpanded[parentGroup.value] = true;
       nextTick(() => {
+        measureAllGroups();
         measureGroup(parentGroup.value);
         const sel = itemRefs[props.selectedValue];
         if (!sel) return;
@@ -2194,6 +2342,11 @@ watch(isCompact, (compact) => {
           calcIndicator();
           requestAnimationFrame(() => { skipTransition = false; });
         }
+      });
+    } else {
+      nextTick(() => {
+        measureAllGroups();
+        restoreIndicatorAfterPaneLayout();
       });
     }
   }
@@ -3400,6 +3553,13 @@ watch(() => props.selectedValue, (val) => {
 
   .win-nav-group.is-expanded > .win-nav-group-header .win-nav-group-chevron {
     transform: rotate(180deg);
+  }
+
+  /* During a pane fold the logical group remains expanded for restoration,
+     while its child presenter is animating closed. Keep the arrow in the
+     same visual state as the height animation. */
+  .win-nav-left-panel .win-nav-group:not(.is-expanded) > .win-nav-group-header .win-nav-group-chevron {
+    transform: rotate(0deg);
   }
 
   .win-nav-group-children {

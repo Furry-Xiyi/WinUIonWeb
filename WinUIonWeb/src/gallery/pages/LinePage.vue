@@ -22,6 +22,7 @@
 
             <!-- Line 示例 -->
             <WinControlExample
+              :theme="currentTheme"
               headerText="Line"
               :templateCode="lineTemplateCode"
               :vueCode="lineVueCode">
@@ -74,6 +75,7 @@
 
             <!-- Polyline 示例 -->
             <WinControlExample
+              :theme="currentTheme"
               headerText="Polyline"
               :templateCode="polylineTemplateCode"
               :vueCode="polylineVueCode">
@@ -109,6 +111,7 @@
 
             <!-- Path 示例 -->
             <WinControlExample
+              :theme="currentTheme"
               headerText="Path"
               :templateCode="pathTemplateCode"
               :vueCode="pathVueCode">
@@ -145,6 +148,7 @@
 
             <!-- GeometryGroup 示例 -->
             <WinControlExample
+              :theme="currentTheme"
               headerText="GeometryGroup"
               :templateCode="geometryTemplateCode"
               :vueCode="geometryVueCode">

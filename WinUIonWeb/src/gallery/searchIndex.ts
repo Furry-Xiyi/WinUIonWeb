@@ -34,7 +34,7 @@ const TAGS = [
   'flipview', 'gridview', 'itemsrepeater', 'itemsview', 'listbox', 'listview',
   'pulltorefresh', 'treeview', 'pipspager', 'semanticzoom',
   'animatedvisualplayer', 'captureelement', 'image', 'mediaplayerelement',
-  'personpicture', 'commandbar', 'contentdialog', 'commandbarflyout', 'flyout',
+  'personpicture', 'appbarbutton', 'appbarseparator', 'toggleappbarbutton', 'commandbar', 'contentdialog', 'commandbarflyout', 'flyout',
   'menubar', 'menuflyout', 'swipecontrol', 'standarduicommand',
   'xamluicommand', 'popup', 'teachingtip', 'tooltip', 'infobadge', 'infobar',
   'progressbar', 'progressring', 'breadcrumbbar', 'navigationview', 'pivot',

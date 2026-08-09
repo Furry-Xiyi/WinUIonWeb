@@ -1,124 +1,165 @@
 <template>
   <div
-    v-show="visibility === 'Visible'"
-    class="win-appbar-separator"
-    :class="{
-      'is-compact': isCompact,
-      'is-disabled': !isEnabled
-    }"
+    v-if="Visibility !== 'Collapsed'"
+    :class="separatorClasses"
+    :style="separatorStyle"
     role="separator"
-    aria-orientation="vertical"
-  >
-    <div class="separator-line"></div>
+    :tabindex="xamlTrue(IsTabStop) ? 0 : -1"
+    :aria-orientation="isOverflowStyle || isHorizontal ? 'horizontal' : 'vertical'"
+    :aria-hidden="Visibility === 'Hidden' ? 'true' : undefined">
+    <div class="separator-line" aria-hidden="true"></div>
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue';
+<script setup lang="ts">
+import { computed, useAttrs } from 'vue';
 
-const props = defineProps({
-  // 官方属性：IsCompact - 控制紧凑模式下的显示
-  isCompact: {
-    type: Boolean,
-    default: false
-  },
+defineOptions({ inheritAttrs: true });
 
-  // 官方属性：Visibility - 控制可见性
-  visibility: {
-    type: String,
-    default: 'Visible',
-    validator: (value) => ['Visible', 'Collapsed', 'Hidden'].includes(value)
-  },
+type XamlBoolean = boolean | 'True' | 'False';
 
-  // 继承自Control的通用属性
-  isEnabled: {
-    type: Boolean,
-    default: true
-  }
+const props = withDefaults(defineProps<{
+  /** Switches the separator to the compact AppBar visual state. */
+  IsCompact?: XamlBoolean;
+  /** Uses the horizontal separator template used by CommandBar overflow. */
+  UseOverflowStyle?: XamlBoolean;
+  /** Read-only in WinUI; accepted here so a command container can describe its state. */
+  IsInOverflow?: XamlBoolean;
+  /** Dynamic overflow ordering metadata inherited from ICommandBarElement. */
+  DynamicOverflowOrder?: number;
+  /** AppBarSeparator is not a tab stop in the WinUI template. */
+  IsTabStop?: XamlBoolean;
+  Visibility?: 'Visible' | 'Collapsed' | 'Hidden';
+  IsEnabled?: XamlBoolean;
+  Foreground?: string;
+  Padding?: string | number;
+  Margin?: string | number;
+  Width?: string | number;
+  Height?: string | number;
+  HorizontalAlignment?: 'Left' | 'Center' | 'Right' | 'Stretch';
+  VerticalAlignment?: 'Top' | 'Center' | 'Bottom' | 'Stretch';
+}>(), {
+  IsCompact: false,
+  UseOverflowStyle: false,
+  IsInOverflow: false,
+  DynamicOverflowOrder: -1,
+  IsTabStop: false,
+  Visibility: 'Visible',
+  IsEnabled: true,
+  Foreground: undefined,
+  Padding: undefined,
+  Margin: undefined,
+  Width: undefined,
+  Height: undefined,
+  HorizontalAlignment: undefined,
+  VerticalAlignment: undefined
 });
 
-// AppBarSeparator没有交互事件，无需emit
+const attrs = useAttrs();
+const isHorizontal = computed(() => Boolean((attrs.class as string | undefined)?.split(' ').includes('is-horizontal')));
+const xamlTrue = (value: XamlBoolean | undefined) => value === true || value === 'True';
+const isOverflowStyle = computed(() => xamlTrue(props.UseOverflowStyle) || xamlTrue(props.IsInOverflow));
+
+const cssLength = (value: string | number | undefined) => {
+  if (value === undefined || value === '') return undefined;
+  return typeof value === 'number' || !Number.isNaN(Number(value)) ? `${Number(value)}px` : String(value);
+};
+
+const xamlThickness = (value: string | number | undefined) => {
+  if (value === undefined || value === '') return undefined;
+  const parts = String(value).split(',').map((part) => cssLength(part.trim()) || '0');
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
+  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
+  return String(value);
+};
+
+const separatorClasses = computed(() => ({
+  'win-appbar-separator': true,
+  'is-compact': xamlTrue(props.IsCompact),
+  'is-overflow': isOverflowStyle.value,
+  'is-disabled': !xamlTrue(props.IsEnabled),
+  'is-hidden': props.Visibility === 'Hidden'
+}));
+
+const separatorStyle = computed(() => ({
+  '--AppBarSeparatorForeground': props.Foreground || undefined,
+  padding: xamlThickness(props.Padding),
+  margin: xamlThickness(props.Margin),
+  width: cssLength(props.Width),
+  height: cssLength(props.Height),
+  justifySelf: props.HorizontalAlignment ? {
+    Left: 'start', Center: 'center', Right: 'end', Stretch: 'stretch'
+  }[props.HorizontalAlignment] : undefined,
+  alignSelf: props.VerticalAlignment ? {
+    Top: 'start', Center: 'center', Bottom: 'end', Stretch: 'stretch'
+  }[props.VerticalAlignment] : undefined,
+}));
 </script>
 
 <style scoped>
 .win-appbar-separator {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  flex-shrink: 0;
-  /* Official AppBarSeparatorMargin is 2,8,2,8 around a 1px line. */
+  display: grid;
+  flex: 0 0 auto;
+  box-sizing: border-box;
   width: 5px;
-  height: 32px;
-  margin: 0;
-  transition: opacity var(--fast-duration) var(--fast-out-slow-in);
+  /* FullSize is stretched by CommandBar's primary-items presenter. */
+  height: auto;
+  min-height: 0;
+  padding: 8px 2px;
+  align-self: stretch;
+  place-items: stretch;
+  color: var(--AppBarSeparatorForeground, var(--stroke-divider));
+  transition: opacity var(--fast-duration, 167ms) var(--fast-out-slow-in, cubic-bezier(0.1, 0.9, 0.2, 1));
 }
 
-/* 紧凑模式：更小的高度和边距 */
-.win-appbar-separator.is-compact {
-  height: 32px;
-}
-
-/* 分隔线本身 */
 .separator-line {
   width: 1px;
   height: auto;
-  margin: 8px 2px;
-  background: var(--divider-stroke-color-default);
-  opacity: 0.6;
-  transition: background var(--fast-duration) var(--fast-out-slow-in);
+  min-height: 0;
+  border-radius: 0.5px;
+  background: currentColor;
 }
 
-/* 禁用状态 */
-.win-appbar-separator.is-disabled .separator-line {
-  background: var(--control-strong-stroke-color-disabled);
-  opacity: 0.3;
+.win-appbar-separator.is-compact {
+  height: 48px;
+  min-height: 0;
+  align-self: start;
 }
 
-/* CommandBar溢出菜单中的横向分隔线 */
-.win-appbar-separator.is-horizontal {
+.win-appbar-separator.is-overflow {
+  width: 100%;
+  min-width: 0;
+  height: 9px;
+  padding: 4px 0;
+  align-self: stretch;
+}
+
+.win-appbar-separator.is-overflow .separator-line {
   width: auto;
   height: 1px;
-  min-width: 200px;
-  margin: 4px 0;
+  align-self: stretch;
+}
+
+.win-appbar-separator.is-horizontal {
+  width: 100%;
+  min-width: 0;
+  height: 9px;
+  padding: 4px 0;
+  align-self: stretch;
 }
 
 .win-appbar-separator.is-horizontal .separator-line {
-  width: 100%;
+  width: auto;
   height: 1px;
-  margin: 0 4px;
 }
 
-/* 浅色主题微调 */
-@media (prefers-color-scheme: light) {
-  .separator-line {
-    opacity: 0.5;
-  }
+.win-appbar-separator.is-disabled {
+  color: var(--ControlStrongStrokeColorDisabledBrush, var(--text-disabled));
+  opacity: 0.55;
 }
 
-/* 深色主题微调 */
-@media (prefers-color-scheme: dark) {
-  .separator-line {
-    opacity: 0.4;
-  }
-}
-
-/* 高对比度模式 */
-@media (prefers-contrast: high) {
-  .separator-line {
-    background: var(--text-fill-color-primary);
-    opacity: 1;
-  }
-
-  .win-appbar-separator.is-disabled .separator-line {
-    background: var(--text-fill-color-disabled);
-  }
-}
-
-/* 动画性能优化 */
-@media (prefers-reduced-motion: reduce) {
-  .win-appbar-separator,
-  .separator-line {
-    transition: none;
-  }
+.win-appbar-separator.is-hidden {
+  visibility: hidden;
 }
 </style>

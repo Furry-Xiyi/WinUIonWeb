@@ -8,6 +8,7 @@
       Title / Subtitle / IconSource
       LeftHeader / Content / RightHeader（Content 同时支持默认插槽）
       IsBackButtonVisible / IsBackButtonEnabled / IsPaneToggleButtonVisible
+      PreferredHeightOption（Default / Tall；Tall 使用 48px）
       AutoRefreshDragRegions / RecomputeDragRegions()
       IsDragRegion（附加属性：在子元素上写 IsDragRegion="true|false"）
       资源：TitleBarContentHorizontalAlignment、TitleBarLeftHeaderHorizontalAlignment、
@@ -131,6 +132,7 @@ const props = defineProps({
   IsBackButtonVisible: { type: Boolean, default: false },
   IsBackButtonEnabled: { type: Boolean, default: true },
   IsPaneToggleButtonVisible: { type: Boolean, default: false },
+  PreferredHeightOption: { type: String, default: 'Default' },
   AutoRefreshDragRegions: { type: Boolean, default: false },
   TitleBarContentHorizontalAlignment: { type: String, default: 'Center' },
   TitleBarContentVerticalAlignment: { type: String, default: 'Center' },
@@ -172,7 +174,8 @@ let resizeObserver = null;
 let contentObserver = null;
 
 const hasContent = computed(() => Boolean(slots.Content || slots.default));
-const hasExpandedHeight = computed(() => hasContent.value || Boolean(slots.LeftHeader || slots.RightHeader));
+const isTallHeight = computed(() => props.PreferredHeightOption === 'Tall');
+const hasExpandedHeight = computed(() => isTallHeight.value || hasContent.value || Boolean(slots.LeftHeader || slots.RightHeader));
 // 标题/副标题始终跟随图标显示，不随紧凑模式隐藏；
 // 空间不足时由网格收缩 + 省略号处理，而不是直接丢掉标题。
 const showTitle = computed(() => props.Title !== '');

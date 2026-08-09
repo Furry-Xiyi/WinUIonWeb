@@ -1,6 +1,6 @@
 <template>
   <span class="win-flyout-anchor" ref="anchorRef">
-    <slot name="trigger"></slot>
+    <slot name="trigger" :Flyout="flyoutController"></slot>
     <Teleport :to="teleportTarget">
       <div v-if="effectiveIsOpen" class="win-flyout-dismiss-layer" @pointerdown="onLightDismiss"></div>
       <div
@@ -33,10 +33,7 @@ const props = defineProps({
   ShowMode: { type: String, default: 'Standard' },
   IsLightDismissEnabled: { type: Boolean, default: true },
   LightDismissOverlayMode: { type: String, default: 'Auto' },
-  Theme: { type: String, default: '' },
-  placement: { type: String, default: '' },
-  direction: { type: String, default: '' },
-  align: { type: String, default: '' }
+  Theme: { type: String, default: '' }
 });
 
 const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed', 'Opening', 'Closing']);
@@ -50,7 +47,7 @@ const teleportTarget = ref<string | HTMLElement>('body');
 
 const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
 const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
-const requestedPlacement = computed(() => props.Placement || props.placement || 'Bottom');
+const requestedPlacement = computed(() => props.Placement || 'Bottom');
 
 const flyoutStyle = computed(() => ({
   top: `${position.value.top}px`,
@@ -74,13 +71,12 @@ const updatePosition = async () => {
   const margin = 8;
   const gap = 6;
   const placement = requestedPlacement.value;
-  const preferTop = placement.includes('Top') || props.direction === 'up';
-  const preferRight = placement.includes('Right');
-  const preferCenter = props.align === 'center';
-  const preferEnd = placement.includes('Right') || props.align === 'right';
+  const preferTop = placement.startsWith('Top');
+  const preferCenter = placement === 'Top' || placement === 'Bottom';
+  const preferEnd = placement.endsWith('EdgeAlignedRight');
 
   let top = preferTop ? rect.top - gap : rect.bottom + gap;
-  let left = preferRight ? rect.right : rect.left;
+  let left = rect.left;
   position.value = {
     top,
     left,
@@ -131,6 +127,13 @@ const toggle = () => {
   else void show();
 };
 
+const flyoutController = {
+  ShowAt: () => { void show(); },
+  Hide: hide,
+  Toggle: toggle,
+  get IsOpen() { return effectiveIsOpen.value; }
+};
+
 const onLightDismiss = () => {
   if (props.IsLightDismissEnabled) hide();
 };
@@ -146,6 +149,14 @@ watch(() => props.IsOpen, async (value: boolean | undefined) => {
 const onViewportChanged = () => {
   if (effectiveIsOpen.value) void updatePosition();
 };
+const onWindowBlur = () => {
+  if (effectiveIsOpen.value && props.IsLightDismissEnabled) hide();
+};
+const onKeyDown = (event: KeyboardEvent) => {
+  if (event.key !== 'Escape' || !effectiveIsOpen.value) return;
+  event.preventDefault();
+  hide();
+};
 
 const onFullscreenChanged = () => {
   teleportTarget.value = (document.fullscreenElement as HTMLElement | null) || 'body';
@@ -156,12 +167,16 @@ onMounted(() => {
   teleportTarget.value = (document.fullscreenElement as HTMLElement | null) || 'body';
   window.addEventListener('resize', onViewportChanged);
   window.addEventListener('scroll', onViewportChanged, true);
+  window.addEventListener('blur', onWindowBlur);
+  document.addEventListener('keydown', onKeyDown, true);
   document.addEventListener('fullscreenchange', onFullscreenChanged);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onViewportChanged);
   window.removeEventListener('scroll', onViewportChanged, true);
+  window.removeEventListener('blur', onWindowBlur);
+  document.removeEventListener('keydown', onKeyDown, true);
   document.removeEventListener('fullscreenchange', onFullscreenChanged);
 });
 

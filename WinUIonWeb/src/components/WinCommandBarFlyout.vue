@@ -15,35 +15,25 @@
             <div class="win-cbf-content-root">
               <div class="win-cbf-primary-items-root">
                 <div v-if="primaryCommands.length" class="win-cbf-primary-items-control" role="toolbar">
-                  <button
-                    v-for="command in primaryCommands"
-                    :key="commandKey(command)"
-                    class="win-cbf-appbar-button"
-                    :class="{ 'is-toggle': command.IsToggle, 'is-checked': command.IsChecked }"
-                    type="button"
-                    role="menuitem"
-                    :aria-label="command.Label"
-                    :aria-pressed="command.IsToggle ? Boolean(command.IsChecked) : undefined"
-                    v-bind="commandToolTipAttrs(command)"
-                    :disabled="command.IsEnabled === false"
-                    @click="invoke(command, $event)">
-                    <span class="win-cbf-appbar-content-root" aria-hidden="true">
-                      <span class="win-cbf-icon-and-label-panel">
-                        <span v-if="command.Icon" class="win-cbf-content-viewbox">
-                          <span class="win-cbf-icon">{{ iconGlyph(command.Icon) }}</span>
-                        </span>
-                        <span v-if="showPrimaryLabels" class="win-cbf-text-label">{{ command.Label }}</span>
-                      </span>
-                    </span>
-                  </button>
+                  <WinCommandBar
+                    class="win-cbf-commandbar"
+                    :IsOpen="true"
+                    :IsSticky="true"
+                    :IsDynamicOverflowEnabled="false"
+                    OverflowButtonVisibility="Collapsed"
+                    DefaultLabelPosition="Bottom"
+                    HorizontalAlignment="Left"
+                    :PrimaryCommands="commandBarPrimaryCommands"
+                    :SecondaryCommands="[]"
+                    :Theme="Theme" />
                 </div>
 
                 <button
                   v-if="secondaryCommands.length && !AlwaysExpanded"
                   class="win-cbf-more-button"
                   type="button"
-                  :aria-label="t('text.more')"
-                  v-bind="{ 'tooltipservice.tooltip': t('text.more') }"
+                  :aria-label="secondaryOpen ? t('text.see-less') : t('text.see-more')"
+                  v-bind="{ 'tooltipservice.tooltip': secondaryOpen ? t('text.see-less') : t('text.see-more') }"
                   :aria-expanded="secondaryOpen"
                   @click="toggleSecondary">
                   <span class="win-cbf-ellipsis-icon" aria-hidden="true">&#xE712;</span>
@@ -88,6 +78,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
+import WinAppBarButton from './WinAppBarButton.vue';
+import WinAppBarToggleButton from './WinAppBarToggleButton.vue';
+import WinCommandBar from './WinCommandBar.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
@@ -131,7 +124,6 @@ const props = withDefaults(defineProps<{
   Placement?: Placement;
   ShowMode?: ShowMode;
   MinWidth?: number;
-  ShowPrimaryLabels?: boolean;
   Theme?: string;
 }>(), {
   Open: false,
@@ -142,7 +134,6 @@ const props = withDefaults(defineProps<{
   Placement: 'Auto',
   ShowMode: 'Standard',
   MinWidth: 0,
-  ShowPrimaryLabels: false,
   Theme: ''
 });
 
@@ -167,14 +158,12 @@ const position = ref({ top: 0, left: 0 });
 const primaryCommands = computed(() => props.PrimaryCommands ?? []);
 const secondaryCommands = computed(() => props.SecondaryCommands ?? []);
 const AlwaysExpanded = computed(() => props.AlwaysExpanded);
-const showPrimaryLabels = computed(() => props.ShowPrimaryLabels);
 const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
 let secondaryAnimationTimer = 0;
 
 const secondaryPanelVisible = computed(() => secondaryCommands.value.length > 0 && secondaryRendered.value);
 const panelStateClasses = computed(() => ({
   'is-expanded': secondaryRendered.value,
-  'has-primary-labels': showPrimaryLabels.value,
   'is-panel-expanding-setup': panelAnimation.value === 'expanding-setup',
   'is-panel-expanding': panelAnimation.value === 'expanding',
   'is-panel-collapsing': panelAnimation.value === 'collapsing'
@@ -192,6 +181,23 @@ const commandKey = (command: CommandBarFlyoutCommand) => command.Name || command
 const commandToolTipAttrs = (command: CommandBarFlyoutCommand) => (
   command['ToolTipService.ToolTip'] ? { 'tooltipservice.tooltip': command['ToolTipService.ToolTip'] } : {}
 );
+
+const commandBarPrimaryCommands = computed(() => primaryCommands.value.map((command) => ({
+  Component: command.IsToggle ? WinAppBarToggleButton : WinAppBarButton,
+  Props: {
+    Icon: command.Icon,
+    Label: command.Label,
+    IsEnabled: command.IsEnabled,
+    IsChecked: command.IsChecked,
+    'ToolTipService.ToolTip': command['ToolTipService.ToolTip'],
+    KeyboardAcceleratorTextOverride: command.KeyboardAcceleratorTextOverride,
+    AllowFocusOnInteraction: false
+  },
+  Key: commandKey(command),
+  Click: (event?: MouseEvent) => {
+    if (event) invoke(command, event);
+  }
+})));
 
 const secondaryCommandClasses = (command: CommandBarFlyoutCommand) => ({
   'is-toggle': command.IsToggle,
@@ -449,11 +455,12 @@ defineExpose({ showAt, hide, openAt, isOpen });
 .win-cbf-primary-items-root {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 46px;
+  min-height: 58px;
   overflow: hidden;
-  background: var(--CommandBarFlyoutBackground, var(--flyout-background, var(--layer-fill-color-default)));
-  border: 1px solid var(--CommandBarFlyoutBorderBrush, var(--control-stroke-color-default, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))));
+  background: transparent;
+  border: 0;
   border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--CommandBarFlyoutBorderBrush, var(--control-stroke-color-default, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))));
 }
 
 .win-commandbar-flyout.is-expanded .win-cbf-primary-items-root {
@@ -465,17 +472,91 @@ defineExpose({ showAt, hide, openAt, isOpen });
   display: flex;
   grid-column: 1;
   align-items: stretch;
-  height: 40px;
+  height: 52px;
+  min-height: 52px;
   min-width: 0;
   margin: 3px 0 3px 3px;
 }
 
-.win-commandbar-flyout.has-primary-labels .win-cbf-primary-items-control {
+.win-cbf-commandbar {
+  height: 52px;
   min-height: 52px;
-  height: auto;
+  background: transparent;
+  --CommandBarBackground: transparent;
+  --CommandBarBackgroundOpen: transparent;
+  --CommandBarBorderBrushOpen: transparent;
+  --CommandBarHeightTransitionDuration: 0ms;
+  --AppBarButtonBackground: var(--CommandBarFlyoutAppBarButtonBackground, transparent);
+  --AppBarButtonBackgroundPointerOver: var(--CommandBarFlyoutAppBarButtonBackgroundPointerOver, var(--subtle-fill-color-secondary, var(--subtle-secondary)));
+  --AppBarButtonBackgroundPressed: var(--CommandBarFlyoutAppBarButtonBackgroundPressed, var(--subtle-fill-color-tertiary, var(--subtle-tertiary)));
+  --AppBarButtonBackgroundDisabled: var(--CommandBarFlyoutAppBarButtonBackgroundDisabled, transparent);
+  --AppBarButtonForeground: var(--CommandBarFlyoutAppBarButtonForeground, var(--text-primary));
+  --AppBarButtonForegroundPointerOver: var(--CommandBarFlyoutAppBarButtonForegroundPointerOver, var(--text-primary));
+  --AppBarButtonForegroundPressed: var(--CommandBarFlyoutAppBarButtonForegroundPressed, var(--text-secondary));
+  --AppBarButtonForegroundDisabled: var(--CommandBarFlyoutAppBarButtonForegroundDisabled, var(--text-disabled));
+  --AppBarToggleButtonBackgroundChecked: var(--CommandBarFlyoutAppBarButtonBackgroundChecked, var(--accent-base));
+  --AppBarToggleButtonBackgroundCheckedPointerOver: var(--CommandBarFlyoutAppBarButtonBackgroundCheckedPointerOver, var(--accent-hover, var(--accent-base)));
+  --AppBarToggleButtonBackgroundCheckedPressed: var(--CommandBarFlyoutAppBarButtonBackgroundCheckedPressed, var(--accent-pressed, var(--accent-base)));
+  --AppBarToggleButtonForegroundChecked: var(--CommandBarFlyoutAppBarButtonForegroundChecked, var(--accent-text));
+  --AppBarToggleButtonForegroundCheckedPointerOver: var(--CommandBarFlyoutAppBarButtonForegroundCheckedPointerOver, var(--accent-text));
+  --AppBarToggleButtonForegroundCheckedPressed: var(--CommandBarFlyoutAppBarButtonForegroundCheckedPressed, var(--accent-text));
 }
 
-.win-cbf-appbar-button,
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open),
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-surface),
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-primary-content) {
+  height: 52px;
+  min-height: 52px;
+  background: transparent;
+}
+
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-surface) {
+  padding-left: 0;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-primary-content) {
+  justify-content: flex-start;
+  overflow: visible;
+}
+
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-primary-content .win-appbar-button) {
+  flex-basis: auto;
+  width: auto;
+  min-width: 40px;
+  max-width: none;
+  height: 52px;
+  min-height: 52px;
+  align-self: stretch;
+  justify-self: stretch;
+}
+
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-inner-border) {
+  inset: 2px;
+}
+
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-content-root) {
+  width: auto;
+  min-width: 40px;
+  height: 52px;
+  min-height: 52px;
+  align-content: start;
+}
+
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-icon) {
+  margin: 9px 0 0;
+}
+
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-label) {
+  width: 60px;
+  max-width: 60px;
+  margin: 6px 0 2px;
+}
+
 .win-cbf-more-button,
 .win-cbf-overflow-button {
   appearance: none;
@@ -491,7 +572,6 @@ defineExpose({ showAt, hide, openAt, isOpen });
   -webkit-tap-highlight-color: transparent;
 }
 
-.win-cbf-appbar-button::before,
 .win-cbf-overflow-button::before {
   content: '';
   position: absolute;
@@ -505,47 +585,19 @@ defineExpose({ showAt, hide, openAt, isOpen });
 .win-cbf-more-button::before {
   content: '';
   position: absolute;
-  inset: 2px;
+  inset: 2px 6px 2px 2px;
   z-index: 0;
   border-radius: inherit;
   background: transparent;
   transition: background-color 83ms linear;
 }
 
-.win-cbf-appbar-button > *,
 .win-cbf-more-button > *,
 .win-cbf-overflow-button > * {
   position: relative;
   z-index: 1;
 }
 
-.win-cbf-appbar-button {
-  width: 40px;
-  min-width: 40px;
-  height: 40px;
-  padding: 0;
-}
-
-.win-cbf-appbar-content-root {
-  display: grid;
-  min-width: 40px;
-  height: 100%;
-  place-items: center;
-}
-
-.win-cbf-icon-and-label-panel {
-  display: grid;
-  place-items: center;
-}
-
-.win-cbf-content-viewbox {
-  display: grid;
-  width: 16px;
-  height: 16px;
-  place-items: center;
-}
-
-.win-cbf-icon,
 .win-cbf-overflow-icon,
 .win-cbf-ellipsis-icon,
 .win-cbf-overflow-check,
@@ -553,52 +605,22 @@ defineExpose({ showAt, hide, openAt, isOpen });
   font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets');
 }
 
-.win-cbf-icon,
 .win-cbf-overflow-icon,
 .win-cbf-ellipsis-icon {
   font-size: 16px;
   line-height: 16px;
 }
 
-.win-commandbar-flyout.has-primary-labels .win-cbf-appbar-button {
-  width: 60px;
-  min-width: 60px;
-  height: 52px;
-}
-
-.win-commandbar-flyout.has-primary-labels .win-cbf-appbar-content-root {
-  min-width: 60px;
-  align-items: start;
-  padding-top: 9px;
-}
-
-.win-commandbar-flyout.has-primary-labels .win-cbf-icon-and-label-panel {
-  width: 60px;
-  align-content: start;
-}
-
-.win-cbf-text-label {
-  display: block;
-  width: 60px;
-  margin: 6px 0 2px;
-  color: inherit;
-  font-size: 12px;
-  line-height: 16px;
-  text-align: center;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: clip;
-}
-
 .win-cbf-more-button {
   display: grid;
   grid-column: 2;
-  align-self: stretch;
+  align-self: start;
   justify-self: stretch;
   width: 44px;
   min-width: 44px;
-  height: auto;
-  min-height: 40px;
+  max-width: 44px;
+  height: 52px;
+  min-height: 52px;
   margin: 3px 3px 3px 0;
   padding: 0;
   place-items: center;
@@ -612,64 +634,35 @@ defineExpose({ showAt, hide, openAt, isOpen });
   height: 16px;
   place-items: center;
   text-align: center;
+  transform: translateX(-2px);
 }
 
-.win-cbf-appbar-button:hover,
 .win-cbf-more-button:hover,
 .win-cbf-overflow-button:hover {
   color: var(--CommandBarFlyoutAppBarButtonForegroundPointerOver, var(--text-primary));
 }
 
-.win-cbf-appbar-button:hover::before,
 .win-cbf-more-button:hover::before,
 .win-cbf-overflow-button:hover::before {
   background: var(--CommandBarFlyoutAppBarButtonBackgroundPointerOver, var(--subtle-fill-color-secondary, var(--subtle-secondary)));
 }
 
-.win-cbf-appbar-button:active,
 .win-cbf-more-button:active,
 .win-cbf-overflow-button:active {
   color: var(--CommandBarFlyoutAppBarButtonForegroundPressed, var(--text-secondary));
 }
 
-.win-cbf-appbar-button:active::before,
 .win-cbf-more-button:active::before,
 .win-cbf-overflow-button:active::before {
   background: var(--CommandBarFlyoutAppBarButtonBackgroundPressed, var(--subtle-fill-color-tertiary, var(--subtle-tertiary)));
 }
 
-.win-cbf-appbar-button.is-checked {
-  color: var(--CommandBarFlyoutAppBarButtonForegroundChecked, var(--accent-text));
-}
-
-.win-cbf-appbar-button.is-checked::before {
-  background: var(--CommandBarFlyoutAppBarButtonBackgroundChecked, var(--accent-base));
-}
-
-.win-cbf-appbar-button.is-checked:hover {
-  color: var(--CommandBarFlyoutAppBarButtonForegroundCheckedPointerOver, var(--accent-text));
-}
-
-.win-cbf-appbar-button.is-checked:hover::before {
-  background: var(--CommandBarFlyoutAppBarButtonBackgroundCheckedPointerOver, var(--accent-hover, var(--accent-base)));
-}
-
-.win-cbf-appbar-button.is-checked:active {
-  color: var(--CommandBarFlyoutAppBarButtonForegroundCheckedPressed, var(--accent-text));
-}
-
-.win-cbf-appbar-button.is-checked:active::before {
-  background: var(--CommandBarFlyoutAppBarButtonBackgroundCheckedPressed, var(--accent-pressed, var(--accent-base)));
-}
-
-.win-cbf-appbar-button:disabled,
 .win-cbf-more-button:disabled,
 .win-cbf-overflow-button:disabled {
   color: var(--CommandBarFlyoutAppBarButtonForegroundDisabled, var(--text-disabled));
   cursor: default;
 }
 
-.win-cbf-appbar-button:focus-visible,
 .win-cbf-more-button:focus-visible,
 .win-cbf-overflow-button:focus-visible {
   outline: 2px solid var(--focus-stroke-color-outer, var(--accent-default, #005FB8));

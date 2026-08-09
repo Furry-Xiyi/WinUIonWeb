@@ -10,24 +10,22 @@
       Margin="0,12" />
 
     <div class="control-example-frame">
-      <div class="example-container">
-        <div
-          class="example-display"
-          :data-theme="theme"
-          :style="displayStyle">
-            <WinThemeWrapper :theme="themeValue">
+      <WinThemeWrapper :theme="themeValue">
+        <div class="example-container">
+          <div
+            class="example-display"
+            :data-theme="theme"
+            :style="displayStyle">
             <slot name="example">
               <slot></slot>
             </slot>
-          </WinThemeWrapper>
-        </div>
+          </div>
 
-        <aside v-if="hasOptions" class="example-options">
-          <WinThemeWrapper :theme="themeValue">
+          <aside v-if="hasOptions" class="example-options">
             <slot name="options">{{ options }}</slot>
-          </WinThemeWrapper>
-        </aside>
-      </div>
+          </aside>
+        </div>
+      </WinThemeWrapper>
 
       <WinExpander
         v-if="showSourceCode"
@@ -89,7 +87,7 @@ const props = defineProps({
   exampleHeight: { type: [String, Number], default: 'auto' },
   webViewHeight: { type: Number, default: 400 },
   webViewWidth: { type: Number, default: 800 },
-  horizontalContentAlignment: { type: String, default: 'Left' },
+  HorizontalContentAlignment: { type: String, default: 'Left' },
   sourceCodeVisibility: { type: [Boolean, String], default: true },
   theme: { type: String, default: 'light' },
   options: { type: [String, Number, Boolean, Object], default: null },
@@ -162,7 +160,7 @@ const displayStyle = computed(() => ({
     Center: 'center',
     Right: 'flex-end',
     Stretch: 'stretch'
-  }[props.horizontalContentAlignment] ?? 'flex-start',
+  }[props.HorizontalContentAlignment] ?? 'flex-start',
   alignItems: 'flex-start'
 }));
 

@@ -5,14 +5,24 @@
         v-if="effectiveIsOpen"
         ref="tipRef"
         class="win-teaching-tip"
-        :class="[isTargeted ? 'is-targeted' : 'is-untargeted', `placement-${actualPlacement.toLowerCase()}`]"
+        :class="[
+          isTargeted ? 'is-targeted' : 'is-untargeted',
+          IsLightDismissEnabled ? 'is-light-dismiss' : 'is-normal-dismiss',
+          themeClass,
+          `placement-${actualPlacement.toLowerCase()}`,
+          `hero-placement-${HeroContentPlacement.toLowerCase()}`
+        ]"
         :style="tipStyle"
         role="dialog"
         @pointerdown.stop>
-        <div v-if="$slots.HeroContent || $slots.hero" class="win-teaching-tip-hero">
-          <slot name="HeroContent"><slot name="hero"></slot></slot>
+        <div v-if="$slots.HeroContent || $slots.hero || HeroContent" class="win-teaching-tip-hero">
+          <slot name="HeroContent">
+            <slot name="hero">
+              <template v-if="typeof HeroContent === 'string' || typeof HeroContent === 'number'">{{ HeroContent }}</template>
+            </slot>
+          </slot>
         </div>
-        <div class="win-teaching-tip-main">
+        <div class="win-teaching-tip-main" :class="{ 'has-alternate-close': ShowAlternateCloseButton }">
           <div v-if="$slots.IconSource || $slots.icon || IconSource" class="win-teaching-tip-icon">
             <slot name="IconSource"><slot name="icon">{{ iconGlyph }}</slot></slot>
           </div>
@@ -23,37 +33,64 @@
               <slot>{{ Content }}</slot>
             </div>
           </div>
-          <button
+          <WinButton
             v-if="ShowAlternateCloseButton"
             class="win-teaching-tip-close"
+            Style="SubtleButtonStyle"
+            Width="32"
+            Height="32"
+            Padding="4"
+            Margin="4"
+            BorderThickness="1"
+            CornerRadius="var(--ControlCornerRadius, 4px)"
+            FocusVisualMargin="-3"
+            Content="&#xE711;"
+            FontFamily="var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets')"
+            FontSize="16"
             type="button"
             :aria-label="t('text.close')"
             v-bind="{ 'tooltipservice.tooltip': t('text.close') }"
-            @click="close">
-            <span class="icon" aria-hidden="true">&#xE711;</span>
-          </button>
+            @Click="close" />
         </div>
         <div
           v-if="ActionButtonContent || CloseButtonContent || $slots.actions"
           class="win-teaching-tip-actions"
           :class="{ 'both-buttons-visible': ActionButtonContent && CloseButtonContent }">
           <slot name="actions">
-            <WinButton v-if="ActionButtonContent" class="win-teaching-tip-action-button" @Click="onAction">
+            <WinButton
+              v-if="ActionButtonContent"
+              class="win-teaching-tip-action-button"
+              :Style="ActionButtonStyle"
+              v-bind="actionButtonStyleAttrs"
+              @Click="onAction">
               <WinTextBlock :Text="ActionButtonContent" />
             </WinButton>
-            <WinButton v-if="CloseButtonContent" class="win-teaching-tip-close-button" @Click="close">
+            <WinButton
+              v-if="CloseButtonContent"
+              class="win-teaching-tip-close-button"
+              :Style="CloseButtonStyle"
+              v-bind="closeButtonStyleAttrs"
+              @Click="onCloseButton">
               <WinTextBlock :Text="CloseButtonContent" />
             </WinButton>
           </slot>
         </div>
-        <span v-if="isTargeted" class="win-teaching-tip-tail" aria-hidden="true"></span>
+        <svg
+          v-if="hasVisibleTail"
+          class="win-teaching-tip-tail"
+          viewBox="0 0 20 10"
+          preserveAspectRatio="none"
+          aria-hidden="true">
+          <polygon :points="tailPoints" />
+          <polyline :points="tailPoints" />
+        </svg>
       </section>
     </Transition>
   </Teleport>
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, unref, watch } from 'vue';
 import WinButton from './WinButton.vue';
 import WinTextBlock from './WinTextBlock.vue';
 import { useI18n } from './i18n/index';
@@ -69,14 +106,24 @@ const props = defineProps({
   title: { type: String, default: '' },
   Subtitle: { type: String, default: '' },
   subtitle: { type: String, default: '' },
-  Content: { type: [String, Number], default: '' },
+  Content: { type: [String, Number, Object], default: '' },
+  HeroContent: { type: [String, Number, Object], default: null },
+  TailVisibility: { type: String, default: 'Auto' },
   PreferredPlacement: { type: String, default: 'Auto' },
   preferredPlacement: { type: String, default: '' },
-  PlacementMargin: { type: Number, default: 8 },
-  IsLightDismissEnabled: { type: Boolean, default: true },
-  ActionButtonContent: { type: String, default: '' },
-  CloseButtonContent: { type: String, default: '' },
-  ShouldShowCloseButton: { type: Boolean, default: true },
+  PlacementMargin: { type: [String, Number, Object], default: 0 },
+  ShouldConstrainToRootBounds: { type: Boolean, default: true },
+  IsLightDismissEnabled: { type: Boolean, default: false },
+  HeroContentPlacement: { type: String, default: 'Auto' },
+  Theme: { type: String, default: '' },
+  ActionButtonContent: { type: [String, Number, Object], default: '' },
+  ActionButtonStyle: { type: [String, Object], default: '' },
+  ActionButtonCommand: { type: [Function, Object], default: null },
+  ActionButtonCommandParameter: { type: [String, Number, Boolean, Object], default: null },
+  CloseButtonContent: { type: [String, Number, Object], default: '' },
+  CloseButtonStyle: { type: [String, Object], default: '' },
+  CloseButtonCommand: { type: [Function, Object], default: null },
+  CloseButtonCommandParameter: { type: [String, Number, Boolean, Object], default: null },
   IconSource: { type: [String, Object], default: '' },
   isTargeted: { type: Boolean, default: undefined }
 });
@@ -85,8 +132,12 @@ const emit = defineEmits(['update:IsOpen', 'update:visible', 'ActionButtonClick'
 
 const tipRef = ref(null);
 const localIsOpen = ref(false);
-const position = ref({ top: 0, left: 0, tailLeft: 168 });
+const position = ref({ top: 0, left: 0, tailLeft: 160 });
 const actualPlacement = ref('Bottom');
+const inheritedTheme = inject('winuiTheme', null);
+const anchorTheme = ref('');
+const documentTheme = ref('');
+let themeObserver = null;
 
 const effectiveIsOpen = computed(() => props.IsOpen ?? props.visible ?? localIsOpen.value);
 const targetValue = computed(() => props.Target || props.target);
@@ -94,18 +145,52 @@ const isTargeted = computed(() => props.isTargeted ?? Boolean(targetElement()));
 const Title = computed(() => props.Title || props.title);
 const Subtitle = computed(() => props.Subtitle || props.subtitle);
 const PreferredPlacement = computed(() => props.PreferredPlacement || props.preferredPlacement || 'Auto');
+const HeroContent = computed(() => props.HeroContent);
 const ActionButtonContent = computed(() => props.ActionButtonContent);
+const ActionButtonStyle = computed(() => typeof props.ActionButtonStyle === 'string' ? props.ActionButtonStyle : '');
+const actionButtonStyleAttrs = computed(() => typeof props.ActionButtonStyle === 'object'
+  ? { style: props.ActionButtonStyle }
+  : {});
 const CloseButtonContent = computed(() => props.CloseButtonContent);
-const ShouldShowCloseButton = computed(() => props.ShouldShowCloseButton);
-const ShowAlternateCloseButton = computed(() => ShouldShowCloseButton.value && !CloseButtonContent.value);
+const CloseButtonStyle = computed(() => typeof props.CloseButtonStyle === 'string' ? props.CloseButtonStyle : '');
+const closeButtonStyleAttrs = computed(() => typeof props.CloseButtonStyle === 'object'
+  ? { style: props.CloseButtonStyle }
+  : {});
+const IsLightDismissEnabled = computed(() => props.IsLightDismissEnabled);
+const TailVisibility = computed(() => normalizeTailVisibility(props.TailVisibility));
+const ShouldConstrainToRootBounds = computed(() => props.ShouldConstrainToRootBounds);
+const HeroContentPlacement = computed(() => normalizeHeroContentPlacement(props.HeroContentPlacement));
+const effectiveTheme = computed(() => {
+  const explicitTheme = normalizeTheme(props.Theme);
+  if (explicitTheme) return explicitTheme;
+  if (anchorTheme.value) return anchorTheme.value;
+  const providedTheme = normalizeTheme(unref(inheritedTheme));
+  return providedTheme || documentTheme.value;
+});
+const themeClass = computed(() => effectiveTheme.value
+  ? `win-theme-scope theme-${effectiveTheme.value}`
+  : '');
+const ShowAlternateCloseButton = computed(() => !CloseButtonContent.value && !IsLightDismissEnabled.value);
+const hasVisibleTail = computed(() => isTargeted.value && TailVisibility.value !== 'Collapsed');
+const tailPoints = computed(() => actualPlacement.value === 'Top'
+  ? '0,0 10,10 20,0'
+  : '0,10 10,0 20,10');
 const IconSource = computed(() => props.IconSource);
 const Content = computed(() => props.Content);
 const iconGlyph = computed(() => IconSource.value === 'Refresh' ? '\uE72C' : IconSource.value);
-const tipStyle = computed(() => ({
-  top: `${position.value.top}px`,
-  left: `${position.value.left}px`,
-  '--teaching-tip-tail-left': `${position.value.tailLeft}px`
-}));
+const tipStyle = computed(() => {
+  const background = IsLightDismissEnabled.value
+    ? 'var(--TeachingTipTransientBackground, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg)))'
+    : 'var(--TeachingTipBackgroundBrush, var(--SolidBackgroundFillColorTertiaryBrush, var(--ctrl-fill-tertiary, var(--flyout-bg))))';
+
+  return {
+    top: `${position.value.top}px`,
+    left: `${position.value.left}px`,
+    '--teaching-tip-tail-left': `${position.value.tailLeft}px`,
+    '--teaching-tip-background': background,
+    '--win-acrylic-fill': background
+  };
+});
 
 function targetElement() {
   const value = targetValue.value;
@@ -115,6 +200,40 @@ function targetElement() {
   if (value.value instanceof HTMLElement) return value.value;
   if (value.value?.$el instanceof HTMLElement) return value.value.$el;
   return null;
+}
+
+function normalizeTheme(value) {
+  const theme = String(value || '').toLowerCase();
+  return theme === 'light' || theme === 'dark' ? theme : '';
+}
+
+function resolveAnchorTheme() {
+  const scope = targetElement()?.closest?.('.theme-light, .theme-dark');
+  if (scope?.classList.contains('theme-dark')) return 'dark';
+  if (scope?.classList.contains('theme-light')) return 'light';
+  return '';
+}
+
+function resolveDocumentTheme() {
+  const root = document.documentElement;
+  if (root.classList.contains('theme-dark') || root.dataset.theme === 'dark') return 'dark';
+  if (root.classList.contains('theme-light') || root.dataset.theme === 'light') return 'light';
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function observeTheme() {
+  themeObserver?.disconnect();
+  anchorTheme.value = resolveAnchorTheme();
+  documentTheme.value = resolveDocumentTheme();
+  themeObserver = new MutationObserver(() => {
+    anchorTheme.value = resolveAnchorTheme();
+    documentTheme.value = resolveDocumentTheme();
+  });
+  const scope = targetElement()?.closest?.('.theme-light, .theme-dark');
+  if (scope) themeObserver.observe(scope, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+  if (document.documentElement !== scope) {
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+  }
 }
 
 const setOpen = (value) => {
@@ -132,32 +251,50 @@ const close = () => {
 };
 
 const onAction = () => {
+  executeCommand(props.ActionButtonCommand, props.ActionButtonCommandParameter);
   emit('ActionButtonClick');
   emit('action');
   setOpen(false);
 };
 
+const onCloseButton = () => {
+  executeCommand(props.CloseButtonCommand, props.CloseButtonCommandParameter);
+  close();
+};
+
+function executeCommand(command, parameter) {
+  if (typeof command === 'function') {
+    command(parameter);
+  } else if (command && typeof command.Execute === 'function') {
+    command.Execute(parameter);
+  }
+}
+
 const updatePosition = async () => {
   await nextTick();
   const tip = tipRef.value;
   if (!tip) return;
-  const tipRect = tip.getBoundingClientRect();
-  const margin = Number(props.PlacementMargin) || 0;
+  // The enter animation scales the element, so getBoundingClientRect() would
+  // measure the transient scaled size and place the tip at the wrong offset.
+  const tipRect = {
+    width: tip.offsetWidth,
+    height: tip.offsetHeight
+  };
+  const margin = parseThickness(props.PlacementMargin);
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
   const target = targetElement();
 
   if (!target) {
     const edgeMargin = 24;
-    const offset = margin;
-    const bottomTop = viewportHeight - tipRect.height - edgeMargin - offset;
-    const topTop = edgeMargin + offset;
+    const bottomTop = viewportHeight - tipRect.height - edgeMargin - margin.bottom;
+    const topTop = edgeMargin + margin.top;
     const fitsBottom = bottomTop >= edgeMargin;
     const fitsTop = topTop + tipRect.height <= viewportHeight - edgeMargin;
     actualPlacement.value = fitsBottom || !fitsTop ? 'Bottom' : 'Top';
     position.value = {
       top: clamp(actualPlacement.value === 'Bottom' ? bottomTop : topTop, edgeMargin, viewportHeight - tipRect.height - edgeMargin),
-      left: clamp((viewportWidth - tipRect.width) / 2, edgeMargin, viewportWidth - tipRect.width - edgeMargin),
+      left: clamp((viewportWidth - tipRect.width) / 2, margin.left, viewportWidth - tipRect.width - margin.right),
       tailLeft: tipRect.width / 2
     };
     return;
@@ -165,26 +302,73 @@ const updatePosition = async () => {
 
   const rect = target.getBoundingClientRect();
   const preferred = normalizePlacement(PreferredPlacement.value);
-  const tailInset = 8;
+  const tailInset = hasVisibleTail.value ? 9 : 0;
   const verticalExtent = tipRect.height + tailInset;
-  const spaceBelow = viewportHeight - rect.bottom - margin;
-  const spaceAbove = rect.top - margin;
+  const spaceBelow = viewportHeight - rect.bottom - margin.bottom;
+  const spaceAbove = rect.top - margin.top;
   const placement = choosePlacement(preferred, verticalExtent, spaceAbove, spaceBelow);
   actualPlacement.value = placement;
 
-  let top = placement === 'Top' ? rect.top - tipRect.height - margin : rect.bottom + margin;
+  let top = placement === 'Top'
+    ? rect.top - tipRect.height - tailInset - margin.top
+    : rect.bottom + tailInset + margin.bottom;
   let left = rect.left + rect.width / 2 - tipRect.width / 2;
-  top = clamp(top, margin, viewportHeight - tipRect.height - margin);
-  left = clamp(left, margin, viewportWidth - tipRect.width - margin);
+  if (ShouldConstrainToRootBounds.value) {
+    const minTop = placement === 'Bottom' ? margin.top + tailInset : margin.top;
+    const maxTop = viewportHeight - tipRect.height - margin.bottom - (placement === 'Top' ? tailInset : 0);
+    top = clamp(top, minTop, maxTop);
+    left = clamp(left, margin.left, viewportWidth - tipRect.width - margin.right);
+  }
   const targetCenter = rect.left + rect.width / 2;
   const tailLeft = clamp(targetCenter - left, 18, tipRect.width - 18);
   position.value = { top, left, tailLeft };
 };
 
+function parseThickness(value) {
+  if (value && typeof value === 'object') {
+    return {
+      top: finiteNumber(value.top ?? value.Top),
+      right: finiteNumber(value.right ?? value.Right),
+      bottom: finiteNumber(value.bottom ?? value.Bottom),
+      left: finiteNumber(value.left ?? value.Left)
+    };
+  }
+
+  const parts = String(value ?? '0')
+    .split(',')
+    .map((part) => Number(part.trim()))
+    .filter(Number.isFinite);
+
+  if (parts.length === 1) return { top: parts[0], right: parts[0], bottom: parts[0], left: parts[0] };
+  if (parts.length === 2) return { top: parts[1], right: parts[0], bottom: parts[1], left: parts[0] };
+  if (parts.length === 4) return { top: parts[1], right: parts[2], bottom: parts[3], left: parts[0] };
+  return { top: 0, right: 0, bottom: 0, left: 0 };
+}
+
+function finiteNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
 function normalizePlacement(value) {
   const placement = String(value || 'Auto').toLowerCase();
-  if (placement === 'top') return 'Top';
+  const knownPlacements = ['Top', 'Bottom', 'Left', 'Right', 'TopRight', 'TopLeft', 'BottomRight', 'BottomLeft', 'LeftTop', 'LeftBottom', 'RightTop', 'RightBottom', 'Center'];
+  const normalized = knownPlacements.find((item) => item.toLowerCase() === placement);
+  if (normalized) return normalized;
+  return 'Auto';
+}
+
+function normalizeTailVisibility(value) {
+  const visibility = String(value || 'Auto').toLowerCase();
+  if (visibility === 'visible') return 'Visible';
+  if (visibility === 'collapsed') return 'Collapsed';
+  return 'Auto';
+}
+
+function normalizeHeroContentPlacement(value) {
+  const placement = String(value || 'Auto').toLowerCase();
   if (placement === 'bottom') return 'Bottom';
+  if (placement === 'top') return 'Top';
   return 'Auto';
 }
 
@@ -204,19 +388,46 @@ function clamp(value, min, max) {
 }
 
 watch(effectiveIsOpen, (value) => {
-  if (value) void updatePosition();
+  if (value) {
+    observeTheme();
+    void updatePosition();
+  }
 });
+
+watch(targetValue, () => {
+  void nextTick(observeTheme);
+});
+
+watch(
+  () => [
+    props.PlacementMargin,
+    props.PreferredPlacement,
+    props.preferredPlacement,
+    props.ShouldConstrainToRootBounds,
+    props.TailVisibility,
+    props.Title,
+    props.Subtitle,
+    props.Content,
+    props.ActionButtonContent,
+    props.CloseButtonContent
+  ],
+  () => {
+    if (effectiveIsOpen.value) void updatePosition();
+  }
+);
 
 const onViewportChanged = () => {
   if (effectiveIsOpen.value) void updatePosition();
 };
 
 onMounted(() => {
+  observeTheme();
   window.addEventListener('resize', onViewportChanged);
   window.addEventListener('scroll', onViewportChanged, true);
 });
 
 onBeforeUnmount(() => {
+  themeObserver?.disconnect();
   window.removeEventListener('resize', onViewportChanged);
   window.removeEventListener('scroll', onViewportChanged, true);
 });
@@ -227,31 +438,56 @@ defineExpose({ close, updatePosition });
 <style>
 .win-teaching-tip {
   position: fixed;
-  z-index: var(--win-teaching-tip-z-index, var(--win-tip-z-index, 2147483647));
+  z-index: var(--win-teaching-tip-z-index, var(--win-tip-z-index, 2147483646));
   width: max-content;
   min-width: min(320px, calc(100vw - 16px));
   max-width: min(336px, calc(100vw - 16px));
   min-height: 40px;
   max-height: min(520px, calc(100vh - 16px));
   overflow: visible;
-  color: var(--text-primary);
-  --win-acrylic-fill: var(--flyout-background, var(--flyout-bg));
+  display: flex;
+  flex-direction: column;
+  color: var(--TeachingTipForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  --teaching-tip-background: var(--TeachingTipBackgroundBrush, var(--SolidBackgroundFillColorTertiaryBrush, var(--ctrl-fill-tertiary, var(--flyout-bg))));
+  --win-acrylic-fill: var(--teaching-tip-background);
+  --teaching-tip-backdrop: none;
+  --teaching-tip-border: var(--TeachingTipBorderBrush, var(--SurfaceStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, var(--surface-stroke-color-flyout, var(--flyout-border)))));
   isolation: isolate;
   background: transparent;
-  border: 1px solid var(--surface-stroke-color-flyout, var(--flyout-border));
-  border-radius: 8px;
+  border: 1px solid var(--teaching-tip-border);
+  border-radius: var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  -webkit-backdrop-filter: var(--flyout-backdrop);
-  backdrop-filter: var(--flyout-backdrop);
+  -webkit-backdrop-filter: var(--teaching-tip-backdrop);
+  backdrop-filter: var(--teaching-tip-backdrop);
+}
+
+.win-teaching-tip.is-light-dismiss {
+  --teaching-tip-backdrop: var(--flyout-backdrop);
 }
 
 .win-teaching-tip-hero {
   height: 100px;
   overflow: hidden;
-  border-radius: 7px 7px 0 0;
+  flex: 0 0 auto;
+  background: transparent;
+  border-radius: var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px)) var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px)) 0 0;
+}
+
+.win-teaching-tip.hero-placement-bottom .win-teaching-tip-hero {
+  order: 3;
+  border-radius: 0 0 var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px)) var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px));
+}
+
+.win-teaching-tip.hero-placement-bottom .win-teaching-tip-main {
+  order: 1;
+}
+
+.win-teaching-tip.hero-placement-bottom .win-teaching-tip-actions {
+  order: 2;
 }
 
 .win-teaching-tip-main {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -272,8 +508,12 @@ defineExpose({ close, updatePosition });
   flex: 1;
 }
 
+.win-teaching-tip-main.has-alternate-close .win-teaching-tip-text {
+  padding-right: 28px;
+}
+
 .win-teaching-tip-title {
-  color: var(--text-primary);
+  color: var(--TeachingTipTitleForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
@@ -282,28 +522,15 @@ defineExpose({ close, updatePosition });
 .win-teaching-tip-subtitle,
 .win-teaching-tip-content {
   margin-top: 0;
-  color: var(--text-primary);
+  color: var(--TeachingTipSubtitleForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
   font-size: 14px;
   line-height: 20px;
 }
 
 .win-teaching-tip-close {
-  width: 40px;
-  height: 40px;
-  margin: -12px -12px 0 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-primary);
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.win-teaching-tip-close:hover {
-  background: var(--subtle-secondary);
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .win-teaching-tip-actions {
@@ -328,29 +555,30 @@ defineExpose({ close, updatePosition });
 .win-teaching-tip-tail {
   position: absolute;
   left: var(--teaching-tip-tail-left, 50%);
-  width: 16px;
-  height: 16px;
-  isolation: isolate;
-  background: transparent;
-  border: 1px solid var(--surface-stroke-color-flyout, var(--flyout-border));
-  transform: translateX(-50%) rotate(45deg);
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
+  z-index: 2;
+  width: 20px;
+  height: 10px;
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+  transform: translateX(-50%);
+  fill: var(--teaching-tip-background);
+  stroke: var(--teaching-tip-border);
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
 }
 
-.win-teaching-tip-tail::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--win-acrylic-fill, var(--flyout-background, var(--flyout-bg)));
+.win-teaching-tip-tail polyline {
+  fill: none;
+}
+
+.win-teaching-tip-tail polygon {
+  stroke: none;
 }
 
 .win-teaching-tip.placement-bottom .win-teaching-tip-tail {
-  top: -8px;
-  border-right: 0;
-  border-bottom: 0;
+  top: -9px;
 }
 
 .win-teaching-tip.placement-bottom {
@@ -358,9 +586,7 @@ defineExpose({ close, updatePosition });
 }
 
 .win-teaching-tip.placement-top .win-teaching-tip-tail {
-  bottom: -8px;
-  border-left: 0;
-  border-top: 0;
+  bottom: -9px;
 }
 
 .win-teaching-tip.placement-top {

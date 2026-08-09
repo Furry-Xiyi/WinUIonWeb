@@ -39,6 +39,7 @@
 
             <!-- 示例 -->
             <WinControlExample
+              :theme="theme"
               headerText="Compact Sizing for controls"
               :templateCode="templateCode"
               :vueCode="vueCode">

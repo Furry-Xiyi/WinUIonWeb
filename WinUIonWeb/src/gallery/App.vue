@@ -9,6 +9,7 @@
     class="gallery-titlebar"
     :class="{ 'is-uwp-webview': isHostedInUwpWebView }"
     :Title="t('app.title')"
+    PreferredHeightOption="Tall"
     :IsBackButtonVisible="canGoBack"
     :IsPaneToggleButtonVisible="!isTopNavMode"
     TitleBarContentHorizontalAlignment="Stretch"
@@ -44,6 +45,7 @@
                        IsBackButtonVisible="Collapsed"
                        :IsPaneToggleButtonVisible="false"
                        :IsBackEnabled="canGoBack"
+                       :IsNavigationPending="isNavigationFrozen"
                        @ItemInvoked="onNavigationItemInvoked"
                        @BackRequested="onBackRequested">
         <router-view v-slot="{ Component }">
@@ -293,20 +295,22 @@ const navMenuItems = [
     { Tag: 'viewbox', Icon: '\uE8A7', Content: t('text.viewbox') }
   ]},
   { Tag: 'media', Icon: '\uE173', Content: t('text.media'), SelectsOnInvoked: false, MenuItems: [
-    { Tag: 'animatedvisualplayer', Icon: '\uF5B0', Content: t('text.animatedvisualplayer') },
     { Tag: 'captureelement', Icon: '\uE722', Content: t('text.capture-element-camera') },
     { Tag: 'image', Icon: '\uE8B9', Content: t('text.image') },
     { Tag: 'mediaplayerelement', Icon: '\uE714', Content: t('text.mediaplayerelement') },
     { Tag: 'personpicture', Icon: '\uE77B', Content: t('text.personpicture') }
   ]},
   { Tag: 'menusandtoolbars', Icon: '\uE74E', Content: t('text.menus-and-toolbars'), SelectsOnInvoked: false, MenuItems: [
+    { Tag: 'appbarbutton', Icon: '\uE76F', Content: t('text.appbarbutton') },
+    { Tag: 'appbarseparator', Icon: '\uF464', Content: t('text.appbarseparator') },
+    { Tag: 'toggleappbarbutton', Icon: '\uE76F', Content: t('text.appbar-toggle-button') },
     { Tag: 'commandbar', Icon: '\uE76F', Content: t('text.commandbar') },
     { Tag: 'commandbarflyout', Icon: '\uF0E2', Content: t('text.commandbarflyout') },
     { Tag: 'menubar', Icon: '\uE76F', Content: t('text.menubar') },
     { Tag: 'menuflyout', Icon: '\uF0E2', Content: t('text.menuflyout') },
-    { Tag: 'swipecontrol', Icon: '\uE8D7', Content: t('text.swipecontrol') },
-    { Tag: 'standarduicommand', Icon: '\uE8A5', Content: t('text.standarduicommand') },
-    { Tag: 'xamluicommand', Icon: '\uE8A5', Content: t('text.xamluicommand') }
+    { Tag: 'swipecontrol', Icon: '\uE927', Content: t('text.swipecontrol') },
+    { Tag: 'standarduicommand', Icon: '\uE756', Content: t('text.standarduicommand') },
+    { Tag: 'xamluicommand', Icon: '\uE756', Content: t('text.xamluicommand') }
   ]},
   { Tag: 'motion', Icon: '\uE945', Content: t('text.motion'), SelectsOnInvoked: false, MenuItems: [
     { Tag: 'parallaxview', Icon: '\uE7F4', Content: t('text.parallaxview') }
@@ -360,6 +364,17 @@ const selectedNavigationItem = computed({
 });
 
 const pageSourceNames = {
+  appbarbutton: 'AppBarButtonPage',
+  appbarseparator: 'AppBarSeparatorPage',
+  toggleappbarbutton: 'AppBarToggleButtonPage',
+  commandbar: 'CommandBarPage',
+  commandbarflyout: 'CommandBarFlyoutPage',
+  listview: 'ListViewPage',
+  menubar: 'MenuBarPage',
+  menuflyout: 'MenuFlyoutPage',
+  standarduicommand: 'StandardUICommandPage',
+  swipecontrol: 'SwipeControlPage',
+  xamluicommand: 'XamlUICommandPage',
   xamlresources: 'ResourcesPage',
   xamlstyles: 'StylePage',
   acrylic: 'AcrylicBrushPage',
@@ -698,7 +713,7 @@ watch(titlebarCompact, (compact) => {
   .gallery-app-content.has-titlebar {
     /* WebView2 does not expose titlebar-area-height. WinTitleBar with the
        search content uses the expanded 48px template height in that host. */
-    --gallery-titlebar-height: max(env(titlebar-area-height, 0px), 48px);
+    --gallery-titlebar-height: max(env(titlebar-area-height, 0px), 46px);
     height: calc(100% - var(--gallery-titlebar-height));
     margin-top: var(--gallery-titlebar-height);
   }

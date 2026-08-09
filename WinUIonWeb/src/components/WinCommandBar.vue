@@ -4,596 +4,567 @@
     :class="commandBarClasses"
     role="toolbar"
     :aria-label="resolvedAriaLabel"
-    :aria-expanded="isOpen"
-    @keydown="handleKeyDown"
-  >
-    <!-- Primary Commands Area -->
-    <div class="commandbar-primary" ref="primaryContainer">
-      <div class="commandbar-primary-content" ref="primaryContent">
-        <slot name="primary">
-          <component
-            v-for="(command, index) in visiblePrimaryCommands"
-            :key="command.key || index"
-            :is="command.component"
-            v-bind="command.props"
-            :label-position="effectiveLabelPosition"
-            @click="(e: MouseEvent) => handleCommandClick(command, e)"
-          />
-        </slot>
+    :aria-expanded="effectiveIsOpen"
+    :style="commandBarStyle"
+    @keydown="handleKeyDown">
+    <div class="commandbar-surface">
+      <div ref="primaryContent" class="commandbar-primary-content">
+        <component
+          v-for="(command, index) in visiblePrimaryCommands"
+          :key="getCommandKey(command, index)"
+          :is="getCommandComponent(command)"
+          v-bind="getCommandProps(command)"
+          :LabelPosition="effectiveLabelPosition"
+          @Click="(event: MouseEvent) => handleCommandInvoked(command, event)" />
       </div>
 
-      <!-- Overflow Button (More) -->
       <button
         v-if="showOverflowButton"
+        ref="overflowButton"
         class="commandbar-overflow-button"
-        :class="{ 'active': isOpen }"
-        :aria-label="isOpen ? t('text.close-overflow-menu') : t('text.more-options')"
-        v-bind="{ 'tooltipservice.tooltip': isOpen ? t('text.close-overflow-menu') : t('text.more-options') }"
-        :aria-expanded="isOpen"
-        @click="toggleOverflow"
-      >
-        <span class="symbol-icon"></span>
+        :class="{ 'is-active': effectiveIsOpen }"
+        type="button"
+        :aria-label="effectiveIsOpen ? t('text.less-app-bar') : t('text.more-options')"
+        :aria-expanded="effectiveIsOpen"
+        v-bind="{ 'tooltipservice.tooltip': effectiveIsOpen ? t('text.see-less') : t('text.see-more') }"
+        @click.stop="toggleOverflow">
+        <span class="commandbar-ellipsis" aria-hidden="true">&#xE712;</span>
       </button>
     </div>
 
-    <!-- Secondary Commands Overflow -->
-    <Transition name="commandbar-overflow">
-      <div
-        v-if="isOpen"
-        class="commandbar-secondary-overlay"
-        @click.self="closeOverflow"
-      >
-        <WinScrollViewer
-          class="commandbar-secondary"
-          role="menu"
-          VerticalScrollMode="Auto"
-          VerticalScrollBarVisibility="Auto"
-          HorizontalScrollMode="Disabled"
-          HorizontalScrollBarVisibility="Disabled"
-        >
-          <div
-            class="commandbar-secondary-content"
-            ref="secondaryContainer"
-            @click="handleSecondaryClick"
-          >
-            <!-- Overflow Primary Commands (if dynamic overflow is enabled) -->
-            <template v-if="overflowPrimaryCommands.length > 0">
-              <component
-                v-for="(command, index) in overflowPrimaryCommands"
-                :key="command.key || `overflow-${index}`"
-                :is="command.component"
-                v-bind="command.props"
-                :is-compact="true"
-                label-position="Right"
-                @click="(e: MouseEvent) => handleCommandClick(command, e)"
-              />
-              <div v-if="hasSecondaryCommands" class="commandbar-separator"></div>
-            </template>
-
-            <!-- Secondary Commands -->
-            <slot name="secondary">
-              <component
-                v-for="(command, index) in secondaryCommandsList"
-                :key="command.key || `secondary-${index}`"
-                :is="command.component"
-                v-bind="command.props"
-                :is-compact="true"
-                label-position="Right"
-                @click="(e: MouseEvent) => handleCommandClick(command, e)"
-              />
-            </slot>
-          </div>
-        </WinScrollViewer>
-      </div>
-    </Transition>
+    <WinMenuFlyout
+      v-if="overflowAnchorRect && overflowMenuItems.length"
+      :Open="overflowIsOpen"
+      :AnchorRect="overflowAnchorRect"
+      :Items="overflowMenuItems"
+      Placement="BottomEdgeAlignedRight"
+      :MinWidth="160"
+      :Gap="0"
+      OverlayInputPassThroughElement
+      CloseAnimation="CommandBar"
+      :Theme="Theme"
+      @Close="handleFlyoutClose"
+      @Select="handleOverflowSelect" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, useSlots } from 'vue'
-import { useI18n } from './i18n/index'
-import WinScrollViewer from './WinScrollViewer.vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useI18n } from './i18n/index';
+import WinAppBarSeparator from './WinAppBarSeparator.vue';
+import WinMenuFlyout from './WinMenuFlyout.vue';
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 export interface CommandBarCommand {
-  component: any
-  props: Record<string, any>
-  key?: string
+  Component?: unknown;
+  Props?: Record<string, unknown>;
+  Key?: string;
+  Click?: (event?: MouseEvent) => void;
+}
+
+interface CommandBarUICommand {
+  Label?: string;
+  IconSource?: string | { Symbol?: string };
+  KeyboardAccelerators?: unknown[];
+  CanExecute?: (parameter?: unknown) => boolean;
+  Execute?: (parameter?: unknown) => void;
 }
 
 export interface CommandBarProps {
-  isOpen?: boolean
-  isSticky?: boolean
-  defaultLabelPosition?: 'Bottom' | 'Right' | 'Collapsed'
-  primaryCommands?: CommandBarCommand[]
-  secondaryCommands?: CommandBarCommand[]
-  isDynamicOverflowEnabled?: boolean
-  overflowButtonVisibility?: 'Auto' | 'Visible' | 'Collapsed'
-  ariaLabel?: string
+  IsOpen?: boolean;
+  IsSticky?: boolean;
+  DefaultLabelPosition?: 'Bottom' | 'Right' | 'Collapsed';
+  PrimaryCommands?: CommandBarCommand[];
+  SecondaryCommands?: CommandBarCommand[];
+  IsDynamicOverflowEnabled?: boolean;
+  OverflowButtonVisibility?: 'Auto' | 'Visible' | 'Collapsed';
+  Background?: string;
+  Foreground?: string;
+  CornerRadius?: string | number;
+  HorizontalAlignment?: 'Left' | 'Center' | 'Right' | 'Stretch';
+  'AutomationProperties.Name'?: string;
+  Theme?: string;
 }
 
-const props = withDefaults(defineProps<CommandBarProps>(), {
-  isOpen: false,
-  isSticky: false,
-  defaultLabelPosition: 'Bottom',
-  primaryCommands: () => [],
-  secondaryCommands: () => [],
-  isDynamicOverflowEnabled: true,
-  overflowButtonVisibility: 'Auto',
-  ariaLabel: ''
-})
-
+const props = defineProps<CommandBarProps>();
 const emit = defineEmits<{
-  opening: []
-  opened: []
-  closing: []
-  closed: []
-  dynamicOverflowItemsChanging: []
-  'update:isOpen': [value: boolean]
-}>()
+  Opening: [];
+  Opened: [];
+  Closing: [];
+  Closed: [];
+  DynamicOverflowItemsChanging: [];
+  'update:IsOpen': [value: boolean];
+}>();
 
-const slots = useSlots()
-const resolvedAriaLabel = computed(() => props.ariaLabel || t('text.command-bar'))
+const commandBarRoot = ref<HTMLElement>();
+const primaryContent = ref<HTMLElement>();
+const overflowButton = ref<HTMLButtonElement>();
+const overflowAnchorRect = ref<DOMRect | null>(null);
+const localIsOpen = ref(props.IsOpen ?? false);
+const overflowIsOpen = ref(false);
+const visiblePrimaryCommands = ref<CommandBarCommand[]>([]);
+const overflowPrimaryCommands = ref<CommandBarCommand[]>([]);
+let resizeObserver: ResizeObserver | undefined;
+let overflowCalculation = 0;
 
-// Refs
-const commandBarRoot = ref<HTMLElement>()
-const primaryContainer = ref<HTMLElement>()
-const primaryContent = ref<HTMLElement>()
-const secondaryContainer = ref<HTMLElement>()
+const effectivePrimaryCommands = computed(() => props.PrimaryCommands ?? []);
+const effectiveSecondaryCommands = computed(() => props.SecondaryCommands ?? []);
+const effectiveIsSticky = computed(() => props.IsSticky ?? false);
+const effectiveDefaultLabelPosition = computed(() => props.DefaultLabelPosition ?? 'Bottom');
+const effectiveDynamicOverflow = computed(() => props.IsDynamicOverflowEnabled ?? true);
+const effectiveOverflowVisibility = computed(() => props.OverflowButtonVisibility ?? 'Auto');
+const resolvedAriaLabel = computed(() => props['AutomationProperties.Name'] || t('text.command-bar'));
+const effectiveIsOpen = computed(() => localIsOpen.value);
+const cssLength = (value: string | number | undefined) => {
+  if (value === undefined || value === '') return undefined;
+  return typeof value === 'number' || !Number.isNaN(Number(value)) ? `${Number(value)}px` : value;
+};
+const horizontalAlignment = computed(() => props.HorizontalAlignment ?? 'Stretch');
+const isHorizontallyStretched = computed(() => horizontalAlignment.value === 'Stretch');
+const commandBarStyle = computed(() => ({
+  '--CommandBarBackground': props.Background || undefined,
+  '--CommandBarForeground': props.Foreground || undefined,
+  '--CommandBarCornerRadius': cssLength(props.CornerRadius),
+  width: isHorizontallyStretched.value ? undefined : 'max-content',
+  maxWidth: isHorizontallyStretched.value ? undefined : '100%',
+  alignSelf: {
+    Left: 'flex-start',
+    Center: 'center',
+    Right: 'flex-end',
+    Stretch: 'stretch'
+  }[horizontalAlignment.value],
+  justifySelf: {
+    Left: 'start',
+    Center: 'center',
+    Right: 'end',
+    Stretch: 'stretch'
+  }[horizontalAlignment.value]
+}));
 
-// State
-const internalIsOpen = ref(props.isOpen)
-const isAnimating = ref(false)
-const overflowPrimaryCommands = ref<CommandBarCommand[]>([])
-const visiblePrimaryCommands = ref<CommandBarCommand[]>([...props.primaryCommands])
-const focusedIndex = ref(-1)
-const resizeObserver = ref<ResizeObserver>()
+const effectiveLabelPosition = computed(() => ({
+  Bottom: 'Default',
+  Right: 'Right',
+  Collapsed: 'Collapsed'
+}[effectiveDefaultLabelPosition.value]));
 
-// Computed
-const isOpen = computed({
-  get: () => internalIsOpen.value,
-  set: (val) => {
-    internalIsOpen.value = val
-    emit('update:isOpen', val)
-  }
-})
-
-const commandBarClasses = computed(() => {
-  const classes = ['win-commandbar']
-  if (isOpen.value) classes.push('open')
-  if (isAnimating.value) classes.push('animating')
-  if (!hasSecondaryCommands.value && overflowPrimaryCommands.value.length === 0) {
-    classes.push('no-overflow')
-  }
-  return classes
-})
-
-const effectiveLabelPosition = computed(() => {
-  // Map WinUI names to component prop format
-  const positionMap = {
-    'Bottom': 'Default',
-    'Right': 'Right',
-    'Collapsed': 'Collapsed'
-  }
-  return positionMap[props.defaultLabelPosition] || 'Default'
-})
-
-const secondaryCommandsList = computed(() => {
-  return props.secondaryCommands
-})
-
-const hasSecondaryCommands = computed(() => {
-  return secondaryCommandsList.value.length > 0 || !!slots.secondary
-})
-
+const hasSecondaryCommands = computed(() => effectiveSecondaryCommands.value.length > 0);
 const showOverflowButton = computed(() => {
-  if (props.overflowButtonVisibility === 'Collapsed') return false
-  if (props.overflowButtonVisibility === 'Visible') return true
+  if (effectiveOverflowVisibility.value === 'Collapsed') return false;
+  if (effectiveOverflowVisibility.value === 'Visible') return true;
+  return effectivePrimaryCommands.value.length > 0
+    || hasSecondaryCommands.value
+    || overflowPrimaryCommands.value.length > 0;
+});
 
-  // Auto: show if there are secondary commands or overflow items
-  return hasSecondaryCommands.value || overflowPrimaryCommands.value.length > 0
-})
+const commandBarClasses = computed(() => ({
+  'win-commandbar': true,
+  open: effectiveIsOpen.value,
+  'has-overflow': showOverflowButton.value,
+  'label-bottom': effectiveDefaultLabelPosition.value === 'Bottom',
+  'label-right': effectiveDefaultLabelPosition.value === 'Right',
+  'label-collapsed': effectiveDefaultLabelPosition.value === 'Collapsed'
+}));
 
-// Methods
-const toggleOverflow = () => {
-  if (isOpen.value) {
-    closeOverflow()
-  } else {
-    openOverflow()
+const getCommandComponent = (command: CommandBarCommand) => command.Component;
+const getCommandProps = (command: CommandBarCommand) => command.Props ?? {};
+const getCommandKey = (command: CommandBarCommand, index: number, prefix = 'primary') => (
+  command.Key ?? `${prefix}-${index}`
+);
+
+const fluentSymbolGlyphs: Record<string, string> = {
+  Accept: '\uE8FB', Add: '\uE710', Back: '\uE72B', Cancel: '\uE711', Close: '\uE711',
+  Copy: '\uE8C8', Cut: '\uE8C6', Delete: '\uE74D', Edit: '\uE70F', Favorite: '\uE734',
+  Flag: '\uE7C1', FontDecrease: '\uE8A0', FontIncrease: '\uE8A1', Forward: '\uE72A',
+  Help: '\uE897', More: '\uE712', OpenFile: '\uE8E5', Paste: '\uE77F', Pause: '\uE769',
+  Play: '\uE768', Redo: '\uE7A6', Refresh: '\uE72C', Save: '\uE74E', SelectAll: '\uE8B3',
+  Send: '\uE724', Setting: '\uE713', Share: '\uE72D', Sort: '\uE8CB', Stop: '\uE71A',
+  Undo: '\uE7A7'
+};
+
+const isSeparatorCommand = (command: CommandBarCommand) => command.Component === WinAppBarSeparator;
+const getUICommand = (command: CommandBarCommand) => command.Props?.Command as CommandBarUICommand | undefined;
+const getCommandLabel = (command: CommandBarCommand) => {
+  const label = command.Props?.Label;
+  if (typeof label === 'string') return label;
+  return getUICommand(command)?.Label ?? '';
+};
+const getCommandIcon = (command: CommandBarCommand) => {
+  const icon = command.Props?.Icon ?? getUICommand(command)?.IconSource;
+  const symbol = typeof icon === 'string'
+    ? icon
+    : icon && typeof icon === 'object' && 'Symbol' in icon && typeof icon.Symbol === 'string'
+      ? icon.Symbol
+      : '';
+  if (!symbol) return '';
+  return fluentSymbolGlyphs[symbol] ?? symbol;
+};
+const toMenuFlyoutItem = (command: CommandBarCommand) => {
+  if (isSeparatorCommand(command)) return { Kind: 'MenuFlyoutSeparator' };
+  const uiCommand = getUICommand(command);
+  const commandParameter = command.Props?.CommandParameter;
+  const isEnabled = command.Props?.IsEnabled;
+  return {
+    Kind: 'MenuFlyoutItem',
+    Text: getCommandLabel(command),
+    Icon: getCommandIcon(command),
+    IsEnabled: isEnabled === undefined ? uiCommand?.CanExecute?.(commandParameter) ?? true : isEnabled !== false,
+    KeyboardAccelerators: command.Props?.KeyboardAccelerators ?? uiCommand?.KeyboardAccelerators,
+    KeyboardAcceleratorTextOverride: command.Props?.KeyboardAcceleratorTextOverride,
+    Command: {
+      Execute: () => {
+        uiCommand?.Execute?.(commandParameter);
+        command.Click?.();
+      }
+    }
+  };
+};
+
+const overflowMenuItems = computed(() => {
+  const primaryItems = overflowPrimaryCommands.value.map(toMenuFlyoutItem);
+  const secondaryItems = effectiveSecondaryCommands.value.map(toMenuFlyoutItem);
+  if (primaryItems.length && secondaryItems.length) {
+    return [...primaryItems, { Kind: 'MenuFlyoutSeparator' }, ...secondaryItems];
   }
-}
+  return [...primaryItems, ...secondaryItems];
+});
+
+const updateOpenState = (value: boolean) => {
+  localIsOpen.value = value;
+  emit('update:IsOpen', value);
+};
+
+const updateOverflowAnchor = () => {
+  overflowAnchorRect.value = overflowButton.value?.getBoundingClientRect() ?? null;
+};
 
 const openOverflow = async () => {
-  if (isOpen.value) return
+  if (!showOverflowButton.value || !overflowMenuItems.value.length) return;
+  await nextTick();
+  updateOverflowAnchor();
+  if (!overflowAnchorRect.value) return;
+  overflowIsOpen.value = true;
+};
 
-  emit('opening')
-  isAnimating.value = true
-  isOpen.value = true
-
-  await nextTick()
-
-  setTimeout(() => {
-    isAnimating.value = false
-    emit('opened')
-  }, 200)
-}
-
-const closeOverflow = async () => {
-  if (!isOpen.value) return
-  if (props.isSticky) return // Don't close if sticky
-
-  emit('closing')
-  isAnimating.value = true
-
-  setTimeout(() => {
-    isOpen.value = false
-    isAnimating.value = false
-    emit('closed')
-  }, 150)
-}
-
-const handleCommandClick = (command: CommandBarCommand, event: MouseEvent) => {
-  // Command's own click handler will be called via v-bind
-
-  // Close overflow after click unless sticky
-  if (isOpen.value && !props.isSticky) {
-    closeOverflow()
+const open = async () => {
+  if (!effectiveIsOpen.value) {
+    updateOverflowAnchor();
+    emit('Opening');
+    updateOpenState(true);
+    await nextTick();
+    updateOverflowAnchor();
+    emit('Opened');
   }
-}
+  await openOverflow();
+};
 
-const handleSecondaryClick = (event: MouseEvent) => {
-  // Close overflow when clicking on secondary area (unless sticky)
-  if (!props.isSticky) {
-    // Small delay to allow button click to register
-    setTimeout(() => {
-      closeOverflow()
-    }, 100)
+const close = async (force = true) => {
+  if (!effectiveIsOpen.value) return;
+  if (!force && effectiveIsSticky.value) return;
+  emit('Closing');
+  overflowIsOpen.value = false;
+  updateOpenState(false);
+  await nextTick();
+  emit('Closed');
+};
+
+const toggle = () => {
+  if (effectiveIsOpen.value) void close(true);
+  else void open();
+};
+
+const toggleOverflow = async () => {
+  if (effectiveIsOpen.value) {
+    if (overflowIsOpen.value) closeOverflow();
+    else await close(true);
+    return;
   }
-}
+  await open();
+};
 
-// Dynamic Overflow Logic
-const calculateOverflow = () => {
-  if (!props.isDynamicOverflowEnabled) return
-  if (!primaryContainer.value || !primaryContent.value) return
+// Overflow is the transient expanded state of CommandBar. Once its flyout
+// closes, the bar must leave the active/open visual state as well.
+const closeOverflow = () => {
+  overflowIsOpen.value = false;
+  if (effectiveIsOpen.value) void close(true);
+};
 
-  const containerWidth = primaryContainer.value.offsetWidth
-  const contentWidth = primaryContent.value.scrollWidth
-  const overflowButtonWidth = 68 // Approximate width of overflow button
+const handleCommandInvoked = (command: CommandBarCommand, event: MouseEvent) => {
+  command.Click?.(event);
+  if (effectiveIsOpen.value && !effectiveIsSticky.value) void close(false);
+};
 
-  // If content fits, show all commands
-  if (contentWidth <= containerWidth - overflowButtonWidth) {
-    if (overflowPrimaryCommands.value.length > 0) {
-      emit('dynamicOverflowItemsChanging')
-      overflowPrimaryCommands.value = []
-      visiblePrimaryCommands.value = [...props.primaryCommands]
-    }
-    return
-  }
+const handleFlyoutClose = () => {
+  closeOverflow();
+};
 
-  // Need to move items to overflow
-  const availableWidth = containerWidth - overflowButtonWidth
-  let totalWidth = 0
-  let visibleCount = 0
+const handleOverflowSelect = () => {
+  closeOverflow();
+};
 
-  // Measure each command (approximate 68px per button)
-  const commandWidth = 68
-  for (let i = 0; i < props.primaryCommands.length; i++) {
-    if (totalWidth + commandWidth <= availableWidth) {
-      totalWidth += commandWidth
-      visibleCount++
-    } else {
-      break
-    }
-  }
-
-  // Update visible/overflow arrays
-  if (visibleCount < props.primaryCommands.length) {
-    emit('dynamicOverflowItemsChanging')
-    visiblePrimaryCommands.value = props.primaryCommands.slice(0, visibleCount)
-    overflowPrimaryCommands.value = props.primaryCommands.slice(visibleCount)
-  }
-}
-
-// Keyboard Navigation
 const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && isOpen.value) {
-    event.preventDefault()
-    closeOverflow()
-    return
+  if (event.key !== 'Escape') return;
+  if (overflowIsOpen.value) {
+    event.preventDefault();
+    closeOverflow();
+    return;
+  }
+  if (effectiveIsOpen.value) {
+    event.preventDefault();
+    void close(true);
+  }
+};
+
+// A CommandBar with no secondary items has no MenuFlyout overlay to receive
+// outside clicks. Keep its expanded state dismissible in the same way as the
+// overflow presenter, while preserving interactions inside the bar itself.
+const closeOnDocumentPointerDown = (event: PointerEvent) => {
+  if (!effectiveIsOpen.value || overflowMenuItems.value.length || effectiveIsSticky.value) return;
+  const path = event.composedPath?.() || [];
+  if (path.some((element) => element?.classList?.contains('win-commandbar'))) return;
+  void close(true);
+};
+
+const calculateOverflow = async () => {
+  const calculationId = ++overflowCalculation;
+  visiblePrimaryCommands.value = [...effectivePrimaryCommands.value];
+  overflowPrimaryCommands.value = [];
+  await nextTick();
+  if (calculationId !== overflowCalculation || !effectiveDynamicOverflow.value || !commandBarRoot.value || !primaryContent.value) return;
+
+  const children = Array.from(primaryContent.value.children) as HTMLElement[];
+  if (!children.length) return;
+  const rootWidth = commandBarRoot.value.clientWidth;
+  const contentWidth = children.reduce((width, child) => width + child.getBoundingClientRect().width, 0);
+  const needsPermanentOverflow = hasSecondaryCommands.value || effectiveOverflowVisibility.value === 'Visible';
+  const availableWithoutButton = Math.max(0, rootWidth - 4);
+  if (!needsPermanentOverflow && contentWidth <= availableWithoutButton) return;
+
+  const available = Math.max(0, rootWidth - 52);
+  let occupied = 0;
+  let visibleCount = 0;
+  for (const child of children) {
+    const width = child.getBoundingClientRect().width;
+    if (occupied + width > available) break;
+    occupied += width;
+    visibleCount += 1;
   }
 
-  if (event.key === 'Tab') {
-    // Allow natural tab navigation
-    return
+  if (visibleCount < effectivePrimaryCommands.value.length) {
+    emit('DynamicOverflowItemsChanging');
+    visiblePrimaryCommands.value = effectivePrimaryCommands.value.slice(0, visibleCount);
+    overflowPrimaryCommands.value = effectivePrimaryCommands.value.slice(visibleCount);
   }
+};
 
-  // Arrow key navigation in overflow
-  if (isOpen.value && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
-    event.preventDefault()
-    handleArrowNavigation(event.key === 'ArrowDown' ? 1 : -1)
+watch(() => props.IsOpen, (value) => {
+  if (value === undefined || value === effectiveIsOpen.value) return;
+  if (value) void open();
+  else void close(true);
+});
+
+watch(effectivePrimaryCommands, () => void calculateOverflow(), { deep: true, immediate: true });
+watch(effectiveSecondaryCommands, () => void calculateOverflow(), { deep: true });
+watch(
+  [effectiveDynamicOverflow, effectiveOverflowVisibility, effectiveDefaultLabelPosition],
+  () => void calculateOverflow()
+);
+
+onMounted(async () => {
+  if (typeof ResizeObserver !== 'undefined' && commandBarRoot.value) {
+    resizeObserver = new ResizeObserver(() => {
+      void calculateOverflow();
+      if (effectiveIsOpen.value || overflowIsOpen.value) updateOverflowAnchor();
+    });
+    resizeObserver.observe(commandBarRoot.value);
   }
-}
-
-const handleArrowNavigation = (direction: number) => {
-  const totalItems = overflowPrimaryCommands.value.length + secondaryCommandsList.value.length
-  if (totalItems === 0) return
-
-  focusedIndex.value = (focusedIndex.value + direction + totalItems) % totalItems
-
-  // Focus the appropriate element in the secondary container
-  if (secondaryContainer.value) {
-    const buttons = secondaryContainer.value.querySelectorAll('button')
-    if (buttons[focusedIndex.value]) {
-      buttons[focusedIndex.value].focus()
-    }
-  }
-}
-
-// Watch for prop changes
-watch(() => props.isOpen, (newVal) => {
-  if (newVal !== internalIsOpen.value) {
-    if (newVal) {
-      openOverflow()
-    } else {
-      closeOverflow()
-    }
-  }
-})
-
-watch(() => props.primaryCommands, () => {
-  visiblePrimaryCommands.value = [...props.primaryCommands]
-  nextTick(() => {
-    calculateOverflow()
-  })
-}, { deep: true })
-
-// Lifecycle
-onMounted(() => {
-  // Set up resize observer for dynamic overflow
-  if (props.isDynamicOverflowEnabled && primaryContainer.value) {
-    resizeObserver.value = new ResizeObserver(() => {
-      calculateOverflow()
-    })
-    resizeObserver.value.observe(primaryContainer.value)
-  }
-
-  // Initial overflow calculation
-  nextTick(() => {
-    calculateOverflow()
-  })
-
-  // Close overflow on click outside
-  document.addEventListener('click', handleClickOutside)
-})
+  window.addEventListener('resize', updateOverflowAnchor);
+  document.addEventListener('pointerdown', closeOnDocumentPointerDown, true);
+  updateOverflowAnchor();
+  await calculateOverflow();
+  if (effectiveIsOpen.value) await openOverflow();
+});
 
 onBeforeUnmount(() => {
-  if (resizeObserver.value) {
-    resizeObserver.value.disconnect()
-  }
-  document.removeEventListener('click', handleClickOutside)
-})
+  resizeObserver?.disconnect();
+  window.removeEventListener('resize', updateOverflowAnchor);
+  document.removeEventListener('pointerdown', closeOnDocumentPointerDown, true);
+});
 
-const handleClickOutside = (event: MouseEvent) => {
-  if (!isOpen.value || props.isSticky) return
-
-  const target = event.target as Node
-  if (commandBarRoot.value && !commandBarRoot.value.contains(target)) {
-    closeOverflow()
-  }
-}
-
-// Public methods (expose for parent component access)
-defineExpose({
-  open: openOverflow,
-  close: closeOverflow,
-  toggle: toggleOverflow
-})
+defineExpose({ Open: open, Close: close, Toggle: toggle, IsOpen: effectiveIsOpen });
 </script>
 
 <style scoped>
 .win-commandbar {
-  --commandbar-fill: var(--muxc-layer-fill-default, #F9F9F9);
-  display: flex;
-  flex-direction: column;
-  isolation: isolate;
-  background: transparent;
-  border-bottom: 1px solid var(--muxc-control-stroke-default, rgba(0, 0, 0, 0.0578));
-  min-height: 48px;
-  font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
+  --CommandBarHeightTransitionDuration: 167ms;
   position: relative;
-  z-index: 100;
-}
-
-.win-commandbar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--commandbar-fill);
+  z-index: 20;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  min-height: 48px;
+  color: var(--CommandBarForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
+  transition: height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    min-height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
 }
 
 .win-commandbar.open {
-  --commandbar-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
+  --CommandBarHeightTransitionDuration: 250ms;
 }
 
-/* Primary Commands Area */
-.commandbar-primary {
-  display: flex;
-  align-items: center;
-  height: 48px;
-  overflow: hidden;
+.commandbar-surface {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  height: 48px;
+  min-height: 48px;
+  padding-left: 4px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--CommandBarCornerRadius, var(--ControlCornerRadius, 4px));
+  background: var(--CommandBarBackground, transparent);
+  box-shadow: inset 0 0 0 1px transparent;
+  box-sizing: border-box;
+  transition: height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    min-height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+}
+
+.win-commandbar.open .commandbar-surface {
+  box-shadow: inset 0 0 0 1px var(--CommandBarBorderBrushOpen, var(--card-stroke));
+  background: var(--CommandBarBackgroundOpen, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg)));
+  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px) saturate(160%));
+  backdrop-filter: var(--flyout-backdrop, blur(30px) saturate(160%));
 }
 
 .commandbar-primary-content {
   display: flex;
-  align-items: center;
-  flex: 1;
+  align-items: stretch;
+  justify-content: flex-end;
+  height: 48px;
+  min-width: 0;
+  min-height: 48px;
   overflow: hidden;
-  gap: 0;
+  transition: height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    min-height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
 }
 
-/* Overflow Button */
+.commandbar-primary-content :deep(.win-appbar-button),
+.commandbar-primary-content :deep(.win-appbar-toggle-button) {
+  flex: 0 0 auto;
+  min-height: 48px;
+  height: 48px;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition: min-height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+}
+
+.win-commandbar.label-collapsed .commandbar-primary-content :deep(.appbar-button-label),
+.win-commandbar.label-bottom:not(.open) .commandbar-primary-content :deep(.appbar-button-label) {
+  display: none;
+}
+
+.win-commandbar.label-bottom.open,
+.win-commandbar.label-bottom.open .commandbar-surface,
+.win-commandbar.label-bottom.open .commandbar-primary-content {
+  height: 64px;
+  min-height: 64px;
+}
+
+.win-commandbar.label-bottom.open .commandbar-primary-content :deep(.win-appbar-button),
+.win-commandbar.label-bottom.open .commandbar-primary-content :deep(.win-appbar-toggle-button) {
+  min-height: 64px;
+  height: 64px;
+}
+
 .commandbar-overflow-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
   min-width: 48px;
   height: 48px;
-  border: none;
-  background: var(--muxc-subtle-fill-transparent, transparent);
-  color: var(--text-fill-color-primary, rgba(0, 0, 0, 0.8956));
-  cursor: pointer;
-  transition: background-color 0.1s ease;
-  flex-shrink: 0;
-  padding: 0 12px;
+  min-height: 48px;
+  align-self: stretch;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ControlCornerRadius, 4px);
+  background: transparent;
+  color: inherit;
+  cursor: default;
+  box-sizing: border-box;
+  transition: height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    min-height var(--CommandBarHeightTransitionDuration) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    background-color var(--faster-duration, 83ms) linear,
+    color var(--faster-duration, 83ms) linear;
+}
+
+.commandbar-overflow-button::before {
+  content: '';
+  position: absolute;
+  inset: 6px 6px 6px 2px;
+  border-radius: var(--ControlCornerRadius, 4px);
+  background: var(--SubtleFillColorTransparentBrush, transparent);
+  transition: background-color var(--faster-duration, 83ms) linear;
+}
+
+.win-commandbar.label-bottom.open .commandbar-overflow-button {
+  height: 64px;
+  min-height: 64px;
 }
 
 .commandbar-overflow-button:hover {
-  background: var(--muxc-subtle-fill-secondary, rgba(0, 0, 0, 0.0373));
+  background: transparent;
 }
 
-.commandbar-overflow-button:active,
-.commandbar-overflow-button.active {
-  background: var(--muxc-subtle-fill-tertiary, rgba(0, 0, 0, 0.0241));
+.commandbar-overflow-button:hover::before {
+  background: var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary));
+}
+
+.win-commandbar.open .commandbar-overflow-button:hover::before {
+  background: var(--SubtleFillColorTransparentBrush, transparent);
+}
+
+.commandbar-overflow-button:active {
+  background: transparent;
+  color: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+}
+
+.commandbar-overflow-button:active::before {
+  background: var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary));
 }
 
 .commandbar-overflow-button:focus-visible {
-  outline: 2px solid var(--muxc-accent-fill-default, #005FB8);
-  outline-offset: -2px;
+  outline: 2px solid var(--FocusStrokeColorOuterBrush, var(--text-primary));
+  outline-offset: -3px;
 }
 
-.commandbar-overflow-button .symbol-icon {
-  font-size: 16px;
-  display: inline-block;
-}
-
-.commandbar-overflow-button .symbol-icon::before {
-  content: ''; /* More icon */
-}
-
-/* Secondary Commands Overlay */
-.commandbar-secondary-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 999;
-  background: transparent;
-}
-
-.commandbar-secondary {
+.commandbar-ellipsis {
   position: absolute;
-  top: 48px;
-  right: 0;
-  min-width: 200px;
-  max-width: 400px;
-  isolation: isolate;
-  background: transparent;
-  border: 1px solid var(--muxc-control-stroke-default, rgba(0, 0, 0, 0.0578));
-  border-radius: var(--muxc-overlay-corner-radius, 8px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  padding: 4px 0;
-  max-height: 60vh;
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
+  top: 50%;
+  left: calc(50% - 2px);
+  z-index: 1;
+  display: block;
+  width: 20px;
+  height: 20px;
+  overflow: visible;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif;
+  font-size: 20px;
+  line-height: 20px;
+  text-align: center;
+  transform: translate(-50%, -50%);
 }
 
-.commandbar-secondary::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: inherit;
-  background: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
-}
-
-.commandbar-secondary-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.commandbar-secondary :deep(.win-appbar-button) {
-  width: 100%;
-  justify-content: flex-start;
-  min-height: 40px;
-  padding: 8px 12px;
-  text-align: left;
-}
-
-.commandbar-separator {
-  height: 1px;
-  background: var(--muxc-control-stroke-default, rgba(0, 0, 0, 0.0578));
-  margin: 4px 0;
-}
-
-/* Transitions */
-.commandbar-overflow-enter-active,
-.commandbar-overflow-leave-active {
-  transition: opacity 0.15s ease;
-}
-
-.commandbar-overflow-enter-active .commandbar-secondary,
-.commandbar-overflow-leave-active .commandbar-secondary {
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-.commandbar-overflow-enter-from,
-.commandbar-overflow-leave-to {
-  opacity: 0;
-}
-
-.commandbar-overflow-enter-from .commandbar-secondary {
-  transform: translateY(-8px);
-  opacity: 0;
-}
-
-.commandbar-overflow-leave-to .commandbar-secondary {
-  transform: translateY(-4px);
-  opacity: 0;
-}
-
-:global(.example-theme-wrapper.theme-dark) .win-commandbar {
-  --commandbar-fill: var(--muxc-layer-fill-default, #2C2C2C);
-  background: transparent;
-  border-bottom-color: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
-}
-
-:global(.example-theme-wrapper.theme-dark) .win-commandbar.open {
-  --commandbar-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
-}
-
-:global(.example-theme-wrapper.theme-dark) .commandbar-overflow-button {
-  color: var(--text-fill-color-primary, rgba(255, 255, 255, 1));
-}
-
-:global(.example-theme-wrapper.theme-dark) .commandbar-overflow-button:hover {
-  background: var(--muxc-subtle-fill-secondary, rgba(255, 255, 255, 0.0605));
-}
-
-:global(.example-theme-wrapper.theme-dark) .commandbar-overflow-button:active,
-:global(.example-theme-wrapper.theme-dark) .commandbar-overflow-button.active {
-  background: var(--muxc-subtle-fill-tertiary, rgba(255, 255, 255, 0.0419));
-}
-
-:global(.example-theme-wrapper.theme-dark) .commandbar-secondary {
-  background: transparent;
-  border-color: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-}
-
-:global(.example-theme-wrapper.theme-dark) .commandbar-separator {
-  background: var(--muxc-control-stroke-default, rgba(255, 255, 255, 0.0837));
-}
-
-/* No overflow state */
-.win-commandbar.no-overflow .commandbar-overflow-button {
-  display: none;
+@media (prefers-reduced-motion: reduce) {
+  .commandbar-surface,
+  .commandbar-primary-content,
+  .commandbar-overflow-button,
+  .win-commandbar,
+  .commandbar-primary-content :deep(.win-appbar-button),
+  .commandbar-primary-content :deep(.win-appbar-toggle-button) {
+    transition-duration: 0.01ms;
+  }
 }
 </style>

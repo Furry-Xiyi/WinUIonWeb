@@ -34,6 +34,7 @@
 
             <!-- 示例1: 创建和应用样式 -->
             <WinControlExample
+              :theme="pageTheme"
               headerText="Creating and applying a style"
               :templateCode="example1Template"
               :vueCode="example1Vue">
@@ -48,6 +49,7 @@
 
             <!-- 示例2: 隐式样式 (无key) -->
             <WinControlExample
+              :theme="pageTheme"
               headerText="Style without a key (implicit style)"
               :templateCode="example2Template"
               :vueCode="example2Vue">
@@ -73,7 +75,7 @@ import { createPageState } from '../../utils/pageState';
 import WinScrollViewer from '../../components/WinScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'xamlstyles');
-const { isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const { pageTheme, isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 // 示例1代码
 const example1Template = `<StackPanel Spacing="8">

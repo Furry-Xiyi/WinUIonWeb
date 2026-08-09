@@ -5,7 +5,7 @@
           <WinTextBlock class="page-header" :Text="$t('text.commandbarflyout')" />
           <WinTextBlock class="page-description" :Text="$t('text.the-commandbarflyout-lets-you-provide-users-with')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
             <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
@@ -16,20 +16,19 @@
           class="basic-input-example-theme"
           :headerText="$t('sample.commandbarflyout.object')"
           :theme="pageTheme"
-          :vue="commandBarFlyoutCode"
-          :xaml="commandBarFlyoutXaml">
+          :vue="commandBarFlyoutCode">
               <template #example>
                 <div class="commandbarflyout-stack">
                   <WinTextBlock :Text="$t('sample.commandbarflyout.open-hint')" TextWrapping="WrapWholeWords" />
-                  <button
+                  <WinButton
                     ref="myImageButton"
-                    class="image-button"
-                    type="button"
-                    :aria-label="$t('sample.mountain')"
-                    @click="myImageButtonClick"
+                    v-bind="{ 'AutomationProperties.Name': $t('sample.mountain') }"
+                    Margin="0,12,0,12"
+                    Padding="0"
+                    @Click="myImageButtonClick"
                     @contextmenu.prevent="myImageButtonContextRequested">
-                    <img ref="image1" class="sample-image" :src="rainierImageUrl" :alt="$t('sample.mountain')" />
-                  </button>
+                    <WinImage Height="300" :Source="rainierImageUrl" />
+                  </WinButton>
                   <WinTextBlock :Text="selectedOptionText" />
                 </div>
               </template>
@@ -40,7 +39,6 @@
               :PrimaryCommands="primaryCommands"
               :SecondaryCommands="secondaryCommands"
               Placement="Right"
-              :ShowPrimaryLabels="true"
               :Theme="pageTheme" />
       </div>
     </div>
@@ -52,6 +50,7 @@ import { computed, inject, ref } from 'vue';
 import WinButton from '../../components/WinButton.vue';
 import WinCommandBarFlyout from '../../components/WinCommandBarFlyout.vue';
 import WinControlExample from '../../components/WinControlExample.vue';
+import WinImage from '../../components/WinImage.vue';
 import WinTextBlock from '../../components/WinTextBlock.vue';
 import WinToggleButton from '../../components/WinToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
@@ -64,7 +63,6 @@ const pageKey = computed(() => currentPage?.value || 'commandbarflyout');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const commandBarFlyout1 = ref(null);
-const image1 = ref(null);
 const myImageButton = ref(null);
 const selectedOptionText = ref('');
 const rainierImageUrl = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/rainier.jpg';
@@ -85,7 +83,7 @@ const onElementClicked = (command) => {
 };
 
 const showMenu = (isTransient) => {
-  const target = image1.value ?? myImageButton.value;
+  const target = myImageButton.value?.$el ?? myImageButton.value;
   if (!target) return;
   commandBarFlyout1.value?.showAt(target, {
     ShowMode: isTransient ? 'Transient' : 'Standard',
@@ -101,39 +99,19 @@ const myImageButtonClick = () => {
   showMenu(true);
 };
 
-const commandBarFlyoutCode = `<WinCommandBarFlyout
-  :PrimaryCommands="[
-    { Label: 'Share', Icon: 'Share', 'ToolTipService.ToolTip': 'Share', Click: onElementClicked },
-    { Label: 'Save', Icon: 'Save', 'ToolTipService.ToolTip': 'Save', Click: onElementClicked },
-    { Label: 'Delete', Icon: 'Delete', 'ToolTipService.ToolTip': 'Delete', Click: onElementClicked }
-  ]"
-  :SecondaryCommands="[
-    { Name: 'ResizeButton1', Label: 'Resize', Click: onElementClicked },
-    { Name: 'MoveButton1', Label: 'Move', Click: onElementClicked }
-  ]"
-  Placement="Right"
-  :ShowPrimaryLabels="true" />
+const commandBarFlyoutCode = `<WinCommandBarFlyout Name="CommandBarFlyout1" Placement="Right">
+  <WinAppBarButton Label="Share" Icon="Share" ToolTipService.ToolTip="Share" Click="OnElementClicked" />
+  <WinAppBarButton Label="Save" Icon="Save" ToolTipService.ToolTip="Save" Click="OnElementClicked" />
+  <WinAppBarButton Label="Delete" Icon="Delete" ToolTipService.ToolTip="Delete" Click="OnElementClicked" />
+  <WinCommandBarFlyout.SecondaryCommands>
+    <WinAppBarButton Name="ResizeButton1" Label="Resize" Click="OnElementClicked" />
+    <WinAppBarButton Name="MoveButton1" Label="Move" Click="OnElementClicked" />
+  </WinCommandBarFlyout.SecondaryCommands>
+</WinCommandBarFlyout>
 
-<button @click="showMenu(true)" @contextmenu.prevent="showMenu(false)">
-  <img src="${rainierImageUrl}" height="300" />
-</button>`;
-
-const commandBarFlyoutXaml = `<Page.Resources>
-    <CommandBarFlyout Placement="Right" x:Name="CommandBarFlyout1">
-        <AppBarButton Label="Share" Icon="Share" ToolTipService.ToolTip="Share" Click="OnElementClicked" />
-        <AppBarButton Label="Save" Icon="Save" ToolTipService.ToolTip="Save" Click="OnElementClicked" />
-        <AppBarButton Label="Delete" Icon="Delete" ToolTipService.ToolTip="Delete" Click="OnElementClicked" />
-        <CommandBarFlyout.SecondaryCommands>
-            <AppBarButton x:Name="ResizeButton1" Label="Resize" Click="OnElementClicked" />
-            <AppBarButton x:Name="MoveButton1" Label="Move" Click="OnElementClicked" />
-        </CommandBarFlyout.SecondaryCommands>
-    </CommandBarFlyout>
-</Page.Resources>
-
-<Button x:Name="myImageButton" AutomationProperties.Name="mountain" Padding="0"
-    Click="MyImageButton_Click" ContextRequested="MyImageButton_ContextRequested" >
-    <Image x:Name="Image1" Height="300" Source="/Assets/SampleMedia/rainier.jpg"/>
-</Button>`;
+<WinButton Name="myImageButton" AutomationProperties.Name="mountain" Margin="0,12,0,12" Padding="0" Click="MyImageButton_Click" ContextRequested="MyImageButton_ContextRequested">
+  <WinImage Name="Image1" Height="300" Source="/Assets/SampleMedia/rainier.jpg" />
+</WinButton>`;
 </script>
 
 <style scoped>
@@ -143,6 +121,4 @@ const commandBarFlyoutXaml = `<Page.Resources>
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .icon { font-size: 16px; }
 .commandbarflyout-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
-.image-button { padding: 0; border: 0; background: transparent; cursor: pointer; }
-.sample-image { height: 300px; display: block; }
 </style>

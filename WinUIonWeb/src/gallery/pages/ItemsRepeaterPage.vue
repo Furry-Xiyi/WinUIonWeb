@@ -39,7 +39,7 @@
               </template>
             </WinControlExample>
 
-            <WinControlExample class="basic-input-example-theme" horizontalContentAlignment="Stretch" :headerText="$t('sample.itemsrepeater.virtualizing-scrollable-list-items')" :theme="pageTheme" :vue="virtualizingRepeaterVue">
+            <WinControlExample class="basic-input-example-theme" HorizontalContentAlignment="Stretch" :headerText="$t('sample.itemsrepeater.virtualizing-scrollable-list-items')" :theme="pageTheme" :vue="virtualizingRepeaterVue">
               <template #example>
                 <WinScrollViewer class="scroll-host feed-host" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
                   <WinItemsRepeater Margin="0,0,12,0" :ItemsSource="numbers" :Layout="virtualizingLayout" HorizontalAlignment="Stretch">

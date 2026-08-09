@@ -5,7 +5,7 @@
           <WinTextBlock class="page-header" :Text="$t('text.menuflyout')" />
           <WinTextBlock class="page-description" :Text="$t('text.a-menuflyout-displays-a-lightweight-menu-of-comm')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
+            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
             <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
             </WinToggleButton>
@@ -15,7 +15,15 @@
         <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-menuflyout-attached-to-an-appbarbutton')" :theme="pageTheme" :vue="appBarCode">
               <template #example>
                 <div class="sample-row">
-                  <WinAppBarButton icon="Sort" :label="$t('sample.sort')" :isCompact="true" :ariaLabel="$t('sample.sort')" @click="openMenu($event, sortMenu)" />
+                  <WinAppBarButton
+                    Icon="Sort"
+                    :IsCompact="true"
+                    v-bind="{
+                      'ToolTipService.ToolTip': $t('sample.sort'),
+                      'AutomationProperties.Name': $t('sample.sort')
+                    }"
+                    :Flyout="sortFlyout"
+                    @Select="onSortSelect" />
                   <WinTextBlock class="output-text" :Text="sortOutput" />
                 </div>
               </template>
@@ -23,62 +31,91 @@
 
             <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.toggle-items')" :theme="pageTheme" :vue="toggleCode">
               <template #example>
-                <WinButton @click="openMenu($event, toggleMenu)">
+                <WinButton @Click="openMenu($event, toggleMenu)">
                   <WinTextBlock :Text="$t('sample.options')" />
                 </WinButton>
+                <WinMenuFlyout
+                  :Open="toggleMenu.open"
+                  :AnchorRect="toggleMenu.anchor"
+                  :Items="toggleItems"
+                  :Theme="pageTheme"
+                  @Close="toggleMenu.open = false" />
               </template>
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.cascading')" :theme="pageTheme" :vue="cascadeCode">
               <template #example>
-                <WinButton @click="openMenu($event, cascadeMenu)">
+                <WinButton @Click="openMenu($event, cascadeMenu)">
                   <WinTextBlock :Text="$t('sample.file-options')" />
                 </WinButton>
+                <WinMenuFlyout
+                  :Open="cascadeMenu.open"
+                  :AnchorRect="cascadeMenu.anchor"
+                  :Items="cascadeItems"
+                  :Theme="pageTheme"
+                  @Close="cascadeMenu.open = false" />
               </template>
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.split-items')" :theme="pageTheme" :vue="splitCode">
               <template #example>
                 <div class="sample-row">
-                  <WinButton @click="openMenu($event, splitMenu)">
+                  <WinButton @Click="openMenu($event, splitMenu)">
                     <WinTextBlock :Text="$t('sample.file-options')" />
                   </WinButton>
                   <WinTextBlock class="output-text" :Text="splitOutput" />
                 </div>
+                <WinMenuFlyout
+                  :Open="splitMenu.open"
+                  :AnchorRect="splitMenu.anchor"
+                  :Items="splitItems"
+                  :Theme="pageTheme"
+                  @Close="splitMenu.open = false"
+                  @Select="onSplitSelect" />
               </template>
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.icons')" :theme="pageTheme" :vue="iconsCode">
               <template #example>
-                <WinButton @click="openMenu($event, iconsMenu)">
+                <WinButton @Click="openMenu($event, iconsMenu)">
                   <WinTextBlock :Text="$t('sample.edit-options')" />
                 </WinButton>
+                <WinMenuFlyout
+                  :Open="iconsMenu.open"
+                  :AnchorRect="iconsMenu.anchor"
+                  :Items="iconItems"
+                  :Theme="pageTheme"
+                  @Close="iconsMenu.open = false" />
               </template>
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.keyboard')" :theme="pageTheme" :vue="keyboardCode">
               <template #example>
-                <WinButton @click="openMenu($event, keyboardMenu)">
+                <WinButton @Click="openMenu($event, keyboardMenu)">
                   <WinTextBlock :Text="$t('sample.edit-options')" />
                 </WinButton>
+                <WinMenuFlyout
+                  :Open="keyboardMenu.open"
+                  :AnchorRect="keyboardMenu.anchor"
+                  :Items="keyboardItems"
+                  :Theme="pageTheme"
+                  @Close="keyboardMenu.open = false" />
               </template>
             </WinControlExample>
 
             <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.radio')" :theme="pageTheme" :vue="radioCode">
               <template #example>
-                <WinButton @click="openMenu($event, radioMenu)">
+                <WinButton @Click="openMenu($event, radioMenu)">
                   <WinTextBlock :Text="$t('sample.options')" />
                 </WinButton>
+                <WinMenuFlyout
+                  :Open="radioMenu.open"
+                  :AnchorRect="radioMenu.anchor"
+                  :Items="radioItems"
+                  :Theme="pageTheme"
+                  @Close="radioMenu.open = false" />
               </template>
             </WinControlExample>
-
-            <WinMenuFlyout :Open="sortMenu.open" :AnchorRect="sortMenu.anchor" :Items="sortItems" :Theme="pageTheme" @Close="sortMenu.open = false" @Select="onSortSelect" />
-            <WinMenuFlyout :Open="toggleMenu.open" :AnchorRect="toggleMenu.anchor" :Items="toggleItems" :Theme="pageTheme" @Close="toggleMenu.open = false" />
-            <WinMenuFlyout :Open="cascadeMenu.open" :AnchorRect="cascadeMenu.anchor" :Items="cascadeItems" :Theme="pageTheme" @Close="cascadeMenu.open = false" />
-            <WinMenuFlyout :Open="splitMenu.open" :AnchorRect="splitMenu.anchor" :Items="splitItems" :Theme="pageTheme" @Close="splitMenu.open = false" @Select="onSplitSelect" />
-            <WinMenuFlyout :Open="iconsMenu.open" :AnchorRect="iconsMenu.anchor" :Items="iconItems" :Theme="pageTheme" @Close="iconsMenu.open = false" />
-            <WinMenuFlyout :Open="keyboardMenu.open" :AnchorRect="keyboardMenu.anchor" :Items="keyboardItems" :Theme="pageTheme" @Close="keyboardMenu.open = false" />
-            <WinMenuFlyout :Open="radioMenu.open" :AnchorRect="radioMenu.anchor" :Items="radioItems" :Theme="pageTheme" @Close="radioMenu.open = false" />
       </div>
     </div>
   </WinScrollViewer>
@@ -102,14 +139,13 @@ const pageKey = computed(() => currentPage?.value || 'menuflyout');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const makeMenu = () => reactive({ open: false, anchor: null });
-const sortMenu = makeMenu();
 const toggleMenu = makeMenu();
 const cascadeMenu = makeMenu();
 const splitMenu = makeMenu();
 const iconsMenu = makeMenu();
 const keyboardMenu = makeMenu();
 const radioMenu = makeMenu();
-const allMenus = [sortMenu, toggleMenu, cascadeMenu, splitMenu, iconsMenu, keyboardMenu, radioMenu];
+const allMenus = [toggleMenu, cascadeMenu, splitMenu, iconsMenu, keyboardMenu, radioMenu];
 
 const sortOutput = ref('');
 const splitOutput = ref('');
@@ -125,6 +161,7 @@ const sortItems = reactive([
   { Text: t('sample.by-match'), Tag: 'match' },
   { Text: t('sample.by-distance'), Tag: 'distance' }
 ]);
+const sortFlyout = computed(() => ({ Items: sortItems, Theme: pageTheme.value }));
 
 const toggleItems = reactive([
   { Text: t('sample.reset') },
@@ -205,7 +242,6 @@ const radioItems = reactive([
 
 const onSortSelect = (item) => {
   sortOutput.value = t('sample.sort-by', { value: item.Tag });
-  sortMenu.open = false;
 };
 
 const onSplitSelect = (item) => {
@@ -213,69 +249,108 @@ const onSplitSelect = (item) => {
   splitMenu.open = false;
 };
 
-const appBarCode = `<WinAppBarButton Icon="Sort" Label="Sort" IsCompact ToolTipService.ToolTip="Sort">
-  <MenuFlyout>
-    <MenuFlyoutItem Text="By rating" />
-    <MenuFlyoutItem Text="By match" />
-    <MenuFlyoutItem Text="By distance" />
-  </MenuFlyout>
+const appBarCode = `<WinAppBarButton
+  Icon="Sort"
+  IsCompact="True"
+  ToolTipService.ToolTip="Sort"
+  AutomationProperties.Name="Sort">
+  <WinAppBarButton.Flyout>
+    <WinMenuFlyout>
+      <WinMenuFlyoutItem Text="By rating" Tag="rating" Click="MenuFlyoutItem_Click" />
+      <WinMenuFlyoutItem Text="By match" Tag="match" Click="MenuFlyoutItem_Click" />
+      <WinMenuFlyoutItem Text="By distance" Tag="distance" Click="MenuFlyoutItem_Click" />
+    </WinMenuFlyout>
+  </WinAppBarButton.Flyout>
 </WinAppBarButton>`;
-const toggleCode = `<WinButton>
-  <WinTextBlock Text="Options" />
-</WinButton>
-<WinMenuFlyout :Items="[
-  { Text: 'Reset' },
-  { Kind: 'MenuFlyoutSeparator' },
-  { Kind: 'ToggleMenuFlyoutItem', Text: 'Repeat', IsChecked: true },
-  { Kind: 'ToggleMenuFlyoutItem', Text: 'Shuffle', IsChecked: true }
-]" />`;
-const cascadeCode = `<WinButton>
-  <WinTextBlock Text="File Options" />
-</WinButton>
-<WinMenuFlyout :Items="[
-  { Text: 'Open' },
-  { Kind: 'MenuFlyoutSubItem', Text: 'Send to', Items: [
-    { Text: 'Bluetooth' },
-    { Text: 'Desktop (shortcut)' },
-    { Kind: 'MenuFlyoutSubItem', Text: 'Compressed file', Items: [
-      { Text: 'Compress and email' },
-      { Text: 'Compress to .7z' },
-      { Text: 'Compress to .zip' }
-    ]}
-  ]}
-]" />`;
-const splitCode = `<WinMenuFlyout :Items="[
-  { Kind: 'SplitMenuFlyoutItem', Text: 'Save', Icon: '\\uE74E', Items: [
-    { Text: 'Save as .docx' },
-    { Text: 'Save as .pdf' },
-    { Text: 'Save as .txt' }
-  ]},
-  { Kind: 'SplitMenuFlyoutItem', Text: 'Share', Icon: '\\uE72D', Items: [
-    { Text: 'Share via email' },
-    { Text: 'Share via link' }
-  ]}
-]" />`;
-const iconsCode = `<WinMenuFlyout :Items="[
-  { Text: 'Share', Icon: '\\uE72D' },
-  { Text: 'Copy', Icon: '\\uE8C8' },
-  { Text: 'Delete', Icon: '\\uE74D' },
-  { Kind: 'MenuFlyoutSeparator' },
-  { Text: 'Rename' },
-  { Text: 'Select' }
-]" />`;
-const keyboardCode = `<WinMenuFlyout :Items="[
-  { Text: 'Share', Icon: '\\uE72D', KeyboardAcceleratorTextOverride: 'Ctrl+S' },
-  { Text: 'Copy', Icon: '\\uE8C8', KeyboardAcceleratorTextOverride: 'Ctrl+C' },
-  { Text: 'Delete', Icon: '\\uE74D', KeyboardAcceleratorTextOverride: 'Delete' }
-]" />`;
-const radioCode = `<WinMenuFlyout :Items="[
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'OrientationGroup', Text: 'Landscape' },
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'OrientationGroup', Text: 'Portrait', IsChecked: true },
-  { Kind: 'MenuFlyoutSeparator' },
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'SizeGroup', Text: 'Small icons' },
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'SizeGroup', Text: 'Medium icons', IsChecked: true },
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'SizeGroup', Text: 'Large icons' }
-]" />`;
+const toggleCode = `<WinButton Content="Options" Click="Control2_Click">
+  <WinButton.Flyout>
+    <WinMenuFlyout>
+      <WinMenuFlyoutItem Text="Reset" />
+      <WinMenuFlyoutSeparator />
+      <WinToggleMenuFlyoutItem Text="Repeat" IsChecked="True" />
+      <WinToggleMenuFlyoutItem Text="Shuffle" IsChecked="True" />
+    </WinMenuFlyout>
+  </WinButton.Flyout>
+</WinButton>`;
+const cascadeCode = `<WinButton Content="File Options" Click="Control3_Click">
+  <WinButton.Flyout>
+    <WinMenuFlyout>
+      <WinMenuFlyoutItem Text="Open" />
+      <WinMenuFlyoutSubItem Text="Send to">
+        <WinMenuFlyoutItem Text="Bluetooth" />
+        <WinMenuFlyoutItem Text="Desktop (shortcut)" />
+        <WinMenuFlyoutSubItem Text="Compressed file">
+          <WinMenuFlyoutItem Text="Compress and email" />
+          <WinMenuFlyoutItem Text="Compress to .7z" />
+          <WinMenuFlyoutItem Text="Compress to .zip" />
+        </WinMenuFlyoutSubItem>
+      </WinMenuFlyoutSubItem>
+    </WinMenuFlyout>
+  </WinButton.Flyout>
+</WinButton>`;
+const splitCode = `<WinButton Content="File Options" Click="Control3b_Click">
+  <WinButton.Flyout>
+    <WinMenuFlyout>
+      <WinSplitMenuFlyoutItem Text="Save" Icon="Save" Click="SplitMenuFlyoutItem_Click">
+        <WinMenuFlyoutItem Text="Save as .docx" Click="SplitMenuFlyoutItem_Click" />
+        <WinMenuFlyoutItem Text="Save as .pdf" Click="SplitMenuFlyoutItem_Click" />
+        <WinMenuFlyoutItem Text="Save as .txt" Click="SplitMenuFlyoutItem_Click" />
+      </WinSplitMenuFlyoutItem>
+      <WinSplitMenuFlyoutItem Text="Share" Icon="Share" Click="SplitMenuFlyoutItem_Click">
+        <WinMenuFlyoutItem Text="Share via email" Click="SplitMenuFlyoutItem_Click" />
+        <WinMenuFlyoutItem Text="Share via link" Click="SplitMenuFlyoutItem_Click" />
+      </WinSplitMenuFlyoutItem>
+    </WinMenuFlyout>
+  </WinButton.Flyout>
+</WinButton>`;
+const iconsCode = `<WinButton Content="Edit Options" Click="Control4_Click">
+  <WinButton.Flyout>
+    <WinMenuFlyout>
+      <WinMenuFlyoutItem Text="Share" Icon="Share" />
+      <WinMenuFlyoutItem Text="Copy" Icon="Copy" />
+      <WinMenuFlyoutItem Text="Delete" Icon="Delete" />
+      <WinMenuFlyoutSeparator />
+      <WinMenuFlyoutItem Text="Rename" />
+      <WinMenuFlyoutItem Text="Select" />
+    </WinMenuFlyout>
+  </WinButton.Flyout>
+</WinButton>`;
+const keyboardCode = `<WinButton Content="Edit Options" Click="Control5_Click">
+  <WinButton.Flyout>
+    <WinMenuFlyout>
+      <WinMenuFlyoutItem Text="Share" Icon="Share">
+        <WinMenuFlyoutItem.KeyboardAccelerators>
+          <WinKeyboardAccelerator Key="S" Modifiers="Control" />
+        </WinMenuFlyoutItem.KeyboardAccelerators>
+      </WinMenuFlyoutItem>
+      <WinMenuFlyoutItem Text="Copy" Icon="Copy" FontFamily="Consolas">
+        <WinMenuFlyoutItem.KeyboardAccelerators>
+          <WinKeyboardAccelerator Key="C" Modifiers="Control" />
+        </WinMenuFlyoutItem.KeyboardAccelerators>
+      </WinMenuFlyoutItem>
+      <WinMenuFlyoutItem Text="Delete" Icon="Delete" FontFamily="Segoe UI">
+        <WinMenuFlyoutItem.KeyboardAccelerators>
+          <WinKeyboardAccelerator Key="Delete" />
+        </WinMenuFlyoutItem.KeyboardAccelerators>
+      </WinMenuFlyoutItem>
+      <WinMenuFlyoutSeparator />
+      <WinMenuFlyoutItem Text="Rename" />
+      <WinMenuFlyoutItem Text="Select" />
+    </WinMenuFlyout>
+  </WinButton.Flyout>
+</WinButton>`;
+const radioCode = `<WinButton Content="Options" Click="Control6_Click">
+  <WinButton.Flyout>
+    <WinMenuFlyout>
+      <WinRadioMenuFlyoutItem GroupName="OrientationGroup" Text="Landscape" />
+      <WinRadioMenuFlyoutItem GroupName="OrientationGroup" IsChecked="True" Text="Portrait" />
+      <WinMenuFlyoutSeparator />
+      <WinRadioMenuFlyoutItem GroupName="SizeGroup" Text="Small icons" />
+      <WinRadioMenuFlyoutItem GroupName="SizeGroup" IsChecked="True" Text="Medium icons" />
+      <WinRadioMenuFlyoutItem GroupName="SizeGroup" Text="Large icons" />
+    </WinMenuFlyout>
+  </WinButton.Flyout>
+</WinButton>`;
 </script>
 
 <style scoped>
@@ -284,6 +359,6 @@ const radioCode = `<WinMenuFlyout :Items="[
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .icon { font-size: 16px; }
-.sample-row { display: flex; align-items: center; gap: 16px; }
-.output-text { color: var(--text-secondary); }
+.sample-row { display: flex; align-items: flex-start; }
+.output-text { margin: 8px 0 0 8px; color: var(--text-secondary); }
 </style>

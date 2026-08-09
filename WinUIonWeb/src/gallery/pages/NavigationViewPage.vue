@@ -18,7 +18,7 @@
           :headerText="$t('sample.navigationview.default-header')"
           :theme="pageTheme"
           :vue="defaultExampleCode"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :webViewHeight="250">
           <template #example>
             <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
@@ -42,7 +42,7 @@
           :headerText="$t('sample.navigationview.top-header')"
           :theme="pageTheme"
           :vue="topExampleCode"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :webViewHeight="200">
           <template #example>
             <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
@@ -66,7 +66,7 @@
           :headerText="$t('sample.navigationview.adaptive-header')"
           :theme="pageTheme"
           :vue="adaptiveExampleCode"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :webViewHeight="450">
           <template #example>
             <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
@@ -90,7 +90,7 @@
           :theme="pageTheme"
           :vue="tabsExampleCode"
           :cSharp="tabsCodeBehind"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :webViewHeight="800">
           <template #example>
             <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
@@ -115,7 +115,7 @@
           :headerText="$t('sample.navigationview.data-binding-header')"
           :theme="pageTheme"
           :vue="dataBindingExampleCode"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :webViewHeight="950">
           <template #example>
             <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
@@ -139,7 +139,7 @@
           :headerText="$t('sample.navigationview.footer-header')"
           :theme="pageTheme"
           :vue="footerExampleCode"
-          horizontalContentAlignment="Stretch">
+          HorizontalContentAlignment="Stretch">
           <template #example>
             <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
               <WinTextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.footer-description')" TextWrapping="WrapWholeWords" />
@@ -171,7 +171,7 @@
           :headerText="$t('sample.navigationview.hierarchical-header')"
           :theme="pageTheme"
           :vue="hierarchicalExampleCode"
-          horizontalContentAlignment="Stretch">
+          HorizontalContentAlignment="Stretch">
           <template #example>
             <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
               <WinStackPanel style="grid-row: 1;" Margin="0,0,0,15">
@@ -207,7 +207,7 @@
           :headerText="$t('sample.navigationview.api-header')"
           :theme="pageTheme"
           :vue="apiExampleCode"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :webViewHeight="250">
           <template #example>
             <WinNavigationView

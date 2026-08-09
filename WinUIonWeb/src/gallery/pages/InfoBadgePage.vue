@@ -27,7 +27,7 @@
       <WinStackPanel class="gallery-page-content" Spacing="0">
         <WinControlExample
           class="basic-input-example-theme"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :headerText="$t('sample.infobadge.embedded-navigationview')"
           :theme="pageTheme"
           :vue="example1Code">
@@ -63,7 +63,7 @@
 
         <WinControlExample
           class="basic-input-example-theme"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :headerText="$t('sample.infobadge.different-styles')"
           :theme="pageTheme"
           :vue="example2Code">
@@ -98,7 +98,7 @@
 
         <WinControlExample
           class="basic-input-example-theme"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :headerText="$t('sample.infobadge.inside-another-control')"
           :theme="pageTheme"
           :vue="example3Code">
@@ -134,7 +134,7 @@
 
         <WinControlExample
           class="basic-input-example-theme"
-          horizontalContentAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
           :headerText="$t('sample.infobadge.dynamic-value')"
           :theme="pageTheme"
           :vue="example4Code">

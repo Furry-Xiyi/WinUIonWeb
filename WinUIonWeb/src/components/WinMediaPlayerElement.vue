@@ -94,7 +94,6 @@
                   ref="volumeFlyoutRef"
                   v-model:IsOpen="isVolumeFlyoutOpen"
                   Placement="Top"
-                  align="center"
                   :Theme="flyoutTheme">
                   <template #trigger>
                     <button

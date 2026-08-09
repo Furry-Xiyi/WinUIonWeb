@@ -65,7 +65,7 @@ export default {
   "text.a-hyperlinkbutton-with-navigateuri": "A HyperlinkButton with NavigateUri.",
   "text.a-lightweight-popup-container": "A lightweight popup container.",
   "text.a-listview-displays-data-in-a-vertical-list-with": "A ListView displays data in a vertical list with selection support.",
-  "text.a-menuflyout-attached-to-an-appbarbutton": "A MenuFlyout attached to an AppBarButton",
+  "text.a-menuflyout-attached-to-an-appbarbutton": "An AppBarButton with a MenuFlyout.",
   "text.a-menuflyout-displays-a-lightweight-menu-of-comm": "A MenuFlyout displays a lightweight menu of commands that can be attached to buttons and other controls.",
   "text.a-numberbox-that-evaluates-expressions": "A NumberBox that evaluates expressions",
   "text.a-passwordbox-is-a-text-input-box-that-conceals": "A PasswordBox is a text input box that conceals the characters typed into it for the purpose of privacy. A PasswordBox looks like a text box, except that it renders placeholder characters in place of the text that has been entered. You can configure the placeholder character.",
@@ -134,7 +134,14 @@ export default {
   "text.combobox": "ComboBox",
   "text.comic-sans-ms": "Comic Sans MS",
   "text.commandbar": "CommandBar",
+  "text.commandbar-subtitle": "A toolbar for displaying application-specific commands that handles layout and resizing of its contents.",
   "text.commandbarflyout": "CommandBarFlyout",
+  "text.appbarbutton": "AppBarButton",
+  "text.appbarbutton-description": "A button that's styled for use in a CommandBar.",
+  "text.appbarseparator": "AppBarSeparator",
+  "text.appbarseparator-description": "A vertical line that's used to visually separate groups of commands in an app bar.",
+  "text.appbar-toggle-button": "AppBarToggleButton",
+  "text.appbar-toggle-button-description": "A button that can be toggled on and off, styled for use in a CommandBar.",
   "text.community-toolkit": "Community Toolkit",
   "text.compactinline": "CompactInline",
   "text.compactoverlay": "CompactOverlay",
@@ -305,8 +312,39 @@ export default {
   "text.splitview": "SplitView",
   "text.standard-xaml-button": "Standard XAML button",
   "text.standarduicommand": "StandardUICommand",
+  "text.standarduicommand-subtitle": "A StandardUICommand is a built-in XamlUICommand which represents a commonly used command, e.g. Save.",
+  "sample.standarduicommand.multiple-controls": "Exposing a command in multiple controls using StandardUICommand",
+  "sample.standarduicommand.description": "StandardUICommand allows the sharing of the UX associated with a command. In this instance we are using a StandardUICommand to quickly place the delete command in multiple controls. The StandardUICommand contains the icon, label, keyboard shortcut, and a description.",
+  "sample.standarduicommand.items": "Items",
+  "sample.standarduicommand.list-item": "List item {index}",
+  "sample.standarduicommand.new": "New",
+  "sample.standarduicommand.open": "Open...",
+  "sample.standarduicommand.exit": "Exit",
   "text.sue": "Sue",
   "text.swipecontrol": "SwipeControl",
+  "text.swipecontrol-subtitle": "Touch gesture for quick menu actions on items.",
+  "sample.swipecontrol.reveal-actions": "Swipe right to reveal actions",
+  "sample.swipecontrol.execute": "Swipe left to invoke an execute",
+  "sample.swipecontrol.custom-list": "Custom Swipe in a ListView",
+  "sample.swipecontrol.gradient": "Gradient Background",
+  "sample.swipecontrol.custom-icons": "Custom icons",
+  "sample.swipecontrol.swipe-right": "Swipe Right",
+  "sample.swipecontrol.swipe-left": "Swipe Left",
+  "sample.swipecontrol.accept": "Accept",
+  "sample.swipecontrol.cancel": "Cancel",
+  "sample.swipecontrol.flag": "Flag",
+  "sample.swipecontrol.unmark": "Unmark",
+  "sample.swipecontrol.archive": "Archive",
+  "sample.swipecontrol.archived": "Archived - Swipe Left",
+  "sample.swipecontrol.accepted": "Swipe Right - Accepted",
+  "sample.swipecontrol.accepted-flagged": "Swipe Right - Accepted & Flagged",
+  "sample.swipecontrol.flagged": "Swipe Right - Flagged",
+  "sample.swipecontrol.list-item": "Swipe Item {index}",
+  "sample.swipecontrol.reply-all": "Reply All",
+  "sample.swipecontrol.open": "Open",
+  "sample.swipecontrol.delete": "Delete",
+  "sample.swipecontrol.lock": "Lock",
+  "sample.swipecontrol.coffee": "Coffee",
   "text.switch-that-can-be-toggled-between-two-states": "Switch that can be toggled between two states.",
   "text.systembackground": "SystemBackground",
   "text.taiwancalendar": "TaiwanCalendar",
@@ -366,6 +404,12 @@ export default {
   "text.winui-on-web-on-github": "WinUI on Web on GitHub",
   "text.workgroup": "Workgroup",
   "text.xamluicommand": "XamlUICommand",
+  "text.xamluicommand-subtitle": "An object which is used to define the look and feel of a given command.",
+  "sample.xamluicommand.reusable-command": "Creating a reusable command with XamlUICommand",
+  "sample.xamluicommand.description": "XamlUICommand allows the sharing of the UX associated with a command. In this instance we create a simple custom command with a label, icon, shortcut, and description. It's defined as a resource and could be used in many controls, like this AppBarButton. The button (and other controls) automatically gets all these UI properties, without the need to define the properties again.",
+  "sample.xamluicommand.custom-label": "Custom XamlUICommand",
+  "sample.xamluicommand.custom-description": "This is a custom command",
+  "sample.xamluicommand.executed": "You fired the custom command",
   "text.white": "White",
   "text.yellow": "Yellow"
   ,"sample.alpha-enabled": "Alpha Enabled"
@@ -649,9 +693,40 @@ export default {
   ,"sample.flyout.empty-cart": "Empty cart"
   ,"sample.flyout.remove-all": "All items will be removed. Do you want to continue?"
   ,"sample.flyout.confirm-empty": "Yes, empty my cart"
-  ,"sample.commandbarflyout.object": "CommandBarFlyout for commands on an in-app object"
+     ,"sample.commandbarflyout.object": "CommandBarFlyout for commands on an in-app object"
   ,"sample.commandbarflyout.open-hint": "Click or right click the image to open a CommandBarFlyout"
-  ,"sample.mountain": "mountain"
+  ,"sample.appbarbutton.symbol": "An AppBarButton with a symbol icon."
+  ,"sample.appbarbutton.symbol-label": "SymbolIcon"
+  ,"sample.appbarbutton.bitmap": "An AppBarButton with a bitmap icon."
+  ,"sample.appbarbutton.bitmap-label": "BitmapIcon"
+  ,"sample.appbarbutton.font": "An AppBarButton with a font icon."
+  ,"sample.appbarbutton.font-label": "FontIcon"
+  ,"sample.appbarbutton.path": "An AppBarButton with a path icon."
+  ,"sample.appbarbutton.path-label": "PathIcon"
+  ,"sample.appbarbutton.keyboard": "An AppBarButton with a KeyboardAccelerator"
+  ,"sample.appbarbutton.flyout": "An AppBarButton that opens a Flyout containing an input control."
+  ,"sample.appbarbutton.input-placeholder": "Input text here"
+  ,"sample.appbarseparator.separated": "AppBarButtons separated by AppBarSeparators."
+  ,"sample.appbarseparator.attach-camera": "Attach Camera"
+  ,"sample.appbarseparator.like": "Like"
+  ,"sample.appbarseparator.dislike": "Dislike"
+  ,"sample.appbarseparator.orientation": "Orientation"
+  ,"sample.appbartogglebutton.symbol": "An AppBarToggleButton with a symbol icon."
+  ,"sample.appbartogglebutton.bitmap": "An AppBarToggleButton with a bitmap icon."
+  ,"sample.appbartogglebutton.font": "An AppBarToggleButton with a font icon."
+  ,"sample.appbartogglebutton.path": "A three-state AppBarToggleButton with a path icon."
+  ,"sample.appbartogglebutton.output": "IsChecked = {value}"
+     ,"sample.commandbar.show-or-hide": "Show or hide"
+     ,"sample.commandbar.open": "Open command bar"
+     ,"sample.commandbar.close": "Close command bar"
+     ,"sample.commandbar.modify-content": "Modify content"
+     ,"sample.commandbar.add-secondary": "Add secondary commands"
+     ,"sample.commandbar.remove-secondary": "Remove secondary commands"
+     ,"sample.commandbar.button-1": "Button 1"
+     ,"sample.commandbar.button-2": "Button 2"
+     ,"sample.commandbar.button-3": "Button 3"
+     ,"sample.commandbar.button-4": "Button 4"
+     ,"sample.mountain": "mountain"
   ,"sample.share": "Share"
   ,"sample.save": "Save"
   ,"sample.delete": "Delete"
@@ -668,6 +743,15 @@ export default {
   ,"sample.menuflyout.icons": "A MenuFlyout with icons"
   ,"sample.menuflyout.keyboard": "A MenuFlyout with keyboard accelerators"
   ,"sample.menuflyout.radio": "A MenuFlyout with radio items"
+  ,"sample.menubar.keyboard": "A MenuBar with keyboard accelerators"
+  ,"sample.menubar.submenus": "A MenuBar with submenus, separators, and radio menu items"
+  ,"sample.menubar.undo": "Undo"
+  ,"sample.menubar.cut": "Cut"
+  ,"sample.menubar.paste": "Paste"
+  ,"sample.menubar.plain-text": "Plain Text Document"
+  ,"sample.menubar.rich-text": "Rich Text Document"
+  ,"sample.menubar.other-formats": "Other Formats"
+  ,"sample.menubar.output": "Output"
   ,"sample.options": "Options"
   ,"sample.file-options": "File Options"
   ,"sample.edit-options": "Edit Options"

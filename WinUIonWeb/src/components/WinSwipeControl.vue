@@ -1,533 +1,581 @@
 <template>
   <div
-    ref="swipeContainer"
+    ref="swipeControlRoot"
     class="win-swipe-control"
-    :class="{
-      'is-swiping': isSwiping,
-      'is-revealed': isRevealed,
-      [`reveal-${revealDirection}`]: isRevealed
-    }"
-    @mousedown="handlePointerDown"
-    @touchstart="handlePointerDown"
-  >
-    <!-- Left Swipe Items -->
+    :class="rootClasses"
+    :style="rootStyle"
+    :aria-label="automationName || undefined"
+    @pointerenter="emit('PointerEntered', $event)"
+    @pointerleave="emit('PointerExited', $event)"
+    @contextmenu.prevent="onContextRequested"
+    @pointerdown="handlePointerDown"
+    @pointermove="handlePointerMove"
+    @pointerup="handlePointerUp"
+    @pointercancel="handlePointerCancel"
+    @lostpointercapture="handleLostPointerCapture">
     <div
-      v-if="leftItems && leftItems.length > 0"
-      class="swipe-items swipe-items-left"
-      :style="{ transform: `translateX(${leftRevealAmount}px)` }"
-    >
-      <div
-        v-for="(item, index) in leftItems"
-        :key="`left-${index}`"
-        class="swipe-item"
-        :class="{
-          'swipe-item-execute': item.mode === 'Execute',
-          'swipe-item-invoked': invokedItem === item
-        }"
-        :style="{
-          background: item.background || 'var(--control-fill-color-default)',
-          color: item.foreground || 'var(--text-fill-color-primary)'
-        }"
-        @click="() => handleItemInvoked(item, 'Left')"
-      >
-        <span v-if="item.iconSource" class="swipe-item-icon" v-html="item.iconSource"></span>
-        <span v-if="item.text" class="swipe-item-text">{{ item.text }}</span>
+      v-if="activeItems"
+      class="swipe-content-root"
+      :class="[`side-${activeSide?.toLowerCase()}`, `mode-${activeMode.toLowerCase()}`]"
+      :style="underlayStyle">
+      <div class="swipe-items-panel" :style="itemsPanelStyle">
+        <button
+          v-for="(item, index) in activeItems.Items"
+          :key="index"
+          type="button"
+          class="swipe-item"
+          :style="getItemStyle(item)"
+          :aria-label="getItemText(item) || automationName || undefined"
+          :disabled="!canExecuteItem(item)"
+          @pointerdown.stop
+          @click.stop="invokeItem(item)">
+          <span class="swipe-item-content">
+            <span
+              v-if="getIconUri(getItemIcon(item))"
+              class="swipe-item-bitmap"
+              :style="getBitmapStyle(getItemIcon(item))"
+              aria-hidden="true" />
+            <span v-else-if="getIconGlyph(getItemIcon(item))" class="swipe-item-icon" aria-hidden="true">
+              {{ getIconGlyph(getItemIcon(item)) }}
+            </span>
+            <span v-if="getItemText(item)" class="swipe-item-text">{{ getItemText(item) }}</span>
+          </span>
+        </button>
       </div>
     </div>
 
-    <!-- Right Swipe Items -->
-    <div
-      v-if="rightItems && rightItems.length > 0"
-      class="swipe-items swipe-items-right"
-      :style="{ transform: `translateX(${rightRevealAmount}px)` }"
-    >
-      <div
-        v-for="(item, index) in rightItems"
-        :key="`right-${index}`"
-        class="swipe-item"
-        :class="{
-          'swipe-item-execute': item.mode === 'Execute',
-          'swipe-item-invoked': invokedItem === item
-        }"
-        :style="{
-          background: item.background || 'var(--control-fill-color-default)',
-          color: item.foreground || 'var(--text-fill-color-primary)'
-        }"
-        @click="() => handleItemInvoked(item, 'Right')"
-      >
-        <span v-if="item.iconSource" class="swipe-item-icon" v-html="item.iconSource"></span>
-        <span v-if="item.text" class="swipe-item-text">{{ item.text }}</span>
-      </div>
-    </div>
-
-    <!-- Top Swipe Items -->
-    <div
-      v-if="topItems && topItems.length > 0"
-      class="swipe-items swipe-items-top"
-      :style="{ transform: `translateY(${topRevealAmount}px)` }"
-    >
-      <div
-        v-for="(item, index) in topItems"
-        :key="`top-${index}`"
-        class="swipe-item"
-        :class="{
-          'swipe-item-execute': item.mode === 'Execute',
-          'swipe-item-invoked': invokedItem === item
-        }"
-        :style="{
-          background: item.background || 'var(--control-fill-color-default)',
-          color: item.foreground || 'var(--text-fill-color-primary)'
-        }"
-        @click="() => handleItemInvoked(item, 'Top')"
-      >
-        <span v-if="item.iconSource" class="swipe-item-icon" v-html="item.iconSource"></span>
-        <span v-if="item.text" class="swipe-item-text">{{ item.text }}</span>
-      </div>
-    </div>
-
-    <!-- Bottom Swipe Items -->
-    <div
-      v-if="bottomItems && bottomItems.length > 0"
-      class="swipe-items swipe-items-bottom"
-      :style="{ transform: `translateY(${bottomRevealAmount}px)` }"
-    >
-      <div
-        v-for="(item, index) in bottomItems"
-        :key="`bottom-${index}`"
-        class="swipe-item"
-        :class="{
-          'swipe-item-execute': item.mode === 'Execute',
-          'swipe-item-invoked': invokedItem === item
-        }"
-        :style="{
-          background: item.background || 'var(--control-fill-color-default)',
-          color: item.foreground || 'var(--text-fill-color-primary)'
-        }"
-        @click="() => handleItemInvoked(item, 'Bottom')"
-      >
-        <span v-if="item.iconSource" class="swipe-item-icon" v-html="item.iconSource"></span>
-        <span v-if="item.text" class="swipe-item-text">{{ item.text }}</span>
-      </div>
-    </div>
-
-    <!-- Content -->
-    <div
-      class="swipe-content"
-      :style="{
-        transform: `translate(${contentOffsetX}px, ${contentOffsetY}px)`,
-        transition: isSwiping ? 'none' : 'transform 0.3s var(--standard-easing)'
-      }"
-    >
+    <div ref="contentRoot" class="swipe-control-content" :style="contentStyle">
       <slot></slot>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { CSSProperties } from 'vue';
+import type { SwipeItem, SwipeItems, SwipeSide } from './WinSwipeControl.types';
 
-const props = defineProps({
-  leftItems: {
-    type: Array,
-    default: null
-  },
-  rightItems: {
-    type: Array,
-    default: null
-  },
-  topItems: {
-    type: Array,
-    default: null
-  },
-  bottomItems: {
-    type: Array,
-    default: null
-  }
+const props = withDefaults(defineProps<{
+  LeftItems?: SwipeItems;
+  RightItems?: SwipeItems;
+  TopItems?: SwipeItems;
+  BottomItems?: SwipeItems;
+  Background?: string;
+  BorderBrush?: string;
+  BorderThickness?: string | number;
+  CornerRadius?: string | number;
+  Padding?: string | number;
+  Margin?: string | number;
+  Width?: string | number;
+  Height?: string | number;
+  MinWidth?: string | number;
+  MinHeight?: string | number;
+  'AutomationProperties.Name'?: string;
+}>(), {
+  LeftItems: undefined,
+  RightItems: undefined,
+  TopItems: undefined,
+  BottomItems: undefined,
+  Background: 'transparent',
+  BorderBrush: 'transparent',
+  BorderThickness: 0,
+  CornerRadius: 0,
+  Padding: 0,
+  Margin: 0,
+  Width: undefined,
+  Height: undefined,
+  MinWidth: 40,
+  MinHeight: 40,
+  'AutomationProperties.Name': ''
 });
+const emit = defineEmits<{
+  PointerEntered: [event: PointerEvent];
+  PointerExited: [event: PointerEvent];
+  ContextRequested: [event: MouseEvent];
+}>();
 
-const swipeContainer = ref(null);
-const isSwiping = ref(false);
-const isRevealed = ref(false);
-const revealDirection = ref(null);
+const automationName = computed(() => props['AutomationProperties.Name']);
+const onContextRequested = (event: MouseEvent) => emit('ContextRequested', event);
+
+const ITEM_WIDTH = 68;
+const ITEM_HEIGHT = 60;
+const OPEN_THRESHOLD = 100;
+const DIRECTION_THRESHOLD = 10;
+const SETTLE_DURATION = 200;
+
+const swipeControlRoot = ref<HTMLElement>();
+const contentRoot = ref<HTMLElement>();
+const isInteracting = ref(false);
+const isOpen = ref(false);
+const thresholdReached = ref(false);
+const activeSide = ref<SwipeSide>();
+const activeItems = ref<SwipeItems>();
 const contentOffsetX = ref(0);
 const contentOffsetY = ref(0);
-const startX = ref(0);
-const startY = ref(0);
-const currentX = ref(0);
-const currentY = ref(0);
-const swipeDirection = ref(null);
-const invokedItem = ref(null);
+let pointerId: number | undefined;
+let startX = 0;
+let startY = 0;
 
-const SWIPE_THRESHOLD = 50; // Minimum distance to trigger reveal
-const EXECUTE_THRESHOLD = 150; // Distance to auto-execute
-const ITEM_WIDTH = 80; // Width of each swipe item
-const ITEM_HEIGHT = 80; // Height of each swipe item
+const toCssLength = (value: string | number | undefined) => {
+  if (value === undefined || value === '') return undefined;
+  if (typeof value === 'number') return `${value}px`;
+  const trimmed = value.trim();
+  return trimmed !== '' && !Number.isNaN(Number(trimmed)) ? `${Number(trimmed)}px` : trimmed;
+};
 
-const leftRevealAmount = computed(() => {
-  if (revealDirection.value === 'Left' && isRevealed.value) {
-    return 0;
+const toCssThickness = (value: string | number | undefined) => {
+  if (value === undefined || value === '') return undefined;
+  if (typeof value === 'number') return `${value}px`;
+  const values = value.split(',').map((part) => toCssLength(part.trim()));
+  if (values.length !== 4) return toCssLength(value) ?? value;
+  const [left, top, right, bottom] = values;
+  return `${top} ${right} ${bottom} ${left}`;
+};
+
+const hasHorizontalItems = computed(() => Boolean(props.LeftItems?.Items.length || props.RightItems?.Items.length));
+const hasVerticalItems = computed(() => Boolean(props.TopItems?.Items.length || props.BottomItems?.Items.length));
+
+const rootStyle = computed<CSSProperties>(() => ({
+  width: toCssLength(props.Width),
+  height: toCssLength(props.Height),
+  minWidth: toCssLength(props.MinWidth),
+  minHeight: toCssLength(props.MinHeight),
+  margin: toCssThickness(props.Margin),
+  touchAction: hasHorizontalItems.value && hasVerticalItems.value
+    ? 'none'
+    : hasHorizontalItems.value ? 'pan-y' : hasVerticalItems.value ? 'pan-x' : 'auto'
+}));
+
+const rootClasses = computed(() => ({
+  interacting: isInteracting.value,
+  open: isOpen.value,
+  'threshold-reached': thresholdReached.value
+}));
+
+const contentStyle = computed<CSSProperties>(() => ({
+  transform: `translate3d(${contentOffsetX.value}px, ${contentOffsetY.value}px, 0)`,
+  padding: toCssThickness(props.Padding),
+  borderColor: props.BorderBrush,
+  borderWidth: toCssThickness(props.BorderThickness),
+  borderRadius: toCssLength(props.CornerRadius),
+  background: props.Background
+}));
+
+const activeMode = computed(() => activeItems.value?.Mode ?? 'Reveal');
+
+const revealExtent = computed(() => {
+  if (!activeItems.value || !activeSide.value) return 0;
+  if (activeMode.value === 'Execute') {
+    return activeSide.value === 'Left' || activeSide.value === 'Right'
+      ? swipeControlRoot.value?.clientWidth ?? 0
+      : swipeControlRoot.value?.clientHeight ?? 0;
   }
-  return Math.min(0, contentOffsetX.value);
+  return activeItems.value.Items.length * (
+    activeSide.value === 'Left' || activeSide.value === 'Right' ? ITEM_WIDTH : ITEM_HEIGHT
+  );
 });
 
-const rightRevealAmount = computed(() => {
-  if (revealDirection.value === 'Right' && isRevealed.value) {
-    return 0;
-  }
-  return Math.max(0, contentOffsetX.value);
+const currentRevealAmount = computed(() => Math.abs(
+  activeSide.value === 'Left' || activeSide.value === 'Right' ? contentOffsetX.value : contentOffsetY.value
+));
+
+const underlayStyle = computed<CSSProperties>(() => {
+  const amount = Math.max(0, currentRevealAmount.value);
+  const width = swipeControlRoot.value?.clientWidth ?? 0;
+  const height = swipeControlRoot.value?.clientHeight ?? 0;
+  const rightInset = Math.max(0, width - amount);
+  const bottomInset = Math.max(0, height - amount);
+  const clipPath = activeSide.value === 'Left'
+    ? `inset(0 ${rightInset}px 0 0)`
+    : activeSide.value === 'Right'
+      ? `inset(0 0 0 ${rightInset}px)`
+      : activeSide.value === 'Top'
+        ? `inset(0 0 ${bottomInset}px 0)`
+        : `inset(${bottomInset}px 0 0 0)`;
+  return { clipPath };
 });
 
-const topRevealAmount = computed(() => {
-  if (revealDirection.value === 'Top' && isRevealed.value) {
-    return 0;
+const itemsPanelStyle = computed<CSSProperties>(() => {
+  if (!activeItems.value || !activeSide.value) return {};
+  const horizontal = activeSide.value === 'Left' || activeSide.value === 'Right';
+  const execute = activeMode.value === 'Execute';
+  const executeItem = activeItems.value.Items[0];
+  let transform: string | undefined;
+  if (execute) {
+    const width = swipeControlRoot.value?.clientWidth ?? 0;
+    const height = swipeControlRoot.value?.clientHeight ?? 0;
+    if (activeSide.value === 'Left') transform = `translate3d(${(contentOffsetX.value - width) / 2}px, 0, 0)`;
+    if (activeSide.value === 'Right') transform = `translate3d(${(contentOffsetX.value + width) / 2}px, 0, 0)`;
+    if (activeSide.value === 'Top') transform = `translate3d(0, ${(contentOffsetY.value - height) / 2}px, 0)`;
+    if (activeSide.value === 'Bottom') transform = `translate3d(0, ${(contentOffsetY.value + height) / 2}px, 0)`;
   }
-  return Math.min(0, contentOffsetY.value);
+  return {
+    width: horizontal ? (execute ? '100%' : `${revealExtent.value}px`) : '100%',
+    height: horizontal ? '100%' : (execute ? '100%' : `${revealExtent.value}px`),
+    flexDirection: horizontal ? 'row' : 'column',
+    transform,
+    background: execute
+      ? executeItem?.Background ?? (thresholdReached.value
+        ? 'var(--SwipeItemPostThresholdExecuteBackground, var(--accent-base))'
+        : 'var(--SwipeItemPreThresholdExecuteBackground, var(--ctrl-fill-tertiary))')
+      : undefined
+  };
 });
 
-const bottomRevealAmount = computed(() => {
-  if (revealDirection.value === 'Bottom' && isRevealed.value) {
-    return 0;
-  }
-  return Math.max(0, contentOffsetY.value);
-});
+const collectionForSide = (side: SwipeSide): SwipeItems | undefined => ({
+  Left: props.LeftItems,
+  Right: props.RightItems,
+  Top: props.TopItems,
+  Bottom: props.BottomItems
+}[side]);
 
-function handlePointerDown(e) {
-  if (isRevealed.value) {
-    closeSwipe();
+const validateItems = (items: SwipeItems | undefined) => {
+  if (!items?.Items.length) return false;
+  if ((items.Mode ?? 'Reveal') === 'Execute' && items.Items.length > 1) {
+    throw new Error('SwipeItems in Execute mode must contain exactly one SwipeItem.');
+  }
+  return true;
+};
+
+watch(
+  () => [props.LeftItems, props.RightItems, props.TopItems, props.BottomItems] as const,
+  ([leftItems, rightItems, topItems, bottomItems]) => {
+    [leftItems, rightItems, topItems, bottomItems].forEach((items) => validateItems(items));
+    const horizontal = Boolean(leftItems?.Items.length || rightItems?.Items.length);
+    const vertical = Boolean(topItems?.Items.length || bottomItems?.Items.length);
+    if (horizontal && vertical) {
+      throw new Error("SwipeControl can't have both horizontal items and vertical items set at the same time.");
+    }
+  },
+  { immediate: true, deep: true }
+);
+
+const sideFromDelta = (deltaX: number, deltaY: number): SwipeSide | undefined => {
+  if (Math.abs(deltaX) < DIRECTION_THRESHOLD && Math.abs(deltaY) < DIRECTION_THRESHOLD) return undefined;
+  if (Math.abs(deltaX) >= Math.abs(deltaY)) return deltaX > 0 ? 'Left' : 'Right';
+  return deltaY > 0 ? 'Top' : 'Bottom';
+};
+
+const setActiveSide = (side: SwipeSide) => {
+  const items = collectionForSide(side);
+  if (!validateItems(items)) return false;
+  activeSide.value = side;
+  activeItems.value = items;
+  return true;
+};
+
+const getMaximumDrag = () => Math.max(0, revealExtent.value);
+
+const updateOffset = (deltaX: number, deltaY: number) => {
+  if (!activeSide.value) return;
+  const maximum = getMaximumDrag();
+  if (activeSide.value === 'Left') contentOffsetX.value = Math.min(Math.max(0, deltaX), maximum);
+  if (activeSide.value === 'Right') contentOffsetX.value = Math.max(Math.min(0, deltaX), -maximum);
+  if (activeSide.value === 'Top') contentOffsetY.value = Math.min(Math.max(0, deltaY), maximum);
+  if (activeSide.value === 'Bottom') contentOffsetY.value = Math.max(Math.min(0, deltaY), -maximum);
+  const threshold = Math.min(revealExtent.value, OPEN_THRESHOLD);
+  thresholdReached.value = currentRevealAmount.value > Math.max(0, threshold - 1);
+};
+
+const handlePointerDown = (event: PointerEvent) => {
+  if (event.pointerType !== 'touch') return;
+  if (event.button !== 0 || pointerId !== undefined) return;
+  if (isOpen.value) {
+    Close();
+    event.preventDefault();
     return;
   }
+  pointerId = event.pointerId;
+  startX = event.clientX;
+  startY = event.clientY;
+  isInteracting.value = true;
+  swipeControlRoot.value?.setPointerCapture(event.pointerId);
+};
 
-  isSwiping.value = true;
-
-  const point = e.touches ? e.touches[0] : e;
-  startX.value = point.clientX;
-  startY.value = point.clientY;
-  currentX.value = point.clientX;
-  currentY.value = point.clientY;
-  swipeDirection.value = null;
-
-  document.addEventListener('mousemove', handlePointerMove);
-  document.addEventListener('mouseup', handlePointerUp);
-  document.addEventListener('touchmove', handlePointerMove);
-  document.addEventListener('touchend', handlePointerUp);
-}
-
-function handlePointerMove(e) {
-  if (!isSwiping.value) return;
-
-  const point = e.touches ? e.touches[0] : e;
-  currentX.value = point.clientX;
-  currentY.value = point.clientY;
-
-  const deltaX = currentX.value - startX.value;
-  const deltaY = currentY.value - startY.value;
-
-  // Determine swipe direction on first significant movement
-  if (!swipeDirection.value && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      swipeDirection.value = deltaX > 0 ? 'Right' : 'Left';
-    } else {
-      swipeDirection.value = deltaY > 0 ? 'Bottom' : 'Top';
-    }
+const handlePointerMove = (event: PointerEvent) => {
+  if (!isInteracting.value || pointerId !== event.pointerId) return;
+  const deltaX = event.clientX - startX;
+  const deltaY = event.clientY - startY;
+  if (!activeSide.value) {
+    const side = sideFromDelta(deltaX, deltaY);
+    if (!side || !setActiveSide(side)) return;
   }
+  updateOffset(deltaX, deltaY);
+  event.preventDefault();
+};
 
-  // Apply movement based on direction
-  if (swipeDirection.value === 'Left' && props.leftItems && props.leftItems.length > 0) {
-    contentOffsetX.value = Math.max(deltaX, -(ITEM_WIDTH * props.leftItems.length));
-    contentOffsetY.value = 0;
-  } else if (swipeDirection.value === 'Right' && props.rightItems && props.rightItems.length > 0) {
-    contentOffsetX.value = Math.min(deltaX, ITEM_WIDTH * props.rightItems.length);
-    contentOffsetY.value = 0;
-  } else if (swipeDirection.value === 'Top' && props.topItems && props.topItems.length > 0) {
-    contentOffsetY.value = Math.max(deltaY, -(ITEM_HEIGHT * props.topItems.length));
-    contentOffsetX.value = 0;
-  } else if (swipeDirection.value === 'Bottom' && props.bottomItems && props.bottomItems.length > 0) {
-    contentOffsetY.value = Math.min(deltaY, ITEM_HEIGHT * props.bottomItems.length);
-    contentOffsetX.value = 0;
+const releasePointer = () => {
+  const capturedPointerId = pointerId;
+  pointerId = undefined;
+  isInteracting.value = false;
+  if (capturedPointerId !== undefined && swipeControlRoot.value?.hasPointerCapture(capturedPointerId)) {
+    swipeControlRoot.value.releasePointerCapture(capturedPointerId);
   }
-}
+};
 
-function handlePointerUp() {
-  if (!isSwiping.value) return;
+const settleOpen = () => {
+  if (!activeSide.value) return;
+  isOpen.value = true;
+  if (activeSide.value === 'Left') contentOffsetX.value = revealExtent.value;
+  if (activeSide.value === 'Right') contentOffsetX.value = -revealExtent.value;
+  if (activeSide.value === 'Top') contentOffsetY.value = revealExtent.value;
+  if (activeSide.value === 'Bottom') contentOffsetY.value = -revealExtent.value;
+};
 
-  document.removeEventListener('mousemove', handlePointerMove);
-  document.removeEventListener('mouseup', handlePointerUp);
-  document.removeEventListener('touchmove', handlePointerMove);
-  document.removeEventListener('touchend', handlePointerUp);
+const handlePointerUp = (event: PointerEvent) => {
+  if (pointerId !== event.pointerId) return;
+  const shouldInvoke = thresholdReached.value && activeMode.value === 'Execute';
+  const shouldReveal = thresholdReached.value && activeMode.value === 'Reveal';
+  releasePointer();
+  if (shouldInvoke && activeItems.value) invokeItem(activeItems.value.Items[0]);
+  else if (shouldReveal) settleOpen();
+  else Close();
+};
 
-  const deltaX = Math.abs(contentOffsetX.value);
-  const deltaY = Math.abs(contentOffsetY.value);
+const handlePointerCancel = (event: PointerEvent) => {
+  if (pointerId !== event.pointerId) return;
+  releasePointer();
+  Close();
+};
 
-  // Check if swipe should trigger reveal or execute
-  if (swipeDirection.value === 'Left' || swipeDirection.value === 'Right') {
-    const items = swipeDirection.value === 'Left' ? props.leftItems : props.rightItems;
-    const executeMode = items && items.length > 0 && items[0].mode === 'Execute';
+const handleLostPointerCapture = (event: PointerEvent) => {
+  if (pointerId !== event.pointerId) return;
+  pointerId = undefined;
+  isInteracting.value = false;
+  Close();
+};
 
-    if (deltaX >= EXECUTE_THRESHOLD && executeMode) {
-      // Auto-execute on full swipe
-      handleItemInvoked(items[0], swipeDirection.value);
-    } else if (deltaX >= SWIPE_THRESHOLD) {
-      // Reveal items
-      revealSwipe(swipeDirection.value, items);
-    } else {
-      // Reset
-      closeSwipe();
-    }
-  } else if (swipeDirection.value === 'Top' || swipeDirection.value === 'Bottom') {
-    const items = swipeDirection.value === 'Top' ? props.topItems : props.bottomItems;
-    const executeMode = items && items.length > 0 && items[0].mode === 'Execute';
+const getIconUri = (source: SwipeItem['IconSource']) => {
+  if (typeof source === 'object') return source.UriSource;
+  if (typeof source === 'string' && /^(?:https?:|data:|\/|\.\/|\.\.\/)/.test(source)) return source;
+  return undefined;
+};
 
-    if (deltaY >= EXECUTE_THRESHOLD && executeMode) {
-      // Auto-execute on full swipe
-      handleItemInvoked(items[0], swipeDirection.value);
-    } else if (deltaY >= SWIPE_THRESHOLD) {
-      // Reveal items
-      revealSwipe(swipeDirection.value, items);
-    } else {
-      // Reset
-      closeSwipe();
-    }
+const getBitmapStyle = (source: SwipeItem['IconSource']): CSSProperties => {
+  const uri = getIconUri(source);
+  return uri
+    ? { '--swipe-item-bitmap-source': `url("${uri}")` } as CSSProperties
+    : {};
+};
+
+const getItemText = (item: SwipeItem) => item.Text || item.Command?.Label || '';
+const getItemIcon = (item: SwipeItem) => item.IconSource ?? item.Command?.IconSource;
+
+const symbolGlyphs: Record<string, string> = {
+  Accept: '\uE8FB', Add: '\uE710', Back: '\uE72B', Cancel: '\uE711', Close: '\uE711',
+  Copy: '\uE8C8', Cut: '\uE8C6', Delete: '\uE74D', Edit: '\uE70F', Favorite: '\uE734',
+  Flag: '\uE7C1', FontDecrease: '\uE8A0', FontIncrease: '\uE8A1', Forward: '\uE72A',
+  OpenFile: '\uE8E5', Paste: '\uE77F', Pause: '\uE769', Play: '\uE768', Redo: '\uE7A6',
+  Save: '\uE74E', SelectAll: '\uE8B3', Share: '\uE72D', Stop: '\uE71A', Undo: '\uE7A7'
+};
+
+const getIconGlyph = (source: SwipeItem['IconSource']) => {
+  if (typeof source === 'object') return source.Glyph ?? (source.Symbol ? symbolGlyphs[source.Symbol] : undefined);
+  return getIconUri(source) ? undefined : source;
+};
+
+const canExecuteItem = (item: SwipeItem) => item.Command?.CanExecute?.(item.CommandParameter) ?? true;
+
+const getItemStyle = (item: SwipeItem): CSSProperties => {
+  const execute = activeMode.value === 'Execute';
+  return {
+    background: execute
+      ? 'transparent'
+      : item.Background ?? 'var(--SwipeItemBackground, var(--ctrl-fill-tertiary))',
+    color: item.Foreground ?? (execute
+      ? thresholdReached.value
+        ? 'var(--SwipeItemPostThresholdExecuteForeground, var(--accent-text))'
+        : 'var(--SwipeItemPreThresholdExecuteForeground, var(--ctrl-strong-fill))'
+      : 'var(--SwipeItemForeground, var(--text-primary))')
+  };
+};
+
+const swipeControlApi = {
+  Close: () => Close(),
+  get Content() { return contentRoot.value; },
+  get Element() { return swipeControlRoot.value; }
+};
+
+const invokeItem = (item: SwipeItem) => {
+  if (!canExecuteItem(item)) return;
+  item.Invoked?.(item, { SwipeControl: swipeControlApi });
+  item.Command?.Execute(item.CommandParameter);
+  if ((item.BehaviorOnInvoked ?? 'Auto') === 'RemainOpen') {
+    settleOpen();
   } else {
-    closeSwipe();
+    Close();
   }
+};
 
-  isSwiping.value = false;
-}
-
-function revealSwipe(direction, items) {
-  isRevealed.value = true;
-  revealDirection.value = direction;
-
-  if (direction === 'Left') {
-    contentOffsetX.value = -(ITEM_WIDTH * items.length);
-    contentOffsetY.value = 0;
-  } else if (direction === 'Right') {
-    contentOffsetX.value = ITEM_WIDTH * items.length;
-    contentOffsetY.value = 0;
-  } else if (direction === 'Top') {
-    contentOffsetY.value = -(ITEM_HEIGHT * items.length);
-    contentOffsetX.value = 0;
-  } else if (direction === 'Bottom') {
-    contentOffsetY.value = ITEM_HEIGHT * items.length;
-    contentOffsetX.value = 0;
-  }
-}
-
-function closeSwipe() {
-  isRevealed.value = false;
-  revealDirection.value = null;
+function Close() {
+  isOpen.value = false;
+  thresholdReached.value = false;
   contentOffsetX.value = 0;
   contentOffsetY.value = 0;
-  swipeDirection.value = null;
-  invokedItem.value = null;
+  window.setTimeout(() => {
+    if (isOpen.value || isInteracting.value) return;
+    activeSide.value = undefined;
+    activeItems.value = undefined;
+  }, SETTLE_DURATION);
 }
 
-function handleItemInvoked(item, direction) {
-  invokedItem.value = item;
+const shouldRemainOpen = () => activeMode.value === 'Execute'
+  && activeItems.value?.Items[0]?.BehaviorOnInvoked === 'RemainOpen';
 
-  // Emit invoked event
-  if (item.invoked) {
-    item.invoked({ swipeControl: swipeContainer.value });
-  }
+const handleDocumentPointerDown = (event: PointerEvent) => {
+  if (isOpen.value && !shouldRemainOpen() && !swipeControlRoot.value?.contains(event.target as Node)) Close();
+};
 
-  // Handle BehaviorOnInvoked
-  const behavior = item.behaviorOnInvoked || 'Auto';
+onMounted(() => document.addEventListener('pointerdown', handleDocumentPointerDown, true));
+onBeforeUnmount(() => document.removeEventListener('pointerdown', handleDocumentPointerDown, true));
 
-  if (behavior === 'Close') {
-    setTimeout(() => closeSwipe(), 200);
-  } else if (behavior === 'RemainOpen') {
-    // Keep items visible
-    setTimeout(() => {
-      invokedItem.value = null;
-    }, 300);
-  } else {
-    // Auto - close for Execute mode, remain open for Reveal mode
-    if (item.mode === 'Execute') {
-      setTimeout(() => closeSwipe(), 200);
-    } else {
-      setTimeout(() => {
-        invokedItem.value = null;
-      }, 300);
-    }
-  }
-}
-
-// Close swipe when clicking outside
-function handleClickOutside(e) {
-  if (isRevealed.value && swipeContainer.value && !swipeContainer.value.contains(e.target)) {
-    closeSwipe();
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside);
-  document.removeEventListener('mousemove', handlePointerMove);
-  document.removeEventListener('mouseup', handlePointerUp);
-  document.removeEventListener('touchmove', handlePointerMove);
-  document.removeEventListener('touchend', handlePointerUp);
-});
-
-defineExpose({
-  close: closeSwipe
-});
+defineExpose({ Close });
 </script>
 
 <style scoped>
 .win-swipe-control {
   position: relative;
   overflow: hidden;
-  touch-action: pan-y;
+  isolation: isolate;
+  background: transparent;
+  box-sizing: border-box;
+  color: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
   user-select: none;
 }
 
-.win-swipe-control.is-swiping {
-  touch-action: none;
+.swipe-content-root {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  will-change: clip-path;
+  transition: clip-path var(--normal-duration, 200ms) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
 }
 
-.swipe-items {
+.swipe-items-panel {
   position: absolute;
   display: flex;
-  z-index: 1;
+  will-change: transform;
+  transition: transform var(--normal-duration, 200ms) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
 }
 
-.swipe-items-left {
-  left: 0;
-  top: 0;
-  bottom: 0;
-  flex-direction: row;
-  transform: translateX(-100%);
-}
-
-.swipe-items-right {
-  right: 0;
-  top: 0;
-  bottom: 0;
-  flex-direction: row;
-  transform: translateX(100%);
-}
-
-.swipe-items-top {
-  left: 0;
-  right: 0;
-  top: 0;
-  flex-direction: column;
-  transform: translateY(-100%);
-}
-
-.swipe-items-bottom {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  flex-direction: column;
-  transform: translateY(100%);
-}
+.side-left .swipe-items-panel { inset: 0 auto 0 0; }
+.side-right .swipe-items-panel { inset: 0 0 0 auto; }
+.side-top .swipe-items-panel { inset: 0 0 auto 0; }
+.side-bottom .swipe-items-panel { inset: auto 0 0 0; }
 
 .swipe-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-width: 80px;
-  min-height: 80px;
-  padding: 12px;
-  cursor: pointer;
-  transition: background 0.1s var(--fast-out-slow-in), opacity 0.2s;
-  border: 1px solid var(--control-stroke-color-default);
+  display: grid;
+  flex: 1 0 auto;
+  place-items: center;
+  min-width: 68px;
+  min-height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  font: inherit;
+  pointer-events: auto;
+  box-sizing: border-box;
+  cursor: default;
+  transition: background-color var(--faster-duration, 83ms) linear, color var(--faster-duration, 83ms) linear;
 }
 
-.swipe-items-left .swipe-item,
-.swipe-items-right .swipe-item {
-  width: 80px;
+.side-left .swipe-item,
+.side-right .swipe-item {
+  width: 68px;
   height: 100%;
 }
 
-.swipe-items-top .swipe-item,
-.swipe-items-bottom .swipe-item {
+.side-top .swipe-item,
+.side-bottom .swipe-item {
   width: 100%;
-  height: 80px;
-  flex-direction: row;
+  height: 60px;
 }
 
-.swipe-item:hover {
-  filter: brightness(1.1);
+.mode-execute .swipe-item {
+  width: 100%;
+  height: 100%;
 }
 
 .swipe-item:active {
-  filter: brightness(0.9);
+  background: var(--SwipeItemBackgroundPressed, var(--subtle-pressed)) !important;
 }
 
-.swipe-item-icon {
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.swipe-item:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
+}
+
+.swipe-item-content {
+  display: grid;
+  grid-template-rows: auto auto;
+  place-items: center;
+  align-content: center;
+  min-width: 16px;
+  margin: 4px 4px 2px;
+}
+
+.swipe-item-icon,
+.swipe-item-bitmap {
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: 0 0 2px;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.swipe-item-bitmap {
+  background: currentColor;
+  -webkit-mask: var(--swipe-item-bitmap-source) center / contain no-repeat;
+  mask: var(--swipe-item-bitmap-source) center / contain no-repeat;
 }
 
 .swipe-item-text {
+  max-width: 64px;
   font-size: 12px;
+  line-height: 16px;
   text-align: center;
-  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
-.swipe-items-top .swipe-item-text,
-.swipe-items-bottom .swipe-item-text {
-  font-size: 14px;
-}
-
-.swipe-item-execute {
-  opacity: 0.9;
-}
-
-.swipe-item-invoked {
-  animation: swipe-item-invoke 0.3s var(--standard-easing);
-}
-
-@keyframes swipe-item-invoke {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.swipe-content {
+.swipe-control-content {
   position: relative;
-  z-index: 2;
-  background: var(--layer-fill-default);
+  z-index: 1;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: inherit;
+  border-style: solid;
+  box-sizing: border-box;
   will-change: transform;
+  transition: transform var(--normal-duration, 200ms) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
 }
 
-.win-swipe-control.is-swiping .swipe-content {
+.swipe-control-content > :deep(.win-text-block) {
+  place-self: center;
+  text-align: center;
+}
+
+.win-swipe-control.interacting .swipe-content-root,
+.win-swipe-control.interacting .swipe-items-panel,
+.win-swipe-control.interacting .swipe-control-content {
   transition: none;
 }
 
-/* Reveal animations */
-.win-swipe-control.is-revealed.reveal-Left .swipe-items-left,
-.win-swipe-control.is-revealed.reveal-Right .swipe-items-right {
-  transition: transform 0.3s var(--standard-easing);
-}
-
-.win-swipe-control.is-revealed.reveal-Top .swipe-items-top,
-.win-swipe-control.is-revealed.reveal-Bottom .swipe-items-bottom {
-  transition: transform 0.3s var(--standard-easing);
-}
-
-/* Ensure content covers swipe items when not revealed */
-.win-swipe-control:not(.is-revealed) .swipe-content {
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Dark theme adjustments */
-.example-theme-wrapper.theme-dark .swipe-item {
-  border-color: rgba(255, 255, 255, 0.08);
+@media (prefers-reduced-motion: reduce) {
+  .swipe-content-root,
+  .swipe-items-panel,
+  .swipe-control-content,
+  .swipe-item {
+    transition-duration: 0.01ms;
+  }
 }
 </style>

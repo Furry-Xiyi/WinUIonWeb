@@ -28,6 +28,7 @@
 
             <!-- Main Example -->
             <WinControlExample
+              :theme="currentTheme"
               headerText="Corner radius examples"
               :templateCode="templateCode"
               :vueCode="vueCode">

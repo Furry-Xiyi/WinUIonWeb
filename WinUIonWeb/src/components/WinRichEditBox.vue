@@ -71,7 +71,6 @@
     :SecondaryCommands="commandBarSecondaryCommands"
     Placement="Auto"
     ShowMode="Standard"
-    :ShowPrimaryLabels="true"
     @Close="commandBarOpen = false" />
 </template>
 

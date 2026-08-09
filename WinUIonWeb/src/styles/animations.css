@@ -778,6 +778,12 @@
     animation: animated-icon-gear-spin 0.65s cubic-bezier(0, 0, 0, 1) forwards;
   }
 
+  .animated-icon-gear.gear-navigation-hold {
+    animation: none;
+    transform: rotate(-20deg);
+    transition: none;
+  }
+
 @keyframes animated-icon-gear-rewind {
   from {
     transform: rotate(0deg);

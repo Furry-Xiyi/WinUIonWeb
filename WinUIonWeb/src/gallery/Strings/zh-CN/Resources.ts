@@ -65,7 +65,7 @@ export default {
   "text.a-hyperlinkbutton-with-navigateuri": "带导航地址的超链接按钮。",
   "text.a-lightweight-popup-container": "轻量级弹出容器。",
   "text.a-listview-displays-data-in-a-vertical-list-with": "列表视图以垂直列表显示数据，并支持选择。",
-  "text.a-menuflyout-attached-to-an-appbarbutton": "附加到应用栏按钮的菜单浮出面板",
+  "text.a-menuflyout-attached-to-an-appbarbutton": "带有菜单飞出控件的应用栏按钮。",
   "text.a-menuflyout-displays-a-lightweight-menu-of-comm": "菜单浮出面板显示轻量级命令菜单，可附加到按钮和其他控件。",
   "text.a-numberbox-that-evaluates-expressions": "可计算表达式的数字框",
   "text.a-passwordbox-is-a-text-input-box-that-conceals": "密码框是一种文本输入框，会隐藏用户输入的字符以保护隐私。密码框看起来像文本框，但会用占位字符替代已输入文本。你可以配置占位字符。",
@@ -134,7 +134,14 @@ export default {
   "text.combobox": "组合框",
   "text.comic-sans-ms": "Comic Sans MS",
   "text.commandbar": "命令栏",
+  "text.commandbar-subtitle": "用于显示应用专用命令并处理内容布局和大小调整的工具栏。",
   "text.commandbarflyout": "命令栏浮出面板",
+  "text.appbarbutton": "应用栏按钮",
+  "text.appbarbutton-description": "专为在 CommandBar 中使用而设计的按钮。",
+  "text.appbarseparator": "应用栏分隔符",
+  "text.appbarseparator-description": "用于在应用栏中直观分隔命令组的垂直线。",
+  "text.appbar-toggle-button": "应用栏切换按钮",
+  "text.appbar-toggle-button-description": "可切换开关状态并专为在 CommandBar 中使用而设计的按钮。",
   "text.community-toolkit": "社区工具包",
   "text.compactinline": "紧凑内联",
   "text.compactoverlay": "紧凑覆盖",
@@ -305,8 +312,39 @@ export default {
   "text.splitview": "拆分视图",
   "text.standard-xaml-button": "标准 XAML 按钮",
   "text.standarduicommand": "标准界面命令",
+  "text.standarduicommand-subtitle": "StandardUICommand 是表示常用命令（例如“保存”）的内置 XamlUICommand。",
+  "sample.standarduicommand.multiple-controls": "使用 StandardUICommand 在多个控件中公开同一命令",
+  "sample.standarduicommand.description": "StandardUICommand 可共享与命令关联的界面体验。此示例使用 StandardUICommand，在多个控件中快速提供删除命令。StandardUICommand 包含图标、标签、键盘快捷键和说明。",
+  "sample.standarduicommand.items": "项目",
+  "sample.standarduicommand.list-item": "列表项 {index}",
+  "sample.standarduicommand.new": "新建",
+  "sample.standarduicommand.open": "打开...",
+  "sample.standarduicommand.exit": "退出",
   "text.sue": "苏",
   "text.swipecontrol": "轻扫控件",
+  "text.swipecontrol-subtitle": "用于对项目快速执行菜单操作的触摸手势。",
+  "sample.swipecontrol.reveal-actions": "向右轻扫以显示操作",
+  "sample.swipecontrol.execute": "向左轻扫以执行操作",
+  "sample.swipecontrol.custom-list": "在列表视图中自定义轻扫操作",
+  "sample.swipecontrol.gradient": "渐变背景",
+  "sample.swipecontrol.custom-icons": "自定义图标",
+  "sample.swipecontrol.swipe-right": "向右轻扫",
+  "sample.swipecontrol.swipe-left": "向左轻扫",
+  "sample.swipecontrol.accept": "接受",
+  "sample.swipecontrol.cancel": "取消",
+  "sample.swipecontrol.flag": "标记",
+  "sample.swipecontrol.unmark": "取消标记",
+  "sample.swipecontrol.archive": "存档",
+  "sample.swipecontrol.archived": "已存档 - 向左轻扫",
+  "sample.swipecontrol.accepted": "向右轻扫 - 已接受",
+  "sample.swipecontrol.accepted-flagged": "向右轻扫 - 已接受并已标记",
+  "sample.swipecontrol.flagged": "向右轻扫 - 已标记",
+  "sample.swipecontrol.list-item": "轻扫项目 {index}",
+  "sample.swipecontrol.reply-all": "全部答复",
+  "sample.swipecontrol.open": "打开",
+  "sample.swipecontrol.delete": "删除",
+  "sample.swipecontrol.lock": "锁定",
+  "sample.swipecontrol.coffee": "咖啡",
   "text.switch-that-can-be-toggled-between-two-states": "可在两种状态之间切换的开关。",
   "text.systembackground": "系统背景",
   "text.taiwancalendar": "台湾历",
@@ -366,6 +404,12 @@ export default {
   "text.winui-on-web-on-github": "GitHub 上的 WinUI on Web",
   "text.workgroup": "工作组",
   "text.xamluicommand": "XAML 界面命令",
+  "text.xamluicommand-subtitle": "用于定义给定命令外观和体验的对象。",
+  "sample.xamluicommand.reusable-command": "使用 XamlUICommand 创建可重用命令",
+  "sample.xamluicommand.description": "XamlUICommand 可共享与命令关联的界面体验。此示例创建一个简单的自定义命令，其中包含标签、图标、快捷键和说明。该命令定义为资源，可用于 AppBarButton 等多个控件。按钮及其他控件会自动获取所有这些界面属性，无需再次定义。",
+  "sample.xamluicommand.custom-label": "自定义 XamlUICommand",
+  "sample.xamluicommand.custom-description": "这是一个自定义命令",
+  "sample.xamluicommand.executed": "你触发了自定义命令",
   "text.white": "白色",
   "text.yellow": "黄色"
   ,"sample.alpha-enabled": "启用 Alpha"
@@ -649,9 +693,40 @@ export default {
   ,"sample.flyout.empty-cart": "清空购物车"
   ,"sample.flyout.remove-all": "所有项目都将被移除。是否继续？"
   ,"sample.flyout.confirm-empty": "是，清空我的购物车"
-  ,"sample.commandbarflyout.object": "用于应用内对象命令的 CommandBarFlyout"
+     ,"sample.commandbarflyout.object": "用于应用内对象命令的 CommandBarFlyout"
   ,"sample.commandbarflyout.open-hint": "单击或右键单击图像以打开 CommandBarFlyout"
-  ,"sample.mountain": "山"
+  ,"sample.appbarbutton.symbol": "带有符号图标的应用栏按钮。"
+  ,"sample.appbarbutton.symbol-label": "SymbolIcon"
+  ,"sample.appbarbutton.bitmap": "带有位图图标的应用栏按钮。"
+  ,"sample.appbarbutton.bitmap-label": "BitmapIcon"
+  ,"sample.appbarbutton.font": "带有字体图标的应用栏按钮。"
+  ,"sample.appbarbutton.font-label": "FontIcon"
+  ,"sample.appbarbutton.path": "带有路径图标的应用栏按钮。"
+  ,"sample.appbarbutton.path-label": "PathIcon"
+  ,"sample.appbarbutton.keyboard": "带有 KeyboardAccelerator 的应用栏按钮"
+  ,"sample.appbarbutton.flyout": "打开包含输入控件的 Flyout 的应用栏按钮。"
+  ,"sample.appbarbutton.input-placeholder": "在此输入文本"
+  ,"sample.appbarseparator.separated": "由 AppBarSeparator 分隔的应用栏按钮。"
+  ,"sample.appbarseparator.attach-camera": "附加相机"
+  ,"sample.appbarseparator.like": "喜欢"
+  ,"sample.appbarseparator.dislike": "不喜欢"
+  ,"sample.appbarseparator.orientation": "方向"
+  ,"sample.appbartogglebutton.symbol": "带有符号图标的应用栏切换按钮。"
+  ,"sample.appbartogglebutton.bitmap": "带有位图图标的应用栏切换按钮。"
+  ,"sample.appbartogglebutton.font": "带有字体图标的应用栏切换按钮。"
+  ,"sample.appbartogglebutton.path": "带有路径图标的三态应用栏切换按钮。"
+  ,"sample.appbartogglebutton.output": "IsChecked = {value}"
+     ,"sample.commandbar.show-or-hide": "显示或隐藏"
+     ,"sample.commandbar.open": "打开命令栏"
+     ,"sample.commandbar.close": "关闭命令栏"
+     ,"sample.commandbar.modify-content": "修改内容"
+     ,"sample.commandbar.add-secondary": "添加二级命令"
+     ,"sample.commandbar.remove-secondary": "移除二级命令"
+     ,"sample.commandbar.button-1": "按钮 1"
+     ,"sample.commandbar.button-2": "按钮 2"
+     ,"sample.commandbar.button-3": "按钮 3"
+     ,"sample.commandbar.button-4": "按钮 4"
+     ,"sample.mountain": "山"
   ,"sample.share": "共享"
   ,"sample.save": "保存"
   ,"sample.delete": "删除"
@@ -668,6 +743,15 @@ export default {
   ,"sample.menuflyout.icons": "带图标的 MenuFlyout"
   ,"sample.menuflyout.keyboard": "带键盘快捷键的 MenuFlyout"
   ,"sample.menuflyout.radio": "带单选项的 MenuFlyout"
+  ,"sample.menubar.keyboard": "带键盘快捷键的菜单栏"
+  ,"sample.menubar.submenus": "带子菜单、分隔线和单选菜单项的菜单栏"
+  ,"sample.menubar.undo": "撤销"
+  ,"sample.menubar.cut": "剪切"
+  ,"sample.menubar.paste": "粘贴"
+  ,"sample.menubar.plain-text": "纯文本文档"
+  ,"sample.menubar.rich-text": "富文本文档"
+  ,"sample.menubar.other-formats": "其他格式"
+  ,"sample.menubar.output": "输出"
   ,"sample.options": "选项"
   ,"sample.file-options": "文件选项"
   ,"sample.edit-options": "编辑选项"

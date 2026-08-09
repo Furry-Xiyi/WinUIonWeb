@@ -46,6 +46,7 @@
 
             <!-- Example 1: Resource Hierarchy -->
             <WinControlExample
+              :theme="pageTheme"
               headerText="Resource hierarchy example"
               :templateCode="example1Template"
               :vueCode="example1Vue">
@@ -91,6 +92,7 @@
 
             <!-- Example 2: StaticResource vs ThemeResource -->
             <WinControlExample
+              :theme="pageTheme"
               headerText="StaticResource versus ThemeResource"
               :templateCode="example2Template"
               :vueCode="example2Vue">
@@ -115,6 +117,7 @@
 
             <!-- Example 3: Define Custom Theme Resources -->
             <WinControlExample
+              :theme="pageTheme"
               headerText="Define a new theme resource"
               :templateCode="example3Template"
               :vueCode="example3Vue">

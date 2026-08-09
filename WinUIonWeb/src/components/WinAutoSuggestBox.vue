@@ -466,8 +466,10 @@ onBeforeUnmount(() => {
   position: fixed;
   z-index: 1000;
   overflow: hidden;
-  padding: 4px;
+  padding: 0;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   --win-acrylic-fill: var(--flyout-background, var(--layer-fill-color-default));
   isolation: isolate;
   background: transparent;
@@ -480,11 +482,13 @@ onBeforeUnmount(() => {
 
 .win-asb-popup-scroll {
   width: 100%;
+  min-height: 0;
   max-height: inherit;
+  flex: 1 1 auto;
 }
 
 .win-asb-popup-scroll :deep(.win-scroll-viewer-viewport) {
-  height: auto;
+  height: 100%;
   max-height: inherit;
 }
 
@@ -496,6 +500,7 @@ onBeforeUnmount(() => {
 .win-asb-results {
   box-sizing: border-box;
   width: 100%;
+  padding: 4px;
   display: flex;
   flex-direction: column;
 }
@@ -524,6 +529,7 @@ onBeforeUnmount(() => {
 }
 
 .win-asb-item {
+  box-sizing: border-box;
   width: 100%;
   min-height: 32px;
   padding: 6px 8px;

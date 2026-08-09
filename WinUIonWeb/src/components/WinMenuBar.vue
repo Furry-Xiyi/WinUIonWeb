@@ -3,14 +3,17 @@
     ref="menuBarRef"
     class="win-menu-bar"
     role="menubar"
-    :aria-label="AutomationPropertiesName"
-    @pointerenter="onMenuBarEnter"
-    @pointerleave="onMenuBarLeave">
+    :aria-label="props['AutomationProperties.Name']">
     <div
       v-for="(item, index) in Items"
       :key="index"
       class="win-menu-bar-item"
-      :class="{ 'is-open': openIndex === index, 'is-disabled': isItemDisabled(item) }"
+      :class="{
+        'is-open': openIndex === index,
+        'is-pointer-over': hoverIndex === index,
+        'is-pressed': pressedIndex === index,
+        'is-disabled': isItemDisabled(item)
+      }"
       role="none">
       <button
         class="win-menu-bar-button"
@@ -21,9 +24,11 @@
         :aria-disabled="isItemDisabled(item)"
         :disabled="isItemDisabled(item)"
         :tabindex="focusedIndex === index ? 0 : -1"
-        @pointerenter="onItemPointerEnter(index)"
-        @pointerdown="onItemPointerDown(index)"
+        @pointerenter="onItemPointerEnter($event, index)"
+        @pointerleave="onItemPointerLeave(index)"
+        @pointerdown="onItemPointerDown($event, index)"
         @pointerup="pressedIndex = null"
+        @pointercancel="pressedIndex = null"
         @keydown="onMenuBarKeyDown($event, index)"
         @focus="focusedIndex = index">
         <WinTextBlock :Text="item.Title" />
@@ -41,9 +46,7 @@
     OverlayInputPassThroughElement
     Placement="BottomEdgeAlignedLeft"
     @Close="closeMenu"
-    @Select="invokeItem"
-    @PointerEnter="onFlyoutEnter"
-    @PointerLeave="onFlyoutLeave" />
+    @Select="invokeItem" />
 </template>
 
 <script setup>
@@ -53,7 +56,7 @@ import WinTextBlock from './WinTextBlock.vue';
 
 const props = defineProps({
   Items: { type: Array, required: true },
-  AutomationPropertiesName: { type: String, default: 'Menu' },
+  'AutomationProperties.Name': { type: String, default: 'Menu' },
   Theme: { type: String, default: '' }
 });
 
@@ -62,24 +65,23 @@ const emit = defineEmits(['ItemClick']);
 const menuBarRef = ref(null);
 const openIndex = ref(null);
 const focusedIndex = ref(0);
+const hoverOpenedIndex = ref(null);
+const hoverIndex = ref(null);
 const pressedIndex = ref(null);
-const isPointerInBar = ref(false);
-const isPointerInFlyout = ref(false);
 const anchorRect = ref(null);
-const menuMinWidth = ref(200);
-let closeTimer = null;
+const menuMinWidth = ref(96);
 
 const Items = computed(() => props.Items);
 const openMenuItem = computed(() => openIndex.value === null ? null : Items.value[openIndex.value]);
 
-const isItemDisabled = (item) => item?.IsEnabled === false;
+const isItemDisabled = (item) => item?.IsEnabled === false || item?.Command?.CanExecute?.(item.CommandParameter) === false;
 
 const updateAnchor = (index) => {
   const button = menuBarRef.value?.querySelectorAll('.win-menu-bar-button')[index];
   if (!button) return;
   const rect = button.getBoundingClientRect();
   anchorRect.value = rect;
-  menuMinWidth.value = Math.max(rect.width, 200);
+  menuMinWidth.value = Math.max(rect.width, 96);
 };
 
 const openMenu = async (index) => {
@@ -88,7 +90,6 @@ const openMenu = async (index) => {
   const wasOpenIndex = openIndex.value;
   openIndex.value = index;
   focusedIndex.value = index;
-  cancelCloseMenu();
   await nextTick();
   if (wasOpenIndex !== index || !anchorRect.value) {
     updateAnchor(index);
@@ -97,61 +98,37 @@ const openMenu = async (index) => {
 
 const closeMenu = () => {
   openIndex.value = null;
+  hoverOpenedIndex.value = null;
   pressedIndex.value = null;
-  cancelCloseMenu();
 };
 
-const scheduleCloseMenu = () => {
-  cancelCloseMenu();
-  closeTimer = window.setTimeout(() => {
-    if (!isPointerInBar.value && !isPointerInFlyout.value && pressedIndex.value === null) {
+const onItemPointerEnter = (event, index) => {
+  hoverIndex.value = index;
+  if (event.pointerType !== 'touch' && openIndex.value !== null && openIndex.value !== index) {
+    hoverOpenedIndex.value = index;
+    void openMenu(index);
+  }
+};
+
+const onItemPointerLeave = (index) => {
+  if (hoverIndex.value === index) hoverIndex.value = null;
+  if (hoverOpenedIndex.value === index) hoverOpenedIndex.value = null;
+};
+
+const onItemPointerDown = (event, index) => {
+  event.preventDefault();
+  pressedIndex.value = index;
+  if (openIndex.value === index) {
+    if (hoverOpenedIndex.value === index) {
+      hoverOpenedIndex.value = null;
+      updateAnchor(index);
+    } else {
       closeMenu();
     }
-  }, 180);
-};
-
-const cancelCloseMenu = () => {
-  if (closeTimer) {
-    window.clearTimeout(closeTimer);
-    closeTimer = null;
+    return;
   }
-};
-
-const onMenuBarEnter = () => {
-  isPointerInBar.value = true;
-  cancelCloseMenu();
-};
-
-const onMenuBarLeave = () => {
-  isPointerInBar.value = false;
-  scheduleCloseMenu();
-};
-
-const onFlyoutEnter = () => {
-  isPointerInFlyout.value = true;
-  cancelCloseMenu();
-};
-
-const onFlyoutLeave = () => {
-  isPointerInFlyout.value = false;
-  scheduleCloseMenu();
-};
-
-const onItemPointerEnter = (index) => {
-  cancelCloseMenu();
-  if (openIndex.value !== null) {
-    void openMenu(index);
-  }
-};
-
-const onItemPointerDown = (index) => {
-  pressedIndex.value = index;
-  cancelCloseMenu();
-  if (openIndex.value === null || openIndex.value !== index) {
-    void openMenu(index);
-  } else {
-    updateAnchor(index);
-  }
+  hoverOpenedIndex.value = null;
+  void openMenu(index);
 };
 
 const updateRadioGroup = (item) => {
@@ -227,6 +204,7 @@ const handleDocumentPointerDown = (event) => {
   if (menuBarRef.value?.contains(target)) return;
   if (target instanceof Element && target.closest('.win-menu-flyout-wrap')) return;
   closeMenu();
+  hoverIndex.value = null;
 };
 
 watch(openIndex, (index) => {
@@ -241,46 +219,72 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('keydown', handleGlobalKeyDown);
   document.removeEventListener('pointerdown', handleDocumentPointerDown, true);
-  cancelCloseMenu();
 });
 </script>
 
 <style scoped>
 .win-menu-bar {
-  position: relative;
-  z-index: 1001;
   display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px 8px;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
   min-height: 40px;
-  background: var(--layer-alt, transparent);
+  background: var(--MenuBarBackground, var(--SubtleFillColorTransparentBrush, transparent));
+}
+
+.win-menu-bar-item {
+  display: flex;
+  align-items: stretch;
+  margin: 4px;
+  border-radius: var(--ControlCornerRadius, 4px);
+  border: var(--MenuBarItemBorderThickness, 0) solid var(--MenuBarItemBorderBrush, var(--ControlAltFillColorTertiaryBrush, transparent));
+  background: var(--MenuBarItemBackground, var(--SubtleFillColorTransparentBrush, transparent));
 }
 
 .win-menu-bar-button {
-  min-height: 32px;
-  padding: 5px 12px;
+  min-height: 0;
+  height: 100%;
+  padding: 4px 10px;
   border: 0;
-  border-radius: 4px;
+  border-radius: inherit;
   background: transparent;
-  color: var(--text-primary);
-  cursor: pointer;
+  color: inherit;
+  cursor: default;
   font: inherit;
   font-size: 14px;
+  line-height: 20px;
 }
 
-.win-menu-bar-button:hover {
-  background: var(--subtle-secondary);
+.win-menu-bar-item.is-pointer-over {
+  background: var(--MenuBarItemBackgroundPointerOver, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)));
+  border-color: var(--MenuBarItemBorderBrushPointerOver, var(--ControlStrokeColorDefaultBrush, transparent));
 }
 
-.win-menu-bar-button:active,
+.win-menu-bar-item.is-pressed {
+  background: var(--MenuBarItemBackgroundPressed, var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary)));
+  border-color: var(--MenuBarItemBorderBrushPressed, var(--ControlStrokeColorDefaultBrush, transparent));
+}
+
 .win-menu-bar-item.is-open .win-menu-bar-button {
-  background: var(--subtle-tertiary);
-  color: var(--text-secondary);
+  background: transparent;
+}
+
+.win-menu-bar-item.is-open {
+  background: var(--MenuBarItemBackgroundSelected, var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary)));
+  border-color: var(--MenuBarItemBorderBrushSelected, var(--ControlStrokeColorDefaultBrush, transparent));
 }
 
 .win-menu-bar-button:disabled {
-  color: var(--text-disabled);
+  color: var(--TextFillColorDisabledBrush, var(--text-disabled));
   cursor: default;
+}
+
+.win-menu-bar-button:focus-visible {
+  outline: 2px solid var(--FocusStrokeColorOuterBrush, var(--text-primary));
+  outline-offset: -3px;
+}
+
+.win-menu-bar-button :deep(.win-text-block) {
+  color: inherit;
 }
 </style>

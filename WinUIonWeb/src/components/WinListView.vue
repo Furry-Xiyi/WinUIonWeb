@@ -1,6 +1,12 @@
-<!-- components/WinListView.vue -->
 <template>
-  <div class="win-list-view" ref="containerRef">
+  <div
+    ref="containerRef"
+    class="win-list-view"
+    :class="{ disabled: !IsEnabled }"
+    :style="rootStyle"
+    role="listbox"
+    :aria-disabled="!IsEnabled"
+    :aria-multiselectable="SelectionMode === 'Multiple' || SelectionMode === 'Extended'">
     <WinScrollViewer
       class="win-list-viewport"
       VerticalScrollMode="Auto"
@@ -13,43 +19,62 @@
            @drop.prevent="onViewportDrop"
            @dragleave="onViewportDragLeave">
         <template v-if="isGrouped">
-          <div v-for="(group, gIdx) in items" :key="gIdx" class="win-list-group">
-            <div v-if="showHeader" class="win-list-header" :class="{ sticky: stickyHeader }">
-              <slot name="header" :group="group">{{ group.key }}</slot>
+          <div v-for="(group, gIdx) in items" :key="getGroupKey(group, gIdx)" class="win-list-group">
+            <div class="win-list-header" :class="{ sticky: stickyHeader }">
+              <slot name="header" :group="group">{{ getGroupTitle(group) }}</slot>
             </div>
-            <div v-for="(item, idx) in group.items" :key="idx"
+            <div v-for="(item, idx) in getGroupItems(group)" :key="getItemKey(item, idx)"
                  class="win-list-item"
-                 :class="{ selected: isSelected(item), clickEnabled: isItemClickEnabled }"
+                 :class="itemClasses(item)"
+                 :style="itemContainerStyle"
                  :draggable="canDragItems"
+                 :tabindex="IsEnabled && SelectionMode !== 'None' ? 0 : -1"
+                 :aria-selected="SelectionMode === 'None' ? undefined : isSelected(item)"
                  @click="onItemClick($event, item)"
+                 @keydown.enter.prevent="onItemClick($event, item)"
+                 @keydown.space.prevent="onItemClick($event, item)"
                  @dragstart="onDragStartGrouped($event, {gIdx, idx})"
                  @dragover.prevent
                  @drop.prevent>
-              <div class="list-indicator" :class="{ active: isSelected(item) }"></div>
-              <slot name="item" :item="item"></slot>
+              <span
+                v-if="selectionMode === 'Multiple'"
+                class="list-selection-box"
+                :class="{ checked: isSelected(item) }"
+                aria-hidden="true">&#xE73E;</span>
+              <slot name="item" :item="item" :index="idx" :group="group"></slot>
+              <div
+                v-if="selectionMode === 'Single' || selectionMode === 'Extended'"
+                class="win-list-view-selection-indicator"
+                :class="{ active: isSelected(item) }"
+                aria-hidden="true"></div>
             </div>
           </div>
         </template>
         <template v-else>
-          <div v-if="showHeader" class="win-list-header" :class="{ sticky: stickyHeader }">
-            <slot name="header"></slot>
-          </div>
-          <div v-for="(item, idx) in internalItems" :key="idx"
+          <div v-for="(item, idx) in internalItems" :key="getItemKey(item, idx)"
                ref="itemEls"
                class="win-list-item"
-               :class="{
-         selected: isSelected(item),
-         clickEnabled: isItemClickEnabled && !isDragging,
-         'drag-shrink': isDragging && !dragIndices.includes(idx),
-         'dragging-source': isDragging && dragIndices.includes(idx)
-       }"
-               :style="getItemStyle(idx)"
+               :class="itemClasses(item, idx)"
+               :style="[itemContainerStyle, getItemStyle(idx)]"
                :draggable="canDragItems"
+               :tabindex="IsEnabled && SelectionMode !== 'None' ? 0 : -1"
+               :aria-selected="SelectionMode === 'None' ? undefined : isSelected(item)"
                @click="onItemClick($event, item)"
+               @keydown.enter.prevent="onItemClick($event, item)"
+               @keydown.space.prevent="onItemClick($event, item)"
                @dragstart="onDragStart($event, idx)"
                @dragend="onDragEnd">
-            <div class="list-indicator" :class="{ active: isSelected(item) }"></div>
-            <slot name="item" :item="item"></slot>
+            <span
+              v-if="selectionMode === 'Multiple'"
+              class="list-selection-box"
+              :class="{ checked: isSelected(item) }"
+              aria-hidden="true">&#xE73E;</span>
+            <slot name="item" :item="item" :index="idx"></slot>
+            <div
+              v-if="selectionMode === 'Single' || selectionMode === 'Extended'"
+              class="win-list-view-selection-indicator"
+              :class="{ active: isSelected(item) }"
+              aria-hidden="true"></div>
           </div>
         </template>
       </div>
@@ -57,111 +82,262 @@
   </div>
 </template>
 
-<script setup>
-import { computed, ref, toRaw, nextTick, watch } from 'vue';
+<script setup lang="ts">
+import { computed, nextTick, ref, toRaw, watch } from 'vue';
+import type { CSSProperties } from 'vue';
 import WinScrollViewer from './WinScrollViewer.vue';
 
-const props = defineProps({
-  ItemsSource: { type: Array, default: null },
-  IsGrouped: { type: Boolean, default: undefined },
-  IsItemClickEnabled: { type: Boolean, default: undefined },
-  CanDragItems: { type: Boolean, default: undefined },
-  CanReorderItems: { type: Boolean, default: undefined },
-  AllowDrop: { type: Boolean, default: undefined },
-  AreStickyGroupHeadersEnabled: { type: Boolean, default: undefined },
-  SelectionMode: { type: String, default: undefined },
-  SelectedItems: { type: Array, default: null },
-  items: { type: Array, default: () => [] },
-  isGrouped: { type: Boolean, default: false },
-  showHeader: { type: Boolean, default: false },
-  stickyHeader: { type: Boolean, default: false },
-  isItemClickEnabled: { type: Boolean, default: true },
-  canDragItems: { type: Boolean, default: false },
-  canReorderItems: { type: Boolean, default: false },
-  allowDrop: { type: Boolean, default: false },
-  selectionMode: { type: String, default: 'Single' },
-  selectedItems: { type: Array, default: () => [] }
+defineSlots<{
+  item(props: { item: any; index: number; group?: any }): any;
+  header(props: { group: any }): any;
+}>();
+
+type ListViewSelectionMode = 'None' | 'Single' | 'Multiple' | 'Extended';
+type ListViewItemStyle = {
+  Height?: string | number;
+  MinHeight?: string | number;
+  Padding?: string | number;
+  BorderBrush?: string;
+  BorderThickness?: string | number;
+  CornerRadius?: string | number;
+  HorizontalContentAlignment?: 'Left' | 'Center' | 'Right' | 'Stretch';
+  VerticalContentAlignment?: 'Top' | 'Center' | 'Bottom' | 'Stretch';
+};
+
+const props = withDefaults(defineProps<{
+  ItemsSource?: unknown[];
+  IsGrouped?: boolean;
+  IsItemClickEnabled?: boolean;
+  CanDragItems?: boolean;
+  CanReorderItems?: boolean;
+  AllowDrop?: boolean;
+  AreStickyGroupHeadersEnabled?: boolean;
+  SelectionMode?: ListViewSelectionMode;
+  SelectedItems?: unknown[];
+  SelectedItem?: unknown;
+  SelectedIndex?: number;
+  ItemContainerStyle?: ListViewItemStyle;
+  IsEnabled?: boolean;
+  Width?: string | number;
+  Height?: string | number;
+  MinWidth?: string | number;
+  MinHeight?: string | number;
+  MaxWidth?: string | number;
+  MaxHeight?: string | number;
+  Margin?: string | number;
+  Padding?: string | number;
+  Background?: string;
+  BorderBrush?: string;
+  BorderThickness?: string | number;
+  CornerRadius?: string | number;
+}>(), {
+  ItemsSource: () => [],
+  IsGrouped: false,
+  IsItemClickEnabled: false,
+  CanDragItems: false,
+  CanReorderItems: false,
+  AllowDrop: false,
+  AreStickyGroupHeadersEnabled: false,
+  SelectionMode: 'Single',
+  SelectedItems: undefined,
+  SelectedItem: undefined,
+  SelectedIndex: -1,
+  ItemContainerStyle: () => ({}),
+  IsEnabled: true,
+  Width: '',
+  Height: '',
+  MinWidth: '',
+  MinHeight: '',
+  MaxWidth: '',
+  MaxHeight: '',
+  Margin: '',
+  Padding: '',
+  Background: '',
+  BorderBrush: '',
+  BorderThickness: '',
+  CornerRadius: ''
 });
 
-const emit = defineEmits(['ItemClick', 'SelectionChanged', 'DragItemsStarting', 'DragItemsCompleted', 'itemClick', 'selectionChanged', 'update:SelectedItems', 'update:selectedItems', 'update:ItemsSource', 'update:items']);
+const emit = defineEmits([
+  'ItemClick',
+  'SelectionChanged',
+  'DragItemsStarting',
+  'DragItemsCompleted',
+  'DragOver',
+  'Drop',
+  'update:SelectedItems',
+  'update:SelectedItem',
+  'update:SelectedIndex',
+  'update:ItemsSource'
+]);
 
-const items = computed(() => props.ItemsSource ?? props.items);
-const isGrouped = computed(() => props.IsGrouped ?? props.isGrouped);
-const isItemClickEnabled = computed(() => props.IsItemClickEnabled ?? props.isItemClickEnabled);
-const canDragItems = computed(() => props.CanDragItems ?? props.canDragItems);
-const canReorderItems = computed(() => props.CanReorderItems ?? props.canReorderItems);
-const allowDrop = computed(() => props.AllowDrop ?? props.allowDrop);
-const showHeader = computed(() => props.showHeader || isGrouped.value);
-const stickyHeader = computed(() => props.AreStickyGroupHeadersEnabled ?? props.stickyHeader);
-const selectionMode = computed(() => props.SelectionMode ?? props.selectionMode);
-const selectedItems = computed(() => props.SelectedItems ?? props.selectedItems);
+const items = computed(() => props.ItemsSource);
+const isGrouped = computed(() => props.IsGrouped);
+const isItemClickEnabled = computed(() => props.IsItemClickEnabled);
+const canDragItems = computed(() => props.CanDragItems && props.IsEnabled);
+const canReorderItems = computed(() => props.CanReorderItems);
+const allowDrop = computed(() => props.AllowDrop);
+const stickyHeader = computed(() => props.AreStickyGroupHeadersEnabled);
+const selectionMode = computed(() => props.SelectionMode);
+const getGroupItems = (group: unknown) => ((group as { Items?: unknown[] })?.Items ?? []);
+const getGroupKey = (group: unknown, index: number) => {
+  const value = group as { Key?: string | number };
+  return value?.Key ?? index;
+};
+const getGroupTitle = (group: unknown) => (group as { Key?: string | number })?.Key ?? '';
+const getItemKey = (item: unknown, index: number) => {
+  const value = item as { Key?: string | number; Id?: string | number };
+  return value?.Key ?? value?.Id ?? index;
+};
+const internalSelectedItems = ref<unknown[]>([]);
+const flatItems = computed(() => isGrouped.value
+  ? items.value.flatMap((group) => getGroupItems(group))
+  : internalItems.value);
+const selectedItems = computed(() => {
+  if (props.SelectedItems !== undefined) return props.SelectedItems;
+  if (props.SelectedItem !== undefined && props.SelectedItem !== null) return [props.SelectedItem];
+  return props.SelectedIndex >= 0 && flatItems.value[props.SelectedIndex] !== undefined
+    ? [flatItems.value[props.SelectedIndex]]
+    : internalSelectedItems.value;
+});
 
-const internalItems = ref([...items.value]);
+const cssLength = (value: string | number | undefined) => {
+  if (value === '' || value === undefined || value === null) return '';
+  if (typeof value === 'number' || !Number.isNaN(Number(String(value).trim()))) return `${Number(value)}px`;
+  return String(value);
+};
+
+const xamlThickness = (value: string | number | undefined) => {
+  if (value === '' || value === undefined || value === null) return '';
+  const parts = String(value).split(',').map((part) => cssLength(part.trim()));
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
+  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
+  return String(value);
+};
+
+const alignment = (value: string | undefined) => ({
+  Left: 'flex-start', Center: 'center', Right: 'flex-end', Stretch: 'stretch',
+  Top: 'flex-start', Bottom: 'flex-end'
+}[value || ''] || undefined) as CSSProperties['justifyContent'] & CSSProperties['alignItems'];
+
+const rootStyle = computed<CSSProperties>(() => ({
+  width: cssLength(props.Width) || undefined,
+  height: cssLength(props.Height) || undefined,
+  minWidth: cssLength(props.MinWidth) || undefined,
+  minHeight: cssLength(props.MinHeight) || undefined,
+  maxWidth: cssLength(props.MaxWidth) || undefined,
+  maxHeight: cssLength(props.MaxHeight) || undefined,
+  margin: xamlThickness(props.Margin) || undefined,
+  padding: xamlThickness(props.Padding) || undefined,
+  background: props.Background || undefined,
+  borderColor: props.BorderBrush || undefined,
+  borderWidth: xamlThickness(props.BorderThickness) || undefined,
+  borderStyle: props.BorderThickness !== '' && props.BorderThickness !== 0 ? 'solid' : undefined,
+  borderRadius: cssLength(props.CornerRadius) || undefined
+}));
+
+const itemContainerStyle = computed<CSSProperties>(() => ({
+  height: cssLength(props.ItemContainerStyle.Height) || undefined,
+  minHeight: cssLength(props.ItemContainerStyle.MinHeight) || undefined,
+  padding: xamlThickness(props.ItemContainerStyle.Padding) || undefined,
+  borderColor: props.ItemContainerStyle.BorderBrush || undefined,
+  borderWidth: xamlThickness(props.ItemContainerStyle.BorderThickness) || undefined,
+  borderStyle: props.ItemContainerStyle.BorderThickness !== undefined
+    && props.ItemContainerStyle.BorderThickness !== 0 ? 'solid' : undefined,
+  borderRadius: cssLength(props.ItemContainerStyle.CornerRadius) || undefined,
+  justifyContent: alignment(props.ItemContainerStyle.HorizontalContentAlignment),
+  alignItems: alignment(props.ItemContainerStyle.VerticalContentAlignment)
+}));
+
+const internalItems = ref<unknown[]>([...items.value]);
 
 watch(items, (val) => {
-  if (!isDragging.value) internalItems.value = [...val];
+  internalItems.value = [...val];
+  const availableItems = props.IsGrouped ? val.flatMap(group => getGroupItems(group)) : val;
+  internalSelectedItems.value = internalSelectedItems.value.filter(selected =>
+    availableItems.some(item => toRaw(item) === toRaw(selected)));
 }, { deep: true });
 
-const containerRef = ref(null);
-const listRef = ref(null);
-const itemEls = ref([]);
+const containerRef = ref<HTMLElement>();
+const listRef = ref<HTMLElement>();
+const itemEls = ref<HTMLElement[]>([]);
 const isDragging = ref(false);
-const dragIndices = ref([]);
+const isExternalDragOver = ref(false);
+const dragIndices = ref<number[]>([]);
 const insertBeforeIndex = ref(-1);
 let dragItemHeight = 0;
-let anchorIndex = null;
+let anchorIndex: number | null = null;
 let lastCalcTime = 0;
-let cachedMidpoints = [];
+let cachedMidpoints: Array<{ index: number; midY: number }> = [];
 
-const isSelected = (item) => {
+const isSelected = (item: unknown) => {
   const rawTarget = toRaw(item);
   return selectedItems.value.some(i => toRaw(i) === rawTarget);
 };
 
-const emitSelection = (newSel) => {
+const itemClasses = (item: unknown, index = -1) => ({
+  selected: isSelected(item),
+  interactive: props.IsEnabled && selectionMode.value !== 'None',
+  'content-stretch': (props.ItemContainerStyle.HorizontalContentAlignment ?? 'Stretch') === 'Stretch',
+  'drag-shrink': index >= 0 && isDragging.value && !dragIndices.value.includes(index),
+  'dragging-source': index >= 0 && isDragging.value && dragIndices.value.includes(index)
+});
+
+const emitSelection = (newSel: unknown[]) => {
+  const previous = selectedItems.value;
+  const addedItems = newSel.filter(item => !previous.some(current => toRaw(current) === toRaw(item)));
+  const removedItems = previous.filter(item => !newSel.some(current => toRaw(current) === toRaw(item)));
+  const selectedItem = newSel[0] ?? null;
+  const selectedIndex = selectedItem === null
+    ? -1
+    : flatItems.value.findIndex(item => toRaw(item) === toRaw(selectedItem));
+
+  internalSelectedItems.value = [...newSel];
   emit('update:SelectedItems', newSel);
-  emit('update:selectedItems', newSel);
-  emit('SelectionChanged', { AddedItems: newSel, RemovedItems: [], SelectedItems: newSel });
-  emit('selectionChanged', newSel);
+  emit('update:SelectedItem', selectedItem);
+  emit('update:SelectedIndex', selectedIndex);
+  emit('SelectionChanged', { AddedItems: addedItems, RemovedItems: removedItems, SelectedItems: newSel });
 };
 
-const onItemClick = (event, item) => {
-  if (isDragging.value) return;
+const onItemClick = (event: MouseEvent | KeyboardEvent, item: unknown) => {
+  if (!props.IsEnabled || isDragging.value) return;
   const rawTarget = toRaw(item);
   if (isItemClickEnabled.value) {
     emit('ItemClick', { ClickedItem: item, OriginalSource: event.target });
-    emit('itemClick', item);
   }
   if (selectionMode.value === 'None') return;
 
   let newSel = [...selectedItems.value];
+  const itemIndex = flatItems.value.findIndex(candidate => toRaw(candidate) === rawTarget);
   if (selectionMode.value === 'Single') {
     newSel = [rawTarget];
-    anchorIndex = internalItems.value.indexOf(item);
+    anchorIndex = itemIndex;
   } else if (selectionMode.value === 'Multiple') {
     const idx = newSel.findIndex(i => toRaw(i) === rawTarget);
     if (idx > -1) newSel.splice(idx, 1);
     else newSel.push(rawTarget);
+    anchorIndex = itemIndex;
   } else if (selectionMode.value === 'Extended') {
     if (event.ctrlKey) {
       const idx = newSel.findIndex(i => toRaw(i) === rawTarget);
       if (idx > -1) newSel.splice(idx, 1);
       else newSel.push(rawTarget);
-      anchorIndex = internalItems.value.indexOf(item);
+      anchorIndex = itemIndex;
     } else if (event.shiftKey && anchorIndex !== null) {
-      const currentIdx = internalItems.value.indexOf(item);
+      const currentIdx = itemIndex;
       const start = Math.min(anchorIndex, currentIdx);
       const end = Math.max(anchorIndex, currentIdx);
-      newSel = internalItems.value.slice(start, end + 1).map(i => toRaw(i));
+      newSel = flatItems.value.slice(start, end + 1).map(i => toRaw(i));
     } else {
       newSel = [rawTarget];
-      anchorIndex = internalItems.value.indexOf(item);
+      anchorIndex = itemIndex;
     }
   }
   emitSelection(newSel);
 };
 
-const getItemStyle = (idx) => {
+const getItemStyle = (idx: number): CSSProperties | undefined => {
   if (!isDragging.value) return undefined;
   if (dragIndices.value.includes(idx)) return undefined;
 
@@ -203,10 +379,10 @@ const cacheMidpoints = () => {
   });
 };
 
-const onDragStart = (e, index) => {
+const onDragStart = (e: DragEvent, index: number) => {
   if (!canDragItems.value || isGrouped.value) return;
 
-  const el = e.currentTarget;
+  const el = e.currentTarget as HTMLElement | null;
   if (el) dragItemHeight = el.offsetHeight;
 
   if (isSelected(items.value[index]) && selectedItems.value.length > 1) {
@@ -218,8 +394,10 @@ const onDragStart = (e, index) => {
   }
 
   emit('DragItemsStarting', { Items: dragIndices.value.map(i => internalItems.value[i]) });
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', '');
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', '');
+  }
 
   requestAnimationFrame(() => {
     isDragging.value = true;
@@ -227,21 +405,28 @@ const onDragStart = (e, index) => {
   });
 };
 
-const onDragStartGrouped = (e, target) => {
+const onDragStartGrouped = (e: DragEvent, _target: { gIdx: number; idx: number }) => {
   if (!canDragItems.value) return;
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', '');
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', '');
+  }
 };
 
-const onViewportDragOver = (e) => {
-  if (!canReorderItems.value || !allowDrop.value || !isDragging.value || isGrouped.value) return;
-  e.dataTransfer.dropEffect = 'move';
+const onViewportDragOver = (e: DragEvent) => {
+  if (!allowDrop.value || isGrouped.value) return;
+  if (isDragging.value && !canReorderItems.value) return;
+  if (!isDragging.value) isExternalDragOver.value = true;
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+  emit('DragOver', { DataTransfer: e.dataTransfer, AcceptedOperation: 'Move', OriginalSource: e.target });
 
   const now = Date.now();
   if (now - lastCalcTime < 40) return;
   lastCalcTime = now;
 
   const mouseY = e.clientY;
+
+  if (cachedMidpoints.length === 0) cacheMidpoints();
 
   const nonDragMidpoints = cachedMidpoints.filter(m => !dragIndices.value.includes(m.index));
   if (nonDragMidpoints.length === 0) return;
@@ -257,7 +442,7 @@ const onViewportDragOver = (e) => {
   const sorted = [...dragIndices.value].sort((a, b) => a - b);
   const minD = sorted[0];
   const maxD = sorted[sorted.length - 1];
-  let contiguous = (maxD - minD + 1) === sorted.length;
+  const contiguous = (maxD - minD + 1) === sorted.length;
   if (contiguous && slot >= minD && slot <= maxD + 1) {
     if (insertBeforeIndex.value !== -1) insertBeforeIndex.value = -1;
     return;
@@ -268,15 +453,28 @@ const onViewportDragOver = (e) => {
   }
 };
 
-const onViewportDragLeave = (e) => {
+const onViewportDragLeave = (e: DragEvent) => {
   const viewport = listRef.value;
   if (!viewport) return;
   const related = e.relatedTarget;
-  if (related && viewport.contains(related)) return;
+  if (related instanceof Node && viewport.contains(related)) return;
   insertBeforeIndex.value = -1;
+  isExternalDragOver.value = false;
 };
 
-const onViewportDrop = () => {
+const onViewportDrop = (event: DragEvent) => {
+  if (isExternalDragOver.value && !isDragging.value) {
+    const insertIndex = insertBeforeIndex.value < 0 ? internalItems.value.length : insertBeforeIndex.value;
+    emit('Drop', {
+      DataTransfer: event.dataTransfer,
+      AcceptedOperation: 'Move',
+      InsertIndex: insertIndex,
+      OriginalSource: event.target
+    });
+    resetDrag();
+    return;
+  }
+
   if (!canReorderItems.value || !isDragging.value || insertBeforeIndex.value === -1) {
     resetDrag();
     return;
@@ -299,13 +497,19 @@ const onViewportDrop = () => {
   newItems.splice(actualInsert, 0, ...draggedItems);
   internalItems.value = newItems;
   emit('update:ItemsSource', newItems);
-  emit('update:items', newItems);
+  emit('Drop', {
+    DataTransfer: event.dataTransfer,
+    AcceptedOperation: 'Move',
+    InsertIndex: actualInsert,
+    OriginalSource: event.target
+  });
   emit('DragItemsCompleted', { Items: draggedItems, DropResult: 'Move' });
   resetDrag();
 };
 
 const resetDrag = () => {
   isDragging.value = false;
+  isExternalDragOver.value = false;
   dragIndices.value = [];
   insertBeforeIndex.value = -1;
   cachedMidpoints = [];
@@ -315,21 +519,23 @@ const onDragEnd = () => { resetDrag(); };
 </script>
 
 <style>
-  /* styles/listview.css */
   .win-list-view {
     display: block;
     width: 100%;
     height: 100%;
     overflow: hidden;
     position: relative;
-    animation: win-list-root-reveal 0ms 250ms forwards;
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: 0;
+    color: var(--ListViewItemForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+    font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', sans-serif);
+    font-size: var(--ControlContentThemeFontSize, 14px);
+    line-height: 20px;
+    letter-spacing: 0;
   }
 
-  @keyframes win-list-root-reveal {
-    to {
-      overflow: visible;
-    }
-  }
+  .win-list-view.disabled { opacity: 0.3; }
 
   .win-list-viewport {
     width: 100%;
@@ -351,10 +557,14 @@ const onDragEnd = () => { resetDrag(); };
   }
 
   .win-list-header {
+    min-height: 40px;
     padding: 8px 12px;
-    font-weight: 600;
-    font-size: 16px;
-    background: var(--app-bg);
+    box-sizing: border-box;
+    color: var(--TextFillColorPrimaryBrush, var(--text-primary));
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 28px;
+    background: var(--LayerFillColorDefaultBrush, var(--app-bg));
     z-index: 5;
   }
 
@@ -365,32 +575,56 @@ const onDragEnd = () => { resetDrag(); };
 
   .win-list-item {
     position: relative;
+    isolation: isolate;
     width: 100%;
+    min-width: 88px;
+    min-height: 40px;
     box-sizing: border-box;
-    padding: 8px 12px;
+    padding: 0 12px 0 16px;
+    border-style: solid;
+    border-width: 0;
     border-radius: 4px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    min-height: 36px;
-    transition: background var(--fast-duration), transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
+    gap: 0;
+    overflow: hidden;
+    cursor: default;
+    user-select: none;
+    transition:
+      background-color var(--faster-duration, 83ms) linear,
+      transform 250ms cubic-bezier(0.1, 0.9, 0.2, 1),
+      opacity 200ms ease;
   }
 
-    .win-list-item.clickEnabled {
-      cursor: pointer;
+    .win-list-item.content-stretch > :not(.win-list-view-selection-indicator):not(.list-selection-box) {
+      flex: 1 1 auto;
+      min-width: 0;
     }
 
-      .win-list-item.clickEnabled:hover {
-        background: var(--subtle-secondary);
-      }
+    .win-list-view:not(.disabled) .win-list-item:hover {
+      background: var(--ListViewItemBackgroundPointerOver, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)));
+    }
+
+    .win-list-view:not(.disabled) .win-list-item:active {
+      background: var(--ListViewItemBackgroundPressed, var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary)));
+    }
 
     .win-list-item.selected {
-      background: var(--subtle-secondary);
+      background: var(--ListViewItemBackgroundSelected, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)));
     }
 
       .win-list-item.selected:hover {
-        background: var(--subtle-tertiary);
+        background: var(--ListViewItemBackgroundSelectedPointerOver, var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary)));
       }
+
+      .win-list-item.selected:active {
+        background: var(--ListViewItemBackgroundSelectedPressed, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)));
+      }
+
+    .win-list-item:focus-visible {
+      outline: 2px solid var(--ListViewItemFocusVisualPrimaryBrush, var(--FocusStrokeColorOuterBrush, var(--text-primary)));
+      outline-offset: -3px;
+    }
 
     .win-list-item.dragging-source {
       opacity: 0.3;
@@ -411,23 +645,54 @@ const onDragEnd = () => { resetDrag(); };
         pointer-events: none;
       }
 
-  .list-indicator {
+  .win-list-view-selection-indicator {
     position: absolute;
+    z-index: 3;
     left: 0;
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 0;
-    background: var(--accent-base);
-    border-radius: 3px;
-    transition: height var(--fast-duration) var(--fast-out-slow-in);
+    height: 16px;
+    border-radius: var(--ListViewItemSelectionIndicatorCornerRadius, 1.5px);
+    background: var(--ListViewItemSelectionIndicatorBrush, var(--AccentFillColorDefaultBrush, var(--accent-base)));
+    opacity: 0;
+    pointer-events: none;
+    transition: height var(--fast-duration, 167ms) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)), opacity var(--fast-duration, 167ms) linear;
   }
 
-    .list-indicator.active {
-      height: 16px;
+    .win-list-view-selection-indicator.active {
+      height: max(16px, calc(100% - 40px));
+      opacity: 1;
     }
 
-  .win-list-item:active .list-indicator.active {
-    height: 10px;
+  .win-list-item:hover .win-list-view-selection-indicator.active {
+    background: var(--ListViewItemSelectionIndicatorPointerOverBrush, var(--AccentFillColorDefaultBrush, var(--accent-base)));
+  }
+
+  .win-list-item:active .win-list-view-selection-indicator.active {
+    height: max(10px, calc(100% - 46px));
+    background: var(--ListViewItemSelectionIndicatorPressedBrush, var(--AccentFillColorDefaultBrush, var(--accent-base)));
+  }
+
+  .list-selection-box {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    box-sizing: border-box;
+    border: 1px solid var(--ListViewItemCheckBoxBorderBrush, var(--ControlStrongStrokeColorDefaultBrush, var(--ctrl-strong-stroke)));
+    border-radius: var(--ListViewItemCheckBoxCornerRadius, 3px);
+    color: transparent;
+    font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .list-selection-box.checked {
+    border-color: var(--ListViewItemCheckBoxSelectedBrush, var(--AccentFillColorDefaultBrush, var(--accent-base)));
+    background: var(--ListViewItemCheckBoxSelectedBrush, var(--AccentFillColorDefaultBrush, var(--accent-base)));
+    color: var(--ListViewItemCheckBrush, var(--TextOnAccentFillColorPrimaryBrush, #fff));
   }
 </style>

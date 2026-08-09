@@ -10,7 +10,7 @@
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" horizontalContentAlignment="Stretch" :vue="example1Template" :headerText="$t('text.a-simple-text-editor')">
+        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" HorizontalContentAlignment="Stretch" :vue="example1Template" :headerText="$t('text.a-simple-text-editor')">
               <template #example>
                 <WinRichEditBox v-model:Text="simpleText" :PlaceholderText="$t('text.enter-rich-text')" />
               </template>
@@ -25,7 +25,7 @@
               </template>
             </WinControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" horizontalContentAlignment="Stretch" :vue="example3Template" :headerText="$t('sample.richeditbox.custom-formatting-editor')">
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" HorizontalContentAlignment="Stretch" :vue="example3Template" :headerText="$t('sample.richeditbox.custom-formatting-editor')">
               <template #example>
                 <div class="official-custom-editor">
                   <div class="official-toolbar">
@@ -73,7 +73,7 @@
               </template>
             </WinControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" horizontalContentAlignment="Stretch" :vue="example5Template" :headerText="$t('sample.richeditbox.mathml')">
+            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" HorizontalContentAlignment="Stretch" :vue="example5Template" :headerText="$t('sample.richeditbox.mathml')">
               <template #example>
                 <div class="stack-example">
                   <WinTextBlock class="note-text" :Text="$t('sample.richeditbox.mathml-set-note')" TextWrapping="WrapWholeWords" />
