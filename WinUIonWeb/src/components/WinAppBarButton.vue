@@ -75,9 +75,9 @@ type AppBarButtonFlyoutValue = AppBarButtonFlyoutDefinition | AppBarButtonFlyout
 const isFlyoutController = (flyout: AppBarButtonFlyoutValue): flyout is AppBarButtonFlyoutController => (
   !('Items' in flyout)
   && (
-    typeof flyout.ShowAt === 'function'
-    || typeof flyout.Hide === 'function'
-    || typeof flyout.Toggle === 'function'
+    ('ShowAt' in flyout && typeof flyout.ShowAt === 'function')
+    || ('Hide' in flyout && typeof flyout.Hide === 'function')
+    || ('Toggle' in flyout && typeof flyout.Toggle === 'function')
     || 'IsOpen' in flyout
   )
 );
