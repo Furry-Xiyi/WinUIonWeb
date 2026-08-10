@@ -3729,6 +3729,33 @@ watch(() => props.selectedValue, (val) => {
     padding-left: 28px;
   }
 
+  /* Expanded Compact/Minimal panes use one direct tinted acrylic surface.
+     The Compact pseudo layer is reserved for the closed-pane transition so
+     it cannot hide the material behind a separate stacking context. */
+  .win-nav-shell.is-left-compact > .win-nav-left-panel:not(.is-compact),
+  html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-compact > .win-nav-left-panel:not(.is-compact) {
+    --win-nav-pane-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+    background: var(--win-nav-pane-fill);
+    -webkit-backdrop-filter: var(--flyout-backdrop);
+    backdrop-filter: var(--flyout-backdrop);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+  }
+
+  .win-nav-shell.is-left-compact > .win-nav-left-panel:not(.is-compact)::before,
+  html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-compact > .win-nav-left-panel:not(.is-compact)::before {
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface {
+    --win-nav-pane-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+    background: var(--win-nav-pane-fill);
+    -webkit-backdrop-filter: var(--flyout-backdrop);
+    backdrop-filter: var(--flyout-backdrop);
+  }
+
   .win-menu-flyout:has(.win-nav-more-panel) {
     --flyout-scroll-max-height: calc(var(--flyout-max-height, 70vh) - 6px);
     padding: 2px 0;
