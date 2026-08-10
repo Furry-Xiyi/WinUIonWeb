@@ -70,6 +70,18 @@ interface AppBarButtonFlyoutController {
   readonly IsOpen?: boolean;
 }
 
+type AppBarButtonFlyoutValue = AppBarButtonFlyoutDefinition | AppBarButtonFlyoutController;
+
+const isFlyoutController = (flyout: AppBarButtonFlyoutValue): flyout is AppBarButtonFlyoutController => (
+  !('Items' in flyout)
+  && (
+    typeof flyout.ShowAt === 'function'
+    || typeof flyout.Hide === 'function'
+    || typeof flyout.Toggle === 'function'
+    || 'IsOpen' in flyout
+  )
+);
+
 const props = withDefaults(defineProps<{
   Command?: UICommandLike;
   CommandParameter?: unknown;
@@ -151,8 +163,9 @@ const showFlyout = ref(false);
 const hasMenuFlyout = computed(() => Array.isArray(props.Flyout)
   || Boolean(props.Flyout && 'Items' in props.Flyout));
 const externalFlyout = computed<AppBarButtonFlyoutController | null>(() => {
-  if (!props.Flyout || Array.isArray(props.Flyout) || 'Items' in props.Flyout) return null;
-  return props.Flyout;
+  const flyout = props.Flyout;
+  if (!flyout || Array.isArray(flyout) || !isFlyoutController(flyout)) return null;
+  return flyout;
 });
 const hasFlyout = computed(() => hasMenuFlyout.value || externalFlyout.value !== null);
 const isFlyoutOpen = computed(() => externalFlyout.value?.IsOpen ?? showFlyout.value);

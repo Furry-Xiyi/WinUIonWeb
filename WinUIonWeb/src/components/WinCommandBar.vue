@@ -321,7 +321,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 const closeOnDocumentPointerDown = (event: PointerEvent) => {
   if (!effectiveIsOpen.value || overflowMenuItems.value.length || effectiveIsSticky.value) return;
   const path = event.composedPath?.() || [];
-  if (path.some((element) => element?.classList?.contains('win-commandbar'))) return;
+  if (path.some((element) => element instanceof Element && element.classList.contains('win-commandbar'))) return;
   void close(true);
 };
 

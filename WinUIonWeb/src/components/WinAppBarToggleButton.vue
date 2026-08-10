@@ -3,7 +3,7 @@
     v-bind="$attrs"
     :class="{
       'win-appbar-toggle-button': true,
-      'appbar-toggle-button-checked': isChecked === true,
+      'appbar-toggle-button-checked': isChecked === true || isChecked === null,
       'appbar-toggle-button-indeterminate': isChecked === null
     }"
     :aria-pressed="isChecked === null ? 'mixed' : isChecked"
