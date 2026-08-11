@@ -3743,10 +3743,7 @@ watch(() => props.selectedValue, (val) => {
 
   .win-nav-shell.is-left-compact > .win-nav-left-panel:not(.is-compact)::before,
   html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-compact > .win-nav-left-panel:not(.is-compact)::before {
-    background: transparent;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    box-shadow: none;
+    content: none;
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface {
