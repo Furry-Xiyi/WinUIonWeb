@@ -1,0 +1,16 @@
+import{$ as e,E as t,H as n,K as r,N as i,S as a,X as o,g as s,h as c,m as l,n as u,t as d}from"./WinScrollViewer-DPrZnleG.js";import{t as f}from"./WinTextBlock-CeUskDRc.js";import{a as p}from"./i18n-DA-FIA7C.js";import{c as m,f as h,r as g}from"./index-CMPZyTwE.js";import{t as _}from"./WinControlExample-C0uhK7Jb.js";import{t as v}from"./pageState-Mr-1-Xo1.js";var y={class:`gallery-item-page`},b={style:{position:`relative`},class:`page-heading`},x={class:`page-header-actions`},S={class:`icon`},C={class:`gallery-page-content`},w=`<WinTextBox v-model:Text="simpleText" />`,T=`<WinTextBox
+  :MinWidth="400"
+  :AcceptsReturn="true"
+  TextWrapping="Wrap"
+  :IsSpellCheckEnabled="true"
+  SelectionHighlightColor="Green" />`,E=u({__name:`TextBoxPage`,setup(u){let{t:E}=p(),D=t(`currentPage`),{isFavoriteState:O,pageTheme:k,toggleTheme:A,toggleFavorite:j}=v(l(()=>D?.value||`textbox`).value),M=r(``),N=r(``),P=l(()=>`<WinTextBox
+  v-model:Text="nameText"
+  Header="${E(`sample.textbox.enter-your-name`)}"
+  PlaceholderText="${E(`sample.textbox.name-placeholder`)}" />`),F=l(()=>`<WinTextBox
+  Text="${E(`sample.common.excited-text`)}"
+  :IsReadOnly="true"
+  FontFamily="Arial"
+  :FontSize="24"
+  FontStyle="Italic"
+  :CharacterSpacing="200"
+  Foreground="#5178BE" />`);return(t,r)=>(i(),s(d,{class:`gallery-page-scroll`,VerticalScrollBarVisibility:`Auto`,VerticalScrollMode:`Auto`},{default:n(()=>[c(`div`,y,[c(`div`,b,[a(f,{class:`page-header`,Text:t.$t(`text.textbox`)},null,8,[`Text`]),a(f,{class:`page-description`,Text:t.$t(`text.use-a-textbox-to-let-a-user-enter-simple-text-in`),TextWrapping:`WrapWholeWords`},null,8,[`Text`]),c(`div`,x,[a(m,{class:`header-action`,onClick:o(A)},{default:n(()=>[...r[2]||=[c(`span`,{class:`icon`},``,-1)]]),_:1},8,[`onClick`]),a(g,{class:`header-action`,IsChecked:o(O),"onUpdate:IsChecked":o(j)},{default:n(()=>[c(`span`,S,e(o(O)?``:``),1)]),_:1},8,[`IsChecked`,`onUpdate:IsChecked`])])]),c(`div`,C,[a(_,{class:`basic-input-example-theme`,headerText:t.$t(`text.a-simple-textbox`),theme:o(k),vue:w},{example:n(()=>[a(h,{Text:M.value,"onUpdate:Text":r[0]||=e=>M.value=e},null,8,[`Text`])]),_:1},8,[`headerText`,`theme`]),a(_,{class:`basic-input-example-theme`,headerText:t.$t(`sample.textbox.header-placeholder`),theme:o(k),vue:P.value},{example:n(()=>[a(h,{Text:N.value,"onUpdate:Text":r[1]||=e=>N.value=e,Header:t.$t(`sample.textbox.enter-your-name`),PlaceholderText:t.$t(`sample.textbox.name-placeholder`)},null,8,[`Text`,`Header`,`PlaceholderText`])]),_:1},8,[`headerText`,`theme`,`vue`]),a(_,{class:`basic-input-example-theme`,headerText:t.$t(`sample.textbox.readonly-properties`),theme:o(k),vue:F.value},{example:n(()=>[a(h,{Text:t.$t(`sample.common.excited-text`),IsReadOnly:!0,FontFamily:`Arial`,FontSize:24,FontStyle:`Italic`,CharacterSpacing:200,Foreground:`#5178BE`},null,8,[`Text`])]),_:1},8,[`headerText`,`theme`,`vue`]),a(_,{class:`basic-input-example-theme`,headerText:t.$t(`sample.textbox.multiline-spellcheck-selection`),theme:o(k),vue:T},{example:n(()=>[a(h,{MinWidth:400,AcceptsReturn:!0,TextWrapping:`Wrap`,IsSpellCheckEnabled:!0,SelectionHighlightColor:`Green`})]),_:1},8,[`headerText`,`theme`])])])]),_:1}))}},[[`__scopeId`,`data-v-a75c84f3`]]);export{E as default};

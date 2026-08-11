@@ -1,0 +1,28 @@
+import{$ as e,C as t,E as n,H as r,K as i,N as a,Q as o,S as s,X as c,g as l,h as u,m as d,n as f,t as p}from"./WinScrollViewer-DPrZnleG.js";import{t as m}from"./WinTextBlock-CeUskDRc.js";import{a as h}from"./i18n-DA-FIA7C.js";import{c as g,f as _,r as v}from"./index-CMPZyTwE.js";import{t as y}from"./WinControlExample-C0uhK7Jb.js";import{t as b}from"./pageState-Mr-1-Xo1.js";import{t as x}from"./WinAppBarButton-BYDM3nok.js";import{t as S}from"./WinFlyout-D6vU-XiH.js";var C={class:`gallery-item-page`},w={class:`page-heading`},T={class:`page-header-actions`},E={class:`icon`},D={class:`gallery-page-content`},O={class:`sample-row`},k={class:`sample-row`},A={class:`sample-row`},j={class:`sample-row`},M={class:`sample-row`},N={class:`sample-row`},P=`https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/Slices2.png`,F=`<WinAppBarButton Icon="Like" Label="SymbolIcon" Click="AppBarButton_Click" />`,I=`<WinAppBarButton Label="BitmapIcon" Click="AppBarButton_Click">
+  <WinAppBarButton.Icon>
+    <WinBitmapIcon UriSource="/Assets/SampleMedia/Slices2.png" />
+  </WinAppBarButton.Icon>
+</WinAppBarButton>`,L=`<WinAppBarButton Label="FontIcon" Click="AppBarButton_Click">
+  <WinAppBarButton.Icon>
+    <WinFontIcon FontFamily="Candara" Glyph="&#x03A3;" />
+  </WinAppBarButton.Icon>
+</WinAppBarButton>`,R=`<WinAppBarButton Label="PathIcon" Click="AppBarButton_Click">
+  <WinAppBarButton.Content>
+    <WinViewbox Stretch="Uniform">
+      <WinPathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24" />
+    </WinViewbox>
+  </WinAppBarButton.Content>
+</WinAppBarButton>`,z=`<WinAppBarButton
+  Icon="Save"
+  Label="Save"
+  Click="AppBarButton_Click">
+  <WinAppBarButton.KeyboardAccelerators>
+    <WinKeyboardAccelerator Key="S" Modifiers="Control" />
+  </WinAppBarButton.KeyboardAccelerators>
+</WinAppBarButton>`,B=`<WinAppBarButton AllowFocusOnInteraction="True" Icon="Edit" Label="Edit">
+  <WinAppBarButton.Flyout>
+    <WinFlyout>
+      <WinTextBox MinWidth="240" PlaceholderText="Input text here" />
+    </WinFlyout>
+  </WinAppBarButton.Flyout>
+</WinAppBarButton>`,V=f(t({__name:`AppBarButtonPage`,setup(t){let{t:f}=h(),V=n(`currentPage`),{isFavoriteState:H,pageTheme:U,toggleTheme:W,toggleFavorite:G}=b(d(()=>V?.value||`appbarbutton`).value),K=i([``,``,``,``,``]),q=d(()=>({"--bitmap-source":`url(${P})`})),J=(e,t)=>{K.value[t]=f(`sample.you-clicked`,{name:e})};return(t,n)=>(a(),l(p,{class:`gallery-page-scroll`,VerticalScrollBarVisibility:`Auto`,VerticalScrollMode:`Auto`},{default:r(()=>[u(`div`,C,[u(`div`,w,[s(m,{class:`page-header`,Text:t.$t(`text.appbarbutton`)},null,8,[`Text`]),s(m,{class:`page-description`,Text:t.$t(`text.appbarbutton-description`),TextWrapping:`WrapWholeWords`},null,8,[`Text`]),u(`div`,T,[s(g,{class:`header-action`,onClick:c(W)},{default:r(()=>[...n[5]||=[u(`span`,{class:`icon`},``,-1)]]),_:1},8,[`onClick`]),s(v,{IsChecked:c(H),class:`header-action`,"onUpdate:IsChecked":c(G)},{default:r(()=>[u(`span`,E,e(c(H)?``:``),1)]),_:1},8,[`IsChecked`,`onUpdate:IsChecked`])])]),u(`div`,D,[s(y,{class:`basic-input-example-theme`,headerText:t.$t(`sample.appbarbutton.symbol`),theme:c(U),vue:F},{example:r(()=>[u(`div`,O,[s(x,{Icon:`Like`,Label:t.$t(`sample.appbarbutton.symbol-label`),onClick:n[0]||=e=>J(`Button1`,0)},null,8,[`Label`]),s(m,{class:`output-text`,Text:K.value[0]},null,8,[`Text`])])]),_:1},8,[`headerText`,`theme`]),s(y,{class:`basic-input-example-theme`,headerText:t.$t(`sample.appbarbutton.bitmap`),theme:c(U),vue:I},{example:r(()=>[u(`div`,k,[s(x,{Label:t.$t(`sample.appbarbutton.bitmap-label`),onClick:n[1]||=e=>J(`Button2`,1)},{content:r(()=>[u(`span`,{class:`bitmap-icon`,style:o(q.value),"aria-hidden":`true`},null,4)]),_:1},8,[`Label`]),s(m,{class:`output-text`,Text:K.value[1]},null,8,[`Text`])])]),_:1},8,[`headerText`,`theme`]),s(y,{class:`basic-input-example-theme`,headerText:t.$t(`sample.appbarbutton.font`),theme:c(U),vue:L},{example:r(()=>[u(`div`,A,[s(x,{Label:t.$t(`sample.appbarbutton.font-label`),onClick:n[2]||=e=>J(`Button3`,2)},{content:r(()=>[...n[6]||=[u(`span`,{class:`font-icon`},`Σ`,-1)]]),_:1},8,[`Label`]),s(m,{class:`output-text`,Text:K.value[2]},null,8,[`Text`])])]),_:1},8,[`headerText`,`theme`]),s(y,{class:`basic-input-example-theme`,headerText:t.$t(`sample.appbarbutton.path`),theme:c(U),vue:R},{example:r(()=>[u(`div`,j,[s(x,{Label:t.$t(`sample.appbarbutton.path-label`),onClick:n[3]||=e=>J(`Button4`,3)},{content:r(()=>[...n[7]||=[u(`svg`,{class:`path-icon`,viewBox:`4 9 21 16`,"aria-hidden":`true`},[u(`path`,{d:`M20 20L24 10V24H5Z`})],-1)]]),_:1},8,[`Label`]),s(m,{class:`output-text`,Text:K.value[3]},null,8,[`Text`])])]),_:1},8,[`headerText`,`theme`]),s(y,{class:`basic-input-example-theme`,headerText:t.$t(`sample.appbarbutton.keyboard`),theme:c(U),vue:z},{example:r(()=>[u(`div`,M,[s(x,{Icon:`Save`,Label:t.$t(`text.save`),KeyboardAccelerators:[{Key:`S`,Modifiers:[`Control`]}],onClick:n[4]||=e=>J(`Button5`,4)},null,8,[`Label`]),s(m,{class:`output-text`,Text:K.value[4]},null,8,[`Text`])])]),_:1},8,[`headerText`,`theme`]),s(y,{class:`basic-input-example-theme`,headerText:t.$t(`sample.appbarbutton.flyout`),theme:c(U),vue:B},{example:r(()=>[u(`div`,N,[s(S,{Placement:`Bottom`,Theme:c(U)},{trigger:r(({Flyout:e})=>[s(x,{AllowFocusOnInteraction:``,Flyout:e,Icon:`Edit`,Label:t.$t(`text.edit`)},null,8,[`Flyout`,`Label`])]),default:r(()=>[s(_,{MinWidth:`240`,PlaceholderText:t.$t(`sample.appbarbutton.input-placeholder`)},null,8,[`PlaceholderText`])]),_:1},8,[`Theme`])])]),_:1},8,[`headerText`,`theme`])])])]),_:1}))}}),[[`__scopeId`,`data-v-0d9a1143`]]);export{V as default};
