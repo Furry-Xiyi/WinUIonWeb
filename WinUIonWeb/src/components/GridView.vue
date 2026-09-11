@@ -51,7 +51,7 @@
         <template v-if="entry.type === 'item'">
           <div v-if="selectionMode === 'Multiple' || selectionMode === 'Extended'"
                class="grid-checkbox" @click.stop @mousedown.stop>
-            <WinCheckBox :modelValue="isSelected(entry.item)" @update:modelValue="onCheckboxToggle($event, entry.item)" />
+            <CheckBox :modelValue="isSelected(entry.item)" @update:modelValue="onCheckboxToggle($event, entry.item)" />
           </div>
 
           <div class="grid-item-inner">
@@ -72,7 +72,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck Legacy JavaScript implementation; public casing is preserved for WinUI compatibility.
 import { ref, computed, nextTick, useSlots } from 'vue';
-import WinCheckBox from './WinCheckBox.vue';
+import CheckBox from './CheckBox.vue';
 
 const props = defineProps({
   ItemsSource: { type: Array, default: null },

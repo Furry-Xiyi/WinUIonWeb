@@ -1,19 +1,19 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.standarduicommand')" role="heading" aria-level="1" />
-        <WinTextBlock class="page-description" :Text="$t('text.standarduicommand-subtitle')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.standarduicommand')" role="heading" aria-level="1" />
+        <TextBlock class="page-description" :Text="$t('text.standarduicommand-subtitle')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme"><WinTextBlock class="icon" Text="&#xE793;" /></WinButton>
-          <WinToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite">
-            <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </WinToggleButton>
+          <Button class="header-action" @Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button>
+          <ToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite">
+            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
+          </ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.standarduicommand.multiple-controls')"
           HorizontalContentAlignment="Stretch"
@@ -22,15 +22,15 @@
           :xaml="exampleXaml"
           :cSharp="exampleCSharp">
           <template #example>
-            <WinStackPanel Width="100%">
-              <WinTextBlock
+            <StackPanel Width="100%">
+              <TextBlock
                 :Text="$t('sample.standarduicommand.description')"
                 Margin="0,0,0,12"
                 TextWrapping="Wrap" />
 
-              <WinMenuBar :Items="menuItems" :Theme="pageTheme" />
+              <MenuBar :Items="menuItems" :Theme="pageTheme" />
 
-              <WinListView
+              <ListView
                 v-model:SelectedItems="selectedItems"
                 :ItemsSource="listItems"
                 :ItemContainerStyle="horizontalSwipeStyle"
@@ -39,16 +39,16 @@
                 SelectionMode="Single"
                 :aria-label="$t('sample.standarduicommand.items')">
                 <template #item="{ item }">
-                  <WinSwipeControl
+                  <SwipeControl
                     Width="100%"
                     Height="60"
                     :RightItems="getDeleteSwipeItems(item.Text)"
                     @ContextRequested="openContextMenu($event, item.Text)"
                     @PointerEntered="hoveredItem = item.Text"
                     @PointerExited="hoveredItem = ''">
-                    <WinGrid class="standard-command-row" ColumnDefinitions="*,Auto" RowDefinitions="60">
-                      <WinTextBlock class="standard-command-text" :Text="item.Text" Margin="10" FontSize="18" />
-                      <WinAppBarButton
+                    <Grid class="standard-command-row" ColumnDefinitions="*,Auto" RowDefinitions="60">
+                      <TextBlock class="standard-command-text" :Text="item.Text" Margin="10" FontSize="18" />
+                      <AppBarButton
                         class="standard-command-delete"
                         :Command="deleteCommand"
                         :CommandParameter="item.Text"
@@ -57,43 +57,43 @@
                         v-bind="{ 'AutomationProperties.Name': deleteCommand.Label }"
                         @pointerdown.stop
                         @Click="onDeleteButtonClick(item.Text)" />
-                    </WinGrid>
-                  </WinSwipeControl>
+                    </Grid>
+                  </SwipeControl>
                 </template>
-              </WinListView>
+              </ListView>
 
-              <WinMenuFlyout
+              <MenuFlyout
                 :Open="contextMenuOpen"
                 :AnchorRect="contextMenuAnchor"
                 :Items="contextMenuItems"
                 :Theme="pageTheme"
                 Placement="RightEdgeAlignedTop"
                 @Close="contextMenuOpen = false" />
-            </WinStackPanel>
+            </StackPanel>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
-import WinAppBarButton from '../../components/WinAppBarButton.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinGrid from '../../components/WinGrid.vue';
+import AppBarButton from '../../components/AppBarButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Grid from '../../components/Grid.vue';
 import { useI18n } from '../../components/i18n/index';
-import WinListView from '../../components/WinListView.vue';
-import WinMenuBar from '../../components/WinMenuBar.vue';
-import WinMenuFlyout from '../../components/WinMenuFlyout.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinStackPanel from '../../components/WinStackPanel.vue';
-import WinSwipeControl from '../../components/WinSwipeControl.vue';
-import type { SwipeItems } from '../../components/WinSwipeControl.types';
-import { StandardUICommand } from '../../components/WinStandardUICommand';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import ListView from '../../components/ListView.vue';
+import MenuBar from '../../components/MenuBar.vue';
+import MenuFlyout from '../../components/MenuFlyout.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import SwipeControl from '../../components/SwipeControl.vue';
+import type { SwipeItems } from '../../components/SwipeControl.types';
+import { StandardUICommand } from '../../components/StandardUICommand';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
 const currentPage = inject<{ value: string }>('currentPage');
@@ -169,51 +169,51 @@ const openContextMenu = (event: MouseEvent, parameter: string) => {
 onMounted(() => { detachAccelerator = deleteCommand.AttachKeyboardAccelerators(); });
 onBeforeUnmount(() => detachAccelerator?.());
 
-const exampleCode = computed(() => `<WinStackPanel Width="100%">
-  <WinTextBlock
+const exampleCode = computed(() => `<StackPanel Width="100%">
+  <TextBlock
     Text="sample.standarduicommand.description"
     Margin="0,0,0,12"
     TextWrapping="Wrap" />
 
-  <WinMenuBar Items="menuItems" />
+  <MenuBar Items="menuItems" />
 
-  <WinListView
+  <ListView
     ItemsSource="listItems"
     ItemContainerStyle="horizontalSwipeStyle"
     IsItemClickEnabled="True"
     Height="500"
     SelectionMode="Single">
-    <WinListView.ItemTemplate>
-      <WinDataTemplate>
-        <WinSwipeControl
+    <ListView.ItemTemplate>
+      <DataTemplate>
+        <SwipeControl
           Width="100%"
           Height="60"
           RightItems="getDeleteSwipeItems(item.Text)"
           ContextRequested="OpenContextMenu"
           PointerEntered="ListItem_PointerEntered"
           PointerExited="ListItem_PointerExited">
-          <WinGrid ColumnDefinitions="*,Auto" RowDefinitions="60">
-            <WinTextBlock Text="item.Text" Margin="10" FontSize="18" />
-            <WinAppBarButton
+          <Grid ColumnDefinitions="*,Auto" RowDefinitions="60">
+            <TextBlock Text="item.Text" Margin="10" FontSize="18" />
+            <AppBarButton
               Command="deleteCommand"
               CommandParameter="item.Text"
               Visibility="Collapsed"
               HorizontalAlignment="Right"
               AutomationProperties.Name="Delete"
               Click="DeleteButton_Click" />
-          </WinGrid>
-        </WinSwipeControl>
-      </WinDataTemplate>
-    </WinListView.ItemTemplate>
-  </WinListView>
+          </Grid>
+        </SwipeControl>
+      </DataTemplate>
+    </ListView.ItemTemplate>
+  </ListView>
 
-  <WinMenuFlyout
+  <MenuFlyout
     Open="contextMenuOpen"
     AnchorRect="contextMenuAnchor"
     Items="contextMenuItems"
     Placement="RightEdgeAlignedTop"
     Close="ContextMenu_Closed" />
-</WinStackPanel>`);
+</StackPanel>`);
 
 const exampleXaml = `<SwipeItem x:Name="DeleteSwipeItem" Background="Red" Command="{x:Bind Command}" CommandParameter="{x:Bind Text}" />
 

@@ -1,11 +1,11 @@
 <template>
   <div class="win-time-picker" ref="containerRef">
-    <WinTextBlock v-if="Header" class="picker-header" :Text="Header" />
-    <WinButton class="picker-btn" :class="{ 'has-no-time': !hasSelectedTime }" Padding="0" MinHeight="32" :IsEnabled="IsEnabled" @Click="toggleOpen">
+    <TextBlock v-if="Header" class="picker-header" :Text="Header" />
+    <Button class="picker-btn" :class="{ 'has-no-time': !hasSelectedTime }" Padding="0" MinHeight="32" :IsEnabled="IsEnabled" @Click="toggleOpen">
       <div class="picker-column-text">{{ hourText }}</div>
       <div class="picker-column-text">{{ minuteText }}</div>
       <div v-if="ClockIdentifier === '12HourClock'" class="picker-column-text">{{ amPmText }}</div>
-    </WinButton>
+    </Button>
 
     <Teleport to="body">
       <div v-if="showFlyout" class="picker-overlay" @click="close(false)"></div>
@@ -17,7 +17,7 @@
         :style="flyoutStyle"
         @animationend="onFlyoutAnimEnd">
         <div class="picker-columns">
-          <WinPickerColumn
+          <PickerColumn
             ref="hourColRef"
             class="picker-col-flex"
             :items="hourItems"
@@ -26,7 +26,7 @@
             :aria-label="t('control.timepicker.hour')"
             @change="onHourChange" />
           <div class="picker-col-divider"></div>
-          <WinPickerColumn
+          <PickerColumn
             ref="minuteColRef"
             class="picker-col-flex"
             :items="minuteItems"
@@ -36,7 +36,7 @@
             @change="onMinuteChange" />
           <template v-if="ClockIdentifier === '12HourClock'">
             <div class="picker-col-divider"></div>
-            <WinPickerColumn
+            <PickerColumn
               ref="ampmColRef"
               class="picker-col-flex"
               :items="ampmItems"
@@ -49,8 +49,8 @@
           </template>
         </div>
         <div class="picker-actions">
-          <WinButton Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.accept')" v-bind="{ 'tooltipservice.tooltip': t('text.accept') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></WinButton>
-          <WinButton Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.cancel')" v-bind="{ 'tooltipservice.tooltip': t('text.cancel') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(false)"><span class="icon" aria-hidden="true">&#xE711;</span></WinButton>
+          <Button Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.accept')" v-bind="{ 'tooltipservice.tooltip': t('text.accept') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></Button>
+          <Button Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.cancel')" v-bind="{ 'tooltipservice.tooltip': t('text.cancel') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(false)"><span class="icon" aria-hidden="true">&#xE711;</span></Button>
         </div>
       </div>
     </Teleport>
@@ -59,9 +59,9 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue';
-import WinButton from './WinButton.vue';
-import WinPickerColumn from './WinPickerColumn.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import Button from './Button.vue';
+import PickerColumn from './PickerColumn.vue';
+import TextBlock from './TextBlock.vue';
 import { useI18n } from './i18n/index';
 import { useFlyoutAnimation } from './useFlyoutAnimation';
 

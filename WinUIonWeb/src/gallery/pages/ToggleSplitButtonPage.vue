@@ -1,58 +1,60 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.togglesplitbutton')" />
-          <WinTextBlock class="page-description" :Text="$t('text.a-button-that-can-be-toggled-on-off-with-additio')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" Text="{x:Bind $t('text.togglesplitbutton'), Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind $t('text.a-button-that-can-be-toggled-on-off-with-additio'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="toggleSplitButtonVue" :headerText="$t('sample.togglesplitbutton.bullet-list')">
-              <template #example>
-                <WinToggleSplitButton v-model:IsChecked="myListButton" VerticalAlignment="Top" :Theme="pageTheme" v-bind="{ 'AutomationProperties.Name': automationName }" @IsCheckedChanged="MyListButton_IsCheckedChanged">
-                  <span class="icon">{{ listIcon }}</span>
-                  <template #flyout="{ close }">
-                    <div class="bullet-flyout">
-                      <WinButton class="bullet-option-button" Padding="4" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Bulleted list" @Click="BulletButton_Click('List', close)">
-                        <span class="icon">{{ listSymbolGlyph }}</span>
-                      </WinButton>
-                      <WinButton class="bullet-option-button" Padding="4" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Roman numerals list" @Click="BulletButton_Click('Bullets', close)">
-                        <span class="icon">{{ bulletsSymbolGlyph }}</span>
-                      </WinButton>
-                    </div>
-                  </template>
-                </WinToggleSplitButton>
-              </template>
-              <template #options>
-                <WinRichEditBox
+        <ControlExample class="basic-input-example-theme" SampleDefinition="ToggleSplitButton\ToggleSplitButtonBulletList.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind toggleSplitButtonVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.togglesplitbutton.bullet-list'), Mode=OneWay}">
+              <ToggleSplitButton IsChecked="{x:Bind myListButton, Mode=TwoWay}" VerticalAlignment="Top" AutomationProperties.Name="{x:Bind automationName, Mode=OneWay}" IsCheckedChanged="MyListButton_IsCheckedChanged">
+                  <SymbolIcon Symbol="{x:Bind listType, Mode=OneWay}" />
+                  <ToggleSplitButton.Flyout>
+                    <Flyout Placement="Bottom">
+                      <StackPanel Orientation="Horizontal">
+                        <Button Padding="4" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Bulleted list" Click="List_Click">
+                          <SymbolIcon Symbol="List" />
+                        </Button>
+                        <Button Padding="4" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Roman numerals list" Click="Bullets_Click">
+                          <SymbolIcon Symbol="Bullets" />
+                        </Button>
+                      </StackPanel>
+                    </Flyout>
+                  </ToggleSplitButton.Flyout>
+              </ToggleSplitButton>
+              <ControlExample.Options>
+                <RichEditBox
                   ref="richEditBox"
-                  v-model:Text="richText"
-                  :Width="240"
-                  :MinHeight="96"
-                  :ShowFormattingCommands="false" />
-              </template>
-            </WinControlExample>
+                  Width="{x:Bind 240, Mode=OneWay}"
+                  MinHeight="{x:Bind 96, Mode=OneWay}"
+                  AutomationProperties.Name="{x:Bind $t('text.enter-rich-text'), Mode=OneWay}" />
+              </ControlExample.Options>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, nextTick, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinRichEditBox from '../../components/WinRichEditBox.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinToggleSplitButton from '../../components/WinToggleSplitButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import RichEditBox from '../../components/RichEditBox.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import ToggleSplitButton from '../../components/ToggleSplitButton.vue';
+import Flyout from '../../components/Flyout.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import SymbolIcon from '../../components/SymbolIcon.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'togglesplitbutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -64,7 +66,6 @@ const listSymbolGlyph = '\uE14C';
 const bulletsSymbolGlyph = '\uE133';
 const listIcon = computed(() => listType.value === 'List' ? listSymbolGlyph : bulletsSymbolGlyph);
 const automationName = computed(() => listType.value === 'List' ? 'Bullets' : 'Roman Numerals');
-const richText = ref('Lorem ipsum dolor sit amet\nTempor commodo ullamcorper');
 
 const listCommand = computed(() => listType.value === 'List' ? 'insertUnorderedList' : 'insertOrderedList');
 const otherListCommand = computed(() => listType.value === 'List' ? 'insertOrderedList' : 'insertUnorderedList');
@@ -73,8 +74,6 @@ const applyListState = async (isChecked = myListButton.value) => {
   await nextTick();
   const editor = richEditBox.value;
   if (!editor) return;
-  if (!editor.hasSelection?.()) editor.execCommand?.('selectAll');
-
   if (isChecked) {
     if (editor.queryCommandState?.(otherListCommand.value)) editor.execCommand?.(otherListCommand.value);
     if (!editor.queryCommandState?.(listCommand.value)) editor.execCommand?.(listCommand.value);
@@ -93,24 +92,28 @@ const BulletButton_Click = async (symbol, close) => {
   await applyListState(true);
   close?.();
 };
+const List_Click = () => BulletButton_Click('List');
+const Bullets_Click = () => BulletButton_Click('Bullets');
 
 const MyListButton_IsCheckedChanged = (args) => {
   applyListState(Boolean(args?.IsChecked));
 };
 
-const toggleSplitButtonVue = `<WinToggleSplitButton v-model:IsChecked="myListButton" VerticalAlignment="Top" :Theme="pageTheme" AutomationProperties.Name="Bullets" @IsCheckedChanged="MyListButton_IsCheckedChanged">
-  <span class="icon">{{ listIcon }}</span>
-  <template #flyout>
-    <div class="bullet-flyout">
-      <WinButton Padding="4" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Bulleted list" @Click="BulletButton_Click('List')">
-        <span class="icon">&#xE14C;</span>
-      </WinButton>
-      <WinButton Padding="4" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Roman numerals list" @Click="BulletButton_Click('Bullets')">
-        <span class="icon">&#xE133;</span>
-      </WinButton>
-    </div>
-  </template>
-</WinToggleSplitButton>`;
+const toggleSplitButtonVue = `<ToggleSplitButton IsChecked="{x:Bind myListButton, Mode=TwoWay}" VerticalAlignment="Top" Theme="{x:Bind pageTheme, Mode=OneWay}" AutomationProperties.Name="Bullets" IsCheckedChanged="MyListButton_IsCheckedChanged">
+  <SymbolIcon Symbol="{x:Bind listType, Mode=OneWay}" />
+  <ToggleSplitButton.Flyout>
+    <Flyout Placement="Bottom">
+      <StackPanel Orientation="Horizontal">
+        <Button Padding="4" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Bulleted list" Click="List_Click">
+          <SymbolIcon Symbol="List" />
+        </Button>
+        <Button Padding="4" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Roman numerals list" Click="Bullets_Click">
+          <SymbolIcon Symbol="Bullets" />
+        </Button>
+      </StackPanel>
+    </Flyout>
+  </ToggleSplitButton.Flyout>
+</ToggleSplitButton>`;
 </script>
 
 <style scoped>
@@ -120,12 +123,4 @@ const toggleSplitButtonVue = `<WinToggleSplitButton v-model:IsChecked="myListBut
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .icon { font-size: 16px; }
 .bullet-flyout { display: flex; padding: 4px; }
-.bullet-option-button { line-height: 20px; }
-.bullet-option-button :deep(.icon) {
-  display: block;
-  width: 20px;
-  height: 20px;
-  font-size: 20px;
-  line-height: 20px;
-}
 </style>

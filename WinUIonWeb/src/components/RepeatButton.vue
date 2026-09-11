@@ -10,12 +10,13 @@
     @pointerleave="stop"
     @pointercancel="stop"
     @contextmenu.prevent>
-    <slot>{{ Content }}</slot>
+    <slot>{{ resolvedContent }}</slot>
   </button>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, useAttrs } from 'vue';
+import { computed, getCurrentInstance, onBeforeUnmount, useAttrs } from 'vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 defineOptions({
   inheritAttrs: false
@@ -23,9 +24,9 @@ defineOptions({
 
 const props = defineProps({
   Content: { type: [String, Number], default: '' },
-  IsEnabled: { type: Boolean, default: true },
-  Delay: { type: Number, default: 250 },
-  Interval: { type: Number, default: 150 },
+  IsEnabled: { type: [Boolean, String], default: true },
+  Delay: { type: [Number, String], default: 250 },
+  Interval: { type: [Number, String], default: 150 },
   Width: { type: [String, Number], default: '' },
   Height: { type: [String, Number], default: '' },
   Margin: { type: String, default: '' },
@@ -36,6 +37,8 @@ const props = defineProps({
 
 const emit = defineEmits(['Click']);
 const attrs = useAttrs();
+const instance = getCurrentInstance();
+const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
 
 let delayTimer = null;
 let intervalTimer = null;
@@ -45,7 +48,8 @@ const buttonAttrs = computed(() => {
   return rest;
 });
 
-const isDisabled = computed(() => props.IsEnabled === false);
+const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
+const isDisabled = computed(() => !resolvedIsEnabled.value);
 
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
@@ -83,10 +87,10 @@ const start = (e) => {
   emit('Click');
 
   delayTimer = setTimeout(() => {
-    intervalTimer = setInterval(() => {
-      emit('Click');
-    }, props.Interval);
-  }, props.Delay);
+      intervalTimer = setInterval(() => {
+        emit('Click');
+      }, Number(resolveXamlValue(props.Interval, instance)) || 150);
+    }, Number(resolveXamlValue(props.Delay, instance)) || 250);
 };
 
 const stop = () => {

@@ -1,108 +1,108 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.appbarbutton')" />
-        <WinTextBlock class="page-description" :Text="$t('text.appbarbutton-description')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.appbarbutton')" />
+        <TextBlock class="page-description" :Text="$t('text.appbarbutton-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+          <Button class="header-action" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+          <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
             <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-          </WinToggleButton>
+          </ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.symbol')" :theme="pageTheme" :vue="symbolCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.symbol')" :theme="pageTheme" :vue="symbolCode">
           <template #example>
             <div class="sample-row">
-              <WinAppBarButton Icon="Like" :Label="$t('sample.appbarbutton.symbol-label')" @Click="onClicked('Button1', 0)" />
-              <WinTextBlock class="output-text" :Text="outputs[0]" />
+              <AppBarButton Icon="Like" :Label="$t('sample.appbarbutton.symbol-label')" @Click="onClicked('Button1', 0)" />
+              <TextBlock class="output-text" :Text="outputs[0]" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.bitmap')" :theme="pageTheme" :vue="bitmapCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.bitmap')" :theme="pageTheme" :vue="bitmapCode">
           <template #example>
             <div class="sample-row">
-              <WinAppBarButton :Label="$t('sample.appbarbutton.bitmap-label')" @Click="onClicked('Button2', 1)">
+              <AppBarButton :Label="$t('sample.appbarbutton.bitmap-label')" @Click="onClicked('Button2', 1)">
                 <template #content><span class="bitmap-icon" :style="bitmapStyle" aria-hidden="true" /></template>
-              </WinAppBarButton>
-              <WinTextBlock class="output-text" :Text="outputs[1]" />
+              </AppBarButton>
+              <TextBlock class="output-text" :Text="outputs[1]" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.font')" :theme="pageTheme" :vue="fontCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.font')" :theme="pageTheme" :vue="fontCode">
           <template #example>
             <div class="sample-row">
-              <WinAppBarButton :Label="$t('sample.appbarbutton.font-label')" @Click="onClicked('Button3', 2)">
+              <AppBarButton :Label="$t('sample.appbarbutton.font-label')" @Click="onClicked('Button3', 2)">
                 <template #content><span class="font-icon">&#x03A3;</span></template>
-              </WinAppBarButton>
-              <WinTextBlock class="output-text" :Text="outputs[2]" />
+              </AppBarButton>
+              <TextBlock class="output-text" :Text="outputs[2]" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.path')" :theme="pageTheme" :vue="pathCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.path')" :theme="pageTheme" :vue="pathCode">
           <template #example>
             <div class="sample-row">
-              <WinAppBarButton :Label="$t('sample.appbarbutton.path-label')" @Click="onClicked('Button4', 3)">
+              <AppBarButton :Label="$t('sample.appbarbutton.path-label')" @Click="onClicked('Button4', 3)">
                 <template #content>
                   <svg class="path-icon" viewBox="4 9 21 16" aria-hidden="true">
                     <path d="M20 20L24 10V24H5Z" />
                   </svg>
                 </template>
-              </WinAppBarButton>
-              <WinTextBlock class="output-text" :Text="outputs[3]" />
+              </AppBarButton>
+              <TextBlock class="output-text" :Text="outputs[3]" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.keyboard')" :theme="pageTheme" :vue="keyboardCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.keyboard')" :theme="pageTheme" :vue="keyboardCode">
           <template #example>
             <div class="sample-row">
-              <WinAppBarButton
+              <AppBarButton
                 Icon="Save"
                 :Label="$t('text.save')"
                 :KeyboardAccelerators="[{ Key: 'S', Modifiers: ['Control'] }]"
                 @Click="onClicked('Button5', 4)" />
-              <WinTextBlock class="output-text" :Text="outputs[4]" />
+              <TextBlock class="output-text" :Text="outputs[4]" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.flyout')" :theme="pageTheme" :vue="flyoutCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.flyout')" :theme="pageTheme" :vue="flyoutCode">
           <template #example>
             <div class="sample-row">
-              <WinFlyout Placement="Bottom" :Theme="pageTheme">
+              <Flyout Placement="Bottom" :Theme="pageTheme">
                 <template #trigger="{ Flyout }">
-                  <WinAppBarButton
+                  <AppBarButton
                     AllowFocusOnInteraction
                     :Flyout="Flyout"
                     Icon="Edit"
                     :Label="$t('text.edit')" />
                 </template>
-                <WinTextBox MinWidth="240" :PlaceholderText="$t('sample.appbarbutton.input-placeholder')" />
-              </WinFlyout>
+                <TextBox MinWidth="240" :PlaceholderText="$t('sample.appbarbutton.input-placeholder')" />
+              </Flyout>
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue';
-import WinAppBarButton from '../../components/WinAppBarButton.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinFlyout from '../../components/WinFlyout.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinTextBox from '../../components/WinTextBox.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import AppBarButton from '../../components/AppBarButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Flyout from '../../components/Flyout.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import TextBox from '../../components/TextBox.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -118,39 +118,39 @@ const onClicked = (name: string, index: number) => {
   outputs.value[index] = t('sample.you-clicked', { name });
 };
 
-const symbolCode = `<WinAppBarButton Icon="Like" Label="SymbolIcon" Click="AppBarButton_Click" />`;
-const bitmapCode = `<WinAppBarButton Label="BitmapIcon" Click="AppBarButton_Click">
-  <WinAppBarButton.Icon>
-    <WinBitmapIcon UriSource="/Assets/SampleMedia/Slices2.png" />
-  </WinAppBarButton.Icon>
-</WinAppBarButton>`;
-const fontCode = `<WinAppBarButton Label="FontIcon" Click="AppBarButton_Click">
-  <WinAppBarButton.Icon>
-    <WinFontIcon FontFamily="Candara" Glyph="&#x03A3;" />
-  </WinAppBarButton.Icon>
-</WinAppBarButton>`;
-const pathCode = `<WinAppBarButton Label="PathIcon" Click="AppBarButton_Click">
-  <WinAppBarButton.Content>
-    <WinViewbox Stretch="Uniform">
-      <WinPathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24" />
-    </WinViewbox>
-  </WinAppBarButton.Content>
-</WinAppBarButton>`;
-const keyboardCode = `<WinAppBarButton
+const symbolCode = `<AppBarButton Icon="Like" Label="SymbolIcon" Click="AppBarButton_Click" />`;
+const bitmapCode = `<AppBarButton Label="BitmapIcon" Click="AppBarButton_Click">
+  <AppBarButton.Icon>
+    <BitmapIcon UriSource="/Assets/SampleMedia/Slices2.png" />
+  </AppBarButton.Icon>
+</AppBarButton>`;
+const fontCode = `<AppBarButton Label="FontIcon" Click="AppBarButton_Click">
+  <AppBarButton.Icon>
+    <FontIcon FontFamily="Candara" Glyph="&#x03A3;" />
+  </AppBarButton.Icon>
+</AppBarButton>`;
+const pathCode = `<AppBarButton Label="PathIcon" Click="AppBarButton_Click">
+  <AppBarButton.Content>
+    <Viewbox Stretch="Uniform">
+      <PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24" />
+    </Viewbox>
+  </AppBarButton.Content>
+</AppBarButton>`;
+const keyboardCode = `<AppBarButton
   Icon="Save"
   Label="Save"
   Click="AppBarButton_Click">
-  <WinAppBarButton.KeyboardAccelerators>
-    <WinKeyboardAccelerator Key="S" Modifiers="Control" />
-  </WinAppBarButton.KeyboardAccelerators>
-</WinAppBarButton>`;
-const flyoutCode = `<WinAppBarButton AllowFocusOnInteraction="True" Icon="Edit" Label="Edit">
-  <WinAppBarButton.Flyout>
-    <WinFlyout>
-      <WinTextBox MinWidth="240" PlaceholderText="Input text here" />
-    </WinFlyout>
-  </WinAppBarButton.Flyout>
-</WinAppBarButton>`;
+  <AppBarButton.KeyboardAccelerators>
+    <KeyboardAccelerator Key="S" Modifiers="Control" />
+  </AppBarButton.KeyboardAccelerators>
+</AppBarButton>`;
+const flyoutCode = `<AppBarButton AllowFocusOnInteraction="True" Icon="Edit" Label="Edit">
+  <AppBarButton.Flyout>
+    <Flyout>
+      <TextBox MinWidth="240" PlaceholderText="Input text here" />
+    </Flyout>
+  </AppBarButton.Flyout>
+</AppBarButton>`;
 </script>
 
 <style scoped>

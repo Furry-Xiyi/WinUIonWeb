@@ -1,5 +1,5 @@
 <template>
-  <WinScrollViewer
+  <ScrollViewer
     ref="scrollPresenterRef"
     class="win-scroll-view"
     :class="`content-orientation-${ContentOrientation.toLowerCase()}`"
@@ -21,12 +21,12 @@
     @ViewChanging="onViewChanging"
     @ViewChanged="onViewChanged">
     <slot />
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import WinScrollViewer from './WinScrollViewer.vue'
+import ScrollViewer from './ScrollViewer.vue'
 
 type ScrollingScrollBarVisibility = 'Auto' | 'Visible' | 'Hidden'
 type ScrollingContentOrientation = 'None' | 'Horizontal' | 'Vertical' | 'Both'
@@ -115,7 +115,7 @@ const emit = defineEmits<{
   ZoomStarting: [args: Record<string, never>]
 }>()
 
-const scrollPresenterRef = ref<InstanceType<typeof WinScrollViewer>>()
+const scrollPresenterRef = ref<InstanceType<typeof ScrollViewer>>()
 const lastView = ref({ IsIntermediate: false, HorizontalOffset: 0, VerticalOffset: 0, ZoomFactor: props.ZoomFactor })
 const operationStartView = ref(lastView.value)
 const interactionState = ref<'Idle' | 'Interaction' | 'Inertia' | 'Animation'>('Idle')
@@ -254,7 +254,7 @@ defineExpose({
 }
 
 /* A vertical StackPanel measures Uniform images against its available width.
- * Keep the WinImage host and bitmap in that same 400px viewport instead of
+ * Keep the Image host and bitmap in that same 400px viewport instead of
  * allowing a larger natural bitmap to overflow to the left. */
 .win-scroll-view.content-orientation-vertical :deep(.scroll-content > .win-stack-panel > .win-image-host) {
   width: 100%;

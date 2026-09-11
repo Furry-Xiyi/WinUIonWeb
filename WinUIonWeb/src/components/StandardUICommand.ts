@@ -1,4 +1,4 @@
-import { XamlUICommand, type KeyboardAccelerator } from './WinXamlUICommand';
+import { XamlUICommand, type KeyboardAccelerator } from './XamlUICommand';
 import { componentResources, normalizeLocale } from './i18n/index';
 
 export type StandardUICommandKind =

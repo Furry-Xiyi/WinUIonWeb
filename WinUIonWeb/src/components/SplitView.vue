@@ -8,20 +8,20 @@
         <slot name="Pane"><slot name="pane"></slot></slot>
       </div>
     </div>
-    <WinScrollViewer
+    <ScrollViewer
       class="split-view-content"
       VerticalScrollMode="Auto"
       VerticalScrollBarVisibility="Auto"
       HorizontalScrollMode="Disabled"
       HorizontalScrollBarVisibility="Disabled">
       <slot></slot>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
-import WinScrollViewer from './WinScrollViewer.vue';
+import ScrollViewer from './ScrollViewer.vue';
 
 const props = defineProps({
   IsPaneOpen: { type: Boolean, default: undefined },

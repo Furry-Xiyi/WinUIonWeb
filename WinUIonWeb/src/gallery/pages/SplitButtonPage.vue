@@ -1,74 +1,100 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.splitbutton')" />
-          <WinTextBlock class="page-description" :Text="$t('text.the-splitbutton-is-a-dropdown-button-but-with-an')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" Text="{x:Bind $t('text.splitbutton'), Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind $t('text.the-splitbutton-is-a-dropdown-button-but-with-an'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonColorPickerVue" :headerText="$t('sample.splitbutton.color-picker')">
-              <template #example>
-                <WinSplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" :Theme="pageTheme" AutomationProperties.Name="Font color" @Click="applyCurrentColor">
-                  <div class="color-swatch current-swatch" :style="{ backgroundColor: currentColor }"></div>
-                  <template #flyout="{ close }">
-                    <div class="swatch-grid">
-                      <WinButton v-for="color in colorOptions" :key="color.value" Padding="0" MinWidth="0" MinHeight="0" Margin="6" :AutomationProperties.Name="color.text" @Click="selectColor(color.value, close)">
-                        <span class="color-swatch" :style="{ backgroundColor: color.value }"></span>
-                      </WinButton>
-                    </div>
-                  </template>
-                </WinSplitButton>
-              </template>
-              <template #options>
-                <WinTextBox v-model:Text="richText" class="sample-editor" AcceptsReturn TextWrapping="Wrap" :PlaceholderText="$t('sample.type-something-here')" :Foreground="appliedColor" />
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="splitButtonTextVue" :headerText="$t('sample.splitbutton.text')">
-              <template #example>
-                <WinSplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" :Theme="pageTheme" AutomationProperties.Name="Font color with text">
-                  <WinTextBlock :Text="$t('sample.choose-color')" />
-                  <template #flyout="{ close }">
-                    <div class="swatch-grid">
-                      <WinButton v-for="color in textColorOptions" :key="color.value" Padding="0" MinWidth="0" MinHeight="0" Margin="6" :AutomationProperties.Name="color.text" @Click="selectTextColor(color.value, close)">
-                        <span class="color-swatch" :style="{ backgroundColor: color.value }"></span>
-                      </WinButton>
-                    </div>
-                  </template>
-                </WinSplitButton>
-              </template>
-            </WinControlExample>
+        <ControlExample class="basic-input-example-theme" SampleDefinition="SplitButton\SplitButtonColorPicker.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind splitButtonColorPickerVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.splitbutton.color-picker'), Mode=OneWay}">
+              <Grid ColumnSpacing="24">
+                  <SplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" Theme="{x:Bind pageTheme, Mode=OneWay}" AutomationProperties.Name="Font color" Click="applyCurrentColor">
+                    <Border class="color-swatch current-swatch" Background="{x:Bind currentColor, Mode=OneWay}" />
+                    <SplitButton.Flyout>
+                      <Flyout Placement="Bottom">
+                        <VariableSizedWrapGrid MaximumRowsOrColumns="3" Orientation="Horizontal">
+                        <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Red" Click="SelectRed_Click"><Rectangle Width="32" Height="32" RadiusX="4" RadiusY="4" Fill="Red" /></Button>
+                        <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Orange" Click="SelectOrange_Click"><Rectangle Width="32" Height="32" RadiusX="4" RadiusY="4" Fill="Orange" /></Button>
+                        <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Yellow" Click="SelectYellow_Click"><Rectangle Width="32" Height="32" RadiusX="4" RadiusY="4" Fill="Yellow" /></Button>
+                        <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Green" Click="SelectGreen_Click"><Rectangle Width="32" Height="32" RadiusX="4" RadiusY="4" Fill="Green" /></Button>
+                        <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Blue" Click="SelectBlue_Click"><Rectangle Width="32" Height="32" RadiusX="4" RadiusY="4" Fill="Blue" /></Button>
+                        <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Indigo" Click="SelectIndigo_Click"><Rectangle Width="32" Height="32" RadiusX="4" RadiusY="4" Fill="Indigo" /></Button>
+                        <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Violet" Click="SelectViolet_Click"><Rectangle Width="32" Height="32" RadiusX="4" RadiusY="4" Fill="Violet" /></Button>
+                        <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Gray" Click="SelectGray_Click"><Rectangle Width="32" Height="32" RadiusX="4" RadiusY="4" Fill="Gray" /></Button>
+                        </VariableSizedWrapGrid>
+                      </Flyout>
+                    </SplitButton.Flyout>
+                  </SplitButton>
+              </Grid>
+              <ControlExample.Options>
+                <RichEditBox
+                  ref="richEditBoxRef"
+                  Text="{x:Bind richText, Mode=TwoWay}"
+                  class="sample-editor"
+                  AcceptsReturn
+                  TextWrapping="Wrap"
+                  PlaceholderText="{x:Bind $t('sample.type-something-here'), Mode=OneWay}"
+                  />
+              </ControlExample.Options>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="SplitButton\SplitButtonText.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind splitButtonTextVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.splitbutton.text'), Mode=OneWay}">
+              <ControlExample.Example>
+                <SplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" Theme="{x:Bind pageTheme, Mode=OneWay}" AutomationProperties.Name="Font color with text">
+                  <TextBlock Text="{x:Bind $t('sample.choose-color'), Mode=OneWay}" />
+                  <SplitButton.Flyout>
+                    <Flyout Placement="Bottom">
+                      <VariableSizedWrapGrid MaximumRowsOrColumns="3" Orientation="Horizontal">
+                      <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Red" Click="SelectTextRed_Click"><Border class="color-swatch" Background="Red" /></Button>
+                      <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Orange" Click="SelectTextOrange_Click"><Border class="color-swatch" Background="Orange" /></Button>
+                      <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Yellow" Click="SelectTextYellow_Click"><Border class="color-swatch" Background="Yellow" /></Button>
+                      <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Green" Click="SelectTextGreen_Click"><Border class="color-swatch" Background="Green" /></Button>
+                      <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Blue" Click="SelectTextBlue_Click"><Border class="color-swatch" Background="Blue" /></Button>
+                      <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Indigo" Click="SelectTextIndigo_Click"><Border class="color-swatch" Background="Indigo" /></Button>
+                      <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Violet" Click="SelectTextViolet_Click"><Border class="color-swatch" Background="Violet" /></Button>
+                      <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Gray" Click="SelectTextGray_Click"><Border class="color-swatch" Background="Gray" /></Button>
+                      <Button Padding="0" MinWidth="0" MinHeight="0" Margin="6" AutomationProperties.Name="Black" Click="SelectTextBlack_Click"><Border class="color-swatch" Background="Black" /></Button>
+                      </VariableSizedWrapGrid>
+                    </Flyout>
+                  </SplitButton.Flyout>
+                </SplitButton>
+              </ControlExample.Example>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinSplitButton from '../../components/WinSplitButton.vue';
-import WinTextBox from '../../components/WinTextBox.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import { computed, inject, nextTick, onMounted, ref } from 'vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Border from '../../components/Border.vue';
+import Grid from '../../components/Grid.vue';
+import Flyout from '../../components/Flyout.vue';
+import SplitButton from '../../components/SplitButton.vue';
+import RichEditBox from '../../components/RichEditBox.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import VariableSizedWrapGrid from '../../components/VariableSizedWrapGrid.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'splitbutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const currentColor = ref('Green');
-const appliedColor = ref('Green');
 const selectedTextColor = ref('Green');
-const richText = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tempor commodo ullamcorper a lacus.');
+const richText = ref(t('sample.splitbutton.rich-text'));
+const richEditBoxRef = ref(null);
 
 const colorOptions = computed(() => [
   { text: t('text.red'), value: 'Red' },
@@ -84,7 +110,7 @@ const textColorOptions = computed(() => [...colorOptions.value, { text: t('sampl
 
 const selectColor = (color, close) => {
   currentColor.value = color;
-  appliedColor.value = color;
+  richEditBoxRef.value?.applyForegroundColor?.(color, true);
   close?.();
 };
 
@@ -93,31 +119,49 @@ const selectTextColor = (color, close) => {
   close?.();
 };
 
+const SelectRed_Click = () => selectColor('Red');
+const SelectOrange_Click = () => selectColor('Orange');
+const SelectYellow_Click = () => selectColor('Yellow');
+const SelectGreen_Click = () => selectColor('Green');
+const SelectBlue_Click = () => selectColor('Blue');
+const SelectIndigo_Click = () => selectColor('Indigo');
+const SelectViolet_Click = () => selectColor('Violet');
+const SelectGray_Click = () => selectColor('Gray');
+const SelectTextRed_Click = () => selectTextColor('Red');
+const SelectTextOrange_Click = () => selectTextColor('Orange');
+const SelectTextYellow_Click = () => selectTextColor('Yellow');
+const SelectTextGreen_Click = () => selectTextColor('Green');
+const SelectTextBlue_Click = () => selectTextColor('Blue');
+const SelectTextIndigo_Click = () => selectTextColor('Indigo');
+const SelectTextViolet_Click = () => selectTextColor('Violet');
+const SelectTextGray_Click = () => selectTextColor('Gray');
+const SelectTextBlack_Click = () => selectTextColor('Black');
+
 const applyCurrentColor = () => {
-  appliedColor.value = currentColor.value;
+  richEditBoxRef.value?.applyForegroundColor?.(currentColor.value, true);
 };
 
-const splitButtonColorPickerVue = `<WinSplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" :Theme="pageTheme" AutomationProperties.Name="Font color" @Click="applyCurrentColor">
-  <div class="color-swatch" :style="{ backgroundColor: currentColor }"></div>
-  <template #flyout>
-    <div class="swatch-grid">
-      <WinButton v-for="color in colorOptions" :key="color.value" @Click="selectColor(color.value)">
-        <span class="color-swatch" :style="{ backgroundColor: color.value }"></span>
-      </WinButton>
-    </div>
-  </template>
-</WinSplitButton>`;
+onMounted(() => {
+  nextTick(() => richEditBoxRef.value?.applyForegroundColor?.('Green', true));
+});
 
-const splitButtonTextVue = `<WinSplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" :Theme="pageTheme" AutomationProperties.Name="Font color with text">
-  Choose color
-  <template #flyout>
-    <div class="swatch-grid">
-      <WinButton v-for="color in textColorOptions" :key="color.value" @Click="selectedTextColor = color.value">
-        <span class="color-swatch" :style="{ backgroundColor: color.value }"></span>
-      </WinButton>
-    </div>
-  </template>
-</WinSplitButton>`;
+const splitButtonColorPickerVue = `<SplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" AutomationProperties.Name="Font color" Click="applyCurrentColor">
+  <Border Width="32" Height="32" Background="{x:Bind currentColor}" CornerRadius="4,0,0,4" />
+  <SplitButton.Flyout>
+    <Flyout Placement="Bottom">
+      <GridView IsItemClickEnabled="True" ItemClick="ColorOption_Click" ItemsSource="{x:Bind colorOptions}" />
+    </Flyout>
+  </SplitButton.Flyout>
+</SplitButton>`;
+
+const splitButtonTextVue = `<SplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" AutomationProperties.Name="Font color with text">
+                  <TextBlock Text="{x:Bind $t('sample.choose-color'), Mode=OneWay}" />
+  <SplitButton.Flyout>
+    <Flyout Placement="Bottom">
+      <GridView IsItemClickEnabled="True" ItemClick="TextColorOption_Click" ItemsSource="{x:Bind textColorOptions}" />
+    </Flyout>
+  </SplitButton.Flyout>
+</SplitButton>`;
 </script>
 
 <style scoped>

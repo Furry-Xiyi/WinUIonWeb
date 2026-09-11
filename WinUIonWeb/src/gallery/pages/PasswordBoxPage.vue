@@ -1,55 +1,55 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div style="position: relative;" class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.passwordbox')" />
-          <WinTextBlock class="page-description" :Text="$t('text.a-passwordbox-is-a-text-input-box-that-conceals')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.passwordbox')" />
+          <TextBlock class="page-description" :Text="$t('text.a-passwordbox-is-a-text-input-box-that-conceals')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+            <Button class="header-action" @click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template" :headerText="$t('text.a-simple-passwordbox')">
+        <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template" :headerText="$t('text.a-simple-passwordbox')">
               <template #example>
                 <div class="stack-example">
-                  <WinPasswordBox v-model:Password="simplePassword" :Width="300" @PasswordChanged="onSimplePasswordChanged" />
-                  <WinTextBlock v-if="passwordMessage" class="error-text" :Text="passwordMessage" />
+                  <PasswordBox v-model:Password="simplePassword" :Width="300" @PasswordChanged="onSimplePasswordChanged" />
+                  <TextBlock v-if="passwordMessage" class="error-text" :Text="passwordMessage" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.passwordbox.header-placeholder-character')">
+            <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.passwordbox.header-placeholder-character')">
               <template #example>
-                <WinPasswordBox :Header="$t('sample.passwordbox.password')" :PlaceholderText="$t('sample.passwordbox.enter-password')" PasswordChar="#" :Width="300" />
+                <PasswordBox :Header="$t('sample.passwordbox.password')" :PlaceholderText="$t('sample.passwordbox.enter-password')" PasswordChar="#" :Width="300" />
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template" :headerText="$t('sample.passwordbox.reveal-mode')">
+            <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template" :headerText="$t('sample.passwordbox.reveal-mode')">
               <template #example>
                 <div class="horizontal-example">
-                  <WinPasswordBox v-model:Password="revealPassword" :PasswordRevealMode="showPassword ? 'Visible' : 'Hidden'" :Width="250" />
-                  <WinCheckBox v-model="showPassword"><WinTextBlock :Text="$t('sample.passwordbox.show-password')" /></WinCheckBox>
+                  <PasswordBox v-model:Password="revealPassword" :PasswordRevealMode="showPassword ? 'Visible' : 'Hidden'" :Width="250" />
+                  <CheckBox v-model="showPassword"><TextBlock :Text="$t('sample.passwordbox.show-password')" /></CheckBox>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinPasswordBox from '../../components/WinPasswordBox.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import PasswordBox from '../../components/PasswordBox.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'passwordbox');
@@ -64,25 +64,25 @@ const onSimplePasswordChanged = ({ password }) => {
   passwordMessage.value = password === 'Password' ? t('sample.passwordbox.not-allowed') : '';
 };
 
-const example1Template = `<WinPasswordBox
+const example1Template = `<PasswordBox
   v-model:Password="simplePassword"
   :Width="300"
   @PasswordChanged="onSimplePasswordChanged" />`;
 
-const example2Template = computed(() => `<WinPasswordBox
+const example2Template = computed(() => `<PasswordBox
   Header="${t('sample.passwordbox.password')}"
   PlaceholderText="${t('sample.passwordbox.enter-password')}"
   PasswordChar="#"
   :Width="300" />`);
 
 const example3Template = computed(() => `<div class="horizontal-example">
-  <WinPasswordBox
+  <PasswordBox
     v-model:Password="revealPassword"
     :PasswordRevealMode="showPassword ? 'Visible' : 'Hidden'"
     :Width="250" />
-  <WinCheckBox v-model="showPassword">
-    <WinTextBlock Text="${t('sample.passwordbox.show-password')}" />
-  </WinCheckBox>
+  <CheckBox v-model="showPassword">
+    <TextBlock Text="${t('sample.passwordbox.show-password')}" />
+  </CheckBox>
 </div>`);
 </script>
 

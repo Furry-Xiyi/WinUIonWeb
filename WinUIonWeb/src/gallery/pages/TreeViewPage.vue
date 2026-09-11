@@ -1,20 +1,20 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.treeview')" />
-          <WinTextBlock class="page-description" :Text="$t('text.the-treeview-control-is-a-hierarchical-list-patt')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.treeview')" />
+          <TextBlock class="page-description" :Text="$t('text.the-treeview-control-is-a-hierarchical-list-patt')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.treeview.drag-drop')" :theme="pageTheme" :vue="simpleTreeViewVue">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.treeview.drag-drop')" :theme="pageTheme" :vue="simpleTreeViewVue">
               <template #example>
-                <WinTreeView
+                <TreeView
                   v-model:ItemsSource="simpleTree"
                   SelectionMode="Single"
                   :CanDragItems="true"
@@ -22,71 +22,71 @@
                   style="min-height: 280px;">
                   <template #item="{ item }">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                      <WinTextBlock :Text="item.Content" />
+                      <TextBlock :Text="item.Content" />
                     </div>
                   </template>
-                </WinTreeView>
+                </TreeView>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.treeview.multi-selection')" :theme="pageTheme" :vue="multiSelectionTreeViewVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.treeview.multi-selection')" :theme="pageTheme" :vue="multiSelectionTreeViewVue">
               <template #example>
-                <WinTreeView
+                <TreeView
                   v-model:ItemsSource="multiSelectTree"
                   SelectionMode="Multiple"
                   style="min-height: 280px;">
                   <template #item="{ item }">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                      <WinTextBlock :Text="item.Content" />
+                      <TextBlock :Text="item.Content" />
                     </div>
                   </template>
-                </WinTreeView>
+                </TreeView>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.treeview.databinding-itemsource')" :theme="pageTheme" :vue="dataBindingTreeViewVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.treeview.databinding-itemsource')" :theme="pageTheme" :vue="dataBindingTreeViewVue">
               <template #example>
-                <WinTreeView
+                <TreeView
                   v-model:ItemsSource="dataSource"
                   SelectionMode="Single"
                   style="min-height: 200px;">
                   <template #item="{ item }">
-                    <WinTextBlock :Text="item.Name" />
+                    <TextBlock :Text="item.Name" />
                   </template>
-                </WinTreeView>
+                </TreeView>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.treeview.item-template-selector')" :theme="pageTheme" :vue="templateSelectorTreeViewVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.treeview.item-template-selector')" :theme="pageTheme" :vue="templateSelectorTreeViewVue">
               <template #example>
-                <WinTreeView
+                <TreeView
                   v-model:ItemsSource="fileTree"
                   SelectionMode="Single"
                   style="min-height: 200px;">
                   <template #item="{ item }">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <span class="tree-icon" :class="item.Type === 'Folder' ? 'folder' : 'file'" aria-hidden="true"></span>
-                      <WinTextBlock :Text="item.Name" />
+                      <TextBlock :Text="item.Name" />
                     </div>
                   </template>
-                </WinTreeView>
+                </TreeView>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinTreeView from '../../components/WinTreeView.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import TreeView from '../../components/TreeView.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'treeview');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -185,26 +185,26 @@ const fileTree = ref([
   }
 ]);
 
-const simpleTreeViewVue = `<WinTreeView v-model:ItemsSource="simpleTree" SelectionMode="Single" CanDragItems AllowDrop>
+const simpleTreeViewVue = `<TreeView v-model:ItemsSource="simpleTree" SelectionMode="Single" CanDragItems AllowDrop>
   <template #item="{ item }">
-    <WinTextBlock :Text="item.Content" />
+    <TextBlock :Text="item.Content" />
   </template>
-</WinTreeView>`;
-const multiSelectionTreeViewVue = `<WinTreeView v-model:ItemsSource="multiSelectTree" SelectionMode="Multiple">
+</TreeView>`;
+const multiSelectionTreeViewVue = `<TreeView v-model:ItemsSource="multiSelectTree" SelectionMode="Multiple">
   <template #item="{ item }">
-    <WinTextBlock :Text="item.Content" />
+    <TextBlock :Text="item.Content" />
   </template>
-</WinTreeView>`;
-const dataBindingTreeViewVue = `<WinTreeView v-model:ItemsSource="dataSource" SelectionMode="Single">
+</TreeView>`;
+const dataBindingTreeViewVue = `<TreeView v-model:ItemsSource="dataSource" SelectionMode="Single">
   <template #item="{ item }">
-    <WinTextBlock :Text="item.Name" />
+    <TextBlock :Text="item.Name" />
   </template>
-</WinTreeView>`;
-const templateSelectorTreeViewVue = `<WinTreeView v-model:ItemsSource="fileTree" SelectionMode="Single">
+</TreeView>`;
+const templateSelectorTreeViewVue = `<TreeView v-model:ItemsSource="fileTree" SelectionMode="Single">
   <template #item="{ item }">
-    <WinTextBlock :Text="item.Name" />
+    <TextBlock :Text="item.Name" />
   </template>
-</WinTreeView>`;
+</TreeView>`;
 </script>
 
 <style scoped>

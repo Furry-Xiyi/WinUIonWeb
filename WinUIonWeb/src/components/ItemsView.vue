@@ -1,5 +1,5 @@
 <template>
-  <WinScrollViewer
+  <ScrollViewer
     ref="rootRef"
     class="win-items-view"
     role="listbox"
@@ -21,7 +21,7 @@
         @dblclick="invokeItem($event, item, index)"
         @keydown.enter.prevent="invokeItem($event, item, index)"
         @keydown.space.prevent="onItemClick($event, item, index)">
-        <WinCheckBox
+        <CheckBox
           v-if="showsSelectionCheckBox"
           class="selection-checkbox"
           :IsChecked="isSelected(item)"
@@ -31,19 +31,19 @@
 
         <slot name="item" :item="item" :index="index">
           <slot :item="item" :index="index">
-            <WinTextBlock :Text="String(item)" />
+            <TextBlock :Text="String(item)" />
           </slot>
         </slot>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, ref, toRaw, watch } from 'vue';
-import WinCheckBox from './WinCheckBox.vue';
-import WinScrollViewer from './WinScrollViewer.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import CheckBox from './CheckBox.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import TextBlock from './TextBlock.vue';
 
 const props = defineProps({
   ItemsSource: { type: Array, default: () => [] },

@@ -10,7 +10,7 @@
     :rel="TargetName === '_blank' ? 'noopener noreferrer' : undefined"
     :aria-disabled="isDisabled"
     @click="onAnchorClick">
-    <slot>{{ Content }}</slot>
+    <slot>{{ resolvedContent }}</slot>
   </a>
   <button
     v-else
@@ -20,12 +20,13 @@
     :style="buttonStyle"
     :disabled="isDisabled"
     @click="emit('Click', $event)">
-    <slot>{{ Content }}</slot>
+    <slot>{{ resolvedContent }}</slot>
   </button>
 </template>
 
 <script setup>
-import { computed, useAttrs } from 'vue';
+import { computed, getCurrentInstance, useAttrs } from 'vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 defineOptions({
   inheritAttrs: false
@@ -35,7 +36,7 @@ const props = defineProps({
   Content: { type: [String, Number], default: '' },
   NavigateUri: { type: String, default: '' },
   TargetName: { type: String, default: '' },
-  IsEnabled: { type: Boolean, default: true },
+  IsEnabled: { type: [Boolean, String], default: true },
   Background: { type: String, default: '' },
   Foreground: { type: String, default: '' },
   Width: { type: [String, Number], default: '' },
@@ -51,13 +52,16 @@ const props = defineProps({
 
 const emit = defineEmits(['Click']);
 const attrs = useAttrs();
+const instance = getCurrentInstance();
+const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
 
 const buttonAttrs = computed(() => {
   const { class: _class, style: _style, disabled: _disabled, ...rest } = attrs;
   return rest;
 });
 
-const isDisabled = computed(() => props.IsEnabled === false);
+const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
+const isDisabled = computed(() => !resolvedIsEnabled.value);
 
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';

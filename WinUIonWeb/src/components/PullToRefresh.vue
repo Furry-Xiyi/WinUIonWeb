@@ -1,4 +1,4 @@
-<!-- components/WinPullToRefresh.vue -->
+<!-- components/PullToRefresh.vue -->
 <template>
   <div class="win-pull-to-refresh" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd">
     <div class="ptr-indicator" :style="indicatorStyle">

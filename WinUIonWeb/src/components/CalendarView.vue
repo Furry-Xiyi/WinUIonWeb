@@ -29,7 +29,7 @@
           <div class="calendar-day-headers">
             <div v-for="d in dayNames" :key="d" class="calendar-day-header">{{ d }}</div>
           </div>
-          <WinScrollViewer
+          <ScrollViewer
             class="calendar-scroll"
             ref="dayScrollEl"
             VerticalScrollMode="Auto"
@@ -70,12 +70,12 @@
                 </div>
               </div>
             </div>
-          </WinScrollViewer>
+          </ScrollViewer>
         </div>
 
         <!-- 月视图 (4列) -->
         <div v-else-if="viewMode === 1" key="month" class="calendar-panel">
-          <WinScrollViewer
+          <ScrollViewer
             class="calendar-scroll large-scroll"
             ref="monthScrollEl"
             VerticalScrollMode="Auto"
@@ -115,12 +115,12 @@
                 </div>
               </div>
             </div>
-          </WinScrollViewer>
+          </ScrollViewer>
         </div>
 
         <!-- 年视图 (4列) -->
         <div v-else key="year" class="calendar-panel">
-          <WinScrollViewer
+          <ScrollViewer
             class="calendar-scroll large-scroll"
             ref="yearScrollEl"
             VerticalScrollMode="Auto"
@@ -154,7 +154,7 @@
                 </div>
               </div>
             </div>
-          </WinScrollViewer>
+          </ScrollViewer>
         </div>
       </Transition>
     </div>
@@ -163,7 +163,7 @@
 
 <script setup>
 import { ref, computed, nextTick, onMounted, watch } from "vue";
-import WinScrollViewer from "./WinScrollViewer.vue";
+import ScrollViewer from "./ScrollViewer.vue";
 import { useI18n } from "./i18n/index";
 
 const { t } = useI18n();

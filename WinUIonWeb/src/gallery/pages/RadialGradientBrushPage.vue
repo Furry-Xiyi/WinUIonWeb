@@ -6,21 +6,21 @@
             Paints an area with a radial gradient. A center point defines the origin of the gradient, and an ellipse defines the outer bounds of the gradient.
           </p>
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"
+            <Button class="header-action" @click="toggleTheme"
              >
               <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
              >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- Example: RadialGradientBrush Sample -->
-            <WinControlExample
+            <ControlExample
               headerText="RadialGradientBrush Sample"
               :theme="pageTheme"
               :templateCode="exampleTemplate"
@@ -34,7 +34,7 @@
               </template>
               <template #options>
                 <div class="options-grid">
-                  <WinComboBox
+                  <ComboBox
                     v-model:SelectedValue="mappingMode"
                     Header="MappingMode"
                     :ItemsSource="mappingModeOptions"
@@ -42,7 +42,7 @@
                     SelectedValuePath="value"
                     style="grid-column: span 2;" />
 
-                  <WinSlider
+                  <Slider
                     v-model="centerX"
                     header="Center.X"
                     :minimum="0"
@@ -50,7 +50,7 @@
                     :stepFrequency="sliderStepFrequency"
                     :smallChange="sliderSmallChange" />
 
-                  <WinSlider
+                  <Slider
                     v-model="centerY"
                     header="Center.Y"
                     :minimum="0"
@@ -58,7 +58,7 @@
                     :stepFrequency="sliderStepFrequency"
                     :smallChange="sliderSmallChange" />
 
-                  <WinSlider
+                  <Slider
                     v-model="radiusX"
                     header="RadiusX"
                     :minimum="0"
@@ -66,7 +66,7 @@
                     :stepFrequency="sliderStepFrequency"
                     :smallChange="sliderSmallChange" />
 
-                  <WinSlider
+                  <Slider
                     v-model="radiusY"
                     header="RadiusY"
                     :minimum="0"
@@ -74,7 +74,7 @@
                     :stepFrequency="sliderStepFrequency"
                     :smallChange="sliderSmallChange" />
 
-                  <WinSlider
+                  <Slider
                     v-model="originX"
                     header="GradientOrigin.X"
                     :minimum="0"
@@ -82,7 +82,7 @@
                     :stepFrequency="sliderStepFrequency"
                     :smallChange="sliderSmallChange" />
 
-                  <WinSlider
+                  <Slider
                     v-model="originY"
                     header="GradientOrigin.Y"
                     :minimum="0"
@@ -90,7 +90,7 @@
                     :stepFrequency="sliderStepFrequency"
                     :smallChange="sliderSmallChange" />
 
-                  <WinComboBox
+                  <ComboBox
                     v-model:SelectedValue="spreadMethod"
                     Header="SpreadMethod"
                     :ItemsSource="spreadMethodOptions"
@@ -99,22 +99,22 @@
                     style="grid-column: span 2; margin-top: 10px;" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject, watch, onMounted } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinSlider from '../../components/WinSlider.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import Slider from '../../components/Slider.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'radialgradientbrush');
 

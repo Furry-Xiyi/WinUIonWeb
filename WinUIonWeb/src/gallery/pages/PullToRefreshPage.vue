@@ -1,53 +1,53 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.pulltorefresh')" />
-          <WinTextBlock class="page-description" :Text="$t('text.a-container-that-allows-users-to-refresh-content')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.pulltorefresh')" />
+          <TextBlock class="page-description" :Text="$t('text.a-container-that-allows-users-to-refresh-content')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.pulltorefresh.basic')" :theme="pageTheme" :vue="basicPullToRefreshVue">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.pulltorefresh.basic')" :theme="pageTheme" :vue="basicPullToRefreshVue">
               <template #example>
-                <WinPullToRefresh class="refresh-surface" @RefreshRequested="rc_RefreshRequested">
+                <PullToRefresh class="refresh-surface" @RefreshRequested="rc_RefreshRequested">
                   <div class="refresh-row">
-                    <WinTextBlock :Text="$t('sample.pulltorefresh.pull-down')" />
-                    <WinTextBlock class="accent-output" :Text="`${$t('sample.pulltorefresh.refresh-count')}: ${count}`" />
+                    <TextBlock :Text="$t('sample.pulltorefresh.pull-down')" />
+                    <TextBlock class="accent-output" :Text="`${$t('sample.pulltorefresh.refresh-count')}: ${count}`" />
                   </div>
-                </WinPullToRefresh>
+                </PullToRefresh>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.pulltorefresh.custom-icon')" :theme="pageTheme" :vue="customIconPullToRefreshVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.pulltorefresh.custom-icon')" :theme="pageTheme" :vue="customIconPullToRefreshVue">
               <template #example>
-                <WinPullToRefresh class="refresh-surface" icon="&#xE1E2" @RefreshRequested="rc_CustomIconRefreshRequested">
+                <PullToRefresh class="refresh-surface" icon="&#xE1E2" @RefreshRequested="rc_CustomIconRefreshRequested">
                   <div class="refresh-row">
-                    <WinTextBlock :Text="$t('sample.pulltorefresh.pull-down-custom')" />
-                    <WinTextBlock class="accent-output" :Text="`${$t('sample.pulltorefresh.sync-count')}: ${customCount}`" />
+                    <TextBlock :Text="$t('sample.pulltorefresh.pull-down-custom')" />
+                    <TextBlock class="accent-output" :Text="`${$t('sample.pulltorefresh.sync-count')}: ${customCount}`" />
                   </div>
-                </WinPullToRefresh>
+                </PullToRefresh>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinPullToRefresh from '../../components/WinPullToRefresh.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import PullToRefresh from '../../components/PullToRefresh.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'pulltorefresh');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -70,17 +70,17 @@ const rc_CustomIconRefreshRequested = (event) => {
   completeRefresh(event, () => { customCount.value += 1; });
 };
 
-const basicPullToRefreshVue = `<WinPullToRefresh @RefreshRequested="rc_RefreshRequested">
+const basicPullToRefreshVue = `<PullToRefresh @RefreshRequested="rc_RefreshRequested">
   <div>
-    <WinTextBlock Text="Pull down to refresh" />
+    <TextBlock Text="Pull down to refresh" />
   </div>
-</WinPullToRefresh>`;
+</PullToRefresh>`;
 
-const customIconPullToRefreshVue = `<WinPullToRefresh icon="&#xE1E2;" @RefreshRequested="rc_CustomIconRefreshRequested">
+const customIconPullToRefreshVue = `<PullToRefresh icon="&#xE1E2;" @RefreshRequested="rc_CustomIconRefreshRequested">
   <div>
-    <WinTextBlock Text="Pull down to sync data" />
+    <TextBlock Text="Pull down to sync data" />
   </div>
-</WinPullToRefresh>`;
+</PullToRefresh>`;
 </script>
 
 <style scoped>

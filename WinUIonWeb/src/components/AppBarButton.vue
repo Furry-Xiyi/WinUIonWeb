@@ -33,7 +33,7 @@
 
   </button>
 
-  <WinMenuFlyout
+  <MenuFlyout
     v-if="hasMenuFlyout"
     :Open="showFlyout"
     :AnchorRect="anchorRect"
@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, useSlots } from 'vue';
-import WinMenuFlyout from './WinMenuFlyout.vue';
+import MenuFlyout from './MenuFlyout.vue';
 
 interface UICommandLike {
   Label?: string;
@@ -246,7 +246,7 @@ const symbolGlyphs: Record<string, string> = {
   Help: '\uE897', More: '\uE712', OpenFile: '\uE8E5', Paste: '\uE77F', Pause: '\uE769',
   Play: '\uE768', Redo: '\uE7A6', Refresh: '\uE72C', Save: '\uE74E', SelectAll: '\uE8B3',
   Send: '\uE724', Setting: '\uE713', Share: '\uE72D', Sort: '\uE8CB', Stop: '\uE71A', Orientation: '\uE8B4',
-  Undo: '\uE7A7'
+  Undo: '\uE7A7', Bold: '\uE8DD', Italic: '\uE8DB', Underline: '\uE8DC'
 };
 
 const getSymbolGlyph = (symbolName: string) => symbolGlyphs[symbolName] ?? '\uE8A5';

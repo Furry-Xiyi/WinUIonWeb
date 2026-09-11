@@ -1,7 +1,7 @@
 <template>
   <div ref="rootRef" class="win-number-box" :class="{ 'is-disabled': !IsEnabled, 'is-inline': SpinButtonPlacementMode === 'Inline', 'is-compact': SpinButtonPlacementMode === 'Compact' }" :style="rootStyle">
     <div class="win-number-shell">
-      <WinTextBox
+      <TextBox
         class="win-number-textbox"
         :Text="displayText"
         :Header="Header"
@@ -34,7 +34,7 @@
             <span></span>
           </span>
         </template>
-      </WinTextBox>
+      </TextBox>
     </div>
 
     <Teleport to="body">
@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { ComputedRef, CSSProperties } from 'vue';
-import WinTextBox from './WinTextBox.vue';
+import TextBox from './TextBox.vue';
 
 type SpinPlacement = 'Hidden' | 'Compact' | 'Inline';
 type ValidationMode = 'InvalidInputOverwritten' | 'Disabled';

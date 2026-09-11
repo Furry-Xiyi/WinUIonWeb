@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
-import type { SwipeItem, SwipeItems, SwipeSide } from './WinSwipeControl.types';
+import type { SwipeItem, SwipeItems, SwipeSide } from './SwipeControl.types';
 
 const props = withDefaults(defineProps<{
   LeftItems?: SwipeItems;

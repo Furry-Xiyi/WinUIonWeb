@@ -1,62 +1,62 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.toggleswitch')" />
-          <WinTextBlock class="page-description" :Text="$t('text.use-toggleswitch-controls-to-present-users-with')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" Text="{x:Bind $t('text.toggleswitch'), Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind $t('text.use-toggleswitch-controls-to-present-users-with'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="toggleSwitchSimpleVue" :headerText="$t('text.a-simple-toggleswitch')">
-              <template #example>
-                <WinToggleSwitch />
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="toggleSwitchCustomVue" :headerText="$t('sample.toggleswitch.custom')">
-              <template #example>
-                <div class="horizontal-stack">
-                  <WinToggleSwitch
-                    :Header="$t('sample.toggle-work')"
-                    :IsOn="workToggle"
-                    :OffContent="$t('sample.do-work')"
-                    :OnContent="$t('sample.working')"
-                    @update:IsOn="workToggle = $event" />
-                  <WinProgressRing Width="32" :IsActive="workToggle" />
-                </div>
-              </template>
-            </WinControlExample>
+        <ControlExample class="basic-input-example-theme" SampleDefinition="ToggleSwitch\ToggleSwitchSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind toggleSwitchSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('text.a-simple-toggleswitch'), Mode=OneWay}">
+              <ControlExample.Example>
+                <ToggleSwitch />
+              </ControlExample.Example>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="ToggleSwitch\ToggleSwitchCustom.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind toggleSwitchCustomVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.toggleswitch.custom'), Mode=OneWay}">
+              <ControlExample.Example>
+                <StackPanel Orientation="Horizontal">
+                  <ToggleSwitch
+                    Header="{x:Bind $t('sample.toggle-work'), Mode=OneWay}"
+                    OffContent="{x:Bind $t('sample.do-work'), Mode=OneWay}"
+                    OnContent="{x:Bind $t('sample.working'), Mode=OneWay}"
+                    IsOn="{x:Bind workToggle, Mode=TwoWay}" />
+                  <ProgressRing Width="32" IsActive="{x:Bind workToggle, Mode=OneWay}" />
+                </StackPanel>
+              </ControlExample.Example>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinProgressRing from '../../components/WinProgressRing.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import ProgressRing from '../../components/ProgressRing.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import ToggleSwitch from '../../components/ToggleSwitch.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'toggleswitch');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const workToggle = ref(true);
 
-const toggleSwitchSimpleVue = `<WinToggleSwitch AutomationProperties.Name="simple ToggleSwitch" />`;
-const toggleSwitchCustomVue = `<div>
-  <WinToggleSwitch Header="Toggle work" OffContent="Do work" OnContent="Working" :IsOn="true" />
-  <WinProgressRing :IsActive="true" Width="32" />
-</div>`;
+const toggleSwitchSimpleVue = `<ToggleSwitch AutomationProperties.Name="simple ToggleSwitch" />`;
+const toggleSwitchCustomVue = `<StackPanel Orientation="Horizontal">
+  <ToggleSwitch Header="{x:Bind $t('sample.toggle-work'), Mode=OneWay}" OffContent="{x:Bind $t('sample.do-work'), Mode=OneWay}" OnContent="{x:Bind $t('sample.working'), Mode=OneWay}" IsOn="{x:Bind true, Mode=OneWay}" />
+  <ProgressRing IsActive="{x:Bind true, Mode=OneWay}" Width="32" />
+</StackPanel>`;
 </script>
 
 <style scoped>

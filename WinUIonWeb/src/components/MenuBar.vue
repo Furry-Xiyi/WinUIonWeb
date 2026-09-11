@@ -31,12 +31,12 @@
         @pointercancel="pressedIndex = null"
         @keydown="onMenuBarKeyDown($event, index)"
         @focus="focusedIndex = index">
-        <WinTextBlock :Text="item.Title" />
+        <TextBlock :Text="item.Title" />
       </button>
     </div>
   </nav>
 
-  <WinMenuFlyout
+  <MenuFlyout
     :Open="openIndex !== null"
     :AnchorRect="anchorRect"
     :Items="openMenuItem?.Items || []"
@@ -51,8 +51,8 @@
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import WinMenuFlyout from './WinMenuFlyout.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import MenuFlyout from './MenuFlyout.vue';
+import TextBlock from './TextBlock.vue';
 
 const props = defineProps({
   Items: { type: Array, required: true },

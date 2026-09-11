@@ -10,13 +10,16 @@
       @mousedown="onChevronDown"
       @mouseup="onChevronUp"
       @mouseleave="onChevronLeave">
-      <span class="win-dropdown-content"><slot>{{ Content }}</slot></span>
+      <span class="win-dropdown-content">
+        <ContentOutlet v-if="contentNodes.length" />
+        <span v-else>{{ resolvedContent }}</span>
+      </span>
       <span class="icon win-dd-chevron chevron-animate"
             :class="[chevronClass, { open: isOpen }]"
             aria-hidden="true"
             @animationend="onChevronAnimEnd"></span>
     </button>
-    <WinMenuFlyout
+    <MenuFlyout
       :Open="isOpen"
       :AnchorRect="anchorRect"
       :Items="flyoutItems"
@@ -25,9 +28,21 @@
       @Select="onSelect" />
   </div>
 </template>
-<script setup>
-import { computed, ref, useAttrs } from 'vue';
-import WinMenuFlyout from './WinMenuFlyout.vue';
+<script lang="ts">
+import { DropDownButtonContent, DropDownButtonFlyout } from './DropDownButtonProperties'
+
+// Vue compiles XAML property elements as static members on the owner
+// component (for example, DropDownButton.Flyout).
+export default {
+  Flyout: DropDownButtonFlyout,
+  Content: DropDownButtonContent
+}
+</script>
+<script setup lang="ts">
+import { computed, defineComponent, Fragment, getCurrentInstance, h, ref, useAttrs, useSlots } from 'vue';
+import MenuFlyout from './MenuFlyout.vue';
+import { getDropDownButtonProperty } from './DropDownButtonProperties';
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
 
 defineOptions({
   inheritAttrs: false
@@ -36,7 +51,7 @@ defineOptions({
 const props = defineProps({
   Content: { type: [String, Number], default: '' },
   Flyout: { type: [Object, Array], default: () => ({ Items: [] }) },
-  IsEnabled: { type: Boolean, default: true },
+  IsEnabled: { type: [Boolean, String], default: true },
   Width: { type: [String, Number], default: '' },
   Height: { type: [String, Number], default: '' },
   MinWidth: { type: [String, Number], default: '' },
@@ -51,6 +66,8 @@ const props = defineProps({
 
 const emit = defineEmits(['Click', 'Select']);
 const attrs = useAttrs();
+const slots = useSlots();
+const instance = getCurrentInstance();
 const wrap = ref(null);
 const isOpen = ref(false);
 const anchorRect = ref(null);
@@ -63,7 +80,93 @@ const buttonAttrs = computed(() => {
   return rest;
 });
 
-const isDisabled = computed(() => props.IsEnabled === false);
+const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
+const isDisabled = computed(() => !resolvedIsEnabled.value);
+const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
+
+const propertyNodes = computed(() => {
+  const content = [];
+  const flyout = [];
+  const collect = (nodes) => {
+    for (const node of nodes) {
+      // Vue may wrap multiple XAML property elements in a Fragment. It is
+      // compiler structure, so inspect its children before classifying them.
+      if (node?.type === Fragment && Array.isArray(node.children)) {
+        collect(node.children);
+        continue;
+      }
+    const property = getDropDownButtonProperty(node)
+      ?? (typeof node?.type === 'string' && node.type.endsWith('.Flyout') ? 'flyout' : undefined)
+      ?? (typeof node?.type === 'string' && node.type.endsWith('.Content') ? 'content' : undefined);
+    if (!property) {
+      content.push(node);
+      continue;
+    }
+    const propertySlot = node.children && typeof node.children === 'object' ? node.children.default : undefined;
+    if (propertySlot) (property === 'content' ? content : flyout).push(...propertySlot());
+    }
+  }
+  collect(slots.default?.() ?? []);
+  return { content, flyout };
+});
+const contentNodes = computed(() => propertyNodes.value.content);
+const flyoutNodes = computed(() => propertyNodes.value.flyout);
+const ContentOutlet = defineComponent({ setup() { return () => h(Fragment, contentNodes.value); } });
+
+// Property elements are compiled as component VNodes in normal templates,
+// but sample content can also be normalized through a Fragment or a global
+// component name. Keep the XAML property-element lookup independent of that
+// compiler detail.
+const hasVNodeMarker = (node, marker, componentName) => {
+  const type = node?.type;
+  if (type && (typeof type === 'object' || typeof type === 'function') && type[marker]) return true;
+  return typeof type === 'string' && (type === componentName || type.endsWith(`.${componentName.split('.').pop()}`));
+};
+const flattenVNodes = (nodes) => {
+  const result = [];
+  for (const node of nodes || []) {
+    if (node?.type === Fragment && Array.isArray(node.children)) result.push(...flattenVNodes(node.children));
+    else if (node) result.push(node);
+  }
+  return result;
+};
+const slotVNodes = (node) => {
+  if (Array.isArray(node?.children)) return flattenVNodes(node.children);
+  const slot = node?.children && typeof node.children === 'object' ? node.children.default : undefined;
+  return typeof slot === 'function' ? flattenVNodes(slot()) : [];
+};
+const childVNodes = (node) => {
+  if (!node) return [];
+  if (Array.isArray(node)) return flattenVNodes(node);
+  const children = node.children;
+  if (Array.isArray(children)) return flattenVNodes(children);
+  if (children && typeof children === 'object') {
+    const slots = Object.values(children).filter((value) => typeof value === 'function');
+    return flattenVNodes(slots.flatMap((slot) => {
+      try { return slot(); } catch { return []; }
+    }));
+  }
+  return [];
+};
+const readIconValue = (node) => {
+  if (!node) return undefined;
+  const props = node.props ?? {};
+  for (const key of ['Glyph', 'Symbol', 'Text', 'Icon']) {
+    if (props[key] !== undefined) return resolveXamlValue(props[key], instance);
+  }
+  const nested = childVNodes(node);
+  return nested.length ? readIconValue(nested[0]) : undefined;
+};
+const findIconValue = (nodes) => {
+  for (const node of flattenVNodes(nodes)) {
+    const value = readIconValue(node);
+    if (value !== undefined) return value;
+    const nested = childVNodes(node);
+    const nestedValue = findIconValue(nested);
+    if (nestedValue !== undefined) return nestedValue;
+  }
+  return undefined;
+};
 
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
@@ -82,11 +185,46 @@ const xamlThickness = (value) => {
   return value;
 };
 
-const flyoutDefinition = computed(() => Array.isArray(props.Flyout) ? { Items: props.Flyout } : props.Flyout || { Items: [] });
+const propertyFlyout = computed(() => {
+  const menuNode = flyoutNodes.value.find((node) => {
+    return hasVNodeMarker(node, '__menuFlyoutDefinition', 'MenuFlyout');
+  });
+  if (!menuNode) return null;
+  const menuProps = (menuNode.props ?? {}) as Record<string, unknown>;
+  const itemNodes = slotVNodes(menuNode);
+  const items = itemNodes.flatMap((node) => {
+    if (!hasVNodeMarker(node, '__menuFlyoutItem', 'MenuFlyoutItem')) return [];
+    const itemProps = { ...((node.props ?? {}) as Record<string, unknown>) };
+    const itemChildren = slotVNodes(node);
+    const iconNode = itemChildren.find((child) => hasVNodeMarker(child, '__menuFlyoutItemProperty', 'MenuFlyoutItem.Icon'));
+    // Depending on whether the property element was compiled locally or
+    // resolved globally, Vue may retain or flatten the MenuFlyoutItem.Icon
+    // wrapper. Search the complete property subtree so the FontIcon glyph is
+    // preserved in either compiler shape.
+    const iconValue = readIconValue(iconNode) ?? findIconValue(itemChildren);
+    if (iconValue !== undefined) itemProps.Icon = iconValue;
+    return [{
+      ...itemProps,
+      Text: resolveXamlValue(itemProps.Text ?? '', instance),
+      Value: resolveXamlValue(itemProps.Value ?? itemProps.Text, instance),
+      IsEnabled: resolveXamlValue(itemProps.IsEnabled ?? true, instance) !== false
+    }];
+  });
+  return { ...menuProps, Items: items };
+});
+const flyoutDefinition = computed(() => {
+  if (propertyFlyout.value) return propertyFlyout.value;
+  return Array.isArray(props.Flyout) ? { Items: props.Flyout } : props.Flyout || { Items: [] };
+});
 const flyoutPlacement = computed(() => flyoutDefinition.value.Placement || 'Bottom');
 const flyoutItems = computed(() => (flyoutDefinition.value.Items || []).map((item) => {
-  if (typeof item === 'string') return { Text: item, Value: item };
-  return { ...item, Text: item.Text ?? item.Content ?? item.label ?? String(item) };
+  if (typeof item === 'string') {
+    const text = resolveXamlValue(item, instance);
+    return { Text: text, Value: text };
+  }
+  const text = resolveXamlValue(item.Text ?? item.Content ?? item.label ?? String(item), instance);
+  const icon = item.Icon === undefined ? undefined : resolveXamlValue(item.Icon, instance);
+  return { ...item, Text: text, ...(icon === undefined ? {} : { Icon: icon }) };
 }));
 
 const buttonStyle = computed(() => {
@@ -129,9 +267,10 @@ const onChevronAnimEnd = (event) => {
   }
 };
 
-const toggle = () => {
+const toggle = (event) => {
   if (isDisabled.value) return;
-  emit('Click');
+  emit('Click', event);
+  resolveXamlHandler(attrs.Click, instance)?.(event);
   if (isOpen.value) { isOpen.value = false; return; }
   const r = wrap.value.getBoundingClientRect();
   anchorRect.value = { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };

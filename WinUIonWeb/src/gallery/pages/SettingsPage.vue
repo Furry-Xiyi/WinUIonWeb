@@ -1,6 +1,6 @@
 <template>
-  <WinGrid class="settings-page-root" RowDefinitions="Auto,*">
-    <WinTextBlock
+  <Grid class="settings-page-root" RowDefinitions="Auto,*">
+    <TextBlock
       class="settings-page-header"
       AutomationProperties.HeadingLevel="Level1"
       FontSize="28"
@@ -10,63 +10,63 @@
       Style="{StaticResource TitleTextBlockStyle}"
       TextWrapping="NoWrap"
       :Text="$t('text.settings')" />
-    <WinScrollViewer
+    <ScrollViewer
       class="settings-page-scroll"
       VerticalScrollBarVisibility="Auto"
       VerticalScrollMode="Auto">
       <div class="gallery-item-page settings-page-body">
         <div class="gallery-page-content">
-          <WinTextBlock class="settings-section-title" :Text="$t('text.appearance')" />
+          <TextBlock class="settings-section-title" :Text="$t('text.appearance')" />
           <div class="settings-controls">
-            <WinExpander
+            <Expander
               Height="70"
               :Header="$t('text.theme')"
               :Description="$t('text.choose-your-app-color-mode')"
               HeaderIcon="">
-              <WinRadioButtons :SelectedIndex="themeIndex" @SelectionChanged="onThemeSelectionChanged">
-                <WinRadioButton :Content="$t('text.use-system-setting')" />
-                <WinRadioButton :Content="$t('text.light')" />
-                <WinRadioButton :Content="$t('text.dark')" />
-              </WinRadioButtons>
-            </WinExpander>
-            <WinExpander
+              <RadioButtons :SelectedIndex="themeIndex" @SelectionChanged="onThemeSelectionChanged">
+                <RadioButton :Content="$t('text.use-system-setting')" />
+                <RadioButton :Content="$t('text.light')" />
+                <RadioButton :Content="$t('text.dark')" />
+              </RadioButtons>
+            </Expander>
+            <Expander
               v-if="isHostedInUwpWebView"
               Height="70"
               :Header="$t('text.material')"
               :Description="$t('text.choose-the-app-background-material')"
               HeaderIcon="&#xE2B1;">
-              <WinRadioButtons :SelectedIndex="materialIndex" @SelectionChanged="onMaterialSelectionChanged">
-                <WinRadioButton :Content="$t('text.mica')" />
-                <WinRadioButton :Content="$t('text.acrylic')" />
-              </WinRadioButtons>
-            </WinExpander>
-            <WinExpander
+              <RadioButtons :SelectedIndex="materialIndex" @SelectionChanged="onMaterialSelectionChanged">
+                <RadioButton :Content="$t('text.mica')" />
+                <RadioButton :Content="$t('text.acrylic')" />
+              </RadioButtons>
+            </Expander>
+            <Expander
               Height="70"
               :Header="$t('text.page-transition')"
               :Description="$t('text.animation-style-when-switching-pages')"
               HeaderIcon="&#xE8AB;">
-              <WinRadioButtons :SelectedIndex="NavigationTransitionInfoIndex" @SelectionChanged="OnNavigationTransitionInfoSelectionChanged">
-                <WinRadioButton
+              <RadioButtons :SelectedIndex="NavigationTransitionInfoIndex" @SelectionChanged="OnNavigationTransitionInfoSelectionChanged">
+                <RadioButton
                   v-for="Option in NavigationTransitionInfoOptions"
                   :key="Option.Key"
                   :Content="$t(Option.LabelKey)" />
-              </WinRadioButtons>
-            </WinExpander>
-            <WinSettingsCard
+              </RadioButtons>
+            </Expander>
+            <SettingsCard
               :Header="$t('text.navigation-pane-position')"
               :Description="$t('text.select-the-navigation-bar-position')"
               :HeaderIcon="'\uF594'"
               :Height="70">
-              <WinComboBox
+              <ComboBox
                 v-model:SelectedValue="navPosition"
                 :ItemsSource="navPositionOptions"
                 DisplayMemberPath="label"
                 SelectedValuePath="value" />
-            </WinSettingsCard>
+            </SettingsCard>
           </div>
-          <WinTextBlock class="about-section-title" :Text="$t('text.about')" />
+          <TextBlock class="about-section-title" :Text="$t('text.about')" />
           <div class="about-controls">
-            <WinExpander
+            <Expander
               :Header="appTitle"
               :Description="copyrightText"
               Height="70">
@@ -74,42 +74,42 @@
                 <img class="about-app-icon" :src="appIcon" alt="App Icon" />
               </template>
               <template #HeaderControls>
-                <WinButton
+                <Button
                   @Click="openRepository"
                   :Content="$t('text.open-code-repository')" />
-                <WinTextBlock :Text="versionText" FontSize="14.4" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
+                <TextBlock :Text="versionText" FontSize="14.4" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
               </template>
               <div class="about-content">
-                <WinHyperlinkButton
+                <HyperlinkButton
                   NavigateUri="https://qm.qq.com/q/UPnTGW164m"
                   TargetName="_blank"
                   HorizontalAlignment="Left"
                   :Content="$t('text.qq-group')" />
-                <WinHyperlinkButton
+                <HyperlinkButton
                   NavigateUri="https://discord.gg/4NScc8sEzw"
                   TargetName="_blank"
                   HorizontalAlignment="Left"
                   :Content="$t('text.discord-group')" />
               </div>
-            </WinExpander>
+            </Expander>
           </div>
         </div>
       </div>
-    </WinScrollViewer>
-  </WinGrid>
+    </ScrollViewer>
+  </Grid>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue';
-import WinExpander from '../../components/WinExpander.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinRadioButtons from '../../components/WinRadioButtons.vue';
-import WinSettingsCard from '../../components/WinSettingsCard.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
-import WinGrid from '../../components/WinGrid.vue';
+import Expander from '../../components/Expander.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import RadioButtons from '../../components/RadioButtons.vue';
+import SettingsCard from '../../components/SettingsCard.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import Button from '../../components/Button.vue';
+import HyperlinkButton from '../../components/HyperlinkButton.vue';
+import Grid from '../../components/Grid.vue';
 import appManifest from '../../manifest.json';
 import appIcon from '../../assets/AppIcon.ico';
 import { useI18n } from '../../components/i18n/index';
@@ -124,7 +124,7 @@ import {
   navigationTransitionInfoEquals
 } from '../../utils/navigationTransitionInfo';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const themeSetting = inject('themeSetting');
 const materialSetting = inject('materialSetting');

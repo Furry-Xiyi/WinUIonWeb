@@ -1,6 +1,6 @@
 <template>
   <div class="win-home-header-tile">
-    <WinHyperlinkButton
+    <HyperlinkButton
       class="win-home-header-tile-link"
       :NavigateUri="Link"
       TargetName="_blank">
@@ -10,14 +10,14 @@
           <template v-else>{{ Icon }}</template>
         </span>
         <span class="win-home-header-tile-text">
-          <WinTextBlock
+          <TextBlock
             class="win-home-header-tile-title"
             :Text="Title"
             FontSize="14"
             FontWeight="600"
             LineHeight="20"
             TextWrapping="Wrap" />
-          <WinTextBlock
+          <TextBlock
             class="win-home-header-tile-description"
             :Text="Description"
             FontSize="12"
@@ -27,14 +27,14 @@
         </span>
         <span class="win-home-header-tile-open-icon icon" aria-hidden="true">&#xE8A7;</span>
       </span>
-    </WinHyperlinkButton>
+    </HyperlinkButton>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
-import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
+import HyperlinkButton from '../../components/HyperlinkButton.vue';
+import TextBlock from '../../components/TextBlock.vue';
 
 const props = defineProps({
   Title: { type: [String, Number], default: '' },

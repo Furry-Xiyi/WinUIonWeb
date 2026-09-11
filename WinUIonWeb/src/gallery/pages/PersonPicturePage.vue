@@ -1,19 +1,19 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.personpicture')" />
-        <WinTextBlock class="page-description" :Text="$t('text.personpicture-description')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.personpicture')" />
+        <TextBlock class="page-description" :Text="$t('text.personpicture-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+          <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+          <ToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.personpicture.select-looks')" :theme="pageTheme" :vue="personPictureCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.personpicture.select-looks')" :theme="pageTheme" :vue="personPictureCode">
           <template #example>
-            <WinPersonPicture
+            <PersonPicture
               Height="300"
               VerticalAlignment="Top"
               :ProfilePicture="profileType === 'image' ? profileImage : ''"
@@ -21,23 +21,23 @@
               :Initials="profileType === 'initials' ? 'SB' : ''" />
           </template>
           <template #options>
-            <WinRadioButton :Header="$t('sample.personpicture.profile-type')" :ItemsSource="profileTypeItems" :SelectedIndex="profileTypeIndex" @update:SelectedIndex="profileTypeIndex = $event" />
+            <RadioButton :Header="$t('sample.personpicture.profile-type')" :ItemsSource="profileTypeItems" :SelectedIndex="profileTypeIndex" @update:SelectedIndex="profileTypeIndex = $event" />
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinPersonPicture from '../../components/WinPersonPicture.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import PersonPicture from '../../components/PersonPicture.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -58,9 +58,9 @@ const profileTypeItems = computed(() => [
 ]);
 
 const personPictureCode = computed(() => {
-  if (profileType.value === 'image') return `<WinPersonPicture Height="300" VerticalAlignment="Top" ProfilePicture="${profileImageUri}" />`;
-  if (profileType.value === 'displayName') return '<WinPersonPicture Height="300" VerticalAlignment="Top" DisplayName="Jane Doe" />';
-  return '<WinPersonPicture Height="300" VerticalAlignment="Top" Initials="SB" />';
+  if (profileType.value === 'image') return `<PersonPicture Height="300" VerticalAlignment="Top" ProfilePicture="${profileImageUri}" />`;
+  if (profileType.value === 'displayName') return '<PersonPicture Height="300" VerticalAlignment="Top" DisplayName="Jane Doe" />';
+  return '<PersonPicture Height="300" VerticalAlignment="Top" Initials="SB" />';
 });
 </script>
 

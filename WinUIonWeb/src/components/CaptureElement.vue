@@ -8,7 +8,7 @@
     </div>
 
     <div class="win-capture-container">
-      <WinScrollViewer
+      <ScrollViewer
         class="win-capture-snapshots-scroll"
         VerticalScrollMode="Auto"
         VerticalScrollBarVisibility="Auto"
@@ -17,14 +17,14 @@
         <div class="win-capture-snapshots">
           <img v-for="snapshot in snapshots" :key="snapshot.id" :src="snapshot.source" alt="Captured photo" />
         </div>
-      </WinScrollViewer>
+      </ScrollViewer>
     </div>
   </div>
 </template>
 
 <script setup>
 import { nextTick, onBeforeUnmount, ref } from 'vue';
-import WinScrollViewer from './WinScrollViewer.vue';
+import ScrollViewer from './ScrollViewer.vue';
 
 const emit = defineEmits(['Ready', 'PhotoCaptured']);
 const videoRef = ref(null);

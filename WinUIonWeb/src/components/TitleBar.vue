@@ -1,6 +1,6 @@
 <template>
   <!--
-    WinTitleBar - 对应 WinUI 官方 Microsoft.UI.Xaml.Controls.TitleBar
+    TitleBar - 对应 WinUI 官方 Microsoft.UI.Xaml.Controls.TitleBar
     官方源码：ref/microsoft-ui-xaml-main/controls/dev/TitleBar/
       TitleBar.idl（API）/ TitleBar.xaml（默认模板与 12 列布局）/ TitleBar_themeresources.xaml（主题资源）
 
@@ -16,7 +16,7 @@
       事件：BackRequested / PaneToggleRequested
 
     用法（与官方 XAML 同名同大小写）：
-    <WinTitleBar
+    <TitleBar
       Title="WinUI Gallery"
       Subtitle="Preview"
       :IsBackButtonVisible="true"
@@ -26,9 +26,9 @@
       :IconSource="{ Glyph: '\\uE72B' }"
       @BackRequested="onBack"
       @PaneToggleRequested="onPaneToggle">
-      <WinAutoSuggestBox ... />
+      <AutoSuggestBox ... />
       <template #RightHeader>...</template>
-    </WinTitleBar>
+    </TitleBar>
   -->
   <div
     ref="rootRef"
@@ -84,14 +84,14 @@
       <span v-else class="win-titlebar-icon-glyph" :style="iconGlyphStyle">{{ iconGlyph }}</span>
     </div>
 
-    <WinTextBlock
+    <TextBlock
       v-if="showTitle"
       class="win-titlebar-title"
       :Text="Title"
       TextTrimming="CharacterEllipsis"
       TextWrapping="NoWrap" />
 
-    <WinTextBlock
+    <TextBlock
       v-if="showSubtitle"
       class="win-titlebar-subtitle"
       :Text="Subtitle"
@@ -118,9 +118,9 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch } from 'vue';
-import WinTextBlock from './WinTextBlock.vue';
+import TextBlock from './TextBlock.vue';
 import { useI18n } from './i18n/index';
-import { clearIsDragRegion, getIsDragRegion, setIsDragRegion } from './winTitleBarDragRegion';
+import { clearIsDragRegion, getIsDragRegion, setIsDragRegion } from './titleBarDragRegion';
 
 const { t } = useI18n();
 const slots = useSlots();

@@ -549,7 +549,7 @@
     --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
     --NavigationViewContentGridBorderBrush: #1D1D1D;
-    --NavigationViewContentBackground: rgba(48, 48, 48, 0.30);
+    --NavigationViewContentBackground: rgba(40, 40, 40, 0.30);
     --SystemFillColorAttentionBrush: #4CC2FF;
     --SystemFillColorSuccessBrush: #6CCB5F;
     --SystemFillColorCautionBrush: #FCE100;
@@ -642,7 +642,7 @@ html, body, #app {
   padding: 0;
 }
 
-/* WinPageHeader owns the page title and actions. Keep each page's description. */
+/* PageHeader owns the page title and actions. Keep each page's description. */
 .page-view.has-page-header .page-heading.page-header,
 .page-view.has-page-header .page-heading > .page-header,
 .page-view.has-page-header .page-heading > h1.page-header,
@@ -913,7 +913,7 @@ html.theme-dark {
   --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
   --NavigationViewContentGridBorderBrush: #1D1D1D;
-  --NavigationViewContentBackground: rgba(48, 48, 48, 0.30);
+  --NavigationViewContentBackground: rgba(40, 40, 40, 0.30);
   --SystemFillColorAttentionBrush: #4CC2FF;
   --SystemFillColorSuccessBrush: #6CCB5F;
   --SystemFillColorCautionBrush: #FCE100;

@@ -1,6 +1,6 @@
 <template>
   <div class="win-switch-root" :style="rootStyle">
-    <WinTextBlock v-if="Header" class="win-switch-header" :Text="Header" />
+    <TextBlock v-if="resolvedHeader" class="win-switch-header" :Text="resolvedHeader" />
     <div class="win-switch-wrap" :class="{ 'is-disabled': !IsEnabledResolved }" @click="onWrapClick">
     <div class="win-switch"
          :class="{ 'is-on': isOnValue, 'dragging': isDragging, 'is-pressed': isPressed, 'is-disabled': !IsEnabledResolved }"
@@ -10,23 +10,25 @@
         <div class="thumb"></div>
       </div>
     </div>
-      <WinTextBlock v-if="$slots.default" class="win-switch-label"><slot></slot></WinTextBlock>
-      <WinTextBlock v-else class="win-switch-label" :Text="isOnValue ? resolvedOnContent : resolvedOffContent" />
+      <TextBlock v-if="$slots.default" class="win-switch-label"><slot></slot></TextBlock>
+      <TextBlock v-else class="win-switch-label" :Text="isOnValue ? resolvedOnContent : resolvedOffContent" />
     </div>
   </div>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, getCurrentInstance, watch } from 'vue';
 import { useI18n } from './i18n/index';
-import WinTextBlock from './WinTextBlock.vue';
+import TextBlock from './TextBlock.vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 const { t } = useI18n();
+const instance = getCurrentInstance();
 const props = defineProps({
-  IsOn: { type: Boolean, default: undefined },
-  Header: { type: String, default: '' },
-  OnContent: { type: String, default: '' },
-  OffContent: { type: String, default: '' },
-  IsEnabled: { type: Boolean, default: true },
+  IsOn: { type: [Boolean, String], default: undefined },
+  Header: { type: [String, Number], default: '' },
+  OnContent: { type: [String, Number], default: '' },
+  OffContent: { type: [String, Number], default: '' },
+  IsEnabled: { type: [Boolean, String], default: true },
   Width: { type: [String, Number], default: '' },
   modelValue: { type: Boolean, default: undefined },
   onContent: { type: String, default: '' },
@@ -37,11 +39,14 @@ const emit = defineEmits(['update:IsOn', 'Toggled', 'update:modelValue']);
 const isDragging = ref(false);
 const isPressed = ref(false);
 const currentTx = ref(0);
-const internalIsOn = ref(props.IsOn ?? props.modelValue ?? false);
-const isOnValue = computed(() => props.IsOn ?? props.modelValue ?? internalIsOn.value);
-const IsEnabledResolved = computed(() => props.IsEnabled && !props.disabled);
-const resolvedOnContent = computed(() => props.OnContent || props.onContent || t('text.on'));
-const resolvedOffContent = computed(() => props.OffContent || props.offContent || t('text.off'));
+const resolvedIsOn = computed(() => resolveXamlValue(props.IsOn, instance));
+const resolvedModelValue = computed(() => resolveXamlValue(props.modelValue, instance));
+const internalIsOn = ref(resolvedIsOn.value ?? resolvedModelValue.value ?? false);
+const isOnValue = computed(() => resolvedIsOn.value ?? resolvedModelValue.value ?? internalIsOn.value);
+const IsEnabledResolved = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false && !props.disabled);
+const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
+const resolvedOnContent = computed(() => resolveXamlValue(props.OnContent || props.onContent || t('text.on'), instance));
+const resolvedOffContent = computed(() => resolveXamlValue(props.OffContent || props.offContent || t('text.off'), instance));
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
   if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return `${Number(value.trim())}px`;

@@ -1,287 +1,219 @@
 <template>
   <div class="win-parallax-view" ref="containerRef">
-    <!-- Child element (background layer with parallax effect) -->
-    <div
-      class="parallax-child"
-      :style="childStyle"
-      ref="childRef"
-    >
+    <!-- Child (background layer) is arranged larger than the ParallaxView by the
+         shift amounts, then translated as the Source scrolls. This mirrors the
+         official MeasureOverride/ArrangeOverride behavior. -->
+    <div class="parallax-child" :style="childStyle" ref="childRef">
       <slot name="child"></slot>
     </div>
-
-    <!-- Source element (foreground scrollable element) -->
-    <WinScrollViewer
-      class="parallax-source"
-      ref="sourceRef"
-      VerticalScrollMode="Auto"
-      VerticalScrollBarVisibility="Auto"
-      HorizontalScrollMode="Auto"
-      HorizontalScrollBarVisibility="Auto"
-      @ViewChanged="handleScroll"
-    >
-      <slot></slot>
-    </WinScrollViewer>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import WinScrollViewer from './WinScrollViewer.vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 
 const props = defineProps({
-  // Source - the scrollable foreground element (handled via default slot)
-  // Child - the background element with parallax effect (handled via child slot)
+  // The scrollable element this ParallaxView tracks. Accepts a CSS selector
+  // string, an HTMLElement, a Vue ref, a component instance (e.g. a
+  // ScrollViewer / ListView whose inner viewport is located automatically),
+  // or a getter function returning any of the above (resolved lazily so a
+  // sibling ref that is still null at render time works).
+  Source: { type: [String, Object, Function], default: null },
 
-  HorizontalShift: {
-    type: Number,
-    default: undefined
-  },
+  HorizontalShift: { type: Number, default: 0 },
+  VerticalShift: { type: Number, default: 0 },
 
-  // 官方属性：HorizontalShift
-  horizontalShift: {
-    type: Number,
-    default: 0
-  },
+  HorizontalSourceStartOffset: { type: Number, default: 0 },
+  HorizontalSourceEndOffset: { type: Number, default: 0 },
+  VerticalSourceStartOffset: { type: Number, default: 0 },
+  VerticalSourceEndOffset: { type: Number, default: 0 },
 
-  VerticalShift: {
-    type: Number,
-    default: undefined
-  },
+  HorizontalSourceOffsetKind: { type: String, default: 'Relative' },
+  VerticalSourceOffsetKind: { type: String, default: 'Relative' },
 
-  // 官方属性：VerticalShift
-  verticalShift: {
-    type: Number,
-    default: 0
-  },
+  IsHorizontalShiftClamped: { type: Boolean, default: true },
+  IsVerticalShiftClamped: { type: Boolean, default: true },
 
-  IsHorizontalShiftClamped: {
-    type: Boolean,
-    default: undefined
-  },
-
-  // 官方属性：IsHorizontalShiftClamped
-  isHorizontalShiftClamped: {
-    type: Boolean,
-    default: true
-  },
-
-  IsVerticalShiftClamped: {
-    type: Boolean,
-    default: undefined
-  },
-
-  // 官方属性：IsVerticalShiftClamped
-  isVerticalShiftClamped: {
-    type: Boolean,
-    default: true
-  },
-
-  MaxHorizontalShiftRatio: {
-    type: Number,
-    default: undefined
-  },
-
-  // 官方属性：MaxHorizontalShiftRatio
-  maxHorizontalShiftRatio: {
-    type: Number,
-    default: 1.0
-  },
-
-  MaxVerticalShiftRatio: {
-    type: Number,
-    default: undefined
-  },
-
-  // 官方属性：MaxVerticalShiftRatio
-  maxVerticalShiftRatio: {
-    type: Number,
-    default: 1.0
-  },
-
-  HorizontalSourceStartOffset: {
-    type: Number,
-    default: undefined
-  },
-
-  // 官方属性：HorizontalSourceStartOffset
-  horizontalSourceStartOffset: {
-    type: Number,
-    default: 0
-  },
-
-  HorizontalSourceEndOffset: {
-    type: Number,
-    default: undefined
-  },
-
-  // 官方属性：HorizontalSourceEndOffset
-  horizontalSourceEndOffset: {
-    type: Number,
-    default: 0
-  },
-
-  VerticalSourceStartOffset: {
-    type: Number,
-    default: undefined
-  },
-
-  // 官方属性：VerticalSourceStartOffset
-  verticalSourceStartOffset: {
-    type: Number,
-    default: 0
-  },
-
-  VerticalSourceEndOffset: {
-    type: Number,
-    default: undefined
-  },
-
-  // 官方属性：VerticalSourceEndOffset
-  verticalSourceEndOffset: {
-    type: Number,
-    default: 0
-  }
+  MaxHorizontalShiftRatio: { type: Number, default: 1.0 },
+  MaxVerticalShiftRatio: { type: Number, default: 1.0 }
 });
 
 const containerRef = ref(null);
-const sourceRef = ref(null);
 const childRef = ref(null);
-
-// Current scroll position
-const scrollX = ref(0);
-const scrollY = ref(0);
-
-// Calculated parallax transform
+const scrollElement = ref(null);
 const parallaxX = ref(0);
 const parallaxY = ref(0);
-
-// Calculate parallax offset based on scroll position
-const getScrollElement = () => {
-  const source = sourceRef.value;
-  return source?.scrollViewerRef?.value ?? source?.scrollViewerRef ?? null;
-};
-
-const calculateParallax = (scrollSource = getScrollElement()) => {
-  if (!scrollSource) return;
-
-  const source = scrollSource;
-  const scrollWidth = source.scrollWidth - source.clientWidth;
-  const scrollHeight = source.scrollHeight - source.clientHeight;
-
-  // Calculate scroll progress (0 to 1)
-  let horizontalProgress = scrollWidth > 0 ? scrollX.value / scrollWidth : 0;
-  let verticalProgress = scrollHeight > 0 ? scrollY.value / scrollHeight : 0;
-
-  // Apply source offsets to adjust when parallax starts/ends
-  // Offsets shift the effective scroll range
-  if (scrollWidth > 0) {
-    const horizontalSourceStartOffset = props.HorizontalSourceStartOffset ?? props.horizontalSourceStartOffset;
-    const horizontalSourceEndOffset = props.HorizontalSourceEndOffset ?? props.horizontalSourceEndOffset;
-    const effectiveScrollWidth = scrollWidth - horizontalSourceStartOffset - horizontalSourceEndOffset;
-    const adjustedScrollX = Math.max(0, scrollX.value - horizontalSourceStartOffset);
-    horizontalProgress = effectiveScrollWidth > 0 ? adjustedScrollX / effectiveScrollWidth : 0;
-  }
-
-  if (scrollHeight > 0) {
-    const verticalSourceStartOffset = props.VerticalSourceStartOffset ?? props.verticalSourceStartOffset;
-    const verticalSourceEndOffset = props.VerticalSourceEndOffset ?? props.verticalSourceEndOffset;
-    const effectiveScrollHeight = scrollHeight - verticalSourceStartOffset - verticalSourceEndOffset;
-    const adjustedScrollY = Math.max(0, scrollY.value - verticalSourceStartOffset);
-    verticalProgress = effectiveScrollHeight > 0 ? adjustedScrollY / effectiveScrollHeight : 0;
-  }
-
-  // Clamp progress to [0, 1]
-  horizontalProgress = Math.max(0, Math.min(1, horizontalProgress));
-  verticalProgress = Math.max(0, Math.min(1, verticalProgress));
-
-  // Calculate shift amounts
-  const horizontalShift = props.HorizontalShift ?? props.horizontalShift;
-  const verticalShift = props.VerticalShift ?? props.verticalShift;
-  const maxHorizontalShiftRatio = props.MaxHorizontalShiftRatio ?? props.maxHorizontalShiftRatio;
-  const maxVerticalShiftRatio = props.MaxVerticalShiftRatio ?? props.maxVerticalShiftRatio;
-  let calculatedHorizontalShift = horizontalShift * horizontalProgress * maxHorizontalShiftRatio;
-  let calculatedVerticalShift = verticalShift * verticalProgress * maxVerticalShiftRatio;
-
-  // Apply clamping if enabled
-  if (props.IsHorizontalShiftClamped ?? props.isHorizontalShiftClamped) {
-    const maxShift = Math.abs(horizontalShift * maxHorizontalShiftRatio);
-    calculatedHorizontalShift = Math.max(-maxShift, Math.min(maxShift, calculatedHorizontalShift));
-  }
-
-  if (props.IsVerticalShiftClamped ?? props.isVerticalShiftClamped) {
-    const maxShift = Math.abs(verticalShift * maxVerticalShiftRatio);
-    calculatedVerticalShift = Math.max(-maxShift, Math.min(maxShift, calculatedVerticalShift));
-  }
-
-  parallaxX.value = calculatedHorizontalShift;
-  parallaxY.value = calculatedVerticalShift;
-};
-
-// Handle scroll event with performance optimization (requestAnimationFrame)
 let rafId = null;
-const handleScroll = (e) => {
-  scrollX.value = e?.horizontalOffset ?? 0;
-  scrollY.value = e?.verticalOffset ?? 0;
 
-  // Use requestAnimationFrame for smooth performance
-  if (rafId) {
-    cancelAnimationFrame(rafId);
+const unwrap = (value) => {
+  if (value && typeof value === 'object' && !(value instanceof HTMLElement) && 'value' in value) {
+    return value.value;
   }
-
-  rafId = requestAnimationFrame(() => {
-    calculateParallax();
-  });
+  return value;
 };
 
-// Computed style for child element
-const childStyle = computed(() => {
-  return {
-    transform: `translate3d(${parallaxX.value}px, ${parallaxY.value}px, 0)`,
-    willChange: 'transform' // Performance optimization hint
-  };
-});
-
-// Watch for property changes and recalculate
-watch([
-  () => props.HorizontalShift,
-  () => props.horizontalShift,
-  () => props.VerticalShift,
-  () => props.verticalShift,
-  () => props.MaxHorizontalShiftRatio,
-  () => props.maxHorizontalShiftRatio,
-  () => props.MaxVerticalShiftRatio,
-  () => props.maxVerticalShiftRatio,
-  () => props.HorizontalSourceStartOffset,
-  () => props.horizontalSourceStartOffset,
-  () => props.HorizontalSourceEndOffset,
-  () => props.horizontalSourceEndOffset,
-  () => props.VerticalSourceStartOffset,
-  () => props.verticalSourceStartOffset,
-  () => props.VerticalSourceEndOffset,
-  () => props.verticalSourceEndOffset,
-  () => props.IsHorizontalShiftClamped,
-  () => props.isHorizontalShiftClamped,
-  () => props.IsVerticalShiftClamped,
-  () => props.isVerticalShiftClamped
-], () => {
-  calculateParallax();
-});
-
-// Initialize
-onMounted(() => {
-  calculateParallax();
-});
-
-onBeforeUnmount(() => {
-  if (rafId) {
-    cancelAnimationFrame(rafId);
+// Resolve the actual scrollable element from the Source prop. ScrollViewer /
+// ListView expose their scrolling viewport as `.win-scroll-viewer-viewport`.
+const resolveScrollElement = (source) => {
+  if (typeof source === 'function') {
+    source = source();
   }
+  if (!source) return null;
+  let el = unwrap(source);
+
+  if (typeof el === 'string') {
+    el = document.querySelector(el);
+  } else if (el && typeof el === 'object' && !(el instanceof HTMLElement) && '$el' in el) {
+    const viewport = unwrap(el.scrollViewerRef);
+    if (viewport instanceof HTMLElement) return viewport;
+    el = el.$el;
+  }
+
+  if (!(el instanceof HTMLElement)) return null;
+  if (el.classList.contains('win-scroll-viewer-viewport')) return el;
+  return el.querySelector('.win-scroll-viewer-viewport') || el;
+};
+
+// Faithful port of the official parallax expression (clamped case).
+// For shift > 0: P(X) = -Min(maxRatio, shift / range) * (X - startOffset),
+// clamped to [-shift, 0]. For shift < 0 the direction is reversed.
+const computeAxis = (scrollPos, scrollable, shift, startOffset, endOffset, maxRatio, clamped) => {
+  if (!shift || scrollable <= 0) return 0;
+  const range = endOffset - startOffset;
+  if (range <= 0) return 0;
+
+  const x = scrollPos;
+  let translate;
+
+  if (shift > 0) {
+    const rate = Math.min(Math.max(0, maxRatio), shift / range);
+    translate = -rate * (x - startOffset);
+    if (clamped) translate = Math.max(-shift, Math.min(0, translate));
+  } else {
+    const rate = Math.min(Math.max(0, maxRatio), -shift / range);
+    translate = rate * (x - endOffset);
+    if (clamped) translate = Math.max(shift, Math.min(0, translate));
+  }
+
+  return translate;
+};
+
+const computeParallax = () => {
+  const el = scrollElement.value;
+  if (!el) return;
+
+  const scrollableW = el.scrollWidth - el.clientWidth;
+  const scrollableH = el.scrollHeight - el.clientHeight;
+
+  let startX = props.HorizontalSourceStartOffset;
+  let endX = props.HorizontalSourceEndOffset;
+  if (props.HorizontalSourceOffsetKind === 'Relative') {
+    endX = Math.max(0, scrollableW + props.HorizontalSourceEndOffset);
+  }
+
+  let startY = props.VerticalSourceStartOffset;
+  let endY = props.VerticalSourceEndOffset;
+  if (props.VerticalSourceOffsetKind === 'Relative') {
+    endY = Math.max(0, scrollableH + props.VerticalSourceEndOffset);
+  }
+
+  const px = computeAxis(
+    el.scrollLeft, scrollableW, props.HorizontalShift,
+    startX, endX, props.MaxHorizontalShiftRatio, props.IsHorizontalShiftClamped
+  );
+  const py = computeAxis(
+    el.scrollTop, scrollableH, props.VerticalShift,
+    startY, endY, props.MaxVerticalShiftRatio, props.IsVerticalShiftClamped
+  );
+
+  // Apply the transform directly to the DOM inside the same layout pass that
+  // reads scroll offsets. Using refs + a second render cycle leaves the child
+  // one frame stale and, under some requestAnimationFrame throttling, never
+  // flushes at all — so the background appears frozen even though the source
+  // scrolled. Writing the style here keeps the parallax pixel-synchronous with
+  // the scroll (matches the native compositor-driven effect).
+  const child = childRef.value;
+  if (child) {
+    const t = `translate3d(${px}px, ${py}px, 0)`;
+    if (child.style.transform !== t) child.style.transform = t;
+  }
+  parallaxX.value = px;
+  parallaxY.value = py;
+};
+
+const handleScroll = () => {
+  if (rafId) cancelAnimationFrame(rafId);
+  // computeParallax reads scrollTop and writes the transform in the same tick,
+  // so no rAF is needed to stay pixel-synchronous. Keep the callback cheap.
+  computeParallax();
+};
+
+// The child is sized to 100% + |shift| in each shifted dimension so that the
+// parallax translation never reveals empty space (matches official arrange).
+const childStyle = computed(() => {
+  const style = {
+    transform: `translate3d(${parallaxX.value}px, ${parallaxY.value}px, 0)`,
+    willChange: 'transform'
+  };
+  if (props.HorizontalShift !== 0) {
+    style.width = `calc(100% + ${Math.abs(props.HorizontalShift)}px)`;
+  }
+  if (props.VerticalShift !== 0) {
+    style.height = `calc(100% + ${Math.abs(props.VerticalShift)}px)`;
+  }
+  return style;
 });
 
-// Expose methods if needed
-defineExpose({
-  refresh: calculateParallax
+const attach = () => {
+  detach();
+  scrollElement.value = resolveScrollElement(props.Source);
+  if (scrollElement.value) {
+    scrollElement.value.addEventListener('scroll', handleScroll, { passive: true });
+    computeParallax();
+  }
+};
+
+const detach = () => {
+  if (scrollElement.value) {
+    scrollElement.value.removeEventListener('scroll', handleScroll);
+  }
+  scrollElement.value = null;
+};
+
+// Track the resolved source value so a sibling ref that is still null at
+// render time (e.g. a ScrollViewer mounted after this component) is picked
+// up as soon as it becomes available.
+const resolvedSource = computed(() => {
+  const source = typeof props.Source === 'function' ? props.Source() : props.Source;
+  return unwrap(source);
 });
+
+watch(resolvedSource, () => nextTick(attach));
+watch(
+  () => [
+    props.HorizontalShift,
+    props.VerticalShift,
+    props.HorizontalSourceStartOffset,
+    props.HorizontalSourceEndOffset,
+    props.VerticalSourceStartOffset,
+    props.VerticalSourceEndOffset,
+    props.HorizontalSourceOffsetKind,
+    props.VerticalSourceOffsetKind,
+    props.IsHorizontalShiftClamped,
+    props.IsVerticalShiftClamped,
+    props.MaxHorizontalShiftRatio,
+    props.MaxVerticalShiftRatio
+  ],
+  computeParallax
+);
+
+onMounted(() => nextTick(attach));
+onBeforeUnmount(() => {
+  detach();
+  if (rafId) cancelAnimationFrame(rafId);
+});
+
+defineExpose({ refresh: computeParallax });
 </script>
 
 <style scoped>
@@ -298,17 +230,7 @@ defineExpose({
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
-  /* Use GPU acceleration for smooth parallax */
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
-  perspective: 1000px;
-}
-
-.parallax-source {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
 }
 </style>

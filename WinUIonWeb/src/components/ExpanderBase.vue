@@ -3,7 +3,7 @@
     class="win-expander"
     :class="{
       'is-expanded': isExpandedState,
-      'expand-up': ExpandDirection === 'Up',
+      'expand-up': resolvedExpandDirection === 'Up',
       'has-header-content': hasHeaderContent,
       'has-header-controls': hasHeaderControls
     }"
@@ -18,25 +18,25 @@
       <div class="win-expander-header-main">
         <span v-if="hasHeaderIcon" class="win-expander-header-icon icon" aria-hidden="true">
           <slot name="HeaderIcon">
-            <span v-if="isHeaderIconMarkup" v-html="HeaderIcon"></span>
-            <template v-else>{{ HeaderIcon }}</template>
+            <span v-if="isHeaderIconMarkup" v-html="resolvedHeaderIcon"></span>
+            <template v-else>{{ resolvedHeaderIcon }}</template>
           </slot>
         </span>
         <div class="win-expander-header-content">
           <slot name="Header">
-            <WinTextBlock
-              v-if="Header"
+            <TextBlock
+              v-if="resolvedHeader"
               class="win-expander-header-text"
-              :Text="Header"
+              :Text="resolvedHeader"
               FontSize="14"
               LineHeight="20"
               TextWrapping="Wrap" />
           </slot>
           <slot name="Description">
-            <WinTextBlock
-              v-if="Description"
+            <TextBlock
+              v-if="resolvedDescription"
               class="win-expander-description"
-              :Text="Description"
+              :Text="resolvedDescription"
               FontSize="var(--SettingsCardDescriptionFontSize, 12px)"
               LineHeight="16"
               Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))"
@@ -53,24 +53,26 @@
     </div>
     <div class="win-expander-grid">
       <div class="win-expander-inner">
-        <div class="win-expander-content" :style="contentStyle"><slot></slot></div>
+        <div class="win-expander-content" :style="contentStyle"><slot>{{ resolvedContent }}</slot></div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, useSlots, watch } from 'vue';
-import WinTextBlock from './WinTextBlock.vue';
+import { computed, getCurrentInstance, ref, useSlots, watch } from 'vue';
+import TextBlock from './TextBlock.vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 const props = defineProps({
   Header: { type: [String, Number], default: '' },
+  Content: { type: [String, Number], default: '' },
   Description: { type: [String, Number], default: '' },
   HeaderIcon: { type: String, default: '' },
   HeaderTemplate: { type: [Object, Function, String], default: null },
   HeaderTemplateSelector: { type: [Object, Function, String], default: null },
-  IsExpanded: { type: Boolean, default: false },
-  ExpandDirection: { type: String, default: 'Down' },
+  IsExpanded: { type: [Boolean, String], default: false },
+  ExpandDirection: { type: [String, Number], default: 'Down' },
   Padding: { type: [String, Number], default: '16' },
   HorizontalContentAlignment: { type: String, default: 'Stretch' },
   VerticalContentAlignment: { type: String, default: 'Stretch' },
@@ -84,19 +86,29 @@ const props = defineProps({
 
 const emit = defineEmits(['update:IsExpanded', 'Expanding', 'Collapsed']);
 
-const isExpandedState = ref(props.IsExpanded);
 const slots = useSlots();
-const hasHeaderIcon = computed(() => Boolean(props.HeaderIcon) || Boolean(slots.HeaderIcon));
+const instance = getCurrentInstance();
+const resolvedIsExpanded = computed(() => resolveXamlValue(props.IsExpanded, instance) === true);
+const resolvedExpandDirection = computed(() => resolveXamlValue(props.ExpandDirection, instance) || 'Down');
+const resolvedPadding = computed(() => resolveXamlValue(props.Padding, instance));
+const resolvedHorizontalContentAlignment = computed(() => resolveXamlValue(props.HorizontalContentAlignment, instance));
+const resolvedVerticalContentAlignment = computed(() => resolveXamlValue(props.VerticalContentAlignment, instance));
+const isExpandedState = ref(resolvedIsExpanded.value);
+const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
+const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
+const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
+const resolvedHeaderIcon = computed(() => resolveXamlValue(props.HeaderIcon, instance));
+const hasHeaderIcon = computed(() => Boolean(resolvedHeaderIcon.value) || Boolean(slots.HeaderIcon));
 const hasHeaderControls = computed(() => Boolean(slots.HeaderControls));
 const hasHeaderContent = computed(() => (
-  Boolean(props.Header)
-  || Boolean(props.Description)
+  Boolean(resolvedHeader.value)
+  || Boolean(resolvedDescription.value)
   || hasHeaderIcon.value
   || Boolean(slots.Header)
   || Boolean(slots.Description)
   || hasHeaderControls.value
 ));
-const isHeaderIconMarkup = computed(() => props.HeaderIcon.trim().startsWith('<'));
+const isHeaderIconMarkup = computed(() => String(resolvedHeaderIcon.value || '').trim().startsWith('<'));
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
   if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) {
@@ -165,9 +177,9 @@ const justifySelfAlignment = (value) => ({
 }[value] ?? 'stretch');
 
 const contentStyle = computed(() => ({
-  padding: xamlThickness(props.Padding),
-  alignItems: flexAlignment(props.HorizontalContentAlignment),
-  justifyContent: flexDistribution(props.VerticalContentAlignment)
+  padding: xamlThickness(resolvedPadding.value),
+  alignItems: flexAlignment(resolvedHorizontalContentAlignment.value),
+  justifyContent: flexDistribution(resolvedVerticalContentAlignment.value)
 }));
 
 const rootStyle = computed(() => {
@@ -188,7 +200,7 @@ const rootStyle = computed(() => {
   return style;
 });
 
-watch(() => props.IsExpanded, (newVal) => {
+watch(resolvedIsExpanded, (newVal) => {
   isExpandedState.value = newVal;
 });
 

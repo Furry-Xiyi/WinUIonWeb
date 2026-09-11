@@ -5,12 +5,12 @@
     class="win-auto-suggest-box"
     :class="{ 'is-suggestion-open-down': isOpen && openDirection === 'down', 'is-suggestion-open-up': isOpen && openDirection === 'up' }"
     :style="rootStyle">
-    <div v-if="Header || $slots.header" class="win-asb-header">
-      <slot name="header">{{ Header }}</slot>
+    <div v-if="resolvedHeader || $slots.header" class="win-asb-header">
+      <slot name="header">{{ resolvedHeader }}</slot>
     </div>
 
     <div ref="anchorRef" class="win-asb-anchor">
-      <WinTextBox
+      <TextBox
         class="win-asb-textbox"
         :Text="currentText"
         :PlaceholderText="PlaceholderText"
@@ -36,11 +36,11 @@
             <span class="win-asb-icon">{{ resolvedQueryIcon }}</span>
           </button>
         </template>
-      </WinTextBox>
+      </TextBox>
     </div>
 
-    <div v-if="Description || $slots.description" class="win-asb-description">
-      <slot name="description">{{ Description }}</slot>
+    <div v-if="resolvedDescription || $slots.description" class="win-asb-description">
+      <slot name="description">{{ resolvedDescription }}</slot>
     </div>
 
     <Teleport to="body">
@@ -51,7 +51,7 @@
         :class="[openDirection === 'up' ? 'opens-up' : 'opens-down', popupThemeClass]"
         :style="popupStyle"
         role="listbox">
-        <WinScrollViewer
+        <ScrollViewer
           class="win-asb-popup-scroll"
           VerticalScrollMode="Auto"
           VerticalScrollBarVisibility="Auto"
@@ -75,19 +75,20 @@
               </button>
             </div>
           </Transition>
-        </WinScrollViewer>
+        </ScrollViewer>
       </div>
     </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from './i18n/index';
 import type { ComputedRef, CSSProperties } from 'vue';
-import WinScrollViewer from './WinScrollViewer.vue';
-import WinTextBox from './WinTextBox.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import TextBox from './TextBox.vue';
 import { useFlyoutAnimation } from './useFlyoutAnimation';
+import { resolveXamlValue } from './xamlRuntime';
 
 const { t } = useI18n();
 
@@ -133,6 +134,9 @@ const props = withDefaults(defineProps<{
   Width: '',
   OpenOnFocus: true
 });
+const instance = getCurrentInstance();
+const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
+const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
 
 const emit = defineEmits<{
   'update:Text': [value: string];

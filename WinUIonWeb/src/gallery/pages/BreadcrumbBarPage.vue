@@ -1,81 +1,81 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.breadcrumbbar')" />
-        <WinTextBlock
+        <TextBlock class="page-header" :Text="$t('text.breadcrumbbar')" />
+        <TextBlock
           class="page-description"
           :Text="$t('text.breadcrumbbar-description')"
           TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme">
-            <WinTextBlock class="icon" Text="&#xE793;" />
-          </WinButton>
-          <WinToggleButton
+          <Button class="header-action" @Click="toggleTheme">
+            <TextBlock class="icon" Text="&#xE793;" />
+          </Button>
+          <ToggleButton
             :IsChecked="isFavoriteState"
             class="header-action"
             @update:IsChecked="toggleFavorite">
-            <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </WinToggleButton>
+            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
+          </ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinStackPanel>
-          <WinControlExample
+        <StackPanel>
+          <ControlExample
             class="basic-input-example-theme"
             :theme="pageTheme"
             :vue="BreadcrumbBarControlVue"
             :headerText="$t('sample.breadcrumbbar.control')">
             <template #example>
-              <WinBreadcrumbBar :ItemsSource="FoldersString" />
+              <BreadcrumbBar :ItemsSource="FoldersString" />
             </template>
-          </WinControlExample>
+          </ControlExample>
 
-          <WinControlExample
+          <ControlExample
             class="basic-input-example-theme"
             :theme="pageTheme"
             :vue="BreadcrumbBarCustomDataTemplateVue"
             :headerText="$t('sample.breadcrumbbar.custom-data-template')">
             <template #example>
-              <WinBreadcrumbBar
+              <BreadcrumbBar
                 :ItemsSource="Folders"
                 @ItemClicked="BreadcrumbBar2_ItemClicked">
                 <template #ItemTemplate="{ Item }">
-                  <WinTextBlock
+                  <TextBlock
                     :Text="Item.Name"
                     :aria-label="Item.Name"
                     v-bind="{ 'AutomationProperties.Name': Item.Name }" />
                 </template>
-              </WinBreadcrumbBar>
+              </BreadcrumbBar>
             </template>
 
             <template #options>
-              <WinButton @Click="ResetSampleButton_Click">
-                <WinTextBlock :Text="$t('sample.breadcrumbbar.reset-sample')" />
-              </WinButton>
-              <WinTextBlock
+              <Button @Click="ResetSampleButton_Click">
+                <TextBlock :Text="$t('sample.breadcrumbbar.reset-sample')" />
+              </Button>
+              <TextBlock
                 class="accessibility-announcement"
                 :Text="ResetAnnouncement"
                 aria-live="polite"
                 AutomationProperties.LiveSetting="Polite" />
             </template>
-          </WinControlExample>
-        </WinStackPanel>
+          </ControlExample>
+        </StackPanel>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, nextTick, ref } from 'vue';
-import WinBreadcrumbBar from '../../components/WinBreadcrumbBar.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinStackPanel from '../../components/WinStackPanel.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import BreadcrumbBar from '../../components/BreadcrumbBar.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -129,21 +129,21 @@ const ResetSampleButton_Click = () => {
   });
 };
 
-const BreadcrumbBarControlVue = `<WinBreadcrumbBar :ItemsSource="FoldersString" />
+const BreadcrumbBarControlVue = `<BreadcrumbBar :ItemsSource="FoldersString" />
 
 <script setup>
 const FoldersString = ${JSON.stringify(FoldersString, null, 2)};
 <\/script>`;
 
-const BreadcrumbBarCustomDataTemplateVue = `<WinBreadcrumbBar
+const BreadcrumbBarCustomDataTemplateVue = `<BreadcrumbBar
   :ItemsSource="Folders"
   @ItemClicked="BreadcrumbBar2_ItemClicked">
   <template #ItemTemplate="{ Item }">
-    <WinTextBlock
+    <TextBlock
       :Text="Item.Name"
       v-bind="{ 'AutomationProperties.Name': Item.Name }" />
   </template>
-</WinBreadcrumbBar>
+</BreadcrumbBar>
 
 <script setup>
 import { ref } from 'vue';

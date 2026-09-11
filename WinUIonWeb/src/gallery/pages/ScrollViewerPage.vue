@@ -1,5 +1,5 @@
 <template>
-  <WinScrollViewer
+  <ScrollViewer
     class="gallery-page-scroll"
     Width="100%"
     Height="100%"
@@ -7,19 +7,19 @@
     VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock
+        <TextBlock
           class="page-description"
           :Text="$t('text.scrollviewer-description')"
           TextWrapping="WrapWholeWords" />
       </div>
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.scrollviewer.content')"
           :theme="pageTheme"
           :vue="contentInsideScrollViewerCode">
           <template #example>
-            <WinScrollViewer
+            <ScrollViewer
               ref="ScrollViewerControl"
               Width="400"
               Height="266"
@@ -34,23 +34,23 @@
               :VerticalScrollMode="VerticalScrollMode"
               :VerticalScrollBarVisibility="VerticalScrollBarVisibility"
               @ViewChanged="onViewChanged">
-              <WinImage
+              <Image
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 v-bind="{ 'AutomationProperties.Name': $t('text.cliff') }"
                 :Source="cliffImage"
                 Stretch="None" />
-            </WinScrollViewer>
+            </ScrollViewer>
           </template>
 
           <template #options>
-            <WinGrid
+            <Grid
               Width="100%"
               MinWidth="200"
               ColumnDefinitions="Auto,*"
               RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-              <WinTextBlock Margin="0,0,10,0" VerticalAlignment="Center" :Text="$t('text.zoom-mode')" style="grid-column: 1; grid-row: 1;" />
-              <WinComboBox
+              <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" :Text="$t('text.zoom-mode')" style="grid-column: 1; grid-row: 1;" />
+              <ComboBox
                 v-model:SelectedIndex="ZoomModeSelectedIndex"
                 Width="100%"
                 HorizontalAlignment="Stretch"
@@ -58,7 +58,7 @@
                 :ItemsSource="ZoomModeItems"
                 style="grid-column: 2; grid-row: 1;" />
 
-              <WinSlider
+              <Slider
                 v-model:Value="ZoomFactor"
                 Width="100%"
                 :Header="$t('text.zoom')"
@@ -68,14 +68,14 @@
                 Margin="0,10,0,0"
                 style="grid-column: 1 / span 2; grid-row: 2;" />
 
-              <WinTextBlock
+              <TextBlock
                 HorizontalAlignment="Center"
                 Margin="0,12"
                 :Text="$t('text.scroll-mode')"
                 style="grid-column: 1 / span 2; grid-row: 3;" />
 
-              <WinTextBlock Margin="0,0,10,0" VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 4;" />
-              <WinComboBox
+              <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 4;" />
+              <ComboBox
                 v-model:SelectedIndex="HorizontalScrollModeSelectedIndex"
                 Width="100%"
                 HorizontalAlignment="Stretch"
@@ -83,8 +83,8 @@
                 :ItemsSource="ScrollModeItems"
                 style="grid-column: 2; grid-row: 4;" />
 
-              <WinTextBlock Margin="0,8,10,0" VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 5;" />
-              <WinComboBox
+              <TextBlock Margin="0,8,10,0" VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 5;" />
+              <ComboBox
                 v-model:SelectedIndex="VerticalScrollModeSelectedIndex"
                 Width="100%"
                 Margin="0,8,0,0"
@@ -93,14 +93,14 @@
                 :ItemsSource="ScrollModeItems"
                 style="grid-column: 2; grid-row: 5; margin-top: 8px;" />
 
-              <WinTextBlock
+              <TextBlock
                 HorizontalAlignment="Center"
                 Margin="0,20,0,12"
                 :Text="$t('text.scrollbar-visibility')"
                 style="grid-column: 1 / span 2; grid-row: 6;" />
 
-              <WinTextBlock Margin="0,0,10,0" VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 7;" />
-              <WinComboBox
+              <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 7;" />
+              <ComboBox
                 v-model:SelectedIndex="HorizontalScrollBarVisibilitySelectedIndex"
                 Width="100%"
                 HorizontalAlignment="Stretch"
@@ -108,8 +108,8 @@
                 :ItemsSource="ScrollBarVisibilityItems"
                 style="grid-column: 2; grid-row: 7;" />
 
-              <WinTextBlock Margin="0,8,10,0" VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 8;" />
-              <WinComboBox
+              <TextBlock Margin="0,8,10,0" VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 8;" />
+              <ComboBox
                 v-model:SelectedIndex="VerticalScrollBarVisibilitySelectedIndex"
                 Width="100%"
                 Margin="0,8,0,0"
@@ -117,23 +117,23 @@
                 v-bind="{ 'AutomationProperties.Name': $t('text.vertical-scrollbar-visibility-automation-name') }"
                 :ItemsSource="ScrollBarVisibilityItems"
                 style="grid-column: 2; grid-row: 8; margin-top: 8px;" />
-            </WinGrid>
+            </Grid>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, ref, watch } from 'vue'
-import WinComboBox from '../../components/WinComboBox.vue'
-import WinControlExample from '../../components/WinControlExample.vue'
-import WinGrid from '../../components/WinGrid.vue'
-import WinImage from '../../components/WinImage.vue'
-import WinScrollViewer from '../../components/WinScrollViewer.vue'
-import WinSlider from '../../components/WinSlider.vue'
-import WinTextBlock from '../../components/WinTextBlock.vue'
+import ComboBox from '../../components/ComboBox.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import Grid from '../../components/Grid.vue'
+import Image from '../../components/Image.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import Slider from '../../components/Slider.vue'
+import TextBlock from '../../components/TextBlock.vue'
 import { useI18n } from '../../components/i18n/index'
 import { createPageState } from '../../utils/pageState'
 
@@ -143,7 +143,7 @@ const { pageTheme } = createPageState(pageKey.value)
 const { t } = useI18n()
 
 const cliffImage = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg'
-const ScrollViewerControl = ref<InstanceType<typeof WinScrollViewer>>()
+const ScrollViewerControl = ref<InstanceType<typeof ScrollViewer>>()
 const ZoomModeValues = ['Disabled', 'Enabled'] as const
 const ScrollModeValues = ['Disabled', 'Enabled', 'Auto'] as const
 const ScrollBarVisibilityValues = ['Disabled', 'Auto', 'Hidden', 'Visible'] as const
@@ -172,7 +172,7 @@ const onViewChanged = ({ IsIntermediate }: { IsIntermediate: boolean }) => {
   if (typeof currentZoomFactor === 'number') ZoomFactor.value = currentZoomFactor
 }
 
-const contentInsideScrollViewerCode = computed(() => `<WinScrollViewer
+const contentInsideScrollViewerCode = computed(() => `<ScrollViewer
   Height="266"
   Width="400"
   ZoomMode="${ZoomMode.value}"
@@ -185,13 +185,13 @@ const contentInsideScrollViewerCode = computed(() => `<WinScrollViewer
   HorizontalScrollBarVisibility="${HorizontalScrollBarVisibility.value}"
   VerticalScrollMode="${VerticalScrollMode.value}"
   VerticalScrollBarVisibility="${VerticalScrollBarVisibility.value}">
-  <WinImage
+  <Image
     Source="${cliffImage}"
     AutomationProperties.Name="cliff"
     Stretch="None"
     HorizontalAlignment="Left"
     VerticalAlignment="Top" />
-</WinScrollViewer>`)
+</ScrollViewer>`)
 </script>
 
 <style scoped>

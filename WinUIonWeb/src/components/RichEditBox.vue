@@ -1,5 +1,5 @@
 <template>
-  <WinTextBox
+  <TextBox
     class="win-rich-edit-box"
     :style="rootStyle"
     :Header="Header"
@@ -19,12 +19,12 @@
     :ShowDeleteButton="false"
     @pointerdown.capture="onRootPointerDown"
     @contextmenu.capture="onRootContextMenu">
-    <template v-if="Header || $slots.header" #header>
-      <slot name="header">{{ Header }}</slot>
+    <template v-if="resolvedHeader || $slots.header" #header>
+      <slot name="header">{{ resolvedHeader }}</slot>
     </template>
 
     <template #field="{ onFocus: setTextBoxFocused, onBlur: setTextBoxBlurred, onPointerEnter, onPointerLeave }">
-      <WinScrollViewer
+      <ScrollViewer
         class="win-reb-editor-scroll"
         :style="editorScrollStyle"
         VerticalScrollMode="Auto"
@@ -56,15 +56,15 @@
           @keyup="onSelectionGesture"
           @pointerenter="onPointerEnter"
           @pointerleave="onPointerLeave"></div>
-      </WinScrollViewer>
+      </ScrollViewer>
     </template>
 
-    <template v-if="Description || $slots.description" #description>
-      <slot name="description">{{ Description }}</slot>
+    <template v-if="resolvedDescription || $slots.description" #description>
+      <slot name="description">{{ resolvedDescription }}</slot>
     </template>
-  </WinTextBox>
+  </TextBox>
 
-  <WinCommandBarFlyout
+  <CommandBarFlyout
     :Open="commandBarOpen"
     :AnchorRect="commandBarAnchor"
     :PrimaryCommands="commandBarPrimaryCommands"
@@ -75,14 +75,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
-import WinCommandBarFlyout from './WinCommandBarFlyout.vue';
-import WinScrollViewer from './WinScrollViewer.vue';
-import WinTextBox from './WinTextBox.vue';
+import CommandBarFlyout from './CommandBarFlyout.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import TextBox from './TextBox.vue';
 import { useI18n } from './i18n/index';
+import { resolveXamlValue } from './xamlRuntime';
 
 const { t } = useI18n();
+const instance = getCurrentInstance();
 
 type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
 type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
@@ -174,6 +176,8 @@ const props = withDefaults(defineProps<{
   Height: '',
   MinHeight: ''
 });
+const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
+const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
 
 const emit = defineEmits<{
   'update:Text': [value: string];
@@ -210,27 +214,27 @@ const commandBarPrimaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
   if (props.ShowFormattingCommands) {
     if (!isFormattingDisabled('bold')) commands.push({
       Name: 'BoldButton',
-      Label: t('text.bold'),
+      Label: t('sample.richeditbox.bold'),
       Icon: 'Bold',
-      'ToolTipService.ToolTip': t('text.bold'),
+      'ToolTipService.ToolTip': t('sample.richeditbox.bold'),
       Click: () => void runTextCommand('bold'),
       IsToggle: true,
       IsChecked: isCommandActive('bold')
     });
     if (!isFormattingDisabled('italic')) commands.push({
       Name: 'ItalicButton',
-      Label: t('text.italic'),
+      Label: t('sample.richeditbox.italic'),
       Icon: 'Italic',
-      'ToolTipService.ToolTip': t('text.italic'),
+      'ToolTipService.ToolTip': t('sample.richeditbox.italic'),
       Click: () => void runTextCommand('italic'),
       IsToggle: true,
       IsChecked: isCommandActive('italic')
     });
     if (!isFormattingDisabled('underline')) commands.push({
       Name: 'UnderlineButton',
-      Label: t('text.underline'),
+      Label: t('sample.richeditbox.underline'),
       Icon: 'Underline',
-      'ToolTipService.ToolTip': t('text.underline'),
+      'ToolTipService.ToolTip': t('sample.richeditbox.underline'),
       Click: () => void runTextCommand('underline'),
       IsToggle: true,
       IsChecked: isCommandActive('underline')
@@ -244,17 +248,12 @@ const commandBarSecondaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
   const selected = getSelectionText();
   const canEdit = !props.IsReadOnly && props.IsEnabled;
   const commands: CommandBarFlyoutCommand[] = [];
-  if (selected && canEdit) commands.push({ Name: 'CutButton', Label: t('text.cut'), Icon: 'Cut', Click: () => void runTextCommand('cut') });
-  if (selected) commands.push({ Name: 'CopyButton', Label: t('text.copy'), Icon: 'Copy', Click: () => void runTextCommand('copy') });
-  if (canEdit) commands.push({ Name: 'PasteButton', Label: t('text.paste'), Icon: 'Paste', Click: () => void runTextCommand('paste') });
-  commands.push({ Name: 'UndoButton', Label: t('text.undo'), Icon: 'Undo', Click: () => void runTextCommand('undo') });
-  commands.push({ Name: 'RedoButton', Label: t('text.redo'), Icon: 'Redo', Click: () => void runTextCommand('redo') });
-  commands.push({ Name: 'SelectAllButton', Label: t('text.select-all'), Icon: 'SelectAll', Click: () => void runTextCommand('selectAll') });
-  if (props.ShowFormattingCommands && canEdit) {
-    commands.push({ Name: 'BulletsButton', Label: t('text.bullets'), Icon: '\uE8FD', Click: () => void runTextCommand('insertUnorderedList') });
-    commands.push({ Name: 'NumberingButton', Label: t('text.numbering'), Icon: '\uE8EF', Click: () => void runTextCommand('insertOrderedList') });
-    commands.push({ Name: 'ClearFormattingButton', Label: t('text.clear-formatting'), Icon: '\uE894', Click: () => void runTextCommand('removeFormat') });
-  }
+  if (selected && canEdit) commands.push({ Name: 'CutButton', Label: t('sample.menubar.cut'), Icon: 'Cut', Click: () => void runTextCommand('cut') });
+  if (selected) commands.push({ Name: 'CopyButton', Label: t('sample.copy'), Icon: 'Copy', Click: () => void runTextCommand('copy') });
+  if (canEdit) commands.push({ Name: 'PasteButton', Label: t('sample.menubar.paste'), Icon: 'Paste', Click: () => void runTextCommand('paste') });
+  commands.push({ Name: 'UndoButton', Label: t('sample.menubar.undo'), Icon: 'Undo', Click: () => void runTextCommand('undo') });
+  commands.push({ Name: 'RedoButton', Label: t('sample.menubar.redo'), Icon: 'Redo', Click: () => void runTextCommand('redo') });
+  commands.push({ Name: 'SelectAllButton', Label: t('sample.select-all'), Icon: '\uE8B3', Click: () => void runTextCommand('selectAll') });
   commands.push(...props.SecondaryCommands);
   return commands;
 });
@@ -541,6 +540,27 @@ const execCommand = (command: string, value?: string) => {
   onInput();
 };
 
+// Apply a character color to the current RichEditBox selection. When there is
+// no selection WinUI's sample colors the whole document, which is also the
+// useful default for the color-picker example.
+const applyForegroundColor = (color: string, selectAllIfEmpty = true) => {
+  if (!editorRef.value || props.IsReadOnly || !props.IsEnabled) return;
+  focus();
+  restoreSelection();
+  const selection = window.getSelection();
+  const inEditor = Boolean(selection?.rangeCount && editorRef.value.contains(selection.anchorNode));
+  const hasRange = Boolean(inEditor && selection && !selection.getRangeAt(0).collapsed);
+  if (!hasRange && selectAllIfEmpty) {
+    const range = document.createRange();
+    range.selectNodeContents(editorRef.value);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }
+  document.execCommand('foreColor', false, color);
+  saveSelection();
+  onInput();
+};
+
 const setListStyleType = (styleType: string) => {
   const editor = editorRef.value;
   if (!editor) return;
@@ -599,6 +619,7 @@ onBeforeUnmount(() => {
 defineExpose({
   focus,
   execCommand,
+  applyForegroundColor,
   queryCommandState,
   hasSelection,
   setText,

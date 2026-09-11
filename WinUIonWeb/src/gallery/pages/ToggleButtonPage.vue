@@ -1,85 +1,95 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div style="position: relative;" class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.togglebutton')" />
-          <WinTextBlock
+          <TextBlock class="page-header" Text="{x:Bind $t('text.togglebutton'), Mode=OneWay}" />
+          <TextBlock
             class="page-description"
-            :Text="$t('text.a-togglebutton-looks-like-a-button-but-works-lik')"
+            Text="{x:Bind $t('text.a-togglebutton-looks-like-a-button-but-works-lik'), Mode=OneWay}"
             TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton
+            <Button
               class="header-action"
-              @Click="toggleTheme"
+              Click="toggleTheme"
               >
               <span class="icon"></span>
-            </WinButton>
-            <WinToggleButton
-              :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton
+              IsChecked="{x:Bind isFavoriteState, Mode=OneWay}"
               class="header-action"
-              @update:IsChecked="toggleFavorite"
+              Click="toggleFavorite"
               >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
               class="basic-input-example-theme"
-              :headerText="$t('sample.togglebutton.simple')"
-              :theme="pageTheme"
-              :vue="toggleButtonVue">
-              <template #example>
-                <WinToggleButton v-model:IsChecked="Toggle1"
-                  :Content="$t('text.togglebutton')"
-                  :IsEnabled="DisableToggle1 !== true"
-                  @Checked="ToggleButton_Checked"
-                  @Unchecked="ToggleButton_Unchecked" />
-              </template>
+              SampleDefinition="ToggleButton\ToggleButtonSimple.txt"
+              HeaderText="{x:Bind $t('sample.togglebutton.simple'), Mode=OneWay}"
+              Theme="{x:Bind pageTheme, Mode=OneWay}"
+              Vue="{x:Bind toggleButtonVue, Mode=OneWay}">
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                <ToggleButton IsChecked="{x:Bind Toggle1, Mode=TwoWay}"
+                  Content="{x:Bind $t('text.togglebutton'), Mode=OneWay}"
+                  IsEnabled="{x:Bind DisableToggle1.IsChecked.Value.Equals(x:False), Mode=OneWay}"
+                  Checked="ToggleButton_Checked"
+                  Unchecked="ToggleButton_Unchecked" />
+              </StackPanel>
 
-              <template #options>
-                <WinTextBlock class="output-text" :Text="Control1Output" />
-                <WinCheckBox v-model="DisableToggle1">
-                  <WinTextBlock :Text="$t('sample.disable-togglebutton')" />
-                </WinCheckBox>
-              </template>
-            </WinControlExample>
+              <ControlExample.Output>
+                <TextBlock class="output-text" Text="{x:Bind Control1Output, Mode=OneWay}" />
+              </ControlExample.Output>
+              <ControlExample.Options>
+                <StackPanel>
+                  <CheckBox IsChecked="{x:Bind DisableToggle1, Mode=TwoWay}">
+                    <TextBlock Text="{x:Bind $t('sample.disable-togglebutton'), Mode=OneWay}" />
+                  </CheckBox>
+                </StackPanel>
+              </ControlExample.Options>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'togglebutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
+const { t } = useI18n();
 const Toggle1 = ref(false);
 const DisableToggle1 = ref(false);
-const Control1Output = ref(Toggle1.value === true ? 'On' : 'Off');
+const Control1Output = ref(Toggle1.value === true ? t('sample.togglebutton.on') : t('sample.togglebutton.off'));
 
 const ToggleButton_Checked = () => {
-  Control1Output.value = 'On';
+  Control1Output.value = t('sample.togglebutton.on');
 };
 
 const ToggleButton_Unchecked = () => {
-  Control1Output.value = 'Off';
+  Control1Output.value = t('sample.togglebutton.off');
 };
 
-const toggleButtonVue = `<WinToggleButton v-model:IsChecked="Toggle1"
-  Content="ToggleButton"
-  :IsEnabled="DisableToggle1 !== true"
-  @Checked="ToggleButton_Checked"
-  @Unchecked="ToggleButton_Unchecked" />`;
+const toggleButtonVue = `<StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+  <ToggleButton IsChecked="{x:Bind Toggle1, Mode=TwoWay}"
+    Content="{x:Bind $t('text.togglebutton'), Mode=OneWay}"
+    IsEnabled="{x:Bind DisableToggle1.IsChecked.Value.Equals(x:False), Mode=OneWay}"
+    Checked="ToggleButton_Checked"
+    Unchecked="ToggleButton_Unchecked" />
+</StackPanel>`;
 
 </script>
 

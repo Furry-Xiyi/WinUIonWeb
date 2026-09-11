@@ -15,25 +15,31 @@
       <span v-if="isIndeterminate" class="checkbox-glyph indeterminate-glyph">{{ indeterminateGlyph }}</span>
     </span>
     <span class="checkbox-content">
-      <slot>{{ Content }}</slot>
+      <slot>{{ resolvedContent }}</slot>
     </span>
   </div>
 </template>
 
-<script setup>
-import { computed, ref, watch } from 'vue';
+<script setup lang="ts">
+import { computed, getCurrentInstance, ref, watch } from 'vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 const props = defineProps({
   Content: { type: [String, Number], default: '' },
-  IsChecked: { type: [Boolean, null], default: undefined },
-  IsThreeState: { type: Boolean, default: undefined },
-  IsEnabled: { type: Boolean, default: true },
+  IsChecked: { type: [Boolean, String, null], default: undefined },
+  IsThreeState: { type: [Boolean, String], default: undefined },
+  IsEnabled: { type: [Boolean, String], default: true },
   Margin: { type: String, default: '' },
   modelValue: { type: [Boolean, null], default: undefined },
   isThreeState: { type: Boolean, default: false },
   indeterminate: { type: Boolean, default: undefined },
   disabled: Boolean
 });
+const instance = getCurrentInstance();
+const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
+const resolvedIsChecked = computed(() => resolveXamlValue(props.IsChecked, instance));
+const resolvedIsThreeState = computed(() => resolveXamlValue(props.IsThreeState, instance));
+const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
 
 const emit = defineEmits([
   'update:modelValue',
@@ -47,19 +53,27 @@ const emit = defineEmits([
 ]);
 
 const localChecked = ref(false);
+const boundChecked = ref<boolean | null | undefined>(undefined);
 const isControlled = computed(() => props.IsChecked !== undefined || props.modelValue !== undefined || props.indeterminate !== undefined);
-const isThreeState = computed(() => props.IsThreeState ?? props.isThreeState);
-const isDisabled = computed(() => props.disabled || props.IsEnabled === false);
+const isThreeState = computed(() => resolvedIsThreeState.value ?? props.isThreeState);
+const isDisabled = computed(() => props.disabled || !resolvedIsEnabled.value);
 
 const currentValue = computed(() => {
   if (props.indeterminate === true) return null;
-  if (props.IsChecked !== undefined) return props.IsChecked;
-  if (props.modelValue !== undefined) return props.modelValue;
+  if (boundChecked.value !== undefined) return boundChecked.value;
   return localChecked.value;
 });
 
-watch(() => props.modelValue, (value) => {
-  if (value !== undefined) localChecked.value = value;
+watch([resolvedIsChecked, () => props.modelValue, () => props.indeterminate], ([isChecked, modelValue, indeterminate]) => {
+  if (indeterminate === true) boundChecked.value = null;
+  else if (isChecked !== undefined) {
+    // A three-state XAML binding uses null for Indeterminate. Do not coerce it
+    // to false when the page's TwoWay source sends the value back down.
+    boundChecked.value = isChecked === null ? null : isChecked === true;
+  }
+  else if (modelValue !== undefined) boundChecked.value = modelValue as boolean | null;
+  else boundChecked.value = undefined;
+  if (modelValue !== undefined) localChecked.value = modelValue as boolean;
 }, { immediate: true });
 
 const isChecked = computed(() => currentValue.value === true);
@@ -92,7 +106,10 @@ const xamlThickness = (value) => {
 const checkboxStyle = computed(() => props.Margin ? { margin: xamlThickness(props.Margin) } : {});
 
 const emitState = (value) => {
-  if (!isControlled.value) localChecked.value = value;
+  // XAML OneWay bindings still allow the control to change its target value.
+  // Keep a local value until the source sends a newer value back down.
+  boundChecked.value = value;
+  localChecked.value = value === true;
   emit('update:modelValue', value);
   emit('update:IsChecked', value);
 

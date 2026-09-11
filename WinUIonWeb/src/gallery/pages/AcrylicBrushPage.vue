@@ -3,31 +3,31 @@
     <div class="page-header page-heading">
           <h1 class="page-title">AcrylicBrush</h1>
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme">
+            <Button class="header-action" @click="toggleTheme">
               <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- Page Description -->
             <div class="page-description">
               <p>
                 Acrylic Brush might fall back to SolidColorbrush in certain scenarios.
                 If you can't see the Acrylic effect, please refer to
-                <WinHyperlinkButton navigateUri="https://learn.microsoft.com/windows/apps/design/style/acrylic#usability-and-adaptability">
+                <HyperlinkButton navigateUri="https://learn.microsoft.com/windows/apps/design/style/acrylic#usability-and-adaptability">
                   Acrylic brush adaptability documentation
-                </WinHyperlinkButton>.
+                </HyperlinkButton>.
                 Acrylic Brush uses in-app acrylic.
               </p>
             </div>
 
             <!-- Example 1: Default Acrylic -->
-            <WinControlExample :theme="pageTheme" headerText="Default In-App Acrylic">
+            <ControlExample :theme="pageTheme" headerText="Default In-App Acrylic">
               <template #example>
                 <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
                   <div class="background-shapes">
@@ -38,10 +38,10 @@
                   <div class="acrylic-layer default-acrylic"></div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 2: Custom Acrylic with Options -->
-            <WinControlExample :theme="pageTheme" headerText="Custom In-App Acrylic">
+            <ControlExample :theme="pageTheme" headerText="Custom In-App Acrylic">
               <template #example>
                 <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
                   <div class="background-shapes">
@@ -62,22 +62,22 @@
               <template #options>
                 <div class="options-group">
                   <label class="option-label">Tint Opacity:</label>
-                  <WinSlider v-model="tintOpacity" :min="0" :max="1" />
+                  <Slider v-model="tintOpacity" :min="0" :max="1" />
                   <span class="option-value">{{ tintOpacity.toFixed(3) }}</span>
                 </div>
                 <div class="options-group">
                   <label class="option-label">Tint Color:</label>
-                  <WinComboBox v-model:SelectedIndex="tintColorIndex" :ItemsSource="colorOptions" DisplayMemberPath="label" />
+                  <ComboBox v-model:SelectedIndex="tintColorIndex" :ItemsSource="colorOptions" DisplayMemberPath="label" />
                 </div>
                 <div class="options-group">
                   <label class="option-label">Fallback Color:</label>
-                  <WinComboBox v-model:SelectedIndex="fallbackColorIndex" :ItemsSource="fallbackColorOptions" DisplayMemberPath="label" />
+                  <ComboBox v-model:SelectedIndex="fallbackColorIndex" :ItemsSource="fallbackColorOptions" DisplayMemberPath="label" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 3: Luminosity Acrylic -->
-            <WinControlExample :theme="pageTheme" headerText="Luminosity In-App Acrylic">
+            <ControlExample :theme="pageTheme" headerText="Luminosity In-App Acrylic">
               <template #example>
                 <div class="acrylic-demo" :style="{ width: demoWidth + 'px', height: demoHeight + 'px' }">
                   <div class="background-shapes">
@@ -96,32 +96,32 @@
 
                 <div class="options-group">
                   <label class="option-label">Tint Opacity:</label>
-                  <WinSlider v-model="luminosityTintOpacity" :min="0" :max="1" />
+                  <Slider v-model="luminosityTintOpacity" :min="0" :max="1" />
                   <span class="option-value">{{ luminosityTintOpacity.toFixed(3) }}</span>
                 </div>
                 <div class="options-group">
                   <label class="option-label">Tint Luminosity Opacity:</label>
-                  <WinSlider v-model="luminosityOpacity" :min="0" :max="1" />
+                  <Slider v-model="luminosityOpacity" :min="0" :max="1" />
                   <span class="option-value">{{ luminosityOpacity.toFixed(3) }}</span>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { computed, inject, onMounted, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinSlider from '../../components/WinSlider.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import HyperlinkButton from '../../components/HyperlinkButton.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Slider from '../../components/Slider.vue';
+import ComboBox from '../../components/ComboBox.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 // Theme and Favorite
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'acrylicbrush');

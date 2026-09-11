@@ -1,19 +1,19 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.navigationview')" />
-        <WinTextBlock class="page-description" :Text="$t('text.navigationview-description')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.navigationview')" />
+        <TextBlock class="page-description" :Text="$t('text.navigationview-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme"><WinTextBlock class="icon" Text="" /></WinButton>
-          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-            <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </WinToggleButton>
+          <Button class="header-action" @Click="toggleTheme"><TextBlock class="icon" Text="" /></Button>
+          <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
+          </ToggleButton>
         </div>
       </div>
 
-      <WinStackPanel class="gallery-page-content" Spacing="0">
-        <WinControlExample
+      <StackPanel class="gallery-page-content" Spacing="0">
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.navigationview.default-header')"
           :theme="pageTheme"
@@ -21,9 +21,9 @@
           HorizontalContentAlignment="Stretch"
           :webViewHeight="250">
           <template #example>
-            <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
-              <WinTextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.default-description')" TextWrapping="WrapWholeWords" />
-              <WinNavigationView
+            <Grid class="sample-layout" RowDefinitions="Auto,Auto">
+              <TextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.default-description')" TextWrapping="WrapWholeWords" />
+              <NavigationView
                 style="grid-row: 2;"
                 class="nav-view-sample"
                 :SelectedItem="defaultSelectedItem"
@@ -31,13 +31,13 @@
                 :Header="defaultHeader"
                 PaneDisplayMode="Auto"
                 @SelectionChanged="NavigationView_SelectionChanged5">
-                <WinNavigationViewSamplePage :Page="defaultPage" :NavigationVersion="defaultNavigationVersion" :NavigationTransitionInfo="defaultNavigationTransitionInfo" />
-              </WinNavigationView>
-            </WinGrid>
+                <NavigationViewSamplePage :Page="defaultPage" :NavigationVersion="defaultNavigationVersion" :NavigationTransitionInfo="defaultNavigationTransitionInfo" />
+              </NavigationView>
+            </Grid>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.navigationview.top-header')"
           :theme="pageTheme"
@@ -45,9 +45,9 @@
           HorizontalContentAlignment="Stretch"
           :webViewHeight="200">
           <template #example>
-            <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
-              <WinTextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.top-description')" TextWrapping="WrapWholeWords" />
-              <WinNavigationView
+            <Grid class="sample-layout" RowDefinitions="Auto,Auto">
+              <TextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.top-description')" TextWrapping="WrapWholeWords" />
+              <NavigationView
                 style="grid-row: 2;"
                 class="nav-view-sample"
                 :SelectedItem="topSelectedItem"
@@ -55,13 +55,13 @@
                 :Header="$t('sample.navigationview.header-text')"
                 PaneDisplayMode="Top"
                 @SelectionChanged="NavigationView_SelectionChanged6">
-                <WinNavigationViewSamplePage :Page="topPage" :NavigationVersion="topNavigationVersion" :NavigationTransitionInfo="topNavigationTransitionInfo" />
-              </WinNavigationView>
-            </WinGrid>
+                <NavigationViewSamplePage :Page="topPage" :NavigationVersion="topNavigationVersion" :NavigationTransitionInfo="topNavigationTransitionInfo" />
+              </NavigationView>
+            </Grid>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.navigationview.adaptive-header')"
           :theme="pageTheme"
@@ -69,22 +69,22 @@
           HorizontalContentAlignment="Stretch"
           :webViewHeight="450">
           <template #example>
-            <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
-              <WinTextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.adaptive-description')" TextWrapping="WrapWholeWords" />
-              <WinNavigationView
+            <Grid class="sample-layout" RowDefinitions="Auto,Auto">
+              <TextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.adaptive-description')" TextWrapping="WrapWholeWords" />
+              <NavigationView
                 style="grid-row: 2;"
                 class="nav-view-sample"
                 :SelectedItem="adaptiveSelectedItem"
                 :MenuItems="adaptiveMenuItems"
                 :PaneDisplayMode="adaptivePaneMode"
                 @SelectionChanged="NavigationView_SelectionChanged2">
-                <WinNavigationViewSamplePage :Page="adaptivePage" :NavigationVersion="adaptiveNavigationVersion" :NavigationTransitionInfo="adaptiveNavigationTransitionInfo" />
-              </WinNavigationView>
-            </WinGrid>
+                <NavigationViewSamplePage :Page="adaptivePage" :NavigationVersion="adaptiveNavigationVersion" :NavigationTransitionInfo="adaptiveNavigationTransitionInfo" />
+              </NavigationView>
+            </Grid>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.navigationview.tabs-header')"
           :theme="pageTheme"
@@ -93,9 +93,9 @@
           HorizontalContentAlignment="Stretch"
           :webViewHeight="800">
           <template #example>
-            <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
-              <WinTextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.tabs-description')" TextWrapping="WrapWholeWords" />
-              <WinNavigationView
+            <Grid class="sample-layout" RowDefinitions="Auto,Auto">
+              <TextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.tabs-description')" TextWrapping="WrapWholeWords" />
+              <NavigationView
                 style="grid-row: 2;"
                 class="nav-view-sample"
                 :SelectedItem="tabsSelectedItem"
@@ -104,13 +104,13 @@
                 SelectionFollowsFocus="Enabled"
                 IsBackButtonVisible="Collapsed"
                 @SelectionChanged="NavigationView_SelectionChanged7">
-                <WinNavigationViewSamplePage :Page="tabsPage" :NavigationVersion="tabsNavigationVersion" :NavigationTransitionInfo="tabsNavigationTransitionInfo" />
-              </WinNavigationView>
-            </WinGrid>
+                <NavigationViewSamplePage :Page="tabsPage" :NavigationVersion="tabsNavigationVersion" :NavigationTransitionInfo="tabsNavigationTransitionInfo" />
+              </NavigationView>
+            </Grid>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.navigationview.data-binding-header')"
           :theme="pageTheme"
@@ -118,9 +118,9 @@
           HorizontalContentAlignment="Stretch"
           :webViewHeight="950">
           <template #example>
-            <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
-              <WinTextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.data-binding-description')" TextWrapping="WrapWholeWords" />
-              <WinNavigationView
+            <Grid class="sample-layout" RowDefinitions="Auto,Auto">
+              <TextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.data-binding-description')" TextWrapping="WrapWholeWords" />
+              <NavigationView
                 style="grid-row: 2;"
                 class="nav-view-sample"
                 :SelectedItem="dataSelectedItem"
@@ -128,22 +128,22 @@
                 :Header="dataHeader"
                 :MenuItemTemplateSelector="categoryTemplateSelector"
                 @SelectionChanged="NavigationView_SelectionChanged4">
-                <WinNavigationViewSamplePage :Page="dataPage" :NavigationVersion="dataNavigationVersion" :NavigationTransitionInfo="dataNavigationTransitionInfo" />
-              </WinNavigationView>
-            </WinGrid>
+                <NavigationViewSamplePage :Page="dataPage" :NavigationVersion="dataNavigationVersion" :NavigationTransitionInfo="dataNavigationTransitionInfo" />
+              </NavigationView>
+            </Grid>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.navigationview.footer-header')"
           :theme="pageTheme"
           :vue="footerExampleCode"
           HorizontalContentAlignment="Stretch">
           <template #example>
-            <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
-              <WinTextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.footer-description')" TextWrapping="WrapWholeWords" />
-              <WinNavigationView
+            <Grid class="sample-layout" RowDefinitions="Auto,Auto">
+              <TextBlock style="grid-row: 1;" Margin="0,0,0,12" :Text="$t('sample.navigationview.footer-description')" TextWrapping="WrapWholeWords" />
+              <NavigationView
                 style="grid-row: 2;"
                 class="nav-view-sample"
                 :SelectedItem="footerSelectedItem"
@@ -154,33 +154,33 @@
                 v-model:IsPaneOpen="footerIsPaneOpen"
                 :IsSettingsVisible="false"
                 @SelectionChanged="NavigationView_SelectionChanged9">
-                <WinNavigationViewSamplePage :Page="footerPage" :NavigationVersion="footerNavigationVersion" :NavigationTransitionInfo="footerNavigationTransitionInfo" />
-              </WinNavigationView>
-            </WinGrid>
+                <NavigationViewSamplePage :Page="footerPage" :NavigationVersion="footerNavigationVersion" :NavigationTransitionInfo="footerNavigationTransitionInfo" />
+              </NavigationView>
+            </Grid>
           </template>
           <template #options>
-            <WinRadioButtons
+            <RadioButtons
               :Header="$t('sample.navigationview.pane-position')"
               :ItemsSource="footerPaneOptions"
               v-model:SelectedIndex="footerPaneIndex" />
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.navigationview.hierarchical-header')"
           :theme="pageTheme"
           :vue="hierarchicalExampleCode"
           HorizontalContentAlignment="Stretch">
           <template #example>
-            <WinGrid class="sample-layout" RowDefinitions="Auto,Auto">
-              <WinStackPanel style="grid-row: 1;" Margin="0,0,0,15">
-                <WinTextBlock :Text="$t('sample.navigationview.hierarchy-description-1')" TextWrapping="WrapWholeWords" />
-                <WinTextBlock :Text="$t('sample.navigationview.hierarchy-description-2')" TextWrapping="WrapWholeWords" />
-                <WinTextBlock :Text="$t('sample.navigationview.hierarchy-description-3')" TextWrapping="WrapWholeWords" />
-                <WinTextBlock :Text="$t('sample.navigationview.hierarchy-description-4')" TextWrapping="WrapWholeWords" />
-              </WinStackPanel>
-              <WinNavigationView
+            <Grid class="sample-layout" RowDefinitions="Auto,Auto">
+              <StackPanel style="grid-row: 1;" Margin="0,0,0,15">
+                <TextBlock :Text="$t('sample.navigationview.hierarchy-description-1')" TextWrapping="WrapWholeWords" />
+                <TextBlock :Text="$t('sample.navigationview.hierarchy-description-2')" TextWrapping="WrapWholeWords" />
+                <TextBlock :Text="$t('sample.navigationview.hierarchy-description-3')" TextWrapping="WrapWholeWords" />
+                <TextBlock :Text="$t('sample.navigationview.hierarchy-description-4')" TextWrapping="WrapWholeWords" />
+              </StackPanel>
+              <NavigationView
                 style="grid-row: 2;"
                 class="nav-view-sample"
                 :SelectedItem="hierarchicalSelectedItem"
@@ -188,21 +188,21 @@
                 :PaneDisplayMode="hierarchicalPaneMode"
                 v-model:IsPaneOpen="hierarchicalIsPaneOpen"
                 @SelectionChanged="NavigationView_SelectionChanged8">
-                <WinNavigationViewSamplePage :Page="hierarchicalPage" :NavigationVersion="hierarchicalNavigationVersion" :NavigationTransitionInfo="hierarchicalNavigationTransitionInfo" />
-              </WinNavigationView>
-            </WinGrid>
+                <NavigationViewSamplePage :Page="hierarchicalPage" :NavigationVersion="hierarchicalNavigationVersion" :NavigationTransitionInfo="hierarchicalNavigationTransitionInfo" />
+              </NavigationView>
+            </Grid>
           </template>
           <template #options>
-            <WinStackPanel>
-              <WinTextBlock Margin="0,12,0,0" :Text="$t('sample.navigationview.pane-position-property')" />
-               <WinRadioButton GroupName="hierarchicalGroup" :Content="$t('sample.navigationview.left-mode')" :IsChecked="hierarchicalPaneMode === 'Left'" @Checked="panePositionLeft_Checked('nvSample8')" />
-               <WinRadioButton GroupName="hierarchicalGroup" :Content="$t('sample.navigationview.top-mode')" :IsChecked="hierarchicalPaneMode === 'Top'" @Checked="panePositionTop_Checked('nvSample8')" />
-               <WinRadioButton GroupName="hierarchicalGroup" :Content="$t('sample.navigationview.left-compact-mode')" :IsChecked="hierarchicalPaneMode === 'LeftCompact'" @Checked="panePositionLeftCompact_Checked('nvSample8')" />
-            </WinStackPanel>
+            <StackPanel>
+              <TextBlock Margin="0,12,0,0" :Text="$t('sample.navigationview.pane-position-property')" />
+               <RadioButton GroupName="hierarchicalGroup" :Content="$t('sample.navigationview.left-mode')" :IsChecked="hierarchicalPaneMode === 'Left'" @Checked="panePositionLeft_Checked('nvSample8')" />
+               <RadioButton GroupName="hierarchicalGroup" :Content="$t('sample.navigationview.top-mode')" :IsChecked="hierarchicalPaneMode === 'Top'" @Checked="panePositionTop_Checked('nvSample8')" />
+               <RadioButton GroupName="hierarchicalGroup" :Content="$t('sample.navigationview.left-compact-mode')" :IsChecked="hierarchicalPaneMode === 'LeftCompact'" @Checked="panePositionLeftCompact_Checked('nvSample8')" />
+            </StackPanel>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.navigationview.api-header')"
           :theme="pageTheme"
@@ -210,7 +210,7 @@
           HorizontalContentAlignment="Stretch"
           :webViewHeight="250">
           <template #example>
-            <WinNavigationView
+            <NavigationView
               class="nav-view-sample nav-view-api"
               :SelectedItem="apiSelectedItem"
               :MenuItems="apiMenuItems"
@@ -226,67 +226,67 @@
               :ExpandedModeThresholdWidth="500"
               @SelectionChanged="NavigationView_SelectionChanged">
               <template v-if="apiAutoSuggestVisible" #AutoSuggestBox>
-                <WinAutoSuggestBox :AutomationProperties.Name="$t('sample.navigationview.search')" QueryIcon="Find" />
+                <AutoSuggestBox :AutomationProperties.Name="$t('sample.navigationview.search')" QueryIcon="Find" />
               </template>
               <template v-if="apiPaneCustomVisible" #PaneCustomContent>
-                <WinHyperlinkButton Margin="12,0" :Content="$t('sample.navigationview.more-info')" />
+                <HyperlinkButton Margin="12,0" :Content="$t('sample.navigationview.more-info')" />
               </template>
               <template v-if="apiPaneFooterVisible" #PaneFooter>
-                <WinStackPanel class="api-pane-footer" :Orientation="apiPaneMode === 'Top' ? 'Horizontal' : 'Vertical'">
-                  <WinButton class="pane-footer-action" Style="{StaticResource SubtleButtonStyle}" :AutomationProperties.Name="$t('sample.navigationview.download')">
-                    <WinTextBlock class="icon" Text="" />
-                  </WinButton>
-                  <WinButton class="pane-footer-action" Style="{StaticResource SubtleButtonStyle}" :AutomationProperties.Name="$t('sample.navigationview.favorite')">
-                    <WinTextBlock class="icon" Text="" />
-                  </WinButton>
-                </WinStackPanel>
+                <StackPanel class="api-pane-footer" :Orientation="apiPaneMode === 'Top' ? 'Horizontal' : 'Vertical'">
+                  <Button class="pane-footer-action" Style="{StaticResource SubtleButtonStyle}" :AutomationProperties.Name="$t('sample.navigationview.download')">
+                    <TextBlock class="icon" Text="" />
+                  </Button>
+                  <Button class="pane-footer-action" Style="{StaticResource SubtleButtonStyle}" :AutomationProperties.Name="$t('sample.navigationview.favorite')">
+                    <TextBlock class="icon" Text="" />
+                  </Button>
+                </StackPanel>
               </template>
-              <WinNavigationViewSamplePage :Page="apiPage" :NavigationVersion="apiNavigationVersion" :NavigationTransitionInfo="apiNavigationTransitionInfo" />
-            </WinNavigationView>
+              <NavigationViewSamplePage :Page="apiPage" :NavigationVersion="apiNavigationVersion" :NavigationTransitionInfo="apiNavigationTransitionInfo" />
+            </NavigationView>
           </template>
           <template #options>
-            <WinStackPanel class="api-options">
-              <WinCheckBox v-model:IsChecked="apiSettingsVisible"><WinTextBlock :Text="$t('sample.navigationview.settings-visible')" /></WinCheckBox>
-              <WinCheckBox v-model:IsChecked="apiBackVisible"><WinTextBlock :Text="$t('sample.navigationview.back-visible')" /></WinCheckBox>
-              <WinCheckBox v-model:IsChecked="apiBackEnabled"><WinTextBlock :Text="$t('sample.navigationview.back-enabled')" /></WinCheckBox>
-              <WinCheckBox v-model:IsChecked="apiAutoSuggestVisible"><WinTextBlock :Text="$t('sample.navigationview.autosuggest-visible')" /></WinCheckBox>
-              <WinTextBlock Margin="0,12,0,0" :Text="$t('sample.navigationview.header-label')" />
-              <WinTextBox v-model:Text="apiHeader" :AutomationProperties.Name="$t('sample.navigationview.header-label')" />
-              <WinCheckBox v-model:IsChecked="apiAlwaysShowHeader"><WinTextBlock :Text="$t('sample.navigationview.always-show-header')" /></WinCheckBox>
-              <WinTextBlock Margin="0,12,0,0" :Text="$t('sample.navigationview.pane-title-label')" />
-              <WinTextBox v-model:Text="apiPaneTitle" :AutomationProperties.Name="$t('sample.navigationview.pane-title-label')" />
-              <WinCheckBox v-model:IsChecked="apiPaneCustomVisible"><WinTextBlock :Text="$t('sample.navigationview.pane-custom-visible')" /></WinCheckBox>
-              <WinCheckBox v-model:IsChecked="apiPaneFooterVisible"><WinTextBlock :Text="$t('sample.navigationview.pane-footer-visible')" /></WinCheckBox>
-              <WinTextBlock Margin="0,12,0,0" :Text="$t('sample.navigationview.pane-position-property')" />
-               <WinRadioButton GroupName="apiPanePosition" :Content="$t('sample.navigationview.left')" :IsChecked="apiPaneMode === 'Left'" @Checked="panePositionLeft_Checked('nvSample')" />
-               <WinRadioButton GroupName="apiPanePosition" Margin="0,0,0,12" :Content="$t('sample.navigationview.top')" :IsChecked="apiPaneMode === 'Top'" @Checked="panePositionTop_Checked('nvSample')" />
-              <WinCheckBox v-model:IsChecked="apiSelectionFollowsFocus"><WinTextBlock :Text="$t('sample.navigationview.keyboard-selection-follows-focus')" /></WinCheckBox>
-              <WinCheckBox v-model:IsChecked="apiSuppressMenuItem2"><WinTextBlock :Text="$t('sample.navigationview.suppress-menu-item-2')" /></WinCheckBox>
-            </WinStackPanel>
+            <StackPanel class="api-options">
+              <CheckBox v-model:IsChecked="apiSettingsVisible"><TextBlock :Text="$t('sample.navigationview.settings-visible')" /></CheckBox>
+              <CheckBox v-model:IsChecked="apiBackVisible"><TextBlock :Text="$t('sample.navigationview.back-visible')" /></CheckBox>
+              <CheckBox v-model:IsChecked="apiBackEnabled"><TextBlock :Text="$t('sample.navigationview.back-enabled')" /></CheckBox>
+              <CheckBox v-model:IsChecked="apiAutoSuggestVisible"><TextBlock :Text="$t('sample.navigationview.autosuggest-visible')" /></CheckBox>
+              <TextBlock Margin="0,12,0,0" :Text="$t('sample.navigationview.header-label')" />
+              <TextBox v-model:Text="apiHeader" :AutomationProperties.Name="$t('sample.navigationview.header-label')" />
+              <CheckBox v-model:IsChecked="apiAlwaysShowHeader"><TextBlock :Text="$t('sample.navigationview.always-show-header')" /></CheckBox>
+              <TextBlock Margin="0,12,0,0" :Text="$t('sample.navigationview.pane-title-label')" />
+              <TextBox v-model:Text="apiPaneTitle" :AutomationProperties.Name="$t('sample.navigationview.pane-title-label')" />
+              <CheckBox v-model:IsChecked="apiPaneCustomVisible"><TextBlock :Text="$t('sample.navigationview.pane-custom-visible')" /></CheckBox>
+              <CheckBox v-model:IsChecked="apiPaneFooterVisible"><TextBlock :Text="$t('sample.navigationview.pane-footer-visible')" /></CheckBox>
+              <TextBlock Margin="0,12,0,0" :Text="$t('sample.navigationview.pane-position-property')" />
+               <RadioButton GroupName="apiPanePosition" :Content="$t('sample.navigationview.left')" :IsChecked="apiPaneMode === 'Left'" @Checked="panePositionLeft_Checked('nvSample')" />
+               <RadioButton GroupName="apiPanePosition" Margin="0,0,0,12" :Content="$t('sample.navigationview.top')" :IsChecked="apiPaneMode === 'Top'" @Checked="panePositionTop_Checked('nvSample')" />
+              <CheckBox v-model:IsChecked="apiSelectionFollowsFocus"><TextBlock :Text="$t('sample.navigationview.keyboard-selection-follows-focus')" /></CheckBox>
+              <CheckBox v-model:IsChecked="apiSuppressMenuItem2"><TextBlock :Text="$t('sample.navigationview.suppress-menu-item-2')" /></CheckBox>
+            </StackPanel>
           </template>
-        </WinControlExample>
-      </WinStackPanel>
+        </ControlExample>
+      </StackPanel>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import WinAutoSuggestBox from '../../components/WinAutoSuggestBox.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinHyperlinkButton from '../../components/WinHyperlinkButton.vue';
-import WinGrid from '../../components/WinGrid.vue';
-import WinNavigationView from '../../components/WinNavigationView.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinRadioButtons from '../../components/WinRadioButtons.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinStackPanel from '../../components/WinStackPanel.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinTextBox from '../../components/WinTextBox.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinNavigationViewSamplePage from '../components/WinNavigationViewSamplePage.vue';
+import AutoSuggestBox from '../../components/AutoSuggestBox.vue';
+import Button from '../../components/Button.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import HyperlinkButton from '../../components/HyperlinkButton.vue';
+import Grid from '../../components/Grid.vue';
+import NavigationView from '../../components/NavigationView.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import RadioButtons from '../../components/RadioButtons.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import TextBox from '../../components/TextBox.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import NavigationViewSamplePage from '../components/NavigationViewSamplePage.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 import { createEntranceNavigationTransitionInfo } from '../../utils/navigationTransitionInfo';
@@ -538,36 +538,36 @@ const NavigationView_SelectionChanged = (args) => {
   if (!args.IsSettingsSelected) apiHeader.value = pageTitle(apiPage.value);
 };
 
-const defaultExampleCode = `<WinNavigationView
+const defaultExampleCode = `<NavigationView
   Height="460"
   :Header="$t('sample.navigationview.header-text')"
   PaneDisplayMode="Auto"
   :SelectedItem="selectedItem"
   :MenuItems="menuItems"
   @SelectionChanged="NavigationView_SelectionChanged5">
-  <WinNavigationViewSamplePage :Page="page" />
-</WinNavigationView>`;
+  <NavigationViewSamplePage :Page="page" />
+</NavigationView>`;
 
-const topExampleCode = `<WinNavigationView
+const topExampleCode = `<NavigationView
   Height="460"
   :Header="$t('sample.navigationview.header-text')"
   PaneDisplayMode="Top"
   :SelectedItem="selectedItem"
   :MenuItems="menuItems"
   @SelectionChanged="NavigationView_SelectionChanged6">
-  <WinNavigationViewSamplePage :Page="page" />
-</WinNavigationView>`;
+  <NavigationViewSamplePage :Page="page" />
+</NavigationView>`;
 
-const adaptiveExampleCode = `<WinNavigationView
+const adaptiveExampleCode = `<NavigationView
   Height="460"
   :PaneDisplayMode="paneDisplayMode"
   :SelectedItem="selectedItem"
   :MenuItems="menuItems"
   @SelectionChanged="NavigationView_SelectionChanged2">
-  <WinNavigationViewSamplePage :Page="page" />
-</WinNavigationView>`;
+  <NavigationViewSamplePage :Page="page" />
+</NavigationView>`;
 
-const tabsExampleCode = `<WinNavigationView
+const tabsExampleCode = `<NavigationView
   Height="460"
   PaneDisplayMode="Top"
   SelectionFollowsFocus="Enabled"
@@ -580,25 +580,25 @@ const tabsExampleCode = `<WinNavigationView
     { Content: $t('sample.navigationview.item-4'), Tag: 'SamplePage4' }
   ]"
   @SelectionChanged="NavigationView_SelectionChanged7">
-  <WinNavigationViewSamplePage :Page="page" />
-</WinNavigationView>`;
+  <NavigationViewSamplePage :Page="page" />
+</NavigationView>`;
 
 const tabsCodeBehind = `const NavigationView_SelectionChanged7 = (sender, args) => {
   const page = args.SelectedItem.Tag;
   navigate(page, args.RecommendedNavigationTransitionInfo);
 };`;
 
-const dataBindingExampleCode = `<WinNavigationView
+const dataBindingExampleCode = `<NavigationView
   Height="460"
   :SelectedItem="selectedItem"
   :MenuItemsSource="categories"
   :MenuItemTemplateSelector="categoryTemplateSelector"
   :Header="header"
   @SelectionChanged="NavigationView_SelectionChanged4">
-  <WinNavigationViewSamplePage Page="SamplePage1" />
-</WinNavigationView>`;
+  <NavigationViewSamplePage Page="SamplePage1" />
+</NavigationView>`;
 
-const footerExampleCode = `<WinNavigationView
+const footerExampleCode = `<NavigationView
   Height="460"
   :Header="$t('sample.navigationview.header-text')"
   :PaneDisplayMode="paneDisplayMode"
@@ -607,19 +607,19 @@ const footerExampleCode = `<WinNavigationView
   :MenuItems="menuItems"
   :FooterMenuItems="footerMenuItems"
   @SelectionChanged="NavigationView_SelectionChanged9">
-  <WinNavigationViewSamplePage :Page="page" />
-</WinNavigationView>`;
+  <NavigationViewSamplePage :Page="page" />
+</NavigationView>`;
 
-const hierarchicalExampleCode = `<WinNavigationView
+const hierarchicalExampleCode = `<NavigationView
   Height="460"
   :PaneDisplayMode="paneDisplayMode"
   :SelectedItem="selectedItem"
   :MenuItems="hierarchicalMenuItems"
   @SelectionChanged="NavigationView_SelectionChanged8">
-  <WinNavigationViewSamplePage :Page="page" />
-</WinNavigationView>`;
+  <NavigationViewSamplePage :Page="page" />
+</NavigationView>`;
 
-const apiExampleCode = computed(() => `<WinNavigationView
+const apiExampleCode = computed(() => `<NavigationView
   :IsSettingsVisible="${apiSettingsVisible.value}"
   IsBackButtonVisible="${apiBackVisible.value ? 'Visible' : 'Collapsed'}"
   :IsBackEnabled="${apiBackEnabled.value}"
@@ -631,11 +631,11 @@ const apiExampleCode = computed(() => `<WinNavigationView
   SelectionFollowsFocus="${apiSelectionFollowsFocus.value ? 'Enabled' : 'Disabled'}"
   :MenuItems="menuItems"
   @SelectionChanged="NavigationView_SelectionChanged">
-  ${apiAutoSuggestVisible.value ? `<template #AutoSuggestBox><WinAutoSuggestBox QueryIcon="Find" AutomationProperties.Name="${t('sample.navigationview.search')}" /></template>` : ''}
-  ${apiPaneCustomVisible.value ? `<template #PaneCustomContent><WinHyperlinkButton Content="${t('sample.navigationview.more-info')}" /></template>` : ''}
-  ${apiPaneFooterVisible.value ? '<template #PaneFooter><WinStackPanel><WinButton /><WinButton /></WinStackPanel></template>' : ''}
-  <WinNavigationViewSamplePage :Page="page" />
-</WinNavigationView>`);
+  ${apiAutoSuggestVisible.value ? `<template #AutoSuggestBox><AutoSuggestBox QueryIcon="Find" AutomationProperties.Name="${t('sample.navigationview.search')}" /></template>` : ''}
+  ${apiPaneCustomVisible.value ? `<template #PaneCustomContent><HyperlinkButton Content="${t('sample.navigationview.more-info')}" /></template>` : ''}
+  ${apiPaneFooterVisible.value ? '<template #PaneFooter><StackPanel><Button /><Button /></StackPanel></template>' : ''}
+  <NavigationViewSamplePage :Page="page" />
+</NavigationView>`);
 </script>
 
 <style scoped>

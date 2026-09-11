@@ -14,7 +14,7 @@
       :style="visualizerStyle"
     >
       <slot name="visualizer">
-        <WinRefreshVisualizer
+        <RefreshVisualizer
           :refreshState="currentRefreshState"
           @refreshStateChanged="handleRefreshStateChanged"
         />
@@ -22,7 +22,7 @@
     </div>
 
     <!-- Scrollable content -->
-    <WinScrollViewer
+    <ScrollViewer
       ref="contentRef"
       class="refresh-container-content"
       :style="contentStyle"
@@ -33,14 +33,14 @@
       @ViewChanged="onContentViewChanged"
     >
       <slot></slot>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import WinScrollViewer from './WinScrollViewer.vue'
-import WinRefreshVisualizer from './WinRefreshVisualizer.vue'
+import ScrollViewer from './ScrollViewer.vue'
+import RefreshVisualizer from './RefreshVisualizer.vue'
 
 // Props - 对齐官方 RefreshContainer API
 interface Props {
@@ -83,7 +83,7 @@ enum RefreshVisualizerState {
 
 // State
 const containerRef = ref<HTMLElement | null>(null)
-const contentRef = ref<InstanceType<typeof WinScrollViewer>>()
+const contentRef = ref<InstanceType<typeof ScrollViewer>>()
 const contentScrollTop = ref(0)
 const currentRefreshState = ref<RefreshVisualizerState>(RefreshVisualizerState.Idle)
 const isRefreshing = ref(false)

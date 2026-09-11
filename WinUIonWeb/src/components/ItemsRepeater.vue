@@ -14,7 +14,7 @@
       @focusin="onGettingFocus"
       @keydown="onKeyDown">
       <slot :item="item" :index="index">
-        <WinTextBlock :Text="String(item)" />
+        <TextBlock :Text="String(item)" />
       </slot>
     </div>
   </div>
@@ -22,7 +22,7 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
-import WinTextBlock from './WinTextBlock.vue';
+import TextBlock from './TextBlock.vue';
 
 const props = defineProps({
   ItemsSource: { type: [Array, Object], default: () => [] },

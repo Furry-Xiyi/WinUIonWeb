@@ -60,7 +60,7 @@
             <div class="win-media-timeline-grid">
               <div class="win-media-progress-host">
                 <div class="win-media-progress-slider">
-                  <WinSlider
+                  <Slider
                     :Value="currentTime"
                     :Minimum="0"
                     :Maximum="duration || 1"
@@ -72,7 +72,7 @@
                     @update:Value="seekTo" />
                 </div>
                 <div v-if="isBuffering || mediaError" class="win-media-loading-progress">
-                  <WinProgressBar
+                  <ProgressBar
                     :IsIndeterminate="isBuffering || mediaError"
                     :ShowError="mediaError"
                     Width="100%"
@@ -89,7 +89,7 @@
           <div class="win-media-command-border">
             <div class="win-media-command-bar" role="toolbar" :aria-label="t('text.media-transport-controls')">
               <div class="win-media-command-left">
-                <WinFlyout
+                <Flyout
                   v-if="isVolumeButtonVisible"
                   ref="volumeFlyoutRef"
                   v-model:IsOpen="isVolumeFlyoutOpen"
@@ -115,7 +115,7 @@
                       <span class="win-media-glyph" aria-hidden="true">{{ volumeGlyph }}</span>
                     </button>
                     <div class="win-media-volume-slider">
-                      <WinSlider
+                      <Slider
                         :Value="volumePercent"
                         :Minimum="0"
                         :Maximum="100"
@@ -128,7 +128,7 @@
                     </div>
                     <span class="win-media-volume-value">{{ Math.round(volumePercent) }}</span>
                   </div>
-                </WinFlyout>
+                </Flyout>
               </div>
 
               <div class="win-media-command-center">
@@ -183,9 +183,9 @@
 
 <script setup lang="ts">
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, unref, watch } from 'vue';
-import WinFlyout from './WinFlyout.vue';
-import WinProgressBar from './WinProgressBar.vue';
-import WinSlider from './WinSlider.vue';
+import Flyout from './Flyout.vue';
+import ProgressBar from './ProgressBar.vue';
+import Slider from './Slider.vue';
 import { useI18n } from './i18n/index';
 
 const props = defineProps({
@@ -1001,7 +1001,7 @@ defineExpose({ MediaPlayer: videoRef });
   text-align: right;
 }
 
-.win-flyout:has(.win-media-volume-panel) {
+.flyout:has(.win-media-volume-panel) {
   min-width: 0;
   padding: 0;
   color: var(--text-primary);
@@ -1009,7 +1009,7 @@ defineExpose({ MediaPlayer: videoRef });
   border-radius: var(--overlay-corner-radius, 8px);
 }
 
-.win-flyout:has(.win-media-volume-panel)::before {
+.flyout:has(.win-media-volume-panel)::before {
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -1019,6 +1019,6 @@ defineExpose({ MediaPlayer: videoRef });
   border-radius: inherit;
 }
 
-.win-flyout:has(.win-media-volume-panel) .win-flyout-scroll { max-height: none; }
+.flyout:has(.win-media-volume-panel) .flyout-scroll { max-height: none; }
 
 </style>

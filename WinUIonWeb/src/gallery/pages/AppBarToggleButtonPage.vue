@@ -1,74 +1,74 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.appbar-toggle-button')" />
-        <WinTextBlock class="page-description" :Text="$t('text.appbar-toggle-button-description')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.appbar-toggle-button')" />
+        <TextBlock class="page-description" :Text="$t('text.appbar-toggle-button-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+          <Button class="header-action" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+          <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
             <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-          </WinToggleButton>
+          </ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.symbol')" :theme="pageTheme" :vue="symbolCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.symbol')" :theme="pageTheme" :vue="symbolCode">
           <template #example>
             <div class="sample-row">
-              <WinAppBarToggleButton Icon="Shuffle" Label="SymbolIcon" v-model:IsChecked="checked[0]" @Click="onClicked(0)" />
-              <WinTextBlock class="output-text" :Text="outputs[0]" />
+              <AppBarToggleButton Icon="Shuffle" Label="SymbolIcon" v-model:IsChecked="checked[0]" @Click="onClicked(0)" />
+              <TextBlock class="output-text" :Text="outputs[0]" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.bitmap')" :theme="pageTheme" :vue="bitmapCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.bitmap')" :theme="pageTheme" :vue="bitmapCode">
           <template #example>
             <div class="sample-row">
-              <WinAppBarToggleButton Label="BitmapIcon" v-model:IsChecked="checked[1]" @Click="onClicked(1)">
+              <AppBarToggleButton Label="BitmapIcon" v-model:IsChecked="checked[1]" @Click="onClicked(1)">
                 <template #content><span class="bitmap-icon" :style="bitmapStyle" aria-hidden="true" /></template>
-              </WinAppBarToggleButton>
-              <WinTextBlock class="output-text" :Text="outputs[1]" />
+              </AppBarToggleButton>
+              <TextBlock class="output-text" :Text="outputs[1]" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.font')" :theme="pageTheme" :vue="fontCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.font')" :theme="pageTheme" :vue="fontCode">
           <template #example>
             <div class="sample-row">
-              <WinAppBarToggleButton Label="FontIcon" v-model:IsChecked="checked[2]" @Click="onClicked(2)">
+              <AppBarToggleButton Label="FontIcon" v-model:IsChecked="checked[2]" @Click="onClicked(2)">
                 <template #content><span class="font-icon" aria-hidden="true">&#x03A3;</span></template>
-              </WinAppBarToggleButton>
-              <WinTextBlock class="output-text" :Text="outputs[2]" />
+              </AppBarToggleButton>
+              <TextBlock class="output-text" :Text="outputs[2]" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.path')" :theme="pageTheme" :vue="pathCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.path')" :theme="pageTheme" :vue="pathCode">
           <template #example>
             <div class="sample-row">
-              <WinAppBarToggleButton Label="PathIcon" IsThreeState="True" v-model:IsChecked="checked[3]" @Click="onClicked(3)">
+              <AppBarToggleButton Label="PathIcon" IsThreeState="True" v-model:IsChecked="checked[3]" @Click="onClicked(3)">
                 <template #content>
                   <svg class="path-icon" viewBox="4 9 21 16" aria-hidden="true"><path d="M20 20L24 10V24H5Z" /></svg>
                 </template>
-              </WinAppBarToggleButton>
-              <WinTextBlock class="output-text" :Text="outputs[3]" />
+              </AppBarToggleButton>
+              <TextBlock class="output-text" :Text="outputs[3]" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinAppBarToggleButton from '../../components/WinAppBarToggleButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import AppBarToggleButton from '../../components/AppBarToggleButton.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -88,24 +88,24 @@ const onClicked = (index: number) => {
 
 const bitmapStyle = computed(() => ({ '--bitmap-source': `url(${slicesImage})` }));
 
-const symbolCode = `<WinAppBarToggleButton Icon="Shuffle" Label="SymbolIcon" Click="AppBarButton_Click" />`;
-const bitmapCode = `<WinAppBarToggleButton Label="BitmapIcon" Click="AppBarButton_Click">
-  <WinAppBarToggleButton.Icon>
-    <WinBitmapIcon UriSource="/Assets/SampleMedia/Slices2.png" />
-  </WinAppBarToggleButton.Icon>
-</WinAppBarToggleButton>`;
-const fontCode = `<WinAppBarToggleButton Label="FontIcon" Click="AppBarButton_Click">
-  <WinAppBarToggleButton.Icon>
-    <WinFontIcon FontFamily="Candara" Glyph="&#x03A3;" />
-  </WinAppBarToggleButton.Icon>
-</WinAppBarToggleButton>`;
-const pathCode = `<WinAppBarToggleButton Label="PathIcon" Click="AppBarButton_Click" IsThreeState="True">
-  <WinAppBarToggleButton.Content>
-    <WinViewbox Stretch="Uniform">
-      <WinPathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24" />
-    </WinViewbox>
-  </WinAppBarToggleButton.Content>
-</WinAppBarToggleButton>`;
+const symbolCode = `<AppBarToggleButton Icon="Shuffle" Label="SymbolIcon" Click="AppBarButton_Click" />`;
+const bitmapCode = `<AppBarToggleButton Label="BitmapIcon" Click="AppBarButton_Click">
+  <AppBarToggleButton.Icon>
+    <BitmapIcon UriSource="/Assets/SampleMedia/Slices2.png" />
+  </AppBarToggleButton.Icon>
+</AppBarToggleButton>`;
+const fontCode = `<AppBarToggleButton Label="FontIcon" Click="AppBarButton_Click">
+  <AppBarToggleButton.Icon>
+    <FontIcon FontFamily="Candara" Glyph="&#x03A3;" />
+  </AppBarToggleButton.Icon>
+</AppBarToggleButton>`;
+const pathCode = `<AppBarToggleButton Label="PathIcon" Click="AppBarButton_Click" IsThreeState="True">
+  <AppBarToggleButton.Content>
+    <Viewbox Stretch="Uniform">
+      <PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24" />
+    </Viewbox>
+  </AppBarToggleButton.Content>
+</AppBarToggleButton>`;
 </script>
 
 <style scoped>

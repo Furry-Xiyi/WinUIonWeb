@@ -6,21 +6,21 @@
             Represents the base class for an icon UI element. IconElement is the parent class for BitmapIcon, FontIcon, ImageIcon, PathIcon, and SymbolIcon.
           </p>
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"
+            <Button class="header-action" @click="toggleTheme"
              >
               <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
              >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- Example 1: BitmapIcon with ShowAsMonochrome -->
-            <WinControlExample
+            <ControlExample
               headerText="BitmapIcon"
               :theme="pageTheme"
               :templateCode="example1Template"
@@ -45,14 +45,14 @@
                 </div>
               </template>
               <template #options>
-                <WinCheckBox v-model="showAsMonochrome">
+                <CheckBox v-model="showAsMonochrome">
                   Monochrome
-                </WinCheckBox>
+                </CheckBox>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 2: FontIcon -->
-            <WinControlExample
+            <ControlExample
               headerText="FontIcon"
               :theme="pageTheme"
               :templateCode="example2Template"
@@ -62,15 +62,15 @@
                   <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
                     Use FontIcon as the icon for a control if you want to specify a Glyph value from a FontFamily. Windows 10 uses the Segoe MDL2 Assets FontFamily and that is what this example is showing.
                   </p>
-                  <WinButton style="width: auto;">
+                  <Button style="width: auto;">
                     <span class="font-icon">&#xE790;</span>
-                  </WinButton>
+                  </Button>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 3: ImageIcon (PNG) -->
-            <WinControlExample
+            <ControlExample
               headerText="ImageIcon (PNG)"
               :theme="pageTheme"
               :templateCode="example3Template"
@@ -80,30 +80,30 @@
                   <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
                     To use an ImageIcon as the icon for a control, you can set image that has a file format supported by the Image class. The two examples here show a PNG and SVG image as the icon.
                   </p>
-                  <WinButton style="width: 100px;">
+                  <Button style="width: 100px;">
                     <img src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Slices.png" alt="Slices" style="width: 20px; height: 20px; object-fit: contain;" />
-                  </WinButton>
+                  </Button>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 4: ImageIcon (SVG) -->
-            <WinControlExample
+            <ControlExample
               headerText="ImageIcon (SVG)"
               :theme="pageTheme"
               :templateCode="example4Template"
               :vueCode="example4Vue">
               <template #example>
-                <WinButton style="width: auto;">
+                <Button style="width: auto;">
                   <svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                   </svg>
-                </WinButton>
+                </Button>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 5: PathIcon -->
-            <WinControlExample
+            <ControlExample
               headerText="PathIcon"
               :theme="pageTheme"
               :templateCode="example5Template"
@@ -113,17 +113,17 @@
                   <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
                     To use a PathIcon as the icon for a control, you specify the path data of the image you are trying to display. The path data draws a series of connected lines and curves.
                   </p>
-                  <WinButton style="width: auto;">
+                  <Button style="width: auto;">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M 16,12 20,2 L 20,16 1,16" />
                     </svg>
-                  </WinButton>
+                  </Button>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 6: SymbolIcon -->
-            <WinControlExample
+            <ControlExample
               headerText="SymbolIcon"
               :theme="pageTheme"
               :templateCode="example6Template"
@@ -133,29 +133,29 @@
                   <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
                     To use a SymbolIcon as the icon for a control, you specify the enum value for the glyph you would like to display. SymbolIcon's enum is based off of icons from the Segoe MDL2 font used by Windows 10.
                   </p>
-                  <WinButton style="width: auto;">
+                  <Button style="width: auto;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
                       <span class="symbol-icon">&#xE8FB;</span>
                       <span style="font-size: 12px;">Accept</span>
                     </div>
-                  </WinButton>
+                  </Button>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject } from 'vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'iconelement');
 
@@ -171,45 +171,45 @@ const example1Template = `<div class="bitmap-icon" :class="{ monochrome: showAsM
 const example1Vue = `const showAsMonochrome = ref(false);`;
 
 // Example 2: FontIcon
-const example2Template = `<WinButton>
+const example2Template = `<Button>
   <span class="font-icon">&#xE790;</span>
-</WinButton>`;
+</Button>`;
 
 const example2Vue = `// FontFamily: Segoe MDL2 Assets
 // Glyph: &#xE790;`;
 
 // Example 3: ImageIcon (PNG)
-const example3Template = `<WinButton>
+const example3Template = `<Button>
   <img src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Slices.png" alt="Icon" />
-</WinButton>`;
+</Button>`;
 
 const example3Vue = `// Source: https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Slices.png`;
 
 // Example 4: ImageIcon (SVG)
-const example4Template = `<WinButton>
+const example4Template = `<Button>
   <svg width="50" height="50" viewBox="0 0 24 24">
     <path d="..." fill="currentColor" />
   </svg>
-</WinButton>`;
+</Button>`;
 
 const example4Vue = `// Source: SVG path data`;
 
 // Example 5: PathIcon
-const example5Template = `<WinButton>
+const example5Template = `<Button>
   <svg width="20" height="20" viewBox="0 0 20 20">
     <path d="M 16,12 20,2 L 20,16 1,16" />
   </svg>
-</WinButton>`;
+</Button>`;
 
 const example5Vue = `// Data: "M 16,12 20,2 L 20,16 1,16"`;
 
 // Example 6: SymbolIcon
-const example6Template = `<WinButton>
+const example6Template = `<Button>
   <div style="display: flex; flex-direction: column; align-items: center;">
     <span class="symbol-icon">&#xE8FB;</span>
     <span>Accept</span>
   </div>
-</WinButton>`;
+</Button>`;
 
 const example6Vue = `// Symbol: Accept (&#xE8FB;)`;
 </script>

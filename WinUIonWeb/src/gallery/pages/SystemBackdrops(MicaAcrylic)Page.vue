@@ -1,28 +1,28 @@
 <template>
   <div class="gallery-item-page">
     <div class="page-heading">
-          <WinTextBlock class="page-header" Text="System Backdrops (Mica/Acrylic)" />
-          <WinTextBlock
+          <TextBlock class="page-header" Text="System Backdrops (Mica/Acrylic)" />
+          <TextBlock
             class="page-description"
             Text="System backdrops provide material effects for window backgrounds, including Mica and Desktop Acrylic."
             TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
-            <WinControlExample
+            <ControlExample
               headerText="Backdrop types"
               :theme="pageTheme"
               :xaml="backdropTypesXaml"
               :cSharp="backdropTypesCSharp">
               <template #example>
                 <div class="backdrop-info">
-                  <WinTextBlock TextWrapping="WrapWholeWords">
+                  <TextBlock TextWrapping="WrapWholeWords">
                     A window can use one of the following system backdrops:<br>
                     <strong>1. Mica</strong> - An opaque material that samples the desktop wallpaper once to tint the window background. Best for main app windows.<br>
                     <strong>2. Mica Alt</strong> - A variant of Mica with stronger tinting. Recommended for apps with a tabbed title bar.<br>
@@ -36,60 +36,60 @@
                     <strong>MicaBackdrop</strong> - Applies the Mica material. Set the Kind property to switch between Base and Alt.<br>
                     <strong>DesktopAcrylicBackdrop</strong> - Applies the Desktop Acrylic material (Base type only).<br><br>
                     All Mica variants require Windows 11 build 22000 or later. In-app acrylic (AcrylicBrush) is a separate XAML brush used within UI elements, not a window backdrop.
-                  </WinTextBlock>
-                  <WinButton Content="Show window" />
+                  </TextBlock>
+                  <Button Content="Show window" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample
+            <ControlExample
               headerText="MicaController"
               :theme="pageTheme"
               :cSharp="micaControllerCSharp">
               <template #example>
                 <div class="backdrop-info">
-                  <WinTextBlock TextWrapping="WrapWholeWords">
+                  <TextBlock TextWrapping="WrapWholeWords">
                     MicaController provides a customizable way to apply the Mica material. You can modify: FallbackColor, Kind, LuminosityOpacity, TintColor, and TintOpacity.<br><br>
                     There are 2 kinds of Mica:<br>
                     <strong>1. Base</strong> - The default, lighter appearance.<br>
                     <strong>2. Alt</strong> - A darker appearance with stronger tinting of the desktop wallpaper.
-                  </WinTextBlock>
-                  <WinButton Content="Show window" />
+                  </TextBlock>
+                  <Button Content="Show window" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample
+            <ControlExample
               headerText="DesktopAcrylicController"
               :theme="pageTheme"
               :cSharp="desktopAcrylicControllerCSharp">
               <template #example>
                 <div class="backdrop-info">
-                  <WinTextBlock TextWrapping="WrapWholeWords">
+                  <TextBlock TextWrapping="WrapWholeWords">
                     DesktopAcrylicController provides a customizable way to apply the Desktop Acrylic material. It supports the same customization properties as MicaController.<br><br>
                     There are 2 kinds of Desktop Acrylic:<br>
                     <strong>1. Base</strong> - The default, darker appearance with less transparency.<br>
                     <strong>2. Thin</strong> - A lighter appearance with more transparency.<br><br>
                     Note: DesktopAcrylicBackdrop always uses the Base kind. To use the Thin kind, you must use DesktopAcrylicController directly.
-                  </WinTextBlock>
-                  <WinButton Content="Show window" />
+                  </TextBlock>
+                  <Button Content="Show window" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => {
   if (typeof currentPage === 'string') return currentPage;

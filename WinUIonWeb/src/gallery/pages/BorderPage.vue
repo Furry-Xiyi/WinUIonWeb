@@ -1,5 +1,5 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div style="position: relative;" class="page-heading">
           <h1 class="page-header">Border</h1>
@@ -7,20 +7,20 @@
             A Border is a container control that draws a border, background, or both, around another object.
           </p>
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"
+            <Button class="header-action" @Click="toggleTheme"
              >
               <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
              >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
         <!-- Example 1: A Border around a TextBlock -->
-            <WinControlExample
+            <ControlExample
               headerText="A Border around a TextBlock."
               :theme="pageTheme"
               :templateCode="example1Template"
@@ -39,7 +39,7 @@
               </template>
               <template #options>
                 <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <WinSlider
+                  <Slider
                     v-model="borderThickness"
                     header="BorderThickness"
                     :minimum="0"
@@ -50,81 +50,81 @@
                     <div>
                       <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Background</p>
                       <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <WinRadioButton
+                        <RadioButton
                           v-model="selectedBackground"
                           value="Green"
                           name="bgColor">
                           Green
-                        </WinRadioButton>
-                        <WinRadioButton
+                        </RadioButton>
+                        <RadioButton
                           v-model="selectedBackground"
                           value="Yellow"
                           name="bgColor">
                           Yellow
-                        </WinRadioButton>
-                        <WinRadioButton
+                        </RadioButton>
+                        <RadioButton
                           v-model="selectedBackground"
                           value="Blue"
                           name="bgColor">
                           Blue
-                        </WinRadioButton>
-                        <WinRadioButton
+                        </RadioButton>
+                        <RadioButton
                           v-model="selectedBackground"
                           value="White"
                           name="bgColor">
                           White
-                        </WinRadioButton>
+                        </RadioButton>
                       </div>
                     </div>
 
                     <div>
                       <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">BorderBrush</p>
                       <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <WinRadioButton
+                        <RadioButton
                           v-model="selectedBorderBrush"
                           value="Green"
                           name="borderBrush">
                           Green
-                        </WinRadioButton>
-                        <WinRadioButton
+                        </RadioButton>
+                        <RadioButton
                           v-model="selectedBorderBrush"
                           value="Yellow"
                           name="borderBrush">
                           Yellow
-                        </WinRadioButton>
-                        <WinRadioButton
+                        </RadioButton>
+                        <RadioButton
                           v-model="selectedBorderBrush"
                           value="Blue"
                           name="borderBrush">
                           Blue
-                        </WinRadioButton>
-                        <WinRadioButton
+                        </RadioButton>
+                        <RadioButton
                           v-model="selectedBorderBrush"
                           value="White"
                           name="borderBrush">
                           White
-                        </WinRadioButton>
+                        </RadioButton>
                       </div>
                     </div>
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { ref, computed, inject } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinSlider from '../../components/WinSlider.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import Slider from '../../components/Slider.vue';
+import RadioButton from '../../components/RadioButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'border');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);

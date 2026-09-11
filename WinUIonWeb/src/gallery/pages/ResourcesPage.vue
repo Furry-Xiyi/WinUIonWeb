@@ -1,17 +1,17 @@
 <template>
   <div class="gallery-item-page">
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- Page Header -->
             <div class="page-header">
               <h1 class="page-title">Resources</h1>
               <div class="page-actions">
-                <WinButton @Click="toggleTheme" class="header-action">
+                <Button @Click="toggleTheme" class="header-action">
                   <span class="icon">&#xE793;</span>
-                </WinButton>
-                <WinToggleButton :IsChecked="isFavorite" class="header-action" @update:IsChecked="toggleFavorite">
+                </Button>
+                <ToggleButton :IsChecked="isFavorite" class="header-action" @update:IsChecked="toggleFavorite">
                   <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
-                </WinToggleButton>
+                </ToggleButton>
               </div>
             </div>
 
@@ -45,7 +45,7 @@
             </div>
 
             <!-- Example 1: Resource Hierarchy -->
-            <WinControlExample
+            <ControlExample
               :theme="pageTheme"
               headerText="Resource hierarchy example"
               :templateCode="example1Template"
@@ -68,7 +68,7 @@
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Theme Resources Section -->
             <div class="section-header" style="margin-top: 32px;">
@@ -91,7 +91,7 @@
             </div>
 
             <!-- Example 2: StaticResource vs ThemeResource -->
-            <WinControlExample
+            <ControlExample
               :theme="pageTheme"
               headerText="StaticResource versus ThemeResource"
               :templateCode="example2Template"
@@ -113,10 +113,10 @@
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 3: Define Custom Theme Resources -->
-            <WinControlExample
+            <ControlExample
               :theme="pageTheme"
               headerText="Define a new theme resource"
               :templateCode="example3Template"
@@ -133,20 +133,20 @@
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const getRootIsDarkTheme = () => {
   const root = document.documentElement;
   if (root.classList.contains('theme-dark') || root.getAttribute('data-theme') === 'dark') return true;

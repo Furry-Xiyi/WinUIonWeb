@@ -15,13 +15,13 @@
             <div class="win-cbf-content-root">
               <div class="win-cbf-primary-items-root">
                 <div v-if="primaryCommands.length" class="win-cbf-primary-items-control" role="toolbar">
-                  <WinCommandBar
+                  <CommandBar
                     class="win-cbf-commandbar"
                     :IsOpen="true"
                     :IsSticky="true"
                     :IsDynamicOverflowEnabled="false"
                     OverflowButtonVisibility="Collapsed"
-                    DefaultLabelPosition="Bottom"
+                    DefaultLabelPosition="Collapsed"
                     HorizontalAlignment="Left"
                     :PrimaryCommands="commandBarPrimaryCommands"
                     :SecondaryCommands="[]"
@@ -57,7 +57,11 @@
                       :disabled="command.IsEnabled === false"
                       @click="invoke(command, $event)">
                       <span v-if="command.IsToggle" class="win-cbf-overflow-check" aria-hidden="true">&#xE73E;</span>
-                      <span v-if="command.Icon" class="win-cbf-overflow-icon" aria-hidden="true">{{ iconGlyph(command.Icon) }}</span>
+                      <span
+                        v-if="secondaryHasIcon"
+                        class="win-cbf-overflow-icon"
+                        :class="{ 'is-placeholder': !command.Icon }"
+                        aria-hidden="true">{{ command.Icon ? iconGlyph(command.Icon) : '' }}</span>
                       <span class="win-cbf-overflow-label">{{ command.Label }}</span>
                       <span v-if="command.KeyboardAcceleratorTextOverride" class="win-cbf-overflow-accelerator">
                         {{ command.KeyboardAcceleratorTextOverride }}
@@ -78,9 +82,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
-import WinAppBarButton from './WinAppBarButton.vue';
-import WinAppBarToggleButton from './WinAppBarToggleButton.vue';
-import WinCommandBar from './WinCommandBar.vue';
+import AppBarButton from './AppBarButton.vue';
+import AppBarToggleButton from './AppBarToggleButton.vue';
+import CommandBar from './CommandBar.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
@@ -157,6 +161,7 @@ const actualPlacement = ref<Placement>(props.Placement);
 const position = ref({ top: 0, left: 0 });
 const primaryCommands = computed(() => props.PrimaryCommands ?? []);
 const secondaryCommands = computed(() => props.SecondaryCommands ?? []);
+const secondaryHasIcon = computed(() => secondaryCommands.value.some((command) => Boolean(command.Icon)));
 const AlwaysExpanded = computed(() => props.AlwaysExpanded);
 const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
 let secondaryAnimationTimer = 0;
@@ -183,7 +188,7 @@ const commandToolTipAttrs = (command: CommandBarFlyoutCommand) => (
 );
 
 const commandBarPrimaryCommands = computed(() => primaryCommands.value.map((command) => ({
-  Component: command.IsToggle ? WinAppBarToggleButton : WinAppBarButton,
+  Component: command.IsToggle ? AppBarToggleButton : AppBarButton,
   Props: {
     Icon: command.Icon,
     Label: command.Label,
@@ -203,7 +208,8 @@ const secondaryCommandClasses = (command: CommandBarFlyoutCommand) => ({
   'is-toggle': command.IsToggle,
   'is-checked': command.IsChecked,
   'has-check': command.IsToggle,
-  'has-menu-icon': Boolean(command.Icon),
+  // Keep the icon column for every item when any overflow item has an icon.
+  'has-menu-icon': secondaryHasIcon.value,
   'has-keyboard-accelerator': Boolean(command.KeyboardAcceleratorTextOverride),
   'has-flyout': Boolean(command.Flyout)
 });
@@ -455,7 +461,7 @@ defineExpose({ showAt, hide, openAt, isOpen });
 .win-cbf-primary-items-root {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 58px;
+  min-height: 46px;
   overflow: hidden;
   background: transparent;
   border: 0;
@@ -472,15 +478,15 @@ defineExpose({ showAt, hide, openAt, isOpen });
   display: flex;
   grid-column: 1;
   align-items: stretch;
-  height: 52px;
-  min-height: 52px;
+  height: 40px;
+  min-height: 40px;
   min-width: 0;
   margin: 3px 0 3px 3px;
 }
 
 .win-cbf-commandbar {
-  height: 52px;
-  min-height: 52px;
+  height: 40px;
+  min-height: 40px;
   background: transparent;
   --CommandBarBackground: transparent;
   --CommandBarBackgroundOpen: transparent;
@@ -502,15 +508,15 @@ defineExpose({ showAt, hide, openAt, isOpen });
   --AppBarToggleButtonForegroundCheckedPressed: var(--CommandBarFlyoutAppBarButtonForegroundCheckedPressed, var(--accent-text));
 }
 
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open),
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-surface),
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-primary-content) {
-  height: 52px;
-  min-height: 52px;
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed),
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-surface),
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-primary-content) {
+  height: 40px;
+  min-height: 40px;
   background: transparent;
 }
 
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-surface) {
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-surface) {
   padding-left: 0;
   border: 0;
   box-shadow: none;
@@ -519,18 +525,18 @@ defineExpose({ showAt, hide, openAt, isOpen });
   backdrop-filter: none;
 }
 
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-primary-content) {
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-primary-content) {
   justify-content: flex-start;
   overflow: visible;
 }
 
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-bottom.open .commandbar-primary-content .win-appbar-button) {
+.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-primary-content .win-appbar-button) {
   flex-basis: auto;
   width: auto;
   min-width: 40px;
   max-width: none;
-  height: 52px;
-  min-height: 52px;
+  height: 40px;
+  min-height: 40px;
   align-self: stretch;
   justify-self: stretch;
 }
@@ -542,13 +548,13 @@ defineExpose({ showAt, hide, openAt, isOpen });
 .win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-content-root) {
   width: auto;
   min-width: 40px;
-  height: 52px;
-  min-height: 52px;
+  height: 40px;
+  min-height: 40px;
   align-content: start;
 }
 
 .win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-icon) {
-  margin: 9px 0 0;
+  margin: 12px 0 0;
 }
 
 .win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-label) {
@@ -585,7 +591,7 @@ defineExpose({ showAt, hide, openAt, isOpen });
 .win-cbf-more-button::before {
   content: '';
   position: absolute;
-  inset: 2px 6px 2px 2px;
+  inset: 2px;
   z-index: 0;
   border-radius: inherit;
   background: transparent;
@@ -619,8 +625,8 @@ defineExpose({ showAt, hide, openAt, isOpen });
   width: 44px;
   min-width: 44px;
   max-width: 44px;
-  height: 52px;
-  min-height: 52px;
+  height: 40px;
+  min-height: 40px;
   margin: 3px 3px 3px 0;
   padding: 0;
   place-items: center;
@@ -634,7 +640,7 @@ defineExpose({ showAt, hide, openAt, isOpen });
   height: 16px;
   place-items: center;
   text-align: center;
-  transform: translateX(-2px);
+  transform: none;
 }
 
 .win-cbf-more-button:hover,
@@ -733,6 +739,10 @@ defineExpose({ showAt, hide, openAt, isOpen });
   width: 16px;
   height: 16px;
   place-items: center;
+}
+
+.win-cbf-overflow-icon.is-placeholder {
+  visibility: hidden;
 }
 
 .win-cbf-overflow-button.has-menu-icon:not(.has-check) .win-cbf-overflow-icon {

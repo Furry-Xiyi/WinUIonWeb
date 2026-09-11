@@ -1,84 +1,90 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.button')" />
-          <WinTextBlock class="page-description" :Text="$t('text.the-button-control-provides-a-click-event-to-res')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" Text="{x:Bind $t('text.button'), Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind $t('text.the-button-control-provides-a-click-event-to-res'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="buttonSimpleVue" :headerText="$t('text.a-simple-button-with-text-content')">
-              <template #example>
-                <WinButton AutomationProperties.Name="Standard XAML"
-                  :Content="$t('sample.button.standard-xaml')"
-                  :IsEnabled="DisableButton1 !== true"
-                  @Click="Button_Click('Button1')" />
-              </template>
-              <template #options>
-                <WinTextBlock FontFamily="Global User Interface" :Text="Control1Output" />
-                <WinCheckBox v-model="DisableButton1">
-                  <WinTextBlock :Text="$t('sample.button.disable')" />
-                </WinCheckBox>
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="buttonWithImageVue" :headerText="$t('sample.button.with-image')">
-              <template #example>
-                <WinButton Width="50" Height="50" AutomationProperties.Name="Pie" Padding="4" @Click="Button_Click('Button2')">
-                  <img class="pie-image" :src="pieSliceImageUrl" alt="Slice" />
-                </WinButton>
-              </template>
-              <template #options>
-                <WinTextBlock :Text="Control2Output" />
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="buttonBuiltInStylesVue" :headerText="$t('sample.button.built-in-styles')">
-              <template #example>
-                <div class="horizontal-stack">
-                  <WinButton AutomationProperties.Name="Accent style" :Content="$t('sample.button.accent-style')" Style="{StaticResource AccentButtonStyle}" />
-                  <WinButton AutomationProperties.Name="Subtle style" :Content="$t('sample.button.subtle-style')" Style="{StaticResource SubtleButtonStyle}" />
-                </div>
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="buttonWrappingVue" :headerText="$t('sample.button.wrapping')">
-              <template #example>
-                <div class="vertical-stack stretch-stack">
-                  <WinTextBlock Margin="0,0,0,8" :Text="$t('sample.button.wrapping-note-1')" TextWrapping="Wrap" />
-                  <WinTextBlock Margin="0,0,0,8" :Text="$t('sample.button.wrapping-note-2')" TextWrapping="Wrap" />
-                  <WinButton HorizontalAlignment="Stretch" Margin="0,0,0,5"><WinTextBlock :Text="$t('sample.button.long-text-1')" /></WinButton>
-                  <WinButton HorizontalAlignment="Stretch"><WinTextBlock :Text="$t('sample.button.long-text-2')" /></WinButton>
-                  <WinTextBlock Margin="0,8,0,8" :Text="$t('sample.button.wrapping-note-3')" />
-                  <div class="horizontal-stack centered-stack">
-                    <WinButton MaxWidth="240" Margin="0,0,8,0">
-                      <WinTextBlock :Text="$t('sample.button.long-text-1-wrapping')" TextWrapping="WrapWholeWords" />
-                    </WinButton>
-                    <WinButton MaxWidth="240">
-                      <WinTextBlock :Text="$t('sample.button.long-text-2-wrapping')" TextWrapping="WrapWholeWords" />
-                    </WinButton>
-                  </div>
-                </div>
-              </template>
-            </WinControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind buttonSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('text.a-simple-button-with-text-content'), Mode=OneWay}">
+              <ControlExample.Example>
+                <Button AutomationProperties.Name="Standard XAML"
+                  Content="{x:Bind $t('sample.button.standard-xaml'), Mode=OneWay}"
+                  IsEnabled="{x:Bind DisableButton1.IsChecked.Value.Equals(x:False), Mode=OneWay}"
+                  Click="Button1_Click" />
+              </ControlExample.Example>
+              <ControlExample.Output>
+                <TextBlock FontFamily="Global User Interface" Text="{x:Bind Control1Output, Mode=OneWay}" />
+              </ControlExample.Output>
+              <ControlExample.Options>
+                <StackPanel>
+                  <CheckBox IsChecked="{x:Bind DisableButton1, Mode=TwoWay}">
+                    <TextBlock Text="{x:Bind $t('sample.button.disable'), Mode=OneWay}" />
+                  </CheckBox>
+                </StackPanel>
+              </ControlExample.Options>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonWithImage.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind buttonWithImageVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.button.with-image'), Mode=OneWay}">
+              <ControlExample.Example>
+                <StackPanel Orientation="Horizontal">
+                  <Button Width="50" Height="50" AutomationProperties.Name="Pie" Padding="4" Click="Button2_Click">
+                    <Image Width="42" Height="42" Source="{x:Bind pieSliceImageUrl, Mode=OneWay}" AutomationProperties.Name="Slice" Stretch="Uniform" />
+                  </Button>
+                </StackPanel>
+              </ControlExample.Example>
+              <ControlExample.Output>
+                <TextBlock Text="{x:Bind Control2Output, Mode=OneWay}" />
+              </ControlExample.Output>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonBuiltInStyles.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind buttonBuiltInStylesVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.button.built-in-styles'), Mode=OneWay}">
+              <ControlExample.Example>
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                  <Button AutomationProperties.Name="Accent style" Content="{x:Bind $t('sample.button.accent-style'), Mode=OneWay}" Style="{StaticResource AccentButtonStyle}" />
+                  <Button AutomationProperties.Name="Subtle style" Content="{x:Bind $t('sample.button.subtle-style'), Mode=OneWay}" Style="{StaticResource SubtleButtonStyle}" />
+                </StackPanel>
+              </ControlExample.Example>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonWrapping.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind buttonWrappingVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.button.wrapping'), Mode=OneWay}">
+                <StackPanel>
+                  <TextBlock Margin="0,0,0,8" Text="{x:Bind $t('sample.button.wrapping-note-1'), Mode=OneWay}" TextWrapping="Wrap" />
+                  <TextBlock Margin="0,0,0,8" Text="{x:Bind $t('sample.button.wrapping-note-2'), Mode=OneWay}" TextWrapping="Wrap" />
+                  <Button HorizontalAlignment="Stretch" Margin="0,0,0,5"><TextBlock Text="{x:Bind $t('sample.button.long-text-1'), Mode=OneWay}" /></Button>
+                  <Button HorizontalAlignment="Stretch"><TextBlock Text="{x:Bind $t('sample.button.long-text-2'), Mode=OneWay}" /></Button>
+                  <TextBlock Margin="0,8,0,8" Text="{x:Bind $t('sample.button.wrapping-note-3'), Mode=OneWay}" />
+                  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button MaxWidth="240" Margin="0,0,8,0">
+                      <TextBlock Text="{x:Bind $t('sample.button.long-text-1-wrapping'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                    </Button>
+                    <Button MaxWidth="240">
+                      <TextBlock Text="{x:Bind $t('sample.button.long-text-2-wrapping'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                    </Button>
+                  </StackPanel>
+                </StackPanel>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import Image from '../../components/Image.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'button');
@@ -93,34 +99,36 @@ const Button_Click = (name) => {
   if (name === 'Button1') Control1Output.value = t('sample.you-clicked', { name });
   if (name === 'Button2') Control2Output.value = t('sample.you-clicked', { name });
 };
+const Button1_Click = () => Button_Click('Button1');
+const Button2_Click = () => Button_Click('Button2');
 
-const buttonSimpleVue = `<WinButton AutomationProperties.Name="Standard XAML"
-  Content="Standard XAML button"
-  :IsEnabled="DisableButton1 !== true"
-  @Click="Button_Click('Button1')" />`;
-const buttonWithImageVue = `<WinButton Width="50" Height="50" AutomationProperties.Name="Pie" @Click="Button_Click('Button2')">
-  <img src="${pieSliceImageUrl}" alt="Slice" />
-</WinButton>`;
+const buttonSimpleVue = `<Button AutomationProperties.Name="Standard XAML"
+                  Content="{x:Bind $t('sample.button.standard-xaml'), Mode=OneWay}"
+  IsEnabled="{x:Bind DisableButton1.IsChecked.Value.Equals(x:False), Mode=OneWay}"
+  Click="Button1_Click" />`;
+const buttonWithImageVue = `<Button Width="50" Height="50" AutomationProperties.Name="Pie" Padding="4" Click="Button2_Click">
+  <Image Width="42" Height="42" AutomationProperties.Name="Slice" Source="{x:Bind pieSliceImageUrl, Mode=OneWay}" Stretch="Uniform" />
+</Button>`;
 
-const buttonBuiltInStylesVue = `<WinButton Style="{StaticResource AccentButtonStyle}" Content="Accent style button" />
-<WinButton Style="{StaticResource SubtleButtonStyle}" Content="Subtle style button" />`;
+const buttonBuiltInStylesVue = `<Button Style="{StaticResource AccentButtonStyle}" Content="{x:Bind $t('sample.button.accent-style'), Mode=OneWay}" />
+<Button Style="{StaticResource SubtleButtonStyle}" Content="{x:Bind $t('sample.button.subtle-style'), Mode=OneWay}" />`;
 
-const buttonWrappingVue = `<div>
-  <WinTextBlock Text="The following buttons' content may get clipped if we don't pay careful attention to their layout containers." Margin="0,0,0,8" TextWrapping="Wrap" />
-  <WinTextBlock Text="One option to mitigate clipped content is to place Buttons underneath each other, allowing for more space to grow horizontally:" Margin="0,0,0,8" TextWrapping="Wrap" />
-  <WinButton HorizontalAlignment="Stretch" Margin="0,0,0,5">This is some text that is too long and will get cut off</WinButton>
-  <WinButton HorizontalAlignment="Stretch">This is another text that would result in being cut off</WinButton>
+const buttonWrappingVue = `<StackPanel>
+  <TextBlock Text="{x:Bind $t('sample.button.wrapping-note-1'), Mode=OneWay}" Margin="0,0,0,8" TextWrapping="Wrap" />
+  <TextBlock Text="{x:Bind $t('sample.button.wrapping-note-2'), Mode=OneWay}" Margin="0,0,0,8" TextWrapping="Wrap" />
+  <Button HorizontalAlignment="Stretch" Margin="0,0,0,5"><TextBlock Text="{x:Bind $t('sample.button.long-text-1'), Mode=OneWay}" /></Button>
+  <Button HorizontalAlignment="Stretch"><TextBlock Text="{x:Bind $t('sample.button.long-text-2'), Mode=OneWay}" /></Button>
 
-  <WinTextBlock Text="Another option is to explicitly wrap the Button's content" Margin="0,8,0,8" />
-  <div>
-    <WinButton MaxWidth="240" Margin="0,0,8,0">
-      <WinTextBlock Text="This is some text that is too long and will get cut off" TextWrapping="WrapWholeWords" />
-    </WinButton>
-    <WinButton MaxWidth="240">
-      <WinTextBlock Text="This is another text that would result in being cut off" TextWrapping="WrapWholeWords" />
-    </WinButton>
-  </div>
-</div>`;
+  <TextBlock Text="{x:Bind $t('sample.button.wrapping-note-3'), Mode=OneWay}" Margin="0,8,0,8" />
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+    <Button MaxWidth="240" Margin="0,0,8,0">
+      <TextBlock Text="{x:Bind $t('sample.button.long-text-1-wrapping'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
+    </Button>
+    <Button MaxWidth="240">
+      <TextBlock Text="{x:Bind $t('sample.button.long-text-2-wrapping'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
+    </Button>
+  </StackPanel>
+</StackPanel>`;
 </script>
 
 <style scoped>
@@ -129,7 +137,6 @@ const buttonWrappingVue = `<div>
 .page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .icon { font-size: 16px; }
-.pie-image { width: 100%; height: 100%; object-fit: contain; }
 .horizontal-stack { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 .vertical-stack { display: flex; flex-direction: column; }
 .stretch-stack { width: 100%; align-items: stretch; }

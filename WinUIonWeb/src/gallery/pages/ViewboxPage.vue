@@ -1,61 +1,61 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.viewbox')" />
-          <WinTextBlock class="page-description" :Text="$t('text.viewbox-description')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.viewbox')" />
+          <TextBlock class="page-description" :Text="$t('text.viewbox-description')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.viewbox.content')" :theme="pageTheme" :vue="viewboxCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.viewbox.content')" :theme="pageTheme" :vue="viewboxCode">
               <template #example>
-                <WinViewbox :Width="size" :Height="size" :Stretch="stretch" :StretchDirection="stretchDirection" VerticalAlignment="Top">
+                <Viewbox :Width="size" :Height="size" :Stretch="stretch" :StretchDirection="stretchDirection" VerticalAlignment="Top">
                   <div class="viewbox-border">
-                    <WinStackPanel Background="DarkGray">
-                      <WinStackPanel Orientation="Horizontal">
+                    <StackPanel Background="DarkGray">
+                      <StackPanel Orientation="Horizontal">
                         <div class="bar blue" />
                         <div class="bar green" />
                         <div class="bar red" />
                         <div class="bar yellow" />
-                      </WinStackPanel>
+                      </StackPanel>
                       <img class="slice-image" :src="sliceImage" alt="" />
-                      <WinTextBlock HorizontalAlignment="Center" :Text="$t('sample.viewbox.text')" />
-                    </WinStackPanel>
+                      <TextBlock HorizontalAlignment="Center" :Text="$t('sample.viewbox.text')" />
+                    </StackPanel>
                   </div>
-                </WinViewbox>
+                </Viewbox>
               </template>
               <template #options>
                 <div class="options-stack">
-                  <WinSlider v-model:Value="size" Header="Width/Height" :Maximum="300" :Minimum="20" />
-                  <WinRadioButtons Header="Stretch" :ItemsSource="stretchItems" :SelectedIndex="stretchIndex" @SelectionChanged="onStretchChanged" />
-                  <WinRadioButtons Header="StretchDirection" :ItemsSource="stretchDirectionItems" :SelectedIndex="stretchDirectionIndex" @SelectionChanged="onStretchDirectionChanged" />
+                  <Slider v-model:Value="size" Header="Width/Height" :Maximum="300" :Minimum="20" />
+                  <RadioButtons Header="Stretch" :ItemsSource="stretchItems" :SelectedIndex="stretchIndex" @SelectionChanged="onStretchChanged" />
+                  <RadioButtons Header="StretchDirection" :ItemsSource="stretchDirectionItems" :SelectedIndex="stretchDirectionIndex" @SelectionChanged="onStretchDirectionChanged" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinRadioButtons from '../../components/WinRadioButtons.vue';
-import WinSlider from '../../components/WinSlider.vue';
-import WinStackPanel from '../../components/WinStackPanel.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinViewbox from '../../components/WinViewbox.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import RadioButtons from '../../components/RadioButtons.vue';
+import Slider from '../../components/Slider.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import Viewbox from '../../components/Viewbox.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'viewbox');
@@ -78,20 +78,20 @@ const onStretchDirectionChanged = ({ SelectedIndex }) => {
   stretchDirectionIndex.value = SelectedIndex;
 };
 
-const viewboxCode = computed(() => `<WinViewbox Height="${size.value}" Width="${size.value}" Stretch="${stretch.value}" StretchDirection="${stretchDirection.value}">
+const viewboxCode = computed(() => `<Viewbox Height="${size.value}" Width="${size.value}" Stretch="${stretch.value}" StretchDirection="${stretchDirection.value}">
   <Border BorderBrush="Gray" BorderThickness="15">
-    <WinStackPanel Background="DarkGray">
-      <WinStackPanel Orientation="Horizontal">
+    <StackPanel Background="DarkGray">
+      <StackPanel Orientation="Horizontal">
         <Rectangle Fill="Blue" Height="10" Width="40" />
         <Rectangle Fill="Green" Height="10" Width="40" />
         <Rectangle Fill="Red" Height="10" Width="40" />
         <Rectangle Fill="Yellow" Height="10" Width="40" />
-      </WinStackPanel>
+      </StackPanel>
       <Image Source="${sliceImage}" />
-      <WinTextBlock Text="${t('sample.viewbox.text')}" HorizontalTextAlignment="Center" />
-    </WinStackPanel>
+      <TextBlock Text="${t('sample.viewbox.text')}" HorizontalTextAlignment="Center" />
+    </StackPanel>
   </Border>
-</WinViewbox>`);
+</Viewbox>`);
 
 </script>
 

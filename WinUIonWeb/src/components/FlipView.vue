@@ -1,4 +1,4 @@
-<!-- components/WinFlipView.vue -->
+<!-- components/FlipView.vue -->
 <template>
   <div class="win-flip-view" :class="orientationClass"
        @mouseenter="hover = true" @mouseleave="hover = false"

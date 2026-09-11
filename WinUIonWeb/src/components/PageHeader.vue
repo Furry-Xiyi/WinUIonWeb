@@ -1,28 +1,28 @@
 <template>
   <div class="page-header-actions">
-    <WinButton
+    <Button
       v-if="showThemeButton"
       class="header-action"
       v-bind="{ 'tooltipservice.tooltip': themeTooltip }"
       @Click="$emit('theme-toggle')">
       <span class="icon">&#xE793;</span>
-    </WinButton>
+    </Button>
 
-    <WinToggleButton
+    <ToggleButton
       v-if="showFavoriteButton"
       class="header-action"
       :IsChecked="isFavorite"
       v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }"
       @update:IsChecked="$emit('favorite-toggle')">
       <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
-    </WinToggleButton>
+    </ToggleButton>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import WinButton from './WinButton.vue';
-import WinToggleButton from './WinToggleButton.vue';
+import Button from './Button.vue';
+import ToggleButton from './ToggleButton.vue';
 
 const props = withDefaults(defineProps<{
   isFavorite?: boolean;

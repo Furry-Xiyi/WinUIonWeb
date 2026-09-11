@@ -1,32 +1,32 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock
+        <TextBlock
           class="page-description"
           :Text="$t('text.semanticzoom-description')"
           TextWrapping="WrapWholeWords" />
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.semanticzoom.simple')"
           :theme="pageTheme"
           :vue="simpleSemanticZoomCode">
           <template #example>
-            <WinSemanticZoom
+            <SemanticZoom
               ref="semanticZoomRef"
               Height="500">
               <template #zoomedInView>
-                <WinScrollViewer
+                <ScrollViewer
                   class="semantic-view-scroll"
                   HorizontalScrollMode="Disabled"
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollMode="Auto"
                   VerticalScrollBarVisibility="Auto"
                   :IsHorizontalScrollChainingEnabled="false">
-                  <WinGridView
+                  <GridView
                     ref="zoomedInGridRef"
                     class="zoomed-in-grid"
                     :ItemsSource="Groups"
@@ -34,31 +34,31 @@
                     SelectionMode="None">
                     <!-- @vue-ignore the legacy JS component does not expose slot types -->
                     <template #groupHeader="slotProps">
-                      <WinTextBlock
+                      <TextBlock
                         class="zoomed-in-group-title"
                         :Text="getGridGroupFromSlot(slotProps).Title" />
                     </template>
                     <!-- @vue-ignore the legacy JS component does not expose slot types -->
                     <template #item="slotProps">
-                      <WinStackPanel
+                      <StackPanel
                         class="zoomed-in-item"
                         MinWidth="200"
                         Margin="12,6,12,6">
-                        <WinTextBlock class="zoomed-in-title" :Text="getGridItemFromSlot(slotProps).Title" />
-                        <WinTextBlock
+                        <TextBlock class="zoomed-in-title" :Text="getGridItemFromSlot(slotProps).Title" />
+                        <TextBlock
                           Width="300"
                           HorizontalAlignment="Left"
                           class="zoomed-in-subtitle"
                           :Text="getGridItemFromSlot(slotProps).Subtitle"
                           TextWrapping="Wrap" />
-                      </WinStackPanel>
+                      </StackPanel>
                     </template>
-                  </WinGridView>
-                </WinScrollViewer>
+                  </GridView>
+                </ScrollViewer>
               </template>
 
               <template #zoomedOutView>
-                <WinListView
+                <ListView
                   class="zoomed-out-list"
                   :ItemsSource="Groups"
                   :IsItemClickEnabled="true"
@@ -66,30 +66,30 @@
                   @ItemClick="onZoomedOutGroupClick">
                   <!-- @vue-ignore the legacy JS component does not expose slot types -->
                   <template #item="slotProps">
-                    <WinTextBlock
+                    <TextBlock
                       class="zoomed-out-group-title"
                       :Text="getGroupFromSlot(slotProps).Title"
                       TextWrapping="Wrap" />
                   </template>
-                </WinListView>
+                </ListView>
               </template>
-            </WinSemanticZoom>
+            </SemanticZoom>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue'
-import WinControlExample from '../../components/WinControlExample.vue'
-import WinGridView from '../../components/WinGridView.vue'
-import WinListView from '../../components/WinListView.vue'
-import WinScrollViewer from '../../components/WinScrollViewer.vue'
-import WinSemanticZoom from '../../components/WinSemanticZoom.vue'
-import WinStackPanel from '../../components/WinStackPanel.vue'
-import WinTextBlock from '../../components/WinTextBlock.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import GridView from '../../components/GridView.vue'
+import ListView from '../../components/ListView.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import SemanticZoom from '../../components/SemanticZoom.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
 import { useI18n } from '../../components/i18n/index'
 import { createPageState } from '../../utils/pageState'
 
@@ -1084,7 +1084,7 @@ const Groups = ref<ControlInfoGroup[]>(officialFallbackGroups.map(group => ({
   Items: group.Items.map(localizeItem)
 })))
 
-const semanticZoomRef = ref<InstanceType<typeof WinSemanticZoom>>()
+const semanticZoomRef = ref<InstanceType<typeof SemanticZoom>>()
 const zoomedInGridRef = ref<{ ScrollIntoGroup: (group: ControlInfoGroup) => boolean }>()
 
 const onZoomedOutGroupClick = ({
@@ -1120,41 +1120,41 @@ onMounted(async () => {
   }
 })
 
-const simpleSemanticZoomCode = `<WinSemanticZoom ref="semanticZoomRef" Height="500">
+const simpleSemanticZoomCode = `<SemanticZoom ref="semanticZoomRef" Height="500">
   <template #zoomedInView>
-    <WinScrollViewer
+    <ScrollViewer
       VerticalScrollMode="Auto"
       VerticalScrollBarVisibility="Auto"
       HorizontalScrollMode="Disabled"
       HorizontalScrollBarVisibility="Disabled">
-      <WinGridView
+      <GridView
         :ItemsSource="Groups"
         SelectionMode="None">
         <template #groupHeader="{ group }">
-          <WinTextBlock :Text="group.Title" FontSize="20" FontWeight="Normal" />
+          <TextBlock :Text="group.Title" FontSize="20" FontWeight="Normal" />
         </template>
         <template #item="{ item }">
-          <WinStackPanel MinWidth="200" Margin="12,6,12,6">
-            <WinTextBlock :Text="item.Title" FontSize="14" FontWeight="SemiBold" />
-            <WinTextBlock Width="300" :Text="item.Subtitle" FontSize="14" FontWeight="Normal" TextWrapping="Wrap" />
-          </WinStackPanel>
+          <StackPanel MinWidth="200" Margin="12,6,12,6">
+            <TextBlock :Text="item.Title" FontSize="14" FontWeight="SemiBold" />
+            <TextBlock Width="300" :Text="item.Subtitle" FontSize="14" FontWeight="Normal" TextWrapping="Wrap" />
+          </StackPanel>
         </template>
-      </WinGridView>
-    </WinScrollViewer>
+      </GridView>
+    </ScrollViewer>
   </template>
 
   <template #zoomedOutView>
-    <WinListView
+    <ListView
       :ItemsSource="Groups"
       :IsItemClickEnabled="true"
       SelectionMode="None"
       @ItemClick="onZoomedOutGroupClick">
       <template #item="{ item }">
-        <WinTextBlock :Text="item.Title" TextWrapping="Wrap" />
+        <TextBlock :Text="item.Title" TextWrapping="Wrap" />
       </template>
-    </WinListView>
+    </ListView>
   </template>
-</WinSemanticZoom>`
+</SemanticZoom>`
 </script>
 
 <style scoped>

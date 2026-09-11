@@ -1,142 +1,41 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.contentdialog')" />
-          <WinTextBlock class="page-description" :Text="$t('text.use-a-contentdialog-to-show-relevant-information')" TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
-          </div>
-        </div>
+        <TextBlock class="page-header" Text="{x:Bind $t('text.contentdialog'), Mode=OneWay}" />
+        <TextBlock class="page-description" Text="{x:Bind $t('text.use-a-contentdialog-to-show-relevant-information'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions"><Button class="header-action" Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button><ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite"><TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" /></ToggleButton></div>
+      </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-basic-content-dialog-with-content')" :theme="pageTheme" :vue="basicCode">
-              <template #example>
-                <div class="sample-row">
-                  <WinButton @Click="showDialog = true">
-                    <WinTextBlock :Text="$t('text.show-dialog')" />
-                  </WinButton>
-                  <WinTextBlock class="output-text" :Text="dialogResult" />
-                </div>
-              </template>
-            </WinControlExample>
-
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.contentdialog.no-default')" :theme="pageTheme" :vue="noDefaultCode">
-              <template #example>
-                <div class="sample-row">
-                  <WinButton @Click="showDialogNoDefault = true">
-                    <WinTextBlock :Text="$t('sample.contentdialog.show-no-default')" />
-                  </WinButton>
-                  <WinTextBlock class="output-text" :Text="dialogResultNoDefault" />
-                </div>
-              </template>
-            </WinControlExample>
-
-            <WinContentDialog
-              v-model:IsOpen="showDialog"
-              :Theme="pageTheme"
-              :Title="$t('sample.contentdialog.save-title')"
-              :PrimaryButtonText="$t('sample.contentdialog.save')"
-              :SecondaryButtonText="$t('sample.contentdialog.dont-save')"
-              :CloseButtonText="$t('sample.contentdialog.cancel')"
-              DefaultButton="Primary"
-              @PrimaryButtonClick="dialogResult = $t('sample.contentdialog.saved')"
-              @SecondaryButtonClick="dialogResult = $t('sample.contentdialog.not-saved')"
-              @CloseButtonClick="dialogResult = $t('sample.contentdialog.cancelled')">
-              <ContentDialogContent />
-            </WinContentDialog>
-
-            <WinContentDialog
-              v-model:IsOpen="showDialogNoDefault"
-              :Theme="pageTheme"
-              :Title="$t('sample.contentdialog.replace-title')"
-              :PrimaryButtonText="$t('sample.contentdialog.save')"
-              :SecondaryButtonText="$t('sample.contentdialog.dont-save')"
-              :CloseButtonText="$t('sample.contentdialog.cancel')"
-              DefaultButton="None"
-              @PrimaryButtonClick="dialogResultNoDefault = $t('sample.contentdialog.saved')"
-              @SecondaryButtonClick="dialogResultNoDefault = $t('sample.contentdialog.not-saved')"
-              @CloseButtonClick="dialogResultNoDefault = $t('sample.contentdialog.cancelled')">
-              <ContentDialogContent />
-            </WinContentDialog>
+        <ControlExample HeaderText="{x:Bind $t('text.a-basic-content-dialog-with-content'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind basicCode, Mode=OneWay}">
+          <ControlExample.Example><StackPanel Orientation="Horizontal"><Button Click="ShowDialog_Click" Content="{x:Bind $t('text.show-dialog'), Mode=OneWay}" /><TextBlock class="output-text" Text="{x:Bind dialogResult, Mode=OneWay}" /></StackPanel></ControlExample.Example>
+        </ControlExample>
+        <ControlExample HeaderText="{x:Bind $t('sample.contentdialog.no-default'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind noDefaultCode, Mode=OneWay}">
+          <ControlExample.Example><StackPanel Orientation="Horizontal"><Button Click="ShowDialogNoDefault_Click" Content="{x:Bind $t('sample.contentdialog.show-no-default'), Mode=OneWay}" /><TextBlock class="output-text" Text="{x:Bind dialogResultNoDefault, Mode=OneWay}" /></StackPanel></ControlExample.Example>
+        </ControlExample>
+        <ContentDialog IsOpen="{x:Bind showDialog, Mode=TwoWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Title="{x:Bind $t('sample.contentdialog.save-title'), Mode=OneWay}" PrimaryButtonText="{x:Bind $t('sample.contentdialog.save'), Mode=OneWay}" SecondaryButtonText="{x:Bind $t('sample.contentdialog.dont-save'), Mode=OneWay}" CloseButtonText="{x:Bind $t('sample.contentdialog.cancel'), Mode=OneWay}" DefaultButton="Primary" PrimaryButtonClick="OnPrimarySave" SecondaryButtonClick="OnSecondarySave" CloseButtonClick="OnCancel"><StackPanel Spacing="12"><TextBlock Text="{x:Bind $t('sample.contentdialog.body'), Mode=OneWay}" TextWrapping="WrapWholeWords" /><CheckBox Content="{x:Bind $t('sample.contentdialog.upload'), Mode=OneWay}" /></StackPanel></ContentDialog>
+        <ContentDialog IsOpen="{x:Bind showDialogNoDefault, Mode=TwoWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Title="{x:Bind $t('sample.contentdialog.replace-title'), Mode=OneWay}" PrimaryButtonText="{x:Bind $t('sample.contentdialog.save'), Mode=OneWay}" SecondaryButtonText="{x:Bind $t('sample.contentdialog.dont-save'), Mode=OneWay}" CloseButtonText="{x:Bind $t('sample.contentdialog.cancel'), Mode=OneWay}" DefaultButton="None" PrimaryButtonClick="OnPrimaryReplace" SecondaryButtonClick="OnSecondaryKeep" CloseButtonClick="OnCancelReplace"><StackPanel Spacing="12"><TextBlock Text="{x:Bind $t('sample.contentdialog.body'), Mode=OneWay}" TextWrapping="WrapWholeWords" /><CheckBox Content="{x:Bind $t('sample.contentdialog.upload'), Mode=OneWay}" /></StackPanel></ContentDialog>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
-
 <script setup>
-import { computed, defineComponent, h, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinContentDialog from '../../components/WinContentDialog.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import { useI18n } from '../../components/i18n/index';
-import { createPageState } from '../../utils/pageState';
-
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-const { t } = useI18n();
-const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'contentdialog');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-
-const showDialog = ref(false);
-const showDialogNoDefault = ref(false);
-const dialogResult = ref('');
-const dialogResultNoDefault = ref('');
-
-const ContentDialogContent = defineComponent({
-  setup() {
-    return () => h('div', { class: 'dialog-content-stack' }, [
-      h(WinTextBlock, { Text: t('sample.contentdialog.body'), FontSize: 14, FontWeight: 400, TextWrapping: 'WrapWholeWords' }),
-      h(WinCheckBox, null, { default: () => h(WinTextBlock, { Text: t('sample.contentdialog.upload'), FontSize: 14, FontWeight: 400 }) })
-    ]);
-  }
-});
-
-const basicCode = computed(() => `<WinButton @Click="showDialog = true">
-  <WinTextBlock Text="${t('text.show-dialog')}" />
-</WinButton>
-<WinContentDialog
-  v-model:IsOpen="showDialog"
-  Title="${t('sample.contentdialog.save-title')}"
-  PrimaryButtonText="${t('sample.contentdialog.save')}"
-  SecondaryButtonText="${t('sample.contentdialog.dont-save')}"
-  CloseButtonText="${t('sample.contentdialog.cancel')}"
-  DefaultButton="Primary">
-  <WinTextBlock Text="${t('sample.contentdialog.body')}" TextWrapping="WrapWholeWords" />
-  <WinCheckBox>
-    <WinTextBlock Text="${t('sample.contentdialog.upload')}" />
-  </WinCheckBox>
-</WinContentDialog>`);
-
-const noDefaultCode = computed(() => `<WinButton @Click="showDialogNoDefault = true">
-  <WinTextBlock Text="${t('sample.contentdialog.show-no-default')}" />
-</WinButton>
-<WinContentDialog
-  v-model:IsOpen="showDialogNoDefault"
-  Title="${t('sample.contentdialog.replace-title')}"
-  PrimaryButtonText="${t('sample.contentdialog.save')}"
-  SecondaryButtonText="${t('sample.contentdialog.dont-save')}"
-  CloseButtonText="${t('sample.contentdialog.cancel')}"
-  DefaultButton="None">
-  <WinTextBlock Text="${t('sample.contentdialog.body')}" TextWrapping="WrapWholeWords" />
-  <WinCheckBox>
-    <WinTextBlock Text="${t('sample.contentdialog.upload')}" />
-  </WinCheckBox>
-</WinContentDialog>`);
+import { computed, inject, ref } from 'vue'
+import Button from '../../components/Button.vue'
+import CheckBox from '../../components/CheckBox.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import ToggleButton from '../../components/ToggleButton.vue'
+import { useI18n } from '../../components/i18n/index'
+import { createPageState } from '../../utils/pageState'
+const { t } = useI18n(); const currentPage = inject('currentPage'); const pageKey = computed(() => currentPage?.value || 'contentdialog'); const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value); const favoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
+const showDialog = ref(false); const showDialogNoDefault = ref(false); const dialogResult = ref(''); const dialogResultNoDefault = ref('')
+const ShowDialog_Click = () => { showDialog.value = true }; const ShowDialogNoDefault_Click = () => { showDialogNoDefault.value = true }
+const OnPrimarySave = () => { dialogResult.value = t('sample.contentdialog.saved') }; const OnSecondarySave = () => { dialogResult.value = t('sample.contentdialog.not-saved') }; const OnCancel = () => { dialogResult.value = t('sample.contentdialog.cancelled') }
+const OnPrimaryReplace = () => { dialogResultNoDefault.value = t('sample.contentdialog.saved') }; const OnSecondaryKeep = () => { dialogResultNoDefault.value = t('sample.contentdialog.not-saved') }; const OnCancelReplace = () => { dialogResultNoDefault.value = t('sample.contentdialog.cancelled') }
+const basicCode = computed(() => `<Button Click="ShowDialog_Click" Content="{x:Bind $t('text.show-dialog'), Mode=OneWay}" />\n<ContentDialog IsOpen="{x:Bind showDialog, Mode=TwoWay}" DefaultButton="Primary" />`); const noDefaultCode = computed(() => `<Button Click="ShowDialogNoDefault_Click" Content="{x:Bind $t('sample.contentdialog.show-no-default'), Mode=OneWay}" />\n<ContentDialog IsOpen="{x:Bind showDialogNoDefault, Mode=TwoWay}" DefaultButton="None" />`)
 </script>
-
 <style scoped>
-.page-heading { position: relative; }
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
-.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-size: 16px; }
-.sample-row { display: flex; align-items: center; gap: 16px; }
-.output-text { color: var(--text-secondary); }
-:global(.dialog-content-stack) { display: flex; flex-direction: column; gap: 12px; }
+.page-heading{position:relative}.page-header{font-size:28px;font-weight:600;margin:0 0 8px;color:var(--text-primary)}.page-description{color:var(--text-secondary);margin:0 72px 16px 0;line-height:20px}.page-header-actions{position:absolute;top:0;right:0;display:flex;gap:4px}.icon{font-size:16px}.output-text{margin-left:16px;color:var(--text-secondary)}
 </style>

@@ -7,7 +7,7 @@
     role="listbox"
     :aria-disabled="!IsEnabled"
     :aria-multiselectable="SelectionMode === 'Multiple' || SelectionMode === 'Extended'">
-    <WinScrollViewer
+    <ScrollViewer
       class="win-list-viewport"
       VerticalScrollMode="Auto"
       VerticalScrollBarVisibility="Auto"
@@ -51,6 +51,9 @@
           </div>
         </template>
         <template v-else>
+          <div v-if="hasHeaderSlot" class="win-list-header" :class="{ sticky: stickyHeader }">
+            <slot name="header"></slot>
+          </div>
           <div v-for="(item, idx) in internalItems" :key="getItemKey(item, idx)"
                ref="itemEls"
                class="win-list-item"
@@ -78,19 +81,22 @@
           </div>
         </template>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, toRaw, watch } from 'vue';
+import { computed, nextTick, ref, toRaw, useSlots, watch } from 'vue';
 import type { CSSProperties } from 'vue';
-import WinScrollViewer from './WinScrollViewer.vue';
+import ScrollViewer from './ScrollViewer.vue';
 
 defineSlots<{
   item(props: { item: any; index: number; group?: any }): any;
   header(props: { group: any }): any;
 }>();
+
+const slots = useSlots();
+const hasHeaderSlot = computed(() => Boolean(slots.header));
 
 type ListViewSelectionMode = 'None' | 'Single' | 'Multiple' | 'Extended';
 type ListViewItemStyle = {

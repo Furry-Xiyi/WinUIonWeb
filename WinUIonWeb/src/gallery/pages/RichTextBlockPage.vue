@@ -4,33 +4,33 @@
       <h1 class="page-header">{{ $t('text.richtextblock') }}</h1>
       <p class="page-description">{{ $t('sample.richtextblock.description') }}</p>
       <div class="page-header-actions">
-        <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }"
+        <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }"
           @click="toggleTheme"
          >
           <span class="icon">&#xE793;</span>
-        </WinButton>
-        <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+        </Button>
+        <ToggleButton class="header-action" :IsChecked="isFavoriteState"
           v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }"
           @update:IsChecked="toggleFavorite"
          >
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+        </ToggleButton>
       </div>
     </div>
 
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template" :headerText="$t('sample.richtextblock.simple')">
+        <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template" :headerText="$t('sample.richtextblock.simple')">
           <template #example>
-            <WinRichTextBlock>
+            <RichTextBlock>
               <p>{{ $t('sample.richtextblock.simple-text') }}</p>
-            </WinRichTextBlock>
+            </RichTextBlock>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.richtextblock.selection-highlight')">
+        <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.richtextblock.selection-highlight')">
           <template #example>
-            <WinRichTextBlock class="green-selection" IsTextSelectionEnabled>
+            <RichTextBlock class="green-selection" IsTextSelectionEnabled>
               <p>
                 {{ $t('sample.richtextblock.rich-container-supports') }}
                 <span style="font-style: italic; font-weight: bold;">{{ $t('sample.richtextblock.formatted-text') }}</span>,
@@ -38,41 +38,41 @@
                 {{ $t('sample.richtextblock.inline-images-and-rich-content') }}
               </p>
               <p>{{ $t('sample.richtextblock.overflow-support') }}</p>
-            </WinRichTextBlock>
+            </RichTextBlock>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template" :headerText="$t('sample.richtextblock.overflow')">
+        <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template" :headerText="$t('sample.richtextblock.overflow')">
           <template #example>
             <div class="overflow-container">
               <div class="overflow-column">
-                <WinRichTextBlock class="overflow-text">
+                <RichTextBlock class="overflow-text">
                   <p>{{ $t('sample.richtextblock.overflow-paragraph') }}</p>
                   <p>{{ $t('sample.richtextblock.overflow-long') }}</p>
-                </WinRichTextBlock>
+                </RichTextBlock>
               </div>
               <div class="overflow-column">
-                <WinRichTextBlock class="overflow-text"></WinRichTextBlock>
+                <RichTextBlock class="overflow-text"></RichTextBlock>
               </div>
               <div class="overflow-column">
-                <WinRichTextBlock class="overflow-text"></WinRichTextBlock>
+                <RichTextBlock class="overflow-text"></RichTextBlock>
               </div>
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example4Template" :headerText="$t('sample.richtextblock.custom-highlighting')">
+        <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example4Template" :headerText="$t('sample.richtextblock.custom-highlighting')">
           <template #example>
-            <WinRichTextBlock>
+            <RichTextBlock>
               <p>
                 {{ $t('sample.richtextblock.highlight-prefix') }}
                 <span :class="`highlight-${highlightColor}`">{{ $t('sample.richtextblock.highlight-word') }}</span>
                 {{ $t('sample.richtextblock.highlight-suffix') }}
               </p>
-            </WinRichTextBlock>
+            </RichTextBlock>
           </template>
           <template #options>
-            <WinComboBox
+            <ComboBox
               v-model:SelectedValue="highlightColor"
               :Header="$t('sample.richtextblock.highlighting-color')"
               :ItemsSource="highlightOptions"
@@ -80,20 +80,20 @@
               SelectedValuePath="value"
               style="min-width: 200px;" />
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinRichTextBlock from '../../components/WinRichTextBlock.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import RichTextBlock from '../../components/RichTextBlock.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -109,11 +109,11 @@ const highlightOptions = computed(() => [
   { label: t('text.blue'), value: 'blue' }
 ]);
 
-const example1Template = computed(() => `<WinRichTextBlock>
+const example1Template = computed(() => `<RichTextBlock>
   <p>${t('sample.richtextblock.simple-text')}</p>
-</WinRichTextBlock>`);
+</RichTextBlock>`);
 
-const example2Template = computed(() => `<WinRichTextBlock class="green-selection" IsTextSelectionEnabled>
+const example2Template = computed(() => `<RichTextBlock class="green-selection" IsTextSelectionEnabled>
   <p>
     ${t('sample.richtextblock.rich-container-supports')}
     <span style="font-style: italic; font-weight: bold;">${t('sample.richtextblock.formatted-text')}</span>,
@@ -121,30 +121,30 @@ const example2Template = computed(() => `<WinRichTextBlock class="green-selectio
     ${t('sample.richtextblock.inline-images-and-rich-content')}
   </p>
   <p>${t('sample.richtextblock.overflow-support')}</p>
-</WinRichTextBlock>`);
+</RichTextBlock>`);
 
 const example3Template = computed(() => `<div class="overflow-container">
   <div class="overflow-column">
-    <WinRichTextBlock class="overflow-text">
+    <RichTextBlock class="overflow-text">
       <p>${t('sample.richtextblock.overflow-paragraph')}</p>
       <p>${t('sample.richtextblock.overflow-long')}</p>
-    </WinRichTextBlock>
+    </RichTextBlock>
   </div>
   <div class="overflow-column">
-    <WinRichTextBlock class="overflow-text"></WinRichTextBlock>
+    <RichTextBlock class="overflow-text"></RichTextBlock>
   </div>
   <div class="overflow-column">
-    <WinRichTextBlock class="overflow-text"></WinRichTextBlock>
+    <RichTextBlock class="overflow-text"></RichTextBlock>
   </div>
 </div>`);
 
-const example4Template = computed(() => `<WinRichTextBlock>
+const example4Template = computed(() => `<RichTextBlock>
   <p>
     ${t('sample.richtextblock.highlight-prefix')}
     <span :class="\`highlight-\${highlightColor}\`">${t('sample.richtextblock.highlight-word')}</span>
     ${t('sample.richtextblock.highlight-suffix')}
   </p>
-</WinRichTextBlock>`);
+</RichTextBlock>`);
 </script>
 
 <style scoped>

@@ -1,78 +1,78 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.image')" />
-        <WinTextBlock class="page-description" :Text="$t('text.image-description')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.image')" />
+        <TextBlock class="page-description" :Text="$t('text.image-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+          <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+          <ToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.image.basic-local-file')" :theme="pageTheme" :vue="basicCode">
-          <template #example><WinImage :Source="treetops" Height="100" AutomationProperties.Name="Treetops" /></template>
-        </WinControlExample>
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.image.basic-local-file')" :theme="pageTheme" :vue="basicCode">
+          <template #example><Image :Source="treetops" Height="100" AutomationProperties.Name="Treetops" /></template>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.image.decoded-rendering-size')" :theme="pageTheme" :vue="decodedCode">
-          <template #example><WinImage :Source="treetopsDecoded" Height="100" AutomationProperties.Name="Treetops" /></template>
-        </WinControlExample>
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.image.decoded-rendering-size')" :theme="pageTheme" :vue="decodedCode">
+          <template #example><Image :Source="treetopsDecoded" Height="100" AutomationProperties.Name="Treetops" /></template>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.image.stretching')" :theme="pageTheme" :vue="stretchCode">
-          <template #example><WinImage :Source="valley" Width="100" Height="100" :Stretch="stretchMode" AutomationProperties.Name="Valley" /></template>
-          <template #options><WinRadioButton :Header="$t('sample.image.stretch-mode')" :ItemsSource="stretchItems" :SelectedIndex="stretchIndex" @update:SelectedIndex="stretchIndex = $event" /></template>
-        </WinControlExample>
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.image.stretching')" :theme="pageTheme" :vue="stretchCode">
+          <template #example><Image :Source="valley" Width="100" Height="100" :Stretch="stretchMode" AutomationProperties.Name="Valley" /></template>
+          <template #options><RadioButton :Header="$t('sample.image.stretch-mode')" :ItemsSource="stretchItems" :SelectedIndex="stretchIndex" @update:SelectedIndex="stretchIndex = $event" /></template>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.image.nine-grid')" :theme="pageTheme" :vue="nineGridCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.image.nine-grid')" :theme="pageTheme" :vue="nineGridCode">
           <template #example>
             <div class="image-stack">
-              <WinTextBlock :Text="$t('sample.image.normal-image')" />
-              <WinImage :Source="nineGridImage" Height="82" AutomationProperties.Name="Nine grid" />
-              <WinTextBlock :Text="$t('sample.image.stretched-evenly')" />
-              <WinImage :Source="nineGridImage" Height="164" NineGrid="3,3,3,3" AutomationProperties.Name="Image stretched evenly" />
-              <WinTextBlock :Text="$t('sample.image.stretched-nine-grid')" />
-              <WinImage :Source="nineGridImage" Height="164" NineGrid="30,20,30,20" AutomationProperties.Name="Image stretched using nine grid" />
+              <TextBlock :Text="$t('sample.image.normal-image')" />
+              <Image :Source="nineGridImage" Height="82" AutomationProperties.Name="Nine grid" />
+              <TextBlock :Text="$t('sample.image.stretched-evenly')" />
+              <Image :Source="nineGridImage" Height="164" NineGrid="3,3,3,3" AutomationProperties.Name="Image stretched evenly" />
+              <TextBlock :Text="$t('sample.image.stretched-nine-grid')" />
+              <Image :Source="nineGridImage" Height="164" NineGrid="30,20,30,20" AutomationProperties.Name="Image stretched using nine grid" />
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.image.svg')" :theme="pageTheme" :vue="svgCode">
-          <template #example><WinImage :Source="mirrorConsent" Height="100" AutomationProperties.Name="SVG" /></template>
-        </WinControlExample>
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.image.svg')" :theme="pageTheme" :vue="svgCode">
+          <template #example><Image :Source="mirrorConsent" Height="100" AutomationProperties.Name="SVG" /></template>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.image.animated-gif')" :theme="pageTheme" :vue="gifCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.image.animated-gif')" :theme="pageTheme" :vue="gifCode">
           <template #example>
             <div class="image-stack gif-stack">
-              <WinTextBlock :Text="$t('sample.image.gif-auto')" TextWrapping="Wrap" />
-              <WinImage :Source="animatedGif" Height="40" HorizontalAlignment="Left" AutomationProperties.Name="Animated GIF" />
-              <WinTextBlock :Text="$t('sample.image.gif-autoplay-false')" TextWrapping="Wrap" />
-              <WinImage :Source="pausedGif" Height="40" HorizontalAlignment="Left" AutomationProperties.Name="Animated GIF" />
-              <WinTextBlock :Text="$t('sample.image.gif-manual')" TextWrapping="Wrap" />
-              <WinImage ref="manualGifRef" :Source="pausedGif" Height="40" HorizontalAlignment="Left" AutomationProperties.Name="Animated GIF" @ImageOpened="gifReady = true" />
+              <TextBlock :Text="$t('sample.image.gif-auto')" TextWrapping="Wrap" />
+              <Image :Source="animatedGif" Height="40" HorizontalAlignment="Left" AutomationProperties.Name="Animated GIF" />
+              <TextBlock :Text="$t('sample.image.gif-autoplay-false')" TextWrapping="Wrap" />
+              <Image :Source="pausedGif" Height="40" HorizontalAlignment="Left" AutomationProperties.Name="Animated GIF" />
+              <TextBlock :Text="$t('sample.image.gif-manual')" TextWrapping="Wrap" />
+              <Image ref="manualGifRef" :Source="pausedGif" Height="40" HorizontalAlignment="Left" AutomationProperties.Name="Animated GIF" @ImageOpened="gifReady = true" />
             </div>
           </template>
           <template #options>
             <div v-if="gifReady" class="gif-buttons">
-              <WinButton @Click="playGif">{{ $t('text.play') }}</WinButton>
-              <WinButton @Click="stopGif">{{ $t('text.stop') }}</WinButton>
+              <Button @Click="playGif">{{ $t('text.play') }}</Button>
+              <Button @Click="stopGif">{{ $t('text.stop') }}</Button>
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinImage from '../../components/WinImage.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Image from '../../components/Image.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -99,18 +99,18 @@ const gifReady = ref(false);
 const playGif = () => manualGifRef.value?.Play();
 const stopGif = () => manualGifRef.value?.Stop();
 
-const basicCode = computed(() => `<WinImage Source="${officialMediaRoot}/treetops.jpg" Height="100" />`);
-const decodedCode = computed(() => `<WinImage :Source="{ UriSource: '${officialMediaRoot}/treetops.jpg', DecodePixelHeight: 100 }" Height="100" />`);
-const stretchCode = computed(() => `<WinImage Stretch="${stretchMode.value}" Height="100" Width="100" Source="${officialMediaRoot}/valley.jpg" />`);
-const nineGridCode = computed(() => `<WinImage Source="${officialMediaRoot}/ninegrid.gif" Height="82" />
-<WinImage Source="${officialMediaRoot}/ninegrid.gif" NineGrid="3,3,3,3" Height="164" />
-<WinImage Source="${officialMediaRoot}/ninegrid.gif" NineGrid="30,20,30,20" Height="164" />`);
-const svgCode = computed(() => `<WinImage Source="${officialMediaRoot}/MirrorPCConsent.svg" Height="100" />`);
-const gifCode = computed(() => `<WinTextBlock Text="${t('sample.image.gif-auto')}" TextWrapping="Wrap" />
-<WinImage Height="40" HorizontalAlignment="Left" Source="${officialMediaRoot}/animated.gif" />
-<WinTextBlock Text="${t('sample.image.gif-autoplay-false')}" TextWrapping="Wrap" />
-<WinImage :Source="{ UriSource: '${officialMediaRoot}/animated.gif', AutoPlay: false }" Height="40" HorizontalAlignment="Left" />
-<WinTextBlock Text="${t('sample.image.gif-manual')}" TextWrapping="Wrap" />`);
+const basicCode = computed(() => `<Image Source="${officialMediaRoot}/treetops.jpg" Height="100" />`);
+const decodedCode = computed(() => `<Image :Source="{ UriSource: '${officialMediaRoot}/treetops.jpg', DecodePixelHeight: 100 }" Height="100" />`);
+const stretchCode = computed(() => `<Image Stretch="${stretchMode.value}" Height="100" Width="100" Source="${officialMediaRoot}/valley.jpg" />`);
+const nineGridCode = computed(() => `<Image Source="${officialMediaRoot}/ninegrid.gif" Height="82" />
+<Image Source="${officialMediaRoot}/ninegrid.gif" NineGrid="3,3,3,3" Height="164" />
+<Image Source="${officialMediaRoot}/ninegrid.gif" NineGrid="30,20,30,20" Height="164" />`);
+const svgCode = computed(() => `<Image Source="${officialMediaRoot}/MirrorPCConsent.svg" Height="100" />`);
+const gifCode = computed(() => `<TextBlock Text="${t('sample.image.gif-auto')}" TextWrapping="Wrap" />
+<Image Height="40" HorizontalAlignment="Left" Source="${officialMediaRoot}/animated.gif" />
+<TextBlock Text="${t('sample.image.gif-autoplay-false')}" TextWrapping="Wrap" />
+<Image :Source="{ UriSource: '${officialMediaRoot}/animated.gif', AutoPlay: false }" Height="40" HorizontalAlignment="Left" />
+<TextBlock Text="${t('sample.image.gif-manual')}" TextWrapping="Wrap" />`);
 </script>
 
 <style scoped>

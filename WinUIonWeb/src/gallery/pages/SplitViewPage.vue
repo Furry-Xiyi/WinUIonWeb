@@ -1,21 +1,21 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.splitview')" />
-          <WinTextBlock class="page-description" :Text="$t('text.a-container-with-two-views-one-view-for-the-main')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.splitview')" />
+          <TextBlock class="page-description" :Text="$t('text.a-container-with-two-views-one-view-for-the-main')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-basic-splitview')" :theme="pageTheme" :vue="splitViewCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('text.a-basic-splitview')" :theme="pageTheme" :vue="splitViewCode">
               <template #example>
                 <div class="split-view-sample-host">
-                  <WinSplitView
+                  <SplitView
                     v-model:IsPaneOpen="isPaneOpen"
                     :CompactPaneLength="compactPaneLength"
                     :DisplayMode="displayMode"
@@ -26,8 +26,8 @@
                     MaxWidth="400">
                     <template #Pane>
                       <div class="split-pane-layout">
-                        <WinTextBlock class="pane-header" :Text="$t('sample.splitview.pane-content')" />
-                        <WinScrollViewer class="nav-links-list" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                        <TextBlock class="pane-header" :Text="$t('sample.splitview.pane-content')" />
+                        <ScrollViewer class="nav-links-list" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
                           <div
                             v-for="item in navLinks"
                             :key="item.label"
@@ -39,52 +39,52 @@
                             @keydown.enter.prevent="selectedNavLabel = item.label"
                             @keydown.space.prevent="selectedNavLabel = item.label">
                             <span v-if="panePlacement === 'Left'" class="nav-symbol icon">{{ item.symbol }}</span>
-                            <WinTextBlock class="nav-label" :Text="item.label" />
+                            <TextBlock class="nav-label" :Text="item.label" />
                             <span v-if="panePlacement === 'Right'" class="nav-symbol icon">{{ item.symbol }}</span>
                           </div>
-                        </WinScrollViewer>
+                        </ScrollViewer>
                       </div>
                     </template>
                     <div class="split-content-layout">
-                      <WinTextBlock class="split-content-header" :Text="$t('sample.splitview.splitview-content')" />
-                      <WinTextBlock class="split-content-text" :Text="selectedNavLabel ? `${selectedNavLabel} ${$t('sample.splitview.page')}` : ''" />
+                      <TextBlock class="split-content-header" :Text="$t('sample.splitview.splitview-content')" />
+                      <TextBlock class="split-content-text" :Text="selectedNavLabel ? `${selectedNavLabel} ${$t('sample.splitview.page')}` : ''" />
                     </div>
-                  </WinSplitView>
+                  </SplitView>
                 </div>
               </template>
 
               <template #options>
                 <div class="split-options">
-                  <WinToggleButton v-model:IsChecked="isPaneOpen">
-                    <WinTextBlock :Text="$t('sample.splitview.is-pane-open')" />
-                  </WinToggleButton>
-                  <WinToggleSwitch v-model:IsOn="isRight" :Header="$t('sample.splitview.placement')" :OffContent="$t('sample.splitview.left')" :OnContent="$t('sample.splitview.right')" />
-                  <WinComboBox v-model:SelectedIndex="displayModeIndex" :Header="$t('sample.splitview.display-mode')" Width="196" :ItemsSource="displayModeItems" DisplayMemberPath="Text" />
-                  <WinComboBox v-model:SelectedIndex="paneBackgroundIndex" :Header="$t('sample.splitview.pane-background')" Width="196" :ItemsSource="paneBackgroundItems" DisplayMemberPath="Text" />
-                  <WinSlider v-model:Value="openPaneLength" :Header="$t('sample.splitview.open-pane-length')" Width="196" :Minimum="128" :Maximum="500" :StepFrequency="8" />
-                  <WinSlider v-model:Value="compactPaneLength" :Header="$t('sample.splitview.compact-pane-length')" Width="196" :Minimum="24" :Maximum="128" :StepFrequency="8" />
+                  <ToggleButton v-model:IsChecked="isPaneOpen">
+                    <TextBlock :Text="$t('sample.splitview.is-pane-open')" />
+                  </ToggleButton>
+                  <ToggleSwitch v-model:IsOn="isRight" :Header="$t('sample.splitview.placement')" :OffContent="$t('sample.splitview.left')" :OnContent="$t('sample.splitview.right')" />
+                  <ComboBox v-model:SelectedIndex="displayModeIndex" :Header="$t('sample.splitview.display-mode')" Width="196" :ItemsSource="displayModeItems" DisplayMemberPath="Text" />
+                  <ComboBox v-model:SelectedIndex="paneBackgroundIndex" :Header="$t('sample.splitview.pane-background')" Width="196" :ItemsSource="paneBackgroundItems" DisplayMemberPath="Text" />
+                  <Slider v-model:Value="openPaneLength" :Header="$t('sample.splitview.open-pane-length')" Width="196" :Minimum="128" :Maximum="500" :StepFrequency="8" />
+                  <Slider v-model:Value="compactPaneLength" :Header="$t('sample.splitview.compact-pane-length')" Width="196" :Minimum="24" :Maximum="128" :StepFrequency="8" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinSlider from '../../components/WinSlider.vue';
-import WinSplitView from '../../components/WinSplitView.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
+import Button from '../../components/Button.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Slider from '../../components/Slider.vue';
+import SplitView from '../../components/SplitView.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import ToggleSwitch from '../../components/ToggleSwitch.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'splitview');
@@ -115,18 +115,18 @@ const displayMode = computed(() => displayModes[displayModeIndex.value]);
 const paneBackground = computed(() => paneBackgroundItems[paneBackgroundIndex.value]?.Value || '');
 const panePlacement = computed(() => isRight.value ? 'Right' : 'Left');
 
-const splitViewCode = computed(() => `<WinSplitView
+const splitViewCode = computed(() => `<SplitView
   v-model:IsPaneOpen="isPaneOpen"
   PaneBackground="${paneBackgroundIndex.value === 0 ? '{ThemeResource SystemControlBackgroundChromeMediumLowBrush}' : paneBackground.value}"
   :OpenPaneLength="${openPaneLength.value}"
   :CompactPaneLength="${compactPaneLength.value}"
   DisplayMode="${displayMode.value}">
   <template #Pane>
-    <WinTextBlock Text="${t('sample.splitview.pane-content')}" Margin="60,12,0,0" />
+    <TextBlock Text="${t('sample.splitview.pane-content')}" Margin="60,12,0,0" />
     <ListView ItemsSource="NavLinks" />
   </template>
-  <WinTextBlock Text="${t('sample.splitview.splitview-content')}" Margin="12,12,0,0" />
-</WinSplitView>`);
+  <TextBlock Text="${t('sample.splitview.splitview-content')}" Margin="12,12,0,0" />
+</SplitView>`);
 </script>
 
 <style scoped>

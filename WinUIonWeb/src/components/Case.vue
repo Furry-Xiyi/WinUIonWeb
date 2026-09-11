@@ -1,13 +1,14 @@
 <template>
   <Transition name="win-switch-presenter-case" :duration="transitionDuration">
     <div v-if="isActive" class="win-case-content">
-      <slot>{{ Content }}</slot>
+      <slot>{{ resolvedContent }}</slot>
     </div>
   </Transition>
 </template>
 
 <script setup>
-import { computed, inject, onBeforeUnmount } from 'vue';
+import { computed, getCurrentInstance, inject, onBeforeUnmount } from 'vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 const props = defineProps({
   Content: { type: [String, Number, Object, Array], default: null },
@@ -16,6 +17,8 @@ const props = defineProps({
 });
 
 const presenter = inject('win-switch-presenter', null);
+const instance = getCurrentInstance();
+const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
 const unregister = presenter?.registerCase(() => ({
   Value: props.Value,
   IsDefault: props.IsDefault,

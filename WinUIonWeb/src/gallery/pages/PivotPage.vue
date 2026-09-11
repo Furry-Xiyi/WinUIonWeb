@@ -1,62 +1,62 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.pivot')" />
-        <WinTextBlock
+        <TextBlock class="page-header" :Text="$t('text.pivot')" />
+        <TextBlock
           class="page-description"
           :Text="$t('text.pivot-description')"
           TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme">
-            <WinTextBlock class="icon" Text="&#xE793;" />
-          </WinButton>
-          <WinToggleButton
+          <Button class="header-action" @Click="toggleTheme">
+            <TextBlock class="icon" Text="&#xE793;" />
+          </Button>
+          <ToggleButton
             :IsChecked="isFavoriteState"
             class="header-action"
             @update:IsChecked="toggleFavorite">
-            <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </WinToggleButton>
+            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
+          </ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :theme="pageTheme"
           :vue="BasicPivotVue"
           :headerText="$t('sample.pivot.basic')">
           <template #example>
-            <WinPivot :Title="$t('sample.pivot.email')" MinHeight="400">
-              <WinPivotItem :Header="$t('sample.pivot.all')">
-                <WinTextBlock :Text="$t('sample.pivot.all-content')" />
-              </WinPivotItem>
-              <WinPivotItem :Header="$t('sample.pivot.unread')">
-                <WinTextBlock :Text="$t('sample.pivot.unread-content')" />
-              </WinPivotItem>
-              <WinPivotItem :Header="$t('sample.pivot.flagged')">
-                <WinTextBlock :Text="$t('sample.pivot.flagged-content')" />
-              </WinPivotItem>
-              <WinPivotItem :Header="$t('sample.pivot.urgent')">
-                <WinTextBlock :Text="$t('sample.pivot.urgent-content')" />
-              </WinPivotItem>
-            </WinPivot>
+            <Pivot :Title="$t('sample.pivot.email')" MinHeight="400">
+              <PivotItem :Header="$t('sample.pivot.all')">
+                <TextBlock :Text="$t('sample.pivot.all-content')" />
+              </PivotItem>
+              <PivotItem :Header="$t('sample.pivot.unread')">
+                <TextBlock :Text="$t('sample.pivot.unread-content')" />
+              </PivotItem>
+              <PivotItem :Header="$t('sample.pivot.flagged')">
+                <TextBlock :Text="$t('sample.pivot.flagged-content')" />
+              </PivotItem>
+              <PivotItem :Header="$t('sample.pivot.urgent')">
+                <TextBlock :Text="$t('sample.pivot.urgent-content')" />
+              </PivotItem>
+            </Pivot>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinPivot from '../../components/WinPivot.vue';
-import WinPivotItem from '../../components/WinPivotItem.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Pivot from '../../components/Pivot.vue';
+import PivotItem from '../../components/PivotItem.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -67,20 +67,20 @@ const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageSt
 
 const EscapeAttribute = (value) => String(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;');
 
-const BasicPivotVue = computed(() => `<WinPivot Title="${EscapeAttribute(t('sample.pivot.email'))}" MinHeight="400">
-  <WinPivotItem Header="${EscapeAttribute(t('sample.pivot.all'))}">
-    <WinTextBlock Text="${EscapeAttribute(t('sample.pivot.all-content'))}" />
-  </WinPivotItem>
-  <WinPivotItem Header="${EscapeAttribute(t('sample.pivot.unread'))}">
-    <WinTextBlock Text="${EscapeAttribute(t('sample.pivot.unread-content'))}" />
-  </WinPivotItem>
-  <WinPivotItem Header="${EscapeAttribute(t('sample.pivot.flagged'))}">
-    <WinTextBlock Text="${EscapeAttribute(t('sample.pivot.flagged-content'))}" />
-  </WinPivotItem>
-  <WinPivotItem Header="${EscapeAttribute(t('sample.pivot.urgent'))}">
-    <WinTextBlock Text="${EscapeAttribute(t('sample.pivot.urgent-content'))}" />
-  </WinPivotItem>
-</WinPivot>`);
+const BasicPivotVue = computed(() => `<Pivot Title="${EscapeAttribute(t('sample.pivot.email'))}" MinHeight="400">
+  <PivotItem Header="${EscapeAttribute(t('sample.pivot.all'))}">
+    <TextBlock Text="${EscapeAttribute(t('sample.pivot.all-content'))}" />
+  </PivotItem>
+  <PivotItem Header="${EscapeAttribute(t('sample.pivot.unread'))}">
+    <TextBlock Text="${EscapeAttribute(t('sample.pivot.unread-content'))}" />
+  </PivotItem>
+  <PivotItem Header="${EscapeAttribute(t('sample.pivot.flagged'))}">
+    <TextBlock Text="${EscapeAttribute(t('sample.pivot.flagged-content'))}" />
+  </PivotItem>
+  <PivotItem Header="${EscapeAttribute(t('sample.pivot.urgent'))}">
+    <TextBlock Text="${EscapeAttribute(t('sample.pivot.urgent-content'))}" />
+  </PivotItem>
+</Pivot>`);
 </script>
 
 <style scoped>

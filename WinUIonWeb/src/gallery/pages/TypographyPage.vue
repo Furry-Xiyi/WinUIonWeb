@@ -1,18 +1,18 @@
 <template>
   <div class="gallery-item-page">
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <div class="page-header">
               <div class="header-left">
                 <h1 class="page-title">Typography</h1>
               </div>
               <div class="header-actions">
-                <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @Click="toggleTheme">
+                <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @Click="toggleTheme">
                   <span class="icon">&#xE793;</span>
-                </WinButton>
-                <WinToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
+                </Button>
+                <ToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
                   <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-                </WinToggleButton>
+                </ToggleButton>
               </div>
             </div>
 
@@ -25,7 +25,7 @@
             </div>
 
             <p class="control-example-description">Type ramp</p>
-            <WinControlExample class="basic-input-example-theme"
+            <ControlExample class="basic-input-example-theme"
               :theme="pageTheme"
               :xaml="xamlCode"
               :cSharp="cSharpCode">
@@ -152,7 +152,7 @@
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Info tooltip -->
             <div v-if="activeInfo" class="info-tooltip" :style="tooltipStyle">
@@ -161,19 +161,19 @@
               </div>
             </div>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import ControlExample from '../../components/ControlExample.vue';
 import TypographyRow from '../../components/TypographyRow.vue';
 import { createPageState } from '../../utils/pageState';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'typography');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);

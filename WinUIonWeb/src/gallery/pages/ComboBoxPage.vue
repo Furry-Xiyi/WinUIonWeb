@@ -1,84 +1,88 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.combobox')" />
-          <WinTextBlock class="page-description" :Text="$t('text.use-a-combobox-also-known-as-a-drop-down-list-to')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" Text="{x:Bind $t('text.combobox'), Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind $t('text.use-a-combobox-also-known-as-a-drop-down-list-to'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxInlineVue" :headerText="$t('sample.combobox.inline')">
-              <template #example>
-                <div class="vertical-stack">
-                  <WinComboBox
+        <ControlExample class="basic-input-example-theme" SampleDefinition="ComboBox\ComboBoxInline.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind comboBoxInlineVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.combobox.inline'), Mode=OneWay}">
+              <ControlExample.Example>
+                <StackPanel>
+                  <ComboBox
                     Width="200"
-                    :Header="$t('text.colors')"
-                    :PlaceholderText="$t('sample.combobox.pick-a-color')"
-                    :ItemsSource="colors"
-                    @SelectionChanged="ColorComboBox_SelectionChanged" />
-                  <div class="color-output" :style="{ backgroundColor: selectedColor }"></div>
-                </div>
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxItemsSourceVue" :headerText="$t('sample.combobox.itemssource')">
-              <template #example>
-                <div class="vertical-stack">
-                  <WinComboBox
-                    v-model:SelectedIndex="Combo2"
+                    Header="{x:Bind $t('text.colors'), Mode=OneWay}"
+                    PlaceholderText="{x:Bind $t('sample.combobox.pick-a-color'), Mode=OneWay}"
+                    SelectionChanged="ColorComboBox_SelectionChanged">
+                    <x:String>Blue</x:String>
+                    <x:String>Green</x:String>
+                    <x:String>Red</x:String>
+                    <x:String>Yellow</x:String>
+                  </ComboBox>
+                  <Border class="color-output" Background="{x:Bind selectedColor, Mode=OneWay}" />
+                </StackPanel>
+              </ControlExample.Example>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="ComboBox\ComboBoxItemsSource.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind comboBoxItemsSourceVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.combobox.itemssource'), Mode=OneWay}">
+              <ControlExample.Example>
+                <StackPanel>
+                  <ComboBox
+                    SelectedIndex="{x:Bind Combo2, Mode=TwoWay}"
                     MinWidth="200"
-                    :Header="$t('sample.combobox.font')"
-                    :ItemsSource="fonts"
+                    Header="{x:Bind $t('sample.combobox.font'), Mode=OneWay}"
+                    ItemsSource="{x:Bind fonts, Mode=OneWay}"
                     DisplayMemberPath="Name" />
-                  <WinTextBlock class="output-text" :FontFamily="fonts[Combo2]?.Font" :Text="$t('sample.combobox.font-text')" />
-                </div>
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="comboBoxEditableVue" :headerText="$t('sample.combobox.editable')">
-              <template #example>
-                <div class="vertical-stack">
-                  <WinComboBox
-                    v-model:SelectedItem="Combo3SelectedItem"
-                    v-model:Text="Combo3Text"
+                  <TextBlock class="output-text" FontFamily="{x:Bind fonts[Combo2]?.Font, Mode=OneWay}" Text="{x:Bind $t('sample.combobox.font-text'), Mode=OneWay}" />
+                </StackPanel>
+              </ControlExample.Example>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="ComboBox\ComboBoxEditable.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind comboBoxEditableVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.combobox.editable'), Mode=OneWay}">
+              <ControlExample.Example>
+                <StackPanel>
+                  <ComboBox
+                    SelectedItem="{x:Bind Combo3SelectedItem, Mode=TwoWay}"
+                    Text="{x:Bind Combo3Text, Mode=TwoWay}"
                     Width="200"
-                    :Header="$t('sample.combobox.font-size')"
-                    IsEditable
-                    :ItemsSource="FontSizes"
-                    @TextSubmitted="Combo3_TextSubmitted" />
-                  <WinTextBlock class="output-text" FontFamily="Segoe UI" :FontSize="Combo3SelectedItem" :Text="$t('sample.combobox.font-size-text')" />
-                </div>
-              </template>
-            </WinControlExample>
+                    Header="{x:Bind $t('sample.combobox.font-size'), Mode=OneWay}"
+                    IsEditable="True"
+                    ItemsSource="{x:Bind FontSizes, Mode=OneWay}"
+                    TextSubmitted="Combo3_TextSubmitted" />
+                  <TextBlock class="output-text" FontFamily="Segoe UI" FontSize="{x:Bind Combo3SelectedItem, Mode=OneWay}" Text="{x:Bind $t('sample.combobox.font-size-text'), Mode=OneWay}" />
+                </StackPanel>
+              </ControlExample.Example>
+            </ControlExample>
 
-            <WinContentDialog
-              v-model:IsOpen="showInvalidFontSizeDialog"
-              :Theme="pageTheme"
-              Content="The font size must be a number between 8 and 100."
-              CloseButtonText="Close"
-              DefaultButton="Close">
-              <WinTextBlock Text="The font size must be a number between 8 and 100." TextWrapping="WrapWholeWords" />
-            </WinContentDialog>
+            <ContentDialog
+              IsOpen="{x:Bind showInvalidFontSizeDialog, Mode=TwoWay}"
+              Theme="{x:Bind pageTheme, Mode=OneWay}"
+              Content="{x:Bind $t('sample.combobox.invalid-font-size'), Mode=OneWay}"
+              CloseButtonText="{x:Bind $t('sample.combobox.close'), Mode=OneWay}"
+              DefaultButton="Close" />
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinContentDialog from '../../components/WinContentDialog.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import ContentDialog from '../../components/ContentDialog.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Border from '../../components/Border.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'combobox');
@@ -120,41 +124,44 @@ const ColorComboBox_SelectionChanged = ({ AddedItems }) => {
   }
 };
 
-const Combo3_TextSubmitted = (args) => {
-  const value = Number(args.Text);
+const Combo3_TextSubmitted = (sender, args) => {
+  const value = Number(sender.Text);
   const isDouble = Number.isFinite(value);
 
   if (isDouble && (FontSizes.includes(value) || (value < 100 && value > 8))) {
-    Combo3SelectedItem.value = value;
-    Combo3Text.value = String(value);
+    sender.SelectedItem = value;
   } else {
-    Combo3Text.value = String(Combo3SelectedItem.value);
+    sender.Text = String(sender.SelectedValue);
     showInvalidFontSizeDialog.value = true;
   }
 
   args.Handled = true;
 };
 
-const comboBoxInlineVue = `<WinComboBox
+const comboBoxInlineVue = `<ComboBox
   Width="200"
-  Header="Colors"
-  PlaceholderText="Pick a color"
-  :ItemsSource="['Blue', 'Green', 'Red', 'Yellow']"
-  @SelectionChanged="ColorComboBox_SelectionChanged" />`;
-const comboBoxItemsSourceVue = `<WinComboBox
+  Header="{x:Bind $t('text.colors'), Mode=OneWay}"
+  PlaceholderText="{x:Bind $t('sample.combobox.pick-a-color'), Mode=OneWay}"
+  SelectionChanged="ColorComboBox_SelectionChanged">
+  <x:String>Blue</x:String>
+  <x:String>Green</x:String>
+  <x:String>Red</x:String>
+  <x:String>Yellow</x:String>
+</ComboBox>`;
+const comboBoxItemsSourceVue = `<ComboBox
   MinWidth="200"
-  Header="Font"
-  :SelectedIndex="2"
-  :ItemsSource="fonts"
+  Header="{x:Bind $t('sample.combobox.font'), Mode=OneWay}"
+  SelectedIndex="{x:Bind 2, Mode=OneWay}"
+  ItemsSource="{x:Bind fonts, Mode=OneWay}"
   DisplayMemberPath="Name" />`;
-const comboBoxEditableVue = `<WinComboBox
-  v-model:SelectedItem="selectedFontSize"
-  v-model:Text="fontSizeText"
+const comboBoxEditableVue = `<ComboBox
+  SelectedItem="{x:Bind selectedFontSize, Mode=TwoWay}"
+  Text="{x:Bind fontSizeText, Mode=TwoWay}"
   Width="200"
-  Header="Font Size"
-  IsEditable
-  :ItemsSource="FontSizes"
-  @TextSubmitted="Combo3_TextSubmitted" />`;
+  Header="{x:Bind $t('sample.combobox.font-size'), Mode=OneWay}"
+  IsEditable="True"
+  ItemsSource="{x:Bind FontSizes, Mode=OneWay}"
+  TextSubmitted="Combo3_TextSubmitted" />`;
 </script>
 
 <style scoped>

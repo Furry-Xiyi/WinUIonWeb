@@ -1,21 +1,21 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.itemsrepeater')" />
-          <WinTextBlock class="page-description" :Text="$t('text.itemsrepeater-description')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.itemsrepeater')" />
+          <TextBlock class="page-description" :Text="$t('text.itemsrepeater-description')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.basic-non-interactive')" :theme="pageTheme" :vue="basicRepeaterVue">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.basic-non-interactive')" :theme="pageTheme" :vue="basicRepeaterVue">
               <template #example>
-                <WinScrollViewer class="scroll-host max-500" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
-                  <WinItemsRepeater :ItemsSource="barItems" :Layout="basicLayout" :MaxWidth="basicRepeaterMaxWidth">
+                <ScrollViewer class="scroll-host max-500" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
+                  <ItemsRepeater :ItemsSource="barItems" :Layout="basicLayout" :MaxWidth="basicRepeaterMaxWidth">
                     <template #default="{ item }">
                       <div v-if="basicLayoutKey === 'UniformGridLayout'" class="circle-template" :style="{ width: item.MaxDiameter + 'px', height: item.MaxDiameter + 'px' }">
                         <div class="circle-accent" :style="{ width: item.Diameter + 'px', height: item.Diameter + 'px' }"></div>
@@ -27,138 +27,138 @@
                         <div class="bar-accent horizontal" :style="{ width: item.Length + 'px' }"></div>
                       </div>
                     </template>
-                  </WinItemsRepeater>
-                </WinScrollViewer>
+                  </ItemsRepeater>
+                </ScrollViewer>
               </template>
               <template #options>
                 <div class="options-stack">
-                  <WinButton class="option-button" @click="AddBtn_Click"><WinTextBlock :Text="$t('sample.add-item')" /></WinButton>
-                  <WinButton class="option-button" @click="DeleteBtn_Click"><WinTextBlock :Text="$t('sample.remove-item')" /></WinButton>
-                  <WinRadioButtons :Header="$t('sample.layout')" :ItemsSource="basicLayoutOptions" :SelectedIndex="basicLayoutSelectedIndex" @SelectionChanged="RadioBtn_Click" />
+                  <Button class="option-button" @click="AddBtn_Click"><TextBlock :Text="$t('sample.add-item')" /></Button>
+                  <Button class="option-button" @click="DeleteBtn_Click"><TextBlock :Text="$t('sample.remove-item')" /></Button>
+                  <RadioButtons :Header="$t('sample.layout')" :ItemsSource="basicLayoutOptions" :SelectedIndex="basicLayoutSelectedIndex" @SelectionChanged="RadioBtn_Click" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" HorizontalContentAlignment="Stretch" :headerText="$t('sample.itemsrepeater.virtualizing-scrollable-list-items')" :theme="pageTheme" :vue="virtualizingRepeaterVue">
+            <ControlExample class="basic-input-example-theme" HorizontalContentAlignment="Stretch" :headerText="$t('sample.itemsrepeater.virtualizing-scrollable-list-items')" :theme="pageTheme" :vue="virtualizingRepeaterVue">
               <template #example>
-                <WinScrollViewer class="scroll-host feed-host" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                  <WinItemsRepeater Margin="0,0,12,0" :ItemsSource="numbers" :Layout="virtualizingLayout" HorizontalAlignment="Stretch">
+                <ScrollViewer class="scroll-host feed-host" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                  <ItemsRepeater Margin="0,0,12,0" :ItemsSource="numbers" :Layout="virtualizingLayout" HorizontalAlignment="Stretch">
                     <template #default="{ item, index }">
                       <div class="number-card" :class="{ accent: index % 2 === 1 }">
-                        <WinTextBlock :Text="String(item)" />
+                        <TextBlock :Text="String(item)" />
                       </div>
                     </template>
-                  </WinItemsRepeater>
-                </WinScrollViewer>
+                  </ItemsRepeater>
+                </ScrollViewer>
               </template>
               <template #options>
                 <div class="options-stack">
-                  <WinRadioButtons :ItemsSource="virtualizingLayoutOptions" :SelectedIndex="virtualizingLayoutSelectedIndex" @SelectionChanged="LayoutBtn_SelectionChanged" />
+                  <RadioButtons :ItemsSource="virtualizingLayoutOptions" :SelectedIndex="virtualizingLayoutSelectedIndex" @SelectionChanged="LayoutBtn_SelectionChanged" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.mixed-type-collection')" :theme="pageTheme" :vue="mixedRepeaterVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.mixed-type-collection')" :theme="pageTheme" :vue="mixedRepeaterVue">
               <template #example>
                 <div class="sample-stack">
-                  <WinTextBlock :Text="$t('sample.itemsrepeater.mixed-note')" TextWrapping="WrapWholeWords" />
-                  <WinItemsRepeater Margin="0,0,12,0" :ItemsSource="mixedItems" :Layout="mixedLayout" HorizontalAlignment="Stretch">
+                  <TextBlock :Text="$t('sample.itemsrepeater.mixed-note')" TextWrapping="WrapWholeWords" />
+                  <ItemsRepeater Margin="0,0,12,0" :ItemsSource="mixedItems" :Layout="mixedLayout" HorizontalAlignment="Stretch">
                     <template #default="{ item }">
                       <div v-if="typeof item === 'string'" class="mixed-card string-card">
-                        <WinTextBlock class="inverse-text mixed-string-text" :Text="String(item)" TextWrapping="WrapWholeWords" />
+                        <TextBlock class="inverse-text mixed-string-text" :Text="String(item)" TextWrapping="WrapWholeWords" />
                       </div>
                       <div v-else class="mixed-card number-mixed-card">
-                        <WinTextBlock class="mixed-number" :Text="String(item)" />
+                        <TextBlock class="mixed-number" :Text="String(item)" />
                       </div>
                     </template>
-                  </WinItemsRepeater>
+                  </ItemsRepeater>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.nested')" :theme="pageTheme" :vue="nestedRepeaterVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.nested')" :theme="pageTheme" :vue="nestedRepeaterVue">
               <template #example>
-                <WinScrollViewer class="scroll-host nested-scroll" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
-                  <WinItemsRepeater :ItemsSource="categories" :Layout="{ Type: 'StackLayout', Orientation: 'Vertical' }">
+                <ScrollViewer class="scroll-host nested-scroll" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto">
+                  <ItemsRepeater :ItemsSource="categories" :Layout="{ Type: 'StackLayout', Orientation: 'Vertical' }">
                     <template #default="{ item }">
                       <div class="category-block">
-                        <WinTextBlock class="category-title" :Text="item.CategoryName" />
-                        <WinItemsRepeater :ItemsSource="item.CategoryItems" :Layout="{ Type: 'StackLayout', Orientation: 'Horizontal', Spacing: 8 }">
+                        <TextBlock class="category-title" :Text="item.CategoryName" />
+                        <ItemsRepeater :ItemsSource="item.CategoryItems" :Layout="{ Type: 'StackLayout', Orientation: 'Horizontal', Spacing: 8 }">
                           <template #default="{ item: child }">
                             <div class="nested-pill">
-                              <WinTextBlock class="inverse-text" :Text="String(child)" />
+                              <TextBlock class="inverse-text" :Text="String(child)" />
                             </div>
                           </template>
-                        </WinItemsRepeater>
+                        </ItemsRepeater>
                       </div>
                     </template>
-                  </WinItemsRepeater>
-                </WinScrollViewer>
+                  </ItemsRepeater>
+                </ScrollViewer>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.animated-scrolling-content-display')" :theme="pageTheme" :vue="animatedRepeaterVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.animated-scrolling-content-display')" :theme="pageTheme" :vue="animatedRepeaterVue">
               <template #example>
                 <div class="animated-grid">
-                  <WinScrollViewer class="scroll-host animated-list" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled" @ViewChanged="Animated_ScrollViewer_ViewChanging">
-                    <WinItemsRepeater :ItemsSource="colors" :Layout="{ Type: 'StackLayout', Orientation: 'Vertical' }" @GettingFocus="OnAnimatedScrollRepeaterGettingFocus" @KeyDown="OnAnimatedScrollRepeaterKeyDown">
+                  <ScrollViewer class="scroll-host animated-list" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled" @ViewChanged="Animated_ScrollViewer_ViewChanging">
+                    <ItemsRepeater :ItemsSource="colors" :Layout="{ Type: 'StackLayout', Orientation: 'Vertical' }" @GettingFocus="OnAnimatedScrollRepeaterGettingFocus" @KeyDown="OnAnimatedScrollRepeaterKeyDown">
                       <template #default="{ item, index }">
-                        <WinButton class="color-button" :style="getAnimatedButtonStyle(item, index)" @focus="OnAnimatedItemClicked(item, $event)" @Click="OnAnimatedItemClicked(item, $event)">
-                          <WinTextBlock :Text="item" />
-                        </WinButton>
+                        <Button class="color-button" :style="getAnimatedButtonStyle(item, index)" @focus="OnAnimatedItemClicked(item, $event)" @Click="OnAnimatedItemClicked(item, $event)">
+                          <TextBlock :Text="item" />
+                        </Button>
                       </template>
-                    </WinItemsRepeater>
-                  </WinScrollViewer>
+                    </ItemsRepeater>
+                  </ScrollViewer>
                   <div class="color-rectangle" :style="{ background: selectedColor }">
-                    <WinTextBlock class="inverse-text" :Text="selectedColor" />
+                    <TextBlock class="inverse-text" :Text="selectedColor" />
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.virtualized-content-heavy-layout')" :theme="pageTheme" :vue="contentHeavyRepeaterVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.itemsrepeater.virtualized-content-heavy-layout')" :theme="pageTheme" :vue="contentHeavyRepeaterVue">
               <template #example>
                 <div class="recipe-grid">
-                  <WinScrollViewer class="scroll-host recipe-host" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                    <WinItemsRepeater :ItemsSource="visibleRecipes" :Layout="recipeLayout">
+                  <ScrollViewer class="scroll-host recipe-host" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsRepeater :ItemsSource="visibleRecipes" :Layout="recipeLayout">
                       <template #default="{ item }">
                         <div class="recipe-card">
                           <div class="recipe-color" :style="{ background: item.Color }">
-                            <WinTextBlock class="recipe-number" :Text="String(item.Num)" />
+                            <TextBlock class="recipe-number" :Text="String(item.Num)" />
                           </div>
-                          <WinTextBlock class="recipe-name" :Text="item.Name" TextWrapping="WrapWholeWords" />
-                          <WinTextBlock class="recipe-ingredients" :Text="item.Ingredients" TextWrapping="WrapWholeWords" />
+                          <TextBlock class="recipe-name" :Text="item.Name" TextWrapping="WrapWholeWords" />
+                          <TextBlock class="recipe-ingredients" :Text="item.Ingredients" TextWrapping="WrapWholeWords" />
                         </div>
                       </template>
-                    </WinItemsRepeater>
-                  </WinScrollViewer>
+                    </ItemsRepeater>
+                  </ScrollViewer>
                   <div class="recipe-options">
-                    <WinTextBox v-model:Text="recipeFilter" Width="200" :Header="$t('sample.filter-by-ingredient')" />
-                    <WinTextBlock Margin="0,0,0,10" :Text="$t('sample.sort-by-number-of-ingredients')" />
-                    <WinButton class="option-button" @click="OnSortAscClick"><WinTextBlock :Text="$t('sample.least-to-most')" /></WinButton>
-                    <WinButton class="option-button" @click="OnSortDesClick"><WinTextBlock :Text="$t('sample.most-to-least')" /></WinButton>
+                    <TextBox v-model:Text="recipeFilter" Width="200" :Header="$t('sample.filter-by-ingredient')" />
+                    <TextBlock Margin="0,0,0,10" :Text="$t('sample.sort-by-number-of-ingredients')" />
+                    <Button class="option-button" @click="OnSortAscClick"><TextBlock :Text="$t('sample.least-to-most')" /></Button>
+                    <Button class="option-button" @click="OnSortDesClick"><TextBlock :Text="$t('sample.most-to-least')" /></Button>
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinItemsRepeater from '../../components/WinItemsRepeater.vue';
-import WinRadioButtons from '../../components/WinRadioButtons.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinTextBox from '../../components/WinTextBox.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import ItemsRepeater from '../../components/ItemsRepeater.vue';
+import RadioButtons from '../../components/RadioButtons.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import TextBox from '../../components/TextBox.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 import { useI18n } from '../../components/i18n/index';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'itemsrepeater');
@@ -304,50 +304,50 @@ const visibleRecipes = computed(() => {
 const OnSortAscClick = () => { sortDirection.value = 'asc'; };
 const OnSortDesClick = () => { sortDirection.value = 'desc'; };
 
-const basicRepeaterVue = `<WinItemsRepeater :ItemsSource="barItems" :Layout="{ Type: 'StackLayout', Orientation: 'Vertical', Spacing: 8 }">
+const basicRepeaterVue = `<ItemsRepeater :ItemsSource="barItems" :Layout="{ Type: 'StackLayout', Orientation: 'Vertical', Spacing: 8 }">
   <template #default="{ item }">
     <div class="horizontal-bar-template">
       <div :style="{ width: item.Length + 'px' }"></div>
     </div>
   </template>
-</WinItemsRepeater>`;
+</ItemsRepeater>`;
 
-const virtualizingRepeaterVue = `<WinItemsRepeater :ItemsSource="numbers" :Layout="{ Type: 'ActivityFeedLayout', ColumnSpacing: 12, RowSpacing: 12 }">
+const virtualizingRepeaterVue = `<ItemsRepeater :ItemsSource="numbers" :Layout="{ Type: 'ActivityFeedLayout', ColumnSpacing: 12, RowSpacing: 12 }">
   <template #default="{ item }">
     <div class="number-card">{{ item }}</div>
   </template>
-</WinItemsRepeater>`;
+</ItemsRepeater>`;
 
-const mixedRepeaterVue = `<WinItemsRepeater :ItemsSource="mixedItems" :Layout="{ Type: 'UniformGridLayout', MinItemWidth: 200, MinItemHeight: 200 }">
+const mixedRepeaterVue = `<ItemsRepeater :ItemsSource="mixedItems" :Layout="{ Type: 'UniformGridLayout', MinItemWidth: 200, MinItemHeight: 200 }">
   <template #default="{ item }">
     <div v-if="typeof item === 'string'" class="string-card">{{ item }}</div>
     <div v-else class="number-mixed-card">{{ item }}</div>
   </template>
-</WinItemsRepeater>`;
+</ItemsRepeater>`;
 
-const nestedRepeaterVue = `<WinItemsRepeater :ItemsSource="categories" :Layout="{ Type: 'StackLayout', Orientation: 'Vertical' }">
+const nestedRepeaterVue = `<ItemsRepeater :ItemsSource="categories" :Layout="{ Type: 'StackLayout', Orientation: 'Vertical' }">
   <template #default="{ item }">
-    <WinTextBlock :Text="item.CategoryName" />
-    <WinItemsRepeater :ItemsSource="item.CategoryItems" :Layout="{ Type: 'StackLayout', Orientation: 'Horizontal' }" />
+    <TextBlock :Text="item.CategoryName" />
+    <ItemsRepeater :ItemsSource="item.CategoryItems" :Layout="{ Type: 'StackLayout', Orientation: 'Horizontal' }" />
   </template>
-</WinItemsRepeater>`;
+</ItemsRepeater>`;
 
-const animatedRepeaterVue = `<WinItemsRepeater :ItemsSource="colors" @GettingFocus="OnAnimatedScrollRepeaterGettingFocus" @KeyDown="OnAnimatedScrollRepeaterKeyDown">
+const animatedRepeaterVue = `<ItemsRepeater :ItemsSource="colors" @GettingFocus="OnAnimatedScrollRepeaterGettingFocus" @KeyDown="OnAnimatedScrollRepeaterKeyDown">
   <template #default="{ item }">
-    <WinButton :style="{ background: item }" @focus="OnAnimatedItemClicked(item)" @Click="OnAnimatedItemClicked(item)">
-      <WinTextBlock :Text="item" />
-    </WinButton>
+    <Button :style="{ background: item }" @focus="OnAnimatedItemClicked(item)" @Click="OnAnimatedItemClicked(item)">
+      <TextBlock :Text="item" />
+    </Button>
   </template>
-</WinItemsRepeater>`;
+</ItemsRepeater>`;
 
-const contentHeavyRepeaterVue = `<WinItemsRepeater :ItemsSource="visibleRecipes" :Layout="{ Type: 'VariedImageSizeLayout', MinItemWidth: 200 }">
+const contentHeavyRepeaterVue = `<ItemsRepeater :ItemsSource="visibleRecipes" :Layout="{ Type: 'VariedImageSizeLayout', MinItemWidth: 200 }">
   <template #default="{ item }">
     <div class="recipe-card">
-      <WinTextBlock :Text="item.Name" />
-      <WinTextBlock :Text="item.Ingredients" />
+      <TextBlock :Text="item.Name" />
+      <TextBlock :Text="item.Ingredients" />
     </div>
   </template>
-</WinItemsRepeater>`;
+</ItemsRepeater>`;
 </script>
 
 <style scoped>

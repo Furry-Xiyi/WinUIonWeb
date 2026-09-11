@@ -1,31 +1,31 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div style="position: relative;" class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.calendarview')" />
-          <WinTextBlock
+          <TextBlock class="page-header" :Text="$t('text.calendarview')" />
+          <TextBlock
             class="page-description"
             :Text="$t('text.the-calendarview-gives-a-standardized-way-to-let')"
             TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme">
+            <Button class="header-action" @click="toggleTheme">
               <span class="icon"></span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
              >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
               class="basic-input-example-theme"
               :headerText="$t('text.a-basic-calendar-view')"
               :theme="pageTheme"
               :vue="example1Vue">
               <template #example>
-                <WinCalendarView
+                <CalendarView
                   :CalendarIdentifier="CalendarIdentifier"
                   :IsGroupLabelVisible="IsGroupLabelVisible"
                   :IsOutOfScopeEnabled="IsOutOfScopeEnabled"
@@ -35,42 +35,42 @@
 
               <template #options>
                 <div class="options-panel">
-                  <WinCheckBox v-model="IsGroupLabelVisible"><WinTextBlock Text="IsGroupLabelVisible" /></WinCheckBox>
-                  <WinCheckBox v-model="IsOutOfScopeEnabled"><WinTextBlock Text="IsOutOfScopeEnabled" /></WinCheckBox>
+                  <CheckBox v-model="IsGroupLabelVisible"><TextBlock Text="IsGroupLabelVisible" /></CheckBox>
+                  <CheckBox v-model="IsOutOfScopeEnabled"><TextBlock Text="IsOutOfScopeEnabled" /></CheckBox>
 
                   <div class="option-group">
-                    <WinComboBox v-model:SelectedIndex="selectionModeIndex" Header="SelectionMode" :ItemsSource="selectionModes" style="width: 220px;" />
+                    <ComboBox v-model:SelectedIndex="selectionModeIndex" Header="SelectionMode" :ItemsSource="selectionModes" style="width: 220px;" />
                   </div>
 
                   <div class="option-group">
-                    <WinComboBox v-model:SelectedIndex="calendarIdentifierIndex" Header="CalendarIdentifier" :ItemsSource="calendarIdentifiers" DisplayMemberPath="label" style="width: 220px;" />
+                    <ComboBox v-model:SelectedIndex="calendarIdentifierIndex" Header="CalendarIdentifier" :ItemsSource="calendarIdentifiers" DisplayMemberPath="label" style="width: 220px;" />
                   </div>
 
                   <div class="option-group">
-                    <WinComboBox v-model:SelectedIndex="languageIndex" Header="Language" :ItemsSource="languages" DisplayMemberPath="label" style="width: 220px;" />
+                    <ComboBox v-model:SelectedIndex="languageIndex" Header="Language" :ItemsSource="languages" DisplayMemberPath="label" style="width: 220px;" />
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCalendarView from '../../components/WinCalendarView.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import CalendarView from '../../components/CalendarView.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
 import { useI18n } from '../../components/i18n/index';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'calendarview');
@@ -193,7 +193,7 @@ const languages = [
 const languageIndex = ref(0);
 const Language = computed(() => languages[languageIndex.value].value);
 
-const example1Vue = `<WinCalendarView
+const example1Vue = `<CalendarView
   :CalendarIdentifier="CalendarIdentifier"
   :IsGroupLabelVisible="IsGroupLabelVisible"
   :IsOutOfScopeEnabled="IsOutOfScopeEnabled"

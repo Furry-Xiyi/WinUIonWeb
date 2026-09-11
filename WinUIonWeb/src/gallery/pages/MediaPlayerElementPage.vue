@@ -1,48 +1,48 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.mediaplayerelement')" />
-        <WinTextBlock class="page-description" :Text="$t('text.mediaplayerelement-description')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.mediaplayerelement')" />
+        <TextBlock class="page-description" :Text="$t('text.mediaplayerelement-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+          <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+          <ToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.media.transport-controls')" :theme="pageTheme" :vue="transportCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.media.transport-controls')" :theme="pageTheme" :vue="transportCode">
           <template #example>
-            <WinMediaPlayerElement :Source="player1Source" MaxWidth="400" :AutoPlay="false" :AreTransportControlsEnabled="true" />
+            <MediaPlayerElement :Source="player1Source" MaxWidth="400" :AutoPlay="false" :AreTransportControlsEnabled="true" />
           </template>
           <template #options>
-            <WinButton AutomationProperties.Name="Open file button" @Click="openFile">{{ $t('sample.media.open-file') }}</WinButton>
+            <Button AutomationProperties.Name="Open file button" @Click="openFile">{{ $t('sample.media.open-file') }}</Button>
             <input
               ref="fileInput"
               class="media-file-input"
               type="file"
               @change="onFileSelected" />
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.media.autoplay-video')" :theme="pageTheme" :vue="autoplayCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.media.autoplay-video')" :theme="pageTheme" :vue="autoplayCode">
           <template #example>
-            <WinMediaPlayerElement :Source="player2Source" MaxWidth="400" :AutoPlay="true" />
+            <MediaPlayerElement :Source="player2Source" MaxWidth="400" :AutoPlay="true" />
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, ref, type Ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinMediaPlayerElement from '../../components/WinMediaPlayerElement.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import MediaPlayerElement from '../../components/MediaPlayerElement.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
 const currentPage = inject<Ref<string | undefined>>('currentPage');
@@ -71,11 +71,11 @@ onBeforeUnmount(() => {
   if (objectUrl) URL.revokeObjectURL(objectUrl);
 });
 
-const transportCode = computed(() => `<WinMediaPlayerElement Source="${officialVideo}"
+const transportCode = computed(() => `<MediaPlayerElement Source="${officialVideo}"
   MaxWidth="400"
   AutoPlay="False"
   AreTransportControlsEnabled="True" />`);
-const autoplayCode = computed(() => `<WinMediaPlayerElement Source="${officialAutoplayVideo}"
+const autoplayCode = computed(() => `<MediaPlayerElement Source="${officialAutoplayVideo}"
   MaxWidth="400"
   AutoPlay="True" />`);
 

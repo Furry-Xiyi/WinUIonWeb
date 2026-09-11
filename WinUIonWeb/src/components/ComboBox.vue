@@ -3,16 +3,16 @@
     ref="comboRef"
     class="win-combo-box"
     :class="{
-      'is-disabled': !IsEnabled,
+      'is-disabled': !resolvedIsEnabled,
       'is-drop-down-open': isOpen,
-      'is-editable': IsEditable
+      'is-editable': resolvedIsEditable
     }"
     :style="rootStyle"
     @keydown.capture="onInputKeyDown"
     @pointerdown.capture="onPointerDown">
-    <WinTextBlock v-if="Header" class="win-combo-header" :Text="Header" />
+    <TextBlock v-if="resolvedHeader" class="win-combo-header" :Text="resolvedHeader" />
 
-    <div v-if="IsEditable" ref="backgroundRef" class="win-combo-editable">
+    <div v-if="resolvedIsEditable" ref="backgroundRef" class="win-combo-editable">
       <button
         v-if="!isEditing"
         class="win-btn DefaultButtonStyle win-combo-btn win-combo-edit-display"
@@ -20,24 +20,24 @@
         role="combobox"
         :aria-controls="listBoxId"
         :aria-expanded="isOpen"
-        :aria-label="Header || PlaceholderText"
-        :disabled="!IsEnabled"
+        :aria-label="resolvedHeader || resolvedPlaceholderText"
+        :disabled="!resolvedIsEnabled"
         @click="beginEditing"
         @keydown="onEditableDisplayKeyDown">
         <span class="win-combo-content" :class="{ 'is-placeholder': !currentText && currentSelectedItem === undefined }">
           {{ editableDisplayLabel }}
         </span>
       </button>
-      <WinTextBox
+      <TextBox
         v-else
         ref="inputRef"
         class="win-combo-textbox"
         role="combobox"
         :aria-controls="listBoxId"
         :aria-expanded="isOpen"
-        :aria-label="Header || PlaceholderText"
-        :IsEnabled="IsEnabled"
-        :PlaceholderText="PlaceholderText"
+        :aria-label="resolvedHeader || resolvedPlaceholderText"
+        :IsEnabled="resolvedIsEnabled"
+        :PlaceholderText="resolvedPlaceholderText"
         :ShowDeleteButton="false"
         :Text="currentText"
         @LostFocus="onEditableLostFocus"
@@ -48,7 +48,7 @@
         type="button"
         tabindex="-1"
         :aria-label="t('text.select')"
-        :disabled="!IsEnabled"
+        :disabled="!resolvedIsEnabled"
         @click="toggleEditableDropDown"
         @pointerdown.prevent="onChevronDown"
         @pointerup="onChevronUp"
@@ -70,8 +70,8 @@
       role="combobox"
       :aria-controls="listBoxId"
       :aria-expanded="isOpen"
-      :aria-label="Header || PlaceholderText"
-      :disabled="!IsEnabled"
+        :aria-label="resolvedHeader || resolvedPlaceholderText"
+        :disabled="!resolvedIsEnabled"
       @click="toggle"
       @keydown="onButtonKeyDown"
       @pointerdown="onChevronDown"
@@ -104,14 +104,18 @@
           'is-positioned': flyoutReady,
           'opens-up': openedUp,
           'touch-input': inputDeviceTypeUsedToOpen === 'Touch',
-          'edge-square-top': IsEditable && !openedUp,
-          'edge-square-bottom': IsEditable && openedUp
+          'edge-square-top': resolvedIsEditable && !openedUp,
+          'edge-square-bottom': resolvedIsEditable && openedUp
         }]"
         :style="flyoutStyle"
         role="listbox"
         @keydown="onFlyoutKeyDown"
         @pointerdown.stop>
-        <WinScrollViewer
+        <div
+          class="win-combo-flyout-hit-root"
+          @pointermove="onFlyoutPointerMove"
+          @click="onFlyoutClick">
+        <ScrollViewer
           ref="scrollViewerRef"
           class="win-combo-scroll-viewer"
           HorizontalScrollMode="Disabled"
@@ -122,11 +126,11 @@
           :IsTabStop="false">
           <div ref="itemsPresenterRef" class="win-combo-items-presenter">
             <button
-              v-for="(item, index) in ItemsSource"
+              v-for="(item, index) in resolvedItemsSource"
               :key="getItemKey(item, index)"
               :ref="(element) => setItemRef(element, index)"
               class="win-combo-item"
-              :class="{ selected: currentSelectedIndex === index }"
+              :class="{ selected: currentSelectedIndex === index, hovered: hoveredIndex === index }"
               type="button"
               role="option"
               :aria-selected="currentSelectedIndex === index"
@@ -138,18 +142,27 @@
               </span>
             </button>
           </div>
-        </WinScrollViewer>
+        </ScrollViewer>
+        </div>
       </div>
+      <div
+        v-if="isOpen && isFlyoutAnimating"
+        class="win-combo-flyout-hit-overlay"
+        :style="flyoutStyle"
+        @pointerdown.stop
+        @pointermove="onFlyoutPointerMove"
+        @click="onFlyoutClick" />
     </Teleport>
   </div>
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch } from 'vue';
 import { useI18n } from './i18n/index';
-import WinScrollViewer from './WinScrollViewer.vue';
-import WinTextBlock from './WinTextBlock.vue';
-import WinTextBox from './WinTextBox.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import { resolveXamlValue } from './xamlRuntime';
+import TextBlock from './TextBlock.vue';
+import TextBox from './TextBox.vue';
 import { useFlyoutAnimation } from './useFlyoutAnimation';
 
 const ComboBoxPopupMaxNumberOfItems = 9;
@@ -159,24 +172,86 @@ const DefaultComboBoxItemHeight = 36;
 
 const { t } = useI18n();
 const props = defineProps({
-  ItemsSource: { type: Array, default: () => [] },
-  Header: { type: String, default: '' },
-  PlaceholderText: { type: String, default: '' },
-  IsEditable: { type: Boolean, default: false },
-  IsEnabled: { type: Boolean, default: true },
-  IsDropDownOpen: { type: Boolean, default: undefined },
-  SelectedIndex: { type: Number, default: undefined },
+  ItemsSource: { type: [Array, String], default: () => [] },
+  Header: { type: [String, Number], default: '' },
+  PlaceholderText: { type: [String, Number], default: '' },
+  IsEditable: { type: [Boolean, String], default: false },
+  IsEnabled: { type: [Boolean, String], default: true },
+  IsDropDownOpen: { type: [Boolean, String], default: undefined },
+  SelectedIndex: { type: [Number, String], default: undefined },
   SelectedItem: { type: null, default: undefined },
   SelectedValue: { type: null, default: undefined },
-  SelectedValuePath: { type: String, default: '' },
-  DisplayMemberPath: { type: String, default: '' },
+  SelectedValuePath: { type: [String, Number], default: '' },
+  DisplayMemberPath: { type: [String, Number], default: '' },
   Text: { type: [String, Number], default: undefined },
   Width: { type: [String, Number], default: '' },
   MinWidth: { type: [String, Number], default: '' },
   MaxWidth: { type: [String, Number], default: '' },
-  MaxDropDownHeight: { type: Number, default: 504 },
+  MaxDropDownHeight: { type: [Number, String], default: 504 },
   Theme: { type: String, default: '' }
 });
+const instance = getCurrentInstance();
+const slots = useSlots();
+const inlineItems = computed(() => {
+  const items = [];
+  const textFromNode = (node) => {
+    if (node === null || node === undefined) return '';
+    if (Array.isArray(node)) return node.map(textFromNode).join('');
+    if (typeof node === 'string' || typeof node === 'number') return String(node);
+    if (typeof node !== 'object') return '';
+    const children = node.children;
+    if (typeof children === 'string' || typeof children === 'number') return String(children);
+    if (children && typeof children === 'object' && typeof children.default === 'function') {
+      try {
+        return textFromNode(children.default());
+      } catch {
+        return '';
+      }
+    }
+    return textFromNode(children);
+  };
+  const visit = (node) => {
+    if (!node) return;
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
+    if (typeof node === 'object') {
+      const type = node.type;
+      const typeName = typeof type === 'string' ? type : type?.name || type?.__name || '';
+      if (String(typeName).toLowerCase() === 'x:string') {
+        const text = textFromNode(node.children).trim();
+        if (text) items.push(text);
+      }
+    }
+  };
+  visit(slots.default?.());
+  return items;
+});
+const resolvedItemsSource = computed(() => {
+  const value = resolveXamlValue(props.ItemsSource, instance);
+  if (Array.isArray(value) && value.length) return value;
+  return inlineItems.value;
+});
+const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
+const resolvedPlaceholderText = computed(() => resolveXamlValue(props.PlaceholderText, instance));
+const resolvedIsEditable = computed(() => resolveXamlValue(props.IsEditable, instance) === true);
+const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
+const resolvedIsDropDownOpen = computed(() => {
+  const value = resolveXamlValue(props.IsDropDownOpen, instance);
+  return value === undefined ? undefined : value === true;
+});
+const resolvedSelectedIndex = computed(() => {
+  const value = resolveXamlValue(props.SelectedIndex, instance);
+  return value === undefined || value === '' ? undefined : Number(value);
+});
+const resolvedSelectedItem = computed(() => resolveXamlValue(props.SelectedItem, instance));
+const resolvedSelectedValue = computed(() => resolveXamlValue(props.SelectedValue, instance));
+const resolvedText = computed(() => resolveXamlValue(props.Text, instance));
+const resolvedWidth = computed(() => resolveXamlValue(props.Width, instance));
+const resolvedMinWidth = computed(() => resolveXamlValue(props.MinWidth, instance));
+const resolvedMaxWidth = computed(() => resolveXamlValue(props.MaxWidth, instance));
+const resolvedMaxDropDownHeight = computed(() => Number(resolveXamlValue(props.MaxDropDownHeight, instance)) || 504);
 
 const emit = defineEmits([
   'update:IsDropDownOpen',
@@ -197,7 +272,8 @@ const flyoutRef = ref(null);
 const scrollViewerRef = ref(null);
 const itemsPresenterRef = ref(null);
 const itemRefs = ref([]);
-const isOpen = ref(Boolean(props.IsDropDownOpen));
+const hoveredIndex = ref(-1);
+const isOpen = ref(Boolean(resolvedIsDropDownOpen.value));
 const isEditing = ref(false);
 const flyoutReady = ref(false);
 const openedUp = ref(false);
@@ -205,21 +281,22 @@ const flyoutStyle = ref({ visibility: 'hidden' });
 const inputDeviceTypeUsedToOpen = ref('Mouse');
 const currentSelectedIndex = ref(-1);
 const currentSelectedItem = ref(undefined);
-const currentText = ref(props.Text === undefined ? '' : String(props.Text));
+const currentText = ref(resolvedText.value === undefined ? '' : String(resolvedText.value));
 const anchorTheme = ref('');
 const inheritedTheme = inject('winuiTheme', null);
 const listBoxId = `win-combo-box-${Math.random().toString(36).slice(2)}`;
 
 const flyoutAnimation = useFlyoutAnimation(flyoutRef, {
-  Origin: () => (props.IsEditable ? 'edge' : 'element'),
+  Origin: () => (resolvedIsEditable.value ? 'edge' : 'element'),
   OriginElement: () => {
-    if (props.IsEditable || props.ItemsSource.length === 0) return null;
-    const index = currentSelectedIndex.value >= 0 ? currentSelectedIndex.value : Math.floor(props.ItemsSource.length / 2);
+    if (resolvedIsEditable.value || resolvedItemsSource.value.length === 0) return null;
+    const index = currentSelectedIndex.value >= 0 ? currentSelectedIndex.value : Math.floor(resolvedItemsSource.value.length / 2);
     return itemRefs.value[index] ?? null;
   },
   Direction: () => (openedUp.value ? 'bottom' : 'top'),
   StripSize: DefaultComboBoxItemHeight
 });
+const isFlyoutAnimating = computed(() => flyoutAnimation.isPlaying.value);
 
 const chevronClass = ref('');
 let chevronPressed = false;
@@ -237,9 +314,9 @@ const cssLength = (value) => {
 
 const rootStyle = computed(() => {
   const style = {};
-  if (props.Width !== '') style.width = cssLength(props.Width);
-  if (props.MinWidth !== '') style.minWidth = cssLength(props.MinWidth);
-  if (props.MaxWidth !== '') style.maxWidth = cssLength(props.MaxWidth);
+  if (resolvedWidth.value !== '') style.width = cssLength(resolvedWidth.value);
+  if (resolvedMinWidth.value !== '') style.minWidth = cssLength(resolvedMinWidth.value);
+  if (resolvedMaxWidth.value !== '') style.maxWidth = cssLength(resolvedMaxWidth.value);
   return style;
 });
 
@@ -254,14 +331,16 @@ const GetPathValue = (item, path) => {
 };
 
 const GetItemLabel = (item) => {
-  const value = props.DisplayMemberPath ? GetPathValue(item, props.DisplayMemberPath) : item;
+  const displayMemberPath = resolveXamlValue(props.DisplayMemberPath, instance);
+  const value = displayMemberPath ? GetPathValue(item, displayMemberPath) : item;
   if (value === null || value === undefined) return '';
   if (typeof value !== 'object') return String(value);
   return String(value.label ?? value.Text ?? value.Name ?? value.Content ?? value.Value ?? value.value ?? value);
 };
 
 const GetItemValue = (item) => {
-  if (props.SelectedValuePath) return GetPathValue(item, props.SelectedValuePath);
+  const selectedValuePath = resolveXamlValue(props.SelectedValuePath, instance);
+  if (selectedValuePath) return GetPathValue(item, selectedValuePath);
   return item;
 };
 
@@ -270,12 +349,12 @@ const getItemKey = (item, index) => {
   return `${String(item)}-${index}`;
 };
 
-const FindItemIndex = (item) => props.ItemsSource.findIndex((candidate) => Object.is(candidate, item));
-const FindValueIndex = (value) => props.ItemsSource.findIndex((item) => Object.is(GetItemValue(item), value));
+const FindItemIndex = (item) => resolvedItemsSource.value.findIndex((candidate) => Object.is(candidate, item));
+const FindValueIndex = (value) => resolvedItemsSource.value.findIndex((item) => Object.is(GetItemValue(item), value));
 
 const selectedLabel = computed(() => {
   if (currentSelectedItem.value !== undefined) return GetItemLabel(currentSelectedItem.value);
-  return props.PlaceholderText || t('text.select');
+  return resolvedPlaceholderText.value || t('text.select');
 });
 
 const editableDisplayLabel = computed(() => currentText.value || selectedLabel.value);
@@ -290,20 +369,20 @@ const SyncSelectionFromProperties = () => {
   let selectedIndex;
   let selectedItem;
 
-  if (props.SelectedIndex !== undefined) {
-    selectedIndex = props.SelectedIndex >= 0 && props.SelectedIndex < props.ItemsSource.length ? props.SelectedIndex : -1;
-    selectedItem = selectedIndex >= 0 ? props.ItemsSource[selectedIndex] : undefined;
-  } else if (props.SelectedItem !== undefined) {
-    selectedIndex = FindItemIndex(props.SelectedItem);
-    selectedItem = props.SelectedItem;
-  } else if (props.SelectedValue !== undefined) {
-    selectedIndex = FindValueIndex(props.SelectedValue);
-    selectedItem = selectedIndex >= 0 ? props.ItemsSource[selectedIndex] : undefined;
+  if (resolvedSelectedIndex.value !== undefined) {
+    selectedIndex = resolvedSelectedIndex.value >= 0 && resolvedSelectedIndex.value < resolvedItemsSource.value.length ? resolvedSelectedIndex.value : -1;
+    selectedItem = selectedIndex >= 0 ? resolvedItemsSource.value[selectedIndex] : undefined;
+  } else if (resolvedSelectedItem.value !== undefined) {
+    selectedIndex = FindItemIndex(resolvedSelectedItem.value);
+    selectedItem = resolvedSelectedItem.value;
+  } else if (resolvedSelectedValue.value !== undefined) {
+    selectedIndex = FindValueIndex(resolvedSelectedValue.value);
+    selectedItem = selectedIndex >= 0 ? resolvedItemsSource.value[selectedIndex] : undefined;
   } else {
     return;
   }
 
-  SetCurrentSelection(selectedIndex, selectedItem, props.Text === undefined);
+  SetCurrentSelection(selectedIndex, selectedItem, resolvedText.value === undefined);
 };
 
 const RaiseSelectionChanged = (oldItem, selectedItem, selectedIndex) => {
@@ -318,8 +397,8 @@ const RaiseSelectionChanged = (oldItem, selectedItem, selectedIndex) => {
 };
 
 const SetSelectedIndex = (index) => {
-  const selectedIndex = index >= 0 && index < props.ItemsSource.length ? index : -1;
-  const selectedItem = selectedIndex >= 0 ? props.ItemsSource[selectedIndex] : undefined;
+  const selectedIndex = index >= 0 && index < resolvedItemsSource.value.length ? index : -1;
+  const selectedItem = selectedIndex >= 0 ? resolvedItemsSource.value[selectedIndex] : undefined;
   const oldItem = currentSelectedItem.value;
   if (selectedIndex === currentSelectedIndex.value && Object.is(selectedItem, oldItem)) return;
 
@@ -599,14 +678,14 @@ const GetPannablePopupLayout = (
   return { popupY, popupMaxHeight, offset, childHeight };
 };
 
-const UpdateIsPopupPannable = (itemCount, maxAllowedPopupHeight, availableSize) => {
+const UpdateIsPopupPannable = (itemCount, maxAllowedPopupHeight, availableSize, contentMargin = ComboBoxDropdownContentMargin) => {
   if (itemCount <= 0) return false;
   if (itemCount > ComboBoxPopupMaxNumberOfItems) return true;
 
   maxAllowedPopupHeight = Math.min(maxAllowedPopupHeight, availableSize.Height);
-  const childHeight = props.ItemsSource.reduce(
+  const childHeight = resolvedItemsSource.value.reduce(
     (height, _item, index) => height + GetItemLayoutHeight(index),
-    ComboBoxDropdownContentMargin.Top + ComboBoxDropdownContentMargin.Bottom
+    contentMargin.Top + contentMargin.Bottom
   );
   return childHeight > maxAllowedPopupHeight;
 };
@@ -622,8 +701,9 @@ const positionFlyout = async () => {
   const rootWindowSize = { Width: window.innerWidth, Height: window.innerHeight };
   if (rootWindowSize.Width === 0 || rootWindowSize.Height === 0 || comboBoxRect.width === 0 || comboBoxRect.height === 0) return;
 
-  const maximumDropDownHeight = Math.min(props.MaxDropDownHeight, rootWindowSize.Height);
+  const maximumDropDownHeight = Math.min(resolvedMaxDropDownHeight.value, rootWindowSize.Height);
   const touchInput = inputDeviceTypeUsedToOpen.value === 'Touch';
+  const popupContentMargin = touchInput ? { Top: 0, Bottom: 0 } : ComboBoxDropdownContentMargin;
   const popupMinWidth = Math.max(touchInput ? 240 : 80, comboBoxRect.width);
   flyoutReady.value = false;
   flyoutStyle.value = {
@@ -641,19 +721,19 @@ const positionFlyout = async () => {
   const alignedPopupLeft = flowDirection === 'rtl' ? comboBoxRect.right - childWidth : comboBoxRect.left;
   const popupLeft = Math.round(Math.max(0, Math.min(alignedPopupLeft, rootWindowSize.Width - childWidth)));
 
-  const isPopupPannable = UpdateIsPopupPannable(props.ItemsSource.length, maximumDropDownHeight, rootWindowSize);
-  const layout = props.IsEditable
+  const isPopupPannable = UpdateIsPopupPannable(resolvedItemsSource.value.length, maximumDropDownHeight, rootWindowSize, popupContentMargin);
+  const layout = resolvedIsEditable.value
     ? GetEditableComboBoxPopupLayout(
-      props.ItemsSource.length,
+      resolvedItemsSource.value.length,
       comboBoxRect.top,
       comboBoxRect.height,
-      ComboBoxDropdownContentMargin,
+      popupContentMargin,
       rootWindowSize
     )
     : touchInput && isPopupPannable
       ? GetPannablePopupLayout(
         currentSelectedIndex.value,
-        props.ItemsSource.length,
+        resolvedItemsSource.value.length,
         comboBoxRect.top,
         comboBoxRect.height,
         flyoutRef.value.getBoundingClientRect().height,
@@ -662,10 +742,10 @@ const positionFlyout = async () => {
       )
       : GetNonPannablePopupLayout(
         currentSelectedIndex.value,
-        props.ItemsSource.length,
+        resolvedItemsSource.value.length,
         comboBoxRect.top,
         comboBoxRect.height,
-        ComboBoxDropdownContentMargin,
+        popupContentMargin,
         rootWindowSize,
         maximumDropDownHeight
       );
@@ -681,6 +761,7 @@ const positionFlyout = async () => {
   flyoutStyle.value = {
     top: `${popupTop}px`,
     left: `${popupLeft}px`,
+    width: `${Math.ceil(childWidth)}px`,
     minWidth: `${popupMinWidth}px`,
     maxWidth: `${rootWindowSize.Width}px`,
     height: `${Math.ceil(popupMaxHeight + 2)}px`,
@@ -698,7 +779,7 @@ const positionFlyout = async () => {
     scrollViewerRef.value?.ChangeView(null, verticalOffset, null);
   }
   flyoutReady.value = true;
-  if (props.ItemsSource.length > 0) flyoutAnimation.play();
+  if (resolvedItemsSource.value.length > 0) flyoutAnimation.play();
 };
 
 const schedulePositionFlyout = () => {
@@ -715,7 +796,7 @@ const onWindowScroll = (event) => {
 };
 
 const setOpen = async (value) => {
-  if (value === isOpen.value || (value && !props.IsEnabled)) return;
+  if (value === isOpen.value || (value && !resolvedIsEnabled.value)) return;
   isOpen.value = value;
   emit('update:IsDropDownOpen', value);
 
@@ -739,7 +820,7 @@ const close = () => setOpen(false);
 const toggle = () => setOpen(!isOpen.value);
 
 const focusCombo = () => {
-  if (!props.IsEditable) {
+  if (!resolvedIsEditable.value) {
     backgroundRef.value?.focus();
     return;
   }
@@ -757,7 +838,7 @@ const focusEditableText = (selectText = false) => {
 };
 
 const beginEditing = () => {
-  if (!props.IsEnabled) return;
+  if (!resolvedIsEnabled.value) return;
   isEditing.value = true;
   nextTick(() => focusEditableText(true));
 };
@@ -786,6 +867,29 @@ const select = (index) => {
   nextTick(focusCombo);
 };
 
+const itemIndexAtPoint = (event) => {
+  const x = event.clientX;
+  const y = event.clientY;
+  for (let index = 0; index < itemRefs.value.length; index += 1) {
+    const item = itemRefs.value[index];
+    if (!item) continue;
+    const rect = item.getBoundingClientRect();
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return index;
+  }
+  return -1;
+};
+
+const onFlyoutPointerMove = (event) => {
+  const index = itemIndexAtPoint(event);
+  hoveredIndex.value = index;
+};
+
+const onFlyoutClick = (event) => {
+  if ((event.target instanceof Element) && event.target.closest('.win-combo-item')) return;
+  const index = itemIndexAtPoint(event);
+  if (index >= 0) select(index);
+};
+
 const onEditableTextChanged = (text) => {
   currentText.value = text;
   emit('update:Text', currentText.value);
@@ -799,11 +903,42 @@ const onEditableLostFocus = () => {
   });
 };
 
+// ComboBoxTextSubmittedEventHandler follows the WinUI event contract:
+// (ComboBox sender, ComboBoxTextSubmittedEventArgs args).  Keep the sender
+// surface limited to the state exposed by the corresponding WinUI control.
+const textSubmittedSender = {};
+Object.defineProperties(textSubmittedSender, {
+  Text: {
+    get: () => currentText.value,
+    set: (value) => {
+      currentText.value = value === null || value === undefined ? '' : String(value);
+      emit('update:Text', currentText.value);
+    }
+  },
+  SelectedIndex: {
+    get: () => currentSelectedIndex.value,
+    set: (value) => SetSelectedIndex(Number(value))
+  },
+  SelectedItem: {
+    get: () => currentSelectedItem.value,
+    set: (value) => {
+      const oldItem = currentSelectedItem.value;
+      const selectedIndex = FindItemIndex(value);
+      if (selectedIndex === currentSelectedIndex.value && Object.is(value, oldItem)) return;
+      SetCurrentSelection(selectedIndex, value);
+      RaiseSelectionChanged(oldItem, value, selectedIndex);
+    }
+  },
+  SelectedValue: {
+    get: () => currentSelectedItem.value === undefined ? undefined : GetItemValue(currentSelectedItem.value)
+  }
+});
+
 const SubmitText = () => {
-  const args = { Text: currentText.value, Handled: false };
-  emit('TextSubmitted', args);
+  const args = { Handled: false };
+  emit('TextSubmitted', textSubmittedSender, args);
   if (!args.Handled) {
-    const selectedIndex = props.ItemsSource.findIndex((item) => GetItemLabel(item) === currentText.value);
+    const selectedIndex = resolvedItemsSource.value.findIndex((item) => GetItemLabel(item) === currentText.value);
     if (selectedIndex >= 0) SetSelectedIndex(selectedIndex);
   }
   close();
@@ -811,17 +946,17 @@ const SubmitText = () => {
 };
 
 const MoveSelection = (delta) => {
-  if (props.ItemsSource.length === 0) return;
+  if (resolvedItemsSource.value.length === 0) return;
   const nextIndex = Math.min(
-    props.ItemsSource.length - 1,
-    Math.max(0, currentSelectedIndex.value < 0 ? (delta > 0 ? 0 : props.ItemsSource.length - 1) : currentSelectedIndex.value + delta)
+    resolvedItemsSource.value.length - 1,
+    Math.max(0, currentSelectedIndex.value < 0 ? (delta > 0 ? 0 : resolvedItemsSource.value.length - 1) : currentSelectedIndex.value + delta)
   );
   SetSelectedIndex(nextIndex);
 };
 
 const FocusItem = (index) => {
-  if (props.ItemsSource.length === 0) return;
-  const boundedIndex = Math.min(props.ItemsSource.length - 1, Math.max(0, index));
+  if (resolvedItemsSource.value.length === 0) return;
+  const boundedIndex = Math.min(resolvedItemsSource.value.length - 1, Math.max(0, index));
   itemRefs.value[boundedIndex]?.focus();
   itemRefs.value[boundedIndex]?.scrollIntoView({ block: 'nearest' });
 };
@@ -884,13 +1019,13 @@ const onFlyoutKeyDown = (event) => {
     FocusItem(activeIndex < 0 ? 0 : activeIndex + 1);
   } else if (event.key === 'ArrowUp') {
     event.preventDefault();
-    FocusItem(activeIndex < 0 ? props.ItemsSource.length - 1 : activeIndex - 1);
+    FocusItem(activeIndex < 0 ? resolvedItemsSource.value.length - 1 : activeIndex - 1);
   } else if (event.key === 'Home') {
     event.preventDefault();
     FocusItem(0);
   } else if (event.key === 'End') {
     event.preventDefault();
-    FocusItem(props.ItemsSource.length - 1);
+    FocusItem(resolvedItemsSource.value.length - 1);
   }
 };
 
@@ -907,7 +1042,7 @@ const onInputKeyDown = (event) => {
   if (event.key === 'Escape' && isOpen.value) {
     event.preventDefault();
     close();
-    if (props.IsEditable) endEditing(true);
+    if (resolvedIsEditable.value) endEditing(true);
   }
 };
 
@@ -921,7 +1056,7 @@ const onDocumentPointerDown = (event) => {
 };
 
 watch(
-  () => [props.ItemsSource, props.SelectedIndex, props.SelectedItem, props.SelectedValue],
+  () => [resolvedItemsSource.value, resolvedSelectedIndex.value, resolvedSelectedItem.value, resolvedSelectedValue.value],
   () => {
     SyncSelectionFromProperties();
     if (isOpen.value) nextTick(schedulePositionFlyout);
@@ -929,22 +1064,22 @@ watch(
   { immediate: true }
 );
 
-watch(() => props.Text, (value) => {
+watch(resolvedText, (value) => {
   if (value !== undefined) currentText.value = String(value);
 });
 
-watch(() => props.IsDropDownOpen, (value) => {
+watch(resolvedIsDropDownOpen, (value) => {
   if (value !== undefined) setOpen(value);
 });
 
-watch(() => props.IsEnabled, (value) => {
+watch(resolvedIsEnabled, (value) => {
   if (!value) {
     endEditing();
     close();
   }
 });
 
-watch(() => props.IsEditable, (value) => {
+watch(resolvedIsEditable, (value) => {
   if (!value) endEditing();
 });
 
@@ -1120,7 +1255,7 @@ onBeforeUnmount(() => {
 
 .win-combo-flyout {
   position: fixed;
-  z-index: 1000;
+  z-index: 10001;
   width: max-content;
   min-width: 80px;
   box-sizing: border-box;
@@ -1134,6 +1269,17 @@ onBeforeUnmount(() => {
   box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);
+}
+
+/* The reveal clip belongs to the presenter for visual fidelity. During that
+   short interval this sibling keeps the already-visible options hit-testable
+   when the pointer was positioned over the popup before it finished opening. */
+.win-combo-flyout-hit-overlay {
+  position: fixed;
+  z-index: 10002;
+  box-sizing: border-box;
+  pointer-events: auto;
+  background: transparent;
 }
 
 .win-combo-flyout.edge-square-top {
@@ -1220,6 +1366,10 @@ onBeforeUnmount(() => {
 }
 
 .win-combo-item:hover .win-combo-item-layout {
+  background: var(--subtle-secondary);
+}
+
+.win-combo-item.hovered .win-combo-item-layout {
   background: var(--subtle-secondary);
 }
 

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "winui-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "WinUIonWeb", "run", "dev", "--", "--port", "63180"],
+      "port": 63180,
+      "autoPort": true
+    }
+  ]
+}

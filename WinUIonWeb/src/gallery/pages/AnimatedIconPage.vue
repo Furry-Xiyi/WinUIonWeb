@@ -6,21 +6,21 @@
             AnimatedIcon is a control that displays an animated icon. These icons are created using Adobe AfterEffects and translated into Microsoft.UI.Composition objects using Lottie-Windows. The control automatically manages the animation state based on user interactions like pointer hover.
           </p>
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"
+            <Button class="header-action" @click="toggleTheme"
              >
               <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
              >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- Example 1: Adding AnimatedIcon to a button -->
-            <WinControlExample
+            <ControlExample
               headerText="Adding AnimatedIcon to a button"
               :theme="pageTheme"
               :templateCode="example1Template"
@@ -31,30 +31,30 @@
                     The following example is a button that the user hovers over to trigger the animation. The AnimatedIcon consumes the animation created using Adobe AfterEffects and translated into Microsoft.UI.Composition objects using
                     <a href="https://aka.ms/lottie" style="color: var(--accent-base);">Lottie-Windows</a>.
                   </p>
-                  <WinButton @mouseenter="onButtonPointerEntered"
+                  <Button @mouseenter="onButtonPointerEntered"
                     @mouseleave="onButtonPointerExited"
                     style="width: 75px; height: 40px;">
-                    <WinAnimatedVisualPlayer
+                    <AnimatedVisualPlayer
                       :playing="isAnimationPlaying"
                       :reversed="isAnimationReversed"
                       :duration="800" />
-                  </WinButton>
+                  </Button>
                 </div>
               </template>
               <template #options>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                   <label style="font-size: 12px; color: var(--text-secondary);">Kind</label>
-                  <WinComboBox
+                  <ComboBox
                     v-model:SelectedIndex="selectedAnimationKindIndex"
                     :ItemsSource="animationKindOptions"
                     DisplayMemberPath="label"
                     style="min-width: 240px;" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 2: Adding AnimatedIcon to NavigationView -->
-            <WinControlExample
+            <ControlExample
               headerText="Adding AnimatedIcon to a NavigationView"
               :theme="pageTheme"
               :templateCode="example2Template"
@@ -70,7 +70,7 @@
                          @mouseleave="onNavItemLeave"
                          :style="{ background: isNavItemHovered ? 'var(--ctrl-fill-subtle)' : 'transparent' }">
                       <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-                        <WinAnimatedVisualPlayer
+                        <AnimatedVisualPlayer
                           :playing="isNavAnimationPlaying"
                           :reversed="false"
                           :duration="600" />
@@ -80,22 +80,22 @@
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinAnimatedVisualPlayer from '../../components/WinAnimatedVisualPlayer.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import AnimatedVisualPlayer from '../../components/AnimatedVisualPlayer.vue';
+import ControlExample from '../../components/ControlExample.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'animatedicon');
 
@@ -140,7 +140,7 @@ const onNavItemLeave = () => {
 };
 
 // Code examples
-const example1Template = `<WinButton @mouseenter="onButtonPointerEntered"
+const example1Template = `<Button @mouseenter="onButtonPointerEntered"
   @mouseleave="onButtonPointerExited"
   style="width: 75px;">
   <AnimatedIcon x:Name="SearchAnimatedIcon">
@@ -151,7 +151,7 @@ const example1Template = `<WinButton @mouseenter="onButtonPointerEntered"
       <SymbolIconSource Symbol="Find"/>
     </AnimatedIcon.FallbackIconSource>
   </AnimatedIcon>
-</WinButton>`;
+</Button>`;
 
 const example1Vue = `const isAnimationPlaying = ref(false);
 

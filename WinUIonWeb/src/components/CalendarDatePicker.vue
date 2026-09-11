@@ -1,7 +1,7 @@
 <template>
   <div class="win-calendar-date-picker" ref="containerRef">
-    <WinTextBlock v-if="Header" class="picker-header" :Text="Header" />
-    <WinButton
+    <TextBlock v-if="Header" class="picker-header" :Text="Header" />
+    <Button
       class="calendar-date-picker-button"
       Padding="0"
       MinHeight="32"
@@ -9,8 +9,8 @@
       @Click="toggleOpen">
       <span class="picker-text" :class="{ placeholder: !effectiveDate }">{{ displayText }}</span>
       <span class="picker-icon" aria-hidden="true">&#xE787;</span>
-    </WinButton>
-    <WinTextBlock v-if="Description" class="picker-description" :Text="Description" />
+    </Button>
+    <TextBlock v-if="Description" class="picker-description" :Text="Description" />
 
     <Teleport to="body">
       <div v-if="showFlyout" class="picker-overlay" @click="closeCalendar"></div>
@@ -21,7 +21,7 @@
         :class="isClosing ? 'picker-flyout-closing' : 'picker-flyout-animate'"
         :style="flyoutStyle"
         @animationend="onFlyoutAnimEnd">
-        <WinCalendarView
+        <CalendarView
           :CalendarIdentifier="CalendarIdentifier"
           :DayOfWeekFormat="DayOfWeekFormat"
           :DisplayMode="DisplayMode"
@@ -42,9 +42,9 @@
 
 <script setup>
 import { computed, nextTick, ref } from 'vue';
-import WinButton from './WinButton.vue';
-import WinCalendarView from './WinCalendarView.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import Button from './Button.vue';
+import CalendarView from './CalendarView.vue';
+import TextBlock from './TextBlock.vue';
 
 const props = defineProps({
   CalendarIdentifier: { type: String, default: 'GregorianCalendar' },

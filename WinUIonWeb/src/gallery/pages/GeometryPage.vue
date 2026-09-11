@@ -1,6 +1,6 @@
 <template>
   <div class="gallery-item-page">
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- Page Header -->
             <div class="page-header">
@@ -17,17 +17,17 @@
                 </p>
               </div>
               <div class="page-actions">
-                <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': themeButtonTitle }" @Click="toggleTheme">
+                <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': themeButtonTitle }" @Click="toggleTheme">
                   <span class="icon">&#xE793;</span>
-                </WinButton>
-                <WinToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': favoriteButtonTitle }" @update:IsChecked="toggleFavorite">
+                </Button>
+                <ToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': favoriteButtonTitle }" @update:IsChecked="toggleFavorite">
                   <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
-                </WinToggleButton>
+                </ToggleButton>
               </div>
             </div>
 
             <!-- Main Example -->
-            <WinControlExample
+            <ControlExample
               :theme="currentTheme"
               headerText="Corner radius examples"
               :templateCode="templateCode"
@@ -43,13 +43,13 @@
                         class="geometry-image" />
 
                       <!-- Overlay Teaching Tip Button (8px) -->
-                      <WinButton
+                      <Button
                         class="geometry-button"
                         style="left: 16px; top: 16px;"
                         @click="toggleTooltip1"
                         v-bind="{ 'tooltipservice.tooltip': '8px' }">
                         <span class="icon">&#xE946;</span>
-                      </WinButton>
+                      </Button>
                       <div
                         v-if="tooltip1Open"
                         class="teaching-tip"
@@ -59,13 +59,13 @@
                       </div>
 
                       <!-- Body Teaching Tip Button (0px) -->
-                      <WinButton
+                      <Button
                         class="geometry-button"
                         style="left: 16px; top: 148px;"
                         @click="toggleTooltip2"
                         v-bind="{ 'tooltipservice.tooltip': 'Body' }">
                         <span class="icon">&#xE946;</span>
-                      </WinButton>
+                      </Button>
                       <div
                         v-if="tooltip2Open"
                         class="teaching-tip"
@@ -74,13 +74,13 @@
                       </div>
 
                       <!-- Control Teaching Tip Button (4px) -->
-                      <WinButton
+                      <Button
                         class="geometry-button"
                         style="left: 240px; top: 168px;"
                         @click="toggleTooltip3"
                         v-bind="{ 'tooltipservice.tooltip': '4px' }">
                         <span class="icon">&#xE946;</span>
-                      </WinButton>
+                      </Button>
                       <div
                         v-if="tooltip3Open"
                         class="teaching-tip"
@@ -115,12 +115,12 @@
                         <code class="code-text">OverlayCornerRadius</code>
                       </div>
                       <div class="cell copy-col">
-                        <WinButton
+                        <Button
                           class="copy-button"
                           @click="copyToClipboard('OverlayCornerRadius')"
                           ToolTipService.ToolTip="Copy to clipboard">
                           <span class="icon">&#xE8C8;</span>
-                        </WinButton>
+                        </Button>
                       </div>
                     </div>
 
@@ -139,12 +139,12 @@
                         <code class="code-text">ControlCornerRadius</code>
                       </div>
                       <div class="cell copy-col">
-                        <WinButton
+                        <Button
                           class="copy-button"
                           @click="copyToClipboard('ControlCornerRadius')"
                           ToolTipService.ToolTip="Copy to clipboard">
                           <span class="icon">&#xE8C8;</span>
-                        </WinButton>
+                        </Button>
                       </div>
                     </div>
 
@@ -167,20 +167,20 @@
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 // Theme management
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'geometry');

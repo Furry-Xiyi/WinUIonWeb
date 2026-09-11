@@ -8,7 +8,7 @@
 
 <script setup>
 defineOptions({
-  name: 'WinPivotItem'
+  name: 'PivotItem'
 });
 
 const props = defineProps({

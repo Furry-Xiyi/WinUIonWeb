@@ -1,6 +1,6 @@
 <template>
   <div class="gallery-item-page">
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- 页面头部 -->
             <div class="page-header">
@@ -11,12 +11,12 @@
                 </p>
               </div>
               <div class="header-actions">
-                <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': `Switch to ${theme === 'light' ? 'dark' : 'light'} theme` }" @Click="toggleTheme">
+                <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': `Switch to ${theme === 'light' ? 'dark' : 'light'} theme` }" @Click="toggleTheme">
                   <span class="icon">&#xE793;</span>
-                </WinButton>
-                <WinToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
+                </Button>
+                <ToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
                   <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
-                </WinToggleButton>
+                </ToggleButton>
               </div>
             </div>
 
@@ -38,7 +38,7 @@
             </div>
 
             <!-- 示例 -->
-            <WinControlExample
+            <ControlExample
               :theme="theme"
               headerText="Compact Sizing for controls"
               :templateCode="templateCode"
@@ -47,23 +47,23 @@
                 <div class="sizing-demo" :class="{ 'compact-mode': isCompact }">
                   <div class="demo-form">
                     <p class="demo-header">{{ isCompact ? 'Compact Size' : 'Standard Size' }}</p>
-                    <WinTextBox
+                    <TextBox
                       v-model:Text="firstName"
                       Header="First Name:"
                       PlaceholderText="Enter first name" />
-                    <WinTextBox
+                    <TextBox
                       v-model:Text="lastName"
                       Header="Last Name:"
                       PlaceholderText="Enter last name" />
-                    <WinPasswordBox
+                    <PasswordBox
                       v-model="password"
                       Header="Password:"
                       placeholder="Enter password" />
-                    <WinPasswordBox
+                    <PasswordBox
                       v-model="confirmPassword"
                       Header="Confirm Password:"
                       placeholder="Confirm password" />
-                    <WinDatePicker
+                    <DatePicker
                       v-model:Date="chosenDate"
                       Header="Pick a date" />
                   </div>
@@ -94,20 +94,20 @@
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinTextBox from '../../components/WinTextBox.vue';
-import WinPasswordBox from '../../components/WinPasswordBox.vue';
-import WinDatePicker from '../../components/WinDatePicker.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import TextBox from '../../components/TextBox.vue';
+import PasswordBox from '../../components/PasswordBox.vue';
+import DatePicker from '../../components/DatePicker.vue';
 import { createPageState } from '../../utils/pageState';
 
 const currentPage = inject('currentPage');
@@ -130,34 +130,34 @@ const onSizingChanged = () => {
 const templateCode = `<div class="sizing-demo" :class="{ 'compact-mode': isCompact }">
   <div class="demo-form">
     <p class="demo-header">{{ isCompact ? 'Compact Size' : 'Standard Size' }}</p>
-    <WinTextBox
+    <TextBox
       v-model:Text="firstName"
       Header="First Name:"
       PlaceholderText="Enter first name" />
-    <WinTextBox
+    <TextBox
       v-model:Text="lastName"
       Header="Last Name:"
       PlaceholderText="Enter last name" />
-    <WinPasswordBox
+    <PasswordBox
       v-model="password"
       Header="Password:"
       placeholder="Enter password" />
-    <WinPasswordBox
+    <PasswordBox
       v-model="confirmPassword"
       Header="Confirm Password:"
       placeholder="Confirm password" />
-    <WinDatePicker
+    <DatePicker
       v-model:Date="chosenDate"
       Header="Pick a date" />
   </div>
 </div>`;
 
 const vueCode = `import { ref, computed } from 'vue';
-import WinTextBox from '../../components/WinTextBox.vue';
-import WinPasswordBox from '../../components/WinPasswordBox.vue';
-import WinDatePicker from '../../components/WinDatePicker.vue';
+import TextBox from '../../components/TextBox.vue';
+import PasswordBox from '../../components/PasswordBox.vue';
+import DatePicker from '../../components/DatePicker.vue';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const sizingMode = ref('standard');
 const isCompact = computed(() => sizingMode.value === 'compact');
 

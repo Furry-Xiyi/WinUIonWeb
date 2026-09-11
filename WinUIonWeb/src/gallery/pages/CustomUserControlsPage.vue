@@ -6,18 +6,18 @@
             Learn how to create reusable custom controls and UserControls in WinUI applications.
           </p>
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"
+            <Button class="header-action" @click="toggleTheme"
              >
               <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
              >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- Custom Control Section -->
             <div class="section-header">
@@ -47,7 +47,7 @@
             </div>
 
             <!-- Example 1: Counter Control with Increment/Decrement -->
-            <WinControlExample
+            <ControlExample
               headerText="Counter Control with Increment/Decrement Mode"
               :theme="pageTheme"
               :templateCode="example1Template"
@@ -58,10 +58,10 @@
                   <CounterControl mode="decrement" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Example 2: Validated Password Box -->
-            <WinControlExample
+            <ControlExample
               headerText="Basic Custom Password Box with Validation"
               :theme="pageTheme"
               :templateCode="example2Template"
@@ -75,17 +75,17 @@
                     :minLength="8"
                     v-model="passwordValue"
                     @validationChanged="onPasswordValidationChanged" />
-                  <WinButton primary
+                  <Button primary
                     :disabled="!isPasswordValid"
                     @click="onSubmitPassword">
                     Submit
-                  </WinButton>
+                  </Button>
                 </div>
               </template>
               <template #options>
                 <p class="output-text">{{ passwordOutput || 'Enter a valid password and click Submit' }}</p>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- UserControl Section -->
             <div class="section-header" style="margin-top: 24px;">
@@ -100,7 +100,7 @@
             </div>
 
             <!-- Example 3: Temperature Converter UserControl -->
-            <WinControlExample
+            <ControlExample
               headerText="Temperature Converter UserControl example"
               :theme="pageTheme"
               :templateCode="example3Template"
@@ -108,23 +108,23 @@
               <template #example>
                 <TemperatureConverter />
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, inject, computed } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import ControlExample from '../../components/ControlExample.vue';
 import CounterControl from '../../components/examples/CounterControl.vue';
 import ValidatedPasswordBox from '../../components/examples/ValidatedPasswordBox.vue';
 import TemperatureConverter from '../../components/examples/TemperatureConverter.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'customusercontrols');
 

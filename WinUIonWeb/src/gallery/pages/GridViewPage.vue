@@ -1,22 +1,22 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.gridview')" />
-          <WinTextBlock class="page-description" :Text="$t('text.the-gridview-lets-people-browse-and-select-from')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.gridview')" />
+          <TextBlock class="page-description" :Text="$t('text.the-gridview-lets-people-browse-and-select-from')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.gridview.basic-simple-datatemplate')" :theme="pageTheme" :vue="basicGridViewVue">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.gridview.basic-simple-datatemplate')" :theme="pageTheme" :vue="basicGridViewVue">
             <template #example>
               <div class="sample-stack">
-                <WinTextBlock :Text="$t('sample.gridview.basic-note')" TextWrapping="WrapWholeWords" />
-                <WinGridView
+                <TextBlock :Text="$t('sample.gridview.basic-note')" TextWrapping="WrapWholeWords" />
+                <GridView
                   class="basic-grid-view"
                   :ItemsSource="items"
                   IsItemClickEnabled
@@ -26,17 +26,17 @@
                   <template #item="{ item }">
                     <img class="image-template" :src="item.ImageLocation" :alt="item.Title" />
                   </template>
-                </WinGridView>
-                <WinTextBlock class="output-text" :Text="basicOutput" />
+                </GridView>
+                <TextBlock class="output-text" :Text="basicOutput" />
               </div>
             </template>
-          </WinControlExample>
+          </ControlExample>
 
-          <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.gridview.layout-customization')" :theme="pageTheme" :vue="layoutGridViewVue">
+          <ControlExample class="basic-input-example-theme" :headerText="$t('sample.gridview.layout-customization')" :theme="pageTheme" :vue="layoutGridViewVue">
             <template #example>
               <div class="sample-stack">
-                <WinTextBlock :Text="$t('sample.gridview.layout-note')" TextWrapping="WrapWholeWords" />
-                <WinGridView
+                <TextBlock :Text="$t('sample.gridview.layout-note')" TextWrapping="WrapWholeWords" />
+                <GridView
                   class="overlay-grid-view"
                   :ItemsSource="items"
                   :style="{ '--grid-column-margin': `${columnSpace}px`, '--grid-row-margin': `${rowSpace}px`, '--grid-max-rows': wrapItemCount }">
@@ -44,27 +44,27 @@
                     <div class="overlay-template">
                       <img :src="item.ImageLocation" :alt="item.Title" />
                       <div class="overlay-caption">
-                        <WinTextBlock :Text="item.Title" />
-                        <WinTextBlock class="caption-text" :Text="`${item.Likes} Likes`" />
+                        <TextBlock :Text="item.Title" />
+                        <TextBlock class="caption-text" :Text="`${item.Likes} Likes`" />
                       </div>
                     </div>
                   </template>
-                </WinGridView>
+                </GridView>
               </div>
             </template>
             <template #options>
               <div class="options-stack">
-                <WinNumberBox :Header="$t('sample.space-between-columns')" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" v-model:Value="columnSpace" />
-                <WinNumberBox :Header="$t('sample.space-between-rows')" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" v-model:Value="rowSpace" />
-                <WinNumberBox :Header="$t('sample.maximum-items-before-wrapping')" :Minimum="1" :Maximum="8" SpinButtonPlacementMode="Inline" v-model:Value="wrapItemCount" />
+                <NumberBox :Header="$t('sample.space-between-columns')" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" v-model:Value="columnSpace" />
+                <NumberBox :Header="$t('sample.space-between-rows')" :Minimum="0" :Maximum="100" SpinButtonPlacementMode="Inline" v-model:Value="rowSpace" />
+                <NumberBox :Header="$t('sample.maximum-items-before-wrapping')" :Minimum="1" :Maximum="8" SpinButtonPlacementMode="Inline" v-model:Value="wrapItemCount" />
               </div>
             </template>
-          </WinControlExample>
+          </ControlExample>
 
-          <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.gridview.content-inside')" :theme="pageTheme" :vue="contentGridViewVue">
+          <ControlExample class="basic-input-example-theme" :headerText="$t('sample.gridview.content-inside')" :theme="pageTheme" :vue="contentGridViewVue">
             <template #example>
               <div class="sample-stack">
-                <WinGridView
+                <GridView
                   class="content-grid-view"
                   :ItemsSource="contentItems"
                   :SelectionMode="selectionMode"
@@ -79,51 +79,51 @@
                   <template #item="{ item }">
                     <component :is="currentTemplate" :item="item" />
                   </template>
-                </WinGridView>
-                <WinTextBlock class="output-text" :Text="clickOutput" />
-                <WinTextBlock class="output-text" :Text="selectionOutput" />
+                </GridView>
+                <TextBlock class="output-text" :Text="clickOutput" />
+                <TextBlock class="output-text" :Text="selectionOutput" />
               </div>
             </template>
             <template #options>
               <div class="options-stack">
-                <WinTextBlock Text="ItemTemplate" />
+                <TextBlock Text="ItemTemplate" />
                 <div class="radio-stack">
-                  <WinRadioButton name="template" value="Image" v-model="itemTemplate"><WinTextBlock :Text="$t('sample.image')" /></WinRadioButton>
-                  <WinRadioButton name="template" value="IconText" v-model="itemTemplate"><WinTextBlock Text="Icon/Text" /></WinRadioButton>
-                  <WinRadioButton name="template" value="ImageText" v-model="itemTemplate"><WinTextBlock Text="Image/Text" /></WinRadioButton>
-                  <WinRadioButton name="template" value="Text" v-model="itemTemplate"><WinTextBlock :Text="$t('text.text')" /></WinRadioButton>
+                  <RadioButton name="template" value="Image" v-model="itemTemplate"><TextBlock :Text="$t('sample.image')" /></RadioButton>
+                  <RadioButton name="template" value="IconText" v-model="itemTemplate"><TextBlock Text="Icon/Text" /></RadioButton>
+                  <RadioButton name="template" value="ImageText" v-model="itemTemplate"><TextBlock Text="Image/Text" /></RadioButton>
+                  <RadioButton name="template" value="Text" v-model="itemTemplate"><TextBlock :Text="$t('text.text')" /></RadioButton>
                 </div>
-                <WinToggleButton @Click="reverseFlowDirection"><WinTextBlock :Text="$t('sample.reverse-flowdirection')" /></WinToggleButton>
-                <WinTextBlock :Text="$t('sample.gridview.properties')" />
-                <WinTextBlock class="caption-text" :Text="$t('sample.gridview.drag-drop-note')" TextWrapping="WrapWholeWords" />
-                <WinTextBlock class="caption-text" :Text="$t('sample.gridview.item-click-note')" TextWrapping="WrapWholeWords" />
-                <WinCheckBox v-model="isItemClickEnabled"><WinTextBlock Text="IsItemClickEnabled" /></WinCheckBox>
-                <WinCheckBox v-model="canDragItems"><WinTextBlock Text="CanDragItems" /></WinCheckBox>
-                <WinCheckBox v-model="canReorderItems"><WinTextBlock Text="CanReorderItems" /></WinCheckBox>
-                <WinCheckBox v-model="allowDrop"><WinTextBlock Text="AllowDrop" /></WinCheckBox>
-                <WinComboBox Header="SelectionMode" :ItemsSource="selectionModeOptions" v-model:SelectedIndex="selectionModeIndex" />
+                <ToggleButton @Click="reverseFlowDirection"><TextBlock :Text="$t('sample.reverse-flowdirection')" /></ToggleButton>
+                <TextBlock :Text="$t('sample.gridview.properties')" />
+                <TextBlock class="caption-text" :Text="$t('sample.gridview.drag-drop-note')" TextWrapping="WrapWholeWords" />
+                <TextBlock class="caption-text" :Text="$t('sample.gridview.item-click-note')" TextWrapping="WrapWholeWords" />
+                <CheckBox v-model="isItemClickEnabled"><TextBlock Text="IsItemClickEnabled" /></CheckBox>
+                <CheckBox v-model="canDragItems"><TextBlock Text="CanDragItems" /></CheckBox>
+                <CheckBox v-model="canReorderItems"><TextBlock Text="CanReorderItems" /></CheckBox>
+                <CheckBox v-model="allowDrop"><TextBlock Text="AllowDrop" /></CheckBox>
+                <ComboBox Header="SelectionMode" :ItemsSource="selectionModeOptions" v-model:SelectedIndex="selectionModeIndex" />
               </div>
             </template>
-          </WinControlExample>
+          </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, h, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinGridView from '../../components/WinGridView.vue';
-import WinNumberBox from '../../components/WinNumberBox.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import GridView from '../../components/GridView.vue';
+import NumberBox from '../../components/NumberBox.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'gridview');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -167,18 +167,18 @@ const selectionModeOptions = selectionModes;
 const imageTemplate = ({ item }) => h('img', { class: 'image-template', src: item.ImageLocation, alt: item.Title });
 const iconTextTemplate = ({ item }) => h('div', { class: 'icon-text-template' }, [
   h('img', { src: item.ImageLocation, alt: '', 'aria-hidden': 'true' }),
-  h(WinTextBlock, { Text: item.Title }),
-  h(WinTextBlock, { class: 'caption-text', Text: item.Description, TextWrapping: 'WrapWholeWords' })
+  h(TextBlock, { Text: item.Title }),
+  h(TextBlock, { class: 'caption-text', Text: item.Description, TextWrapping: 'WrapWholeWords' })
 ]);
 const imageTextTemplate = ({ item }) => h('div', { class: 'image-text-template' }, [
   h('img', { src: item.ImageLocation, alt: item.Title }),
   h('div', {}, [
-    h(WinTextBlock, { style: 'font-weight: 600; margin-bottom: 8px;', Text: item.Title }),
-    h(WinTextBlock, { class: 'caption-text', Text: `${item.Views} Views` }),
-    h(WinTextBlock, { class: 'caption-text', Text: `${item.Likes} Likes` })
+    h(TextBlock, { style: 'font-weight: 600; margin-bottom: 8px;', Text: item.Title }),
+    h(TextBlock, { class: 'caption-text', Text: `${item.Views} Views` }),
+    h(TextBlock, { class: 'caption-text', Text: `${item.Likes} Likes` })
   ])
 ]);
-const textTemplate = ({ item }) => h('div', { class: 'text-template' }, [h(WinTextBlock, { Text: item.Title })]);
+const textTemplate = ({ item }) => h('div', { class: 'text-template' }, [h(TextBlock, { Text: item.Title })]);
 const currentTemplate = computed(() => ({
   Image: imageTemplate,
   IconText: iconTextTemplate,
@@ -195,11 +195,11 @@ const onContentSelectionChanged = ({ SelectedItems }) => {
   selectionOutput.value = `Selected: ${SelectedItems?.map(item => item.Title).join(', ') || 'None'}`;
 };
 
-const basicGridViewVue = `<WinGridView ItemsSource="{items}" IsItemClickEnabled SelectionMode="Single" />`;
-const layoutGridViewVue = `<WinGridView ItemsSource="{items}">
+const basicGridViewVue = `<GridView ItemsSource="{items}" IsItemClickEnabled SelectionMode="Single" />`;
+const layoutGridViewVue = `<GridView ItemsSource="{items}">
   <!-- Use NumberBox options to change row/column spacing and wrap count. -->
-</WinGridView>`;
-const contentGridViewVue = `<WinGridView
+</GridView>`;
+const contentGridViewVue = `<GridView
   ItemsSource="{items}"
   IsItemClickEnabled="{value}"
   CanDragItems="{value}"

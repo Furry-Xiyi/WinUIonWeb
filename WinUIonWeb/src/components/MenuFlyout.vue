@@ -21,8 +21,8 @@
       @pointerleave="emit('PointerLeave')">
       <div :key="animationKey" class="win-menu-flyout-motion">
         <div class="win-menu-flyout-shadow" aria-hidden="true"></div>
-        <div class="win-menu-flyout" @focusout="onFlyoutFocusOut">
-          <WinScrollViewer
+        <div class="win-menu-flyout" @focusout="onFlyoutFocusOut" @click="onSlottedItemClick">
+          <ScrollViewer
             class="win-menu-flyout-scroll"
             :class="{ 'has-submenu': hasSubmenu }"
             VerticalScrollMode="Auto"
@@ -37,7 +37,7 @@
               @PointerEnter="emit('PointerEnter')"
               @PointerLeave="emit('PointerLeave')" />
             <slot></slot>
-          </WinScrollViewer>
+          </ScrollViewer>
         </div>
       </div>
     </div>
@@ -46,8 +46,8 @@
 
 <script setup>
 import { Teleport, computed, defineComponent, h, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import WinScrollViewer from './WinScrollViewer.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import TextBlock from './TextBlock.vue';
 
 const props = defineProps({
   Open: Boolean,
@@ -398,7 +398,7 @@ const MenuFlyoutItems = defineComponent({
             }),
             h('div', { class: 'win-menu-flyout-split-content', 'aria-hidden': true }, [
               ...renderLeadingSlots(item, kind),
-              h(WinTextBlock, {
+              h(TextBlock, {
                 class: 'win-menu-flyout-label',
                 Foreground: itemForeground,
                 Text: text
@@ -437,7 +437,7 @@ const MenuFlyoutItems = defineComponent({
           onKeydown: (event) => onItemKeydown(event, item, index, submenuButton)
         }, [
           ...renderLeadingSlots(item, kind),
-          h(WinTextBlock, {
+          h(TextBlock, {
             class: 'win-menu-flyout-label',
             Foreground: itemForeground,
             Text: text
@@ -472,13 +472,13 @@ const MenuFlyoutItems = defineComponent({
         onKeydown: (event) => onItemKeydown(event, item, index)
       }, [
         ...renderLeadingSlots(item, kind),
-        h(WinTextBlock, {
+        h(TextBlock, {
           class: 'win-menu-flyout-label',
           Foreground: itemForeground,
           Text: text
         }),
         acceleratorText
-          ? h(WinTextBlock, { class: 'win-menu-flyout-accelerator', Text: acceleratorText })
+          ? h(TextBlock, { class: 'win-menu-flyout-accelerator', Text: acceleratorText })
           : null
       ]);
     };
@@ -575,6 +575,20 @@ const onFlyoutFocusOut = () => {
       && !activeElement.closest?.('.win-menu-flyout-wrap')
       && !remainsInOwningCommandSurface) close();
   }, 0);
+};
+
+// XAML Flyout content can contain ordinary Button controls rather than
+// MenuFlyoutItem objects (SplitButton color swatches and ToggleSplitButton's
+// formatting commands are examples). Those controls still dismiss a WinUI
+// flyout after invocation. MenuFlyoutItems already go through onItemSelect;
+// this delegated handler supplies the same light-dismiss behavior to slotted
+// controls without requiring a Vue-specific close callback in every page.
+const onSlottedItemClick = (event) => {
+  const target = event?.target;
+  if (!(target instanceof Element)) return;
+  if (target.closest('.win-menu-flyout-item')) return;
+  const control = target.closest('button, [role="button"]');
+  if (control && !control.hasAttribute('disabled') && !control.getAttribute('aria-disabled')) close();
 };
 
 const closeOnWindowBlur = () => {

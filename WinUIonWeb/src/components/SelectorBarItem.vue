@@ -8,7 +8,7 @@
 
 <script setup>
 defineOptions({
-  name: 'WinSelectorBarItem'
+  name: 'SelectorBarItem'
 });
 
 const props = defineProps({

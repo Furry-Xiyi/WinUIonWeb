@@ -7,7 +7,7 @@
     :aria-valuemin="0"
     :aria-valuemax="effectiveMax"
     :aria-valuenow="ariaValue"
-    :aria-readonly="IsReadOnly"
+    :aria-readonly="resolvedIsReadOnly"
     :aria-disabled="!isEnabled"
     :tabindex="isEnabled ? 0 : -1"
     @keydown="onKeyDown">
@@ -31,10 +31,10 @@
         </span>
       </div>
 
-      <WinTextBlock
-        v-if="Caption"
+      <TextBlock
+        v-if="resolvedCaption"
         class="win-rating-caption"
-        :Text="Caption" />
+        :Text="resolvedCaption" />
     </div>
 
     <div class="win-rating-foreground-presenter" aria-hidden="true">
@@ -54,25 +54,35 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
-import WinTextBlock from './WinTextBlock.vue';
+import { computed, getCurrentInstance, ref, watch } from 'vue';
+import TextBlock from './TextBlock.vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 const noValueSetSentinel = -1;
 
 const props = defineProps({
-  Value: { type: Number, default: noValueSetSentinel },
-  MaxRating: { type: Number, default: 5 },
-  PlaceholderValue: { type: Number, default: noValueSetSentinel },
+  Value: { type: [Number, String], default: noValueSetSentinel },
+  MaxRating: { type: [Number, String], default: 5 },
+  PlaceholderValue: { type: [Number, String], default: noValueSetSentinel },
   Caption: { type: String, default: '' },
-  InitialSetValue: { type: Number, default: 1 },
-  IsClearEnabled: { type: Boolean, default: true },
-  IsReadOnly: { type: Boolean, default: false },
-  IsEnabled: { type: Boolean, default: true },
+  InitialSetValue: { type: [Number, String], default: 1 },
+  IsClearEnabled: { type: [Boolean, String], default: true },
+  IsReadOnly: { type: [Boolean, String], default: false },
+  IsEnabled: { type: [Boolean, String], default: true },
   Width: { type: [String, Number], default: '' },
   modelValue: { type: Number, default: undefined },
   max: { type: Number, default: undefined },
   disabled: { type: Boolean, default: false }
 });
+const instance = getCurrentInstance();
+const resolvedCaption = computed(() => resolveXamlValue(props.Caption, instance));
+const resolvedValue = computed(() => resolveXamlValue(props.Value, instance));
+const resolvedMaxRating = computed(() => resolveXamlValue(props.MaxRating, instance));
+const resolvedPlaceholderValue = computed(() => resolveXamlValue(props.PlaceholderValue, instance));
+const resolvedInitialSetValue = computed(() => resolveXamlValue(props.InitialSetValue, instance));
+const resolvedIsClearEnabled = computed(() => resolveXamlValue(props.IsClearEnabled, instance) !== false);
+const resolvedIsReadOnly = computed(() => resolveXamlValue(props.IsReadOnly, instance) === true);
+const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
 
 const emit = defineEmits(['update:Value', 'ValueChanged', 'update:modelValue']);
 
@@ -101,23 +111,23 @@ const coerceRatingValue = (value) => {
   return number;
 };
 
-const effectiveMax = computed(() => Math.max(1, Math.trunc(toNumber(props.max ?? props.MaxRating, 5))));
-const isEnabled = computed(() => props.IsEnabled && !props.disabled);
+const effectiveMax = computed(() => Math.max(1, Math.trunc(toNumber(props.max ?? resolvedMaxRating.value, 5))));
+const isEnabled = computed(() => resolvedIsEnabled.value && !props.disabled);
 const actualValue = computed(() => internalValue.value);
-const placeholderValue = computed(() => coerceRatingValue(props.PlaceholderValue));
-const initialSetValue = computed(() => Math.max(1, Math.min(effectiveMax.value, Math.trunc(toNumber(props.InitialSetValue, 1)))));
+const placeholderValue = computed(() => coerceRatingValue(resolvedPlaceholderValue.value));
+const initialSetValue = computed(() => Math.max(1, Math.min(effectiveMax.value, Math.trunc(toNumber(resolvedInitialSetValue.value, 1)))));
 const itemIndexes = computed(() => Array.from({ length: effectiveMax.value }, (_, index) => index + 1));
 
 watch(
-  () => [props.modelValue, props.Value, effectiveMax.value],
+  () => [props.modelValue, resolvedValue.value, effectiveMax.value],
   () => {
-    internalValue.value = coerceRatingValue(props.modelValue ?? props.Value);
+    internalValue.value = coerceRatingValue(props.modelValue ?? resolvedValue.value);
   },
   { immediate: true }
 );
 
 const displayedValue = computed(() => {
-  if (isPointerOver.value && !props.IsReadOnly && isEnabled.value) return Math.max(0, Math.min(effectiveMax.value, pointerRating.value));
+  if (isPointerOver.value && !resolvedIsReadOnly.value && isEnabled.value) return Math.max(0, Math.min(effectiveMax.value, pointerRating.value));
   if (actualValue.value > noValueSetSentinel) return actualValue.value;
   if (placeholderValue.value > noValueSetSentinel) return placeholderValue.value;
   return 0;
@@ -125,7 +135,7 @@ const displayedValue = computed(() => {
 
 const visualState = computed(() => {
   if (!isEnabled.value) return 'disabled';
-  if (isPointerOver.value && !props.IsReadOnly) {
+  if (isPointerOver.value && !resolvedIsReadOnly.value) {
     return actualValue.value > noValueSetSentinel ? 'pointer-over-set' : 'pointer-over-placeholder';
   }
   if (actualValue.value > noValueSetSentinel) return 'set';
@@ -134,7 +144,7 @@ const visualState = computed(() => {
 });
 
 const stateClasses = computed(() => ({
-  'is-readonly': props.IsReadOnly,
+  'is-readonly': resolvedIsReadOnly.value,
   'is-disabled': !isEnabled.value,
   [`state-${visualState.value}`]: true
 }));
@@ -164,9 +174,9 @@ const commitRating = (newRating, originatedFromMouse = false) => {
   let nextValue = oldValue;
 
   if (oldValue > noValueSetSentinel || boundedRating !== 0) {
-    if (!props.IsClearEnabled && boundedRating <= 0) {
+    if (!resolvedIsClearEnabled.value && boundedRating <= 0) {
       nextValue = 1;
-    } else if (boundedRating === oldValue && props.IsClearEnabled && (boundedRating !== effectiveMax.value || originatedFromMouse)) {
+    } else if (boundedRating === oldValue && resolvedIsClearEnabled.value && (boundedRating !== effectiveMax.value || originatedFromMouse)) {
       nextValue = noValueSetSentinel;
     } else if (boundedRating > 0) {
       nextValue = boundedRating;
@@ -201,13 +211,13 @@ const changeRatingBy = (change, originatedFromMouse = false) => {
 };
 
 const onPointerEnter = (event) => {
-  if (!isEnabled.value || props.IsReadOnly) return;
+  if (!isEnabled.value || resolvedIsReadOnly.value) return;
   isPointerOver.value = true;
   updatePointerRating(event);
 };
 
 const onPointerMove = (event) => {
-  if (!isEnabled.value || props.IsReadOnly) return;
+  if (!isEnabled.value || resolvedIsReadOnly.value) return;
   updatePointerRating(event);
 };
 
@@ -229,13 +239,13 @@ const onPointerCaptureLost = () => {
 };
 
 const onPointerDown = (event) => {
-  if (!isEnabled.value || props.IsReadOnly) return;
+  if (!isEnabled.value || resolvedIsReadOnly.value) return;
   isPointerDown.value = true;
   itemsRef.value?.setPointerCapture?.(event.pointerId);
 };
 
 const onPointerUp = (event) => {
-  if (!isEnabled.value || props.IsReadOnly) return;
+  if (!isEnabled.value || resolvedIsReadOnly.value) return;
   const rating = pointerRatingFromEvent(event);
   commitRating(rating, true);
   isPointerDown.value = false;
@@ -247,7 +257,7 @@ const onPointerUp = (event) => {
 };
 
 const onKeyDown = (event) => {
-  if (!isEnabled.value || props.IsReadOnly) return;
+  if (!isEnabled.value || resolvedIsReadOnly.value) return;
 
   let handled = true;
   switch (event.key) {

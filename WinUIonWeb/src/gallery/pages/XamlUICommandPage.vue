@@ -1,19 +1,19 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.xamluicommand')" role="heading" aria-level="1" />
-        <WinTextBlock class="page-description" :Text="$t('text.xamluicommand-subtitle')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.xamluicommand')" role="heading" aria-level="1" />
+        <TextBlock class="page-description" :Text="$t('text.xamluicommand-subtitle')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme"><WinTextBlock class="icon" Text="&#xE793;" /></WinButton>
-          <WinToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite">
-            <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </WinToggleButton>
+          <Button class="header-action" @Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button>
+          <ToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite">
+            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
+          </ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.xamluicommand.reusable-command')"
           HorizontalContentAlignment="Stretch"
@@ -21,39 +21,39 @@
           :vue="exampleCode">
           <template #example>
             <div class="xaml-command-example">
-              <WinTextBlock
+              <TextBlock
                 class="sample-description"
                 :Text="$t('sample.xamluicommand.description')"
                 Margin="0,0,0,12"
                 TextWrapping="Wrap" />
-              <WinRelativePanel class="command-output-row">
-                <WinAppBarButton :Command="customCommand" />
-                <WinTextBlock
+              <RelativePanel class="command-output-row">
+                <AppBarButton :Command="customCommand" />
+                <TextBlock
                   class="command-output"
                   :Text="commandOutput"
                   FontFamily="Global User Interface"
                   Margin="8,0,0,0"
                   aria-live="polite" />
-              </WinRelativePanel>
+              </RelativePanel>
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
-import WinAppBarButton from '../../components/WinAppBarButton.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
+import AppBarButton from '../../components/AppBarButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
 import { useI18n } from '../../components/i18n/index';
-import WinRelativePanel from '../../components/WinRelativePanel.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import { XamlUICommand } from '../../components/WinXamlUICommand';
+import RelativePanel from '../../components/RelativePanel.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import { XamlUICommand } from '../../components/XamlUICommand';
 import { createPageState } from '../../utils/pageState';
 
 const currentPage = inject<{ value: string }>('currentPage');
@@ -74,10 +74,10 @@ const customCommand = new XamlUICommand({
 onMounted(() => { detachAccelerator = customCommand.AttachKeyboardAccelerators(); });
 onBeforeUnmount(() => detachAccelerator?.());
 
-const exampleCode = computed(() => `<WinRelativePanel>
-  <WinAppBarButton Command="customCommand" />
-  <WinTextBlock Margin="8,0,0,0" Text="commandOutput" />
-</WinRelativePanel>`);
+const exampleCode = computed(() => `<RelativePanel>
+  <AppBarButton Command="customCommand" />
+  <TextBlock Margin="8,0,0,0" Text="commandOutput" />
+</RelativePanel>`);
 </script>
 
 <style scoped>

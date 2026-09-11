@@ -1,5 +1,5 @@
 <template>
-  <WinScrollViewer class="gallery-home-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-home-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-home-page">
       <div class="home-page">
           <section class="home-page-header">
@@ -10,13 +10,13 @@
             </div>
 
             <div class="home-header-copy">
-              <WinTextBlock class="home-header-subtitle" :Text="$t(appManifest.version ?? 'app.version')" :FontSize="18" />
-              <WinTextBlock class="home-header-title" :Text="$t('app.title')" :FontSize="40" FontWeight="600" :LineHeight="52" />
+              <TextBlock class="home-header-subtitle" :Text="$t(appManifest.version ?? 'app.version')" :FontSize="18" />
+              <TextBlock class="home-header-title" :Text="$t('app.title')" :FontSize="40" FontWeight="600" :LineHeight="52" />
             </div>
 
-            <WinHorizontalScrollContainer class="home-header-tiles-scroll">
+            <HorizontalScrollContainer class="home-header-tiles-scroll">
               <div class="home-header-tiles">
-                <WinHomeHeaderTile
+                <HomeHeaderTile
                   v-for="tile in headerTiles"
                   :key="tile.Title"
                   :Title="tile.Title"
@@ -24,27 +24,27 @@
                   :Icon="tile.Icon"
                   :Link="tile.Link" />
               </div>
-            </WinHorizontalScrollContainer>
+            </HorizontalScrollContainer>
           </section>
 
-          <WinSelectorBar
+          <SelectorBar
             :class="['filter-bar', 'token-filter-bar', { 'is-cjk-locale': locale === 'zh-CN' }]"
             HorizontalAlignment="Center"
             :Items="filterItems"
             :SelectedItem="filterItems[selectedFilterIndex]"
             @SelectionChanged="OnFilterChanged" />
 
-          <WinSwitchPresenter class="switch-presenter" :Value="selectedFilter">
-            <WinCase Value="Recent">
+          <SwitchPresenter class="switch-presenter" :Value="selectedFilter">
+            <Case Value="Recent">
               <section class="sample-panel">
               <template v-if="RecentlyVisitedSamplesList.length > 0">
-                <WinTextBlock
+                <TextBlock
                   class="sample-panel-title"
                   :Text="$t('text.recently-visited')"
                   FontSize="16"
                   FontWeight="600"
                   LineHeight="20" />
-                <WinHorizontalScrollContainer class="recently-visited-container">
+                <HorizontalScrollContainer class="recently-visited-container">
                   <div class="single-row-grid-view">
                     <button
                       v-for="item in RecentlyVisitedSamplesList"
@@ -55,16 +55,16 @@
                       <span class="control-item-surface">
                         <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
                         <span class="control-item-text">
-                          <WinTextBlock class="control-item-title" :Text="item.Title" />
-                          <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                          <TextBlock class="control-item-title" :Text="item.Title" />
+                          <TextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
                         </span>
                       </span>
                     </button>
                   </div>
-                </WinHorizontalScrollContainer>
+                </HorizontalScrollContainer>
               </template>
 
-              <WinTextBlock
+              <TextBlock
                 class="sample-panel-title recently-added-title"
                 :Text="$t('text.recently-added-or-updated')"
                 FontSize="16"
@@ -81,17 +81,17 @@
                   <span class="control-item-surface">
                     <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
                     <span class="control-item-text">
-                      <WinTextBlock class="control-item-title" :Text="item.Title" />
-                      <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                      <TextBlock class="control-item-title" :Text="item.Title" />
+                      <TextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
                     </span>
                   </span>
                 </button>
               </div>
             </section>
 
-            </WinCase>
+            </Case>
 
-            <WinCase Value="Favorites">
+            <Case Value="Favorites">
               <section class="sample-panel">
               <div v-if="FavoriteSamplesList.length > 0" class="grid-view">
                 <button
@@ -103,36 +103,36 @@
                   <span class="control-item-surface">
                     <img class="control-item-image" :src="item.ImagePath" :alt="item.Title" />
                     <span class="control-item-text">
-                      <WinTextBlock class="control-item-title" :Text="item.Title" />
-                      <WinTextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
+                      <TextBlock class="control-item-title" :Text="item.Title" />
+                      <TextBlock class="control-item-subtitle" :Text="item.Subtitle" TextWrapping="Wrap" />
                     </span>
                   </span>
                 </button>
               </div>
               <div v-else class="favorite-samples-fallback-message">
                 <img class="favorite-samples-fallback-image" :src="controlImage('RatingControl')" alt="" />
-                <WinTextBlock class="favorite-samples-fallback-title" Text="No favorites yet" />
-                <WinTextBlock
+                <TextBlock class="favorite-samples-fallback-title" Text="No favorites yet" />
+                <TextBlock
                   class="favorite-samples-fallback-description"
                   Text="Favorite samples by clicking the star icon on the sample page."
                   TextAlignment="Center" />
               </div>
               </section>
-            </WinCase>
-          </WinSwitchPresenter>
+            </Case>
+          </SwitchPresenter>
         </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, onMounted, onUnmounted, ref } from 'vue';
-import WinHomeHeaderTile from '../components/WinHomeHeaderTile.vue';
-import WinHorizontalScrollContainer from '../../components/WinHorizontalScrollContainer.vue';
-import WinSelectorBar from '../../components/WinSelectorBar.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinCase from '../../components/WinCase.vue';
-import WinSwitchPresenter from '../../components/WinSwitchPresenter.vue';
+import HomeHeaderTile from '../components/HomeHeaderTile.vue';
+import HorizontalScrollContainer from '../../components/HorizontalScrollContainer.vue';
+import SelectorBar from '../../components/SelectorBar.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import Case from '../../components/Case.vue';
+import SwitchPresenter from '../../components/SwitchPresenter.vue';
 import appIcon from '../../assets/AppIcon.ico';
 import splashDark from '../../assets/HomePage/Splash-Dark.png';
 import splashLight from '../../assets/HomePage/Splash-Light.png';
@@ -141,7 +141,7 @@ import { favoritesStorageKey, getStoredFavorites } from '../../utils/pageState';
 
 import { useI18n } from '../../components/i18n/index';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t, locale } = useI18n();
 const navigate = inject('navigate', () => {});
 const favorites = ref(getStoredFavorites());
@@ -389,7 +389,7 @@ onUnmounted(() => {
   background: linear-gradient(to bottom, #CED8E4 0%, #D5DBE3 100%);
 }
 
-:global(html.theme-dark) .home-header-image-grid {
+:global(html.theme-dark .home-header-image-grid) {
   background: #020B20;
 }
 
@@ -401,16 +401,16 @@ onUnmounted(() => {
   opacity: 0.9;
 }
 
-:global(html.theme-dark) .home-header-image {
+:global(html.theme-dark .home-header-image) {
   opacity: 0.8;
 }
 
 @media (prefers-color-scheme: dark) {
-  :global(html:not(.theme-light)) .home-header-image-grid {
+  :global(html:not(.theme-light) .home-header-image-grid) {
     background: #020B20;
   }
 
-  :global(html:not(.theme-light)) .home-header-image {
+  :global(html:not(.theme-light) .home-header-image) {
     opacity: 0.8;
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="win-password-box" :style="rootStyle">
-    <WinTextBox
+    <TextBox
       ref="textBoxRef"
       class="win-password-textbox"
       :Text="visibleText"
@@ -31,7 +31,7 @@
           <span></span>
         </button>
       </template>
-    </WinTextBox>
+    </TextBox>
   </div>
 </template>
 
@@ -41,7 +41,7 @@ import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 import type { CSSProperties } from 'vue';
-import WinTextBox from './WinTextBox.vue';
+import TextBox from './TextBox.vue';
 
 type PasswordRevealMode = 'Peek' | 'Hidden' | 'Visible';
 

@@ -7,7 +7,7 @@
     :style="badgeStyle"
     role="status"
     :aria-label="automationName">
-    <WinTextBlock
+    <TextBlock
       v-if="displayKind === 'Value'"
       class="win-infobadge-value-text"
       :Text="displayValue"
@@ -18,7 +18,7 @@
       v-else-if="displayKind !== 'Dot'"
       class="win-infobadge-icon-presenter"
       aria-hidden="true">
-      <WinTextBlock
+      <TextBlock
         class="win-infobadge-icon-glyph"
         :Text="iconGlyph"
         :FontFamily="resolvedIconFontFamily"
@@ -31,7 +31,7 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue';
-import WinTextBlock from './WinTextBlock.vue';
+import TextBlock from './TextBlock.vue';
 import { useI18n } from './i18n/index';
 
 defineOptions({

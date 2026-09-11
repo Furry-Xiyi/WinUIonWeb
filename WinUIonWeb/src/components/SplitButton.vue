@@ -1,10 +1,13 @@
 <template>
   <div class="win-split-button" :class="[attrs.class, { 'is-open': isOpen }]" :style="rootStyle" ref="wrap">
     <slot name="main" :isDisabled="isDisabled" :onClick="onClick">
-      <WinButton class="win-split-main-button" :IsEnabled="!isDisabled" @Click="onClick"><slot>{{ Content }}</slot></WinButton>
+      <Button class="win-split-main-button" :IsEnabled="!isDisabled" @Click="onClick">
+        <MainOutlet v-if="mainNodes.length" />
+        <slot v-else>{{ resolvedContent }}</slot>
+      </Button>
     </slot>
     <div class="win-btn-separator"></div>
-    <WinButton class="win-btn-chevron"
+    <Button class="win-btn-chevron"
             :IsEnabled="!isDisabled"
             Width="35"
             MinWidth="35"
@@ -20,23 +23,38 @@
             :class="chevronClass"
             aria-hidden="true"
             @animationend="onChevronAnimEnd"></span>
-    </WinButton>
-    <WinMenuFlyout :Open="isOpen" :AnchorRect="anchorRect" :Items="flyoutItems" :Placement="flyoutPlacement" :Theme="menuTheme" @Close="isOpen = false" @Select="onSelect">
-      <slot name="flyout" :close="closeFlyout"></slot>
-    </WinMenuFlyout>
+    </Button>
+    <MenuFlyout :Open="isOpen" :AnchorRect="anchorRect" :Items="flyoutItems" :Placement="flyoutPlacement" :Theme="menuTheme" @Close="isOpen = false" @Select="onSelect">
+      <FlyoutOutlet v-if="flyoutNodes.length" />
+      <slot v-else name="flyout" :close="closeFlyout"></slot>
+    </MenuFlyout>
   </div>
 </template>
-<script setup>
-import { ref, computed, onBeforeUnmount, onMounted, useAttrs } from 'vue';
-import WinButton from './WinButton.vue';
-import WinMenuFlyout from './WinMenuFlyout.vue';
+<script lang="ts">
+import { defineComponent, h, Fragment } from 'vue'
+
+export const SplitButtonFlyout = defineComponent({
+  name: 'SplitButton.Flyout',
+  __splitButtonProperty: 'flyout',
+  setup(_, { slots }) {
+    return () => h('span', { class: 'split-button-property' }, slots.default?.())
+  }
+})
+
+export default { Flyout: SplitButtonFlyout }
+</script>
+<script setup lang="ts">
+import { ref, computed, defineComponent, Fragment, getCurrentInstance, h, onBeforeUnmount, onMounted, useAttrs, useSlots } from 'vue';
+import Button from './Button.vue';
+import MenuFlyout from './MenuFlyout.vue';
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
 
 defineOptions({ inheritAttrs: false });
 
 const props = defineProps({
   Content: { type: [String, Number], default: '' },
   Flyout: { type: [Object, Array], default: () => ({ Items: [] }) },
-  IsEnabled: { type: Boolean, default: true },
+  IsEnabled: { type: [Boolean, String], default: true },
   Options: { type: Array, default: () => [] },
   Theme: { type: String, default: '' },
   MinWidth: { type: [String, Number], default: '' },
@@ -47,6 +65,45 @@ const props = defineProps({
 });
 const emit = defineEmits(['Click', 'Select', 'click', 'select']);
 const attrs = useAttrs();
+const slots = useSlots();
+const instance = getCurrentInstance();
+const isFlyoutContainer = (node) => {
+  const type = node?.type;
+  if (!type || typeof type !== 'object') return false;
+  const name = type.name || type.__name;
+  return name === 'Flyout' || name === 'Flyout';
+};
+const propertyNodes = computed(() => {
+  const main = [];
+  const flyout = [];
+  let placement = '';
+  const appendFlyoutContent = (nodes) => {
+    for (const node of nodes ?? []) {
+      if (isFlyoutContainer(node)) {
+        const requestedPlacement = node.props?.Placement;
+        if (requestedPlacement) placement = requestedPlacement;
+        const contentSlot = node.children && typeof node.children === 'object' ? node.children.default : undefined;
+        if (contentSlot) appendFlyoutContent(contentSlot());
+      } else {
+        flyout.push(node);
+      }
+    }
+  };
+  for (const node of slots.default?.() ?? []) {
+    const type = node.type;
+    if (typeof type === 'object' && type?.__splitButtonProperty === 'flyout') {
+      const propertySlot = node.children && typeof node.children === 'object' ? node.children.default : undefined;
+      if (propertySlot) appendFlyoutContent(propertySlot());
+    } else {
+      main.push(node);
+    }
+  }
+  return { main, flyout, placement };
+});
+const MainOutlet = defineComponent({ setup() { return () => h(Fragment, propertyNodes.value.main); } });
+const FlyoutOutlet = defineComponent({ setup() { return () => h(Fragment, propertyNodes.value.flyout); } });
+const mainNodes = computed(() => propertyNodes.value.main);
+const flyoutNodes = computed(() => propertyNodes.value.flyout);
 const wrap = ref(null);
 const isOpen = ref(false);
 const anchorRect = ref(null);
@@ -56,7 +113,9 @@ let chevronPressed = false;
 let chevronPressDone = false;
 let themeObserver;
 
-const isDisabled = computed(() => props.IsEnabled === false);
+const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
+const isDisabled = computed(() => !resolvedIsEnabled.value);
+const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
   if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return `${Number(value.trim())}px`;
@@ -71,7 +130,7 @@ const xamlThickness = (value) => {
   return value;
 };
 const flyoutDefinition = computed(() => Array.isArray(props.Flyout) ? { Items: props.Flyout } : props.Flyout || { Items: [] });
-const flyoutPlacement = computed(() => flyoutDefinition.value.Placement || 'Bottom');
+const flyoutPlacement = computed(() => propertyNodes.value.placement || flyoutDefinition.value.Placement || 'Bottom');
 const sourceItems = computed(() => flyoutDefinition.value.Items?.length ? flyoutDefinition.value.Items : props.Options);
 const flyoutItems = computed(() => sourceItems.value.map((item) => {
   if (typeof item === 'string') return { Text: item, Value: item };
@@ -146,6 +205,7 @@ const onClick = (event) => {
   if (isDisabled.value) return;
   emit('Click', event);
   emit('click', event);
+  resolveXamlHandler(attrs.Click, instance)?.(event);
 };
 const onSelect = (item) => {
   emit('Select', item);

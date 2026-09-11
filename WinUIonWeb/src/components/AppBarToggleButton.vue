@@ -1,5 +1,5 @@
 <template>
-  <WinAppBarButton
+  <AppBarButton
     v-bind="$attrs"
     :class="{
       'win-appbar-toggle-button': true,
@@ -11,12 +11,12 @@
     <template v-if="$slots.content || $slots.default" #content>
       <slot name="content"><slot /></slot>
     </template>
-  </WinAppBarButton>
+  </AppBarButton>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import WinAppBarButton from './WinAppBarButton.vue';
+import AppBarButton from './AppBarButton.vue';
 
 defineOptions({ inheritAttrs: false });
 

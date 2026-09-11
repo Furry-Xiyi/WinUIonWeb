@@ -1,73 +1,8 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.flyout')" />
-          <WinTextBlock class="page-description" :Text="$t('text.a-flyout-displays-lightweight-ui-that-is-either')" TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
-          </div>
-        </div>
-      <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-button-with-a-flyout')" :theme="pageTheme" :vue="buttonFlyoutCode">
-              <template #example>
-                <WinFlyout ref="flyoutRef" Placement="Bottom">
-                  <template #trigger>
-                    <WinButton @click="flyoutRef?.toggle()">
-                      <WinTextBlock :Text="$t('sample.flyout.empty-cart')" />
-                    </WinButton>
-                  </template>
-                  <div class="flyout-stack">
-                    <WinTextBlock class="flyout-message" :Text="$t('sample.flyout.remove-all')" TextWrapping="WrapWholeWords" />
-                    <WinButton @click="flyoutRef?.hide()">
-                      <WinTextBlock :Text="$t('sample.flyout.confirm-empty')" />
-                    </WinButton>
-                  </div>
-                </WinFlyout>
-              </template>
-            </WinControlExample>
-      </div>
-    </div>
-  </WinScrollViewer>
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"><div class="gallery-item-page"><div class="page-heading"><TextBlock class="page-header" Text="{x:Bind $t('text.flyout'), Mode=OneWay}" /><TextBlock class="page-description" Text="{x:Bind $t('text.a-flyout-displays-lightweight-ui-that-is-either'), Mode=OneWay}" TextWrapping="WrapWholeWords" /><div class="page-header-actions"><Button class="header-action" Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button><ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite"><TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" /></ToggleButton></div></div><div class="gallery-page-content"><ControlExample HeaderText="{x:Bind $t('text.a-button-with-a-flyout'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind buttonFlyoutCode, Mode=OneWay}"><ControlExample.Example><Button Content="{x:Bind $t('sample.flyout.empty-cart'), Mode=OneWay}"><Button.Flyout><Flyout Placement="Bottom"><StackPanel><TextBlock Margin="0,0,0,12" Text="{x:Bind $t('sample.flyout.remove-all'), Mode=OneWay}" TextWrapping="WrapWholeWords" /><Button Click="HideFlyout_Click" Content="{x:Bind $t('sample.flyout.confirm-empty'), Mode=OneWay}" /></StackPanel></Flyout></Button.Flyout></Button></ControlExample.Example></ControlExample></div></div></ScrollViewer>
 </template>
-
 <script setup>
-import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinFlyout from '../../components/WinFlyout.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import { createPageState } from '../../utils/pageState';
-
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'flyout');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-const flyoutRef = ref(null);
-
-const buttonFlyoutCode = `<WinFlyout ref="flyoutRef" Placement="Bottom">
-  <template #trigger>
-    <WinButton @click="flyoutRef?.toggle()">
-      <WinTextBlock Text="Empty cart" />
-    </WinButton>
-  </template>
-  <WinTextBlock Text="All items will be removed. Do you want to continue?" Margin="0,0,0,12" />
-  <WinButton @click="flyoutRef?.hide()">
-    <WinTextBlock Text="Yes, empty my cart" />
-  </WinButton>
-</WinFlyout>`;
+import { computed, inject } from 'vue'; import Button from '../../components/Button.vue'; import ControlExample from '../../components/ControlExample.vue'; import Flyout from '../../components/Flyout.vue'; import ScrollViewer from '../../components/ScrollViewer.vue'; import StackPanel from '../../components/StackPanel.vue'; import TextBlock from '../../components/TextBlock.vue'; import ToggleButton from '../../components/ToggleButton.vue'; import { createPageState } from '../../utils/pageState';
+const currentPage=inject('currentPage'); const pageKey=computed(()=>currentPage?.value||'flyout'); const {isFavoriteState,pageTheme,toggleTheme,toggleFavorite}=createPageState(pageKey.value); const favoriteGlyph=computed(()=>isFavoriteState.value?'\uE735':'\uE734'); const HideFlyout_Click=()=>window.dispatchEvent(new CustomEvent('winui-flyout-hide')); const buttonFlyoutCode=`<Button Content="Empty cart"><Button.Flyout><Flyout><StackPanel><TextBlock Text="All items will be removed. Do you want to continue?" /><Button Content="Yes, empty my cart" Click="DeleteConfirmation_Click" /></StackPanel></Flyout></Button.Flyout></Button>`;
 </script>
-
-<style scoped>
-.page-heading { position: relative; }
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
-.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-size: 16px; }
-.flyout-stack { min-width: 220px; display: flex; flex-direction: column; gap: 12px; }
-.flyout-message { max-width: 260px; }
-</style>
+<style scoped>.page-heading{position:relative}.page-header{font-size:28px;font-weight:600;margin:0 0 8px;color:var(--text-primary)}.page-description{color:var(--text-secondary);margin:0 72px 16px 0;line-height:20px}.page-header-actions{position:absolute;top:0;right:0;display:flex;gap:4px}.icon{font-size:16px}</style>

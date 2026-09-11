@@ -30,15 +30,15 @@
     </div>
 
     <div v-if="IsMoreButtonVisible" class="cp-more-row">
-      <WinButton class="cp-more-button" Style="SubtleButtonStyle" @Click="moreExpanded = !moreExpanded">
-        <WinTextBlock class="cp-more-label" :Text="t('text.more')" />
+      <Button class="cp-more-button" Style="SubtleButtonStyle" @Click="moreExpanded = !moreExpanded">
+        <TextBlock class="cp-more-label" :Text="t('text.more')" />
         <span class="icon">{{ moreGlyph }}</span>
-      </WinButton>
+      </Button>
     </div>
 
     <div v-if="detailsVisible" class="cp-details-grid">
-      <WinComboBox Width="120" :ItemsSource="colorModelItems" :SelectedIndex="selectedColorModelIndex" @update:SelectedIndex="onColorModelChanged" />
-      <WinTextBox
+      <ComboBox Width="120" :ItemsSource="colorModelItems" :SelectedIndex="selectedColorModelIndex" @update:SelectedIndex="onColorModelChanged" />
+      <TextBox
         v-if="IsHexInputVisible"
         class="cp-hex-box"
         :Text="hexInputText"
@@ -47,30 +47,30 @@
         @update:Text="onHexTextChanged" />
 
       <template v-if="IsColorChannelTextInputVisible && selectedColorModel === 'RGB'">
-        <WinNumberBox Width="120" :Value="rgb.r" :Minimum="0" :Maximum="255" @update:Value="onRgbValueInput('r', $event)" />
-        <WinTextBlock :Text="t('text.red')" />
-        <WinNumberBox Width="120" :Value="rgb.g" :Minimum="0" :Maximum="255" @update:Value="onRgbValueInput('g', $event)" />
-        <WinTextBlock :Text="t('text.green')" />
-        <WinNumberBox Width="120" :Value="rgb.b" :Minimum="0" :Maximum="255" @update:Value="onRgbValueInput('b', $event)" />
-        <WinTextBlock :Text="t('text.blue')" />
+        <NumberBox Width="120" :Value="rgb.r" :Minimum="0" :Maximum="255" @update:Value="onRgbValueInput('r', $event)" />
+        <TextBlock :Text="t('text.red')" />
+        <NumberBox Width="120" :Value="rgb.g" :Minimum="0" :Maximum="255" @update:Value="onRgbValueInput('g', $event)" />
+        <TextBlock :Text="t('text.green')" />
+        <NumberBox Width="120" :Value="rgb.b" :Minimum="0" :Maximum="255" @update:Value="onRgbValueInput('b', $event)" />
+        <TextBlock :Text="t('text.blue')" />
       </template>
 
       <template v-if="IsColorChannelTextInputVisible && selectedColorModel === 'HSV'">
-        <WinNumberBox Width="120" :Value="hsvHue" :Minimum="0" :Maximum="359" @update:Value="onHsvValueInput('h', $event)" />
-        <WinTextBlock :Text="t('text.hue')" />
-        <WinNumberBox Width="120" :Value="hsvSaturation" :Minimum="0" :Maximum="100" @update:Value="onHsvValueInput('s', $event)" />
-        <WinTextBlock :Text="t('text.saturation')" />
-        <WinNumberBox Width="120" :Value="hsvValue" :Minimum="0" :Maximum="100" @update:Value="onHsvValueInput('v', $event)" />
-        <WinTextBlock :Text="t('text.value')" />
+        <NumberBox Width="120" :Value="hsvHue" :Minimum="0" :Maximum="359" @update:Value="onHsvValueInput('h', $event)" />
+        <TextBlock :Text="t('text.hue')" />
+        <NumberBox Width="120" :Value="hsvSaturation" :Minimum="0" :Maximum="100" @update:Value="onHsvValueInput('s', $event)" />
+        <TextBlock :Text="t('text.saturation')" />
+        <NumberBox Width="120" :Value="hsvValue" :Minimum="0" :Maximum="100" @update:Value="onHsvValueInput('v', $event)" />
+        <TextBlock :Text="t('text.value')" />
       </template>
 
       <template v-if="IsAlphaEnabled && IsAlphaTextInputVisible">
-        <WinNumberBox Width="120" :Value="opacityPercent" :Minimum="0" :Maximum="100" @update:Value="onOpacityInput" />
-        <WinTextBlock :Text="t('sample.opacity')" />
+        <NumberBox Width="120" :Value="opacityPercent" :Minimum="0" :Maximum="100" @update:Value="onOpacityInput" />
+        <TextBlock :Text="t('sample.opacity')" />
       </template>
     </div>
 
-    <WinToolTip
+    <ToolTip
       ref="spectrumToolTipRef"
       IsServiceHost
       :IsOpen="spectrumToolTipOpen"
@@ -81,28 +81,30 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
-import WinButton from './WinButton.vue';
-import WinComboBox from './WinComboBox.vue';
-import WinNumberBox from './WinNumberBox.vue';
-import WinTextBlock from './WinTextBlock.vue';
-import WinTextBox from './WinTextBox.vue';
-import WinToolTip from './WinToolTip.vue';
+import { ref, reactive, computed, watch, onMounted, nextTick, getCurrentInstance } from 'vue';
+import Button from './Button.vue';
+import ComboBox from './ComboBox.vue';
+import NumberBox from './NumberBox.vue';
+import TextBlock from './TextBlock.vue';
+import TextBox from './TextBox.vue';
+import ToolTip from './ToolTip.vue';
 import { useI18n } from './i18n/index';
+import { resolveXamlValue } from './xamlRuntime';
 
 const { t } = useI18n();
+const instance = getCurrentInstance();
 
 const props = defineProps({
-  Color: { type: String, default: undefined },
-  ColorSpectrumShape: { type: String, default: undefined },
-  IsMoreButtonVisible: { type: Boolean, default: false },
-  IsColorPreviewVisible: { type: Boolean, default: undefined },
-  IsColorSliderVisible: { type: Boolean, default: undefined },
-  IsColorChannelTextInputVisible: { type: Boolean, default: undefined },
-  IsHexInputVisible: { type: Boolean, default: undefined },
-  IsAlphaEnabled: { type: Boolean, default: undefined },
-  IsAlphaSliderVisible: { type: Boolean, default: undefined },
-  IsAlphaTextInputVisible: { type: Boolean, default: undefined },
+  Color: { type: [String, Object], default: undefined },
+  ColorSpectrumShape: { type: [String, Number], default: undefined },
+  IsMoreButtonVisible: { type: [Boolean, String], default: false },
+  IsColorPreviewVisible: { type: [Boolean, String], default: undefined },
+  IsColorSliderVisible: { type: [Boolean, String], default: undefined },
+  IsColorChannelTextInputVisible: { type: [Boolean, String], default: undefined },
+  IsHexInputVisible: { type: [Boolean, String], default: undefined },
+  IsAlphaEnabled: { type: [Boolean, String], default: undefined },
+  IsAlphaSliderVisible: { type: [Boolean, String], default: undefined },
+  IsAlphaTextInputVisible: { type: [Boolean, String], default: undefined },
   modelValue: { type: String, default: '#0067C0' },
   isColorPreviewVisible: { type: Boolean, default: true },
   isColorSliderVisible: { type: Boolean, default: true },
@@ -134,15 +136,20 @@ let draggingValue = false;
 let draggingAlpha = false;
 const spectrumToolTipOpen = ref(false);
 
-const ColorSpectrumShape = computed(() => props.ColorSpectrumShape ?? props.colorSpectrumShape);
-const IsColorPreviewVisible = computed(() => props.IsColorPreviewVisible ?? props.isColorPreviewVisible);
-const IsColorSliderVisible = computed(() => props.IsColorSliderVisible ?? props.isColorSliderVisible);
-const IsColorChannelTextInputVisible = computed(() => props.IsColorChannelTextInputVisible ?? props.isColorChannelTextInputVisible);
-const IsHexInputVisible = computed(() => props.IsHexInputVisible ?? props.isHexInputVisible);
-const IsAlphaEnabled = computed(() => props.IsAlphaEnabled ?? props.isAlphaEnabled);
-const IsAlphaSliderVisible = computed(() => props.IsAlphaSliderVisible ?? props.isAlphaSliderVisible);
-const IsAlphaTextInputVisible = computed(() => props.IsAlphaTextInputVisible ?? props.isAlphaTextInputVisible);
-const detailsVisible = computed(() => !props.IsMoreButtonVisible || moreExpanded.value);
+const boolValue = (value, fallback) => {
+  const resolved = resolveXamlValue(value, instance);
+  return resolved === undefined ? fallback : resolved === true;
+};
+const IsMoreButtonVisible = computed(() => boolValue(props.IsMoreButtonVisible, false));
+const ColorSpectrumShape = computed(() => String(resolveXamlValue(props.ColorSpectrumShape, instance) ?? props.colorSpectrumShape));
+const IsColorPreviewVisible = computed(() => boolValue(props.IsColorPreviewVisible, props.isColorPreviewVisible));
+const IsColorSliderVisible = computed(() => boolValue(props.IsColorSliderVisible, props.isColorSliderVisible));
+const IsColorChannelTextInputVisible = computed(() => boolValue(props.IsColorChannelTextInputVisible, props.isColorChannelTextInputVisible));
+const IsHexInputVisible = computed(() => boolValue(props.IsHexInputVisible, props.isHexInputVisible));
+const IsAlphaEnabled = computed(() => boolValue(props.IsAlphaEnabled, props.isAlphaEnabled));
+const IsAlphaSliderVisible = computed(() => boolValue(props.IsAlphaSliderVisible, props.isAlphaSliderVisible));
+const IsAlphaTextInputVisible = computed(() => boolValue(props.IsAlphaTextInputVisible, props.isAlphaTextInputVisible));
+const detailsVisible = computed(() => !IsMoreButtonVisible.value || moreExpanded.value);
 const colorModelItems = computed(() => ['RGB', 'HSV']);
 const selectedColorModel = computed(() => selectedColorModelIndex.value === 1 ? 'HSV' : 'RGB');
 const isRing = computed(() => ColorSpectrumShape.value === 'Ring');

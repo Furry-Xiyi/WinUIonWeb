@@ -1,6 +1,6 @@
 <template>
   <div class="gallery-item-page">
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- 页面标题区域 -->
             <div class="page-header">
@@ -11,12 +11,12 @@
                 </p>
               </div>
               <div class="header-actions">
-                <WinButton class="header-action" @Click="toggleTheme">
+                <Button class="header-action" @Click="toggleTheme">
                   <span class="icon">&#xE793;</span>
-                </WinButton>
-                <WinToggleButton :IsChecked="isFavorite" class="header-action" @update:IsChecked="toggleFavorite">
+                </Button>
+                <ToggleButton :IsChecked="isFavorite" class="header-action" @update:IsChecked="toggleFavorite">
                   <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
-                </WinToggleButton>
+                </ToggleButton>
               </div>
             </div>
 
@@ -33,22 +33,22 @@
             </div>
 
             <!-- 示例1: 创建和应用样式 -->
-            <WinControlExample
+            <ControlExample
               :theme="pageTheme"
               headerText="Creating and applying a style"
               :templateCode="example1Template"
               :vueCode="example1Vue">
               <template #example>
                 <div class="example-layout">
-                  <WinButton>Default button</WinButton>
-                  <WinButton :class="'styled-button'">Styled button</WinButton>
-                  <WinButton :class="'styled-button override-bg'">Styled button (overridden)</WinButton>
+                  <Button>Default button</Button>
+                  <Button :class="'styled-button'">Styled button</Button>
+                  <Button :class="'styled-button override-bg'">Styled button (overridden)</Button>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- 示例2: 隐式样式 (无key) -->
-            <WinControlExample
+            <ControlExample
               :theme="pageTheme"
               headerText="Style without a key (implicit style)"
               :templateCode="example2Template"
@@ -59,20 +59,20 @@
                   <p class="styled-text">No need to set a key.</p>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'xamlstyles');
 const { pageTheme, isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -93,9 +93,9 @@ const example1Template = `<StackPanel Spacing="8">
 
 const example1Vue = `<template>
   <div class="example-layout">
-    <WinButton>Default button</WinButton>
-    <WinButton :class="'styled-button'">Styled button</WinButton>
-    <WinButton :class="'styled-button override-bg'">Styled button (overridden)</WinButton>
+    <Button>Default button</Button>
+    <Button :class="'styled-button'">Styled button</Button>
+    <Button :class="'styled-button override-bg'">Styled button (overridden)</Button>
   </div>
 </template>
 

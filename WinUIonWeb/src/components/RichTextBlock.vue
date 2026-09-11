@@ -4,12 +4,13 @@
     class="win-rich-text-block"
     :class="[attrs.class, { 'is-selectable': IsTextSelectionEnabled }]"
     :style="richTextBlockStyle">
-    <slot>{{ Text }}</slot>
+    <slot>{{ resolvedText }}</slot>
   </div>
 </template>
 
 <script setup>
-import { computed, useAttrs } from 'vue';
+import { computed, getCurrentInstance, useAttrs } from 'vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 defineOptions({
   inheritAttrs: false
@@ -31,6 +32,8 @@ const props = defineProps({
 });
 
 const attrs = useAttrs();
+const instance = getCurrentInstance();
+const resolvedText = computed(() => resolveXamlValue(props.Text, instance));
 
 const richTextBlockAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;

@@ -1,14 +1,14 @@
 <template>
   <!-- 对应官方 WinUIGallery/Pages/SearchResultsPage.xaml 的 NoResultsFound 状态 -->
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="search-no-results">
       <h1 class="search-no-results-title">{{ t('search.no-results') }}</h1>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 import { useI18n } from '../../components/i18n/index';
 
 const { t } = useI18n();

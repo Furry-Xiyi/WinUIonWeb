@@ -1,25 +1,25 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.commandbar')" />
-        <WinTextBlock class="page-description" :Text="$t('text.commandbar-subtitle')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.commandbar')" />
+        <TextBlock class="page-description" :Text="$t('text.commandbar-subtitle')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+          <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
+          <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
             <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-          </WinToggleButton>
+          </ToggleButton>
         </div>
       </div>
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('text.a-command-bar-with-labels-on-the-side-free-float')"
           :theme="pageTheme"
           :vue="exampleCode">
           <template #example>
-            <WinStackPanel class="commandbar-sample">
-              <WinCommandBar
+            <StackPanel class="commandbar-sample">
+              <CommandBar
                 Background="Transparent"
                 HorizontalAlignment="Left"
                 :Theme="pageTheme"
@@ -29,39 +29,39 @@
                 :PrimaryCommands="primaryCommands"
                 :SecondaryCommands="secondaryCommands"
                 @update:IsOpen="isOpen = $event" />
-              <WinTextBlock :Text="selectedOption" Padding="0,8,0,0" />
-            </WinStackPanel>
+              <TextBlock :Text="selectedOption" Padding="0,8,0,0" />
+            </StackPanel>
           </template>
           <template #options>
-            <WinStackPanel>
-              <WinTextBlock :Text="$t('sample.commandbar.show-or-hide')" />
-              <WinButton :Content="$t('sample.commandbar.open')" Margin="0,12,0,0" @Click="openCommandBar" />
-              <WinButton :Content="$t('sample.commandbar.close')" Margin="0,12,0,0" @Click="closeCommandBar" />
-              <WinTextBlock :Text="$t('sample.commandbar.modify-content')" Margin="0,16,0,0" />
-              <WinButton :Content="$t('sample.commandbar.add-secondary')" Margin="0,12,0,0" @Click="hasExtraCommands = true" />
-              <WinButton :Content="$t('sample.commandbar.remove-secondary')" Margin="0,12,0,0" @Click="hasExtraCommands = false" />
-            </WinStackPanel>
+            <StackPanel>
+              <TextBlock :Text="$t('sample.commandbar.show-or-hide')" />
+              <Button :Content="$t('sample.commandbar.open')" Margin="0,12,0,0" @Click="openCommandBar" />
+              <Button :Content="$t('sample.commandbar.close')" Margin="0,12,0,0" @Click="closeCommandBar" />
+              <TextBlock :Text="$t('sample.commandbar.modify-content')" Margin="0,16,0,0" />
+              <Button :Content="$t('sample.commandbar.add-secondary')" Margin="0,12,0,0" @Click="hasExtraCommands = true" />
+              <Button :Content="$t('sample.commandbar.remove-secondary')" Margin="0,12,0,0" @Click="hasExtraCommands = false" />
+            </StackPanel>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue';
-import WinAppBarButton from '../../components/WinAppBarButton.vue';
-import WinAppBarSeparator from '../../components/WinAppBarSeparator.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCommandBar from '../../components/WinCommandBar.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinStackPanel from '../../components/WinStackPanel.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import AppBarButton from '../../components/AppBarButton.vue';
+import AppBarSeparator from '../../components/AppBarSeparator.vue';
+import Button from '../../components/Button.vue';
+import CommandBar from '../../components/CommandBar.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject<{ value: string }>('currentPage');
 const pageKey = computed(() => currentPage?.value || 'commandbar');
@@ -79,7 +79,7 @@ const onElementClicked = (name: string) => {
 const primaryCommands = computed(() => [
   {
     Key: 'Add',
-    Component: WinAppBarButton,
+    Component: AppBarButton,
     Props: {
       Icon: 'Add',
       Label: t('text.add'),
@@ -89,7 +89,7 @@ const primaryCommands = computed(() => [
   },
   {
     Key: 'Edit',
-    Component: WinAppBarButton,
+    Component: AppBarButton,
     Props: {
       Icon: 'Edit',
       Label: t('text.edit'),
@@ -99,7 +99,7 @@ const primaryCommands = computed(() => [
   },
   {
     Key: 'Share',
-    Component: WinAppBarButton,
+    Component: AppBarButton,
     Props: {
       Icon: 'Share',
       Label: t('text.share'),
@@ -118,7 +118,7 @@ const secondaryCommands = computed(() => {
   }> = [
     {
       Key: 'Settings',
-      Component: WinAppBarButton,
+      Component: AppBarButton,
       Props: {
         Icon: 'Setting',
         Label: t('text.settings'),
@@ -131,7 +131,7 @@ const secondaryCommands = computed(() => {
     commands.push(
       {
         Key: 'Button1',
-        Component: WinAppBarButton,
+        Component: AppBarButton,
         Props: {
           Icon: 'Add',
           Label: t('sample.commandbar.button-1'),
@@ -141,7 +141,7 @@ const secondaryCommands = computed(() => {
       },
       {
         Key: 'Button2',
-        Component: WinAppBarButton,
+        Component: AppBarButton,
         Props: {
           Icon: 'Delete',
           Label: t('sample.commandbar.button-2'),
@@ -151,12 +151,12 @@ const secondaryCommands = computed(() => {
       },
       {
         Key: 'Separator',
-        Component: WinAppBarSeparator,
+        Component: AppBarSeparator,
         Props: {}
       },
       {
         Key: 'Button3',
-        Component: WinAppBarButton,
+        Component: AppBarButton,
         Props: {
           Icon: 'FontDecrease',
           Label: t('sample.commandbar.button-3'),
@@ -167,7 +167,7 @@ const secondaryCommands = computed(() => {
       },
       {
         Key: 'Button4',
-        Component: WinAppBarButton,
+        Component: AppBarButton,
         Props: {
           Icon: 'FontIncrease',
           Label: t('sample.commandbar.button-4'),
@@ -191,23 +191,23 @@ const closeCommandBar = () => {
   isOpen.value = false;
 };
 
-const exampleCode = `<WinCommandBar
+const exampleCode = `<CommandBar
   Background="Transparent"
   HorizontalAlignment="Left"
   IsOpen="False"
   IsSticky="False"
   DefaultLabelPosition="Right">
-  <WinAppBarButton Icon="Add" Label="Add" Click="OnElementClicked" />
-  <WinAppBarButton Icon="Edit" Label="Edit" Click="OnElementClicked" />
-  <WinAppBarButton Icon="Share" Label="Share" Click="OnElementClicked" />
-  <WinCommandBar.SecondaryCommands>
-    <WinAppBarButton Icon="Setting" Label="Settings" Click="OnElementClicked">
-      <WinAppBarButton.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="I" Modifiers="Control" />
-      </WinAppBarButton.KeyboardAccelerators>
-    </WinAppBarButton>
-  </WinCommandBar.SecondaryCommands>
-</WinCommandBar>`;
+  <AppBarButton Icon="Add" Label="Add" Click="OnElementClicked" />
+  <AppBarButton Icon="Edit" Label="Edit" Click="OnElementClicked" />
+  <AppBarButton Icon="Share" Label="Share" Click="OnElementClicked" />
+  <CommandBar.SecondaryCommands>
+    <AppBarButton Icon="Setting" Label="Settings" Click="OnElementClicked">
+      <AppBarButton.KeyboardAccelerators>
+        <KeyboardAccelerator Key="I" Modifiers="Control" />
+      </AppBarButton.KeyboardAccelerators>
+    </AppBarButton>
+  </CommandBar.SecondaryCommands>
+</CommandBar>`;
 </script>
 
 <style scoped>

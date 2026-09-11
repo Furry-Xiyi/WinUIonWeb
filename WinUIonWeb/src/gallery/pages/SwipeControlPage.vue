@@ -1,142 +1,142 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.swipecontrol')" role="heading" aria-level="1" />
-        <WinTextBlock class="page-description" :Text="$t('text.swipecontrol-subtitle')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.swipecontrol')" role="heading" aria-level="1" />
+        <TextBlock class="page-description" :Text="$t('text.swipecontrol-subtitle')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme"><WinTextBlock class="icon" Text="&#xE793;" /></WinButton>
-          <WinToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite">
-            <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </WinToggleButton>
+          <Button class="header-action" @Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button>
+          <ToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite">
+            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
+          </ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.swipecontrol.reveal-actions')"
           :theme="pageTheme"
           :vue="example1Code">
           <template #example>
-            <WinSwipeControl
+            <SwipeControl
               BorderThickness="1"
               BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
               Width="500"
               Height="68"
               Margin="12"
               :LeftItems="leftRevealItems">
-              <WinGrid class="swipe-demo-content">
-                <WinTextBlock :Text="revealOutput" />
-              </WinGrid>
-            </WinSwipeControl>
+              <Grid class="swipe-demo-content">
+                <TextBlock :Text="revealOutput" />
+              </Grid>
+            </SwipeControl>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.swipecontrol.execute')"
           :theme="pageTheme"
           :vue="example2Code">
           <template #example>
-            <WinSwipeControl
+            <SwipeControl
               BorderThickness="1"
               BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
               Width="500"
               Height="68"
               Margin="12"
               :RightItems="rightExecuteItems">
-              <WinGrid class="swipe-demo-content">
-                <WinTextBlock :Text="executeOutput" />
-              </WinGrid>
-            </WinSwipeControl>
+              <Grid class="swipe-demo-content">
+                <TextBlock :Text="executeOutput" />
+              </Grid>
+            </SwipeControl>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.swipecontrol.custom-list')"
           :theme="pageTheme"
           :vue="example3Code">
           <template #example>
-            <WinListView
+            <ListView
               class="swipe-list"
               :ItemsSource="listItems"
               Width="800"
               Height="300"
               MinWidth="200"
               Margin="12">
-              <!-- @vue-ignore WinListView is currently a JavaScript component without typed slots. -->
+              <!-- @vue-ignore ListView is currently a JavaScript component without typed slots. -->
               <template #item="{ item }">
-                <WinSwipeControl
+                <SwipeControl
                   BorderThickness="0,1,0,0"
                   BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
                   Height="68"
                   MinWidth="200"
                   :LeftItems="listLeftItems"
                   :RightItems="deleteItems(item)">
-                  <WinTextBlock class="list-item-content" :Text="item" FontSize="24" />
-                </WinSwipeControl>
+                  <TextBlock class="list-item-content" :Text="item" FontSize="24" />
+                </SwipeControl>
               </template>
-            </WinListView>
+            </ListView>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.swipecontrol.gradient')"
           :theme="pageTheme"
           :vue="example4Code">
           <template #example>
-            <WinSwipeControl
+            <SwipeControl
               BorderThickness="1"
               BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
               Width="500"
               Height="68"
               Margin="12"
               :RightItems="gradientItems">
-              <WinGrid class="swipe-demo-content">
-                <WinTextBlock :Text="$t('sample.swipecontrol.swipe-left')" />
-              </WinGrid>
-            </WinSwipeControl>
+              <Grid class="swipe-demo-content">
+                <TextBlock :Text="$t('sample.swipecontrol.swipe-left')" />
+              </Grid>
+            </SwipeControl>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.swipecontrol.custom-icons')"
           :theme="pageTheme"
           :vue="example5Code">
           <template #example>
-            <WinSwipeControl
+            <SwipeControl
               BorderThickness="1"
               BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
               Width="500"
               Height="68"
               Margin="12"
               :LeftItems="customIconItems">
-              <WinGrid class="swipe-demo-content">
-                <WinTextBlock :Text="$t('sample.swipecontrol.swipe-right')" />
-              </WinGrid>
-            </WinSwipeControl>
+              <Grid class="swipe-demo-content">
+                <TextBlock :Text="$t('sample.swipecontrol.swipe-right')" />
+              </Grid>
+            </SwipeControl>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, reactive, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinGrid from '../../components/WinGrid.vue';
-import WinListView from '../../components/WinListView.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinSwipeControl from '../../components/WinSwipeControl.vue';
-import type { SwipeItems, SwipeItem } from '../../components/WinSwipeControl.types';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Grid from '../../components/Grid.vue';
+import ListView from '../../components/ListView.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import SwipeControl from '../../components/SwipeControl.vue';
+import type { SwipeItems, SwipeItem } from '../../components/SwipeControl.types';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -239,99 +239,99 @@ const customIconItems: SwipeItems = {
   }]
 };
 
-const example1Code = computed(() => `<WinSwipeControl
+const example1Code = computed(() => `<SwipeControl
   BorderThickness="1"
   BorderBrush="{ThemeResource ButtonBackground}"
   Width="500"
   Height="68"
   Margin="12">
-  <WinSwipeControl.LeftItems>
-    <WinSwipeItems Mode="Reveal">
-      <WinSwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" IconSource="Accept" Text="Accept" Invoked="Accept_ItemInvoked" />
-      <WinSwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" IconSource="Flag" Text="Flag" Invoked="Flag_ItemInvoked" />
-    </WinSwipeItems>
-  </WinSwipeControl.LeftItems>
-  <WinTextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Right" />
-</WinSwipeControl>`);
+  <SwipeControl.LeftItems>
+    <SwipeItems Mode="Reveal">
+      <SwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" IconSource="Accept" Text="Accept" Invoked="Accept_ItemInvoked" />
+      <SwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" IconSource="Flag" Text="Flag" Invoked="Flag_ItemInvoked" />
+    </SwipeItems>
+  </SwipeControl.LeftItems>
+  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Right" />
+</SwipeControl>`);
 
-const example2Code = computed(() => `<WinSwipeControl
+const example2Code = computed(() => `<SwipeControl
   BorderThickness="1"
   BorderBrush="{ThemeResource ButtonBackground}"
   Width="500"
   Height="68"
   Margin="12">
-  <WinSwipeControl.RightItems>
-    <WinSwipeItems Mode="Execute">
-      <WinSwipeItem BehaviorOnInvoked="Close" IconSource="Archive" Text="Archive" Invoked="DeleteOne_ItemInvoked" />
-    </WinSwipeItems>
-  </WinSwipeControl.RightItems>
-  <WinTextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Left" />
-</WinSwipeControl>`);
+  <SwipeControl.RightItems>
+    <SwipeItems Mode="Execute">
+      <SwipeItem BehaviorOnInvoked="Close" IconSource="Archive" Text="Archive" Invoked="DeleteOne_ItemInvoked" />
+    </SwipeItems>
+  </SwipeControl.RightItems>
+  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Left" />
+</SwipeControl>`);
 
-const example3Code = computed(() => `<WinListView ItemsSource="listItems" Width="800" Height="300" MinWidth="200" Margin="12">
-  <WinListView.ItemTemplate>
-    <WinDataTemplate>
-      <WinSwipeControl
+const example3Code = computed(() => `<ListView ItemsSource="listItems" Width="800" Height="300" MinWidth="200" Margin="12">
+  <ListView.ItemTemplate>
+    <DataTemplate>
+      <SwipeControl
         Height="68"
         MinWidth="200"
         BorderBrush="{ThemeResource ButtonBackground}"
         BorderThickness="0,1,0,0">
-        <WinSwipeControl.LeftItems>
-          <WinSwipeItems Mode="Reveal">
-            <WinSwipeItem Background="#FF3e6fa7" Foreground="White" IconSource="ReplyAll" Text="Reply All" />
-            <WinSwipeItem Background="#FFff9501" Foreground="White" IconSource="Read" Text="Open" />
-          </WinSwipeItems>
-        </WinSwipeControl.LeftItems>
-        <WinSwipeControl.RightItems>
-          <WinSwipeItems Mode="Execute">
-            <WinSwipeItem Background="Red" IconSource="Delete" Text="Delete" Invoked="DeleteItem_ItemInvoked" />
-          </WinSwipeItems>
-        </WinSwipeControl.RightItems>
-        <WinTextBlock Margin="12" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontSize="24" Text="{Binding}" />
-      </WinSwipeControl>
-    </WinDataTemplate>
-  </WinListView.ItemTemplate>
-</WinListView>`);
+        <SwipeControl.LeftItems>
+          <SwipeItems Mode="Reveal">
+            <SwipeItem Background="#FF3e6fa7" Foreground="White" IconSource="ReplyAll" Text="Reply All" />
+            <SwipeItem Background="#FFff9501" Foreground="White" IconSource="Read" Text="Open" />
+          </SwipeItems>
+        </SwipeControl.LeftItems>
+        <SwipeControl.RightItems>
+          <SwipeItems Mode="Execute">
+            <SwipeItem Background="Red" IconSource="Delete" Text="Delete" Invoked="DeleteItem_ItemInvoked" />
+          </SwipeItems>
+        </SwipeControl.RightItems>
+        <TextBlock Margin="12" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontSize="24" Text="{Binding}" />
+      </SwipeControl>
+    </DataTemplate>
+  </ListView.ItemTemplate>
+</ListView>`);
 
-const example4Code = computed(() => `<WinSwipeControl
+const example4Code = computed(() => `<SwipeControl
   BorderThickness="1"
   BorderBrush="{ThemeResource ButtonBackground}"
   Width="500"
   Height="68"
   Margin="12">
-  <WinSwipeControl.RightItems>
-    <WinSwipeItems Mode="Execute">
-      <WinSwipeItem BehaviorOnInvoked="Close" IconSource="Lock" Text="Lock">
-        <WinSwipeItem.Background>
-          <WinLinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
-            <WinGradientStop Offset="0.0" Color="#ff8990f9" />
-            <WinGradientStop Offset="0.5" Color="#ff5b66fb" />
-            <WinGradientStop Offset="1.0" Color="#ff5c1df4" />
-          </WinLinearGradientBrush>
-        </WinSwipeItem.Background>
-      </WinSwipeItem>
-    </WinSwipeItems>
-  </WinSwipeControl.RightItems>
-  <WinTextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Left" />
-</WinSwipeControl>`);
+  <SwipeControl.RightItems>
+    <SwipeItems Mode="Execute">
+      <SwipeItem BehaviorOnInvoked="Close" IconSource="Lock" Text="Lock">
+        <SwipeItem.Background>
+          <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+            <GradientStop Offset="0.0" Color="#ff8990f9" />
+            <GradientStop Offset="0.5" Color="#ff5b66fb" />
+            <GradientStop Offset="1.0" Color="#ff5c1df4" />
+          </LinearGradientBrush>
+        </SwipeItem.Background>
+      </SwipeItem>
+    </SwipeItems>
+  </SwipeControl.RightItems>
+  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Left" />
+</SwipeControl>`);
 
-const example5Code = computed(() => `<WinSwipeControl
+const example5Code = computed(() => `<SwipeControl
   BorderThickness="1"
   BorderBrush="{ThemeResource ButtonBackground}"
   Width="500"
   Height="68"
   Margin="12">
-  <WinSwipeControl.LeftItems>
-    <WinSwipeItems Mode="Reveal">
-      <WinSwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" Text="Coffee">
-        <WinSwipeItem.IconSource>
-          <WinBitmapIconSource UriSource="/Assets/SampleMedia/CoffeeCup.png" />
-        </WinSwipeItem.IconSource>
-      </WinSwipeItem>
-    </WinSwipeItems>
-  </WinSwipeControl.LeftItems>
-  <WinTextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Right" />
-</WinSwipeControl>`);
+  <SwipeControl.LeftItems>
+    <SwipeItems Mode="Reveal">
+      <SwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" Text="Coffee">
+        <SwipeItem.IconSource>
+          <BitmapIconSource UriSource="/Assets/SampleMedia/CoffeeCup.png" />
+        </SwipeItem.IconSource>
+      </SwipeItem>
+    </SwipeItems>
+  </SwipeControl.LeftItems>
+  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Right" />
+</SwipeControl>`);
 </script>
 
 <style scoped>

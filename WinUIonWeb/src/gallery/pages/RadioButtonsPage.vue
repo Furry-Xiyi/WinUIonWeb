@@ -1,42 +1,42 @@
 <template>
   <div>
     <div class="page-heading">
-      <WinTextBlock class="page-header" :Text="$t('text.radiobuttons')" />
-      <WinTextBlock class="page-description" :Text="$t('text.radiobuttons-are-used-to-select-a-single-option')" TextWrapping="WrapWholeWords" />
+      <TextBlock class="page-header" :Text="$t('text.radiobuttons')" />
+      <TextBlock class="page-description" :Text="$t('text.radiobuttons-are-used-to-select-a-single-option')" TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-        <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+        <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
+        <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
           <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-        </WinToggleButton>
+        </ToggleButton>
       </div>
     </div>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.radiobutton.group')" :theme="pageTheme" :vue="radioButtonGroupVue">
+    <ControlExample class="basic-input-example-theme" :headerText="$t('sample.radiobutton.group')" :theme="pageTheme" :vue="radioButtonGroupVue">
       <template #example>
-        <WinRadioButton
+        <RadioButton
           :Header="$t('text.options')"
           :SelectedIndex="selectedOptionIndex"
           @SelectionChanged="onOptionSelectionChanged">
-          <WinRadioButton :Content="$t('text.option-1')" />
-          <WinRadioButton :Content="$t('text.option-2')" />
-          <WinRadioButton :Content="$t('text.option-3')" />
-        </WinRadioButton>
+          <RadioButton :Content="$t('text.option-1')" />
+          <RadioButton :Content="$t('text.option-2')" />
+          <RadioButton :Content="$t('text.option-3')" />
+        </RadioButton>
       </template>
       <template #options>
-        <WinTextBlock :Text="optionOutputText" />
+        <TextBlock :Text="optionOutputText" />
       </template>
-    </WinControlExample>
+    </ControlExample>
 
-    <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.radiobutton.strings')" :theme="pageTheme" :vue="radioButtonStringsVue">
+    <ControlExample class="basic-input-example-theme" :headerText="$t('sample.radiobutton.strings')" :theme="pageTheme" :vue="radioButtonStringsVue">
       <template #example>
         <div class="vertical-stack">
-          <WinRadioButton
+          <RadioButton
             :Header="$t('sample.background')"
             :ItemsSource="colorItems"
             MaxColumns="3"
             :SelectedIndex="backgroundIndex"
             @SelectionChanged="backgroundIndex = $event.SelectedIndex" />
-          <WinRadioButton
+          <RadioButton
             :Header="$t('sample.border')"
             :ItemsSource="colorItems"
             MaxColumns="3"
@@ -45,17 +45,17 @@
           <div class="radio-color-output" :style="colorOutputStyle" />
         </div>
       </template>
-    </WinControlExample>
+    </ControlExample>
   </div>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -85,14 +85,14 @@ const onOptionSelectionChanged = (event) => {
   selectedOptionIndex.value = event.SelectedIndex;
 };
 
-const radioButtonGroupVue = `<WinRadioButton Header="Options:">
-  <WinRadioButton Content="Option 1" />
-  <WinRadioButton Content="Option 2" />
-  <WinRadioButton Content="Option 3" />
-</WinRadioButton>`;
+const radioButtonGroupVue = `<RadioButton Header="Options:">
+  <RadioButton Content="Option 1" />
+  <RadioButton Content="Option 2" />
+  <RadioButton Content="Option 3" />
+</RadioButton>`;
 
-const radioButtonStringsVue = `<WinRadioButton Header="Background" MaxColumns="3" :SelectedIndex="0" :ItemsSource="['Green', 'Yellow', 'White']" />
-<WinRadioButton Header="Border" MaxColumns="3" :SelectedIndex="1" :ItemsSource="['Green', 'Yellow', 'White']" />
+const radioButtonStringsVue = `<RadioButton Header="Background" MaxColumns="3" :SelectedIndex="0" :ItemsSource="['Green', 'Yellow', 'White']" />
+<RadioButton Header="Border" MaxColumns="3" :SelectedIndex="1" :ItemsSource="['Green', 'Yellow', 'White']" />
 
 <div style="height: 50px; margin: 0 10px; border: 10px solid #FFD700; background: #FFFFFF;" />`;
 </script>

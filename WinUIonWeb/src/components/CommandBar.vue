@@ -32,7 +32,7 @@
       </button>
     </div>
 
-    <WinMenuFlyout
+    <MenuFlyout
       v-if="overflowAnchorRect && overflowMenuItems.length"
       :Open="overflowIsOpen"
       :AnchorRect="overflowAnchorRect"
@@ -51,8 +51,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from './i18n/index';
-import WinAppBarSeparator from './WinAppBarSeparator.vue';
-import WinMenuFlyout from './WinMenuFlyout.vue';
+import AppBarSeparator from './AppBarSeparator.vue';
+import MenuFlyout from './MenuFlyout.vue';
 
 const { t } = useI18n();
 
@@ -179,10 +179,10 @@ const fluentSymbolGlyphs: Record<string, string> = {
   Help: '\uE897', More: '\uE712', OpenFile: '\uE8E5', Paste: '\uE77F', Pause: '\uE769',
   Play: '\uE768', Redo: '\uE7A6', Refresh: '\uE72C', Save: '\uE74E', SelectAll: '\uE8B3',
   Send: '\uE724', Setting: '\uE713', Share: '\uE72D', Sort: '\uE8CB', Stop: '\uE71A',
-  Undo: '\uE7A7'
+  Undo: '\uE7A7', Bold: '\uE8DD', Italic: '\uE8DB', Underline: '\uE8DC'
 };
 
-const isSeparatorCommand = (command: CommandBarCommand) => command.Component === WinAppBarSeparator;
+const isSeparatorCommand = (command: CommandBarCommand) => command.Component === AppBarSeparator;
 const getUICommand = (command: CommandBarCommand) => command.Props?.Command as CommandBarUICommand | undefined;
 const getCommandLabel = (command: CommandBarCommand) => {
   const label = command.Props?.Label;
@@ -504,7 +504,7 @@ defineExpose({ Open: open, Close: close, Toggle: toggle, IsOpen: effectiveIsOpen
 .commandbar-overflow-button::before {
   content: '';
   position: absolute;
-  inset: 6px 6px 6px 2px;
+  inset: 6px;
   border-radius: var(--ControlCornerRadius, 4px);
   background: var(--SubtleFillColorTransparentBrush, transparent);
   transition: background-color var(--faster-duration, 83ms) linear;
@@ -544,7 +544,7 @@ defineExpose({ Open: open, Close: close, Toggle: toggle, IsOpen: effectiveIsOpen
 .commandbar-ellipsis {
   position: absolute;
   top: 50%;
-  left: calc(50% - 2px);
+  left: 50%;
   z-index: 1;
   display: block;
   width: 20px;

@@ -1,5 +1,5 @@
 <template>
-  <WinScrollViewer
+  <ScrollViewer
     class="gallery-page-scroll"
     Width="100%"
     Height="100%"
@@ -7,23 +7,23 @@
     VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock
+        <TextBlock
           class="page-description"
           :Text="$t('text.scrollview-description')"
           TextWrapping="WrapWholeWords" />
       </div>
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.scrollview.content')"
           :theme="pageTheme"
           :vue="contentInsideScrollViewCode">
           <template #example>
-            <WinStackPanel Spacing="16">
-              <WinTextBlock
+            <StackPanel Spacing="16">
+              <TextBlock
                 :Text="$t('sample.scrollview.content-note')"
                 TextWrapping="Wrap" />
-              <WinScrollView
+              <ScrollView
                 ref="scrollView1Ref"
                 Width="400"
                 Height="266"
@@ -37,25 +37,25 @@
                 :VerticalScrollMode="VerticalScrollMode"
                 :HorizontalScrollBarVisibility="HorizontalScrollBarVisibility"
                 :VerticalScrollBarVisibility="VerticalScrollBarVisibility">
-                <WinImage
+                <Image
                   HorizontalAlignment="Center"
                   VerticalAlignment="Center"
                   v-bind="{ 'AutomationProperties.Name': $t('text.cliff') }"
                   :Source="cliffImage"
                   Stretch="Uniform" />
-              </WinScrollView>
-            </WinStackPanel>
+              </ScrollView>
+            </StackPanel>
           </template>
           <template #options>
-            <WinGrid
+            <Grid
               Width="100%"
               MinWidth="200"
               ColumnDefinitions="Auto,*"
               ColumnSpacing="12"
               RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
               RowSpacing="16">
-              <WinTextBlock VerticalAlignment="Center" :Text="$t('text.zoom-mode')" style="grid-column: 1; grid-row: 1;" />
-                <WinComboBox
+              <TextBlock VerticalAlignment="Center" :Text="$t('text.zoom-mode')" style="grid-column: 1; grid-row: 1;" />
+                <ComboBox
                   v-model:SelectedIndex="ZoomModeSelectedIndex"
                   Width="100%"
                 HorizontalAlignment="Stretch"
@@ -63,8 +63,8 @@
                 :ItemsSource="ZoomModeItems"
                 style="grid-column: 2; grid-row: 1;" />
 
-              <WinTextBlock VerticalAlignment="Center" :Text="$t('text.zoom-factor')" style="grid-column: 1; grid-row: 2;" />
-              <WinNumberBox
+              <TextBlock VerticalAlignment="Center" :Text="$t('text.zoom-factor')" style="grid-column: 1; grid-row: 2;" />
+              <NumberBox
                 v-model:Value="ZoomFactor"
                 Width="100%"
                 v-bind="{ 'AutomationProperties.Name': $t('text.zoom-factor-automation-name') }"
@@ -75,17 +75,17 @@
                 SpinButtonPlacementMode="Inline"
                 style="grid-column: 2; grid-row: 2;" />
 
-              <WinTextBlock HorizontalAlignment="Center" :Text="$t('text.scroll-mode')" style="grid-column: 1 / span 2; grid-row: 3;" />
-              <WinTextBlock VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 4;" />
-              <WinComboBox
+              <TextBlock HorizontalAlignment="Center" :Text="$t('text.scroll-mode')" style="grid-column: 1 / span 2; grid-row: 3;" />
+              <TextBlock VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 4;" />
+              <ComboBox
                 v-model:SelectedIndex="HorizontalScrollModeSelectedIndex"
                 Width="100%"
                 HorizontalAlignment="Stretch"
                 v-bind="{ 'AutomationProperties.Name': $t('text.horizontal-scroll-mode-automation-name') }"
                 :ItemsSource="ScrollModeItems"
                 style="grid-column: 2; grid-row: 4;" />
-              <WinTextBlock VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 5;" />
-              <WinComboBox
+              <TextBlock VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 5;" />
+              <ComboBox
                 v-model:SelectedIndex="VerticalScrollModeSelectedIndex"
                 Width="100%"
                 HorizontalAlignment="Stretch"
@@ -93,65 +93,65 @@
                 :ItemsSource="ScrollModeItems"
                 style="grid-column: 2; grid-row: 5;" />
 
-              <WinTextBlock HorizontalAlignment="Center" :Text="$t('text.scrollbar-visibility')" style="grid-column: 1 / span 2; grid-row: 6;" />
-              <WinTextBlock VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 7;" />
-              <WinComboBox
+              <TextBlock HorizontalAlignment="Center" :Text="$t('text.scrollbar-visibility')" style="grid-column: 1 / span 2; grid-row: 6;" />
+              <TextBlock VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 7;" />
+              <ComboBox
                 v-model:SelectedIndex="HorizontalScrollBarVisibilitySelectedIndex"
                 Width="100%"
                 HorizontalAlignment="Stretch"
                 v-bind="{ 'AutomationProperties.Name': $t('text.horizontal-scrollbar-visibility-automation-name') }"
                 :ItemsSource="ScrollBarVisibilityItems"
                 style="grid-column: 2; grid-row: 7;" />
-              <WinTextBlock VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 8;" />
-              <WinComboBox
+              <TextBlock VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 8;" />
+              <ComboBox
                 v-model:SelectedIndex="VerticalScrollBarVisibilitySelectedIndex"
                 Width="100%"
                 HorizontalAlignment="Stretch"
                 v-bind="{ 'AutomationProperties.Name': $t('text.vertical-scrollbar-visibility-automation-name') }"
                 :ItemsSource="ScrollBarVisibilityItems"
                 style="grid-column: 2; grid-row: 8;" />
-            </WinGrid>
+            </Grid>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.scrollview.constant-velocity')"
           :theme="pageTheme"
           :vue="constantVelocityCode">
           <template #example>
-            <WinStackPanel Spacing="16">
-              <WinTextBlock
+            <StackPanel Spacing="16">
+              <TextBlock
                 :Text="$t('sample.scrollview.velocity-note')"
                 TextWrapping="Wrap" />
-              <WinScrollView
+              <ScrollView
                 ref="scrollView2Ref"
                 Width="400"
                 Height="300"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 :IsTabStop="true">
-                <WinStackPanel>
-                  <WinImage
+                <StackPanel>
+                  <Image
                     v-for="image in velocityImages"
                     :key="image.name"
                     v-bind="{ 'AutomationProperties.Name': image.name }"
                     :Source="image.source"
                     Stretch="Uniform" />
-                </WinStackPanel>
-              </WinScrollView>
-            </WinStackPanel>
+                </StackPanel>
+              </ScrollView>
+            </StackPanel>
           </template>
           <template #options>
-            <WinGrid
+            <Grid
               Width="100%"
               MinWidth="200"
               ColumnDefinitions="Auto,*"
               ColumnSpacing="12"
               RowDefinitions="Auto"
               RowSpacing="16">
-              <WinTextBlock VerticalAlignment="Center" :Text="$t('text.vertical-velocity')" style="grid-column: 1; grid-row: 1;" />
-              <WinNumberBox
+              <TextBlock VerticalAlignment="Center" :Text="$t('text.vertical-velocity')" style="grid-column: 1; grid-row: 1;" />
+              <NumberBox
                 v-model:Value="VerticalVelocity"
                 Width="100%"
                 v-bind="{ 'AutomationProperties.Name': $t('text.vertical-velocity-automation-name') }"
@@ -162,56 +162,56 @@
                 SpinButtonPlacementMode="Inline"
                 style="grid-column: 2; grid-row: 1;"
                 @ValueChanged="onVerticalVelocityChanged" />
-            </WinGrid>
+            </Grid>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.scrollview.programmatic-animation')"
           :theme="pageTheme"
           :vue="programmaticScrollCode">
           <template #example>
-            <WinStackPanel Spacing="16">
-              <WinTextBlock
+            <StackPanel Spacing="16">
+              <TextBlock
                 :Text="$t('sample.scrollview.animation-note')"
                 TextWrapping="Wrap" />
-              <WinScrollView
+              <ScrollView
                 ref="scrollView3Ref"
                 Width="400"
                 Height="300"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 :IsTabStop="true">
-                <WinStackPanel>
-                  <WinImage
+                <StackPanel>
+                  <Image
                     v-for="image in animationImages"
                     :key="image.name"
                     v-bind="{ 'AutomationProperties.Name': image.name }"
                     :Source="image.source"
                     Stretch="Uniform" />
-                </WinStackPanel>
-              </WinScrollView>
-            </WinStackPanel>
+                </StackPanel>
+              </ScrollView>
+            </StackPanel>
           </template>
           <template #options>
-            <WinGrid
+            <Grid
               Width="100%"
               MinWidth="320"
               ColumnDefinitions="Auto,*"
               ColumnSpacing="12"
               RowDefinitions="Auto,Auto,Auto"
               RowSpacing="16">
-              <WinTextBlock VerticalAlignment="Center" :Text="$t('text.scroll-with-animation')" style="grid-column: 1; grid-row: 1;" />
-              <WinComboBox
+              <TextBlock VerticalAlignment="Center" :Text="$t('text.scroll-with-animation')" style="grid-column: 1; grid-row: 1;" />
+              <ComboBox
                 v-model:SelectedIndex="VerticalAnimationSelectedIndex"
                 Width="100%"
                 HorizontalAlignment="Stretch"
                 v-bind="{ 'AutomationProperties.Name': $t('text.vertical-animation-options-automation-name') }"
                 :ItemsSource="AnimationItems"
                 style="grid-column: 2; grid-row: 1;" />
-              <WinTextBlock VerticalAlignment="Center" :Text="$t('text.animation-duration-msec')" style="grid-column: 1; grid-row: 2;" />
-              <WinNumberBox
+              <TextBlock VerticalAlignment="Center" :Text="$t('text.animation-duration-msec')" style="grid-column: 1; grid-row: 2;" />
+              <NumberBox
                 v-model:Value="AnimationDuration"
                 Width="100%"
                 v-bind="{ 'AutomationProperties.Name': $t('text.animation-duration-automation-name') }"
@@ -221,33 +221,33 @@
                 :SmallChange="500"
                 SpinButtonPlacementMode="Inline"
                 style="grid-column: 2; grid-row: 2;" />
-              <WinButton
+              <Button
                 HorizontalAlignment="Stretch"
                 v-bind="{ 'AutomationProperties.Name': $t('text.scroll-with-animation-automation-name') }"
                 style="grid-column: 1 / span 2; grid-row: 3;"
                 @Click="scrollWithAnimation">
                 {{ $t('text.scroll-with-animation') }}
-              </WinButton>
-            </WinGrid>
+              </Button>
+            </Grid>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
-import WinButton from '../../components/WinButton.vue'
-import WinComboBox from '../../components/WinComboBox.vue'
-import WinControlExample from '../../components/WinControlExample.vue'
-import WinGrid from '../../components/WinGrid.vue'
-import WinImage from '../../components/WinImage.vue'
-import WinNumberBox from '../../components/WinNumberBox.vue'
-import WinScrollView from '../../components/WinScrollView.vue'
-import WinScrollViewer from '../../components/WinScrollViewer.vue'
-import WinStackPanel from '../../components/WinStackPanel.vue'
-import WinTextBlock from '../../components/WinTextBlock.vue'
+import Button from '../../components/Button.vue'
+import ComboBox from '../../components/ComboBox.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import Grid from '../../components/Grid.vue'
+import Image from '../../components/Image.vue'
+import NumberBox from '../../components/NumberBox.vue'
+import ScrollView from '../../components/ScrollView.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
 import { useI18n } from '../../components/i18n/index'
 import { createPageState } from '../../utils/pageState'
 
@@ -263,9 +263,9 @@ const velocityImages = velocityNames.map(name => ({ name, source: `${sampleMedia
 const animationNames = ['leaves', 'carousel', 'bicycles', 'pond', 'marina', 'beach', 'rampart', 'mountain']
 const animationImages = animationNames.map((name, index) => ({ name, source: `${sampleMedia}/LandscapeImage${index + 1}.jpg` }))
 
-const scrollView1Ref = ref<InstanceType<typeof WinScrollView>>()
-const scrollView2Ref = ref<InstanceType<typeof WinScrollView>>()
-const scrollView3Ref = ref<InstanceType<typeof WinScrollView>>()
+const scrollView1Ref = ref<InstanceType<typeof ScrollView>>()
+const scrollView2Ref = ref<InstanceType<typeof ScrollView>>()
+const scrollView3Ref = ref<InstanceType<typeof ScrollView>>()
 const ZoomModeValues = ['Enabled', 'Disabled'] as const
 const ScrollModeValues = ['Enabled', 'Disabled', 'Auto'] as const
 const ScrollBarVisibilityValues = ['Auto', 'Visible', 'Hidden'] as const
@@ -366,7 +366,7 @@ const scrollWithAnimation = () => {
   requestAnimationFrame(animate)
 }
 
-const contentInsideScrollViewCode = computed(() => `<WinScrollView
+const contentInsideScrollViewCode = computed(() => `<ScrollView
   Height="266"
   Width="400"
   ContentOrientation="None"
@@ -379,51 +379,51 @@ const contentInsideScrollViewCode = computed(() => `<WinScrollView
   HorizontalScrollBarVisibility="${HorizontalScrollBarVisibility.value}"
   VerticalScrollMode="${VerticalScrollMode.value}"
   VerticalScrollBarVisibility="${VerticalScrollBarVisibility.value}">
-  <WinImage
+  <Image
     Source="${cliffImage}"
     AutomationProperties.Name="cliff"
     Stretch="Uniform"
     HorizontalAlignment="Center"
     VerticalAlignment="Center" />
-</WinScrollView>`)
+</ScrollView>`)
 
-const constantVelocityCode = `<WinScrollView
+const constantVelocityCode = `<ScrollView
   ref="scrollView"
   Height="300"
   Width="400"
   :IsTabStop="true"
   VerticalAlignment="Top"
   HorizontalAlignment="Left">
-  <WinStackPanel>
-    <WinImage
+  <StackPanel>
+    <Image
       v-for="image in velocityImages"
       :key="image.name"
       :Source="image.source"
       :AutomationProperties.Name="image.name"
       Stretch="Uniform" />
-  </WinStackPanel>
-</WinScrollView>`
+  </StackPanel>
+</ScrollView>`
 
-const programmaticScrollCode = computed(() => `<WinScrollView
+const programmaticScrollCode = computed(() => `<ScrollView
   ref="scrollView"
   Height="300"
   Width="400"
   :IsTabStop="true"
   VerticalAlignment="Top"
   HorizontalAlignment="Left">
-  <WinStackPanel>
-    <WinImage
+  <StackPanel>
+    <Image
       v-for="image in animationImages"
       :key="image.name"
       :Source="image.source"
       :AutomationProperties.Name="image.name"
       Stretch="Uniform" />
-  </WinStackPanel>
-</WinScrollView>
+  </StackPanel>
+</ScrollView>
 
-<WinButton @Click="scrollWithAnimation">
+<Button @Click="scrollWithAnimation">
   Scroll with animation
-</WinButton>
+</Button>
 
 // Animation: ${VerticalAnimation.value}
 // Duration: ${AnimationDuration.value} ms`)

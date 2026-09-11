@@ -6,21 +6,21 @@
             ThemeShadow is a pre-configured shadow effect that can be applied to any XAML element to draw appropriate shadows based on x, y, z coordinates.
           </p>
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"
+            <Button class="header-action" @click="toggleTheme"
              >
               <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
              >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- Example 1: ThemeShadow applied to a Border -->
-            <WinControlExample
+            <ControlExample
               headerText="ThemeShadow applied to a Border"
               :theme="pageTheme"
               exampleHeight="320px"
@@ -40,7 +40,7 @@
                 </div>
               </template>
               <template #options>
-                <WinSlider
+                <Slider
                   v-model="zTranslation"
                   header="Z-translation"
                   :min="0"
@@ -49,20 +49,20 @@
                   style="width: 200px;"
                 />
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, inject } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinSlider from '../../components/WinSlider.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import Slider from '../../components/Slider.vue';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 import { createPageState } from '../../utils/pageState';
 // Theme management
 const currentPage = inject('currentPage');
@@ -105,7 +105,7 @@ const example1Template = `<div class="shadow-container">
   </div>
 </div>
 
-<WinSlider
+<Slider
   v-model="zTranslation"
   header="Z-translation"
   :min="0"

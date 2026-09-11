@@ -1,15 +1,15 @@
 <template>
-  <WinGrid v-if="Page === 'SampleSettingsPage'" class="sample-settings-page" :class="transitionClass">
-    <WinTextBlock
+  <Grid v-if="Page === 'SampleSettingsPage'" class="sample-settings-page" :class="transitionClass">
+    <TextBlock
       HorizontalAlignment="Center"
       VerticalAlignment="Center"
       FontSize="20"
       LineHeight="28"
       FontWeight="600"
       :Text="$t('sample.navigationview.settings-page')" />
-  </WinGrid>
+  </Grid>
 
-  <WinScrollViewer
+  <ScrollViewer
     ref="sampleScrollViewer"
     v-else
     class="sample-page-scroll"
@@ -18,122 +18,122 @@
     VerticalScrollBarVisibility="Auto"
     HorizontalScrollMode="Disabled"
     HorizontalScrollBarVisibility="Disabled">
-    <WinGrid v-if="Page === 'SamplePage1'" class="sample-page page-one">
-      <WinGrid class="tile page-one-accent" Background="var(--accent-base)" />
-      <WinGrid class="tile page-one-dark-top" Background="DarkGray" />
-      <WinGrid class="tile page-one-light-top" Background="LightGray" />
-      <WinGrid class="tile page-one-light-bottom" Background="LightGray" />
-      <WinGrid class="tile page-one-dark-bottom" Background="DarkGray" />
-      <WinGrid class="page-copy page-one-copy">
-        <WinTextBlock
+    <Grid v-if="Page === 'SamplePage1'" class="sample-page page-one">
+      <Grid class="tile page-one-accent" Background="var(--accent-base)" />
+      <Grid class="tile page-one-dark-top" Background="DarkGray" />
+      <Grid class="tile page-one-light-top" Background="LightGray" />
+      <Grid class="tile page-one-light-bottom" Background="LightGray" />
+      <Grid class="tile page-one-dark-bottom" Background="DarkGray" />
+      <Grid class="page-copy page-one-copy">
+        <TextBlock
           class="sample-body"
           :Text="$t('sample.navigationview.lorem-body')"
           TextWrapping="WrapWholeWords" />
-      </WinGrid>
-    </WinGrid>
+      </Grid>
+    </Grid>
 
-    <WinGrid v-else-if="Page === 'SamplePage2'" class="sample-page page-two">
-      <WinGrid class="page-two-accent" Background="var(--accent-base)" />
-      <WinStackPanel class="page-two-copy" Margin="12">
-        <WinTextBlock
+    <Grid v-else-if="Page === 'SamplePage2'" class="sample-page page-two">
+      <Grid class="page-two-accent" Background="var(--accent-base)" />
+      <StackPanel class="page-two-copy" Margin="12">
+        <TextBlock
           Margin="0,0,0,12"
           FontSize="20"
           LineHeight="28"
           FontWeight="600"
           :Text="$t('sample.navigationview.lorem-title')"
           TextWrapping="WrapWholeWords" />
-        <WinTextBlock
+        <TextBlock
           :Text="$t('sample.navigationview.lorem-body')"
           TextWrapping="WrapWholeWords" />
-      </WinStackPanel>
-    </WinGrid>
+      </StackPanel>
+    </Grid>
 
-    <WinGrid v-else-if="Page === 'SamplePage3'" class="sample-page page-three">
-      <WinGrid class="tile page-three-feature" Background="LightGray" />
-      <WinGrid class="tile page-three-dark-top" Background="DarkGray" />
-      <WinGrid class="tile page-three-gray-bottom" Background="Gray" />
-      <WinGrid class="tile page-three-light-top" Background="LightGray" />
-      <WinGrid class="tile page-three-dark-bottom" Background="DarkGray" />
-      <WinGrid class="page-copy page-three-copy">
-        <WinTextBlock
+    <Grid v-else-if="Page === 'SamplePage3'" class="sample-page page-three">
+      <Grid class="tile page-three-feature" Background="LightGray" />
+      <Grid class="tile page-three-dark-top" Background="DarkGray" />
+      <Grid class="tile page-three-gray-bottom" Background="Gray" />
+      <Grid class="tile page-three-light-top" Background="LightGray" />
+      <Grid class="tile page-three-dark-bottom" Background="DarkGray" />
+      <Grid class="page-copy page-three-copy">
+        <TextBlock
           class="sample-body"
           :Text="$t('sample.navigationview.lorem-body')"
           TextWrapping="WrapWholeWords" />
-      </WinGrid>
-    </WinGrid>
+      </Grid>
+    </Grid>
 
-    <WinStackPanel v-else-if="Page === 'SamplePage4'" class="sample-page page-four">
-      <WinGrid class="page-four-row page-four-first-row">
-        <WinGrid class="tile page-four-feature" Background="DarkSalmon" />
-        <WinGrid class="tile page-four-dark" Background="DarkRed" />
-        <WinGrid class="tile page-four-light" Background="LightCoral" />
-      </WinGrid>
-      <WinGrid class="page-four-row page-four-second-row">
-        <WinGrid class="tile page-four-second-light" Background="LightCoral" />
-        <WinGrid class="tile page-four-second-dark" Background="DarkRed" />
-        <WinGrid class="tile page-four-second-red" Background="IndianRed" />
-        <WinGrid class="page-copy page-four-copy">
-          <WinTextBlock
+    <StackPanel v-else-if="Page === 'SamplePage4'" class="sample-page page-four">
+      <Grid class="page-four-row page-four-first-row">
+        <Grid class="tile page-four-feature" Background="DarkSalmon" />
+        <Grid class="tile page-four-dark" Background="DarkRed" />
+        <Grid class="tile page-four-light" Background="LightCoral" />
+      </Grid>
+      <Grid class="page-four-row page-four-second-row">
+        <Grid class="tile page-four-second-light" Background="LightCoral" />
+        <Grid class="tile page-four-second-dark" Background="DarkRed" />
+        <Grid class="tile page-four-second-red" Background="IndianRed" />
+        <Grid class="page-copy page-four-copy">
+          <TextBlock
             class="sample-body"
             :Text="$t('sample.navigationview.lorem-body')"
             TextWrapping="WrapWholeWords" />
-        </WinGrid>
-      </WinGrid>
-    </WinStackPanel>
+        </Grid>
+      </Grid>
+    </StackPanel>
 
-    <WinGrid v-else-if="Page === 'SamplePage5'" class="sample-page page-five">
-      <WinGrid class="tile" Background="Khaki" />
-      <WinGrid class="tile" Background="DarkKhaki" />
-      <WinGrid Width="150" Height="150" class="sample-ellipse page-five-large-circle" Background="DarkSeaGreen" />
-      <WinGrid Width="75" Height="75" class="sample-ellipse page-five-small-circle" Background="MediumSeaGreen" />
-      <WinGrid class="tile page-five-green" Background="DarkOliveGreen" />
-      <WinGrid class="page-copy page-five-copy">
-        <WinTextBlock
+    <Grid v-else-if="Page === 'SamplePage5'" class="sample-page page-five">
+      <Grid class="tile" Background="Khaki" />
+      <Grid class="tile" Background="DarkKhaki" />
+      <Grid Width="150" Height="150" class="sample-ellipse page-five-large-circle" Background="DarkSeaGreen" />
+      <Grid Width="75" Height="75" class="sample-ellipse page-five-small-circle" Background="MediumSeaGreen" />
+      <Grid class="tile page-five-green" Background="DarkOliveGreen" />
+      <Grid class="page-copy page-five-copy">
+        <TextBlock
           class="sample-body"
           :Text="$t('sample.navigationview.lorem-body')"
           TextWrapping="WrapWholeWords" />
-      </WinGrid>
-    </WinGrid>
+      </Grid>
+    </Grid>
 
-    <WinGrid v-else-if="Page === 'SamplePage6'" class="sample-page page-six">
-      <WinGrid Width="20" Height="20" class="sample-ellipse" Background="MediumTurquoise" />
-      <WinGrid Width="50" Height="50" class="sample-ellipse" Background="SteelBlue" />
-      <WinGrid class="tile" Background="SkyBlue" />
-      <WinGrid Width="50" Height="50" class="sample-ellipse" Background="PowderBlue" />
-      <WinGrid Width="20" Height="20" class="sample-ellipse" Background="MediumTurquoise" />
-      <WinGrid class="tile" Background="SteelBlue" />
-      <WinGrid class="page-copy page-six-copy">
-        <WinTextBlock
+    <Grid v-else-if="Page === 'SamplePage6'" class="sample-page page-six">
+      <Grid Width="20" Height="20" class="sample-ellipse" Background="MediumTurquoise" />
+      <Grid Width="50" Height="50" class="sample-ellipse" Background="SteelBlue" />
+      <Grid class="tile" Background="SkyBlue" />
+      <Grid Width="50" Height="50" class="sample-ellipse" Background="PowderBlue" />
+      <Grid Width="20" Height="20" class="sample-ellipse" Background="MediumTurquoise" />
+      <Grid class="tile" Background="SteelBlue" />
+      <Grid class="page-copy page-six-copy">
+        <TextBlock
           class="sample-body"
           :Text="$t('sample.navigationview.lorem-body')"
           TextWrapping="WrapWholeWords" />
-      </WinGrid>
-    </WinGrid>
+      </Grid>
+    </Grid>
 
-    <WinGrid v-else-if="Page === 'SamplePage7'" class="sample-page page-seven">
-      <WinGrid class="page-seven-accent" Background="PaleVioletRed" />
-      <WinStackPanel class="page-seven-copy" Margin="12">
-        <WinTextBlock
+    <Grid v-else-if="Page === 'SamplePage7'" class="sample-page page-seven">
+      <Grid class="page-seven-accent" Background="PaleVioletRed" />
+      <StackPanel class="page-seven-copy" Margin="12">
+        <TextBlock
           Margin="0,0,0,12"
           FontSize="20"
           LineHeight="28"
           FontWeight="600"
           :Text="$t('sample.navigationview.lorem-title')"
           TextWrapping="WrapWholeWords" />
-        <WinTextBlock
+        <TextBlock
           :Text="$t('sample.navigationview.lorem-body')"
           TextWrapping="WrapWholeWords" />
-      </WinStackPanel>
-    </WinGrid>
-  </WinScrollViewer>
+      </StackPanel>
+    </Grid>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { nextTick, ref, watch } from 'vue';
-import WinGrid from '../../components/WinGrid.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinStackPanel from '../../components/WinStackPanel.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
+import Grid from '../../components/Grid.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
 import {
   createEntranceNavigationTransitionInfo,
   getNavigationTransitionInfoClassName

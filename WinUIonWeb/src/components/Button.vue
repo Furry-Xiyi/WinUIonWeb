@@ -1,5 +1,6 @@
 <template>
   <button
+    ref="buttonRef"
     v-bind="buttonAttrs"
     class="win-btn"
     :class="[
@@ -13,11 +14,27 @@
     :style="buttonStyle"
     :disabled="isDisabled"
     @click="onClick">
-    <slot>{{ Content }}</slot>
+    <ContentOutlet v-if="propertyNodes.content.length" />
+    <slot v-else>{{ resolvedContent }}</slot>
   </button>
+  <FlyoutOutlet v-if="propertyNodes.flyout.length" />
 </template>
-<script setup>
-import { computed, useAttrs } from 'vue';
+<script lang="ts">
+import { defineComponent, h } from 'vue'
+
+export const ButtonFlyout = defineComponent({
+  name: 'Button.Flyout',
+  __buttonProperty: 'flyout',
+  setup(_, { slots }) {
+    return () => h('span', { class: 'button-flyout-property' }, slots.default?.())
+  }
+})
+
+export default { Flyout: ButtonFlyout }
+</script>
+<script setup lang="ts">
+import { computed, defineComponent, Fragment, getCurrentInstance, h, provide, ref, useAttrs, useSlots } from 'vue';
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
 
 defineOptions({
   inheritAttrs: false
@@ -26,7 +43,7 @@ defineOptions({
 const props = defineProps({
   Style: { type: String, default: '' },
   Content: { type: [String, Number], default: '' },
-  IsEnabled: { type: Boolean, default: true },
+  IsEnabled: { type: [Boolean, String], default: true },
   Background: { type: String, default: '' },
   BackgroundSizing: { type: String, default: '' },
   Foreground: { type: String, default: '' },
@@ -55,13 +72,53 @@ const props = defineProps({
 const emit = defineEmits(['Click']);
 
 const attrs = useAttrs();
+const instance = getCurrentInstance();
+const slots = useSlots();
+const buttonRef = ref(null);
+provide('buttonFlyoutAnchor', buttonRef);
+
+const propertyNodes = computed(() => {
+  const content = [];
+  const flyout = [];
+  for (const node of slots.default?.() ?? []) {
+    const type = node?.type;
+    const property = type && typeof type === 'object'
+      ? type.__buttonProperty
+      : undefined;
+    if (property === 'flyout') {
+      const slot = node.children && typeof node.children === 'object'
+        ? node.children.default
+        : undefined;
+      if (slot) flyout.push(...slot());
+    } else {
+      content.push(node);
+    }
+  }
+  return { content, flyout };
+});
+
+const ContentOutlet = defineComponent({
+  name: 'ButtonContentOutlet',
+  setup() {
+    return () => h(Fragment, propertyNodes.value.content);
+  }
+});
+
+const FlyoutOutlet = defineComponent({
+  name: 'ButtonFlyoutOutlet',
+  setup() {
+    return () => h(Fragment, propertyNodes.value.flyout);
+  }
+});
 
 const buttonAttrs = computed(() => {
-  const { class: _class, style: _style, disabled: _disabled, ...rest } = attrs;
+  const { class: _class, style: _style, disabled: _disabled, Click: _click, ...rest } = attrs;
   return rest;
 });
 
-const isDisabled = computed(() => props.IsEnabled === false);
+const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance));
+const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
+const isDisabled = computed(() => resolvedIsEnabled.value === false);
 
 const contentAlignment = (value) => ({
   Left: 'flex-start',
@@ -145,6 +202,7 @@ const buttonStyle = computed(() => {
 const onClick = (event) => {
   if (isDisabled.value) return;
   emit('Click', event);
+  resolveXamlHandler(attrs.Click, instance)?.(event);
 };
 </script>
 <style>

@@ -5,6 +5,7 @@ export default {
   "app.author": "惜忆想睡觉",
   "search.placeholder": "搜索控件和示例...",
   "search.no-results": "没有匹配搜索内容的结果。",
+  "text.submit-query": "提交搜索",
   "text.no-results-found": "未找到结果",
   "gallery.page-header.api-details": "API 详细信息",
   "gallery.page-header.api-tooltip": "API 命名空间和继承关系",
@@ -453,6 +454,8 @@ export default {
   ,"sample.combobox.inline": "包含内联项目并设置宽度的组合框。"
   ,"sample.combobox.itemssource": "设置了 ItemsSource 的组合框。"
   ,"sample.combobox.pick-a-color": "选择颜色"
+  ,"sample.combobox.invalid-font-size": "字号必须是 8 到 100 之间的数字。"
+  ,"sample.combobox.close": "关闭"
   ,"sample.disable-hyperlink-button": "禁用超链接按钮"
   ,"sample.disable-repeatbutton": "禁用重复按钮"
   ,"sample.disable-togglebutton": "禁用切换按钮"
@@ -554,6 +557,8 @@ export default {
   ,"sample.sticky-headers": "粘性标题"
   ,"sample.image": "图像"
   ,"sample.rating.caption": "312 个评分"
+  ,"sample.rating.is-clear-enabled": "启用清除评分"
+  ,"sample.rating.is-read-only": "只读"
   ,"sample.rating.your-rating": "你的评分"
   ,"sample.rating.clear-note": "向左轻扫或再次点击可清除评分。"
   ,"sample.rating.placeholder": "RatingControl 的 PlaceholderValue"
@@ -564,6 +569,10 @@ export default {
   ,"sample.select-all": "全选"
   ,"sample.select-an-option": "选择一个选项。"
   ,"sample.slider.control-header": "控件标题"
+  ,"sample.slider.minimum": "最小值："
+  ,"sample.slider.maximum": "最大值："
+  ,"sample.slider.step-frequency": "步进频率："
+  ,"sample.slider.small-change": "小步长："
   ,"sample.slider.range": "指定范围和步进的滑块。"
   ,"sample.slider.snaps-to": "吸附到："
   ,"sample.slider.ticks": "带刻度标记的滑块。"
@@ -573,8 +582,11 @@ export default {
   ,"sample.ticks": "刻度"
   ,"sample.toggle-work": "切换工作"
   ,"sample.splitbutton.text": "包含文本的拆分按钮"
+  ,"sample.splitbutton.rich-text": "这是拆分按钮页中的富文本示例。你可以从菜单中选择颜色，并将其应用到这段文字。"
   ,"sample.do-work": "开始工作"
   ,"sample.togglebutton.simple": "包含文本内容的简单切换按钮。"
+  ,"sample.togglebutton.on": "开"
+  ,"sample.togglebutton.off": "关"
   ,"sample.toggleswitch.custom": "带自定义标题和内容的切换开关。"
   ,"sample.togglesplitbutton.bullet-list": "使用切换拆分按钮控制富文本编辑框中的项目符号列表功能"
   ,"sample.type-something-here": "在此处键入内容"
@@ -611,6 +623,10 @@ export default {
   ,"sample.richeditbox.save-file": "保存文件"
   ,"sample.richeditbox.bold": "加粗"
   ,"sample.richeditbox.italic": "斜体"
+  ,"sample.richeditbox.underline": "下划线"
+  ,"sample.richeditbox.bullets": "项目符号"
+  ,"sample.richeditbox.numbering": "编号"
+  ,"sample.richeditbox.clear-formatting": "清除格式"
   ,"sample.richeditbox.font-color": "字体颜色"
   ,"sample.richeditbox.custom-editor": "自定义编辑器"
   ,"sample.richeditbox.share-command": "共享"
@@ -746,6 +762,7 @@ export default {
   ,"sample.menubar.keyboard": "带键盘快捷键的菜单栏"
   ,"sample.menubar.submenus": "带子菜单、分隔线和单选菜单项的菜单栏"
   ,"sample.menubar.undo": "撤销"
+  ,"sample.menubar.redo": "重做"
   ,"sample.menubar.cut": "剪切"
   ,"sample.menubar.paste": "粘贴"
   ,"sample.menubar.plain-text": "纯文本文档"
@@ -915,7 +932,7 @@ export default {
   ,"text.viewbox": "Viewbox"
   ,"text.scrollviewer": "滚动器"
   ,"text.scrollview": "滚动"
-  ,"text.parallaxview": "ParallaxView"
+  ,"text.parallaxview": "视差视图"
   ,"text.canvas-description": "定义一个区域，你可以在其中使用相对于 Canvas 区域的坐标显式定位子元素。"
   ,"text.grid-description": "Grid 是一个布局面板，支持按行和列排列子元素。"
   ,"text.stackpanel-description": "StackPanel 控件是一个布局面板，可将子元素排列成水平或垂直方向的一条线。"
@@ -1091,4 +1108,10 @@ export default {
      ,"sample.progressring.background-color": "背景颜色"
      ,"sample.progressring.pick-color": "选择颜色"
      ,"sample.progressring.progress": "进度"
+     ,"sample.colorpicker.more-button-visible": "显示更多按钮"
+     ,"sample.colorpicker.color-slider-visible": "显示颜色滑块"
+     ,"sample.colorpicker.color-channel-text-input-visible": "显示颜色通道文本输入框"
+     ,"sample.colorpicker.hex-input-visible": "显示十六进制输入框"
+     ,"sample.colorpicker.alpha-slider-visible": "显示 Alpha 滑块"
+     ,"sample.colorpicker.alpha-text-input-visible": "显示 Alpha 文本输入框"
   };

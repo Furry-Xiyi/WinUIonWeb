@@ -1,5 +1,5 @@
 <template>
-  <WinToolTip
+  <ToolTip
     :IsOpen="isOpen"
     :Content="content"
     :Placement="placement"
@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
-import WinToolTip from './WinToolTip.vue';
+import ToolTip from './ToolTip.vue';
 
 const TOOL_TIP_ATTRIBUTE = 'tooltipservice.tooltip';
 const PLACEMENT_ATTRIBUTE = 'tooltipservice.placement';

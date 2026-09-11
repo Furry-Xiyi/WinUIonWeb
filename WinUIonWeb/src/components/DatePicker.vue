@@ -1,11 +1,11 @@
 <template>
   <div class="win-date-picker" ref="containerRef">
-    <WinTextBlock v-if="Header" class="picker-header" :Text="Header" />
-    <WinButton class="picker-btn" :class="{ 'has-no-date': !hasSelectedDate }" Padding="0" MinHeight="32" :IsEnabled="IsEnabled" @Click="toggleOpen">
+    <TextBlock v-if="Header" class="picker-header" :Text="Header" />
+    <Button class="picker-btn" :class="{ 'has-no-date': !hasSelectedDate }" Padding="0" MinHeight="32" :IsEnabled="IsEnabled" @Click="toggleOpen">
       <div v-if="MonthVisible" class="picker-column-text picker-month-text">{{ monthText }}</div>
       <div v-if="DayVisible" class="picker-column-text picker-day-text">{{ dayText }}</div>
       <div v-if="YearVisible" class="picker-column-text picker-year-text">{{ yearText }}</div>
-    </WinButton>
+    </Button>
 
     <Teleport to="body">
       <div v-if="showFlyout" class="picker-overlay" @click="close(false)"></div>
@@ -17,7 +17,7 @@
         :style="flyoutStyle"
         @animationend="onFlyoutAnimEnd">
         <div class="picker-columns">
-          <WinPickerColumn
+          <PickerColumn
             ref="monthColRef"
             v-if="MonthVisible"
             class="picker-month"
@@ -29,7 +29,7 @@
 
           <div v-if="MonthVisible && DayVisible" class="picker-col-divider"></div>
 
-          <WinPickerColumn
+          <PickerColumn
             ref="dayColRef"
             v-if="DayVisible"
             class="picker-day"
@@ -41,7 +41,7 @@
 
           <template v-if="YearVisible">
             <div v-if="MonthVisible || DayVisible" class="picker-col-divider"></div>
-            <WinPickerColumn
+            <PickerColumn
               ref="yearColRef"
               class="picker-year"
               :items="yearItems"
@@ -52,8 +52,8 @@
           </template>
         </div>
         <div class="picker-actions">
-          <WinButton Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.accept')" v-bind="{ 'tooltipservice.tooltip': t('text.accept') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></WinButton>
-          <WinButton Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.cancel')" v-bind="{ 'tooltipservice.tooltip': t('text.cancel') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(false)"><span class="icon" aria-hidden="true">&#xE711;</span></WinButton>
+          <Button Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.accept')" v-bind="{ 'tooltipservice.tooltip': t('text.accept') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(true)"><span class="icon" aria-hidden="true">&#xE8FB;</span></Button>
+          <Button Style="SubtleButtonStyle" class="picker-action-btn" :aria-label="t('text.cancel')" v-bind="{ 'tooltipservice.tooltip': t('text.cancel') }" Padding="0" Margin="4" MinWidth="0" MinHeight="0" FontSize="16" @Click="close(false)"><span class="icon" aria-hidden="true">&#xE711;</span></Button>
         </div>
       </div>
     </Teleport>
@@ -62,9 +62,9 @@
 
 <script setup>
 import { ref, computed, nextTick, watch } from 'vue';
-import WinButton from './WinButton.vue';
-import WinPickerColumn from './WinPickerColumn.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import Button from './Button.vue';
+import PickerColumn from './PickerColumn.vue';
+import TextBlock from './TextBlock.vue';
 import { useI18n } from './i18n/index';
 import { useFlyoutAnimation } from './useFlyoutAnimation';
 

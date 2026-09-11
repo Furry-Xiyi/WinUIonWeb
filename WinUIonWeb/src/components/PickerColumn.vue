@@ -1,6 +1,6 @@
 <template>
   <div ref="rootEl" class="picker-col-root" @mouseenter="hovered = true" @mouseleave="hovered = false">
-    <WinButton
+    <Button
       v-show="hovered && canScrollUp"
       Style="SubtleButtonStyle"
       class="picker-arrow picker-arrow-up"
@@ -15,7 +15,7 @@
       @pointerleave="stopRepeating"
       @Click="stepBy(-1)">
       <span class="icon" aria-hidden="true">&#xEDDB;</span>
-    </WinButton>
+    </Button>
 
     <div
       ref="scrollEl"
@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <WinButton
+    <Button
       v-show="hovered && canScrollDown"
       Style="SubtleButtonStyle"
       class="picker-arrow picker-arrow-down"
@@ -63,13 +63,13 @@
       @pointerleave="stopRepeating"
       @Click="stepBy(1)">
       <span class="icon" aria-hidden="true">&#xEDDC;</span>
-    </WinButton>
+    </Button>
   </div>
 </template>
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import WinButton from './WinButton.vue';
+import Button from './Button.vue';
 
 const props = defineProps({
   items: { type: Array, default: () => [] },

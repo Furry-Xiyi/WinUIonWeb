@@ -9,8 +9,8 @@
       'candidate-window-bottom-edge': DesiredCandidateWindowAlignment === 'BottomEdge'
     }"
     :style="rootStyle">
-    <div v-if="Header || $slots.header" class="win-textbox-header">
-      <slot name="header">{{ Header }}</slot>
+    <div v-if="resolvedHeader || $slots.header" class="win-textbox-header">
+      <slot name="header">{{ resolvedHeader }}</slot>
     </div>
 
     <div
@@ -104,11 +104,11 @@
       </div>
     </div>
 
-    <div v-if="Description || $slots.description" class="win-textbox-description">
-      <slot name="description">{{ Description }}</slot>
+    <div v-if="resolvedDescription || $slots.description" class="win-textbox-description">
+      <slot name="description">{{ resolvedDescription }}</slot>
     </div>
 
-    <WinMenuFlyout
+    <MenuFlyout
       :Open="contextMenuOpen"
       :AnchorRect="contextMenuAnchor"
       :Items="contextMenuItems"
@@ -120,12 +120,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
-import WinMenuFlyout from './WinMenuFlyout.vue';
+import MenuFlyout from './MenuFlyout.vue';
 import { useI18n } from './i18n/index';
+import { resolveXamlValue } from './xamlRuntime';
 
 const { t } = useI18n();
+const instance = getCurrentInstance();
 
 type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
 type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
@@ -199,6 +201,8 @@ const props = withDefaults(defineProps<{
   MinHeight: '',
   MaxHeight: ''
 });
+const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
+const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
 
 const emit = defineEmits<{
   'update:Text': [value: string];
@@ -793,15 +797,15 @@ defineExpose({
   width: 100%;
 }
 
-:global(html.theme-dark) .win-textbox,
-:global(.example-theme-wrapper.theme-dark) .win-textbox,
-:global(.win-theme-scope.theme-dark) .win-textbox {
+:global(html.theme-dark .win-textbox),
+:global(.example-theme-wrapper.theme-dark .win-textbox),
+:global(.win-theme-scope.theme-dark .win-textbox) {
   --textbox-border-focused: var(--SystemAccentColorLight2, var(--AccentFillColorDefaultBrush, var(--accent-base)));
 }
 
-:global(html.theme-light) .win-textbox,
-:global(.example-theme-wrapper.theme-light) .win-textbox,
-:global(.win-theme-scope.theme-light) .win-textbox {
+:global(html.theme-light .win-textbox),
+:global(.example-theme-wrapper.theme-light .win-textbox),
+:global(.win-theme-scope.theme-light .win-textbox) {
   --textbox-border-focused: var(--SystemAccentColorDark1, var(--AccentFillColorDefaultBrush, var(--accent-base)));
 }
 

@@ -15,7 +15,7 @@
           :is="EffectiveTitleTemplate"
           v-if="EffectiveTitleTemplate"
           :Title="EffectiveTitle" />
-        <WinTextBlock
+        <TextBlock
           v-else
           class="win-pivot-title"
           :Text="EffectiveTitle"
@@ -37,7 +37,7 @@
               :is="LeftHeaderTemplate"
               v-if="LeftHeaderTemplate"
               :Content="LeftHeader" />
-            <WinTextBlock
+            <TextBlock
               v-else
               :Text="LeftHeader"
               TextWrapping="NoWrap" />
@@ -45,7 +45,7 @@
         </div>
 
         <div class="win-pivot-header-clipper">
-          <WinScrollViewer
+          <ScrollViewer
             ref="headerScrollerRef"
             class="win-pivot-header-scroll-viewer"
             HorizontalScrollMode="Auto"
@@ -59,7 +59,7 @@
               ref="headerPanelRef"
               class="win-pivot-header-panel"
               role="tablist">
-              <WinButton
+              <Button
                 v-for="(Item, Index) in Items"
                 :key="GetItemKey(Item, Index)"
                 :ref="(element) => SetHeaderRef(Index, element)"
@@ -79,7 +79,7 @@
                     v-if="EffectiveHeaderTemplate"
                     :Item="Item.Source"
                     :Index="Index" />
-                  <WinTextBlock
+                  <TextBlock
                     v-else
                     class="win-pivot-header-content"
                     :Text="GetHeaderText(Item)"
@@ -92,39 +92,39 @@
                 <div
                   class="win-pivot-selected-pipe"
                   aria-hidden="true"></div>
-              </WinButton>
+              </Button>
             </div>
-          </WinScrollViewer>
+          </ScrollViewer>
 
-          <WinButton
+          <Button
             v-show="ShowPreviousButton"
             class="win-pivot-nav-button win-pivot-previous-button"
             :IsEnabled="EffectiveIsEnabled && CanScrollPrevious"
             :tabindex="-1"
             :aria-hidden="true"
             @Click="ScrollHeaders(-1)">
-            <WinTextBlock
+            <TextBlock
               class="win-pivot-nav-glyph"
               Text="&#xE76B;"
               FontFamily="var(--SymbolThemeFontFamily, 'Segoe Fluent Icons')"
               FontSize="12"
               :IsTextScaleFactorEnabled="false" />
-          </WinButton>
+          </Button>
 
-          <WinButton
+          <Button
             v-show="ShowNextButton"
             class="win-pivot-nav-button win-pivot-next-button"
             :IsEnabled="EffectiveIsEnabled && CanScrollNext"
             :tabindex="-1"
             :aria-hidden="true"
             @Click="ScrollHeaders(1)">
-            <WinTextBlock
+            <TextBlock
               class="win-pivot-nav-glyph"
               Text="&#xE76C;"
               FontFamily="var(--SymbolThemeFontFamily, 'Segoe Fluent Icons')"
               FontSize="12"
               :IsTextScaleFactorEnabled="false" />
-          </WinButton>
+          </Button>
         </div>
 
         <div
@@ -135,7 +135,7 @@
               :is="RightHeaderTemplate"
               v-if="RightHeaderTemplate"
               :Content="RightHeader" />
-            <WinTextBlock
+            <TextBlock
               v-else
               :Text="RightHeader"
               TextWrapping="NoWrap" />
@@ -162,9 +162,9 @@
 
 <script setup>
 import { Comment, Fragment, Text, computed, defineComponent, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useSlots, watch } from 'vue';
-import WinButton from './WinButton.vue';
-import WinScrollViewer from './WinScrollViewer.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import Button from './Button.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import TextBlock from './TextBlock.vue';
 
 defineOptions({
   inheritAttrs: false
@@ -224,7 +224,7 @@ let nextStructureKeyId = 0;
 const structureKeyIds = new Map();
 
 const RenderVNode = defineComponent({
-  name: 'WinPivotRenderVNode',
+  name: 'PivotRenderVNode',
   props: {
     vnode: { type: Object, required: true }
   },
@@ -305,7 +305,7 @@ const GetProp = (sourceProps, name, defaultValue = undefined) => {
 };
 
 const Items = computed(() => NormalizeChildren(slots.default?.() ?? [])
-  .filter((vnode) => GetVNodeTypeName(vnode) === 'WinPivotItem' || GetProp(vnode.props, 'Header') !== undefined)
+  .filter((vnode) => GetVNodeTypeName(vnode) === 'PivotItem' || GetProp(vnode.props, 'Header') !== undefined)
   .map((vnode, Index) => {
     const Header = GetProp(vnode.props, 'Header', '');
     const IsEnabled = GetProp(vnode.props, 'IsEnabled', true);

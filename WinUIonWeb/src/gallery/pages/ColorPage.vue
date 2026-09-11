@@ -3,16 +3,16 @@
     <div class="page-header-section page-heading">
           <h1 class="page-header">Color</h1>
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme">
+            <Button class="header-action" @click="toggleTheme">
               <span class="icon">&#xE793;</span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <div class="page-intro">
               <p class="intro-text">
@@ -23,7 +23,7 @@
               </div>
             </div>
 
-            <WinSelectorBar
+            <SelectorBar
               :Items="selectorItems"
               :SelectedItem="selectorItems[selectedSection]"
               @SelectionChanged="onSectionChanged"
@@ -33,15 +33,15 @@
               <component :is="currentSectionComponent" />
             </div>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { computed, inject, ref, shallowRef } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinSelectorBar from '../../components/WinSelectorBar.vue';
+import Button from '../../components/Button.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import SelectorBar from '../../components/SelectorBar.vue';
 import TextColorSection from '../../components/ColorSections/TextColorSection.vue';
 import FillColorSection from '../../components/ColorSections/FillColorSection.vue';
 import StrokeColorSection from '../../components/ColorSections/StrokeColorSection.vue';
@@ -50,7 +50,7 @@ import SignalColorSection from '../../components/ColorSections/SignalColorSectio
 import HighContrastColorSection from '../../components/ColorSections/HighContrastColorSection.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'color');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);

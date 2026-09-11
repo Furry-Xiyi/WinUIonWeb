@@ -1,52 +1,52 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.relativepanel')" />
-          <WinTextBlock class="page-description" :Text="$t('text.relativepanel-description')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.relativepanel')" />
+          <TextBlock class="page-description" :Text="$t('text.relativepanel-description')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.relativepanel.control')" :theme="pageTheme" :vue="relativePanelCode">
-              <template #example>
-                <WinRelativePanel Width="300" Height="108">
+        <ControlExample class="basic-input-example-theme" SampleDefinition="RelativePanel\RelativepanelControl.txt" :HeaderText="$t('sample.relativepanel.control')" :Theme="pageTheme" :Vue="relativePanelCode">
+              <ControlExample.Example>
+                <RelativePanel Width="300" Height="108">
                   <div class="layout-rectangle red" style="left: 0; top: 0;" />
                   <div class="layout-rectangle blue" style="left: 58px; top: 0;" />
                   <div class="layout-rectangle green" style="right: 0; top: 0;" />
                   <div class="layout-rectangle yellow" style="right: 0; top: 58px;" />
-                </WinRelativePanel>
-              </template>
-            </WinControlExample>
+                </RelativePanel>
+              </ControlExample.Example>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinRelativePanel from '../../components/WinRelativePanel.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import RelativePanel from '../../components/RelativePanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'relativepanel');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const relativePanelCode = `<WinRelativePanel Width="300">
+const relativePanelCode = `<RelativePanel Width="300">
   <Rectangle x:Name="Rectangle1" Fill="Red" Height="50" Width="50" />
   <Rectangle x:Name="Rectangle2" Fill="Blue" Height="50" Width="50" RelativePanel.RightOf="Rectangle1" Margin="8,0,0,0" />
   <Rectangle x:Name="Rectangle3" Fill="Green" Height="50" Width="50" RelativePanel.AlignRightWithPanel="True" />
   <Rectangle x:Name="Rectangle4" Fill="Yellow" Height="50" Width="50" RelativePanel.Below="Rectangle3" RelativePanel.AlignHorizontalCenterWith="Rectangle3" Margin="0,8,0,0" />
-</WinRelativePanel>`;
+</RelativePanel>`;
 </script>
 
 <style scoped>

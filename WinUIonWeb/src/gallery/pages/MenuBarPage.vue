@@ -1,60 +1,60 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.menubar')" />
-          <WinTextBlock class="page-description" :Text="$t('text.the-menubar-simplifies-the-creation-of-basic-men')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.menubar')" />
+          <TextBlock class="page-description" :Text="$t('text.the-menubar-simplifies-the-creation-of-basic-men')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-menubar')" :theme="pageTheme" :vue="simpleCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-menubar')" :theme="pageTheme" :vue="simpleCode">
               <template #example>
                 <div class="sample-stack">
-                  <WinTextBlock :Text="simpleOutput" TextWrapping="WrapWholeWords" />
-                  <WinMenuBar :Items="simpleItems" :Theme="pageTheme" @ItemClick="simpleOutput = itemClickText($event.Item)" />
+                  <TextBlock :Text="simpleOutput" TextWrapping="WrapWholeWords" />
+                  <MenuBar :Items="simpleItems" :Theme="pageTheme" @ItemClick="simpleOutput = itemClickText($event.Item)" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.menubar.keyboard')" :theme="pageTheme" :vue="acceleratorCode">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menubar.keyboard')" :theme="pageTheme" :vue="acceleratorCode">
               <template #example>
                 <div class="sample-stack">
-                  <WinTextBlock :Text="acceleratorOutput" TextWrapping="WrapWholeWords" />
-                  <WinMenuBar :Items="acceleratorItems" :Theme="pageTheme" @ItemClick="acceleratorOutput = itemClickText($event.Item)" />
+                  <TextBlock :Text="acceleratorOutput" TextWrapping="WrapWholeWords" />
+                  <MenuBar :Items="acceleratorItems" :Theme="pageTheme" @ItemClick="acceleratorOutput = itemClickText($event.Item)" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.menubar.submenus')" :theme="pageTheme" :vue="submenuCode">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menubar.submenus')" :theme="pageTheme" :vue="submenuCode">
               <template #example>
                 <div class="sample-stack">
-                  <WinTextBlock :Text="submenuOutput" TextWrapping="WrapWholeWords" />
-                  <WinMenuBar :Items="submenuItems" :Theme="pageTheme" @ItemClick="submenuOutput = itemClickText($event.Item)" />
+                  <TextBlock :Text="submenuOutput" TextWrapping="WrapWholeWords" />
+                  <MenuBar :Items="submenuItems" :Theme="pageTheme" @ItemClick="submenuOutput = itemClickText($event.Item)" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinMenuBar from '../../components/WinMenuBar.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import MenuBar from '../../components/MenuBar.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
 import { useI18n } from '../../components/i18n/index';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'menubar');
@@ -105,108 +105,108 @@ const submenuItems = ref([
   { Title: t('text.help'), Items: [{ Text: t('text.about') }] }
 ]);
 
-const simpleCode = `<WinMenuBar>
-  <WinMenuBarItem Title="File">
-    <WinMenuFlyoutItem Text="New" />
-    <WinMenuFlyoutItem Text="Open..." />
-    <WinMenuFlyoutItem Text="Save" />
-    <WinMenuFlyoutItem Text="Exit" />
-  </WinMenuBarItem>
-  <WinMenuBarItem Title="Edit">
-    <WinMenuFlyoutItem Text="Undo" />
-    <WinMenuFlyoutItem Text="Cut" />
-    <WinMenuFlyoutItem Text="Copy" />
-    <WinMenuFlyoutItem Text="Paste" />
-  </WinMenuBarItem>
-  <WinMenuBarItem Title="Help">
-    <WinMenuFlyoutItem Text="About" />
-  </WinMenuBarItem>
-</WinMenuBar>`;
-const acceleratorCode = `<WinMenuBar>
-  <WinMenuBarItem Title="File">
-    <WinMenuFlyoutItem Text="New">
-      <WinMenuFlyoutItem.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="N" Modifiers="Control" />
-      </WinMenuFlyoutItem.KeyboardAccelerators>
-    </WinMenuFlyoutItem>
-    <WinMenuFlyoutItem Text="Open...">
-      <WinMenuFlyoutItem.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="O" Modifiers="Control" />
-      </WinMenuFlyoutItem.KeyboardAccelerators>
-    </WinMenuFlyoutItem>
-    <WinMenuFlyoutItem Text="Save">
-      <WinMenuFlyoutItem.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="S" Modifiers="Control" />
-      </WinMenuFlyoutItem.KeyboardAccelerators>
-    </WinMenuFlyoutItem>
-    <WinMenuFlyoutItem Text="Exit">
-      <WinMenuFlyoutItem.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="E" Modifiers="Control" />
-      </WinMenuFlyoutItem.KeyboardAccelerators>
-    </WinMenuFlyoutItem>
-  </WinMenuBarItem>
-  <WinMenuBarItem Title="Edit">
-    <WinMenuFlyoutItem Text="Undo">
-      <WinMenuFlyoutItem.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="Z" Modifiers="Control" />
-      </WinMenuFlyoutItem.KeyboardAccelerators>
-    </WinMenuFlyoutItem>
-    <WinMenuFlyoutItem Text="Cut">
-      <WinMenuFlyoutItem.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="X" Modifiers="Control" />
-      </WinMenuFlyoutItem.KeyboardAccelerators>
-    </WinMenuFlyoutItem>
-    <WinMenuFlyoutItem Text="Copy">
-      <WinMenuFlyoutItem.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="C" Modifiers="Control" />
-      </WinMenuFlyoutItem.KeyboardAccelerators>
-    </WinMenuFlyoutItem>
-    <WinMenuFlyoutItem Text="Paste">
-      <WinMenuFlyoutItem.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="V" Modifiers="Control" />
-      </WinMenuFlyoutItem.KeyboardAccelerators>
-    </WinMenuFlyoutItem>
-  </WinMenuBarItem>
-  <WinMenuBarItem Title="Help">
-    <WinMenuFlyoutItem Text="About">
-      <WinMenuFlyoutItem.KeyboardAccelerators>
-        <WinKeyboardAccelerator Key="I" Modifiers="Control" />
-      </WinMenuFlyoutItem.KeyboardAccelerators>
-    </WinMenuFlyoutItem>
-  </WinMenuBarItem>
-</WinMenuBar>`;
-const submenuCode = `<WinMenuBar>
-  <WinMenuBarItem Title="File">
-    <WinMenuFlyoutSubItem Text="New">
-      <WinMenuFlyoutItem Text="Plain Text Document" />
-      <WinMenuFlyoutItem Text="Rich Text Document" />
-      <WinMenuFlyoutItem Text="Other Formats..." />
-    </WinMenuFlyoutSubItem>
-    <WinMenuFlyoutItem Text="Open..." />
-    <WinMenuFlyoutItem Text="Save" />
-    <WinMenuFlyoutSeparator />
-    <WinMenuFlyoutItem Text="Exit" />
-  </WinMenuBarItem>
-  <WinMenuBarItem Title="Edit">
-    <WinMenuFlyoutItem Text="Undo" />
-    <WinMenuFlyoutItem Text="Cut" />
-    <WinMenuFlyoutItem Text="Copy" />
-    <WinMenuFlyoutItem Text="Paste" />
-  </WinMenuBarItem>
-  <WinMenuBarItem Title="View">
-    <WinMenuFlyoutItem Text="Output" />
-    <WinMenuFlyoutSeparator />
-    <WinRadioMenuFlyoutItem Text="Landscape" GroupName="OrientationGroup" />
-    <WinRadioMenuFlyoutItem Text="Portrait" GroupName="OrientationGroup" IsChecked="True" />
-    <WinMenuFlyoutSeparator />
-    <WinRadioMenuFlyoutItem Text="Small icons" GroupName="SizeGroup" />
-    <WinRadioMenuFlyoutItem Text="Medium icons" GroupName="SizeGroup" IsChecked="True" />
-    <WinRadioMenuFlyoutItem Text="Large icons" GroupName="SizeGroup" />
-  </WinMenuBarItem>
-  <WinMenuBarItem Title="Help">
-    <WinMenuFlyoutItem Text="About" />
-  </WinMenuBarItem>
-</WinMenuBar>`;
+const simpleCode = `<MenuBar>
+  <MenuBarItem Title="File">
+    <MenuFlyoutItem Text="New" />
+    <MenuFlyoutItem Text="Open..." />
+    <MenuFlyoutItem Text="Save" />
+    <MenuFlyoutItem Text="Exit" />
+  </MenuBarItem>
+  <MenuBarItem Title="Edit">
+    <MenuFlyoutItem Text="Undo" />
+    <MenuFlyoutItem Text="Cut" />
+    <MenuFlyoutItem Text="Copy" />
+    <MenuFlyoutItem Text="Paste" />
+  </MenuBarItem>
+  <MenuBarItem Title="Help">
+    <MenuFlyoutItem Text="About" />
+  </MenuBarItem>
+</MenuBar>`;
+const acceleratorCode = `<MenuBar>
+  <MenuBarItem Title="File">
+    <MenuFlyoutItem Text="New">
+      <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Key="N" Modifiers="Control" />
+      </MenuFlyoutItem.KeyboardAccelerators>
+    </MenuFlyoutItem>
+    <MenuFlyoutItem Text="Open...">
+      <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Key="O" Modifiers="Control" />
+      </MenuFlyoutItem.KeyboardAccelerators>
+    </MenuFlyoutItem>
+    <MenuFlyoutItem Text="Save">
+      <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Key="S" Modifiers="Control" />
+      </MenuFlyoutItem.KeyboardAccelerators>
+    </MenuFlyoutItem>
+    <MenuFlyoutItem Text="Exit">
+      <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Key="E" Modifiers="Control" />
+      </MenuFlyoutItem.KeyboardAccelerators>
+    </MenuFlyoutItem>
+  </MenuBarItem>
+  <MenuBarItem Title="Edit">
+    <MenuFlyoutItem Text="Undo">
+      <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Key="Z" Modifiers="Control" />
+      </MenuFlyoutItem.KeyboardAccelerators>
+    </MenuFlyoutItem>
+    <MenuFlyoutItem Text="Cut">
+      <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Key="X" Modifiers="Control" />
+      </MenuFlyoutItem.KeyboardAccelerators>
+    </MenuFlyoutItem>
+    <MenuFlyoutItem Text="Copy">
+      <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Key="C" Modifiers="Control" />
+      </MenuFlyoutItem.KeyboardAccelerators>
+    </MenuFlyoutItem>
+    <MenuFlyoutItem Text="Paste">
+      <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Key="V" Modifiers="Control" />
+      </MenuFlyoutItem.KeyboardAccelerators>
+    </MenuFlyoutItem>
+  </MenuBarItem>
+  <MenuBarItem Title="Help">
+    <MenuFlyoutItem Text="About">
+      <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Key="I" Modifiers="Control" />
+      </MenuFlyoutItem.KeyboardAccelerators>
+    </MenuFlyoutItem>
+  </MenuBarItem>
+</MenuBar>`;
+const submenuCode = `<MenuBar>
+  <MenuBarItem Title="File">
+    <MenuFlyoutSubItem Text="New">
+      <MenuFlyoutItem Text="Plain Text Document" />
+      <MenuFlyoutItem Text="Rich Text Document" />
+      <MenuFlyoutItem Text="Other Formats..." />
+    </MenuFlyoutSubItem>
+    <MenuFlyoutItem Text="Open..." />
+    <MenuFlyoutItem Text="Save" />
+    <MenuFlyoutSeparator />
+    <MenuFlyoutItem Text="Exit" />
+  </MenuBarItem>
+  <MenuBarItem Title="Edit">
+    <MenuFlyoutItem Text="Undo" />
+    <MenuFlyoutItem Text="Cut" />
+    <MenuFlyoutItem Text="Copy" />
+    <MenuFlyoutItem Text="Paste" />
+  </MenuBarItem>
+  <MenuBarItem Title="View">
+    <MenuFlyoutItem Text="Output" />
+    <MenuFlyoutSeparator />
+    <RadioMenuFlyoutItem Text="Landscape" GroupName="OrientationGroup" />
+    <RadioMenuFlyoutItem Text="Portrait" GroupName="OrientationGroup" IsChecked="True" />
+    <MenuFlyoutSeparator />
+    <RadioMenuFlyoutItem Text="Small icons" GroupName="SizeGroup" />
+    <RadioMenuFlyoutItem Text="Medium icons" GroupName="SizeGroup" IsChecked="True" />
+    <RadioMenuFlyoutItem Text="Large icons" GroupName="SizeGroup" />
+  </MenuBarItem>
+  <MenuBarItem Title="Help">
+    <MenuFlyoutItem Text="About" />
+  </MenuBarItem>
+</MenuBar>`;
 </script>
 
 <style scoped>

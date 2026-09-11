@@ -1,10 +1,10 @@
 <template>
   <!-- 对应官方 WinUIGallery/MainWindow.xaml(.cs)：Gallery 主窗口壳（TitleBar + NavigationView + 搜索 + 页面导航） -->
-  <WinToolTipService />
+  <ToolTipService />
   <Teleport to="body">
     <div v-if="isNavigationFrozen" class="gallery-navigation-freeze" aria-hidden="true"></div>
   </Teleport>
-  <WinTitleBar
+  <TitleBar
     ref="titleBarRef"
     class="gallery-titlebar"
     :class="{ 'is-uwp-webview': isHostedInUwpWebView }"
@@ -16,7 +16,7 @@
     :IconSource="appIcon"
     @BackRequested="onBackRequested"
     @PaneToggleRequested="onTopBarToggle">
-    <WinAutoSuggestBox
+    <AutoSuggestBox
       ref="searchBoxRef"
       v-model:Text="searchQuery"
       :ItemsSource="searchResults"
@@ -34,10 +34,10 @@
       @click="onCompactSearchButtonClick">
       <span class="gallery-titlebar-search-button-icon" aria-hidden="true">&#xE721;</span>
     </button>
-  </WinTitleBar>
+  </TitleBar>
   <div class="gallery-app-content" :class="{ 'has-titlebar': isHostedInUwpWebView, 'wco-titlebar': !isHostedInUwpWebView }">
     <div class="gallery-nav-host">
-      <WinNavigationView :SelectedItem="selectedNavigationItem"
+      <NavigationView :SelectedItem="selectedNavigationItem"
                        :PaneDisplayMode="navPosition"
                        :MenuItems="navMenuItems"
                        :FooterMenuItems="[]"
@@ -58,7 +58,7 @@
               :key="route.fullPath"
               class="page-view active"
               :class="{ 'has-page-header': currentPage !== 'home' && currentPage !== 'settings' && currentPage !== 'search' }">
-              <WinPageHeader
+              <PageHeader
                 v-if="currentPage !== 'home' && currentPage !== 'settings' && currentPage !== 'search'"
                 :Item="currentPageItem"
                 :PageName="pageName"
@@ -68,7 +68,7 @@
             </div>
           </Transition>
         </router-view>
-      </WinNavigationView>
+      </NavigationView>
     </div>
   </div>
 
@@ -78,7 +78,7 @@
       ref="compactSearchRef"
       class="gallery-compact-search-popup"
       role="search">
-      <WinAutoSuggestBox
+      <AutoSuggestBox
         ref="compactSearchBoxRef"
         v-model:Text="searchQuery"
         :ItemsSource="searchResults"
@@ -94,11 +94,11 @@
 
 <script setup>
 import { nextTick, ref, watch, provide, computed, onMounted, onBeforeUnmount } from 'vue';
-import WinTitleBar from '../components/WinTitleBar.vue';
-import WinNavigationView from '../components/WinNavigationView.vue';
-import WinToolTipService from '../components/WinToolTipService.vue';
-import WinAutoSuggestBox from '../components/WinAutoSuggestBox.vue';
-import WinPageHeader from './components/WinPageHeader.vue';
+import TitleBar from '../components/TitleBar.vue';
+import NavigationView from '../components/NavigationView.vue';
+import ToolTipService from '../components/ToolTipService.vue';
+import AutoSuggestBox from '../components/AutoSuggestBox.vue';
+import PageHeader from './components/PageHeader.vue';
 import appIcon from '../assets/AppIcon.ico';
 import { useRoute, useRouter } from 'vue-router';
 import { pageTags } from './router';
@@ -390,13 +390,33 @@ const pageSourceNames = {
 const pageName = computed(() => pageSourceNames[currentPage.value]
   || `${currentPage.value.charAt(0).toUpperCase()}${currentPage.value.slice(1)}Page`);
 
+// Route tag → localized resource key for the page title. Mirrors searchIndex's
+// LABEL_KEYS so pages whose route tag differs from their resource key (e.g.
+// xamlresources → text.resources) get a correct localized header title instead
+// of the raw tag.
+const pageTitle = {
+  radiobutton: 'text.radiobuttons',
+  rating: 'text.ratingcontrol',
+  captureelement: 'text.capture-element-camera',
+  toggleappbarbutton: 'text.appbar-toggle-button',
+  xamlresources: 'text.resources',
+  xamlstyles: 'text.style',
+  animatedicon: 'text.animated-icon',
+  compactsizing: 'text.compact-sizing',
+  iconelement: 'text.icon-element',
+  radialgradientbrush: 'text.radial-gradient-brush',
+  systembackdrops: 'text.system-backdrops',
+  themeshadow: 'text.theme-shadow'
+};
+
 const currentPageItem = computed(() => {
   const selected = selectedNavigationItem.value;
   const selectedPage = selected?.Tag === currentPage.value ? selected : null;
   const pageSourceUri = `https://github.com/Furry-Xiyi/WinUIonWeb/tree/main/WinUIonWeb/src/gallery/pages/${pageName.value}.vue`;
+  const titleKey = pageTitle[currentPage.value] ?? `text.${currentPage.value}`;
   return {
     ...(selectedPage || {}),
-    Title: selectedPage?.Content || t(`text.${currentPage.value}`),
+    Title: selectedPage?.Content || t(titleKey) || currentPage.value,
     UniqueId: currentPage.value,
     ApiNamespace: selected?.ApiNamespace || '',
     BaseClasses: selected?.BaseClasses || [],
@@ -711,7 +731,7 @@ watch(titlebarCompact, (compact) => {
   }
 
   .gallery-app-content.has-titlebar {
-    /* WebView2 does not expose titlebar-area-height. WinTitleBar with the
+    /* WebView2 does not expose titlebar-area-height. TitleBar with the
        search content uses the expanded 48px template height in that host. */
     --gallery-titlebar-height: max(env(titlebar-area-height, 0px), 46px);
     height: calc(100% - var(--gallery-titlebar-height));
@@ -730,7 +750,7 @@ watch(titlebarCompact, (compact) => {
 
   /* The UWP WebView host owns the caption buttons outside the web content.
      Its browser shell does not expose AppWindow.TitleBar.RightInset, so keep
-     the standard three-button 138px inset. WinTitleBar already reserves the
+     the standard three-button 138px inset. TitleBar already reserves the
      official 48px minimum drag region beside it (186px total). */
   .gallery-titlebar.is-uwp-webview {
     --TitleBarRightPaddingWidth: 138px;
@@ -744,7 +764,7 @@ watch(titlebarCompact, (compact) => {
   }
 
   /* 标题栏实际宽度过窄时优先保留标题，隐藏搜索框；
-     由 WinTitleBar 根据自身宽度添加 is-narrow，不依赖视口媒体查询，
+     由 TitleBar 根据自身宽度添加 is-narrow，不依赖视口媒体查询，
      这样 PWA overlay / WebView2 中标题栏区域比视口窄时也能生效。 */
   .gallery-titlebar.is-narrow .gallery-titlebar-search,
   .gallery-titlebar.is-compact .gallery-titlebar-search {
@@ -817,7 +837,7 @@ watch(titlebarCompact, (compact) => {
   }
 
   /* The compact title-bar search is the only Gallery search surface that
-     uses an Acrylic input fill. Replace WinTextBox's normal translucent
+     uses an Acrylic input fill. Replace TextBox's normal translucent
      control layer in every interaction state so it does not stack over the
      Acrylic backdrop. */
   .gallery-compact-search.win-auto-suggest-box .win-textbox {

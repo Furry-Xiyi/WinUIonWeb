@@ -1,39 +1,39 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.capture-element-camera-preview')" />
-        <WinTextBlock class="page-description" :Text="$t('text.capture-element-description')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.capture-element-camera-preview')" />
+        <TextBlock class="page-description" :Text="$t('text.capture-element-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+          <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+          <ToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.capture.preview')" :theme="pageTheme" :vue="captureCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.capture.preview')" :theme="pageTheme" :vue="captureCode">
           <template #example>
-            <WinCaptureElement ref="captureRef" />
+            <CaptureElement ref="captureRef" />
           </template>
           <template #options>
-            <WinToggleSwitch :IsOn="mirrorPreview" :Header="$t('sample.capture.mirror-preview')" v-bind="{ 'tooltipservice.tooltip': $t('sample.capture.mirror-tooltip') }" @update:IsOn="onMirrorChanged" />
-            <WinButton @Click="capturePhoto">{{ $t('sample.capture.capture-photo') }}</WinButton>
+            <ToggleSwitch :IsOn="mirrorPreview" :Header="$t('sample.capture.mirror-preview')" v-bind="{ 'tooltipservice.tooltip': $t('sample.capture.mirror-tooltip') }" @update:IsOn="onMirrorChanged" />
+            <Button @Click="capturePhoto">{{ $t('sample.capture.capture-photo') }}</Button>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, onMounted, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCaptureElement from '../../components/WinCaptureElement.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
+import Button from '../../components/Button.vue';
+import CaptureElement from '../../components/CaptureElement.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import ToggleSwitch from '../../components/ToggleSwitch.vue';
 import { createPageState } from '../../utils/pageState';
 
 const currentPage = inject('currentPage');
@@ -51,16 +51,16 @@ const capturePhoto = () => captureRef.value?.CapturePhoto();
 
 onMounted(() => captureRef.value?.StartCaptureElement());
 
-const captureCode = computed(() => `<WinGrid RowDefinitions="Auto,*" ColumnDefinitions="*,100" MinWidth="400" MinHeight="300" RowSpacing="10" ColumnSpacing="4">
-  <WinTextBlock x:Name="frameSourceName" />
-  <WinMediaPlayerElement x:Name="captureElement" Stretch="Uniform" AutoPlay="True" />
-  <WinTextBlock x:Name="capturedText" Text="Captured:" Visibility="Collapsed" />
-  <WinGrid Grid.Row="1" Grid.Column="1">
-    <WinScrollViewer VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto">
-      <WinStackPanel Spacing="2" />
-    </WinScrollViewer>
-  </WinGrid>
-</WinGrid>`);
+const captureCode = computed(() => `<Grid RowDefinitions="Auto,*" ColumnDefinitions="*,100" MinWidth="400" MinHeight="300" RowSpacing="10" ColumnSpacing="4">
+  <TextBlock x:Name="frameSourceName" />
+  <MediaPlayerElement x:Name="captureElement" Stretch="Uniform" AutoPlay="True" />
+  <TextBlock x:Name="capturedText" Text="Captured:" Visibility="Collapsed" />
+  <Grid Grid.Row="1" Grid.Column="1">
+    <ScrollViewer VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto">
+      <StackPanel Spacing="2" />
+    </ScrollViewer>
+  </Grid>
+</Grid>`);
 </script>
 
 <style scoped>

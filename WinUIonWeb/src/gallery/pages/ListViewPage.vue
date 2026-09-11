@@ -1,64 +1,64 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.listview')" />
-          <WinTextBlock class="page-description" :Text="$t('text.a-listview-displays-data-in-a-vertical-list-with')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.listview')" />
+          <TextBlock class="page-description" :Text="$t('text.a-listview-displays-data-in-a-vertical-list-with')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.basic-simple-datatemplate')" :theme="pageTheme" :vue="basicListViewVue">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.basic-simple-datatemplate')" :theme="pageTheme" :vue="basicListViewVue">
               <template #example>
                 <div class="sample-stack">
-                  <WinTextBlock :Text="$t('sample.listview.basic-note')" TextWrapping="WrapWholeWords" />
+                  <TextBlock :Text="$t('sample.listview.basic-note')" TextWrapping="WrapWholeWords" />
                   <div class="listview-demo-scroll narrow">
-                    <WinListView :ItemsSource="contacts" SelectionMode="Single">
+                    <ListView :ItemsSource="contacts" SelectionMode="Single">
                       <template #item="{ item }">
-                        <WinTextBlock :Text="item.Name" Margin="0,5" />
+                        <TextBlock :Text="item.Name" Margin="0,5" />
                       </template>
-                    </WinListView>
+                    </ListView>
                   </div>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.selection-support')" :theme="pageTheme" :vue="selectionListViewVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.selection-support')" :theme="pageTheme" :vue="selectionListViewVue">
               <template #example>
                 <div class="sample-stack">
-                  <WinTextBlock
+                  <TextBlock
                     :Text="$t('sample.listview.selection-note')"
                     TextWrapping="WrapWholeWords" />
                   <div class="listview-demo-scroll">
-                    <WinListView :ItemsSource="contacts" :SelectionMode="selectionMode" v-model:SelectedItems="selectionSelected">
+                    <ListView :ItemsSource="contacts" :SelectionMode="selectionMode" v-model:SelectedItems="selectionSelected">
                       <template #item="{ item }">
                         <div class="contact-template">
                           <div class="contact-avatar" />
                           <div class="contact-text">
-                            <WinTextBlock class="contact-name" :Text="item.Name" />
-                            <WinTextBlock class="caption-text" :Text="item.Company" />
+                            <TextBlock class="contact-name" :Text="item.Name" />
+                            <TextBlock class="caption-text" :Text="item.Company" />
                           </div>
                         </div>
                       </template>
-                    </WinListView>
+                    </ListView>
                   </div>
                 </div>
               </template>
               <template #options>
-                <WinComboBox Header="SelectionMode" :ItemsSource="selectionModeOptions" v-model:SelectedIndex="selectionModeIndex" />
+                <ComboBox Header="SelectionMode" :ItemsSource="selectionModeOptions" v-model:SelectedIndex="selectionModeIndex" />
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.drag-drop-reordering')" :theme="pageTheme" :vue="dragDropListViewVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.drag-drop-reordering')" :theme="pageTheme" :vue="dragDropListViewVue">
               <template #example>
                 <div class="sample-stack">
-                  <WinTextBlock :Text="$t('sample.listview.drag-drop-note')" TextWrapping="WrapWholeWords" />
-                  <WinGrid class="drag-list-grid" ColumnDefinitions="*,*" ColumnSpacing="12">
-                    <WinListView
+                  <TextBlock :Text="$t('sample.listview.drag-drop-note')" TextWrapping="WrapWholeWords" />
+                  <Grid class="drag-list-grid" ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <ListView
                       v-model:ItemsSource="dragListLeft"
                       v-model:SelectedItems="dragSelectionLeft"
                       Height="400"
@@ -74,10 +74,10 @@
                       @DragItemsCompleted="activeListDrag = null"
                       @Drop="completeListDrop($event, 'Left')">
                       <template #item="{ item }">
-                        <WinTextBlock :Text="item.Name" />
+                        <TextBlock :Text="item.Name" />
                       </template>
-                    </WinListView>
-                    <WinListView
+                    </ListView>
+                    <ListView
                       v-model:ItemsSource="dragListRight"
                       v-model:SelectedItems="dragSelectionRight"
                       Height="400"
@@ -92,58 +92,58 @@
                       @DragItemsCompleted="activeListDrag = null"
                       @Drop="completeListDrop($event, 'Right')">
                       <template #item="{ item }">
-                        <WinTextBlock :Text="item.Name" />
+                        <TextBlock :Text="item.Name" />
                       </template>
-                    </WinListView>
-                  </WinGrid>
+                    </ListView>
+                  </Grid>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.grouped-headers')" :theme="pageTheme" :vue="groupedListViewVue">
+            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.listview.grouped-headers')" :theme="pageTheme" :vue="groupedListViewVue">
               <template #example>
                 <div class="sample-stack">
-                  <WinTextBlock :Text="$t('sample.listview.grouped-note')" TextWrapping="WrapWholeWords" />
+                  <TextBlock :Text="$t('sample.listview.grouped-note')" TextWrapping="WrapWholeWords" />
                   <div class="listview-demo-scroll">
-                    <WinListView :ItemsSource="groups" IsGrouped :AreStickyGroupHeadersEnabled="stickyOn" SelectionMode="Single" v-model:SelectedItems="groupSel">
+                    <ListView :ItemsSource="groups" IsGrouped :AreStickyGroupHeadersEnabled="stickyOn" SelectionMode="Single" v-model:SelectedItems="groupSel">
                       <template #header="{ group }">
-                        <WinTextBlock class="group-header" :Text="group.Key" />
+                        <TextBlock class="group-header" :Text="group.Key" />
                       </template>
                       <template #item="{ item }">
                         <div class="contact-template">
                           <div class="contact-avatar" />
                           <div class="contact-text">
-                            <WinTextBlock class="contact-name" :Text="item.Name" />
-                            <WinTextBlock class="caption-text" :Text="item.Company" />
+                            <TextBlock class="contact-name" :Text="item.Name" />
+                            <TextBlock class="caption-text" :Text="item.Company" />
                           </div>
                         </div>
                       </template>
-                    </WinListView>
+                    </ListView>
                   </div>
                 </div>
               </template>
               <template #options>
-                <WinToggleSwitch :Header="$t('sample.sticky-headers')" v-model:IsOn="stickyOn" />
+                <ToggleSwitch :Header="$t('sample.sticky-headers')" v-model:IsOn="stickyOn" />
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref, watch } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinComboBox from '../../components/WinComboBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinGrid from '../../components/WinGrid.vue';
-import WinListView from '../../components/WinListView.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Grid from '../../components/Grid.vue';
+import ListView from '../../components/ListView.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleSwitch from '../../components/ToggleSwitch.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'listview');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -204,24 +204,24 @@ const completeListDrop = (args, target) => {
 
 watch(selectionMode, () => { selectionSelected.value = []; });
 
-const basicListViewVue = `<WinListView ItemsSource="contacts" SelectionMode="Single">
-  <WinListView.ItemTemplate>
-    <WinDataTemplate>
-      <WinTextBlock Text="item.Name" />
-    </WinDataTemplate>
-  </WinListView.ItemTemplate>
-</WinListView>`;
+const basicListViewVue = `<ListView ItemsSource="contacts" SelectionMode="Single">
+  <ListView.ItemTemplate>
+    <DataTemplate>
+      <TextBlock Text="item.Name" />
+    </DataTemplate>
+  </ListView.ItemTemplate>
+</ListView>`;
 
-const selectionListViewVue = `<WinListView ItemsSource="contacts" SelectionMode="selectionMode" SelectedItems="selectionSelected">
-  <WinListView.ItemTemplate>
-    <WinDataTemplate>
-      <WinTextBlock Text="item.Name" />
-    </WinDataTemplate>
-  </WinListView.ItemTemplate>
-</WinListView>`;
+const selectionListViewVue = `<ListView ItemsSource="contacts" SelectionMode="selectionMode" SelectedItems="selectionSelected">
+  <ListView.ItemTemplate>
+    <DataTemplate>
+      <TextBlock Text="item.Name" />
+    </DataTemplate>
+  </ListView.ItemTemplate>
+</ListView>`;
 
-const dragDropListViewVue = `<WinGrid ColumnDefinitions="*,*" ColumnSpacing="12">
-  <WinListView
+const dragDropListViewVue = `<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+  <ListView
     ItemsSource="dragListLeft"
     Height="400"
     MinWidth="350"
@@ -236,7 +236,7 @@ const dragDropListViewVue = `<WinGrid ColumnDefinitions="*,*" ColumnSpacing="12"
     DragItemsCompleted="ListView_DragItemsCompleted"
     Drop="ListView_Drop" />
 
-  <WinListView
+  <ListView
     ItemsSource="dragListRight"
     Height="400"
     MinWidth="350"
@@ -249,20 +249,20 @@ const dragDropListViewVue = `<WinGrid ColumnDefinitions="*,*" ColumnSpacing="12"
     DragItemsStarting="ListView_DragItemsStarting"
     DragItemsCompleted="ListView_DragItemsCompleted"
     Drop="ListView_Drop" />
-</WinGrid>`;
+</Grid>`;
 
-const groupedListViewVue = `<WinListView ItemsSource="groups" IsGrouped="True" AreStickyGroupHeadersEnabled="stickyOn" SelectionMode="Single">
-  <WinListView.GroupHeaderTemplate>
-    <WinDataTemplate>
-      <WinTextBlock Text="group.Key" />
-    </WinDataTemplate>
-  </WinListView.GroupHeaderTemplate>
-  <WinListView.ItemTemplate>
-    <WinDataTemplate>
-      <WinTextBlock Text="item.Name" />
-    </WinDataTemplate>
-  </WinListView.ItemTemplate>
-</WinListView>`;
+const groupedListViewVue = `<ListView ItemsSource="groups" IsGrouped="True" AreStickyGroupHeadersEnabled="stickyOn" SelectionMode="Single">
+  <ListView.GroupHeaderTemplate>
+    <DataTemplate>
+      <TextBlock Text="group.Key" />
+    </DataTemplate>
+  </ListView.GroupHeaderTemplate>
+  <ListView.ItemTemplate>
+    <DataTemplate>
+      <TextBlock Text="item.Name" />
+    </DataTemplate>
+  </ListView.ItemTemplate>
+</ListView>`;
 </script>
 
 <style scoped>

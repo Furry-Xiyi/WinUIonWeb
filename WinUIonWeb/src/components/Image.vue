@@ -27,6 +27,7 @@
     <div v-else class="win-image-nine-grid" :style="nineGridStyle" aria-hidden="true">
       <img class="win-image-nine-grid-image" :src="sourceUri" alt="" />
     </div>
+    <slot />
   </div>
 </template>
 

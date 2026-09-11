@@ -5,6 +5,7 @@ export default {
   "app.author": "惜忆想睡觉",
   "search.placeholder": "Search controls and samples...",
   "search.no-results": "No results match your search.",
+  "text.submit-query": "Submit search",
   "text.no-results-found": "No results found",
   "gallery.page-header.api-details": "API details",
   "gallery.page-header.api-tooltip": "API namespace and inheritance",
@@ -453,6 +454,8 @@ export default {
   ,"sample.combobox.inline": "A ComboBox with items defined inline and its width set."
   ,"sample.combobox.itemssource": "A ComboBox with its ItemsSource set."
   ,"sample.combobox.pick-a-color": "Pick a color"
+  ,"sample.combobox.invalid-font-size": "The font size must be a number between 8 and 100."
+  ,"sample.combobox.close": "Close"
   ,"sample.disable-hyperlink-button": "Disable hyperlink button"
   ,"sample.disable-repeatbutton": "Disable RepeatButton"
   ,"sample.disable-togglebutton": "Disable ToggleButton"
@@ -554,6 +557,8 @@ export default {
   ,"sample.sticky-headers": "Sticky Headers"
   ,"sample.image": "Image"
   ,"sample.rating.caption": "312 ratings"
+  ,"sample.rating.is-clear-enabled": "IsClearEnabled"
+  ,"sample.rating.is-read-only": "IsReadOnly"
   ,"sample.rating.your-rating": "Your rating"
   ,"sample.rating.clear-note": "Swipe left or click again to clear your rating."
   ,"sample.rating.placeholder": "PlaceholderValue of RatingControl"
@@ -564,6 +569,10 @@ export default {
   ,"sample.select-all": "Select all"
   ,"sample.select-an-option": "Select an option."
   ,"sample.slider.control-header": "Control header"
+  ,"sample.slider.minimum": "Minimum:"
+  ,"sample.slider.maximum": "Maximum:"
+  ,"sample.slider.step-frequency": "StepFrequency:"
+  ,"sample.slider.small-change": "SmallChange:"
   ,"sample.slider.range": "A Slider with range and steps specified."
   ,"sample.slider.snaps-to": "Snaps to:"
   ,"sample.slider.ticks": "A Slider with tick marks."
@@ -573,8 +582,11 @@ export default {
   ,"sample.ticks": "Ticks"
   ,"sample.toggle-work": "Toggle work"
   ,"sample.splitbutton.text": "A SplitButton with text"
+  ,"sample.splitbutton.rich-text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tempor commodo ullamcorper a lacus."
   ,"sample.do-work": "Do work"
   ,"sample.togglebutton.simple": "A simple ToggleButton with text content."
+  ,"sample.togglebutton.on": "On"
+  ,"sample.togglebutton.off": "Off"
   ,"sample.toggleswitch.custom": "A ToggleSwitch with custom header and content."
   ,"sample.togglesplitbutton.bullet-list": "Using ToggleSplitButton to control bulleted list functionality in RichEditBox"
   ,"sample.type-something-here": "Type something here"
@@ -611,6 +623,10 @@ export default {
   ,"sample.richeditbox.save-file": "Save file"
   ,"sample.richeditbox.bold": "Bold"
   ,"sample.richeditbox.italic": "Italic"
+  ,"sample.richeditbox.underline": "Underline"
+  ,"sample.richeditbox.bullets": "Bullets"
+  ,"sample.richeditbox.numbering": "Numbering"
+  ,"sample.richeditbox.clear-formatting": "Clear formatting"
   ,"sample.richeditbox.font-color": "Font color"
   ,"sample.richeditbox.custom-editor": "Custom editor"
   ,"sample.richeditbox.share-command": "Share"
@@ -746,6 +762,7 @@ export default {
   ,"sample.menubar.keyboard": "A MenuBar with keyboard accelerators"
   ,"sample.menubar.submenus": "A MenuBar with submenus, separators, and radio menu items"
   ,"sample.menubar.undo": "Undo"
+  ,"sample.menubar.redo": "Redo"
   ,"sample.menubar.cut": "Cut"
   ,"sample.menubar.paste": "Paste"
   ,"sample.menubar.plain-text": "Plain Text Document"
@@ -1091,4 +1108,10 @@ export default {
      ,"sample.progressring.background-color": "Background color"
      ,"sample.progressring.pick-color": "Pick a color"
      ,"sample.progressring.progress": "Progress"
+     ,"sample.colorpicker.more-button-visible": "More button visible"
+     ,"sample.colorpicker.color-slider-visible": "Color slider visible"
+     ,"sample.colorpicker.color-channel-text-input-visible": "Color channel text input visible"
+     ,"sample.colorpicker.hex-input-visible": "Hex input visible"
+     ,"sample.colorpicker.alpha-slider-visible": "Alpha slider visible"
+     ,"sample.colorpicker.alpha-text-input-visible": "Alpha text input visible"
   };

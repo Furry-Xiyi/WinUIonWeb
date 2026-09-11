@@ -1,40 +1,40 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.commandbarflyout')" />
-          <WinTextBlock class="page-description" :Text="$t('text.the-commandbarflyout-lets-you-provide-users-with')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.commandbarflyout')" />
+          <TextBlock class="page-description" :Text="$t('text.the-commandbarflyout-lets-you-provide-users-with')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.commandbarflyout.object')"
           :theme="pageTheme"
           :vue="commandBarFlyoutCode">
               <template #example>
                 <div class="commandbarflyout-stack">
-                  <WinTextBlock :Text="$t('sample.commandbarflyout.open-hint')" TextWrapping="WrapWholeWords" />
-                  <WinButton
+                  <TextBlock :Text="$t('sample.commandbarflyout.open-hint')" TextWrapping="WrapWholeWords" />
+                  <Button
                     ref="myImageButton"
                     v-bind="{ 'AutomationProperties.Name': $t('sample.mountain') }"
                     Margin="0,12,0,12"
                     Padding="0"
                     @Click="myImageButtonClick"
                     @contextmenu.prevent="myImageButtonContextRequested">
-                    <WinImage Height="300" :Source="rainierImageUrl" />
-                  </WinButton>
-                  <WinTextBlock :Text="selectedOptionText" />
+                    <Image Height="300" :Source="rainierImageUrl" />
+                  </Button>
+                  <TextBlock :Text="selectedOptionText" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinCommandBarFlyout
+            <CommandBarFlyout
               ref="commandBarFlyout1"
               :PrimaryCommands="primaryCommands"
               :SecondaryCommands="secondaryCommands"
@@ -42,21 +42,21 @@
               :Theme="pageTheme" />
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCommandBarFlyout from '../../components/WinCommandBarFlyout.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinImage from '../../components/WinImage.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import CommandBarFlyout from '../../components/CommandBarFlyout.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Image from '../../components/Image.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'commandbarflyout');
@@ -99,19 +99,19 @@ const myImageButtonClick = () => {
   showMenu(true);
 };
 
-const commandBarFlyoutCode = `<WinCommandBarFlyout Name="CommandBarFlyout1" Placement="Right">
-  <WinAppBarButton Label="Share" Icon="Share" ToolTipService.ToolTip="Share" Click="OnElementClicked" />
-  <WinAppBarButton Label="Save" Icon="Save" ToolTipService.ToolTip="Save" Click="OnElementClicked" />
-  <WinAppBarButton Label="Delete" Icon="Delete" ToolTipService.ToolTip="Delete" Click="OnElementClicked" />
-  <WinCommandBarFlyout.SecondaryCommands>
-    <WinAppBarButton Name="ResizeButton1" Label="Resize" Click="OnElementClicked" />
-    <WinAppBarButton Name="MoveButton1" Label="Move" Click="OnElementClicked" />
-  </WinCommandBarFlyout.SecondaryCommands>
-</WinCommandBarFlyout>
+const commandBarFlyoutCode = `<CommandBarFlyout Name="CommandBarFlyout1" Placement="Right">
+  <AppBarButton Label="Share" Icon="Share" ToolTipService.ToolTip="Share" Click="OnElementClicked" />
+  <AppBarButton Label="Save" Icon="Save" ToolTipService.ToolTip="Save" Click="OnElementClicked" />
+  <AppBarButton Label="Delete" Icon="Delete" ToolTipService.ToolTip="Delete" Click="OnElementClicked" />
+  <CommandBarFlyout.SecondaryCommands>
+    <AppBarButton Name="ResizeButton1" Label="Resize" Click="OnElementClicked" />
+    <AppBarButton Name="MoveButton1" Label="Move" Click="OnElementClicked" />
+  </CommandBarFlyout.SecondaryCommands>
+</CommandBarFlyout>
 
-<WinButton Name="myImageButton" AutomationProperties.Name="mountain" Margin="0,12,0,12" Padding="0" Click="MyImageButton_Click" ContextRequested="MyImageButton_ContextRequested">
-  <WinImage Name="Image1" Height="300" Source="/Assets/SampleMedia/rainier.jpg" />
-</WinButton>`;
+<Button Name="myImageButton" AutomationProperties.Name="mountain" Margin="0,12,0,12" Padding="0" Click="MyImageButton_Click" ContextRequested="MyImageButton_ContextRequested">
+  <Image Name="Image1" Height="300" Source="/Assets/SampleMedia/rainier.jpg" />
+</Button>`;
 </script>
 
 <style scoped>

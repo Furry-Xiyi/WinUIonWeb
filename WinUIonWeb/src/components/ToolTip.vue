@@ -2,7 +2,7 @@
   <span
     v-if="!IsServiceHost"
     ref="anchorRef"
-    class="win-tooltip-anchor"
+    class="tooltip-anchor"
     :aria-describedby="isVisible ? tooltipId : undefined"
     :aria-label="contentText || undefined"
     @pointerenter="onPointerEnter"
@@ -15,19 +15,19 @@
   </span>
 
   <Teleport :to="teleportTarget">
-    <Transition name="win-tooltip">
+    <Transition name="tooltip">
       <div
         v-if="isVisible"
         :id="tooltipId"
         ref="tooltipRef"
-        class="win-tooltip"
+        class="tooltip"
         :class="[themeClass, `placement-${actualPlacement.toLowerCase()}`]"
         :style="tooltipStyle"
         role="tooltip"
         @pointerenter="onToolTipPointerEnter"
         @pointerleave="onToolTipPointerLeave">
         <slot v-if="$slots.content" name="content"></slot>
-        <WinTextBlock v-else :Text="contentText" TextWrapping="WrapWholeWords" />
+        <TextBlock v-else :Text="contentText" TextWrapping="WrapWholeWords" />
       </div>
     </Transition>
   </Teleport>
@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, unref, useSlots, watch } from 'vue';
 import type { ComponentPublicInstance, CSSProperties, Ref } from 'vue';
-import WinTextBlock from './WinTextBlock.vue';
+import TextBlock from './TextBlock.vue';
 
 type PlacementKey = 'bottom' | 'left' | 'mouse' | 'right' | 'top';
 type Position = { top: number; left: number };
@@ -44,7 +44,7 @@ type Point = { x: number; y: number };
 type PlacementTargetValue = HTMLElement | ComponentPublicInstance | { value?: unknown; $el?: unknown } | string | null;
 type PlacementRectValue = { x?: number; y?: number; left?: number; top?: number; width?: number; height?: number; getBoundingClientRect?: () => DOMRect } | string | null;
 
-defineOptions({ inheritAttrs: false });
+defineOptions({ name: 'ToolTip', inheritAttrs: false });
 
 const props = defineProps({
   Content: { type: [String, Number, Object], default: '' },
@@ -92,7 +92,7 @@ const isPositioned = ref(false);
 const isSuppressedUntilPointerLeave = ref(false);
 const actualPlacement = ref('Mouse');
 const teleportTarget = ref<HTMLElement | string>('body');
-const tooltipId = `win-tooltip-${Math.random().toString(36).slice(2, 10)}`;
+const tooltipId = `tooltip-${Math.random().toString(36).slice(2, 10)}`;
 let openTimer: number | undefined;
 let closeTimer: number | undefined;
 let suppressFocusShowUntil = 0;
@@ -120,7 +120,7 @@ const effectiveTheme = computed(() => {
 });
 const themeClass = computed(() => effectiveTheme.value
   ? `win-theme-scope theme-${effectiveTheme.value}`
-  : 'win-tooltip-theme');
+  : 'tooltip-theme');
 const templateSettings = computed(() => ({
   FromHorizontalOffset: Number(props.HorizontalOffset || 0),
   FromVerticalOffset: Number(props.VerticalOffset || 0)
@@ -432,10 +432,10 @@ defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSe
 </script>
 
 <style>
-.win-tooltip-anchor { display: inline-flex; position: relative; }
-.win-tooltip {
+.tooltip-anchor { display: inline-flex; position: relative; }
+.tooltip {
   position: fixed;
-  z-index: var(--win-tooltip-z-index, var(--win-tip-z-index, 2147483647));
+  z-index: var(--tooltip-z-index, var(--win-tip-z-index, 2147483647));
   min-width: max-content;
   max-width: 320px;
   padding: 6px 9px 8px;
@@ -460,17 +460,17 @@ defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSe
   isolation: isolate;
 }
 
-.win-tooltip .win-text-block {
+.tooltip .win-text-block {
   display: inline;
   color: inherit;
   font-size: inherit;
   line-height: inherit;
 }
-.win-tooltip-enter-active { animation: win-tooltip-fade-in 167ms linear both; }
-.win-tooltip-leave-active { animation: win-tooltip-fade-out 167ms linear both; }
-@keyframes win-tooltip-fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes win-tooltip-fade-out { from { opacity: 1; } to { opacity: 0; } }
+.tooltip-enter-active { animation: tooltip-fade-in 167ms linear both; }
+.tooltip-leave-active { animation: tooltip-fade-out 167ms linear both; }
+@keyframes tooltip-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tooltip-fade-out { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .win-tooltip-enter-active, .win-tooltip-leave-active { animation-duration: 1ms; }
+  .tooltip-enter-active, .tooltip-leave-active { animation-duration: 1ms; }
 }
 </style>

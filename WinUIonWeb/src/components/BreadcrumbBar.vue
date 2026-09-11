@@ -14,7 +14,7 @@
         :class="{ 'is-crumbled': !ellipsisIsRendered }"
         :aria-hidden="ellipsisIsRendered ? undefined : 'true'"
         :inert="ellipsisIsRendered ? undefined : ''">
-        <WinButton
+        <Button
           ref="ellipsisButtonRef"
           class="win-breadcrumb-item-button win-breadcrumb-ellipsis-button"
           :IsEnabled="IsEnabled"
@@ -23,13 +23,13 @@
           @focus="OnItemGotFocus(ELLIPSIS_INDEX)"
           @Click="OpenFlyout"
           @keydown="OnItemKeyDown($event, ELLIPSIS_INDEX)">
-          <WinTextBlock
+          <TextBlock
             class="win-breadcrumb-ellipsis-glyph icon"
             Text="&#xE712;"
             FontFamily="var(--SymbolThemeFontFamily, 'Segoe Fluent Icons')"
             :IsTextScaleFactorEnabled="false" />
-        </WinButton>
-        <WinTextBlock
+        </Button>
+        <TextBlock
           class="win-breadcrumb-chevron icon"
           :Text="ChevronGlyph"
           FontFamily="var(--SymbolThemeFontFamily, 'Segoe Fluent Icons')"
@@ -50,7 +50,7 @@
         }"
         :aria-hidden="IsItemCrumbled(Index) ? 'true' : undefined"
         :inert="IsItemCrumbled(Index) ? '' : undefined">
-        <WinButton
+        <Button
           v-if="Index < Items.length - 1"
           :ref="(element) => SetItemControlRef(Index, element)"
           class="win-breadcrumb-item-button"
@@ -67,14 +67,14 @@
               v-if="ItemTemplate"
               :Item="Item"
               :Index="Index" />
-            <WinTextBlock
+            <TextBlock
               v-else
               class="win-breadcrumb-item-content"
               :Text="GetItemText(Item)"
               LineHeight="20"
               TextWrapping="NoWrap" />
           </slot>
-        </WinButton>
+        </Button>
 
         <div
           v-else
@@ -94,7 +94,7 @@
               v-if="ItemTemplate"
               :Item="Item"
               :Index="Index" />
-            <WinTextBlock
+            <TextBlock
               v-else
               class="win-breadcrumb-item-content"
               :Text="GetItemText(Item)"
@@ -103,7 +103,7 @@
           </slot>
         </div>
 
-        <WinTextBlock
+        <TextBlock
           v-if="Index < Items.length - 1"
           class="win-breadcrumb-chevron icon"
           :Text="ChevronGlyph"
@@ -115,14 +115,14 @@
     </div>
   </nav>
 
-  <WinMenuFlyout
+  <MenuFlyout
     :Open="ellipsisFlyoutIsOpen"
     :AnchorRect="ellipsisAnchorRect"
     Placement="Bottom"
     :MinWidth="20"
     @Close="CloseFlyout">
     <div class="win-breadcrumb-flyout-items" role="menu">
-      <WinButton
+      <Button
         v-for="({ Item, Index }, FlyoutIndex) in HiddenItems"
         :key="GetItemKey(Item, Index)"
         :ref="(element) => SetFlyoutItemRef(FlyoutIndex, element)"
@@ -141,23 +141,23 @@
             v-if="ItemTemplate"
             :Item="Item"
             :Index="Index" />
-          <WinTextBlock
+          <TextBlock
             v-else
             class="win-breadcrumb-flyout-item-content"
             :Text="GetItemText(Item)"
             LineHeight="20"
             TextWrapping="NoWrap" />
         </slot>
-      </WinButton>
+      </Button>
     </div>
-  </WinMenuFlyout>
+  </MenuFlyout>
 </template>
 
 <script setup>
 import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue';
-import WinButton from './WinButton.vue';
-import WinMenuFlyout from './WinMenuFlyout.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import Button from './Button.vue';
+import MenuFlyout from './MenuFlyout.vue';
+import TextBlock from './TextBlock.vue';
 import { useI18n } from './i18n/index';
 
 const ELLIPSIS_INDEX = -1;

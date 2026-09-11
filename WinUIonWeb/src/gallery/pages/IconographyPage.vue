@@ -1,13 +1,13 @@
 <template>
   <div class="gallery-item-page">
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <div class="page-description">
               <p>Browse and search the Fluent System Icons library. Click any icon to see usage details.</p>
             </div>
 
             <div class="icon-gallery-container">
-              <WinAutoSuggestBox
+              <AutoSuggestBox
                 v-model:Text="searchText"
                 PlaceholderText="Search icons by name, code, or tags"
                 queryIcon="🔍"
@@ -17,7 +17,7 @@
 
               <div class="gallery-layout">
                 <div class="icons-grid-container">
-                  <WinItemsView
+                  <ItemsView
                     :itemsSource="filteredIcons"
                     layout="Grid"
                     selectionMode="Single"
@@ -33,7 +33,7 @@
                         <div class="icon-name">{{ item.name }}</div>
                       </div>
                     </template>
-                  </WinItemsView>
+                  </ItemsView>
 
                   <div v-if="filteredIcons.length === 0" class="no-results">
                     <p>No icons found.</p>
@@ -115,16 +115,16 @@
               </div>
             </div>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, inject } from 'vue';
-import WinAutoSuggestBox from '../../components/WinAutoSuggestBox.vue';
-import WinItemsView from '../../components/WinItemsView.vue';
+import AutoSuggestBox from '../../components/AutoSuggestBox.vue';
+import ItemsView from '../../components/ItemsView.vue';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 import { createPageState } from '../../utils/pageState';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'iconography');

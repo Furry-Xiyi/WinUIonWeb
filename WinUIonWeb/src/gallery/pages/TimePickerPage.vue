@@ -1,79 +1,79 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div style="position: relative;" class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.timepicker')" />
-          <WinTextBlock
+          <TextBlock class="page-header" :Text="$t('text.timepicker')" />
+          <TextBlock
             class="page-description"
             :Text="$t('text.use-a-timepicker-to-let-users-set-a-time-in-your')"
             TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme">
+            <Button class="header-action" @click="toggleTheme">
               <span class="icon"></span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
              >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
               class="basic-input-example-theme"
               :headerText="$t('text.a-simple-timepicker')"
               :theme="pageTheme"
               :vue="example1Vue">
               <template #example>
-                <WinTimePicker />
+                <TimePicker />
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample
+            <ControlExample
               class="basic-input-example-theme"
               :headerText="$t('sample.timepicker.header-minute-increment')"
               :theme="pageTheme"
               :vue="example2Vue">
               <template #example>
-                <WinTimePicker :Header="$t('sample.timepicker.arrival-time')" :MinuteIncrement="15" />
+                <TimePicker :Header="$t('sample.timepicker.arrival-time')" :MinuteIncrement="15" />
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample
+            <ControlExample
               class="basic-input-example-theme"
               :headerText="$t('sample.timepicker.24-hour-clock')"
               :theme="pageTheme"
               :vue="example3Vue">
               <template #example>
-                <WinTimePicker
+                <TimePicker
                   ClockIdentifier="24HourClock"
                   :Header="$t('sample.timepicker.24-hour-clock-header')" />
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinTimePicker from '../../components/WinTimePicker.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import TimePicker from '../../components/TimePicker.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'timepicker');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const example1Vue = `<WinTimePicker />`;
+const example1Vue = `<TimePicker />`;
 
-const example2Vue = `<WinTimePicker Header="Arrival time" :MinuteIncrement="15" />`;
+const example2Vue = `<TimePicker Header="Arrival time" :MinuteIncrement="15" />`;
 
-const example3Vue = `<WinTimePicker
+const example3Vue = `<TimePicker
   ClockIdentifier="24HourClock"
   Header="24 hour clock" />`;
 </script>

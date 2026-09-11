@@ -22,7 +22,7 @@
               @click.stop="toggleExpand(node)"></span>
 
         <div v-if="selectionMode === 'Multiple' || selectionMode === 'Extended'" class="tree-checkbox" @click.stop>
-          <WinCheckBox :IsThreeState="true"
+          <CheckBox :IsThreeState="true"
                        :IsChecked="getCheckValue(node)"
                        @update:IsChecked="onCheck(node, $event)" />
         </div>
@@ -33,7 +33,7 @@
       </div>
 
       <div v-if="node.expanded && hasChildren(node)" class="tree-children">
-        <WinTreeView v-model:ItemsSource="node.children"
+        <TreeView v-model:ItemsSource="node.children"
                      :SelectionMode="selectionMode"
                      :CanDragItems="canDragItems"
                      :AllowDrop="allowDrop"
@@ -42,7 +42,7 @@
           <template #item="{ item }">
             <slot name="item" :item="item"></slot>
           </template>
-        </WinTreeView>
+        </TreeView>
       </div>
     </div>
   </div>
@@ -50,7 +50,7 @@
 
 <script setup>
 import { computed, ref, defineProps, defineEmits } from 'vue';
-import WinCheckBox from './WinCheckBox.vue';
+import CheckBox from './CheckBox.vue';
 
 const props = defineProps({
   ItemsSource: { type: Array, default: null },

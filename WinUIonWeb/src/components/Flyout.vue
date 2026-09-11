@@ -1,31 +1,33 @@
 <template>
-  <span class="win-flyout-anchor" ref="anchorRef">
+  <span class="flyout-anchor" ref="anchorRef">
     <slot name="trigger" :Flyout="flyoutController"></slot>
     <Teleport :to="teleportTarget">
-      <div v-if="effectiveIsOpen" class="win-flyout-dismiss-layer" @pointerdown="onLightDismiss"></div>
+      <div v-if="effectiveIsOpen" class="flyout-dismiss-layer" @pointerdown="onLightDismiss"></div>
       <div
         v-if="effectiveIsOpen"
         ref="flyoutRef"
-        class="win-flyout"
+        class="flyout"
         :class="[themeClass, openDirection === 'up' ? 'opens-up' : 'opens-down']"
         :style="flyoutStyle"
         @pointerdown.stop>
-        <WinScrollViewer
-          class="win-flyout-scroll"
+        <ScrollViewer
+          class="flyout-scroll"
           VerticalScrollMode="Auto"
           VerticalScrollBarVisibility="Auto"
           HorizontalScrollMode="Disabled"
           HorizontalScrollBarVisibility="Disabled">
           <slot></slot>
-        </WinScrollViewer>
+        </ScrollViewer>
       </div>
     </Teleport>
   </span>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import WinScrollViewer from './WinScrollViewer.vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch } from 'vue';
+import ScrollViewer from './ScrollViewer.vue';
+
+defineOptions({ name: 'Flyout' });
 
 const props = defineProps({
   IsOpen: { type: Boolean, default: undefined },
@@ -39,11 +41,13 @@ const props = defineProps({
 const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed', 'Opening', 'Closing']);
 
 const anchorRef = ref<HTMLElement | null>(null);
+const buttonFlyoutAnchor = inject<{ value: HTMLElement | null } | null>('buttonFlyoutAnchor', null);
 const flyoutRef = ref<HTMLElement | null>(null);
 const localIsOpen = ref(false);
 const position = ref({ top: 0, left: 0, maxHeight: 0, minWidth: 0 });
 const openDirection = ref('down');
 const teleportTarget = ref<string | HTMLElement>('body');
+const slots = useSlots();
 
 const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
 const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
@@ -65,7 +69,7 @@ const setOpen = (value: boolean) => {
 };
 
 const updatePosition = async () => {
-  const anchor = anchorRef.value;
+  const anchor = buttonFlyoutAnchor?.value || anchorRef.value;
   if (!anchor) return;
   const rect = anchor.getBoundingClientRect();
   const margin = 8;
@@ -137,6 +141,7 @@ const flyoutController = {
 const onLightDismiss = () => {
   if (props.IsLightDismissEnabled) hide();
 };
+const onGlobalHide = () => hide();
 
 watch(() => props.IsOpen, async (value: boolean | undefined) => {
   if (value) {
@@ -170,6 +175,9 @@ onMounted(() => {
   window.addEventListener('blur', onWindowBlur);
   document.addEventListener('keydown', onKeyDown, true);
   document.addEventListener('fullscreenchange', onFullscreenChanged);
+  window.addEventListener('winui-flyout-hide', onGlobalHide);
+  const button = buttonFlyoutAnchor?.value;
+  if (!slots.trigger) button?.addEventListener('click', toggle);
 });
 
 onBeforeUnmount(() => {
@@ -178,28 +186,31 @@ onBeforeUnmount(() => {
   window.removeEventListener('blur', onWindowBlur);
   document.removeEventListener('keydown', onKeyDown, true);
   document.removeEventListener('fullscreenchange', onFullscreenChanged);
+  window.removeEventListener('winui-flyout-hide', onGlobalHide);
+  if (!slots.trigger) buttonFlyoutAnchor?.value?.removeEventListener('click', toggle);
 });
 
 defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
 </script>
 
 <style>
-.win-flyout-anchor {
+.flyout-anchor {
   display: inline-flex;
 }
 
-.win-flyout-dismiss-layer {
+.flyout-dismiss-layer {
   position: fixed;
   inset: 0;
   z-index: 989;
 }
 
-.win-flyout {
+.flyout {
   position: fixed;
   z-index: 990;
   min-width: 20px;
   max-width: min(420px, calc(100vw - 16px));
-  padding: 16px;
+  /* DefaultFlyoutPresenterStyle in WinUI uses a 12px presenter inset. */
+  padding: 12px;
   overflow: hidden;
   color: var(--text-primary);
   --win-acrylic-fill: var(--flyout-background, var(--flyout-bg));
@@ -208,52 +219,52 @@ defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
   border: 1px solid var(--surface-stroke-color-flyout, var(--flyout-border));
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  --win-flyout-shadow-bleed: 32px;
+  --flyout-shadow-bleed: 32px;
   -webkit-backdrop-filter: var(--flyout-backdrop);
   backdrop-filter: var(--flyout-backdrop);
 }
 
-.win-flyout-scroll {
+.flyout-scroll {
   width: 100%;
   max-height: inherit;
 }
 
-.win-flyout-scroll :deep(.win-scroll-viewer-viewport) {
+.flyout-scroll :deep(.win-scroll-viewer-viewport) {
   height: auto;
   max-height: inherit;
 }
 
-.win-flyout.opens-down {
-  animation: win-flyout-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, win-flyout-opacity 83ms linear both;
+.flyout.opens-down {
+  animation: flyout-open-down 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, flyout-opacity 83ms linear both;
 }
 
-.win-flyout.opens-up {
-  animation: win-flyout-open-up 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, win-flyout-opacity 83ms linear both;
+.flyout.opens-up {
+  animation: flyout-open-up 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, flyout-opacity 83ms linear both;
 }
 
-@keyframes win-flyout-opacity {
+@keyframes flyout-opacity {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes win-flyout-open-down {
+@keyframes flyout-open-down {
   from {
     clip-path: inset(0 0 calc(100% - 1px) 0);
     transform: translateY(-16px);
   }
   to {
-    clip-path: inset(calc(-1 * var(--win-flyout-shadow-bleed)));
+    clip-path: inset(calc(-1 * var(--flyout-shadow-bleed)));
     transform: translateY(0);
   }
 }
 
-@keyframes win-flyout-open-up {
+@keyframes flyout-open-up {
   from {
     clip-path: inset(calc(100% - 1px) 0 0 0);
     transform: translateY(16px);
   }
   to {
-    clip-path: inset(calc(-1 * var(--win-flyout-shadow-bleed)));
+    clip-path: inset(calc(-1 * var(--flyout-shadow-bleed)));
     transform: translateY(0);
   }
 }

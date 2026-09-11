@@ -13,7 +13,7 @@
         v-if="showStandardIcon"
         class="win-infobar-standard-icon-area"
         aria-hidden="true">
-        <WinTextBlock
+        <TextBlock
           class="win-infobar-standard-icon"
           :Text="severityIconGlyph"
           :Foreground="standardIconForeground"
@@ -26,7 +26,7 @@
         v-else-if="showUserIcon"
         class="win-infobar-user-icon-box"
         aria-hidden="true">
-        <WinTextBlock
+        <TextBlock
           class="win-infobar-user-icon"
           :Text="userIconGlyph"
           :FontFamily="userIconFontFamily"
@@ -39,7 +39,7 @@
         ref="panelRef"
         class="win-infobar-panel"
         :class="panelStateClass">
-        <WinTextBlock
+        <TextBlock
           v-if="Title"
           class="win-infobar-title"
           :Text="Title"
@@ -48,7 +48,7 @@
           FontSize="14"
           FontWeight="600"
           LineHeight="20" />
-        <WinTextBlock
+        <TextBlock
           v-if="Message"
           class="win-infobar-message"
           :Text="Message"
@@ -83,14 +83,14 @@
             :is="ContentTemplate"
             v-if="ContentTemplate"
             :Content="Content" />
-          <WinTextBlock
+          <TextBlock
             v-else-if="Content !== null && Content !== undefined"
             :Text="Content"
             TextWrapping="WrapWholeWords" />
         </slot>
       </div>
 
-      <WinButton
+      <Button
         v-if="IsClosable"
         class="win-infobar-close-button"
         :class="{ 'uses-default-close-button-style': usesDefaultCloseButtonStyle }"
@@ -98,13 +98,13 @@
         :aria-label="t('control.infobar.close-button-name')"
         v-bind="{ 'tooltipservice.tooltip': t('control.infobar.close-button-tooltip') }"
         @Click="onCloseButtonClick">
-        <WinTextBlock
+        <TextBlock
           class="win-infobar-close-glyph"
           Text="&#xE711;"
           FontFamily="WinUIOnWebIcons"
           FontSize="12"
           LineHeight="16" />
-      </WinButton>
+      </Button>
     </div>
   </section>
 </template>
@@ -120,8 +120,8 @@ import {
   useAttrs,
   watch
 } from 'vue';
-import WinButton from './WinButton.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import Button from './Button.vue';
+import TextBlock from './TextBlock.vue';
 import { useI18n } from './i18n/index';
 
 defineOptions({

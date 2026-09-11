@@ -1,86 +1,97 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.dropdownbutton')" />
-          <WinTextBlock class="page-description" :Text="$t('text.a-dropdownbutton-is-a-button-that-displays-a-che')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" Text="{x:Bind $t('text.dropdownbutton'), Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind $t('text.a-dropdownbutton-is-a-button-that-displays-a-che'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="dropDownButtonSimpleVue" :headerText="$t('sample.dropdown.simple')">
-              <template #example>
-                <WinDropDownButton :Content="$t('text.email')" :Flyout="emailFlyout" />
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="dropDownButtonIconVue" :headerText="$t('sample.dropdown.icons')">
-              <template #example>
-                <WinDropDownButton AutomationProperties.Name="Email" :Flyout="emailIconFlyout">
-                  <span class="icon">&#xE715;</span>
-                </WinDropDownButton>
-              </template>
-            </WinControlExample>
+        <ControlExample class="basic-input-example-theme" SampleDefinition="DropDownButton\DropDownButtonSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind dropDownButtonSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.dropdown.simple'), Mode=OneWay}">
+              <StackPanel Orientation="Horizontal">
+                <DropDownButton Content="{x:Bind $t('text.email'), Mode=OneWay}">
+                  <DropDownButton.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                      <MenuFlyoutItem Text="{x:Bind $t('text.send'), Mode=OneWay}" />
+                      <MenuFlyoutItem Text="{x:Bind $t('text.reply'), Mode=OneWay}" />
+                      <MenuFlyoutItem Text="{x:Bind $t('text.reply-all'), Mode=OneWay}" />
+                    </MenuFlyout>
+                  </DropDownButton.Flyout>
+                </DropDownButton>
+              </StackPanel>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="DropDownButton\DropDownButtonIcon.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind dropDownButtonIconVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.dropdown.icons'), Mode=OneWay}">
+              <StackPanel Orientation="Horizontal">
+                <DropDownButton AutomationProperties.Name="Email">
+                  <DropDownButton.Content>
+                    <FontIcon Glyph="&#xE715;" />
+                  </DropDownButton.Content>
+                  <DropDownButton.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                      <MenuFlyoutItem Text="{x:Bind $t('text.send'), Mode=OneWay}"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE725;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                      <MenuFlyoutItem Text="{x:Bind $t('text.reply'), Mode=OneWay}"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8CA;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                      <MenuFlyoutItem Text="{x:Bind $t('text.reply-all'), Mode=OneWay}"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8C2;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                    </MenuFlyout>
+                  </DropDownButton.Flyout>
+                </DropDownButton>
+              </StackPanel>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinDropDownButton from '../../components/WinDropDownButton.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import DropDownButton from '../../components/DropDownButton.vue';
+import { MenuFlyout, MenuFlyoutItem } from '../../components/DropDownButtonProperties';
+import FontIcon from '../../components/FontIcon.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'dropdownbutton');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const emailFlyout = {
-  Placement: 'BottomEdgeAlignedLeft',
-  Items: [
-    { Text: t('text.send') },
-    { Text: t('text.reply') },
-    { Text: t('text.reply-all') }
-  ]
-};
-
-const emailIconFlyout = {
-  Placement: 'BottomEdgeAlignedLeft',
-  Items: [
-    { Text: t('text.send'), Icon: '\uE725' },
-    { Text: t('text.reply'), Icon: '\uE8CA' },
-    { Text: t('text.reply-all'), Icon: '\uE8C2' }
-  ]
-};
-
-const dropDownButtonSimpleVue = `<WinDropDownButton Content="Email" :Flyout="{
-  Placement: 'BottomEdgeAlignedLeft',
-  Items: [
-    { Text: 'Send' },
-    { Text: 'Reply' },
-    { Text: 'Reply All' }
-  ]
-}" />`;
-const dropDownButtonIconVue = `<WinDropDownButton AutomationProperties.Name="Email" :Flyout="{
-  Placement: 'BottomEdgeAlignedLeft',
-  Items: [
-    { Text: 'Send', Icon: '\\uE725' },
-    { Text: 'Reply', Icon: '\\uE8CA' },
-    { Text: 'Reply All', Icon: '\\uE8C2' }
-  ]
-}">
-  <span class="icon">&#xE715;</span>
-</WinDropDownButton>`;
+const dropDownButtonSimpleVue = `<DropDownButton Content="{x:Bind $t('text.email'), Mode=OneWay}">
+  <DropDownButton.Flyout>
+    <MenuFlyout Placement="BottomEdgeAlignedLeft">
+      <MenuFlyoutItem Text="{x:Bind $t('text.send'), Mode=OneWay}" />
+      <MenuFlyoutItem Text="{x:Bind $t('text.reply'), Mode=OneWay}" />
+      <MenuFlyoutItem Text="{x:Bind $t('text.reply-all'), Mode=OneWay}" />
+    </MenuFlyout>
+  </DropDownButton.Flyout>
+</DropDownButton>`;
+const dropDownButtonIconVue = `<DropDownButton AutomationProperties.Name="Email">
+  <DropDownButton.Content>
+    <FontIcon Glyph="&#xE715;" />
+  </DropDownButton.Content>
+  <DropDownButton.Flyout>
+    <MenuFlyout Placement="BottomEdgeAlignedLeft">
+      <MenuFlyoutItem Text="{x:Bind $t('text.send'), Mode=OneWay}">
+        <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE725;" /></MenuFlyoutItem.Icon>
+      </MenuFlyoutItem>
+      <MenuFlyoutItem Text="{x:Bind $t('text.reply'), Mode=OneWay}">
+        <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8CA;" /></MenuFlyoutItem.Icon>
+      </MenuFlyoutItem>
+      <MenuFlyoutItem Text="{x:Bind $t('text.reply-all'), Mode=OneWay}">
+        <MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8C2;" /></MenuFlyoutItem.Icon>
+      </MenuFlyoutItem>
+    </MenuFlyout>
+  </DropDownButton.Flyout>
+</DropDownButton>`;
 </script>
 
 <style scoped>

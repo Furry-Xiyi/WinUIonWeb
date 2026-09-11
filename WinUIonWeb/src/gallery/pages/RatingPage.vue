@@ -1,75 +1,80 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.ratingcontrol')" />
-          <WinTextBlock class="page-description" :Text="$t('text.the-ratingcontrol-allows-users-to-view-and-set-r')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" Text="{x:Bind $t('text.ratingcontrol'), Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind $t('text.the-ratingcontrol-allows-users-to-view-and-set-r'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="ratingSimpleVue" :headerText="$t('text.a-simple-ratingcontrol')">
-              <template #example>
-                <WinRating
-                  :Value="ratingValue"
-                  :Caption="ratingCaption"
-                  :IsClearEnabled="clearEnabled"
-                  :IsReadOnly="readOnly"
-                  @update:Value="ratingValue = $event"
-                  @ValueChanged="onRatingValueChanged" />
-              </template>
-              <template #options>
-                <div class="rating-options">
-                  <WinTextBlock FontWeight="Bold" :Text="String(ratingValue)" />
-                  <WinCheckBox v-model:IsChecked="clearEnabled"><WinTextBlock Text="IsClearEnabled" /></WinCheckBox>
-                  <WinTextBlock :Text="$t('sample.rating.clear-note')" TextWrapping="WrapWholeWords" />
-                  <WinCheckBox Margin="0,12,0,0" v-model:IsChecked="readOnly"><WinTextBlock Text="IsReadOnly" /></WinCheckBox>
-                </div>
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="ratingPlaceholderVue" :headerText="$t('sample.rating.placeholder')">
-              <template #example>
-                <WinRating :PlaceholderValue="placeholderValue" />
-              </template>
-              <template #options>
-                <div
-                  class="rating-options"
-                  @pointerdown="isPlaceholderSliderDragging = true"
-                  @pointerup="commitPlaceholderSlider"
-                  @pointercancel="commitPlaceholderSlider">
-                  <WinSlider
-                    :Header="$t('sample.placeholder-value')"
-                    :Value="placeholderSliderValue"
-                    :Minimum="0"
-                    :Maximum="5"
-                    :SmallChange="0.5"
-                    :StepFrequency="0.5"
-                    @update:Value="onPlaceholderSliderValueChanged" />
-                </div>
-              </template>
-            </WinControlExample>
+        <ControlExample class="basic-input-example-theme" SampleDefinition="RatingControl\RatingControlSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind ratingSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('text.a-simple-ratingcontrol'), Mode=OneWay}">
+              <ControlExample.Example>
+                <StackPanel VerticalAlignment="Top">
+                  <RatingControl
+                    HorizontalAlignment="Left"
+                    Caption="{x:Bind ratingCaption, Mode=OneWay}"
+                    IsClearEnabled="{x:Bind clearEnabled, Mode=OneWay}"
+                    IsReadOnly="{x:Bind readOnly, Mode=OneWay}"
+                    Value="{x:Bind ratingValue, Mode=TwoWay}"
+                    ValueChanged="onRatingValueChanged" />
+                </StackPanel>
+              </ControlExample.Example>
+              <ControlExample.Output>
+                <TextBlock FontWeight="Bold" Text="{x:Bind String(ratingValue), Mode=OneWay}" />
+              </ControlExample.Output>
+              <ControlExample.Options>
+                <StackPanel Width="220">
+                  <CheckBox IsChecked="{x:Bind clearEnabled, Mode=TwoWay}"><TextBlock Text="{x:Bind $t('sample.rating.is-clear-enabled'), Mode=OneWay}" /></CheckBox>
+                  <TextBlock Text="{x:Bind $t('sample.rating.clear-note'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                  <CheckBox Margin="0,12,0,0" IsChecked="{x:Bind readOnly, Mode=TwoWay}"><TextBlock Text="{x:Bind $t('sample.rating.is-read-only'), Mode=OneWay}" /></CheckBox>
+                </StackPanel>
+              </ControlExample.Options>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="RatingControl\RatingControlPlaceholder.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind ratingPlaceholderVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.rating.placeholder'), Mode=OneWay}">
+              <ControlExample.Example>
+                <RatingControl
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  AutomationProperties.Name="RatingControl with placeholder"
+                  PlaceholderValue="{x:Bind placeholderValue, Mode=OneWay}" />
+              </ControlExample.Example>
+              <ControlExample.Options>
+                <StackPanel Width="220">
+                  <Slider
+                    Header="{x:Bind $t('sample.placeholder-value'), Mode=OneWay}"
+                    Value="{x:Bind placeholderSliderValue, Mode=TwoWay}"
+                    Minimum="{x:Bind 0, Mode=OneWay}"
+                    Maximum="{x:Bind 5, Mode=OneWay}"
+                    SmallChange="{x:Bind 0.5, Mode=OneWay}"
+                    StepFrequency="{x:Bind 0.5, Mode=OneWay}"
+                    ValueChanged="onPlaceholderSliderValueChanged" />
+                </StackPanel>
+              </ControlExample.Options>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinRating from '../../components/WinRating.vue';
-import WinSlider from '../../components/WinSlider.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import RatingControl from '../../components/Rating.vue';
+import Slider from '../../components/Slider.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'rating');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -79,8 +84,10 @@ const ratingValue = ref(-1);
 const clearEnabled = ref(false);
 const readOnly = ref(false);
 const placeholderSliderValue = ref(1);
-const isPlaceholderSliderDragging = ref(false);
-const placeholderValue = computed(() => Math.max(1, placeholderSliderValue.value));
+const placeholderValue = computed(() => {
+  const numericValue = Number(placeholderSliderValue.value);
+  return Number.isFinite(numericValue) ? Math.max(1, Math.min(5, numericValue)) : 1;
+});
 const ratingCaptionChanged = ref(false);
 const ratingCaption = ref(t('sample.rating.caption'));
 
@@ -89,25 +96,33 @@ const onRatingValueChanged = () => {
   ratingCaption.value = t('sample.rating.your-rating');
 };
 
-const onPlaceholderSliderValueChanged = (value) => {
-  placeholderSliderValue.value = !isPlaceholderSliderDragging.value && value < 1 ? 1 : value;
+const onPlaceholderSliderValueChanged = (event) => {
+  // Slider raises the XAML-shaped ValueChanged payload. The previous
+  // handler stored that object in the bound ref, which made the value NaN
+  // and left the placeholder/rating display stuck at zero.
+  const rawValue = typeof event === 'number'
+    ? event
+    : event?.NewValue ?? event?.Value ?? event?.value;
+  const numericValue = Number(rawValue);
+  const steppedValue = Number.isFinite(numericValue)
+    ? Math.round(numericValue * 2) / 2
+    : 1;
+  // RatingControl's effective minimum is 1.0. Dragging the options slider
+  // to zero therefore returns to 1.0, while retaining the official 0.5 step.
+  placeholderSliderValue.value = Math.max(1, Math.min(5, steppedValue));
 };
+const RatingControl1_ValueChanged = () => onRatingValueChanged();
 
-const commitPlaceholderSlider = () => {
-  isPlaceholderSliderDragging.value = false;
-  if (placeholderSliderValue.value < 1) placeholderSliderValue.value = 1;
-};
-
-const ratingSimpleVue = `<WinRating
+const ratingSimpleVue = `<RatingControl
   AutomationProperties.Name="Simple RatingControl"
-  :Caption="ratingCaption"
-  :IsClearEnabled="clearEnabled"
-  :IsReadOnly="readOnly"
-  @ValueChanged="ratingCaption = 'Your rating'" />`;
+  Caption="{x:Bind ratingCaption, Mode=OneWay}"
+  IsClearEnabled="{x:Bind clearEnabled, Mode=OneWay}"
+  IsReadOnly="{x:Bind readOnly, Mode=OneWay}"
+  ValueChanged="RatingControl1_ValueChanged" />`;
 
-const ratingPlaceholderVue = `<WinRating AutomationProperties.Name="RatingControl with placeholder" :PlaceholderValue="placeholderValue" />
+const ratingPlaceholderVue = `<RatingControl AutomationProperties.Name="RatingControl with placeholder" PlaceholderValue="{x:Bind placeholderValue, Mode=OneWay}" />
 
-<WinSlider Header="PlaceholderValue" :Minimum="0" :Maximum="5" :SmallChange="0.5" :StepFrequency="0.5" :Value="placeholderSliderValue" />`;
+<Slider Header="{x:Bind $t('sample.placeholder-value'), Mode=OneWay}" Minimum="{x:Bind 0, Mode=OneWay}" Maximum="{x:Bind 5, Mode=OneWay}" SmallChange="{x:Bind 0.5, Mode=OneWay}" StepFrequency="{x:Bind 0.5, Mode=OneWay}" Value="{x:Bind placeholderSliderValue, Mode=OneWay}" />`;
 </script>
 
 <style scoped>

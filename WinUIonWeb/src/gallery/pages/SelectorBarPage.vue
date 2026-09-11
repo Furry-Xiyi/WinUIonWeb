@@ -1,54 +1,54 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.selectorbar')" />
-        <WinTextBlock
+        <TextBlock class="page-header" :Text="$t('text.selectorbar')" />
+        <TextBlock
           class="page-description"
           :Text="$t('text.selectorbar-description')"
           TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" @Click="toggleTheme">
-            <WinTextBlock class="icon" Text="&#xE793;" />
-          </WinButton>
-          <WinToggleButton
+          <Button class="header-action" @Click="toggleTheme">
+            <TextBlock class="icon" Text="&#xE793;" />
+          </Button>
+          <ToggleButton
             :IsChecked="isFavoriteState"
             class="header-action"
             @update:IsChecked="toggleFavorite">
-            <WinTextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </WinToggleButton>
+            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
+          </ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :theme="pageTheme"
           :vue="BasicSelectorBarVue"
           :headerText="$t('sample.selectorbar.basic')">
           <template #example>
-            <WinSelectorBar>
-              <WinSelectorBarItem :Text="$t('text.recent')" Icon="Clock" />
-              <WinSelectorBarItem :Text="$t('text.shared')" Icon="Share" />
-              <WinSelectorBarItem :Text="$t('text.favorites')" Icon="Favorite" />
-            </WinSelectorBar>
+            <SelectorBar>
+              <SelectorBarItem :Text="$t('text.recent')" Icon="Clock" />
+              <SelectorBarItem :Text="$t('text.shared')" Icon="Share" />
+              <SelectorBarItem :Text="$t('text.favorites')" Icon="Favorite" />
+            </SelectorBar>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :theme="pageTheme"
           :vue="FrameSlideTransitionsVue"
           :headerText="$t('sample.selectorbar.frame-slide-transitions')">
           <template #example>
             <div class="selectorbar-sample-stack">
-              <WinSelectorBar @SelectionChanged="SelectorBar2_SelectionChanged">
-                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-1')" IsSelected />
-                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-2')" />
-                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-3')" />
-                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-4')" />
-                <WinSelectorBarItem :Text="$t('sample.selectorbar.page-5')" />
-              </WinSelectorBar>
+              <SelectorBar @SelectionChanged="SelectorBar2_SelectionChanged">
+                <SelectorBarItem :Text="$t('sample.selectorbar.page-1')" IsSelected />
+                <SelectorBarItem :Text="$t('sample.selectorbar.page-2')" />
+                <SelectorBarItem :Text="$t('sample.selectorbar.page-3')" />
+                <SelectorBarItem :Text="$t('sample.selectorbar.page-4')" />
+                <SelectorBarItem :Text="$t('sample.selectorbar.page-5')" />
+              </SelectorBar>
 
               <div class="selectorbar-content-frame">
                 <div
@@ -65,12 +65,12 @@
                     v-if="CurrentFramePage.Body"
                     class="sample-page-copy"
                     :class="CurrentFramePage.CopyClass">
-                    <WinTextBlock
+                    <TextBlock
                       v-if="CurrentFramePage.Title"
                       class="sample-page-title"
                       :Text="CurrentFramePage.Title"
                       TextWrapping="WrapWholeWords" />
-                    <WinTextBlock
+                    <TextBlock
                       class="sample-page-body"
                       :Text="CurrentFramePage.Body"
                       TextWrapping="WrapWholeWords" />
@@ -79,47 +79,47 @@
               </div>
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :theme="pageTheme"
           :vue="DisplayingDifferentCollectionsVue"
           :headerText="$t('sample.selectorbar.collections')">
           <template #example>
             <div class="selectorbar-sample-stack">
-              <WinSelectorBar @SelectionChanged="SelectorBar3_SelectionChanged">
-                <WinSelectorBarItem :Text="$t('sample.selectorbar.pink')" IsSelected />
-                <WinSelectorBarItem :Text="$t('sample.selectorbar.plum')" />
-                <WinSelectorBarItem :Text="$t('sample.selectorbar.powder-blue')" />
-              </WinSelectorBar>
+              <SelectorBar @SelectionChanged="SelectorBar3_SelectionChanged">
+                <SelectorBarItem :Text="$t('sample.selectorbar.pink')" IsSelected />
+                <SelectorBarItem :Text="$t('sample.selectorbar.plum')" />
+                <SelectorBarItem :Text="$t('sample.selectorbar.powder-blue')" />
+              </SelectorBar>
 
-              <WinItemsView
+              <ItemsView
                 class="selectorbar-colors-view"
                 :ItemsSource="ItemsView3ItemsSource"
                 :Layout="ColorsLayout">
                 <template #item="{ item }">
                   <div class="color-item-container" :style="{ background: item }"></div>
                 </template>
-              </WinItemsView>
+              </ItemsView>
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinItemsView from '../../components/WinItemsView.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinSelectorBar from '../../components/WinSelectorBar.vue';
-import WinSelectorBarItem from '../../components/WinSelectorBarItem.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import ItemsView from '../../components/ItemsView.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import SelectorBar from '../../components/SelectorBar.vue';
+import SelectorBarItem from '../../components/SelectorBarItem.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 import {
@@ -242,19 +242,19 @@ const SelectorBar3_SelectionChanged = (sender) => {
   }
 };
 
-const BasicSelectorBarVue = `<WinSelectorBar>
-  <WinSelectorBarItem Text="Recent" Icon="Clock" />
-  <WinSelectorBarItem Text="Shared" Icon="Share" />
-  <WinSelectorBarItem Text="Favorites" Icon="Favorite" />
-</WinSelectorBar>`;
+const BasicSelectorBarVue = `<SelectorBar>
+  <SelectorBarItem Text="Recent" Icon="Clock" />
+  <SelectorBarItem Text="Shared" Icon="Share" />
+  <SelectorBarItem Text="Favorites" Icon="Favorite" />
+</SelectorBar>`;
 
-const FrameSlideTransitionsVue = `<WinSelectorBar @SelectionChanged="SelectorBar2_SelectionChanged">
-  <WinSelectorBarItem Text="Page1" IsSelected />
-  <WinSelectorBarItem Text="Page2" />
-  <WinSelectorBarItem Text="Page3" />
-  <WinSelectorBarItem Text="Page4" />
-  <WinSelectorBarItem Text="Page5" />
-</WinSelectorBar>
+const FrameSlideTransitionsVue = `<SelectorBar @SelectionChanged="SelectorBar2_SelectionChanged">
+  <SelectorBarItem Text="Page1" IsSelected />
+  <SelectorBarItem Text="Page2" />
+  <SelectorBarItem Text="Page3" />
+  <SelectorBarItem Text="Page4" />
+  <SelectorBarItem Text="Page5" />
+</SelectorBar>
 
 <div class="selectorbar-content-frame">
   <div :key="CurrentFramePage.Name" :class="FrameTransitionClass">
@@ -262,19 +262,19 @@ const FrameSlideTransitionsVue = `<WinSelectorBar @SelectionChanged="SelectorBar
   </div>
 </div>`;
 
-const DisplayingDifferentCollectionsVue = `<WinSelectorBar @SelectionChanged="SelectorBar3_SelectionChanged">
-  <WinSelectorBarItem Text="Pink" IsSelected />
-  <WinSelectorBarItem Text="Plum" />
-  <WinSelectorBarItem Text="PowderBlue" />
-</WinSelectorBar>
+const DisplayingDifferentCollectionsVue = `<SelectorBar @SelectionChanged="SelectorBar3_SelectionChanged">
+  <SelectorBarItem Text="Pink" IsSelected />
+  <SelectorBarItem Text="Plum" />
+  <SelectorBarItem Text="PowderBlue" />
+</SelectorBar>
 
-<WinItemsView
+<ItemsView
   :ItemsSource="ItemsView3ItemsSource"
   :Layout="{ Type: 'StackLayout', Orientation: 'Horizontal' }">
   <template #item="{ item }">
     <div class="color-item-container" :style="{ background: item }" />
   </template>
-</WinItemsView>`;
+</ItemsView>`;
 </script>
 
 <style scoped>

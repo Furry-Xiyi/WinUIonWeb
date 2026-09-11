@@ -1,10 +1,10 @@
 <template>
   <Teleport to="body">
-    <Transition name="win-teaching-tip">
+    <Transition name="teaching-tip">
       <section
         v-if="effectiveIsOpen"
         ref="tipRef"
-        class="win-teaching-tip"
+        class="teaching-tip"
         :class="[
           isTargeted ? 'is-targeted' : 'is-untargeted',
           IsLightDismissEnabled ? 'is-light-dismiss' : 'is-normal-dismiss',
@@ -15,27 +15,27 @@
         :style="tipStyle"
         role="dialog"
         @pointerdown.stop>
-        <div v-if="$slots.HeroContent || $slots.hero || HeroContent" class="win-teaching-tip-hero">
+        <div v-if="$slots.HeroContent || $slots.hero || HeroContent" class="teaching-tip-hero">
           <slot name="HeroContent">
             <slot name="hero">
               <template v-if="typeof HeroContent === 'string' || typeof HeroContent === 'number'">{{ HeroContent }}</template>
             </slot>
           </slot>
         </div>
-        <div class="win-teaching-tip-main" :class="{ 'has-alternate-close': ShowAlternateCloseButton }">
-          <div v-if="$slots.IconSource || $slots.icon || IconSource" class="win-teaching-tip-icon">
+        <div class="teaching-tip-main" :class="{ 'has-alternate-close': ShowAlternateCloseButton }">
+          <div v-if="$slots.IconSource || $slots.icon || IconSource" class="teaching-tip-icon">
             <slot name="IconSource"><slot name="icon">{{ iconGlyph }}</slot></slot>
           </div>
-          <div class="win-teaching-tip-text">
-            <WinTextBlock v-if="Title" class="win-teaching-tip-title" :Text="Title" TextWrapping="WrapWholeWords" />
-            <WinTextBlock v-if="Subtitle" class="win-teaching-tip-subtitle" :Text="Subtitle" TextWrapping="WrapWholeWords" />
-            <div v-if="$slots.default || Content" class="win-teaching-tip-content">
+          <div class="teaching-tip-text">
+            <TextBlock v-if="Title" class="teaching-tip-title" :Text="Title" TextWrapping="WrapWholeWords" />
+            <TextBlock v-if="Subtitle" class="teaching-tip-subtitle" :Text="Subtitle" TextWrapping="WrapWholeWords" />
+            <div v-if="$slots.default || Content" class="teaching-tip-content">
               <slot>{{ Content }}</slot>
             </div>
           </div>
-          <WinButton
+          <Button
             v-if="ShowAlternateCloseButton"
-            class="win-teaching-tip-close"
+            class="teaching-tip-close"
             Style="SubtleButtonStyle"
             Width="32"
             Height="32"
@@ -54,30 +54,30 @@
         </div>
         <div
           v-if="ActionButtonContent || CloseButtonContent || $slots.actions"
-          class="win-teaching-tip-actions"
+          class="teaching-tip-actions"
           :class="{ 'both-buttons-visible': ActionButtonContent && CloseButtonContent }">
           <slot name="actions">
-            <WinButton
+            <Button
               v-if="ActionButtonContent"
-              class="win-teaching-tip-action-button"
+              class="teaching-tip-action-button"
               :Style="ActionButtonStyle"
               v-bind="actionButtonStyleAttrs"
               @Click="onAction">
-              <WinTextBlock :Text="ActionButtonContent" />
-            </WinButton>
-            <WinButton
+              <TextBlock :Text="ActionButtonContent" />
+            </Button>
+            <Button
               v-if="CloseButtonContent"
-              class="win-teaching-tip-close-button"
+              class="teaching-tip-close-button"
               :Style="CloseButtonStyle"
               v-bind="closeButtonStyleAttrs"
               @Click="onCloseButton">
-              <WinTextBlock :Text="CloseButtonContent" />
-            </WinButton>
+              <TextBlock :Text="CloseButtonContent" />
+            </Button>
           </slot>
         </div>
         <svg
           v-if="hasVisibleTail"
-          class="win-teaching-tip-tail"
+          class="teaching-tip-tail"
           viewBox="0 0 20 10"
           preserveAspectRatio="none"
           aria-hidden="true">
@@ -91,26 +91,23 @@
 
 <script setup>
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, unref, watch } from 'vue';
-import WinButton from './WinButton.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import Button from './Button.vue';
+import TextBlock from './TextBlock.vue';
 import { useI18n } from './i18n/index';
 
 const { t } = useI18n();
 
+defineOptions({ name: 'TeachingTip' });
+
 const props = defineProps({
   IsOpen: { type: Boolean, default: undefined },
-  visible: { type: Boolean, default: undefined },
   Target: { type: Object, default: null },
-  target: { type: Object, default: null },
   Title: { type: String, default: '' },
-  title: { type: String, default: '' },
   Subtitle: { type: String, default: '' },
-  subtitle: { type: String, default: '' },
   Content: { type: [String, Number, Object], default: '' },
   HeroContent: { type: [String, Number, Object], default: null },
   TailVisibility: { type: String, default: 'Auto' },
   PreferredPlacement: { type: String, default: 'Auto' },
-  preferredPlacement: { type: String, default: '' },
   PlacementMargin: { type: [String, Number, Object], default: 0 },
   ShouldConstrainToRootBounds: { type: Boolean, default: true },
   IsLightDismissEnabled: { type: Boolean, default: false },
@@ -128,7 +125,7 @@ const props = defineProps({
   isTargeted: { type: Boolean, default: undefined }
 });
 
-const emit = defineEmits(['update:IsOpen', 'update:visible', 'ActionButtonClick', 'CloseButtonClick', 'Opened', 'Closed', 'action', 'close']);
+const emit = defineEmits(['update:IsOpen', 'ActionButtonClick', 'CloseButtonClick', 'Opened', 'Closed']);
 
 const tipRef = ref(null);
 const localIsOpen = ref(false);
@@ -139,12 +136,12 @@ const anchorTheme = ref('');
 const documentTheme = ref('');
 let themeObserver = null;
 
-const effectiveIsOpen = computed(() => props.IsOpen ?? props.visible ?? localIsOpen.value);
-const targetValue = computed(() => props.Target || props.target);
+const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
+const targetValue = computed(() => props.Target);
 const isTargeted = computed(() => props.isTargeted ?? Boolean(targetElement()));
-const Title = computed(() => props.Title || props.title);
-const Subtitle = computed(() => props.Subtitle || props.subtitle);
-const PreferredPlacement = computed(() => props.PreferredPlacement || props.preferredPlacement || 'Auto');
+const Title = computed(() => props.Title);
+const Subtitle = computed(() => props.Subtitle);
+const PreferredPlacement = computed(() => props.PreferredPlacement || 'Auto');
 const HeroContent = computed(() => props.HeroContent);
 const ActionButtonContent = computed(() => props.ActionButtonContent);
 const ActionButtonStyle = computed(() => typeof props.ActionButtonStyle === 'string' ? props.ActionButtonStyle : '');
@@ -239,21 +236,18 @@ function observeTheme() {
 const setOpen = (value) => {
   localIsOpen.value = value;
   emit('update:IsOpen', value);
-  emit('update:visible', value);
   emit(value ? 'Opened' : 'Closed');
 };
 
 const close = () => {
   if (!effectiveIsOpen.value) return;
   emit('CloseButtonClick');
-  emit('close');
   setOpen(false);
 };
 
 const onAction = () => {
   executeCommand(props.ActionButtonCommand, props.ActionButtonCommandParameter);
   emit('ActionButtonClick');
-  emit('action');
   setOpen(false);
 };
 
@@ -402,7 +396,6 @@ watch(
   () => [
     props.PlacementMargin,
     props.PreferredPlacement,
-    props.preferredPlacement,
     props.ShouldConstrainToRootBounds,
     props.TailVisibility,
     props.Title,
@@ -436,9 +429,9 @@ defineExpose({ close, updatePosition });
 </script>
 
 <style>
-.win-teaching-tip {
+.teaching-tip {
   position: fixed;
-  z-index: var(--win-teaching-tip-z-index, var(--win-tip-z-index, 2147483646));
+  z-index: var(--teaching-tip-z-index, var(--win-tip-z-index, 2147483646));
   width: max-content;
   min-width: min(320px, calc(100vw - 16px));
   max-width: min(336px, calc(100vw - 16px));
@@ -461,11 +454,11 @@ defineExpose({ close, updatePosition });
   backdrop-filter: var(--teaching-tip-backdrop);
 }
 
-.win-teaching-tip.is-light-dismiss {
+.teaching-tip.is-light-dismiss {
   --teaching-tip-backdrop: var(--flyout-backdrop);
 }
 
-.win-teaching-tip-hero {
+.teaching-tip-hero {
   height: 100px;
   overflow: hidden;
   flex: 0 0 auto;
@@ -473,20 +466,20 @@ defineExpose({ close, updatePosition });
   border-radius: var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px)) var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px)) 0 0;
 }
 
-.win-teaching-tip.hero-placement-bottom .win-teaching-tip-hero {
+.teaching-tip.hero-placement-bottom .teaching-tip-hero {
   order: 3;
   border-radius: 0 0 var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px)) var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px));
 }
 
-.win-teaching-tip.hero-placement-bottom .win-teaching-tip-main {
+.teaching-tip.hero-placement-bottom .teaching-tip-main {
   order: 1;
 }
 
-.win-teaching-tip.hero-placement-bottom .win-teaching-tip-actions {
+.teaching-tip.hero-placement-bottom .teaching-tip-actions {
   order: 2;
 }
 
-.win-teaching-tip-main {
+.teaching-tip-main {
   position: relative;
   display: flex;
   align-items: flex-start;
@@ -494,7 +487,7 @@ defineExpose({ close, updatePosition });
   padding: 12px;
 }
 
-.win-teaching-tip-icon {
+.teaching-tip-icon {
   flex: 0 0 auto;
   width: 20px;
   color: var(--text-primary);
@@ -503,37 +496,37 @@ defineExpose({ close, updatePosition });
   text-align: center;
 }
 
-.win-teaching-tip-text {
+.teaching-tip-text {
   min-width: 0;
   flex: 1;
 }
 
-.win-teaching-tip-main.has-alternate-close .win-teaching-tip-text {
+.teaching-tip-main.has-alternate-close .teaching-tip-text {
   padding-right: 28px;
 }
 
-.win-teaching-tip-title {
+.teaching-tip-title {
   color: var(--TeachingTipTitleForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
 }
 
-.win-teaching-tip-subtitle,
-.win-teaching-tip-content {
+.teaching-tip-subtitle,
+.teaching-tip-content {
   margin-top: 0;
   color: var(--TeachingTipSubtitleForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
   font-size: 14px;
   line-height: 20px;
 }
 
-.win-teaching-tip-close {
+.teaching-tip-close {
   position: absolute;
   top: 0;
   right: 0;
 }
 
-.win-teaching-tip-actions {
+.teaching-tip-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   justify-content: stretch;
@@ -541,18 +534,18 @@ defineExpose({ close, updatePosition });
   padding: 0 12px 12px;
 }
 
-.win-teaching-tip-actions.both-buttons-visible {
+.teaching-tip-actions.both-buttons-visible {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   column-gap: 8px;
 }
 
-.win-teaching-tip-action-button,
-.win-teaching-tip-close-button {
+.teaching-tip-action-button,
+.teaching-tip-close-button {
   width: 100%;
   margin-top: 12px;
 }
 
-.win-teaching-tip-tail {
+.teaching-tip-tail {
   position: absolute;
   left: var(--teaching-tip-tail-left, 50%);
   z-index: 2;
@@ -569,39 +562,39 @@ defineExpose({ close, updatePosition });
   stroke-linejoin: miter;
 }
 
-.win-teaching-tip-tail polyline {
+.teaching-tip-tail polyline {
   fill: none;
 }
 
-.win-teaching-tip-tail polygon {
+.teaching-tip-tail polygon {
   stroke: none;
 }
 
-.win-teaching-tip.placement-bottom .win-teaching-tip-tail {
+.teaching-tip.placement-bottom .teaching-tip-tail {
   top: -9px;
 }
 
-.win-teaching-tip.placement-bottom {
+.teaching-tip.placement-bottom {
   transform-origin: var(--teaching-tip-tail-left, 50%) 0;
 }
 
-.win-teaching-tip.placement-top .win-teaching-tip-tail {
+.teaching-tip.placement-top .teaching-tip-tail {
   bottom: -9px;
 }
 
-.win-teaching-tip.placement-top {
+.teaching-tip.placement-top {
   transform-origin: var(--teaching-tip-tail-left, 50%) 100%;
 }
 
-.win-teaching-tip-enter-active {
-  animation: win-teaching-tip-enter 167ms cubic-bezier(0, 0, 0, 1) both;
+.teaching-tip-enter-active {
+  animation: teaching-tip-enter 167ms cubic-bezier(0, 0, 0, 1) both;
 }
 
-.win-teaching-tip-leave-active {
-  animation: win-teaching-tip-exit 167ms cubic-bezier(0.7, 0, 1, 0.5) both;
+.teaching-tip-leave-active {
+  animation: teaching-tip-exit 167ms cubic-bezier(0.7, 0, 1, 0.5) both;
 }
 
-@keyframes win-teaching-tip-enter {
+@keyframes teaching-tip-enter {
   from {
     opacity: 0;
     transform: scale(0.08);
@@ -612,7 +605,7 @@ defineExpose({ close, updatePosition });
   }
 }
 
-@keyframes win-teaching-tip-exit {
+@keyframes teaching-tip-exit {
   from {
     opacity: 1;
     transform: scale(1);

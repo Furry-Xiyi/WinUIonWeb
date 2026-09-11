@@ -1,68 +1,73 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.colorpicker')" />
-          <WinTextBlock class="page-description" :Text="$t('text.a-control-that-lets-users-pick-a-color-from-a-sp')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" Text="{x:Bind $t('text.colorpicker'), Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind $t('text.a-control-that-lets-users-pick-a-color-from-a-sp'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="colorPickerPropertiesVue" :headerText="$t('sample.colorpicker.properties')">
-              <template #example>
-                <WinColorPicker
-                  v-model:Color="color"
-                  :ColorSpectrumShape="ColorSpectrumShape"
-                  :IsMoreButtonVisible="IsMoreButtonVisible"
-                  :IsColorSliderVisible="IsColorSliderVisible"
-                  :IsColorChannelTextInputVisible="IsColorChannelTextInputVisible"
-                  :IsHexInputVisible="IsHexInputVisible"
-                  :IsAlphaEnabled="IsAlphaEnabled"
-                  :IsAlphaSliderVisible="IsAlphaSliderVisible"
-                  :IsAlphaTextInputVisible="IsAlphaTextInputVisible" />
-              </template>
-              <template #options>
-                <div class="options-panel">
-                  <WinCheckBox v-model:IsChecked="IsMoreButtonVisible"><WinTextBlock Text="IsMoreButtonVisible" /></WinCheckBox>
-                  <WinCheckBox v-model:IsChecked="IsColorSliderVisible"><WinTextBlock Text="IsColorSliderVisible" /></WinCheckBox>
-                  <WinCheckBox v-model:IsChecked="IsColorChannelTextInputVisible"><WinTextBlock Text="IsColorChannelTextInputVisible" /></WinCheckBox>
-                  <WinCheckBox v-model:IsChecked="IsHexInputVisible"><WinTextBlock Text="IsHexInputVisible" /></WinCheckBox>
-                  <WinCheckBox v-model:IsChecked="IsAlphaEnabled"><WinTextBlock :Text="$t('sample.alpha-enabled')" /></WinCheckBox>
-                  <WinCheckBox v-model:IsChecked="IsAlphaSliderVisible" :IsEnabled="IsAlphaEnabled"><WinTextBlock Text="IsAlphaSliderVisible" /></WinCheckBox>
-                  <WinCheckBox v-model:IsChecked="IsAlphaTextInputVisible" :IsEnabled="IsAlphaEnabled"><WinTextBlock Text="IsAlphaTextInputVisible" /></WinCheckBox>
-                  <div class="radio-group">
-                    <WinTextBlock class="radio-header" :Text="$t('sample.colorspectrum-shape')" />
-                    <WinRadioButton v-model="ColorSpectrumShape" value="Box"><WinTextBlock :Text="$t('sample.box')" /></WinRadioButton>
-                    <WinRadioButton v-model="ColorSpectrumShape" value="Ring"><WinTextBlock :Text="$t('sample.ring')" /></WinRadioButton>
-                  </div>
-                  <div class="preview-section">
-                    <WinTextBlock :Text="$t('sample.colorpicker.applied-rectangle')" />
-                    <div class="preview-rect" :style="{ background: color }"></div>
-                  </div>
-                </div>
-              </template>
-            </WinControlExample>
+        <ControlExample class="basic-input-example-theme" SampleDefinition="ColorPicker\ColorPickerProperties.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind colorPickerPropertiesVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.colorpicker.properties'), Mode=OneWay}">
+              <ControlExample.Example>
+                <ColorPicker
+                  Color="{x:Bind color, Mode=TwoWay}"
+                  ColorSpectrumShape="{x:Bind ColorSpectrumShape, Mode=OneWay}"
+                  IsMoreButtonVisible="{x:Bind IsMoreButtonVisible, Mode=OneWay}"
+                  IsColorSliderVisible="{x:Bind IsColorSliderVisible, Mode=OneWay}"
+                  IsColorChannelTextInputVisible="{x:Bind IsColorChannelTextInputVisible, Mode=OneWay}"
+                  IsHexInputVisible="{x:Bind IsHexInputVisible, Mode=OneWay}"
+                  IsAlphaEnabled="{x:Bind IsAlphaEnabled, Mode=OneWay}"
+                  IsAlphaSliderVisible="{x:Bind IsAlphaSliderVisible, Mode=OneWay}"
+                  IsAlphaTextInputVisible="{x:Bind IsAlphaTextInputVisible, Mode=OneWay}" />
+              </ControlExample.Example>
+              <ControlExample.Options>
+                <StackPanel Width="250" Margin="0,-5,0,0">
+                  <CheckBox IsChecked="{x:Bind IsMoreButtonVisible, Mode=TwoWay}"><TextBlock Text="{x:Bind $t('sample.colorpicker.more-button-visible'), Mode=OneWay}" /></CheckBox>
+                  <CheckBox IsChecked="{x:Bind IsColorSliderVisible, Mode=TwoWay}"><TextBlock Text="{x:Bind $t('sample.colorpicker.color-slider-visible'), Mode=OneWay}" /></CheckBox>
+                  <CheckBox IsChecked="{x:Bind IsColorChannelTextInputVisible, Mode=TwoWay}"><TextBlock Text="{x:Bind $t('sample.colorpicker.color-channel-text-input-visible'), Mode=OneWay}" /></CheckBox>
+                  <CheckBox IsChecked="{x:Bind IsHexInputVisible, Mode=TwoWay}"><TextBlock Text="{x:Bind $t('sample.colorpicker.hex-input-visible'), Mode=OneWay}" /></CheckBox>
+                  <CheckBox IsChecked="{x:Bind IsAlphaEnabled, Mode=TwoWay}"><TextBlock Text="{x:Bind $t('sample.alpha-enabled'), Mode=OneWay}" /></CheckBox>
+                  <CheckBox IsChecked="{x:Bind IsAlphaSliderVisible, Mode=TwoWay}" IsEnabled="{x:Bind IsAlphaEnabled, Mode=OneWay}"><TextBlock Text="{x:Bind $t('sample.colorpicker.alpha-slider-visible'), Mode=OneWay}" /></CheckBox>
+                  <CheckBox IsChecked="{x:Bind IsAlphaTextInputVisible, Mode=TwoWay}" IsEnabled="{x:Bind IsAlphaEnabled, Mode=OneWay}"><TextBlock Text="{x:Bind $t('sample.colorpicker.alpha-text-input-visible'), Mode=OneWay}" /></CheckBox>
+                  <RadioButtons
+                    Header="{x:Bind $t('sample.colorspectrum-shape'), Mode=OneWay}"
+                    SelectedIndex="{x:Bind ColorSpectrumShape === 'Box' ? 0 : 1, Mode=OneWay}"
+                    SelectionChanged="ColorSpectrumShape_SelectionChanged">
+                    <RadioButton Content="{x:Bind $t('sample.box'), Mode=OneWay}" />
+                    <RadioButton Content="{x:Bind $t('sample.ring'), Mode=OneWay}" />
+                  </RadioButtons>
+                  <StackPanel Margin="0,12,0,0">
+                    <TextBlock Text="{x:Bind $t('sample.colorpicker.applied-rectangle'), Mode=OneWay}" />
+                    <Border class="preview-rect" Background="{x:Bind color, Mode=OneWay}" />
+                  </StackPanel>
+                </StackPanel>
+              </ControlExample.Options>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCheckBox from '../../components/WinCheckBox.vue';
-import WinColorPicker from '../../components/WinColorPicker.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ColorPicker from '../../components/ColorPicker.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Border from '../../components/Border.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import RadioButtons from '../../components/RadioButtons.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'colorpicker');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
@@ -77,16 +82,20 @@ const IsAlphaSliderVisible = ref(true);
 const IsAlphaTextInputVisible = ref(true);
 const ColorSpectrumShape = ref('Box');
 
-const colorPickerPropertiesVue = `<WinColorPicker
-  v-model:Color="color"
+const ColorSpectrumShape_SelectionChanged = (args) => {
+  ColorSpectrumShape.value = args?.SelectedIndex === 0 ? 'Box' : 'Ring';
+};
+
+const colorPickerPropertiesVue = `<ColorPicker
+  Color="{x:Bind color, Mode=TwoWay}"
   ColorSpectrumShape="Box"
-  :IsMoreButtonVisible="IsMoreButtonVisible"
-  :IsColorSliderVisible="IsColorSliderVisible"
-  :IsColorChannelTextInputVisible="IsColorChannelTextInputVisible"
-  :IsHexInputVisible="IsHexInputVisible"
-  :IsAlphaEnabled="IsAlphaEnabled"
-  :IsAlphaSliderVisible="IsAlphaSliderVisible"
-  :IsAlphaTextInputVisible="IsAlphaTextInputVisible" />`;
+  IsMoreButtonVisible="{x:Bind IsMoreButtonVisible, Mode=OneWay}"
+  IsColorSliderVisible="{x:Bind IsColorSliderVisible, Mode=OneWay}"
+  IsColorChannelTextInputVisible="{x:Bind IsColorChannelTextInputVisible, Mode=OneWay}"
+  IsHexInputVisible="{x:Bind IsHexInputVisible, Mode=OneWay}"
+  IsAlphaEnabled="{x:Bind IsAlphaEnabled, Mode=OneWay}"
+  IsAlphaSliderVisible="{x:Bind IsAlphaSliderVisible, Mode=OneWay}"
+  IsAlphaTextInputVisible="{x:Bind IsAlphaTextInputVisible, Mode=OneWay}" />`;
 </script>
 
 <style scoped>

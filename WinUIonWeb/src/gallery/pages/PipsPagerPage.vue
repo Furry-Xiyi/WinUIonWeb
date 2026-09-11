@@ -1,21 +1,21 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock
+        <TextBlock
           class="page-description"
           :Text="$t('text.pipspager-description')"
           TextWrapping="WrapWholeWords" />
       </div>
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.pipspager.integrated-flipview')"
           :theme="pageTheme"
           :vue="integratedFlipViewCode">
           <template #example>
-            <WinStackPanel class="pips-gallery-stack">
-              <WinFlipView
+            <StackPanel class="pips-gallery-stack">
+              <FlipView
                 v-model:SelectedIndex="currentImageIndex"
                 class="pips-flip-view"
                 Height="270"
@@ -23,26 +23,26 @@
                 :ItemsSource="Pictures">
                 <!-- @vue-ignore the legacy JS component does not expose slot types -->
                 <template #item="slotProps">
-                  <WinImage class="gallery-image" :Source="getPictureFromSlot(slotProps)" Stretch="Uniform" />
+                  <Image class="gallery-image" :Source="getPictureFromSlot(slotProps)" Stretch="Uniform" />
                 </template>
-              </WinFlipView>
-              <WinPipsPager
+              </FlipView>
+              <PipsPager
                 HorizontalAlignment="Center"
                 Margin="0,12,0,0"
                 :NumberOfPages="Pictures.length"
                 :SelectedPageIndex="currentImageIndex"
                 @update:SelectedPageIndex="currentImageIndex = $event" />
-            </WinStackPanel>
+            </StackPanel>
           </template>
-        </WinControlExample>
+        </ControlExample>
 
-        <WinControlExample
+        <ControlExample
           class="basic-input-example-theme"
           :headerText="$t('sample.pipspager.options')"
           :theme="pageTheme"
           :vue="optionsCode">
           <template #example>
-            <WinPipsPager
+            <PipsPager
               v-model:SelectedPageIndex="SelectedPageIndex"
               :NumberOfPages="10"
               :Orientation="Orientation"
@@ -51,37 +51,37 @@
               @SelectedIndexChanged="onSelectedIndexChanged" />
           </template>
           <template #options>
-            <WinStackPanel>
-              <WinComboBox
+            <StackPanel>
+              <ComboBox
                 v-model:SelectedIndex="OrientationSelectedIndex"
                 :Header="$t('text.orientation')"
                 :ItemsSource="OrientationItems" />
-              <WinComboBox
+              <ComboBox
                 v-model:SelectedIndex="PreviousButtonVisibilitySelectedIndex"
                 :Header="$t('text.previous-button-visibility')"
                 :ItemsSource="ButtonVisibilityItems" />
-              <WinComboBox
+              <ComboBox
                 v-model:SelectedIndex="NextButtonVisibilitySelectedIndex"
                 :Header="$t('text.next-button-visibility')"
                 :ItemsSource="ButtonVisibilityItems" />
-            </WinStackPanel>
+            </StackPanel>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
-import WinComboBox from '../../components/WinComboBox.vue'
-import WinControlExample from '../../components/WinControlExample.vue'
-import WinFlipView from '../../components/WinFlipView.vue'
-import WinImage from '../../components/WinImage.vue'
-import WinPipsPager from '../../components/WinPipsPager.vue'
-import WinScrollViewer from '../../components/WinScrollViewer.vue'
-import WinStackPanel from '../../components/WinStackPanel.vue'
-import WinTextBlock from '../../components/WinTextBlock.vue'
+import ComboBox from '../../components/ComboBox.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import FlipView from '../../components/FlipView.vue'
+import Image from '../../components/Image.vue'
+import PipsPager from '../../components/PipsPager.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
 import { useI18n } from '../../components/i18n/index'
 import { createPageState } from '../../utils/pageState'
 
@@ -117,25 +117,25 @@ const onSelectedIndexChanged = () => {
   window.dispatchEvent(new CustomEvent('winui-announce', { detail: announcement }))
 }
 
-const integratedFlipViewCode = `<WinStackPanel>
-  <WinFlipView
+const integratedFlipViewCode = `<StackPanel>
+  <FlipView
     v-model:SelectedIndex="currentImageIndex"
     MaxWidth="400"
     Height="270"
     :ItemsSource="Pictures">
     <template #item="{ item }">
-      <WinImage :Source="item" Stretch="Uniform" />
+      <Image :Source="item" Stretch="Uniform" />
     </template>
-  </WinFlipView>
-  <WinPipsPager
+  </FlipView>
+  <PipsPager
     HorizontalAlignment="Center"
     Margin="0,12,0,0"
     :NumberOfPages="Pictures.length"
     :SelectedPageIndex="currentImageIndex"
     @update:SelectedPageIndex="currentImageIndex = $event" />
-</WinStackPanel>`
+</StackPanel>`
 
-const optionsCode = computed(() => `<WinPipsPager
+const optionsCode = computed(() => `<PipsPager
   :NumberOfPages="10"
   Orientation="${Orientation.value}"
   PreviousButtonVisibility="${PreviousButtonVisibility.value}"

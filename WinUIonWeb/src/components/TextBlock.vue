@@ -8,10 +8,11 @@
     @contextmenu="onContextMenu"
     @copy="onCopyingToClipboard"
     @selectstart="onSelectStart">
-    <slot>{{ Text }}</slot>
+    <span v-if="!$slots.default">{{ resolvedText }}</span>
+    <slot />
   </span>
 
-  <WinMenuFlyout
+  <MenuFlyout
     :Open="contextMenuOpen"
     :AnchorRect="contextMenuAnchor"
     :Items="contextMenuItems"
@@ -22,9 +23,10 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, useAttrs } from 'vue';
-import WinMenuFlyout from './WinMenuFlyout.vue';
+import { computed, getCurrentInstance, onBeforeUnmount, ref, useAttrs } from 'vue';
+import MenuFlyout from './MenuFlyout.vue';
 import { useI18n } from './i18n/index';
+import { resolveXamlValue } from './xamlRuntime';
 
 const { t } = useI18n();
 
@@ -63,6 +65,8 @@ const props = defineProps({
 });
 
 const attrs = useAttrs();
+const instance = getCurrentInstance();
+const resolvedText = computed(() => resolveXamlValue(props.Text, instance));
 const rootRef = ref(null);
 const contextMenuOpen = ref(false);
 const contextMenuAnchor = ref(null);

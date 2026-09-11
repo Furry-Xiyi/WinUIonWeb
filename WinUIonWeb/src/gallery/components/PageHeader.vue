@@ -1,7 +1,7 @@
 <template>
-  <WinGrid class="win-page-header" RowDefinitions="Auto,Auto">
-    <WinStackPanel class="win-page-header-title-row" Orientation="Horizontal" Spacing="4">
-      <WinTextBlock
+  <Grid class="win-page-header" RowDefinitions="Auto,Auto">
+    <StackPanel class="win-page-header-title-row" Orientation="Horizontal" Spacing="4">
+      <TextBlock
         class="win-page-header-title"
         AutomationProperties.AutomationId="PageHeader"
         AutomationProperties.HeadingLevel="Level1"
@@ -12,7 +12,7 @@
         TextTrimming="CharacterEllipsis"
         TextWrapping="NoWrap"
         :Text="itemTitle" />
-      <WinButton
+      <Button
         v-if="hasApiDetails"
         ref="apiDetailsButton"
         class="win-page-header-api-button"
@@ -20,51 +20,51 @@
         Padding="4"
         v-bind="{ 'automationproperties.name': t('gallery.page-header.api-details'), 'tooltipservice.tooltip': t('gallery.page-header.api-tooltip') }"
         @Click="openFlyout('api')">
-        <WinTextBlock class="icon" FontSize="14" Text="&#xE946;" />
-      </WinButton>
-    </WinStackPanel>
+        <TextBlock class="icon" FontSize="14" Text="&#xE946;" />
+      </Button>
+    </StackPanel>
 
-    <WinGrid class="win-page-header-command-row" RowDefinitions="Auto" Grid.Row="1">
-      <WinStackPanel class="win-page-header-left-actions" Orientation="Horizontal" Spacing="4">
-        <WinDropDownButton
+    <Grid class="win-page-header-command-row" RowDefinitions="Auto" Grid.Row="1">
+      <StackPanel class="win-page-header-left-actions" Orientation="Horizontal" Spacing="4">
+        <DropDownButton
           v-if="hasDocs"
           class="win-page-header-drop-down"
           v-bind="{ 'automationproperties.name': t('gallery.page-header.documentation'), 'tooltipservice.tooltip': t('gallery.page-header.documentation') }"
           :Flyout="docsFlyout"
           @Select="onDocumentationSelected">
-          <WinStackPanel Orientation="Horizontal" Spacing="8">
-            <WinTextBlock class="icon" FontSize="16" Text="&#xE8A5;" />
-            <WinTextBlock :Text="t('gallery.page-header.documentation')" />
-          </WinStackPanel>
-        </WinDropDownButton>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock class="icon" FontSize="16" Text="&#xE8A5;" />
+            <TextBlock :Text="t('gallery.page-header.documentation')" />
+          </StackPanel>
+        </DropDownButton>
 
-        <WinDropDownButton
+        <DropDownButton
           class="win-page-header-drop-down"
           v-bind="{ 'automationproperties.name': t('gallery.page-header.source-code'), 'tooltipservice.tooltip': t('gallery.page-header.source-code-tooltip') }"
           :Flyout="sourceFlyout"
           @Select="onSourceSelected">
-          <WinStackPanel Orientation="Horizontal" Spacing="8">
-            <WinTextBlock class="icon" FontSize="16" Text="&#xE8A5;" />
-            <WinTextBlock :Text="t('gallery.page-header.source')" />
-          </WinStackPanel>
-        </WinDropDownButton>
-      </WinStackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock class="icon" FontSize="16" Text="&#xE8A5;" />
+            <TextBlock :Text="t('gallery.page-header.source')" />
+          </StackPanel>
+        </DropDownButton>
+      </StackPanel>
 
-      <WinStackPanel class="win-page-header-right-actions" Orientation="Horizontal" Spacing="0" HorizontalAlignment="Right">
-        <WinButton
+      <StackPanel class="win-page-header-right-actions" Orientation="Horizontal" Spacing="0" HorizontalAlignment="Right">
+        <Button
           v-if="ThemeButtonVisibility !== 'Collapsed' && ThemeButtonVisibility !== 'Hidden'"
           class="win-page-header-action"
           Height="32"
           Margin="0,0,4,0"
           v-bind="{ 'automationproperties.name': t('gallery.page-header.toggle-theme'), 'tooltipservice.tooltip': t('gallery.page-header.toggle-theme') }"
           @Click="OnThemeButtonClick">
-          <WinTextBlock class="icon" FontSize="16" Text="&#xE793;" />
-        </WinButton>
-        <WinAppBarSeparator
+          <TextBlock class="icon" FontSize="16" Text="&#xE793;" />
+        </Button>
+        <AppBarSeparator
           v-if="ThemeButtonVisibility !== 'Collapsed' && ThemeButtonVisibility !== 'Hidden'"
           class="win-page-header-separator"
           Visibility="Visible" />
-        <WinButton
+        <Button
           ref="copyLinkButton"
           class="win-page-header-action win-page-header-copy-button"
           Height="32"
@@ -72,54 +72,54 @@
           Padding="11,2,11,0"
           v-bind="{ 'automationproperties.name': t('gallery.page-header.copy-link'), 'tooltipservice.tooltip': t('gallery.page-header.copy-link') }"
           @Click="OnCopyLinkButtonClick">
-          <WinTextBlock class="icon" FontSize="16" Text="&#xE71B;" />
-        </WinButton>
-        <WinToggleButton
+          <TextBlock class="icon" FontSize="16" Text="&#xE71B;" />
+        </Button>
+        <ToggleButton
           class="win-page-header-action win-page-header-favorite-button"
           Height="32"
           Margin="4,0,0,0"
           :IsChecked="isFavorite"
           v-bind="{ 'automationproperties.name': t('gallery.page-header.favorite'), 'tooltipservice.tooltip': favoriteToolTip }"
           @update:IsChecked="FavoriteButton_Click">
-          <WinTextBlock class="icon" FontSize="16" :Text="favoriteGlyph" />
-        </WinToggleButton>
-      </WinStackPanel>
-    </WinGrid>
+          <TextBlock class="icon" FontSize="16" :Text="favoriteGlyph" />
+        </ToggleButton>
+      </StackPanel>
+    </Grid>
 
-    <WinMenuFlyout
+    <MenuFlyout
       :Open="openFlyoutName === 'api'"
       :AnchorRect="apiAnchorRect"
       :MinWidth="420"
       @Close="closeFlyouts">
-      <WinStackPanel class="win-page-header-flyout-panel" Spacing="16">
-        <WinStackPanel v-if="item.ApiNamespace" Spacing="8">
-          <WinTextBlock class="win-page-header-secondary-label" :Text="t('gallery.page-header.namespace')" />
-          <WinTextBlock FontFamily="Consolas" IsTextSelectionEnabled :Text="item.ApiNamespace" />
-        </WinStackPanel>
-        <WinAppBarSeparator
+      <StackPanel class="win-page-header-flyout-panel" Spacing="16">
+        <StackPanel v-if="item.ApiNamespace" Spacing="8">
+          <TextBlock class="win-page-header-secondary-label" :Text="t('gallery.page-header.namespace')" />
+          <TextBlock FontFamily="Consolas" IsTextSelectionEnabled :Text="item.ApiNamespace" />
+        </StackPanel>
+        <AppBarSeparator
           v-if="item.ApiNamespace && item.BaseClasses?.length"
           class="win-page-header-separator-line is-horizontal"
           UseOverflowStyle="True" />
-        <WinStackPanel v-if="item.BaseClasses?.length" Spacing="4">
-          <WinTextBlock class="win-page-header-secondary-label" :Text="t('gallery.page-header.inheritance')" />
-          <WinBreadcrumbBar :ItemsSource="item.BaseClasses" IsEnabled="false" />
-        </WinStackPanel>
-      </WinStackPanel>
-    </WinMenuFlyout>
-  </WinGrid>
+        <StackPanel v-if="item.BaseClasses?.length" Spacing="4">
+          <TextBlock class="win-page-header-secondary-label" :Text="t('gallery.page-header.inheritance')" />
+          <BreadcrumbBar :ItemsSource="item.BaseClasses" IsEnabled="false" />
+        </StackPanel>
+      </StackPanel>
+    </MenuFlyout>
+  </Grid>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import WinAppBarSeparator from '../../components/WinAppBarSeparator.vue';
-import WinBreadcrumbBar from '../../components/WinBreadcrumbBar.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinDropDownButton from '../../components/WinDropDownButton.vue';
-import WinGrid from '../../components/WinGrid.vue';
-import WinMenuFlyout from '../../components/WinMenuFlyout.vue';
-import WinStackPanel from '../../components/WinStackPanel.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import AppBarSeparator from '../../components/AppBarSeparator.vue';
+import BreadcrumbBar from '../../components/BreadcrumbBar.vue';
+import Button from '../../components/Button.vue';
+import DropDownButton from '../../components/DropDownButton.vue';
+import Grid from '../../components/Grid.vue';
+import MenuFlyout from '../../components/MenuFlyout.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 
 const { t } = useI18n();

@@ -1,55 +1,55 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div style="position: relative;" class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.calendardatepicker')" />
-          <WinTextBlock
+          <TextBlock class="page-header" :Text="$t('text.calendardatepicker')" />
+          <TextBlock
             class="page-description"
             :Text="$t('text.the-calendardatepicker-is-a-drop-down-control-th')"
             TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme">
+            <Button class="header-action" @click="toggleTheme">
               <span class="icon"></span>
-            </WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState"
+            </Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
               @update:IsChecked="toggleFavorite"
              >
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample
+        <ControlExample
               class="basic-input-example-theme"
               :headerText="$t('text.calendardatepicker-with-a-header-and-placeholder')"
               :theme="pageTheme"
               :vue="example1Vue">
               <template #example>
-                <WinCalendarDatePicker
+                <CalendarDatePicker
                   :Header="$t('text.calendar')"
                   :PlaceholderText="$t('text.pick-a-date')" />
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinCalendarDatePicker from '../../components/WinCalendarDatePicker.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import CalendarDatePicker from '../../components/CalendarDatePicker.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'calendardatepicker');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const example1Vue = `<WinCalendarDatePicker
+const example1Vue = `<CalendarDatePicker
   Header="Calendar"
   PlaceholderText="Pick a date" />`;
 </script>

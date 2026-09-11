@@ -1,45 +1,45 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <WinTextBlock class="page-header" :Text="$t('text.animatedvisualplayer')" />
-        <WinTextBlock class="page-description" :Text="$t('text.animatedvisualplayer-description')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" :Text="$t('text.animatedvisualplayer')" />
+        <TextBlock class="page-description" :Text="$t('text.animatedvisualplayer-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-          <WinToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+          <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+          <ToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></ToggleButton>
         </div>
       </div>
 
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :headerText="$t('sample.animatedvisualplayer.playback')" :theme="pageTheme" :vue="playerCode">
+        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.animatedvisualplayer.playback')" :theme="pageTheme" :vue="playerCode">
           <template #example>
             <div class="animated-visual-player-sample">
-              <WinTextBlock class="animated-visual-player-copy" :Text="$t('sample.animatedvisualplayer.description')" TextWrapping="WrapWholeWords" />
+              <TextBlock class="animated-visual-player-copy" :Text="$t('sample.animatedvisualplayer.description')" TextWrapping="WrapWholeWords" />
               <div class="animated-visual-player-frame">
-                <WinAnimatedVisualPlayer ref="playerRef" :AutoPlay="false" :PlaybackRate="playbackRate" />
+                <AnimatedVisualPlayer ref="playerRef" :AutoPlay="false" :PlaybackRate="playbackRate" />
               </div>
               <div class="animated-visual-player-buttons">
-                <WinButton AutomationProperties.Name="Play" v-bind="{ 'tooltipservice.tooltip': playTooltip }" @Click="play"><span class="icon">&#xE768;</span></WinButton>
-                <WinToggleButton AutomationProperties.Name="Pause" :IsChecked="paused" v-bind="{ 'tooltipservice.tooltip': pauseTooltip }" @update:IsChecked="onPausedChanged"><span class="icon">&#xE769;</span></WinToggleButton>
-                <WinButton AutomationProperties.Name="Stop" v-bind="{ 'tooltipservice.tooltip': stopTooltip }" @Click="stop"><span class="icon">&#xE71A;</span></WinButton>
-                <WinButton AutomationProperties.Name="Reverse" v-bind="{ 'tooltipservice.tooltip': reverseTooltip }" @Click="reverse"><span class="icon">&#xE892;</span></WinButton>
+                <Button AutomationProperties.Name="Play" v-bind="{ 'tooltipservice.tooltip': playTooltip }" @Click="play"><span class="icon">&#xE768;</span></Button>
+                <ToggleButton AutomationProperties.Name="Pause" :IsChecked="paused" v-bind="{ 'tooltipservice.tooltip': pauseTooltip }" @update:IsChecked="onPausedChanged"><span class="icon">&#xE769;</span></ToggleButton>
+                <Button AutomationProperties.Name="Stop" v-bind="{ 'tooltipservice.tooltip': stopTooltip }" @Click="stop"><span class="icon">&#xE71A;</span></Button>
+                <Button AutomationProperties.Name="Reverse" v-bind="{ 'tooltipservice.tooltip': reverseTooltip }" @Click="reverse"><span class="icon">&#xE892;</span></Button>
               </div>
             </div>
           </template>
-        </WinControlExample>
+        </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinAnimatedVisualPlayer from '../../components/WinAnimatedVisualPlayer.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import AnimatedVisualPlayer from '../../components/AnimatedVisualPlayer.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
@@ -80,7 +80,7 @@ const reverse = () => {
   playerRef.value?.PlayAsync(1, 0, false);
 };
 
-const playerCode = computed(() => '<WinAnimatedVisualPlayer AutoPlay="False" />');
+const playerCode = computed(() => '<AnimatedVisualPlayer AutoPlay="False" />');
 
 </script>
 

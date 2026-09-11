@@ -1,59 +1,59 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div style="position: relative;" class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.numberbox')" />
-          <WinTextBlock class="page-description" :Text="$t('text.the-numberbox-control-allows-users-to-enter-numb')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.numberbox')" />
+          <TextBlock class="page-description" :Text="$t('text.the-numberbox-control-allows-users-to-enter-numb')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></WinToggleButton>
+            <Button class="header-action" @click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template" :headerText="$t('text.a-numberbox-that-evaluates-expressions')">
+        <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template" :headerText="$t('text.a-numberbox-that-evaluates-expressions')">
               <template #example>
-                <WinNumberBox v-model:Value="expressionValue" :AcceptsExpression="true" :Header="$t('text.enter-an-expression')" PlaceholderText="1 + 2^2" :Width="300" />
+                <NumberBox v-model:Value="expressionValue" :AcceptsExpression="true" :Header="$t('text.enter-an-expression')" PlaceholderText="1 + 2^2" :Width="300" />
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.numberbox.spin-button')">
+            <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.numberbox.spin-button')">
               <template #example>
-                <WinNumberBox v-model:Value="spinValue" :Header="$t('sample.numberbox.enter-integer')" :SmallChange="10" :LargeChange="100" :SpinButtonPlacementMode="spinMode" :Width="300" />
+                <NumberBox v-model:Value="spinValue" :Header="$t('sample.numberbox.enter-integer')" :SmallChange="10" :LargeChange="100" :SpinButtonPlacementMode="spinMode" :Width="300" />
               </template>
               <template #options>
                 <div class="options-group">
-                  <WinTextBlock class="options-label" :Text="$t('sample.numberbox.spinbutton-placement')" />
-                  <WinRadioButton v-model="spinMode" value="Inline"><WinTextBlock :Text="$t('text.inline')" /></WinRadioButton>
-                  <WinRadioButton v-model="spinMode" value="Compact"><WinTextBlock :Text="$t('sample.numberbox.compact')" /></WinRadioButton>
+                  <TextBlock class="options-label" :Text="$t('sample.numberbox.spinbutton-placement')" />
+                  <RadioButton v-model="spinMode" value="Inline"><TextBlock :Text="$t('text.inline')" /></RadioButton>
+                  <RadioButton v-model="spinMode" value="Compact"><TextBlock :Text="$t('sample.numberbox.compact')" /></RadioButton>
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
 
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template" :headerText="$t('sample.numberbox.formatted-rounding')">
+            <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template" :headerText="$t('sample.numberbox.formatted-rounding')">
               <template #example>
                 <div class="stack-example">
-                  <WinNumberBox v-model:Value="currencyValue" :NumberFormatter="currencyFormatter" :Header="$t('sample.numberbox.enter-dollar-amount')" PlaceholderText="0.00" :SmallChange="0.25" :Width="300" @ValueChanged="roundCurrency" />
-                  <WinTextBlock class="output-text" :Text="currencyOutput" />
+                  <NumberBox v-model:Value="currencyValue" :NumberFormatter="currencyFormatter" :Header="$t('sample.numberbox.enter-dollar-amount')" PlaceholderText="0.00" :SmallChange="0.25" :Width="300" @ValueChanged="roundCurrency" />
+                  <TextBlock class="output-text" :Text="currencyOutput" />
                 </div>
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinNumberBox from '../../components/WinNumberBox.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import NumberBox from '../../components/NumberBox.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t, locale } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'numberbox');
@@ -77,20 +77,20 @@ const roundCurrency = ({ NewValue }) => {
   currencyOutput.value = formatCurrency(rounded);
 };
 
-const example1Template = computed(() => `<WinNumberBox
+const example1Template = computed(() => `<NumberBox
   v-model:Value="expressionValue"
   :AcceptsExpression="true"
   Header="${t('text.enter-an-expression')}"
   PlaceholderText="1 + 2^2" />`);
 
-const example2Template = computed(() => `<WinNumberBox
+const example2Template = computed(() => `<NumberBox
   v-model:Value="spinValue"
   Header="${t('sample.numberbox.enter-integer')}"
   :SmallChange="10"
   :LargeChange="100"
   :SpinButtonPlacementMode="spinMode" />`);
 
-const example3Template = computed(() => `<WinNumberBox
+const example3Template = computed(() => `<NumberBox
   v-model:Value="currencyValue"
   :NumberFormatter="currencyFormatter"
   Header="${t('sample.numberbox.enter-dollar-amount')}"

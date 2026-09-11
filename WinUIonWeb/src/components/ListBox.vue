@@ -1,6 +1,6 @@
-<!-- components/WinListBox.vue -->
+<!-- components/ListBox.vue -->
 <template>
-  <WinScrollViewer
+  <ScrollViewer
     class="win-list-box"
     VerticalScrollMode="Auto"
     VerticalScrollBarVisibility="Auto"
@@ -11,15 +11,15 @@
            class="win-list-box-item"
            :class="{ selected: isSelected(item, index) }"
            @click="select(index)">
-        <slot name="item" :item="item"><WinTextBlock :Text="String(item)" /></slot>
+        <slot name="item" :item="item"><TextBlock :Text="String(item)" /></slot>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 <script setup>
 import { computed, ref, toRaw } from 'vue';
-import WinScrollViewer from './WinScrollViewer.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import TextBlock from './TextBlock.vue';
 
 const props = defineProps({
   ItemsSource: { type: Array, default: null },

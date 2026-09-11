@@ -1,6 +1,6 @@
 <template>
   <section class="control-example-root">
-    <WinTextBlock
+    <TextBlock
       v-if="headerText"
       class="control-example-header"
       :Text="headerText"
@@ -10,8 +10,8 @@
       Margin="0,12" />
 
     <div class="control-example-frame">
-      <WinThemeWrapper :theme="themeValue">
-        <div class="example-container">
+      <ThemeWrapper :theme="themeValue">
+        <div class="example-container" :class="{ 'has-output': hasOutput, 'has-options': hasOptions }">
           <div
             class="example-display"
             :data-theme="theme"
@@ -19,60 +19,65 @@
             <slot name="example">
               <slot></slot>
             </slot>
-          </div>
+            </div>
+
+          <aside v-if="hasOutput" class="example-output">
+            <TextBlock :Text="t('sample.menubar.output')" />
+            <slot name="output" />
+          </aside>
 
           <aside v-if="hasOptions" class="example-options">
             <slot name="options">{{ options }}</slot>
           </aside>
         </div>
-      </WinThemeWrapper>
+      </ThemeWrapper>
 
-      <WinExpander
+      <Expander
         v-if="showSourceCode"
         :IsExpanded="false"
         :Header="t('text.source-code')"
         class="code-expander">
         <div class="source-code-presenter">
-          <WinSelectorBar
+          <SelectorBar
             v-if="codeTabItems.length > 1"
             :Items="codeTabItems"
             :SelectedItem="codeTabItems[selectedCodeTab]"
             @SelectionChanged="onCodeTabChanged" />
           <div class="sample-code-presenter">
-            <WinScrollViewer
+            <ScrollViewer
               class="source-code-scroll"
               VerticalScrollMode="Auto"
               VerticalScrollBarVisibility="Auto"
               HorizontalScrollMode="Auto"
               HorizontalScrollBarVisibility="Auto">
-              <WinTextBlock
+              <TextBlock
                 class="code-block"
                 :Text="activeCode"
                 IsTextSelectionEnabled />
-            </WinScrollViewer>
+            </ScrollViewer>
             <div class="copy-button-border">
-              <WinButton
+              <Button
                 class="copy-code-button"
                 v-bind="{ 'tooltipservice.tooltip': t('text.copy') }"
                 @Click="copyActiveCode">
-                <WinTextBlock class="icon" Text="&#xE8C8;" />
-              </WinButton>
+                <TextBlock class="icon" Text="&#xE8C8;" />
+              </Button>
             </div>
           </div>
         </div>
-      </WinExpander>
+      </Expander>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, useSlots, watch } from 'vue';
-import WinExpander from './WinExpander.vue';
-import WinButton from './WinButton.vue';
-import WinSelectorBar from './WinSelectorBar.vue';
-import WinScrollViewer from './WinScrollViewer.vue';
-import WinTextBlock from './WinTextBlock.vue';
-import WinThemeWrapper from './WinThemeWrapper.vue';
+import Expander from './Expander.vue';
+import Button from './Button.vue';
+import SelectorBar from './SelectorBar.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import TextBlock from './TextBlock.vue';
+import ThemeWrapper from './ThemeWrapper.vue';
 
 import { useI18n } from './i18n/index';
 
@@ -145,6 +150,7 @@ const showSourceCode = computed(() => {
 });
 
 const hasOptions = computed(() => props.options !== null || hasSlottedContent('options'));
+const hasOutput = computed(() => hasSlottedContent('output'));
 
 watch(codeTabs, (tabs) => {
   if (selectedCodeTab.value >= tabs.length) {
@@ -200,26 +206,15 @@ const copyActiveCode = async () => {
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   width: 100%;
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--card-stroke);
-  border-bottom: none;
   border-radius: 8px 8px 0 0;
-  background: transparent;
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
-}
-
-.example-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: inherit;
-  background: var(--card-bg);
+  /* GalleryTileGridStyle.Background in the official Gallery. */
+  background: var(--GalleryBackgroundBrush, var(--SolidBackgroundFillColorBaseBrush, var(--ctrl-solid-fill)));
 }
 
 .control-example-frame:not(:has(.code-expander)) .example-container {
@@ -228,25 +223,52 @@ const copyActiveCode = async () => {
 }
 
 .example-display {
+  grid-column: 1;
+  grid-row: 1;
   padding: 12px;
   display: flex;
   width: 100%;
   min-width: 0;
-  background: var(--control-example-display-bg, var(--SolidBackgroundFillColorBaseBrush, var(--ctrl-solid-fill)));
+  box-sizing: border-box;
+  /* ControlExampleDisplayBrush is SolidBackgroundFillColorBaseBrush in the
+     official ControlExample resources; it is not the card/options fill. */
+  background: var(--ControlExampleDisplayBrush, var(--SolidBackgroundFillColorBaseBrush, var(--ctrl-solid-fill)));
   color: var(--text-primary);
+  border: 0;
+  border-radius: 8px 8px 0 0;
 }
 
 .example-options {
-  width: 320px;
-  max-width: 100%;
+  grid-column: 3;
+  grid-row: 1;
+  width: auto;
+  max-width: 320px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   align-self: stretch;
-  background: transparent;
+  background: var(--card-bg);
   border-left: 1px solid var(--stroke-divider);
   border-radius: 0 8px 0 0;
+  color: var(--text-primary);
+}
+
+.example-output {
+  grid-column: 2;
+  grid-row: 1;
+  max-width: 320px;
+  width: fit-content;
+  margin: 12px 12px 12px 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: stretch;
+  justify-self: end;
+  background: var(--ControlExampleDisplayBrush, var(--SolidBackgroundFillColorBaseBrush, var(--ctrl-solid-fill)));
+  border: 0;
+  border-radius: 8px;
   color: var(--text-primary);
 }
 
@@ -328,16 +350,16 @@ const copyActiveCode = async () => {
   box-sizing: border-box;
 }
 
-:global(html.theme-light) .copy-button-border {
+:global(html.theme-light .copy-button-border) {
   --control-on-image-fill-color-default: rgba(243, 243, 243, 0.85);
 }
 
-:global(html.theme-dark) .copy-button-border {
+:global(html.theme-dark .copy-button-border) {
   --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
 }
 
 @media (prefers-color-scheme: dark) {
-  :global(html:not(.theme-light):not(.theme-dark)) .copy-button-border {
+  :global(html:not(.theme-light):not(.theme-dark) .copy-button-border) {
     --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
   }
 }
@@ -363,13 +385,25 @@ const copyActiveCode = async () => {
 
 @media (max-width: 739px) {
   .example-container {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto;
   }
 
   .example-options {
+    grid-column: 1 / span 2;
+    grid-row: 2;
+    max-width: none;
     width: auto;
     border-left: 0;
     border-top: 1px solid var(--stroke-divider);
+    border-radius: 0 0 8px 8px;
+  }
+
+  .example-output {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    margin-right: 0;
   }
 }
 </style>

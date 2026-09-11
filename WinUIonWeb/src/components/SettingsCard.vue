@@ -17,25 +17,25 @@
       <div v-if="ContentAlignment !== 'Left'" class="win-settings-card-header">
         <span v-if="hasHeaderIcon" class="win-settings-card-icon icon" aria-hidden="true">
           <slot name="HeaderIcon">
-            <span v-if="isHeaderIconMarkup" v-html="HeaderIcon"></span>
-            <template v-else>{{ HeaderIcon }}</template>
+            <span v-if="isHeaderIconMarkup" v-html="resolvedHeaderIcon"></span>
+            <template v-else>{{ resolvedHeaderIcon }}</template>
           </slot>
         </span>
         <div class="win-settings-card-text">
           <slot name="Header">
-            <WinTextBlock
-              v-if="Header"
+            <TextBlock
+              v-if="resolvedHeader"
               class="win-settings-card-title"
-              :Text="Header"
+              :Text="resolvedHeader"
               FontSize="14"
               LineHeight="20"
               TextWrapping="Wrap" />
           </slot>
           <slot name="Description">
-            <WinTextBlock
-              v-if="Description"
+            <TextBlock
+              v-if="resolvedDescription"
               class="win-settings-card-desc"
-              :Text="Description"
+              :Text="resolvedDescription"
               FontSize="var(--SettingsCardDescriptionFontSize, 12px)"
               LineHeight="16"
               Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))"
@@ -51,8 +51,8 @@
         class="win-settings-card-action-icon icon"
         aria-hidden="true">
         <slot name="ActionIcon">
-          <span v-if="isActionIconMarkup" v-html="ActionIcon"></span>
-          <template v-else>{{ ActionIcon }}</template>
+          <span v-if="isActionIconMarkup" v-html="resolvedActionIcon"></span>
+          <template v-else>{{ resolvedActionIcon }}</template>
         </slot>
       </span>
     </div>
@@ -60,8 +60,9 @@
 </template>
 
 <script setup>
-import { computed, useSlots } from 'vue';
-import WinTextBlock from './WinTextBlock.vue';
+import { computed, getCurrentInstance, useSlots } from 'vue';
+import TextBlock from './TextBlock.vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 const props = defineProps({
   Header: { type: [String, Number], default: '' },
@@ -79,10 +80,15 @@ const props = defineProps({
 const emit = defineEmits(['Click']);
 
 const slots = useSlots();
-const hasHeaderIcon = computed(() => Boolean(props.HeaderIcon) || Boolean(slots.HeaderIcon));
-const hasHeaderContent = computed(() => Boolean(props.Header) || Boolean(props.Description) || hasHeaderIcon.value || Boolean(slots.Header) || Boolean(slots.Description));
-const isHeaderIconMarkup = computed(() => props.HeaderIcon.trim().startsWith('<'));
-const isActionIconMarkup = computed(() => props.ActionIcon.trim().startsWith('<'));
+const instance = getCurrentInstance();
+const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
+const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
+const resolvedHeaderIcon = computed(() => resolveXamlValue(props.HeaderIcon, instance));
+const resolvedActionIcon = computed(() => resolveXamlValue(props.ActionIcon, instance));
+const hasHeaderIcon = computed(() => Boolean(resolvedHeaderIcon.value) || Boolean(slots.HeaderIcon));
+const hasHeaderContent = computed(() => Boolean(resolvedHeader.value) || Boolean(resolvedDescription.value) || hasHeaderIcon.value || Boolean(slots.Header) || Boolean(slots.Description));
+const isHeaderIconMarkup = computed(() => String(resolvedHeaderIcon.value || '').trim().startsWith('<'));
+const isActionIconMarkup = computed(() => String(resolvedActionIcon.value || '').trim().startsWith('<'));
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
   if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) {

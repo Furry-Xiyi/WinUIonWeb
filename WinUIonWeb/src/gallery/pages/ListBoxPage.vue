@@ -1,40 +1,40 @@
 <template>
   <div class="gallery-item-page">
     <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.listbox')" />
-          <WinTextBlock class="page-description" :Text="$t('text.a-control-that-presents-an-inline-list-of-items')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" :Text="$t('text.listbox')" />
+          <TextBlock class="page-description" :Text="$t('text.a-control-that-presents-an-inline-list-of-items')" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
-          <WinControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-listbox')" :theme="pageTheme">
+          <ControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-listbox')" :theme="pageTheme">
             <template #example>
-              <WinListBox :ItemsSource="['Blue', 'Green', 'Red', 'Yellow']" v-model:SelectedIndex="idx" style="width: 200px;" />
+              <ListBox :ItemsSource="['Blue', 'Green', 'Red', 'Yellow']" v-model:SelectedIndex="idx" style="width: 200px;" />
             </template>
             <template #options>
-              <WinTextBlock :Text="`Selected color: ${['Blue', 'Green', 'Red', 'Yellow'][idx] || 'None'}`" />
+              <TextBlock :Text="`Selected color: ${['Blue', 'Green', 'Red', 'Yellow'][idx] || 'None'}`" />
             </template>
-          </WinControlExample>
+          </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinListBox from '../../components/WinListBox.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ListBox from '../../components/ListBox.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'listbox');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);

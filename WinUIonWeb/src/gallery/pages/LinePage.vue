@@ -1,6 +1,6 @@
 <template>
   <div class="gallery-item-page">
-    <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
             <!-- 页面头部 -->
             <div class="page-header">
@@ -11,17 +11,17 @@
                 </p>
               </div>
               <div class="page-actions">
-                <WinButton class="header-action" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @Click="toggleTheme">
+                <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @Click="toggleTheme">
                   <span class="icon">&#xE793;</span>
-                </WinButton>
-                <WinToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
+                </Button>
+                <ToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
                   <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
-                </WinToggleButton>
+                </ToggleButton>
               </div>
             </div>
 
             <!-- Line 示例 -->
-            <WinControlExample
+            <ControlExample
               :theme="currentTheme"
               headerText="Line"
               :templateCode="lineTemplateCode"
@@ -40,41 +40,41 @@
               </template>
 
               <template #options>
-                <WinSlider
+                <Slider
                   v-model="lineX1"
                   header="Start point X"
                   :minimum="0"
                   :maximum="100"
                   :stepFrequency="0.5" />
-                <WinSlider
+                <Slider
                   v-model="lineY1"
                   header="Start point Y"
                   :minimum="0"
                   :maximum="100"
                   :stepFrequency="0.5" />
-                <WinSlider
+                <Slider
                   v-model="lineX2"
                   header="End point X"
                   :minimum="200"
                   :maximum="300"
                   :stepFrequency="0.5" />
-                <WinSlider
+                <Slider
                   v-model="lineY2"
                   header="End point Y"
                   :minimum="0"
                   :maximum="100"
                   :stepFrequency="0.5" />
-                <WinSlider
+                <Slider
                   v-model="lineThickness"
                   header="Stroke Thickness"
                   :minimum="5"
                   :maximum="10"
                   :stepFrequency="0.5" />
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Polyline 示例 -->
-            <WinControlExample
+            <ControlExample
               :theme="currentTheme"
               headerText="Polyline"
               :templateCode="polylineTemplateCode"
@@ -97,20 +97,20 @@
                   </svg>
                 </div>
 
-                <WinToggleSwitch
+                <ToggleSwitch
                   v-model="showPolylinePoints"
                   header="Show points" />
-                <WinSlider
+                <Slider
                   v-model="polylineThickness"
                   header="Stroke Thickness"
                   :minimum="2"
                   :maximum="10"
                   :stepFrequency="0.5" />
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- Path 示例 -->
-            <WinControlExample
+            <ControlExample
               :theme="currentTheme"
               headerText="Path"
               :templateCode="pathTemplateCode"
@@ -134,20 +134,20 @@
                   </svg>
                 </div>
 
-                <WinToggleSwitch
+                <ToggleSwitch
                   v-model="showPathPoints"
                   header="Show points" />
-                <WinSlider
+                <Slider
                   v-model="pathThickness"
                   header="Stroke Thickness"
                   :minimum="2"
                   :maximum="10"
                   :stepFrequency="0.5" />
               </template>
-            </WinControlExample>
+            </ControlExample>
 
             <!-- GeometryGroup 示例 -->
-            <WinControlExample
+            <ControlExample
               :theme="currentTheme"
               headerText="GeometryGroup"
               :templateCode="geometryTemplateCode"
@@ -176,32 +176,32 @@
                   </svg>
                 </div>
 
-                <WinSlider
+                <Slider
                   v-model="ellipseRadiusX"
                   header="RadiusX"
                   :minimum="30"
                   :maximum="40"
                   :stepFrequency="0.5" />
-                <WinSlider
+                <Slider
                   v-model="ellipseRadiusY"
                   header="RadiusY"
                   :minimum="30"
                   :maximum="50"
                   :stepFrequency="0.5" />
               </template>
-            </WinControlExample>
+            </ControlExample>
       </div>
-    </WinScrollViewer>
+    </ScrollViewer>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, inject } from 'vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinButton from '../../components/WinButton.vue';
-import WinSlider from '../../components/WinSlider.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
-import WinToggleSwitch from '../../components/WinToggleSwitch.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Button from '../../components/Button.vue';
+import Slider from '../../components/Slider.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import ToggleSwitch from '../../components/ToggleSwitch.vue';
 import { createPageState } from '../../utils/pageState';
 
 // 页面状态
@@ -301,7 +301,7 @@ const geometryTemplateCode = `<svg width="200" height="150">
 const geometryVueCode = `<script setup>
 import { ref } from 'vue';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const ellipseRadiusX = ref(30);
 const ellipseRadiusY = ref(30);
 <\/script>`;

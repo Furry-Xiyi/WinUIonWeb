@@ -9,30 +9,30 @@
         <span class="icon animated-icon animated-icon-back" :class="backClass" @animationend="onBackAnimEnd">&#xE72B;</span>
       </button>
       <div v-if="$slots.PaneHeader" class="win-nav-top-fixed win-nav-top-pane-header"><slot name="PaneHeader"></slot></div>
-      <WinTextBlock v-else-if="paneTitle && !isPaneToggleButtonVisible" class="win-nav-top-fixed win-nav-top-pane-title" :Text="paneTitle" />
+      <TextBlock v-else-if="paneTitle && !isPaneToggleButtonVisible" class="win-nav-top-fixed win-nav-top-pane-title" :Text="paneTitle" />
       <div class="win-nav-menu win-nav-top-primary-menu" ref="topPrimaryMenuRef">
         <template v-for="item in topVisibleMenuItems" :key="item.value">
           <div v-if="item.type === 'Header'" class="win-nav-item-header">
-            <WinTextBlock :Text="item.label" />
+            <TextBlock :Text="item.label" />
           </div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
           <div v-else-if="!item.children" class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span v-if="item.icon" class="icon">{{ item.icon }}</span>
-            <WinTextBlock class="label" :Text="item.label" />
-            <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
+            <TextBlock class="label" :Text="item.label" />
+            <InfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-child-selected': isChildOfGroup(item) }">
             <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
               <span v-if="item.icon" class="icon">{{ item.icon }}</span>
-              <WinTextBlock class="label" :Text="item.label" />
-              <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
+              <TextBlock class="label" :Text="item.label" />
+              <InfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onGroupChevronClick(item)"></span>
             </div>
           </div>
         </template>
         <div v-if="topOverflowMenuItems.length" class="win-nav-item win-nav-more-button" role="button" tabindex="0" :aria-label="t('text.more')" v-bind="{ 'tooltipservice.tooltip': t('text.more') }" @click="toggleMoreFlyout" ref="moreButtonRef">
           <span class="icon">&#xE712;</span>
-          <WinTextBlock v-if="officialProps.OverflowLabelMode === 'MoreLabel'" class="label" :Text="t('text.more')" />
+          <TextBlock v-if="officialProps.OverflowLabelMode === 'MoreLabel'" class="label" :Text="t('text.more')" />
         </div>
       </div>
       <div class="win-nav-top-pane-custom-content"><slot name="PaneCustomContent"></slot></div>
@@ -40,33 +40,33 @@
       <div v-if="$slots.PaneFooter" class="win-nav-top-fixed win-nav-top-pane-footer"><slot name="PaneFooter"></slot></div>
       <div class="win-nav-menu win-nav-top-footer-menu" ref="topFooterMenuRef">
         <template v-for="item in footerItems" :key="item.value">
-          <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
+          <div v-if="item.type === 'Header'" class="win-nav-item-header"><TextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
           <div v-else class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
             <span v-if="item.icon" class="icon">{{ item.icon }}</span>
-            <WinTextBlock class="label" :Text="item.label" />
-            <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
+            <TextBlock class="label" :Text="item.label" />
+            <InfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
           </div>
         </template>
         <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" role="button" :class="{ 'is-selected': selectedValue === settingsValue }" tabindex="0" v-bind="{ 'tooltipservice.tooltip': resolvedSettingsLabel }" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
           <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
-          <WinTextBlock class="label" :Text="resolvedSettingsLabel" />
+          <TextBlock class="label" :Text="resolvedSettingsLabel" />
         </div>
       </div>
       <div class="win-nav-top-measure" ref="topMeasureRef" aria-hidden="true">
         <template v-for="item in menuItems" :key="item.value">
-          <div v-if="item.type === 'Header'" class="win-nav-item-header" :data-value="item.value"><WinTextBlock :Text="item.label" /></div>
+          <div v-if="item.type === 'Header'" class="win-nav-item-header" :data-value="item.value"><TextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator" :data-value="item.value"></div>
           <div v-else class="win-nav-item" :data-value="item.value">
             <span v-if="item.icon" class="icon">{{ item.icon }}</span>
-            <WinTextBlock class="label" :Text="item.label" />
-            <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
+            <TextBlock class="label" :Text="item.label" />
+            <InfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
             <span v-if="item.children" class="icon win-nav-group-chevron">&#xE70D;</span>
           </div>
         </template>
         <div class="win-nav-item win-nav-more-button" data-value="__more">
           <span class="icon">&#xE712;</span>
-          <WinTextBlock v-if="officialProps.OverflowLabelMode === 'MoreLabel'" class="label" :Text="t('text.more')" />
+          <TextBlock v-if="officialProps.OverflowLabelMode === 'MoreLabel'" class="label" :Text="t('text.more')" />
         </div>
       </div>
     </nav>
@@ -77,7 +77,7 @@
       <div v-if="isPaneToggleButtonVisible" class="win-nav-pane-command-row">
         <button v-if="isPaneToggleButtonVisible" class="win-nav-hamburger" :class="{ 'has-pane-title': paneTitle && paneTitleSpaceVisible }" :aria-label="paneToggleLabel" v-bind="{ 'tooltipservice.tooltip': paneToggleLabel }" @click="toggleCompact" @mousedown="onHamburgerDown" @mouseup="onHamburgerUp" @mouseleave="onHamburgerLeave">
           <span class="icon animated-icon animated-icon-hamburger" :class="hamburgerClass" @animationend="onHamburgerAnimEnd">&#xE700;</span>
-          <WinTextBlock v-if="paneTitle && showPaneTitle" class="win-nav-pane-title" :Text="paneTitle" />
+          <TextBlock v-if="paneTitle && showPaneTitle" class="win-nav-pane-title" :Text="paneTitle" />
         </button>
       </div>
       <div class="win-nav-pane-surface" v-show="isLeftPaneContentVisible" :aria-hidden="isLeftMinimalMode && isCompact ? 'true' : undefined" :inert="isLeftMinimalMode && isCompact">
@@ -85,7 +85,7 @@
           <div class="win-nav-indicator" :class="{ 'is-child': indicatorIsChild }" :style="indicatorStyle"></div>
         </div>
         <div v-if="!isPaneToggleButtonVisible && paneTitle && showPaneTitle" class="win-nav-pane-title-holder">
-          <WinTextBlock class="win-nav-pane-title" :Text="paneTitle" />
+          <TextBlock class="win-nav-pane-title" :Text="paneTitle" />
         </div>
         <div v-if="$slots.PaneHeader" v-show="isFullPaneList" class="win-nav-pane-header" :class="{ 'has-pane-toggle': isPaneToggleButtonVisible }"><slot name="PaneHeader"></slot></div>
         <div v-if="$slots.AutoSuggestBox" class="win-nav-pane-top" :class="{ 'is-closed-compact': isClosedCompact }">
@@ -97,7 +97,7 @@
           </div>
         </div>
         <div v-if="$slots.PaneCustomContent" class="win-nav-pane-custom-content"><slot name="PaneCustomContent"></slot></div>
-        <WinScrollViewer
+        <ScrollViewer
           class="win-nav-left-scrollable"
           ref="scrollArea"
           VerticalScrollMode="Auto"
@@ -108,19 +108,19 @@
           <div class="win-nav-menu">
             <template v-for="item in menuItems" :key="item.value">
               <div v-if="item.type === 'Header'" class="win-nav-item-header">
-                <WinTextBlock :Text="item.label" />
+                <TextBlock :Text="item.label" />
               </div>
               <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
               <div v-else-if="!item.children" class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
                 <span v-if="item.icon" class="icon">{{ item.icon }}</span>
-                <WinTextBlock class="label" :Text="item.label" />
-                <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
+                <TextBlock class="label" :Text="item.label" />
+                <InfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
               </div>
               <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value] && isPaneGroupChildrenVisible, 'is-child-selected': isChildOfGroup(item) }">
                 <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onGroupHeaderClick(item)" :ref="el => setItemRef(item.value, el)">
                   <span v-if="item.icon" class="icon">{{ item.icon }}</span>
-                  <WinTextBlock class="label" :Text="item.label" />
-                  <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
+                  <TextBlock class="label" :Text="item.label" />
+                  <InfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
                   <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onGroupChevronClick(item)">&#xE70D;</span>
                 </div>
                 <div
@@ -131,79 +131,79 @@
                   <div class="win-nav-group-children-inner" :ref="el => setChildrenRef(item.value, el)">
                     <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" role="button" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onChildClick(item, child)" :ref="el => setItemRef(child.value, el)">
                       <span v-if="child.icon" class="icon">{{ child.icon }}</span>
-                      <WinTextBlock class="label" :Text="child.label" />
-                      <WinInfoBadge v-if="child.infoBadge" class="win-nav-infobadge" v-bind="child.infoBadge" />
+                      <TextBlock class="label" :Text="child.label" />
+                      <InfoBadge v-if="child.infoBadge" class="win-nav-infobadge" v-bind="child.infoBadge" />
                     </div>
                   </div>
                 </div>
               </div>
             </template>
           </div>
-        </WinScrollViewer>
+        </ScrollViewer>
         <div class="win-nav-footer">
           <div v-if="$slots.PaneFooter" class="win-nav-pane-footer"><slot name="PaneFooter"></slot></div>
           <template v-for="item in footerItems" :key="item.value">
-            <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
+            <div v-if="item.type === 'Header'" class="win-nav-item-header"><TextBlock :Text="item.label" /></div>
             <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
             <div v-else class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onItemClick(item)" :ref="el => setItemRef(item.value, el)">
               <span v-if="item.icon" class="icon">{{ item.icon }}</span>
-              <WinTextBlock class="label" :Text="item.label" />
-              <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
+              <TextBlock class="label" :Text="item.label" />
+              <InfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
             </div>
           </template>
           <div v-if="isSettingsVisible" class="win-nav-item win-nav-settings-item" role="button" :class="{ 'is-selected': selectedValue === settingsValue }" tabindex="0" v-bind="(isTopNavigation || isClosedCompact) ? { 'tooltipservice.tooltip': resolvedSettingsLabel } : {}" @click="selectSettings" @mousedown="onGearDown" @mouseup="onGearUp" @mouseleave="onGearLeave" :ref="el => setItemRef(settingsValue, el)">
             <span class="icon animated-icon animated-icon-gear" :class="gearClass" @animationend="onGearAnimEnd">{{ settingsIcon }}</span>
-            <WinTextBlock class="label" :Text="resolvedSettingsLabel" />
+            <TextBlock class="label" :Text="resolvedSettingsLabel" />
           </div>
         </div>
       </div>
     </nav>
     <main class="win-nav-content">
       <div v-if="shouldShowHeader" class="win-nav-page-header">
-        <slot name="Header"><WinTextBlock :Text="header" /></slot>
+        <slot name="Header"><TextBlock :Text="header" /></slot>
       </div>
       <div class="win-nav-content-inner"><slot></slot></div>
       <div v-if="$slots.ContentOverlay" class="win-nav-content-overlay"><slot name="ContentOverlay"></slot></div>
     </main>
-    <WinMenuFlyout :Open="flyoutOpen" :AnchorRect="flyoutAnchor" :Items="flyoutItems" :Placement="flyoutPlacement" @Close="closeFlyout" @Select="onFlyoutSelect" />
-    <WinMenuFlyout :Open="moreFlyoutOpen" :AnchorRect="moreFlyoutAnchor" :Items="[]" Placement="BottomEdgeAlignedRight" @Close="closeMoreFlyout">
+    <MenuFlyout :Open="flyoutOpen" :AnchorRect="flyoutAnchor" :Items="flyoutItems" :Placement="flyoutPlacement" @Close="closeFlyout" @Select="onFlyoutSelect" />
+    <MenuFlyout :Open="moreFlyoutOpen" :AnchorRect="moreFlyoutAnchor" :Items="[]" Placement="BottomEdgeAlignedRight" @Close="closeMoreFlyout">
       <div class="win-nav-more-panel">
         <template v-for="item in topOverflowMenuItems" :key="item.value">
-          <div v-if="item.type === 'Header'" class="win-nav-item-header"><WinTextBlock :Text="item.label" /></div>
+          <div v-if="item.type === 'Header'" class="win-nav-item-header"><TextBlock :Text="item.label" /></div>
           <div v-else-if="item.type === 'Separator'" class="win-nav-item-separator"></div>
           <div v-else-if="!item.children" class="win-nav-item" role="button" :class="{ 'is-selected': selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreItemClick(item)">
             <span v-if="item.icon" class="icon">{{ item.icon }}</span>
-            <WinTextBlock class="label" :Text="item.label" />
-            <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
+            <TextBlock class="label" :Text="item.label" />
+            <InfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
           </div>
           <div v-else class="win-nav-group" :class="{ 'is-expanded': groupExpanded[item.value], 'is-child-selected': isChildOfGroup(item) }">
             <div class="win-nav-item win-nav-group-header" role="button" :class="{ 'is-selected': item.selectsOnInvoked !== false && selectedValue === item.value, 'is-disabled': !item.isEnabled }" :aria-disabled="!item.isEnabled || undefined" v-bind="itemToolTipAttrs(item)" @click="onMoreGroupHeaderClick(item)">
               <span v-if="item.icon" class="icon">{{ item.icon }}</span>
-              <WinTextBlock class="label" :Text="item.label" />
-              <WinInfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
+              <TextBlock class="label" :Text="item.label" />
+              <InfoBadge v-if="item.infoBadge" class="win-nav-infobadge" v-bind="item.infoBadge" />
               <span class="icon win-nav-group-chevron" :class="groupChevronClass(item.value)" @click.stop="onMoreGroupChevronClick(item)">&#xE70D;</span>
             </div>
             <div class="win-nav-group-children" :style="{ height: groupExpanded[item.value] ? ((item.children?.length || 0) * 36) + 'px' : '0px' }">
               <div class="win-nav-group-children-inner">
                 <div v-for="child in item.children" :key="child.value" class="win-nav-item win-nav-group-child" role="button" :class="{ 'is-selected': selectedValue === child.value, 'is-disabled': !child.isEnabled }" :aria-disabled="!child.isEnabled || undefined" v-bind="itemToolTipAttrs(child)" @click="onMoreChildClick(item, child)">
                   <span v-if="child.icon" class="icon">{{ child.icon }}</span>
-                  <WinTextBlock class="label" :Text="child.label" />
-                  <WinInfoBadge v-if="child.infoBadge" class="win-nav-infobadge" v-bind="child.infoBadge" />
+                  <TextBlock class="label" :Text="child.label" />
+                  <InfoBadge v-if="child.infoBadge" class="win-nav-infobadge" v-bind="child.infoBadge" />
                 </div>
               </div>
             </div>
           </div>
         </template>
       </div>
-    </WinMenuFlyout>
+    </MenuFlyout>
   </div>
 </template>
 <script setup>
 import { ref, reactive, computed, getCurrentInstance, onMounted, onBeforeUnmount, watch, nextTick, useSlots, toRaw } from 'vue';
-import WinMenuFlyout from './WinMenuFlyout.vue';
-import WinScrollViewer from './WinScrollViewer.vue';
-import WinInfoBadge from './WinInfoBadge.vue';
-import WinTextBlock from './WinTextBlock.vue';
+import MenuFlyout from './MenuFlyout.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import InfoBadge from './InfoBadge.vue';
+import TextBlock from './TextBlock.vue';
 import { useI18n } from './i18n/index';
 import {
   createEntranceNavigationTransitionInfo,

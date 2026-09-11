@@ -233,7 +233,7 @@ const NormalizeItem = (source, index, vnode = null) => ({
 });
 
 const SlotItems = computed(() => NormalizeChildren(slots.default?.() ?? [])
-  .filter((vnode) => GetVNodeTypeName(vnode) === 'WinSelectorBarItem' || GetProp(vnode.props, 'Text') !== undefined)
+  .filter((vnode) => GetVNodeTypeName(vnode) === 'SelectorBarItem' || GetProp(vnode.props, 'Text') !== undefined)
   .map((vnode, index) => NormalizeItem(vnode.props ?? {}, index, vnode)));
 
 const Items = computed(() => {

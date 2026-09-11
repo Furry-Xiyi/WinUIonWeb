@@ -1,95 +1,112 @@
 <template>
-  <WinScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-          <WinTextBlock class="page-header" :Text="$t('text.slider')" />
-          <WinTextBlock class="page-description" :Text="$t('text.use-a-slider-to-let-users-set-a-value-by-moving')" TextWrapping="WrapWholeWords" />
+          <TextBlock class="page-header" Text="{x:Bind $t('text.slider'), Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind $t('text.use-a-slider-to-let-users-set-a-value-by-moving'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <WinButton class="header-action" @Click="toggleTheme"><span class="icon"></span></WinButton>
-            <WinToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
+            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
               <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </WinToggleButton>
+            </ToggleButton>
           </div>
         </div>
       <div class="gallery-page-content">
-        <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="sliderSimpleVue" :headerText="$t('text.a-simple-slider')">
-              <template #example>
-                <WinSlider Width="200" :Value="slider1" @update:Value="slider1 = $event" />
-              </template>
-              <template #options>
-                <WinTextBlock :Text="String(slider1)" />
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="sliderRangeVue" :headerText="$t('sample.slider.range')">
-              <template #example>
-                <WinSlider
-                  Width="200"
-                  Margin="0,0,10,0"
-                  :Header="$t('sample.slider.control-header')"
-                  :Maximum="maximumValue"
-                  :Minimum="minimumValue"
-                  :SmallChange="smallChangeValue"
-                  :StepFrequency="stepFrequencyValue"
-                  :Value="slider2"
-                  @update:Value="slider2 = $event" />
-              </template>
-              <template #options>
-                <div class="slider-options">
-                  <WinTextBlock :Text="String(slider2)" />
-                  <div class="options-grid">
-                    <WinTextBlock Text="Minimum:" />
-                    <WinNumberBox :Value="minimumValue" SpinButtonPlacementMode="Compact" @update:Value="minimumValue = $event" />
-                    <WinTextBlock Text="Maximum:" />
-                    <WinNumberBox :Value="maximumValue" SpinButtonPlacementMode="Compact" @update:Value="maximumValue = $event" />
-                    <WinTextBlock Text="StepFrequency:" />
-                    <WinNumberBox :Value="stepFrequencyValue" :Minimum="1" SpinButtonPlacementMode="Compact" @update:Value="stepFrequencyValue = $event" />
-                    <WinTextBlock Text="SmallChange:" />
-                    <WinNumberBox :Value="smallChangeValue" SpinButtonPlacementMode="Compact" @update:Value="smallChangeValue = $event" />
-                  </div>
-                </div>
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="sliderTicksVue" :headerText="$t('sample.slider.ticks')">
-              <template #example>
-                <WinSlider Width="290" TickFrequency="20" TickPlacement="Outside" :SnapsTo="snapsTo" :Value="slider3" @update:Value="slider3 = $event" />
-              </template>
-              <template #options>
-                <div class="slider-options">
-                  <WinTextBlock :Text="String(slider3)" />
-                  <WinRadioButton
-                    :Header="$t('sample.slider.snaps-to')"
-                    :ItemsSource="snapItems"
-                    :SelectedIndex="snapsToIndex"
-                    @SelectionChanged="snapsToIndex = $event.SelectedIndex" />
-                </div>
-              </template>
-            </WinControlExample>
-            <WinControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="sliderVerticalVue" :headerText="$t('sample.slider.vertical')">
-              <template #example>
-                <WinSlider Width="100" Height="100" :Maximum="50" :Minimum="-50" Orientation="Vertical" TickFrequency="10" TickPlacement="Outside" :Value="slider4" @update:Value="slider4 = $event" />
-              </template>
-              <template #options>
-                <WinTextBlock :Text="String(slider4)" />
-              </template>
-            </WinControlExample>
+        <ControlExample class="basic-input-example-theme" SampleDefinition="Slider\SliderSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind sliderSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('text.a-simple-slider'), Mode=OneWay}">
+              <StackPanel Orientation="Horizontal">
+                <Slider Width="200" Value="{x:Bind slider1, Mode=TwoWay}" />
+              </StackPanel>
+              <ControlExample.Output>
+                <TextBlock Text="{x:Bind String(slider1), Mode=OneWay}" />
+              </ControlExample.Output>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Slider\SliderRange.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind sliderRangeVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.slider.range'), Mode=OneWay}">
+              <ControlExample.Options>
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" MinWidth="80" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind $t('sample.slider.minimum'), Mode=OneWay}" />
+                  <NumberBox Grid.Row="0" Grid.Column="1" Margin="10,-5,0,0" SpinButtonPlacementMode="Compact" Value="{x:Bind minimumValue, Mode=TwoWay}" />
+                  <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,7,0,0" Text="{x:Bind $t('sample.slider.maximum'), Mode=OneWay}" />
+                  <NumberBox Grid.Row="1" Grid.Column="1" Margin="10,5,0,0" SpinButtonPlacementMode="Compact" Value="{x:Bind maximumValue, Mode=TwoWay}" />
+                  <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,5,0,0" Text="{x:Bind $t('sample.slider.step-frequency'), Mode=OneWay}" />
+                  <NumberBox Grid.Row="2" Grid.Column="1" Margin="10,5,0,0" Minimum="{x:Bind 1, Mode=OneWay}" SpinButtonPlacementMode="Compact" Value="{x:Bind stepFrequencyValue, Mode=TwoWay}" />
+                  <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,5,0,0" Text="{x:Bind $t('sample.slider.small-change'), Mode=OneWay}" />
+                  <NumberBox Grid.Row="3" Grid.Column="1" Margin="10,5,0,0" SpinButtonPlacementMode="Compact" Value="{x:Bind smallChangeValue, Mode=TwoWay}" />
+                </Grid>
+              </ControlExample.Options>
+              <ControlExample.Example>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                  <Slider
+                    Width="200"
+                    Margin="0,0,10,0"
+                    Header="{x:Bind $t('sample.slider.control-header'), Mode=OneWay}"
+                    Maximum="{x:Bind maximumValue, Mode=OneWay}"
+                    Minimum="{x:Bind minimumValue, Mode=OneWay}"
+                    SmallChange="{x:Bind smallChangeValue, Mode=OneWay}"
+                    StepFrequency="{x:Bind stepFrequencyValue, Mode=OneWay}"
+                    Value="{x:Bind slider2, Mode=TwoWay}" />
+                </StackPanel>
+              </ControlExample.Example>
+              <ControlExample.Output>
+                <TextBlock Text="{x:Bind String(slider2), Mode=OneWay}" />
+              </ControlExample.Output>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Slider\SliderTicks.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind sliderTicksVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.slider.ticks'), Mode=OneWay}">
+              <StackPanel Orientation="Horizontal">
+                <Slider Width="290" TickFrequency="20" TickPlacement="Outside" SnapsTo="{x:Bind snapsTo, Mode=OneWay}" Value="{x:Bind slider3, Mode=TwoWay}" />
+              </StackPanel>
+              <ControlExample.Output>
+                <TextBlock Text="{x:Bind String(slider3), Mode=OneWay}" />
+              </ControlExample.Output>
+              <ControlExample.Options>
+                <StackPanel>
+                  <RadioButtons
+                    Header="{x:Bind $t('sample.slider.snaps-to'), Mode=OneWay}"
+                    SelectedIndex="{x:Bind snapsToIndex, Mode=TwoWay}"
+                    SelectionChanged="SnapsToRadioButtons_SelectionChanged">
+                    <x:String>StepValues</x:String>
+                    <x:String>Ticks</x:String>
+                  </RadioButtons>
+                </StackPanel>
+              </ControlExample.Options>
+            </ControlExample>
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Slider\SliderVertical.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind sliderVerticalVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.slider.vertical'), Mode=OneWay}">
+              <StackPanel Orientation="Horizontal">
+                <Slider Width="100" Height="100" Maximum="{x:Bind 50, Mode=OneWay}" Minimum="{x:Bind -50, Mode=OneWay}" Orientation="Vertical" TickFrequency="10" TickPlacement="Outside" Value="{x:Bind slider4, Mode=TwoWay}" />
+              </StackPanel>
+              <ControlExample.Output>
+                <TextBlock Text="{x:Bind String(slider4), Mode=OneWay}" />
+              </ControlExample.Output>
+            </ControlExample>
       </div>
     </div>
-  </WinScrollViewer>
+  </ScrollViewer>
 </template>
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import WinButton from '../../components/WinButton.vue';
-import WinControlExample from '../../components/WinControlExample.vue';
-import WinNumberBox from '../../components/WinNumberBox.vue';
-import WinRadioButton from '../../components/WinRadioButton.vue';
-import WinSlider from '../../components/WinSlider.vue';
-import WinTextBlock from '../../components/WinTextBlock.vue';
-import WinToggleButton from '../../components/WinToggleButton.vue';
+import Button from '../../components/Button.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import NumberBox from '../../components/NumberBox.vue';
+import RadioButtons from '../../components/RadioButtons.vue';
+import Slider from '../../components/Slider.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import WinScrollViewer from '../../components/WinScrollViewer.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'slider');
@@ -107,23 +124,26 @@ const slider4 = ref(0);
 
 const snapItems = computed(() => [t('sample.step-values'), t('sample.ticks')]);
 const snapsTo = computed(() => snapsToIndex.value === 0 ? 'StepValues' : 'Ticks');
+const SnapsToRadioButtons_SelectionChanged = (event) => {
+  snapsToIndex.value = event?.SelectedIndex ?? event?.SelectedItemIndex ?? 0;
+};
 
-const sliderSimpleVue = `<WinSlider AutomationProperties.Name="simple slider" Width="200" />`;
-const sliderRangeVue = `<WinSlider
+const sliderSimpleVue = `<Slider AutomationProperties.Name="simple slider" Width="200" />`;
+const sliderRangeVue = `<Slider
   Width="200"
-  Header="Control header"
-  :Maximum="maximumValue"
-  :Minimum="minimumValue"
-  :SmallChange="smallChangeValue"
-  :StepFrequency="stepFrequencyValue"
-  :Value="800" />`;
-const sliderTicksVue = `<WinSlider AutomationProperties.Name="Slider with ticks" Width="290" TickFrequency="20" TickPlacement="Outside" />`;
-const sliderVerticalVue = `<WinSlider
+  Header="{x:Bind $t('sample.slider.control-header'), Mode=OneWay}"
+  Maximum="{x:Bind maximumValue, Mode=OneWay}"
+  Minimum="{x:Bind minimumValue, Mode=OneWay}"
+  SmallChange="{x:Bind smallChangeValue, Mode=OneWay}"
+  StepFrequency="{x:Bind stepFrequencyValue, Mode=OneWay}"
+  Value="{x:Bind 800, Mode=OneWay}" />`;
+const sliderTicksVue = `<Slider AutomationProperties.Name="Slider with ticks" Width="290" TickFrequency="20" TickPlacement="Outside" />`;
+const sliderVerticalVue = `<Slider
   AutomationProperties.Name="vertical slider"
   Width="100"
   Height="100"
-  :Maximum="50"
-  :Minimum="-50"
+  Maximum="{x:Bind 50, Mode=OneWay}"
+  Minimum="{x:Bind -50, Mode=OneWay}"
   Orientation="Vertical"
   TickFrequency="10"
   TickPlacement="Outside" />`;
