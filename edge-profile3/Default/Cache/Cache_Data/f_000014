@@ -1,0 +1,264 @@
+import { createHotContext as __vite__createHotContext } from "/WinUIonWeb/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ToggleSplitButton.vue");import { defineComponent as _defineComponent } from "/WinUIonWeb/node_modules/.vite/deps/vue.js?v=2d9bc00e";
+import { computed, Fragment, getCurrentInstance, provide, ref, useAttrs, useSlots, watch } from "/WinUIonWeb/node_modules/.vite/deps/vue.js?v=2d9bc00e";
+import SplitButton from "/WinUIonWeb/src/components/SplitButton.vue";
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from "/WinUIonWeb/src/components/xamlRuntime.ts?t=1789826858491";
+import { defineComponent, h } from "/WinUIonWeb/node_modules/.vite/deps/vue.js?v=2d9bc00e";
+export const ToggleSplitButtonFlyout = defineComponent({
+	name: "ToggleSplitButton.Flyout",
+	__splitButtonProperty: "flyout",
+	setup(_, { slots }) {
+		return () => h("span", { class: "split-button-property" }, slots.default?.());
+	}
+});
+const __default__ = { Flyout: ToggleSplitButtonFlyout };
+const _sfc_main = /*@__PURE__*/ _defineComponent({
+	...__default__,
+	...{ inheritAttrs: false },
+	__name: "ToggleSplitButton",
+	props: {
+		Content: {
+			type: [String, Number],
+			default: ""
+		},
+		IsChecked: {
+			type: [Boolean, String],
+			default: undefined
+		},
+		Flyout: {
+			type: [Object, Array],
+			default: () => ({ Items: [] })
+		},
+		IsEnabled: {
+			type: [Boolean, String],
+			default: true
+		},
+		Theme: {
+			type: String,
+			default: ""
+		},
+		MinWidth: {
+			type: [String, Number],
+			default: ""
+		},
+		MinHeight: {
+			type: [String, Number],
+			default: ""
+		},
+		Padding: {
+			type: String,
+			default: ""
+		},
+		Margin: {
+			type: String,
+			default: ""
+		},
+		VerticalAlignment: {
+			type: String,
+			default: ""
+		}
+	},
+	emits: [
+		"update:IsChecked",
+		"Click",
+		"IsCheckedChanged",
+		"Select"
+	],
+	setup(__props, { expose: __expose, emit: __emit }) {
+		__expose();
+		const props = __props;
+		const emit = __emit;
+		const attrs = useAttrs();
+		const slots = useSlots();
+		const instance = getCurrentInstance();
+		const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
+		const isFlyoutProperty = (node) => {
+			const type = node.type;
+			return type?.__splitButtonProperty === "flyout";
+		};
+		const isFlyoutContainer = (node) => {
+			const type = node?.type;
+			const name = type?.name || type?.__name;
+			return name === "Flyout" || name === "Flyout";
+		};
+		const propertyNodes = computed(() => {
+			const main = [];
+			const flyout = [];
+			const collect = (nodes) => {
+				for (const node of nodes) {
+					if (isFlyoutProperty(node)) {
+						const propertySlot = node.children && typeof node.children === "object" ? node.children.default : undefined;
+						if (propertySlot) {
+							for (const child of propertySlot()) {
+								if (isFlyoutContainer(child)) {
+									const contentSlot = child.children && typeof child.children === "object" ? child.children.default : undefined;
+									if (contentSlot) flyout.push(...contentSlot());
+								} else {
+									flyout.push(child);
+								}
+							}
+						}
+						continue;
+					}
+					// Vue can add a Fragment around template content.  A Fragment is only
+					// compiler structure; it is not XAML content and must not hide a
+					// ToggleSplitButton.Flyout property element from the parser.
+					if (node.type === Fragment && Array.isArray(node.children)) {
+						collect(node.children);
+						continue;
+					}
+					main.push(node);
+				}
+			};
+			collect(slots.default?.() ?? []);
+			return {
+				main,
+				flyout
+			};
+		});
+		const mainNodes = computed(() => propertyNodes.value.main);
+		const flyoutNodes = computed(() => propertyNodes.value.flyout);
+		const MainOutlet = defineComponent({
+			name: "ToggleSplitButtonMainOutlet",
+			setup() {
+				return () => mainNodes.value.length ? h(Fragment, mainNodes.value) : String(resolvedContent.value ?? "");
+			}
+		});
+		const FlyoutOutlet = defineComponent({
+			name: "ToggleSplitButtonFlyoutOutlet",
+			setup() {
+				return () => h(Fragment, flyoutNodes.value);
+			}
+		});
+		const resolvedIsChecked = computed(() => resolveXamlValue(props.IsChecked, instance));
+		const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
+		const localIsChecked = ref(undefined);
+		const isUpdatingChecked = ref(false);
+		watch(resolvedIsChecked, (value) => {
+			if (!isUpdatingChecked.value) localIsChecked.value = value === true;
+		}, { immediate: true });
+		const checkedState = computed(() => localIsChecked.value !== undefined ? localIsChecked.value : resolvedIsChecked.value === true);
+		const isDisabled = computed(() => !resolvedIsEnabled.value);
+		const flyoutDefinition = computed(() => Array.isArray(props.Flyout) ? { Items: props.Flyout } : props.Flyout || { Items: [] });
+		const sourceItems = computed(() => flyoutDefinition.value.Items ?? []);
+		const splitOptions = computed(() => sourceItems.value.map((item, idx) => {
+			if (typeof item === "string") return {
+				Text: item,
+				Value: idx
+			};
+			return {
+				...item,
+				Text: item.Text ?? item.Content ?? item.label ?? String(item),
+				Value: item.Value ?? idx
+			};
+		}));
+		const splitFlyout = computed(() => ({
+			...flyoutDefinition.value,
+			Items: splitOptions.value
+		}));
+		const setChecked = (next, event) => {
+			if (isDisabled.value) return;
+			localIsChecked.value = next;
+			isUpdatingChecked.value = true;
+			emit("update:IsChecked", next);
+			updateXamlBinding(props.IsChecked, next, instance);
+			isUpdatingChecked.value = false;
+			emit("Click", event);
+			resolveXamlHandler(attrs.Click, instance)?.(event);
+			emit("IsCheckedChanged", { IsChecked: next });
+			resolveXamlHandler(attrs.IsCheckedChanged, instance)?.({ IsChecked: next });
+		};
+		const onSplitClick = (event) => {
+			setChecked(!checkedState.value, event);
+		};
+		const onSelect = (item) => {
+			emit("Select", item);
+			resolveXamlHandler(attrs.Select, instance)?.(item);
+		};
+		provide(xamlScopeKey, {
+			splitFlyout,
+			resolvedIsEnabled,
+			Theme: computed(() => props.Theme),
+			MinWidth: computed(() => props.MinWidth),
+			MinHeight: computed(() => props.MinHeight),
+			Padding: computed(() => props.Padding),
+			Margin: computed(() => props.Margin),
+			VerticalAlignment: computed(() => props.VerticalAlignment),
+			OnSplitClick: onSplitClick,
+			OnSelect: onSelect
+		});
+		const __returned__ = {
+			ToggleSplitButtonFlyout,
+			props,
+			emit,
+			attrs,
+			slots,
+			instance,
+			resolvedContent,
+			isFlyoutProperty,
+			isFlyoutContainer,
+			propertyNodes,
+			mainNodes,
+			flyoutNodes,
+			MainOutlet,
+			FlyoutOutlet,
+			resolvedIsChecked,
+			resolvedIsEnabled,
+			localIsChecked,
+			isUpdatingChecked,
+			checkedState,
+			isDisabled,
+			flyoutDefinition,
+			sourceItems,
+			splitOptions,
+			splitFlyout,
+			setChecked,
+			onSplitClick,
+			onSelect,
+			SplitButton
+		};
+		Object.defineProperty(__returned__, "__isScriptSetup", {
+			enumerable: false,
+			value: true
+		});
+		return __returned__;
+	}
+});
+import { createVNode as _createVNode, openBlock as _openBlock, createBlock as _createBlock, createCommentVNode as _createCommentVNode, normalizeClass as _normalizeClass, normalizeStyle as _normalizeStyle, withCtx as _withCtx } from "/WinUIonWeb/node_modules/.vite/deps/vue.js?v=2d9bc00e";
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+	return _openBlock(), _createBlock($setup["SplitButton"], {
+		class: _normalizeClass([$setup.attrs.class, { "is-checked": $setup.checkedState }]),
+		style: _normalizeStyle($setup.attrs.style),
+		Flyout: "{x:Bind splitFlyout, Mode=OneWay}",
+		IsEnabled: "{x:Bind resolvedIsEnabled, Mode=OneWay}",
+		Theme: "{x:Bind Theme, Mode=OneWay}",
+		MinWidth: "{x:Bind MinWidth, Mode=OneWay}",
+		MinHeight: "{x:Bind MinHeight, Mode=OneWay}",
+		Padding: "{x:Bind Padding, Mode=OneWay}",
+		Margin: "{x:Bind Margin, Mode=OneWay}",
+		VerticalAlignment: "{x:Bind VerticalAlignment, Mode=OneWay}",
+		Click: "OnSplitClick",
+		Select: "OnSelect"
+	}, {
+		flyout: _withCtx(() => [$setup.flyoutNodes.length ? (_openBlock(), _createBlock($setup["FlyoutOutlet"], { key: 0 })) : _createCommentVNode("v-if", true)]),
+		default: _withCtx(() => [_createVNode($setup["MainOutlet"])]),
+		_: 1
+	}, 8, ["class", "style"]);
+}
+_sfc_main.__hmrId = "4e690b4a";
+typeof __VUE_HMR_RUNTIME__ !== "undefined" && __VUE_HMR_RUNTIME__.createRecord(_sfc_main.__hmrId, _sfc_main);
+import.meta.hot.on("file-changed", ({ file }) => {
+	__VUE_HMR_RUNTIME__.CHANGED_FILE = file;
+});
+import.meta.hot.accept((mod) => {
+	if (!mod) return;
+	const { default: updated, _rerender_only } = mod;
+	if (_rerender_only) {
+		__VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render);
+	} else {
+		__VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated);
+	}
+});
+import _export_sfc from "/WinUIonWeb/@id/__x00__plugin-vue:export-helper";
+export default /*#__PURE__*/ _export_sfc(_sfc_main, [["render", _sfc_render], ["__file", "E:/Windows/WinUIonWeb/WinUIonWeb/src/components/ToggleSplitButton.vue"]]);
+
+//# sourceMappingURL=data:application/json;base64,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QU0sa0JBQWtCLFFBQVEsSUFBSSxFQUFFLFdBQVcsS0FBSyxDQUFDO0VBQzVFO0VBRUEsTUFBTSxnQkFBZ0IsVUFBVTtHQUM5QixXQUFXLENBQUMsYUFBYSxPQUFPLEtBQUs7RUFDdkM7RUFFQSxNQUFNLFlBQVksU0FBUztHQUN6QixLQUFLLFVBQVUsSUFBSTtHQUNuQixtQkFBbUIsTUFBTSxRQUFRLFFBQVEsSUFBSSxJQUFJO0VBQ25EO0VBRUEsUUFBUSxjQUFjO0dBQ3BCO0dBQ0E7R0FDQSxPQUFPLGVBQWUsTUFBTSxLQUFLO0dBQ2pDLFVBQVUsZUFBZSxNQUFNLFFBQVE7R0FDdkMsV0FBVyxlQUFlLE1BQU0sU0FBUztHQUN6QyxTQUFTLGVBQWUsTUFBTSxPQUFPO0dBQ3JDLFFBQVEsZUFBZSxNQUFNLE1BQU07R0FDbkMsbUJBQW1CLGVBQWUsTUFBTSxpQkFBaUI7R0FDekQsY0FBYztHQUNkLFVBQVU7RUFDWixDQUFDOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O3NCQXBMQyxhQWlCYyxPQUFBLGdCQUFBO0VBaEJYLE9BQUssZ0JBQUEsQ0FBRyxPQUFBLE1BQU0sT0FBSyxFQUFBLGNBQWtCLE9BQUEsYUFBWSxDQUFBLENBQUE7RUFDakQsT0FBSyxnQkFBRSxPQUFBLE1BQU0sS0FBSztFQUNuQixRQUFPO0VBQ1AsV0FBVTtFQUNWLE9BQU07RUFDTixVQUFTO0VBQ1QsV0FBVTtFQUNWLFNBQVE7RUFDUixRQUFPO0VBQ1AsbUJBQWtCO0VBQ2xCLE9BQU07RUFDTixRQUFPOztFQUVJLFFBQU0sZUFDMkIsQ0FBdEIsT0FBQSxZQUFZLHdCQUFoQyxhQUEwQyxPQUFBLGlCQUFBLEVBQUEsS0FBQSxFQUFBLENBQUE7MEJBRjlCLENBQWQsYUFBYyxPQUFBLGFBQUEiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiVG9nZ2xlU3BsaXRCdXR0b24udnVlIl0sInZlcnNpb24iOjMsInNvdXJjZXNDb250ZW50IjpbIjx0ZW1wbGF0ZT5cbiAgPFNwbGl0QnV0dG9uXG4gICAgOmNsYXNzPVwiW2F0dHJzLmNsYXNzLCB7ICdpcy1jaGVja2VkJzogY2hlY2tlZFN0YXRlIH1dXCJcbiAgICA6c3R5bGU9XCJhdHRycy5zdHlsZVwiXG4gICAgRmx5b3V0PVwie3g6QmluZCBzcGxpdEZseW91dCwgTW9kZT1PbmVXYXl9XCJcbiAgICBJc0VuYWJsZWQ9XCJ7eDpCaW5kIHJlc29sdmVkSXNFbmFibGVkLCBNb2RlPU9uZVdheX1cIlxuICAgIFRoZW1lPVwie3g6QmluZCBUaGVtZSwgTW9kZT1PbmVXYXl9XCJcbiAgICBNaW5XaWR0aD1cInt4OkJpbmQgTWluV2lkdGgsIE1vZGU9T25lV2F5fVwiXG4gICAgTWluSGVpZ2h0PVwie3g6QmluZCBNaW5IZWlnaHQsIE1vZGU9T25lV2F5fVwiXG4gICAgUGFkZGluZz1cInt4OkJpbmQgUGFkZGluZywgTW9kZT1PbmVXYXl9XCJcbiAgICBNYXJnaW49XCJ7eDpCaW5kIE1hcmdpbiwgTW9kZT1PbmVXYXl9XCJcbiAgICBWZXJ0aWNhbEFsaWdubWVudD1cInt4OkJpbmQgVmVydGljYWxBbGlnbm1lbnQsIE1vZGU9T25lV2F5fVwiXG4gICAgQ2xpY2s9XCJPblNwbGl0Q2xpY2tcIlxuICAgIFNlbGVjdD1cIk9uU2VsZWN0XCI+XG4gICAgPE1haW5PdXRsZXQgLz5cbiAgICA8dGVtcGxhdGUgI2ZseW91dD5cbiAgICAgIDxGbHlvdXRPdXRsZXQgdi1pZj1cImZseW91dE5vZGVzLmxlbmd0aFwiIC8+XG4gICAgPC90ZW1wbGF0ZT5cbiAgPC9TcGxpdEJ1dHRvbj5cbjwvdGVtcGxhdGU+XG48c2NyaXB0IGxhbmc9XCJ0c1wiPlxuaW1wb3J0IHsgZGVmaW5lQ29tcG9uZW50LCBoIH0gZnJvbSAndnVlJ1xuXG5leHBvcnQgY29uc3QgVG9nZ2xlU3BsaXRCdXR0b25GbHlvdXQgPSBkZWZpbmVDb21wb25lbnQoe1xuICBuYW1lOiAnVG9nZ2xlU3BsaXRCdXR0b24uRmx5b3V0JyxcbiAgX19zcGxpdEJ1dHRvblByb3BlcnR5OiAnZmx5b3V0JyxcbiAgc2V0dXAoXywgeyBzbG90cyB9KSB7XG4gICAgcmV0dXJuICgpID0+IGgoJ3NwYW4nLCB7IGNsYXNzOiAnc3BsaXQtYnV0dG9uLXByb3BlcnR5JyB9LCBzbG90cy5kZWZhdWx0Py4oKSlcbiAgfVxufSlcblxuZXhwb3J0IGRlZmF1bHQgeyBGbHlvdXQ6IFRvZ2dsZVNwbGl0QnV0dG9uRmx5b3V0IH1cbjwvc2NyaXB0PlxuXG48c2NyaXB0IHNldHVwIGxhbmc9XCJ0c1wiPlxuaW1wb3J0IHsgY29tcHV0ZWQsIGRlZmluZUNvbXBvbmVudCwgRnJhZ21lbnQsIGdldEN1cnJlbnRJbnN0YW5jZSwgaCwgcHJvdmlkZSwgcmVmLCB1c2VBdHRycywgdXNlU2xvdHMsIHdhdGNoLCB0eXBlIFZOb2RlIH0gZnJvbSAndnVlJztcbmltcG9ydCBTcGxpdEJ1dHRvbiBmcm9tICcuL1NwbGl0QnV0dG9uLnZ1ZSc7XG5pbXBvcnQgeyByZXNvbHZlWGFtbEhhbmRsZXIsIHJlc29sdmVYYW1sVmFsdWUsIHVwZGF0ZVhhbWxCaW5kaW5nLCB4YW1sU2NvcGVLZXkgfSBmcm9tICcuL3hhbWxSdW50aW1lJztcblxuZGVmaW5lT3B0aW9ucyh7IGluaGVyaXRBdHRyczogZmFsc2UgfSk7XG5cbmNvbnN0IHByb3BzID0gZGVmaW5lUHJvcHMoe1xuICBDb250ZW50OiB7IHR5cGU6IFtTdHJpbmcsIE51bWJlcl0sIGRlZmF1bHQ6ICcnIH0sXG4gIElzQ2hlY2tlZDogeyB0eXBlOiBbQm9vbGVhbiwgU3RyaW5nXSwgZGVmYXVsdDogdW5kZWZpbmVkIH0sXG4gIEZseW91dDogeyB0eXBlOiBbT2JqZWN0LCBBcnJheV0sIGRlZmF1bHQ6ICgpID0+ICh7IEl0ZW1zOiBbXSB9KSB9LFxuICBJc0VuYWJsZWQ6IHsgdHlwZTogW0Jvb2xlYW4sIFN0cmluZ10sIGRlZmF1bHQ6IHRydWUgfSxcbiAgVGhlbWU6IHsgdHlwZTogU3RyaW5nLCBkZWZhdWx0OiAnJyB9LFxuICBNaW5XaWR0aDogeyB0eXBlOiBbU3RyaW5nLCBOdW1iZXJdLCBkZWZhdWx0OiAnJyB9LFxuICBNaW5IZWlnaHQ6IHsgdHlwZTogW1N0cmluZywgTnVtYmVyXSwgZGVmYXVsdDogJycgfSxcbiAgUGFkZGluZzogeyB0eXBlOiBTdHJpbmcsIGRlZmF1bHQ6ICcnIH0sXG4gIE1hcmdpbjogeyB0eXBlOiBTdHJpbmcsIGRlZmF1bHQ6ICcnIH0sXG4gIFZlcnRpY2FsQWxpZ25tZW50OiB7IHR5cGU6IFN0cmluZywgZGVmYXVsdDogJycgfVxufSk7XG5cbmNvbnN0IGVtaXQgPSBkZWZpbmVFbWl0cyhbJ3VwZGF0ZTpJc0NoZWNrZWQnLCAnQ2xpY2snLCAnSXNDaGVja2VkQ2hhbmdlZCcsICdTZWxlY3QnXSk7XG5jb25zdCBhdHRycyA9IHVzZUF0dHJzKCk7XG5jb25zdCBzbG90cyA9IHVzZVNsb3RzKCk7XG5jb25zdCBpbnN0YW5jZSA9IGdldEN1cnJlbnRJbnN0YW5jZSgpO1xuY29uc3QgcmVzb2x2ZWRDb250ZW50ID0gY29tcHV0ZWQoKCkgPT4gcmVzb2x2ZVhhbWxWYWx1ZShwcm9wcy5Db250ZW50LCBpbnN0YW5jZSkpO1xuXG5jb25zdCBpc0ZseW91dFByb3BlcnR5ID0gKG5vZGU6IFZOb2RlKSA9PiB7XG4gIGNvbnN0IHR5cGUgPSBub2RlLnR5cGUgYXMgeyBfX3NwbGl0QnV0dG9uUHJvcGVydHk/OiBzdHJpbmcgfSB8IHVuZGVmaW5lZDtcbiAgcmV0dXJuIHR5cGU/Ll9fc3BsaXRCdXR0b25Qcm9wZXJ0eSA9PT0gJ2ZseW91dCc7XG59O1xuXG5jb25zdCBpc0ZseW91dENvbnRhaW5lciA9IChub2RlOiBWTm9kZSkgPT4ge1xuICBjb25zdCB0eXBlID0gbm9kZT8udHlwZSBhcyB7IG5hbWU/OiBzdHJpbmc7IF9fbmFtZT86IHN0cmluZyB9IHwgdW5kZWZpbmVkO1xuICBjb25zdCBuYW1lID0gdHlwZT8ubmFtZSB8fCB0eXBlPy5fX25hbWU7XG4gIHJldHVybiBuYW1lID09PSAnRmx5b3V0JyB8fCBuYW1lID09PSAnRmx5b3V0Jztcbn07XG5cbmNvbnN0IHByb3BlcnR5Tm9kZXMgPSBjb21wdXRlZCgoKSA9PiB7XG4gIGNvbnN0IG1haW46IFZOb2RlW10gPSBbXTtcbiAgY29uc3QgZmx5b3V0OiBWTm9kZVtdID0gW107XG5cbiAgY29uc3QgY29sbGVjdCA9IChub2RlczogVk5vZGVbXSkgPT4ge1xuICAgIGZvciAoY29uc3Qgbm9kZSBvZiBub2Rlcykge1xuICAgICAgaWYgKGlzRmx5b3V0UHJvcGVydHkobm9kZSkpIHtcbiAgICAgICAgY29uc3QgcHJvcGVydHlTbG90ID0gbm9kZS5jaGlsZHJlbiAmJiB0eXBlb2Ygbm9kZS5jaGlsZHJlbiA9PT0gJ29iamVjdCdcbiAgICAgICAgICA/IChub2RlLmNoaWxkcmVuIGFzIHsgZGVmYXVsdD86ICgpID0+IFZOb2RlW10gfSkuZGVmYXVsdFxuICAgICAgICAgIDogdW5kZWZpbmVkO1xuICAgICAgICBpZiAocHJvcGVydHlTbG90KSB7XG4gICAgICAgICAgZm9yIChjb25zdCBjaGlsZCBvZiBwcm9wZXJ0eVNsb3QoKSkge1xuICAgICAgICAgICAgaWYgKGlzRmx5b3V0Q29udGFpbmVyKGNoaWxkKSkge1xuICAgICAgICAgICAgICBjb25zdCBjb250ZW50U2xvdCA9IGNoaWxkLmNoaWxkcmVuICYmIHR5cGVvZiBjaGlsZC5jaGlsZHJlbiA9PT0gJ29iamVjdCdcbiAgICAgICAgICAgICAgICA/IChjaGlsZC5jaGlsZHJlbiBhcyB7IGRlZmF1bHQ/OiAoKSA9PiBWTm9kZVtdIH0pLmRlZmF1bHRcbiAgICAgICAgICAgICAgICA6IHVuZGVmaW5lZDtcbiAgICAgICAgICAgICAgaWYgKGNvbnRlbnRTbG90KSBmbHlvdXQucHVzaCguLi5jb250ZW50U2xvdCgpKTtcbiAgICAgICAgICAgIH0gZWxzZSB7XG4gICAgICAgICAgICAgIGZseW91dC5wdXNoKGNoaWxkKTtcbiAgICAgICAgICAgIH1cbiAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICAgICAgY29udGludWU7XG4gICAgICB9XG5cbiAgICAgIC8vIFZ1ZSBjYW4gYWRkIGEgRnJhZ21lbnQgYXJvdW5kIHRlbXBsYXRlIGNvbnRlbnQuICBBIEZyYWdtZW50IGlzIG9ubHlcbiAgICAgIC8vIGNvbXBpbGVyIHN0cnVjdHVyZTsgaXQgaXMgbm90IFhBTUwgY29udGVudCBhbmQgbXVzdCBub3QgaGlkZSBhXG4gICAgICAvLyBUb2dnbGVTcGxpdEJ1dHRvbi5GbHlvdXQgcHJvcGVydHkgZWxlbWVudCBmcm9tIHRoZSBwYXJzZXIuXG4gICAgICBpZiAobm9kZS50eXBlID09PSBGcmFnbWVudCAmJiBBcnJheS5pc0FycmF5KG5vZGUuY2hpbGRyZW4pKSB7XG4gICAgICAgIGNvbGxlY3Qobm9kZS5jaGlsZHJlbiBhcyBWTm9kZVtdKTtcbiAgICAgICAgY29udGludWU7XG4gICAgICB9XG5cbiAgICAgIG1haW4ucHVzaChub2RlKTtcbiAgICB9XG4gIH07XG5cbiAgY29sbGVjdChzbG90cy5kZWZhdWx0Py4oKSA/PyBbXSk7XG4gIHJldHVybiB7IG1haW4sIGZseW91dCB9O1xufSk7XG5cbmNvbnN0IG1haW5Ob2RlcyA9IGNvbXB1dGVkKCgpID0+IHByb3BlcnR5Tm9kZXMudmFsdWUubWFpbik7XG5jb25zdCBmbHlvdXROb2RlcyA9IGNvbXB1dGVkKCgpID0+IHByb3BlcnR5Tm9kZXMudmFsdWUuZmx5b3V0KTtcbmNvbnN0IE1haW5PdXRsZXQgPSBkZWZpbmVDb21wb25lbnQoe1xuICBuYW1lOiAnVG9nZ2xlU3BsaXRCdXR0b25NYWluT3V0bGV0JyxcbiAgc2V0dXAoKSB7XG4gICAgcmV0dXJuICgpID0+IG1haW5Ob2Rlcy52YWx1ZS5sZW5ndGhcbiAgICAgID8gaChGcmFnbWVudCwgbWFpbk5vZGVzLnZhbHVlKVxuICAgICAgOiBTdHJpbmcocmVzb2x2ZWRDb250ZW50LnZhbHVlID8/ICcnKTtcbiAgfVxufSk7XG5jb25zdCBGbHlvdXRPdXRsZXQgPSBkZWZpbmVDb21wb25lbnQoe1xuICBuYW1lOiAnVG9nZ2xlU3BsaXRCdXR0b25GbHlvdXRPdXRsZXQnLFxuICBzZXR1cCgpIHtcbiAgICByZXR1cm4gKCkgPT4gaChGcmFnbWVudCwgZmx5b3V0Tm9kZXMudmFsdWUpO1xuICB9XG59KTtcblxuY29uc3QgcmVzb2x2ZWRJc0NoZWNrZWQgPSBjb21wdXRlZCgoKSA9PiByZXNvbHZlWGFtbFZhbHVlKHByb3BzLklzQ2hlY2tlZCwgaW5zdGFuY2UpKTtcbmNvbnN0IHJlc29sdmVkSXNFbmFibGVkID0gY29tcHV0ZWQoKCkgPT4gcmVzb2x2ZVhhbWxWYWx1ZShwcm9wcy5Jc0VuYWJsZWQsIGluc3RhbmNlKSAhPT0gZmFsc2UpO1xuY29uc3QgbG9jYWxJc0NoZWNrZWQgPSByZWY8Ym9vbGVhbiB8IHVuZGVmaW5lZD4odW5kZWZpbmVkKTtcbmNvbnN0IGlzVXBkYXRpbmdDaGVja2VkID0gcmVmKGZhbHNlKTtcbndhdGNoKHJlc29sdmVkSXNDaGVja2VkLCAodmFsdWUpID0+IHtcbiAgaWYgKCFpc1VwZGF0aW5nQ2hlY2tlZC52YWx1ZSkgbG9jYWxJc0NoZWNrZWQudmFsdWUgPSB2YWx1ZSA9PT0gdHJ1ZTtcbn0sIHsgaW1tZWRpYXRlOiB0cnVlIH0pO1xuY29uc3QgY2hlY2tlZFN0YXRlID0gY29tcHV0ZWQoKCkgPT4gbG9jYWxJc0NoZWNrZWQudmFsdWUgIT09IHVuZGVmaW5lZFxuICA/IGxvY2FsSXNDaGVja2VkLnZhbHVlXG4gIDogcmVzb2x2ZWRJc0NoZWNrZWQudmFsdWUgPT09IHRydWUpO1xuY29uc3QgaXNEaXNhYmxlZCA9IGNvbXB1dGVkKCgpID0+ICFyZXNvbHZlZElzRW5hYmxlZC52YWx1ZSk7XG5jb25zdCBmbHlvdXREZWZpbml0aW9uID0gY29tcHV0ZWQoKCkgPT4gQXJyYXkuaXNBcnJheShwcm9wcy5GbHlvdXQpID8geyBJdGVtczogcHJvcHMuRmx5b3V0IH0gOiBwcm9wcy5GbHlvdXQgfHwgeyBJdGVtczogW10gfSk7XG5jb25zdCBzb3VyY2VJdGVtcyA9IGNvbXB1dGVkKCgpID0+IGZseW91dERlZmluaXRpb24udmFsdWUuSXRlbXMgPz8gW10pO1xuY29uc3Qgc3BsaXRPcHRpb25zID0gY29tcHV0ZWQoKCkgPT4gc291cmNlSXRlbXMudmFsdWUubWFwKChpdGVtLCBpZHgpID0+IHtcbiAgaWYgKHR5cGVvZiBpdGVtID09PSAnc3RyaW5nJykgcmV0dXJuIHsgVGV4dDogaXRlbSwgVmFsdWU6IGlkeCB9O1xuICByZXR1cm4geyAuLi5pdGVtLCBUZXh0OiBpdGVtLlRleHQgPz8gaXRlbS5Db250ZW50ID8/IGl0ZW0ubGFiZWwgPz8gU3RyaW5nKGl0ZW0pLCBWYWx1ZTogaXRlbS5WYWx1ZSA/PyBpZHggfTtcbn0pKTtcbmNvbnN0IHNwbGl0Rmx5b3V0ID0gY29tcHV0ZWQoKCkgPT4gKHsgLi4uZmx5b3V0RGVmaW5pdGlvbi52YWx1ZSwgSXRlbXM6IHNwbGl0T3B0aW9ucy52YWx1ZSB9KSk7XG5cbmNvbnN0IHNldENoZWNrZWQgPSAobmV4dCwgZXZlbnQpID0+IHtcbiAgaWYgKGlzRGlzYWJsZWQudmFsdWUpIHJldHVybjtcbiAgbG9jYWxJc0NoZWNrZWQudmFsdWUgPSBuZXh0O1xuICBpc1VwZGF0aW5nQ2hlY2tlZC52YWx1ZSA9IHRydWU7XG4gIGVtaXQoJ3VwZGF0ZTpJc0NoZWNrZWQnLCBuZXh0KTtcbiAgdXBkYXRlWGFtbEJpbmRpbmcocHJvcHMuSXNDaGVja2VkLCBuZXh0LCBpbnN0YW5jZSk7XG4gIGlzVXBkYXRpbmdDaGVja2VkLnZhbHVlID0gZmFsc2U7XG4gIGVtaXQoJ0NsaWNrJywgZXZlbnQpO1xuICByZXNvbHZlWGFtbEhhbmRsZXIoYXR0cnMuQ2xpY2ssIGluc3RhbmNlKT8uKGV2ZW50KTtcbiAgZW1pdCgnSXNDaGVja2VkQ2hhbmdlZCcsIHsgSXNDaGVja2VkOiBuZXh0IH0pO1xuICByZXNvbHZlWGFtbEhhbmRsZXIoYXR0cnMuSXNDaGVja2VkQ2hhbmdlZCwgaW5zdGFuY2UpPy4oeyBJc0NoZWNrZWQ6IG5leHQgfSk7XG59O1xuXG5jb25zdCBvblNwbGl0Q2xpY2sgPSAoZXZlbnQpID0+IHtcbiAgc2V0Q2hlY2tlZCghY2hlY2tlZFN0YXRlLnZhbHVlLCBldmVudCk7XG59O1xuXG5jb25zdCBvblNlbGVjdCA9IChpdGVtKSA9PiB7XG4gIGVtaXQoJ1NlbGVjdCcsIGl0ZW0pO1xuICByZXNvbHZlWGFtbEhhbmRsZXIoYXR0cnMuU2VsZWN0LCBpbnN0YW5jZSk/LihpdGVtKTtcbn07XG5cbnByb3ZpZGUoeGFtbFNjb3BlS2V5LCB7XG4gIHNwbGl0Rmx5b3V0LFxuICByZXNvbHZlZElzRW5hYmxlZCxcbiAgVGhlbWU6IGNvbXB1dGVkKCgpID0+IHByb3BzLlRoZW1lKSxcbiAgTWluV2lkdGg6IGNvbXB1dGVkKCgpID0+IHByb3BzLk1pbldpZHRoKSxcbiAgTWluSGVpZ2h0OiBjb21wdXRlZCgoKSA9PiBwcm9wcy5NaW5IZWlnaHQpLFxuICBQYWRkaW5nOiBjb21wdXRlZCgoKSA9PiBwcm9wcy5QYWRkaW5nKSxcbiAgTWFyZ2luOiBjb21wdXRlZCgoKSA9PiBwcm9wcy5NYXJnaW4pLFxuICBWZXJ0aWNhbEFsaWdubWVudDogY29tcHV0ZWQoKCkgPT4gcHJvcHMuVmVydGljYWxBbGlnbm1lbnQpLFxuICBPblNwbGl0Q2xpY2s6IG9uU3BsaXRDbGljayxcbiAgT25TZWxlY3Q6IG9uU2VsZWN0XG59KTtcbjwvc2NyaXB0PlxuIl19

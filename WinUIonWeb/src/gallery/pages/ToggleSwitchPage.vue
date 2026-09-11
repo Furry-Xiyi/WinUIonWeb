@@ -13,12 +13,9 @@
         </div>
       <div class="gallery-page-content">
         <ControlExample class="basic-input-example-theme" SampleDefinition="ToggleSwitch\ToggleSwitchSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind toggleSwitchSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('text.a-simple-toggleswitch'), Mode=OneWay}">
-              <ControlExample.Example>
                 <ToggleSwitch />
-              </ControlExample.Example>
             </ControlExample>
             <ControlExample class="basic-input-example-theme" SampleDefinition="ToggleSwitch\ToggleSwitchCustom.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind toggleSwitchCustomVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.toggleswitch.custom'), Mode=OneWay}">
-              <ControlExample.Example>
                 <StackPanel Orientation="Horizontal">
                   <ToggleSwitch
                     Header="{x:Bind $t('sample.toggle-work'), Mode=OneWay}"
@@ -27,7 +24,6 @@
                     IsOn="{x:Bind workToggle, Mode=TwoWay}" />
                   <ProgressRing Width="32" IsActive="{x:Bind workToggle, Mode=OneWay}" />
                 </StackPanel>
-              </ControlExample.Example>
             </ControlExample>
       </div>
     </div>

@@ -983,7 +983,7 @@ watch(titlebarCompact, (compact) => {
     --TextFillColorInverseBrush: #FFFFFF;
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
     --NavigationViewContentGridBorderBrush: #E5E5E5;
-    --NavigationViewContentBackground: rgba(249, 249, 249, 0.50);
+    --NavigationViewContentBackground: #F9F9F9;
     --SystemFillColorAttentionBrush: #0067C0;
     --SystemFillColorSuccessBrush: #0F7B0F;
     --SystemFillColorCautionBrush: #9D5D00;
@@ -1076,7 +1076,7 @@ watch(titlebarCompact, (compact) => {
     --TextFillColorInverseBrush: rgba(0, 0, 0, 0.89);
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
     --NavigationViewContentGridBorderBrush: #1D1D1D;
-    --NavigationViewContentBackground: rgba(48, 48, 48, 0.30);
+    --NavigationViewContentBackground: #282828;
     --SystemFillColorAttentionBrush: #4CC2FF;
     --SystemFillColorSuccessBrush: #6CCB5F;
     --SystemFillColorCautionBrush: #FCE100;

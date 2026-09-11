@@ -12,7 +12,7 @@
           </div>
         </div>
       <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" SampleDefinition="ToggleSplitButton\ToggleSplitButtonBulletList.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind toggleSplitButtonVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.togglesplitbutton.bullet-list'), Mode=OneWay}">
+        <ControlExample class="basic-input-example-theme" SampleDefinition="ToggleSplitButton\ToggleSplitButtonBulletList.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind toggleSplitButtonVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.togglesplitbutton.bullet-list'), Mode=OneWay}">
               <ToggleSplitButton IsChecked="{x:Bind myListButton, Mode=TwoWay}" VerticalAlignment="Top" AutomationProperties.Name="{x:Bind automationName, Mode=OneWay}" IsCheckedChanged="MyListButton_IsCheckedChanged">
                   <SymbolIcon Symbol="{x:Bind listType, Mode=OneWay}" />
                   <ToggleSplitButton.Flyout>

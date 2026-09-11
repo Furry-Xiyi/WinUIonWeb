@@ -12,7 +12,7 @@
           </div>
         </div>
       <div class="gallery-page-content">
-            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind buttonSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('text.a-simple-button-with-text-content'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind buttonSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('text.a-simple-button-with-text-content'), Mode=OneWay}">
               <ControlExample.Example>
                 <Button AutomationProperties.Name="Standard XAML"
                   Content="{x:Bind $t('sample.button.standard-xaml'), Mode=OneWay}"
@@ -30,7 +30,7 @@
                 </StackPanel>
               </ControlExample.Options>
             </ControlExample>
-            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonWithImage.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind buttonWithImageVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.button.with-image'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonWithImage.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind buttonWithImageVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.button.with-image'), Mode=OneWay}">
               <ControlExample.Example>
                 <StackPanel Orientation="Horizontal">
                   <Button Width="50" Height="50" AutomationProperties.Name="Pie" Padding="4" Click="Button2_Click">
@@ -42,7 +42,7 @@
                 <TextBlock Text="{x:Bind Control2Output, Mode=OneWay}" />
               </ControlExample.Output>
             </ControlExample>
-            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonBuiltInStyles.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind buttonBuiltInStylesVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.button.built-in-styles'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonBuiltInStyles.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind buttonBuiltInStylesVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.button.built-in-styles'), Mode=OneWay}">
               <ControlExample.Example>
                 <StackPanel Orientation="Horizontal" Spacing="16">
                   <Button AutomationProperties.Name="Accent style" Content="{x:Bind $t('sample.button.accent-style'), Mode=OneWay}" Style="{StaticResource AccentButtonStyle}" />
@@ -50,7 +50,7 @@
                 </StackPanel>
               </ControlExample.Example>
             </ControlExample>
-            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonWrapping.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind buttonWrappingVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.button.wrapping'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="Button\ButtonWrapping.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind buttonWrappingVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.button.wrapping'), Mode=OneWay}">
                 <StackPanel>
                   <TextBlock Margin="0,0,0,8" Text="{x:Bind $t('sample.button.wrapping-note-1'), Mode=OneWay}" TextWrapping="Wrap" />
                   <TextBlock Margin="0,0,0,8" Text="{x:Bind $t('sample.button.wrapping-note-2'), Mode=OneWay}" TextWrapping="Wrap" />

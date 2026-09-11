@@ -1,8 +1,160 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"><div class="gallery-item-page"><div class="page-heading"><TextBlock class="page-header" Text="{x:Bind $t('text.popup'), Mode=OneWay}" /><TextBlock class="page-description" Text="{x:Bind $t('text.displays-content-on-top-of-existing-content-with'), Mode=OneWay}" TextWrapping="WrapWholeWords" /><div class="page-header-actions"><Button class="header-action" Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button><ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite"><TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" /></ToggleButton></div></div><div class="gallery-page-content"><ControlExample HeaderText="{x:Bind $t('text.popup-with-offset-positioning'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind popupCode, Mode=OneWay}"><ControlExample.Example><Grid HorizontalAlignment="Left" VerticalAlignment="Top"><Button Click="ShowPopupOffsetClicked" Content="{x:Bind $t('text.show-popup-using-offset'), Mode=OneWay}" /><Popup IsOpen="{x:Bind isPopupOpen, Mode=TwoWay}" HorizontalOffset="{x:Bind horizontalOffset, Mode=OneWay}" VerticalOffset="{x:Bind verticalOffset, Mode=OneWay}" IsLightDismissEnabled="{x:Bind isLightDismissEnabled, Mode=OneWay}" Closed="PopupClosed"><Grid MinWidth="240" Padding="16" Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{StaticResource OverlayCornerRadius}"><StackPanel Spacing="8"><TextBlock FontSize="16" Text="{x:Bind $t('sample.popup.simple'), Mode=OneWay}" /><Button Click="ClosePopupClicked" Content="{x:Bind $t('sample.popup.close'), Mode=OneWay}" /></StackPanel></Grid></Popup></Grid></ControlExample.Example><ControlExample.Options><StackPanel Spacing="8"><ToggleSwitch Header="{x:Bind $t('sample.popup.light-dismiss'), Mode=OneWay}" IsOn="{x:Bind isLightDismissEnabled, Mode=TwoWay}" OnContent="{x:Bind $t('sample.true'), Mode=OneWay}" OffContent="{x:Bind $t('sample.false'), Mode=OneWay}" /><NumberBox Header="{x:Bind $t('sample.popup.vertical-offset'), Mode=OneWay}" SpinButtonPlacementMode="Inline" LargeChange="100" SmallChange="10" Minimum="-100" Maximum="100" Value="{x:Bind verticalOffset, Mode=TwoWay}" /><NumberBox Header="{x:Bind $t('sample.popup.horizontal-offset'), Mode=OneWay}" SpinButtonPlacementMode="Inline" LargeChange="100" SmallChange="10" Minimum="-100" Maximum="500" Value="{x:Bind horizontalOffset, Mode=TwoWay}" /></StackPanel></ControlExample.Options></ControlExample></div></div></ScrollViewer>
+  <ScrollViewer
+    class="gallery-page-scroll"
+    VerticalScrollBarVisibility="Auto"
+    VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+        <TextBlock
+          class="page-header"
+          Text="{x:Bind $t('text.popup'), Mode=OneWay}" />
+        <TextBlock
+          class="page-description"
+          Text="{x:Bind $t('text.displays-content-on-top-of-existing-content-with'), Mode=OneWay}"
+          TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <Button class="header-action" Click="toggleTheme">
+            <TextBlock class="icon" Text="&#xE793;" />
+          </Button>
+          <ToggleButton
+            IsChecked="{x:Bind isFavoriteState, Mode=OneWay}"
+            class="header-action"
+            Click="toggleFavorite">
+            <TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" />
+          </ToggleButton>
+        </div>
+      </div>
+
+      <div class="gallery-page-content">
+        <ControlExample
+          HeaderText="{x:Bind $t('text.popup-with-offset-positioning'), Mode=OneWay}"
+          Theme="{x:Bind pageTheme, Mode=OneWay}"
+          Vue="{x:Bind popupCode, Mode=OneWay}">
+          <ControlExample.Example>
+            <Grid
+              HorizontalAlignment="Left"
+              VerticalAlignment="Top">
+              <Button
+                Click="ShowPopupOffsetClicked"
+                Content="{x:Bind $t('text.show-popup-using-offset'), Mode=OneWay}" />
+              <Popup
+                IsOpen="{x:Bind isPopupOpen, Mode=TwoWay}"
+                Theme="{x:Bind pageTheme, Mode=OneWay}"
+                HorizontalOffset="{x:Bind horizontalOffset, Mode=OneWay}"
+                VerticalOffset="{x:Bind verticalOffset, Mode=OneWay}"
+                IsLightDismissEnabled="{x:Bind isLightDismissEnabled, Mode=OneWay}"
+                Closed="PopupClosed">
+                <Grid
+                  MinWidth="240"
+                  Padding="16"
+                  Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                  BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                  BorderThickness="1"
+                  CornerRadius="{StaticResource OverlayCornerRadius}">
+                  <StackPanel Spacing="8">
+                    <TextBlock
+                      FontSize="16"
+                      Text="{x:Bind $t('sample.popup.simple'), Mode=OneWay}" />
+                    <Button
+                      Click="ClosePopupClicked"
+                      Content="{x:Bind $t('sample.popup.close'), Mode=OneWay}" />
+                  </StackPanel>
+                </Grid>
+              </Popup>
+            </Grid>
+          </ControlExample.Example>
+          <ControlExample.Options>
+            <StackPanel Spacing="8">
+              <ToggleSwitch
+                Header="{x:Bind $t('sample.popup.light-dismiss'), Mode=OneWay}"
+                IsOn="{x:Bind isLightDismissEnabled, Mode=TwoWay}"
+                OnContent="{x:Bind $t('sample.true'), Mode=OneWay}"
+                OffContent="{x:Bind $t('sample.false'), Mode=OneWay}" />
+              <NumberBox
+                Header="{x:Bind $t('sample.popup.vertical-offset'), Mode=OneWay}"
+                SpinButtonPlacementMode="Inline"
+                LargeChange="100"
+                SmallChange="10"
+                Minimum="-100"
+                Maximum="100"
+                Value="{x:Bind verticalOffset, Mode=TwoWay}" />
+              <NumberBox
+                Header="{x:Bind $t('sample.popup.horizontal-offset'), Mode=OneWay}"
+                SpinButtonPlacementMode="Inline"
+                LargeChange="100"
+                SmallChange="10"
+                Minimum="-100"
+                Maximum="500"
+                Value="{x:Bind horizontalOffset, Mode=TwoWay}" />
+            </StackPanel>
+          </ControlExample.Options>
+        </ControlExample>
+      </div>
+    </div>
+  </ScrollViewer>
 </template>
+
 <script setup>
-import { computed, inject, ref } from 'vue'; import Button from '../../components/Button.vue'; import ControlExample from '../../components/ControlExample.vue'; import Grid from '../../components/Grid.vue'; import NumberBox from '../../components/NumberBox.vue'; import Popup from '../../components/Popup.vue'; import ScrollViewer from '../../components/ScrollViewer.vue'; import StackPanel from '../../components/StackPanel.vue'; import TextBlock from '../../components/TextBlock.vue'; import ToggleButton from '../../components/ToggleButton.vue'; import ToggleSwitch from '../../components/ToggleSwitch.vue'; import { createPageState } from '../../utils/pageState';
-const currentPage=inject('currentPage'); const pageKey=computed(()=>currentPage?.value||'popup'); const {isFavoriteState,pageTheme,toggleTheme,toggleFavorite}=createPageState(pageKey.value); const favoriteGlyph=computed(()=>isFavoriteState.value?'\uE735':'\uE734'); const isPopupOpen=ref(false); const isLightDismissEnabled=ref(true); const verticalOffset=ref(0); const horizontalOffset=ref(200); const ShowPopupOffsetClicked=()=>{isPopupOpen.value=true}; const ClosePopupClicked=()=>{isPopupOpen.value=false}; const PopupClosed=()=>{}; const popupCode=`<Grid><Button Click="ShowPopupOffsetClicked" Content="Show Popup (using Offset)" /><Popup IsLightDismissEnabled="{x:Bind IsLightDismissEnabledToggleSwitch.IsOn, Mode=OneWay}" HorizontalOffset="{x:Bind HorizontalOffset.Value, Mode=OneWay}" VerticalOffset="{x:Bind VerticalOffset.Value, Mode=OneWay}"><Grid MinWidth="240" Padding="16"><StackPanel Spacing="8"><TextBlock FontSize="16" Text="Simple Popup" /><Button Content="Close" Click="ClosePopupClicked" /></StackPanel></Grid></Popup></Grid>`;
+import { computed, inject, ref } from 'vue'
+import Button from '../../components/Button.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import Grid from '../../components/Grid.vue'
+import NumberBox from '../../components/NumberBox.vue'
+import Popup from '../../components/Popup.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import ToggleButton from '../../components/ToggleButton.vue'
+import ToggleSwitch from '../../components/ToggleSwitch.vue'
+import { createPageState } from '../../utils/pageState'
+
+const currentPage = inject('currentPage')
+const pageKey = computed(() => currentPage?.value || 'popup')
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value)
+const favoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
+
+const isPopupOpen = ref(false)
+const isLightDismissEnabled = ref(true)
+const verticalOffset = ref(0)
+const horizontalOffset = ref(200)
+
+const ShowPopupOffsetClicked = () => { isPopupOpen.value = true }
+const ClosePopupClicked = () => { isPopupOpen.value = false }
+const PopupClosed = () => {}
+
+const popupCode = `<Grid
+  HorizontalAlignment="Left"
+  VerticalAlignment="Top">
+  <Button
+    Click="ShowPopupOffsetClicked"
+    Content="Show Popup (using Offset)" />
+  <Popup
+    Closed="PopupClosed"
+    HorizontalOffset="{x:Bind HorizontalOffset.Value, Mode=OneWay}"
+    IsLightDismissEnabled="{x:Bind IsLightDismissEnabledToggleSwitch.IsOn, Mode=OneWay}"
+    VerticalOffset="{x:Bind VerticalOffset.Value, Mode=OneWay}">
+    <Grid
+      MinWidth="240"
+      Padding="16"
+      Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+      BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+      BorderThickness="1"
+      CornerRadius="{StaticResource OverlayCornerRadius}">
+      <StackPanel Spacing="8">
+        <TextBlock FontSize="16" Text="Simple Popup" />
+        <Button
+          Click="ClosePopupClicked"
+          Content="Close" />
+      </StackPanel>
+    </Grid>
+  </Popup>
+</Grid>`
 </script>
-<style scoped>.page-heading{position:relative}.page-header{font-size:28px;font-weight:600;margin:0 0 8px;color:var(--text-primary)}.page-description{color:var(--text-secondary);margin:0 72px 16px 0;line-height:20px}.page-header-actions{position:absolute;top:0;right:0;display:flex;gap:4px}.icon{font-size:16px}</style>
+
+<style scoped>
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.icon { font-size: 16px; }
+</style>

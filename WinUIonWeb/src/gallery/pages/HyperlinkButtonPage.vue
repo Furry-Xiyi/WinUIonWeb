@@ -12,7 +12,7 @@
           </div>
         </div>
       <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" SampleDefinition="HyperlinkButton\HyperlinkButtonNavigate.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind hyperlinkButtonNavigateVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.hyperlink.navigate'), Mode=OneWay}">
+        <ControlExample class="basic-input-example-theme" SampleDefinition="HyperlinkButton\HyperlinkButtonNavigate.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind hyperlinkButtonNavigateVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.hyperlink.navigate'), Mode=OneWay}">
               <ControlExample.Example>
                 <HyperlinkButton
                   Content="{x:Bind $t('text.microsoft-home-page'), Mode=OneWay}"
@@ -27,7 +27,7 @@
                 </StackPanel>
               </ControlExample.Options>
             </ControlExample>
-            <ControlExample class="basic-input-example-theme" SampleDefinition="HyperlinkButton\HyperlinkButtonClick.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind hyperlinkButtonClickVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.hyperlink.click'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="HyperlinkButton\HyperlinkButtonClick.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind hyperlinkButtonClickVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.hyperlink.click'), Mode=OneWay}">
               <ControlExample.Example>
                 <HyperlinkButton Content="{x:Bind $t('sample.hyperlink.go-to-togglebutton'), Mode=OneWay}" Click="GoToHyperlinkButton_Click" />
               </ControlExample.Example>

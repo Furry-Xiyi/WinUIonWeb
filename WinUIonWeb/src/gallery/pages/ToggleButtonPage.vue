@@ -29,7 +29,7 @@
               SampleDefinition="ToggleButton\ToggleButtonSimple.txt"
               HeaderText="{x:Bind $t('sample.togglebutton.simple'), Mode=OneWay}"
               Theme="{x:Bind pageTheme, Mode=OneWay}"
-              Vue="{x:Bind toggleButtonVue, Mode=OneWay}">
+              Xaml="{x:Bind toggleButtonVue, Mode=OneWay}">
               <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
                 <ToggleButton IsChecked="{x:Bind Toggle1, Mode=TwoWay}"
                   Content="{x:Bind $t('text.togglebutton'), Mode=OneWay}"

@@ -12,7 +12,7 @@
           </div>
         </div>
       <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" SampleDefinition="DropDownButton\DropDownButtonSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind dropDownButtonSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.dropdown.simple'), Mode=OneWay}">
+        <ControlExample class="basic-input-example-theme" SampleDefinition="DropDownButton\DropDownButtonSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind dropDownButtonSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.dropdown.simple'), Mode=OneWay}">
               <StackPanel Orientation="Horizontal">
                 <DropDownButton Content="{x:Bind $t('text.email'), Mode=OneWay}">
                   <DropDownButton.Flyout>
@@ -25,7 +25,7 @@
                 </DropDownButton>
               </StackPanel>
             </ControlExample>
-            <ControlExample class="basic-input-example-theme" SampleDefinition="DropDownButton\DropDownButtonIcon.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind dropDownButtonIconVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.dropdown.icons'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="DropDownButton\DropDownButtonIcon.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind dropDownButtonIconVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.dropdown.icons'), Mode=OneWay}">
               <StackPanel Orientation="Horizontal">
                 <DropDownButton AutomationProperties.Name="Email">
                   <DropDownButton.Content>

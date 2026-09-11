@@ -1,6 +1,6 @@
 <template>
   <div v-if="isGroup" class="win-radio-buttons" :class="{ 'is-disabled': !resolvedIsEnabled }" :style="rootStyle">
-    <TextBlock v-if="resolvedHeader" class="win-radio-buttons-header" :Text="resolvedHeader" />
+    <TextBlock v-if="resolvedHeader" class="win-radio-buttons-header" Text="{x:Bind RadioButtonsHeader}" />
     <div class="win-radio-buttons-items" :style="itemsStyle">
       <label
         v-for="(item, index) in normalizedItems"
@@ -15,7 +15,7 @@
           :disabled="!resolvedIsEnabled"
           @change="select(index)" />
         <span class="win-radio-glyph" aria-hidden="true"><span class="win-radio-check" /></span>
-        <TextBlock class="win-radio-content" :Text="item.Text" />
+        <TextBlock class="win-radio-content">{{ item.Text }}</TextBlock>
       </label>
       <slot v-if="normalizedItems.length === 0" />
     </div>
@@ -34,16 +34,16 @@
       :disabled="!resolvedIsEnabled"
       @change="check" />
     <span class="win-radio-glyph" aria-hidden="true"><span class="win-radio-check" /></span>
-    <TextBlock class="win-radio-content" :Text="contentText">
+    <TextBlock class="win-radio-content" Text="{x:Bind RadioContent}">
       <slot>{{ contentText }}</slot>
     </TextBlock>
   </label>
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, inject, provide, ref } from 'vue';
+import { computed, getCurrentInstance, inject, provide, ref, useAttrs } from 'vue';
 import TextBlock from './TextBlock.vue';
-import { resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime';
 
 const radioButtonsGroupKey = Symbol.for('WinUIonWeb.RadioButtons');
 
@@ -67,6 +67,7 @@ const emit = defineEmits(['update:IsChecked', 'Checked', 'Unchecked', 'update:mo
 
 const groupName = `win-radio-buttons-${Math.random().toString(36).slice(2)}`;
 const instance = getCurrentInstance();
+const attrs = useAttrs();
 const resolvedItemsSource = computed(() => {
   const value = resolveXamlValue(props.ItemsSource, instance);
   return Array.isArray(value) ? value : [];
@@ -114,6 +115,8 @@ const contentText = computed(() => {
   const value = resolveXamlValue(props.Content, instance);
   return value === undefined || value === null ? '' : String(value);
 });
+const RadioButtonsHeader = computed(() => resolvedHeader.value);
+const RadioContent = computed(() => contentText.value);
 const rootStyle = computed(() => props.Margin ? { margin: xamlThickness(resolveXamlValue(props.Margin, instance)) } : {});
 const itemsStyle = computed(() => {
   const maxColumns = Math.max(1, Number(props.MaxColumns) || 1);
@@ -127,6 +130,7 @@ const check = () => {
   if (group && groupIndex !== undefined) group.select(groupIndex);
   emit('update:IsChecked', true);
   emit('Checked');
+  resolveXamlHandler(attrs.Checked, instance)?.();
   if (props.value !== undefined) emit('update:modelValue', props.value);
 };
 
@@ -137,13 +141,17 @@ const select = (index) => {
   internalSelectedIndex.value = index;
   emit('update:SelectedIndex', index);
   emit('update:SelectedItem', newItem?.Value ?? newItem);
-  emit('SelectionChanged', {
+  const args = {
     SelectedIndex: index,
     SelectedItem: newItem?.Value ?? newItem,
     AddedItems: newItem ? [newItem.Value ?? newItem] : [],
     RemovedItems: oldItem ? [oldItem.Value ?? oldItem] : []
-  });
+  };
+  emit('SelectionChanged', args);
+  resolveXamlHandler(attrs.SelectionChanged, instance)?.(args);
 };
+
+provide(xamlScopeKey, { RadioButtonsHeader, RadioContent });
 
 provide(radioButtonsGroupKey, {
   selectedIndex: selectedIndexValue,

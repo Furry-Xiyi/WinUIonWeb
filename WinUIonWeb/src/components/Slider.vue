@@ -1,6 +1,6 @@
 <template>
   <div class="win-slider-root" :class="{ 'is-disabled': !resolvedIsEnabled }" :style="rootStyle">
-    <TextBlock v-if="resolvedHeader" class="win-slider-header" :Text="resolvedHeader" />
+    <TextBlock v-if="resolvedHeader" class="win-slider-header" Text="{x:Bind SliderHeader}" />
     <div
       ref="trackRef"
       class="win-slider"
@@ -23,27 +23,28 @@
         class="win-slider-thumb"
         :class="{ 'is-pointer-over': isThumbPointerOver && !isTrackInteraction, 'is-pressed': isThumbPressed }"
         :style="thumbStyle"
+        @pointerdown.stop="onThumbPointerDown"
         @pointerenter="onThumbPointerEnter"
         @pointerleave="onThumbPointerLeave" />
     </div>
     <ToolTip
       ref="thumbToolTipRef"
       IsServiceHost
-      v-model:IsOpen="isThumbToolTipOpen"
-      :IsEnabled="resolvedIsEnabled && resolvedIsThumbToolTipEnabled"
-      :Content="thumbToolTipContent"
-      :Placement="tooltipPlacement"
-      :PlacementTarget="thumbRef"
+      IsOpen="{x:Bind IsThumbToolTipOpen, Mode=TwoWay}"
+      IsEnabled="{x:Bind IsThumbToolTipActive}"
+      Content="{x:Bind ThumbToolTipContent}"
+      Placement="{x:Bind ThumbToolTipPlacement}"
+      PlacementTarget="{x:Bind ThumbToolTipTarget}"
       Padding="8,3,8,5"
       FontSize="15" />
   </div>
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, nextTick, ref, useAttrs, watch } from 'vue';
+import { computed, getCurrentInstance, nextTick, onBeforeUnmount, provide, ref, useAttrs, watch } from 'vue';
 import TextBlock from './TextBlock.vue';
 import ToolTip from './ToolTip.vue';
-import { resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 
 defineOptions({ inheritAttrs: false });
 
@@ -77,6 +78,7 @@ const emit = defineEmits(['update:Value', 'ValueChanged', 'update:modelValue']);
 const attrs = useAttrs();
 const instance = getCurrentInstance();
 const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
+const SliderHeader = computed(() => resolvedHeader.value);
 const resolvedValue = computed(() => resolveXamlValue(props.Value, instance));
 const resolvedMinimum = computed(() => resolveXamlValue(props.Minimum, instance));
 const resolvedMaximum = computed(() => resolveXamlValue(props.Maximum, instance));
@@ -104,6 +106,7 @@ const isThumbPointerOver = ref(false);
 const isThumbPressed = ref(false);
 const isTrackInteraction = ref(false);
 const isThumbToolTipOpen = ref(false);
+const isDraggingState = ref(false);
 const thumbLength = 18;
 const thumbCenterOffset = thumbLength / 2;
 const tickOffset = (thumbLength - 1) / 2;
@@ -167,6 +170,11 @@ const formatSliderValue = (value) => {
 // tooltip, however, reports the value the slider would commit at the current
 // position when snapping is enabled, so it must use the snapped projection.
 const thumbToolTipContent = computed(() => formatSliderValue(snap(effectiveValue.value)));
+const IsThumbToolTipOpen = isThumbToolTipOpen;
+const IsThumbToolTipActive = computed(() => resolvedIsEnabled.value && resolvedIsThumbToolTipEnabled.value);
+const ThumbToolTipContent = computed(() => thumbToolTipContent.value);
+const ThumbToolTipPlacement = computed(() => tooltipPlacement.value);
+const ThumbToolTipTarget = computed(() => thumbRef.value);
 
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
@@ -253,19 +261,55 @@ const setValue = (value, { commit = true } = {}) => {
   ).toFixed(4));
   // Keep pointer movement continuous.  Snapping is only committed on release;
   // the tooltip projects the continuous value through snap() independently.
-  const nextValue = commit ? snap(rawValue) : rawValue;
+  const snappedValue = snap(rawValue);
+  const nextValue = commit ? snappedValue : rawValue;
   dragValue.value = nextValue;
-  if (!commit) return;
+  if (!commit) {
+    // RangeBase.Value is a TwoWay property in the official Gallery. Publish
+    // the snapped Value while the thumb follows the pointer continuously.
+    // This keeps StepFrequency/Ticks output and bound controls on the official
+    // increments without making the thumb itself jump between tick positions.
+    emit('update:Value', snappedValue);
+    emit('update:modelValue', snappedValue);
+    updateXamlBinding(props.Value, snappedValue, instance);
+    return;
+  }
   internalValue.value = nextValue;
   emit('update:Value', nextValue);
   emit('update:modelValue', nextValue);
-  if (oldValue !== nextValue) emit('ValueChanged', { OldValue: oldValue, NewValue: nextValue });
+  updateXamlBinding(props.Value, nextValue, instance);
+  if (oldValue !== nextValue) {
+    const args = { OldValue: oldValue, NewValue: nextValue };
+    emit('ValueChanged', args);
+    resolveXamlHandler(attrs.ValueChanged, instance)?.(args);
+  }
 };
+
+const exposedValue = computed({
+  // XAML consumers observe the RangeBase.Value after StepFrequency/Ticks
+  // snapping, while the visual thumb continues to follow the pointer.
+  get: () => snap(effectiveValue.value),
+  set: (value) => setValue(value, { commit: true })
+});
+defineExpose({ Value: exposedValue, IsDragging: isDraggingState });
+
+provide(xamlScopeKey, {
+  SliderHeader,
+  IsThumbToolTipOpen,
+  IsThumbToolTipActive,
+  ThumbToolTipContent,
+  ThumbToolTipPlacement,
+  ThumbToolTipTarget
+});
 
 const showThumbToolTip = (immediate = true) => {
   if (!resolvedIsEnabled.value || !resolvedIsThumbToolTipEnabled.value) return;
-  if (immediate) isThumbToolTipOpen.value = true;
-  thumbToolTipRef.value?.show?.(immediate);
+  if (immediate) {
+    isThumbToolTipOpen.value = true;
+    nextTick(() => thumbToolTipRef.value?.updatePosition?.());
+    return;
+  }
+  thumbToolTipRef.value?.show?.(false);
 };
 
 const hideThumbToolTip = () => {
@@ -286,38 +330,88 @@ const onThumbPointerLeave = () => {
 const updateFromPointer = (event) => {
   const rect = trackRef.value.getBoundingClientRect();
   const usableSize = Math.max(1, (orientation.value === 'Vertical' ? rect.height : rect.width) - thumbLength);
+  const adjustedClientX = event.clientX - pointerGrabOffset;
+  const adjustedClientY = event.clientY - pointerGrabOffset;
   const ratio = orientation.value === 'Vertical'
-    ? ((rect.bottom - event.clientY - thumbCenterOffset) / usableSize)
-    : ((event.clientX - rect.left - thumbCenterOffset) / usableSize);
+    ? ((rect.bottom - adjustedClientY - thumbCenterOffset) / usableSize)
+    : ((adjustedClientX - rect.left - thumbCenterOffset) / usableSize);
   setValue(minimum.value + Math.max(0, Math.min(1, ratio)) * range.value, { commit: false });
 };
 
-const onPointerDown = (event) => {
-  if (!resolvedIsEnabled.value || !trackRef.value) return;
-  const startedOnThumb = event.target?.closest?.('.win-slider-thumb');
-  isThumbPressed.value = Boolean(startedOnThumb);
-  isTrackInteraction.value = !startedOnThumb;
-  trackRef.value.setPointerCapture(event.pointerId);
-  updateFromPointer(event);
-  showThumbToolTip(true);
-  const finishPointerInteraction = (commit = true) => {
-    if (!isThumbPressed.value && !isTrackInteraction.value) return;
-    if (commit && dragValue.value !== null) setValue(dragValue.value, { commit: true });
-    dragValue.value = null;
-    isThumbPressed.value = false;
-    isTrackInteraction.value = false;
-    trackRef.value.onpointermove = null;
-    trackRef.value.onpointerup = null;
-    trackRef.value.onpointercancel = null;
-    trackRef.value.onlostpointercapture = null;
-    if (trackRef.value?.hasPointerCapture?.(event.pointerId)) trackRef.value.releasePointerCapture(event.pointerId);
-    hideThumbToolTip();
-  };
-  trackRef.value.onpointermove = updateFromPointer;
-  trackRef.value.onpointerup = () => finishPointerInteraction(true);
-  trackRef.value.onpointercancel = () => finishPointerInteraction(false);
-  trackRef.value.onlostpointercapture = () => finishPointerInteraction(true);
+let activePointerId = null;
+let pointerCaptureElement = null;
+let pointerGrabOffset = 0;
+const addPointerListeners = () => {
+  window.addEventListener('pointermove', onWindowPointerMove, { capture: true, passive: false });
+  window.addEventListener('pointerup', onWindowPointerUp, true);
+  window.addEventListener('pointercancel', onWindowPointerCancel, true);
 };
+const removePointerListeners = () => {
+  window.removeEventListener('pointermove', onWindowPointerMove, true);
+  window.removeEventListener('pointerup', onWindowPointerUp, true);
+  window.removeEventListener('pointercancel', onWindowPointerCancel, true);
+};
+const finishPointerInteraction = (commit = true) => {
+  if (activePointerId === null) return;
+  if (commit && dragValue.value !== null) setValue(dragValue.value, { commit: true });
+  const pointerId = activePointerId;
+  const captureElement = pointerCaptureElement;
+  activePointerId = null;
+  pointerCaptureElement = null;
+  pointerGrabOffset = 0;
+  dragValue.value = null;
+  isDraggingState.value = false;
+  isThumbPressed.value = false;
+  isTrackInteraction.value = false;
+  removePointerListeners();
+  if (captureElement?.hasPointerCapture?.(pointerId)) captureElement.releasePointerCapture(pointerId);
+  hideThumbToolTip();
+};
+const onWindowPointerMove = (event) => {
+  if (event.pointerId !== activePointerId) return;
+  event.preventDefault();
+  updateFromPointer(event);
+};
+const onWindowPointerUp = (event) => {
+  if (event.pointerId === activePointerId) finishPointerInteraction(true);
+};
+const onWindowPointerCancel = (event) => {
+  if (event.pointerId === activePointerId) finishPointerInteraction(false);
+};
+
+const beginPointerInteraction = (event, startedOnThumb) => {
+  if (!resolvedIsEnabled.value || !trackRef.value) return;
+  if (activePointerId !== null) finishPointerInteraction(false);
+  event.preventDefault();
+  event.stopPropagation();
+  isThumbPressed.value = startedOnThumb;
+  isTrackInteraction.value = !startedOnThumb;
+  isDraggingState.value = true;
+  activePointerId = event.pointerId;
+  pointerCaptureElement = startedOnThumb ? thumbRef.value : trackRef.value;
+  if (startedOnThumb && thumbRef.value) {
+    const thumbRect = thumbRef.value.getBoundingClientRect();
+    pointerGrabOffset = orientation.value === 'Vertical'
+      ? event.clientY - (thumbRect.top + thumbRect.height / 2)
+      : event.clientX - (thumbRect.left + thumbRect.width / 2);
+  } else {
+    pointerGrabOffset = 0;
+  }
+  addPointerListeners();
+  try {
+    pointerCaptureElement?.setPointerCapture?.(event.pointerId);
+  } catch {
+    // The capture listeners above keep mouse, pen and touch dragging active
+    // even if a browser declines pointer capture for this pointer.
+  }
+  if (!startedOnThumb) updateFromPointer(event);
+  showThumbToolTip(true);
+};
+
+const onPointerDown = (event) => beginPointerInteraction(event, false);
+const onThumbPointerDown = (event) => beginPointerInteraction(event, true);
+
+onBeforeUnmount(() => finishPointerInteraction(false));
 
 watch(externalValue, (value) => {
   if (dragValue.value === null) internalValue.value = toNumber(value, internalValue.value ?? minimum.value);
@@ -371,6 +465,7 @@ watch([resolvedIsEnabled, resolvedIsThumbToolTipEnabled], ([isEnabled, isToolTip
   border-radius: 2px;
   background: var(--ctrl-strong-fill);
   overflow: hidden;
+  z-index: 0;
 }
 
 .win-slider.vertical .win-slider-track {
@@ -412,6 +507,9 @@ watch([resolvedIsEnabled, resolvedIsThumbToolTipEnabled], ([isEnabled, isToolTip
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   display: grid;
   place-items: center;
+  z-index: 2;
+  pointer-events: auto;
+  touch-action: none;
 }
 
 .win-slider.vertical .win-slider-thumb {
@@ -444,6 +542,7 @@ watch([resolvedIsEnabled, resolvedIsThumbToolTipEnabled], ([isEnabled, isToolTip
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 1;
 }
 
 .win-slider-tick {

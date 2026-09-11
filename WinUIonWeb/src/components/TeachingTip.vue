@@ -15,42 +15,44 @@
         :style="tipStyle"
         role="dialog"
         @pointerdown.stop>
-        <div v-if="$slots.HeroContent || $slots.hero || HeroContent" class="teaching-tip-hero">
-          <slot name="HeroContent">
+        <div v-if="hasHeroContent" class="teaching-tip-hero">
+          <HeroContentOutlet v-if="propertyNodes.heroContent.length" />
+          <slot v-else name="HeroContent">
             <slot name="hero">
               <template v-if="typeof HeroContent === 'string' || typeof HeroContent === 'number'">{{ HeroContent }}</template>
             </slot>
           </slot>
         </div>
         <div class="teaching-tip-main" :class="{ 'has-alternate-close': ShowAlternateCloseButton }">
-          <div v-if="$slots.IconSource || $slots.icon || IconSource" class="teaching-tip-icon">
-            <slot name="IconSource"><slot name="icon">{{ iconGlyph }}</slot></slot>
+          <div v-if="hasIconSource" class="teaching-tip-icon">
+            <IconSourceOutlet v-if="propertyNodes.iconSource.length" />
+            <slot v-else name="IconSource"><slot name="icon">{{ iconGlyph }}</slot></slot>
           </div>
           <div class="teaching-tip-text">
-            <TextBlock v-if="Title" class="teaching-tip-title" :Text="Title" TextWrapping="WrapWholeWords" />
-            <TextBlock v-if="Subtitle" class="teaching-tip-subtitle" :Text="Subtitle" TextWrapping="WrapWholeWords" />
-            <div v-if="$slots.default || Content" class="teaching-tip-content">
-              <slot>{{ Content }}</slot>
+            <TextBlock v-if="Title" class="teaching-tip-title" Text="{x:Bind TipTitle}" TextWrapping="WrapWholeWords" />
+            <TextBlock v-if="Subtitle" class="teaching-tip-subtitle" Text="{x:Bind TipSubtitle}" TextWrapping="WrapWholeWords" />
+            <div v-if="hasContent" class="teaching-tip-content">
+              <ContentOutlet v-if="propertyNodes.content.length" />
+              <slot v-else>{{ Content }}</slot>
             </div>
           </div>
           <Button
             v-if="ShowAlternateCloseButton"
             class="teaching-tip-close"
             Style="SubtleButtonStyle"
-            Width="32"
-            Height="32"
+            Width="40"
+            Height="40"
             Padding="4"
-            Margin="4"
+            Margin="0"
             BorderThickness="1"
             CornerRadius="var(--ControlCornerRadius, 4px)"
             FocusVisualMargin="-3"
             Content="&#xE711;"
             FontFamily="var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets')"
             FontSize="16"
-            type="button"
-            :aria-label="t('text.close')"
-            v-bind="{ 'tooltipservice.tooltip': t('text.close') }"
-            @Click="close" />
+            AutomationProperties.Name="{x:Bind CloseButtonLabel}"
+            ToolTipService.ToolTip="{x:Bind CloseButtonLabel}"
+            Click="OnTeachingTipCloseButtonClick" />
         </div>
         <div
           v-if="ActionButtonContent || CloseButtonContent || $slots.actions"
@@ -60,18 +62,16 @@
             <Button
               v-if="ActionButtonContent"
               class="teaching-tip-action-button"
-              :Style="ActionButtonStyle"
-              v-bind="actionButtonStyleAttrs"
-              @Click="onAction">
-              <TextBlock :Text="ActionButtonContent" />
+              Style="{x:Bind ActionButtonStyleName}"
+              Click="OnTeachingTipActionButtonClick">
+              <TextBlock Text="{x:Bind ActionButtonContent}" />
             </Button>
             <Button
               v-if="CloseButtonContent"
               class="teaching-tip-close-button"
-              :Style="CloseButtonStyle"
-              v-bind="closeButtonStyleAttrs"
-              @Click="onCloseButton">
-              <TextBlock :Text="CloseButtonContent" />
+              Style="{x:Bind CloseButtonStyleName}"
+              Click="OnTeachingTipCloseButtonClick">
+              <TextBlock Text="{x:Bind CloseButtonContent}" />
             </Button>
           </slot>
         </div>
@@ -89,19 +89,31 @@
   </Teleport>
 </template>
 
-<script setup>
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, unref, watch } from 'vue';
+<script lang="ts">
+import { TeachingTipContent, TeachingTipHeroContent, TeachingTipIconSource } from './TeachingTipProperties'
+
+export default {
+  HeroContent: TeachingTipHeroContent,
+  Content: TeachingTipContent,
+  IconSource: TeachingTipIconSource
+}
+</script>
+
+<script setup lang="ts">
+import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, unref, useAttrs, useSlots, watch } from 'vue';
 import Button from './Button.vue';
 import TextBlock from './TextBlock.vue';
 import { useI18n } from './i18n/index';
+import { getTeachingTipProperty, type TeachingTipPropertyName } from './TeachingTipProperties';
+import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime';
 
 const { t } = useI18n();
 
 defineOptions({ name: 'TeachingTip' });
 
 const props = defineProps({
-  IsOpen: { type: Boolean, default: undefined },
-  Target: { type: Object, default: null },
+  IsOpen: { type: [Boolean, String], default: undefined },
+  Target: { type: [Object, String], default: null },
   Title: { type: String, default: '' },
   Subtitle: { type: String, default: '' },
   Content: { type: [String, Number, Object], default: '' },
@@ -128,6 +140,9 @@ const props = defineProps({
 const emit = defineEmits(['update:IsOpen', 'ActionButtonClick', 'CloseButtonClick', 'Opened', 'Closed']);
 
 const tipRef = ref(null);
+const instance = getCurrentInstance();
+const attrs = useAttrs();
+const slots = useSlots();
 const localIsOpen = ref(false);
 const position = ref({ top: 0, left: 0, tailLeft: 160 });
 const actualPlacement = ref('Bottom');
@@ -136,29 +151,28 @@ const anchorTheme = ref('');
 const documentTheme = ref('');
 let themeObserver = null;
 
-const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
-const targetValue = computed(() => props.Target);
+const resolve = (value: unknown) => resolveXamlValue(value, instance);
+const effectiveIsOpen = computed(() => resolve(props.IsOpen) ?? localIsOpen.value);
+const targetValue = computed(() => resolve(props.Target));
 const isTargeted = computed(() => props.isTargeted ?? Boolean(targetElement()));
-const Title = computed(() => props.Title);
-const Subtitle = computed(() => props.Subtitle);
-const PreferredPlacement = computed(() => props.PreferredPlacement || 'Auto');
-const HeroContent = computed(() => props.HeroContent);
-const ActionButtonContent = computed(() => props.ActionButtonContent);
-const ActionButtonStyle = computed(() => typeof props.ActionButtonStyle === 'string' ? props.ActionButtonStyle : '');
-const actionButtonStyleAttrs = computed(() => typeof props.ActionButtonStyle === 'object'
-  ? { style: props.ActionButtonStyle }
-  : {});
-const CloseButtonContent = computed(() => props.CloseButtonContent);
-const CloseButtonStyle = computed(() => typeof props.CloseButtonStyle === 'string' ? props.CloseButtonStyle : '');
-const closeButtonStyleAttrs = computed(() => typeof props.CloseButtonStyle === 'object'
-  ? { style: props.CloseButtonStyle }
-  : {});
-const IsLightDismissEnabled = computed(() => props.IsLightDismissEnabled);
-const TailVisibility = computed(() => normalizeTailVisibility(props.TailVisibility));
-const ShouldConstrainToRootBounds = computed(() => props.ShouldConstrainToRootBounds);
-const HeroContentPlacement = computed(() => normalizeHeroContentPlacement(props.HeroContentPlacement));
+const Title = computed(() => resolve(props.Title));
+const Subtitle = computed(() => resolve(props.Subtitle));
+const PreferredPlacement = computed(() => resolve(props.PreferredPlacement) || 'Auto');
+const ActionButtonContent = computed(() => resolve(props.ActionButtonContent));
+const ActionButtonStyle = computed(() => typeof resolve(props.ActionButtonStyle) === 'string' ? resolve(props.ActionButtonStyle) : '');
+const CloseButtonContent = computed(() => resolve(props.CloseButtonContent));
+const CloseButtonStyle = computed(() => typeof resolve(props.CloseButtonStyle) === 'string' ? resolve(props.CloseButtonStyle) : '');
+const ActionButtonStyleName = computed(() => ActionButtonStyle.value || 'DefaultButtonStyle');
+const CloseButtonStyleName = computed(() => CloseButtonStyle.value || 'DefaultButtonStyle');
+const TipTitle = computed(() => Title.value);
+const TipSubtitle = computed(() => Subtitle.value);
+const CloseButtonLabel = computed(() => t('text.close'));
+const IsLightDismissEnabled = computed(() => resolve(props.IsLightDismissEnabled) === true);
+const TailVisibility = computed(() => normalizeTailVisibility(resolve(props.TailVisibility)));
+const ShouldConstrainToRootBounds = computed(() => resolve(props.ShouldConstrainToRootBounds) !== false);
+const HeroContentPlacement = computed(() => normalizeHeroContentPlacement(resolve(props.HeroContentPlacement)));
 const effectiveTheme = computed(() => {
-  const explicitTheme = normalizeTheme(props.Theme);
+  const explicitTheme = normalizeTheme(resolve(props.Theme));
   if (explicitTheme) return explicitTheme;
   if (anchorTheme.value) return anchorTheme.value;
   const providedTheme = normalizeTheme(unref(inheritedTheme));
@@ -172,8 +186,36 @@ const hasVisibleTail = computed(() => isTargeted.value && TailVisibility.value !
 const tailPoints = computed(() => actualPlacement.value === 'Top'
   ? '0,0 10,10 20,0'
   : '0,10 10,0 20,10');
-const IconSource = computed(() => props.IconSource);
-const Content = computed(() => props.Content);
+const propertyNodes = computed(() => {
+  const result: Record<TeachingTipPropertyName, ReturnType<NonNullable<typeof slots.default>>> = {
+    heroContent: [], content: [], iconSource: []
+  };
+  const defaultContent: ReturnType<NonNullable<typeof slots.default>> = [];
+  for (const node of slots.default?.() ?? []) {
+    const property = getTeachingTipProperty(node);
+    if (!property || !node.children || typeof node.children !== 'object') {
+      defaultContent.push(node);
+      continue;
+    }
+    const propertySlot = (node.children as { default?: () => ReturnType<NonNullable<typeof slots.default>> }).default;
+    if (propertySlot) result[property] = normalizeXamlNodes(propertySlot(), instance);
+  }
+  if (!result.content.length) result.content = normalizeXamlNodes(defaultContent, instance);
+  return result;
+});
+const outlet = (name: TeachingTipPropertyName) => defineComponent({
+  name: `TeachingTip${name[0].toUpperCase()}${name.slice(1)}Outlet`,
+  setup() { return () => h(Fragment, propertyNodes.value[name]); }
+});
+const HeroContentOutlet = outlet('heroContent');
+const ContentOutlet = outlet('content');
+const IconSourceOutlet = outlet('iconSource');
+const HeroContent = computed(() => resolve(props.HeroContent));
+const IconSource = computed(() => resolve(props.IconSource));
+const Content = computed(() => resolve(props.Content));
+const hasHeroContent = computed(() => propertyNodes.value.heroContent.length > 0 || Boolean(HeroContent.value) || Boolean(slots.HeroContent || slots.hero));
+const hasContent = computed(() => propertyNodes.value.content.length > 0 || Boolean(Content.value) || Boolean(slots.content));
+const hasIconSource = computed(() => propertyNodes.value.iconSource.length > 0 || Boolean(IconSource.value) || Boolean(slots.IconSource || slots.icon));
 const iconGlyph = computed(() => IconSource.value === 'Refresh' ? '\uE72C' : IconSource.value);
 const tipStyle = computed(() => {
   const background = IsLightDismissEnabled.value
@@ -189,14 +231,27 @@ const tipStyle = computed(() => {
   };
 });
 
+function targetElementFallback() {
+  const expression = typeof props.Target === 'string'
+    ? props.Target.match(/^\{(?:x:Bind|Binding)\s+([A-Za-z_$][\w$]*)[\s\S]*\}$/)?.[1]
+    : '';
+  if (!expression) return null;
+  const escaped = typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+    ? CSS.escape(expression)
+    : expression.replace(/[^A-Za-z0-9_-]/g, '\\$&');
+  return document.querySelector<HTMLElement>(`[data-xaml-ref="${escaped}"]`)
+    || document.querySelector<HTMLElement>(`[data-xaml-ref~="${escaped}"]`);
+}
+
 function targetElement() {
   const value = targetValue.value;
-  if (!value) return null;
+  const fallback = targetElementFallback();
+  if (!value) return fallback;
   if (value instanceof HTMLElement) return value;
-  if (value.$el instanceof HTMLElement) return value.$el;
-  if (value.value instanceof HTMLElement) return value.value;
-  if (value.value?.$el instanceof HTMLElement) return value.value.$el;
-  return null;
+  if (value && typeof value === 'object' && value.$el instanceof HTMLElement) return value.$el;
+  if (value && typeof value === 'object' && value.value instanceof HTMLElement) return value.value;
+  if (value && typeof value === 'object' && value.value?.$el instanceof HTMLElement) return value.value.$el;
+  return fallback;
 }
 
 function normalizeTheme(value) {
@@ -236,25 +291,49 @@ function observeTheme() {
 const setOpen = (value) => {
   localIsOpen.value = value;
   emit('update:IsOpen', value);
+  const binding = typeof props.IsOpen === 'string'
+    ? props.IsOpen.match(/^\{(?:x:Bind|Binding)\s+([\s\S]*?)\}$/)
+    : null;
+  if (binding) {
+    const expression = binding[1]
+      .replace(/,\s*Mode\s*=\s*(?:OneWay|TwoWay|OneTime)\s*$/, '')
+      .trim();
+    resolveXamlHandler(`${expression} = $event`, instance)?.(value);
+  }
   emit(value ? 'Opened' : 'Closed');
 };
 
 const close = () => {
   if (!effectiveIsOpen.value) return;
   emit('CloseButtonClick');
+  resolveXamlHandler(attrs.CloseButtonClick, instance)?.();
   setOpen(false);
 };
 
 const onAction = () => {
   executeCommand(props.ActionButtonCommand, props.ActionButtonCommandParameter);
   emit('ActionButtonClick');
-  setOpen(false);
+  resolveXamlHandler(attrs.ActionButtonClick, instance)?.();
 };
 
 const onCloseButton = () => {
   executeCommand(props.CloseButtonCommand, props.CloseButtonCommandParameter);
   close();
 };
+
+const OnTeachingTipCloseButtonClick = () => onCloseButton();
+const OnTeachingTipActionButtonClick = () => onAction();
+provide(xamlScopeKey, {
+  OnTeachingTipCloseButtonClick,
+  OnTeachingTipActionButtonClick,
+  TipTitle,
+  TipSubtitle,
+  ActionButtonContent,
+  CloseButtonContent,
+  ActionButtonStyleName,
+  CloseButtonStyleName,
+  CloseButtonLabel
+});
 
 function executeCommand(command, parameter) {
   if (typeof command === 'function') {
@@ -390,6 +469,19 @@ watch(effectiveIsOpen, (value) => {
 
 watch(targetValue, () => {
   void nextTick(observeTheme);
+  if (effectiveIsOpen.value) {
+    void nextTick(() => updatePosition());
+    requestAnimationFrame(() => { if (effectiveIsOpen.value) void updatePosition(); });
+  }
+});
+
+watch(effectiveIsOpen, (open) => {
+  if (open) {
+    // Component refs are registered after the first render. Reposition once
+    // more after Vue commits the button element so the tail anchors to it.
+    void nextTick(() => updatePosition());
+    requestAnimationFrame(() => { if (effectiveIsOpen.value) void updatePosition(); });
+  }
 });
 
 watch(
@@ -413,16 +505,27 @@ const onViewportChanged = () => {
   if (effectiveIsOpen.value) void updatePosition();
 };
 
+const onDocumentPointerDown = (event: PointerEvent) => {
+  if (!effectiveIsOpen.value || !IsLightDismissEnabled.value) return;
+  const target = event.target;
+  if (!(target instanceof Node)) return;
+  if (tipRef.value?.contains(target) || targetElement()?.contains(target)) return;
+  // Light-dismiss closes the tip without reporting a close-button click.
+  setOpen(false);
+};
+
 onMounted(() => {
   observeTheme();
   window.addEventListener('resize', onViewportChanged);
   window.addEventListener('scroll', onViewportChanged, true);
+  document.addEventListener('pointerdown', onDocumentPointerDown, true);
 });
 
 onBeforeUnmount(() => {
   themeObserver?.disconnect();
   window.removeEventListener('resize', onViewportChanged);
   window.removeEventListener('scroll', onViewportChanged, true);
+  document.removeEventListener('pointerdown', onDocumentPointerDown, true);
 });
 
 defineExpose({ close, updatePosition });
@@ -433,22 +536,22 @@ defineExpose({ close, updatePosition });
   position: fixed;
   z-index: var(--teaching-tip-z-index, var(--win-tip-z-index, 2147483646));
   width: max-content;
-  min-width: min(320px, calc(100vw - 16px));
-  max-width: min(336px, calc(100vw - 16px));
-  min-height: 40px;
-  max-height: min(520px, calc(100vh - 16px));
+  min-width: min(var(--TeachingTipMinWidth, 320px), calc(100vw - 16px));
+  max-width: min(var(--TeachingTipMaxWidth, 336px), calc(100vw - 16px));
+  min-height: var(--TeachingTipMinHeight, 40px);
+  max-height: min(var(--TeachingTipMaxHeight, 520px), calc(100vh - 16px));
   overflow: visible;
   display: flex;
   flex-direction: column;
   color: var(--TeachingTipForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
-  --teaching-tip-background: var(--TeachingTipBackgroundBrush, var(--SolidBackgroundFillColorTertiaryBrush, var(--ctrl-fill-tertiary, var(--flyout-bg))));
+  --teaching-tip-background: var(--TeachingTipBackgroundBrush, var(--SolidBackgroundFillColorTertiaryBrush, #F9F9F9));
   --win-acrylic-fill: var(--teaching-tip-background);
   --teaching-tip-backdrop: none;
-  --teaching-tip-border: var(--TeachingTipBorderBrush, var(--SurfaceStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, var(--surface-stroke-color-flyout, var(--flyout-border)))));
+  --teaching-tip-border: var(--TeachingTipBorderBrush, var(--SurfaceStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))));
   isolation: isolate;
-  background: transparent;
+  background: var(--teaching-tip-background);
   border: 1px solid var(--teaching-tip-border);
-  border-radius: var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px));
+  border-radius: var(--OverlayCornerRadius, 8px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   -webkit-backdrop-filter: var(--teaching-tip-backdrop);
   backdrop-filter: var(--teaching-tip-backdrop);
@@ -459,16 +562,31 @@ defineExpose({ close, updatePosition });
 }
 
 .teaching-tip-hero {
-  height: 100px;
+  /* HeroContentBorder is an Auto row in the WinUI template. */
+  min-height: 0;
   overflow: hidden;
   flex: 0 0 auto;
-  background: transparent;
-  border-radius: var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px)) var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px)) 0 0;
+  background: var(--teaching-tip-background);
+  border-radius: var(--OverlayCornerRadius, 8px) var(--OverlayCornerRadius, 8px) 0 0;
+}
+
+.teaching-tip-hero .win-image-host {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  height: 160px;
+}
+
+.teaching-tip-hero .win-image {
+  width: 100%;
+  max-width: 100%;
+  height: 160px;
+  object-fit: cover;
 }
 
 .teaching-tip.hero-placement-bottom .teaching-tip-hero {
   order: 3;
-  border-radius: 0 0 var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px)) var(--OverlayCornerRadius, var(--overlay-corner-radius, 8px));
+  border-radius: 0 0 var(--OverlayCornerRadius, 8px) var(--OverlayCornerRadius, 8px);
 }
 
 .teaching-tip.hero-placement-bottom .teaching-tip-main {
@@ -490,7 +608,7 @@ defineExpose({ close, updatePosition });
 .teaching-tip-icon {
   flex: 0 0 auto;
   width: 20px;
-  color: var(--text-primary);
+  color: var(--TeachingTipForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
   font-size: 16px;
   line-height: 20px;
   text-align: center;
@@ -536,13 +654,21 @@ defineExpose({ close, updatePosition });
 
 .teaching-tip-actions.both-buttons-visible {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: 8px;
+  column-gap: 0;
 }
 
 .teaching-tip-action-button,
 .teaching-tip-close-button {
   width: 100%;
   margin-top: 12px;
+}
+
+.teaching-tip-actions.both-buttons-visible .teaching-tip-action-button {
+  margin-right: 4px;
+}
+
+.teaching-tip-actions.both-buttons-visible .teaching-tip-close-button {
+  margin-left: 4px;
 }
 
 .teaching-tip-tail {

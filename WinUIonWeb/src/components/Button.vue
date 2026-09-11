@@ -1,6 +1,7 @@
 <template>
   <button
     ref="buttonRef"
+    type="button"
     v-bind="buttonAttrs"
     class="win-btn"
     :class="[
@@ -15,7 +16,10 @@
     :disabled="isDisabled"
     @click="onClick">
     <ContentOutlet v-if="propertyNodes.content.length" />
-    <slot v-else>{{ resolvedContent }}</slot>
+    <template v-else>
+      <span v-if="propertyNodes.flyout.length">{{ resolvedContent }}</span>
+      <slot v-else>{{ resolvedContent }}</slot>
+    </template>
   </button>
   <FlyoutOutlet v-if="propertyNodes.flyout.length" />
 </template>
@@ -112,12 +116,28 @@ const FlyoutOutlet = defineComponent({
 });
 
 const buttonAttrs = computed(() => {
-  const { class: _class, style: _style, disabled: _disabled, Click: _click, ...rest } = attrs;
+  const rest = { ...attrs };
+  delete rest.class;
+  delete rest.style;
+  delete rest.disabled;
+  delete rest.Click;
+  const findAttr = (name) => Object.keys(rest).find((key) => key.toLowerCase() === name.toLowerCase());
+  const toolTipKey = findAttr('ToolTipService.ToolTip');
+  const automationKey = findAttr('AutomationProperties.Name');
+  const toolTipValue = toolTipKey ? rest[toolTipKey] : undefined;
+  const automationValue = automationKey ? rest[automationKey] : undefined;
+  if (toolTipKey) delete rest[toolTipKey];
+  if (automationKey) delete rest[automationKey];
+  const toolTip = resolveXamlValue(toolTipValue, instance);
+  const automationName = resolveXamlValue(automationValue, instance);
+  if (toolTip !== undefined && toolTip !== null && toolTip !== '') rest['tooltipservice.tooltip'] = String(toolTip);
+  if (automationName !== undefined && automationName !== null && automationName !== '') rest['aria-label'] = String(automationName);
   return rest;
 });
 
 const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance));
 const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
+const resolvedStyle = computed(() => String(resolveXamlValue(props.Style, instance) || ''));
 const isDisabled = computed(() => resolvedIsEnabled.value === false);
 
 const contentAlignment = (value) => ({
@@ -131,9 +151,9 @@ const contentAlignment = (value) => ({
 
 const styleClass = computed(() => {
   return {
-    DefaultButtonStyle: !props.Style || props.Style.includes('DefaultButtonStyle'),
-    AccentButtonStyle: props.Style.includes('AccentButtonStyle'),
-    SubtleButtonStyle: props.Style.includes('SubtleButtonStyle')
+    DefaultButtonStyle: !resolvedStyle.value || resolvedStyle.value.includes('DefaultButtonStyle'),
+    AccentButtonStyle: resolvedStyle.value.includes('AccentButtonStyle'),
+    SubtleButtonStyle: resolvedStyle.value.includes('SubtleButtonStyle')
   };
 });
 
@@ -231,7 +251,7 @@ const onClick = (event) => {
     user-select: none;
     --ButtonPadding: 5px 11px 6px;
     --ButtonBorderThemeThickness: 1px;
-    --ButtonCornerRadius: var(--ControlCornerRadius, 4px);
+    --ButtonCornerRadius: 4px;
     --ButtonBackground: var(--ctrl-fill-default);
     --ButtonBackgroundPointerOver: var(--ctrl-fill-secondary);
     --ButtonBackgroundPressed: var(--ctrl-fill-tertiary);

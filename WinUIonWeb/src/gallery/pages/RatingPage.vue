@@ -38,21 +38,22 @@
             <ControlExample class="basic-input-example-theme" SampleDefinition="RatingControl\RatingControlPlaceholder.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind ratingPlaceholderVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.rating.placeholder'), Mode=OneWay}">
               <ControlExample.Example>
                 <RatingControl
+                  x:Name="RatingControl2"
                   HorizontalAlignment="Left"
                   VerticalAlignment="Top"
                   AutomationProperties.Name="RatingControl with placeholder"
-                  PlaceholderValue="{x:Bind placeholderValue, Mode=OneWay}" />
+                  PlaceholderValue="{x:Bind slider.Value, Mode=TwoWay}" />
               </ControlExample.Example>
               <ControlExample.Options>
                 <StackPanel Width="220">
                   <Slider
+                    x:Name="slider"
                     Header="{x:Bind $t('sample.placeholder-value'), Mode=OneWay}"
-                    Value="{x:Bind placeholderSliderValue, Mode=TwoWay}"
-                    Minimum="{x:Bind 0, Mode=OneWay}"
-                    Maximum="{x:Bind 5, Mode=OneWay}"
-                    SmallChange="{x:Bind 0.5, Mode=OneWay}"
-                    StepFrequency="{x:Bind 0.5, Mode=OneWay}"
-                    ValueChanged="onPlaceholderSliderValueChanged" />
+                    IsFocusEngagementEnabled="False"
+                    Maximum="5"
+                    Minimum="0"
+                    SmallChange="0.5"
+                    StepFrequency="0.5" />
                 </StackPanel>
               </ControlExample.Options>
             </ControlExample>
@@ -83,11 +84,6 @@ const { t } = useI18n();
 const ratingValue = ref(-1);
 const clearEnabled = ref(false);
 const readOnly = ref(false);
-const placeholderSliderValue = ref(1);
-const placeholderValue = computed(() => {
-  const numericValue = Number(placeholderSliderValue.value);
-  return Number.isFinite(numericValue) ? Math.max(1, Math.min(5, numericValue)) : 1;
-});
 const ratingCaptionChanged = ref(false);
 const ratingCaption = ref(t('sample.rating.caption'));
 
@@ -96,21 +92,6 @@ const onRatingValueChanged = () => {
   ratingCaption.value = t('sample.rating.your-rating');
 };
 
-const onPlaceholderSliderValueChanged = (event) => {
-  // Slider raises the XAML-shaped ValueChanged payload. The previous
-  // handler stored that object in the bound ref, which made the value NaN
-  // and left the placeholder/rating display stuck at zero.
-  const rawValue = typeof event === 'number'
-    ? event
-    : event?.NewValue ?? event?.Value ?? event?.value;
-  const numericValue = Number(rawValue);
-  const steppedValue = Number.isFinite(numericValue)
-    ? Math.round(numericValue * 2) / 2
-    : 1;
-  // RatingControl's effective minimum is 1.0. Dragging the options slider
-  // to zero therefore returns to 1.0, while retaining the official 0.5 step.
-  placeholderSliderValue.value = Math.max(1, Math.min(5, steppedValue));
-};
 const RatingControl1_ValueChanged = () => onRatingValueChanged();
 
 const ratingSimpleVue = `<RatingControl
@@ -120,9 +101,19 @@ const ratingSimpleVue = `<RatingControl
   IsReadOnly="{x:Bind readOnly, Mode=OneWay}"
   ValueChanged="RatingControl1_ValueChanged" />`;
 
-const ratingPlaceholderVue = `<RatingControl AutomationProperties.Name="RatingControl with placeholder" PlaceholderValue="{x:Bind placeholderValue, Mode=OneWay}" />
+const ratingPlaceholderVue = `<RatingControl
+  x:Name="RatingControl2"
+  AutomationProperties.Name="RatingControl with placeholder"
+  PlaceholderValue="{x:Bind slider.Value, Mode=TwoWay}" />
 
-<Slider Header="{x:Bind $t('sample.placeholder-value'), Mode=OneWay}" Minimum="{x:Bind 0, Mode=OneWay}" Maximum="{x:Bind 5, Mode=OneWay}" SmallChange="{x:Bind 0.5, Mode=OneWay}" StepFrequency="{x:Bind 0.5, Mode=OneWay}" Value="{x:Bind placeholderSliderValue, Mode=OneWay}" />`;
+<Slider
+  x:Name="slider"
+  Header="PlaceholderValue"
+  IsFocusEngagementEnabled="False"
+  Maximum="5"
+  Minimum="0"
+  SmallChange="0.5"
+  StepFrequency="0.5" />`;
 </script>
 
 <style scoped>

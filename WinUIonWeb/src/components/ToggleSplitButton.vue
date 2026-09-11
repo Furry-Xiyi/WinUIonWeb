@@ -2,17 +2,16 @@
   <SplitButton
     :class="[attrs.class, { 'is-checked': checkedState }]"
     :style="attrs.style"
-    :Flyout="splitFlyout"
-    :IsEnabled="IsEnabled"
-    :Options="splitOptions"
-    :Theme="Theme"
-    :MinWidth="MinWidth"
-    :MinHeight="MinHeight"
-    :Padding="Padding"
-    :Margin="Margin"
-    :VerticalAlignment="VerticalAlignment"
-    @Click="onSplitClick"
-    @Select="onSelect">
+    Flyout="{x:Bind splitFlyout, Mode=OneWay}"
+    IsEnabled="{x:Bind resolvedIsEnabled, Mode=OneWay}"
+    Theme="{x:Bind Theme, Mode=OneWay}"
+    MinWidth="{x:Bind MinWidth, Mode=OneWay}"
+    MinHeight="{x:Bind MinHeight, Mode=OneWay}"
+    Padding="{x:Bind Padding, Mode=OneWay}"
+    Margin="{x:Bind Margin, Mode=OneWay}"
+    VerticalAlignment="{x:Bind VerticalAlignment, Mode=OneWay}"
+    Click="OnSplitClick"
+    Select="OnSelect">
     <MainOutlet />
     <template #flyout>
       <FlyoutOutlet v-if="flyoutNodes.length" />
@@ -34,9 +33,9 @@ export default { Flyout: ToggleSplitButtonFlyout }
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, useAttrs, useSlots, type VNode } from 'vue';
+import { computed, defineComponent, Fragment, getCurrentInstance, h, provide, ref, useAttrs, useSlots, watch, type VNode } from 'vue';
 import SplitButton from './SplitButton.vue';
-import { resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 
 defineOptions({ inheritAttrs: false });
 
@@ -45,9 +44,6 @@ const props = defineProps({
   IsChecked: { type: [Boolean, String], default: undefined },
   Flyout: { type: [Object, Array], default: () => ({ Items: [] }) },
   IsEnabled: { type: [Boolean, String], default: true },
-  modelValue: { type: [Boolean, String], default: false },
-  options: { type: Array, default: () => [] },
-  Options: { type: Array, default: () => [] },
   Theme: { type: String, default: '' },
   MinWidth: { type: [String, Number], default: '' },
   MinHeight: { type: [String, Number], default: '' },
@@ -56,7 +52,7 @@ const props = defineProps({
   VerticalAlignment: { type: String, default: '' }
 });
 
-const emit = defineEmits(['update:modelValue', 'update:IsChecked', 'Click', 'IsCheckedChanged', 'Select', 'click', 'optionClick']);
+const emit = defineEmits(['update:IsChecked', 'Click', 'IsCheckedChanged', 'Select']);
 const attrs = useAttrs();
 const slots = useSlots();
 const instance = getCurrentInstance();
@@ -133,11 +129,17 @@ const FlyoutOutlet = defineComponent({
 
 const resolvedIsChecked = computed(() => resolveXamlValue(props.IsChecked, instance));
 const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
-const resolvedModelValue = computed(() => resolveXamlValue(props.modelValue, instance));
-const checkedState = computed(() => resolvedIsChecked.value ?? resolvedModelValue.value);
+const localIsChecked = ref<boolean | undefined>(undefined);
+const isUpdatingChecked = ref(false);
+watch(resolvedIsChecked, (value) => {
+  if (!isUpdatingChecked.value) localIsChecked.value = value === true;
+}, { immediate: true });
+const checkedState = computed(() => localIsChecked.value !== undefined
+  ? localIsChecked.value
+  : resolvedIsChecked.value === true);
 const isDisabled = computed(() => !resolvedIsEnabled.value);
 const flyoutDefinition = computed(() => Array.isArray(props.Flyout) ? { Items: props.Flyout } : props.Flyout || { Items: [] });
-const sourceItems = computed(() => flyoutDefinition.value.Items?.length ? flyoutDefinition.value.Items : props.Options.length ? props.Options : props.options);
+const sourceItems = computed(() => flyoutDefinition.value.Items ?? []);
 const splitOptions = computed(() => sourceItems.value.map((item, idx) => {
   if (typeof item === 'string') return { Text: item, Value: idx };
   return { ...item, Text: item.Text ?? item.Content ?? item.label ?? String(item), Value: item.Value ?? idx };
@@ -146,11 +148,15 @@ const splitFlyout = computed(() => ({ ...flyoutDefinition.value, Items: splitOpt
 
 const setChecked = (next, event) => {
   if (isDisabled.value) return;
-  emit('update:modelValue', next);
+  localIsChecked.value = next;
+  isUpdatingChecked.value = true;
   emit('update:IsChecked', next);
+  updateXamlBinding(props.IsChecked, next, instance);
+  isUpdatingChecked.value = false;
   emit('Click', event);
-  emit('click', event);
+  resolveXamlHandler(attrs.Click, instance)?.(event);
   emit('IsCheckedChanged', { IsChecked: next });
+  resolveXamlHandler(attrs.IsCheckedChanged, instance)?.({ IsChecked: next });
 };
 
 const onSplitClick = (event) => {
@@ -159,6 +165,19 @@ const onSplitClick = (event) => {
 
 const onSelect = (item) => {
   emit('Select', item);
-  emit('optionClick', item.Value);
+  resolveXamlHandler(attrs.Select, instance)?.(item);
 };
+
+provide(xamlScopeKey, {
+  splitFlyout,
+  resolvedIsEnabled,
+  Theme: computed(() => props.Theme),
+  MinWidth: computed(() => props.MinWidth),
+  MinHeight: computed(() => props.MinHeight),
+  Padding: computed(() => props.Padding),
+  Margin: computed(() => props.Margin),
+  VerticalAlignment: computed(() => props.VerticalAlignment),
+  OnSplitClick: onSplitClick,
+  OnSelect: onSelect
+});
 </script>

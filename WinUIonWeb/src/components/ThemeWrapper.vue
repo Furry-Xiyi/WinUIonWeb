@@ -45,6 +45,12 @@ provide('winuiTheme', resolvedTheme);
 /* Light theme overrides */
 .example-theme-wrapper.theme-light,
 .win-theme-scope.theme-light {
+  --SmokeFillColorDefaultBrush: rgba(0, 0, 0, 0.302);
+  --LayerFillColorAltBrush: #FFFFFF;
+  --ContentDialogCommandSpaceBackground: #F3F3F3;
+  --OverlayCornerRadius: 8px;
+  --SurfaceStrokeColorFlyoutBrush: rgba(0, 0, 0, 0.0588235);
+  --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.0588235);
   --TeachingTipBackgroundBrush: #F9F9F9;
   --SolidBackgroundFillColorTertiaryBrush: #F9F9F9;
   --TeachingTipBorderBrush: rgba(117, 117, 117, 0.4);
@@ -149,7 +155,7 @@ provide('winuiTheme', resolvedTheme);
   --card-stroke: rgba(0, 0, 0, 0.06);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
   --NavigationViewContentGridBorderBrush: #E5E5E5;
-  --NavigationViewContentBackground: rgba(249, 249, 249, 0.50);
+  --NavigationViewContentBackground: #F9F9F9;
   --SystemFillColorAttentionBrush: #0067C0;
   --SystemFillColorSuccessBrush: #0F7B0F;
   --SystemFillColorCautionBrush: #9D5D00;
@@ -180,6 +186,12 @@ provide('winuiTheme', resolvedTheme);
 /* Dark theme overrides */
 .example-theme-wrapper.theme-dark,
 .win-theme-scope.theme-dark {
+  --SmokeFillColorDefaultBrush: rgba(0, 0, 0, 0.302);
+  --LayerFillColorAltBrush: rgba(255, 255, 255, 0.051);
+  --ContentDialogCommandSpaceBackground: #202020;
+  --OverlayCornerRadius: 8px;
+  --SurfaceStrokeColorFlyoutBrush: rgba(0, 0, 0, 0.20);
+  --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.0980392);
   --TeachingTipBackgroundBrush: #282828;
   --SolidBackgroundFillColorTertiaryBrush: #282828;
   --TeachingTipBorderBrush: rgba(117, 117, 117, 0.4);
@@ -284,7 +296,7 @@ provide('winuiTheme', resolvedTheme);
   --card-stroke: rgba(0, 0, 0, 0.10);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
   --NavigationViewContentGridBorderBrush: #1D1D1D;
-  --NavigationViewContentBackground: rgba(48, 48, 48, 0.30);
+  --NavigationViewContentBackground: #282828;
   --SystemFillColorAttentionBrush: #4CC2FF;
   --SystemFillColorSuccessBrush: #6CCB5F;
   --SystemFillColorCautionBrush: #FCE100;

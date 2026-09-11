@@ -16,7 +16,7 @@
 
 <script setup>
 import { computed, getCurrentInstance, onBeforeUnmount, useAttrs } from 'vue';
-import { resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
 
 defineOptions({
   inheritAttrs: false
@@ -42,6 +42,10 @@ const resolvedContent = computed(() => resolveXamlValue(props.Content, instance)
 
 let delayTimer = null;
 let intervalTimer = null;
+const raiseClick = (event) => {
+  emit('Click', event);
+  resolveXamlHandler(attrs.Click, instance)?.(event);
+};
 
 const buttonAttrs = computed(() => {
   const { class: _class, style: _style, disabled: _disabled, ...rest } = attrs;
@@ -84,11 +88,11 @@ const start = (e) => {
 
   e.currentTarget.setPointerCapture(e.pointerId);
 
-  emit('Click');
+  raiseClick(e);
 
   delayTimer = setTimeout(() => {
       intervalTimer = setInterval(() => {
-        emit('Click');
+        raiseClick(e);
       }, Number(resolveXamlValue(props.Interval, instance)) || 150);
     }, Number(resolveXamlValue(props.Delay, instance)) || 250);
 };

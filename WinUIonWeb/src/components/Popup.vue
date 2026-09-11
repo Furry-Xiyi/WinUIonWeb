@@ -2,12 +2,12 @@
   <span class="popup-anchor" ref="anchorRef">
     <slot name="trigger"></slot>
     <Teleport to="body">
-      <div v-if="effectiveIsOpen && IsLightDismissEnabled" class="popup-dismiss-layer" @pointerdown="close"></div>
       <Transition name="popup">
         <div
           v-if="effectiveIsOpen"
           ref="popupRef"
           class="popup"
+          :class="themeClass"
           :style="popupStyle"
           @pointerdown.stop>
           <slot></slot>
@@ -17,14 +17,16 @@
   </span>
 </template>
 
-<script setup>
-import { computed, nextTick, ref, watch } from 'vue';
+<script setup lang="ts">
+import { computed, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref, unref, useAttrs, watch } from 'vue';
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
 
 const props = defineProps({
-  IsOpen: { type: Boolean, default: undefined },
-  HorizontalOffset: { type: Number, default: 0 },
-  VerticalOffset: { type: Number, default: 0 },
-  IsLightDismissEnabled: { type: Boolean, default: true }
+  IsOpen: { type: [Boolean, String], default: undefined },
+  HorizontalOffset: { type: [Number, String], default: 0 },
+  VerticalOffset: { type: [Number, String], default: 0 },
+  IsLightDismissEnabled: { type: [Boolean, String], default: true },
+  Theme: { type: String, default: '' }
 });
 
 defineOptions({ name: 'Popup' });
@@ -34,20 +36,43 @@ const anchorRef = ref(null);
 const popupRef = ref(null);
 const localIsOpen = ref(false);
 const position = ref({ top: 0, left: 0 });
+const attrs = useAttrs();
+const inheritedTheme = inject<string | { value?: string } | null>('winuiTheme', null);
+const instance = getCurrentInstance();
+const resolve = (value: unknown) => resolveXamlValue(value, instance);
 
-const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
-const HorizontalOffset = computed(() => props.HorizontalOffset ?? 0);
-const VerticalOffset = computed(() => props.VerticalOffset ?? 0);
-const IsLightDismissEnabled = computed(() => props.IsLightDismissEnabled);
+const resolvedIsOpen = computed(() => {
+  const value = resolve(props.IsOpen);
+  return value === undefined || value === null ? undefined : value === true || value === 'True';
+});
+const effectiveIsOpen = computed(() => localIsOpen.value);
+const HorizontalOffset = computed(() => Number(resolve(props.HorizontalOffset) ?? 0));
+const VerticalOffset = computed(() => Number(resolve(props.VerticalOffset) ?? 0));
+const IsLightDismissEnabled = computed(() => resolve(props.IsLightDismissEnabled) !== false);
+const themeClass = computed(() => {
+  const explicit = String(resolve(props.Theme) || '').toLowerCase();
+  const provided = String(unref(inheritedTheme as never) || '').toLowerCase();
+  const theme = explicit === 'light' || explicit === 'dark' ? explicit : provided;
+  return theme === 'light' || theme === 'dark' ? `win-theme-scope theme-${theme}` : '';
+});
 const popupStyle = computed(() => ({
   top: `${position.value.top}px`,
   left: `${position.value.left}px`
 }));
 
-const setOpen = (value) => {
-  localIsOpen.value = value;
+const setOpen = (value: boolean) => {
+  if (value === effectiveIsOpen.value) return;
   emit('update:IsOpen', value);
-  emit(value ? 'Opened' : 'Closed');
+  const binding = typeof props.IsOpen === 'string'
+    ? props.IsOpen.match(/^\{(?:x:Bind|Binding)\s+([\s\S]*?)\}$/)
+    : null;
+  if (binding) {
+    const expression = binding[1]
+      .replace(/,\s*Mode\s*=\s*(?:OneWay|TwoWay|OneTime)\s*$/, '')
+      .trim();
+    resolveXamlHandler(`${expression} = $event`, instance)?.(value);
+  }
+  localIsOpen.value = value;
 };
 
 const updatePosition = async () => {
@@ -73,13 +98,42 @@ const close = () => {
   if (effectiveIsOpen.value) setOpen(false);
 };
 
-watch(effectiveIsOpen, (value) => {
-  if (value) void updatePosition();
-});
+const onDocumentPointerDown = (event: PointerEvent) => {
+  if (!effectiveIsOpen.value || !IsLightDismissEnabled.value) return;
+  const target = event.target;
+  if (target instanceof Node && (popupRef.value?.contains(target) || anchorRef.value?.contains(target))) return;
+  close();
+};
+
+watch(resolvedIsOpen, (value) => {
+  if (value !== undefined) localIsOpen.value = value;
+}, { immediate: true, flush: 'sync' });
+
+let transitionVersion = 0;
+watch(effectiveIsOpen, async (value, previous) => {
+  if (value === previous) return;
+  const version = ++transitionVersion;
+  if (value) {
+    await updatePosition();
+    if (version === transitionVersion && effectiveIsOpen.value) {
+      emit('Opened');
+      resolveXamlHandler(attrs.Opened, instance)?.();
+    }
+  } else {
+    await nextTick();
+    if (version === transitionVersion && !effectiveIsOpen.value) {
+      emit('Closed');
+      resolveXamlHandler(attrs.Closed, instance)?.();
+    }
+  }
+}, { flush: 'sync' });
 
 watch([HorizontalOffset, VerticalOffset], () => {
   if (effectiveIsOpen.value) void updatePosition();
 });
+
+onMounted(() => document.addEventListener('pointerdown', onDocumentPointerDown, true));
+onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocumentPointerDown, true));
 
 defineExpose({ open, close });
 </script>
@@ -89,16 +143,11 @@ defineExpose({ open, close });
   display: inline-flex;
 }
 
-.popup-dismiss-layer {
-  position: fixed;
-  inset: 0;
-  z-index: 949;
-}
-
 .popup {
   position: fixed;
   z-index: 950;
-  color: var(--text-primary);
+  /* Popup has no presenter chrome in WinUI; its child supplies the visual. */
+  color: var(--TextFillColorPrimaryBrush, var(--text-primary));
 }
 
 .popup-enter-active {

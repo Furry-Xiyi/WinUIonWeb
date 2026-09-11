@@ -36,7 +36,7 @@
                     <div class="toolbar-end">
                       <Button class="toolbar-icon-button" @click="customEditor?.execCommand('bold')" v-bind="{ 'tooltipservice.tooltip': $t('sample.richeditbox.bold') }"><span class="icon">&#xE8DD;</span></Button>
                       <Button class="toolbar-icon-button" @click="customEditor?.execCommand('italic')" v-bind="{ 'tooltipservice.tooltip': $t('sample.richeditbox.italic') }"><span class="icon">&#xE8DB;</span></Button>
-                      <Flyout ref="fontColorFlyout" Placement="Bottom" :Theme="pageTheme">
+                      <Flyout ref="fontColorFlyout" Placement="Bottom" Theme="{x:Bind pageTheme, Mode=OneWay}">
                         <template #trigger>
                           <Button class="toolbar-icon-button" @click="fontColorFlyout?.toggle()" v-bind="{ 'tooltipservice.tooltip': $t('sample.richeditbox.font-color') }"><span class="icon">&#xE790;</span></Button>
                         </template>
@@ -190,7 +190,7 @@ const example3Template = computed(() => `<div class="official-custom-editor">
     <div class="toolbar-end">
       <Button class="toolbar-icon-button" @click="editor?.execCommand('bold')"><span class="icon">&#xE8DD;</span></Button>
       <Button class="toolbar-icon-button" @click="editor?.execCommand('italic')"><span class="icon">&#xE8DB;</span></Button>
-      <Flyout ref="fontColorFlyout" Placement="Bottom" :Theme="pageTheme">
+      <Flyout ref="fontColorFlyout" Placement="Bottom" Theme="{x:Bind pageTheme, Mode=OneWay}">
         <template #trigger>
           <Button class="toolbar-icon-button" @click="fontColorFlyout?.toggle()"><span class="icon">&#xE790;</span></Button>
         </template>

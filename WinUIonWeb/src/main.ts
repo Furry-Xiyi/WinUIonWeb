@@ -30,6 +30,11 @@ import Flyout from './components/Flyout.vue'
 import ContentDialog from './components/ContentDialog.vue'
 import Popup from './components/Popup.vue'
 import TeachingTip from './components/TeachingTip.vue'
+import {
+  TeachingTipContent,
+  TeachingTipHeroContent,
+  TeachingTipIconSource
+} from './components/TeachingTipProperties'
 import ToolTip from './components/ToolTip.vue'
 import { SplitButtonFlyout } from './components/SplitButton.vue'
 import { ToolTipServiceToolTip } from './components/ToolTipServiceProperties'
@@ -112,6 +117,9 @@ app.component('Flyout', Flyout)
 app.component('ContentDialog', ContentDialog)
 app.component('Popup', Popup)
 app.component('TeachingTip', TeachingTip)
+app.component('TeachingTip.HeroContent', TeachingTipHeroContent)
+app.component('TeachingTip.Content', TeachingTipContent)
+app.component('TeachingTip.IconSource', TeachingTipIconSource)
 app.component('ToolTip', ToolTip)
 app.component('ToolTipService.ToolTip', ToolTipServiceToolTip)
 app.component('ControlExample', ControlExample)

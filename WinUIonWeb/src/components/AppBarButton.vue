@@ -19,7 +19,8 @@
     <span class="appbar-button-inner-border" aria-hidden="true"></span>
     <span class="appbar-button-content-root">
       <span v-if="hasIconContent" class="appbar-button-icon">
-        <slot name="content">
+        <ContentOutlet v-if="contentNodes.length" />
+        <slot v-else name="content">
           <span v-if="effectiveIcon" class="symbol-icon" :data-symbol="effectiveIcon">
             {{ getSymbolGlyph(effectiveIcon) }}
           </span>
@@ -28,7 +29,7 @@
       <span v-if="!effectiveIsCompact && !isLabelCollapsed && effectiveLabel" class="appbar-button-label">
         {{ effectiveLabel }}
       </span>
-      <span v-if="hasFlyout" class="icon appbar-button-chevron" aria-hidden="true">&#xE974;</span>
+    <span v-if="hasFlyout" class="icon appbar-button-chevron" aria-hidden="true">&#xE974;</span>
     </span>
 
   </button>
@@ -43,10 +44,25 @@
     @Close="closeFlyout"
     @PointerEnter="clearPointerVisuals"
     @Select="onMenuSelect" />
+  <FlyoutOutlet v-if="flyoutNodes.length" />
 </template>
 
+<script lang="ts">
+import { defineComponent, h } from 'vue'
+
+export const AppBarButtonFlyout = defineComponent({
+  name: 'AppBarButton.Flyout',
+  __appBarButtonProperty: 'flyout',
+  setup(_, { slots }) {
+    return () => h('span', { class: 'appbar-button-property' }, slots.default?.())
+  }
+})
+
+export default { Flyout: AppBarButtonFlyout }
+</script>
+
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useSlots } from 'vue';
+import { computed, defineComponent, Fragment, h, onBeforeUnmount, onMounted, provide, ref, useSlots } from 'vue';
 import MenuFlyout from './MenuFlyout.vue';
 
 interface UICommandLike {
@@ -156,10 +172,40 @@ const emit = defineEmits<{
 }>();
 const slots = useSlots();
 const buttonRef = ref<HTMLButtonElement>();
+provide('buttonFlyoutAnchor', buttonRef);
 const anchorRect = ref<DOMRect>();
 const isPointerOver = ref(false);
 const isPressed = ref(false);
 const showFlyout = ref(false);
+const propertyNodes = computed(() => {
+  const content = [];
+  const flyout = [];
+  for (const node of slots.default?.() ?? []) {
+    const type = node?.type;
+    const property = type && typeof type === 'object' ? type.__appBarButtonProperty : undefined;
+    if (property === 'flyout') {
+      const propertySlot = node.children && typeof node.children === 'object' ? node.children.default : undefined;
+      if (propertySlot) flyout.push(...propertySlot());
+    } else {
+      content.push(node);
+    }
+  }
+  return { content, flyout };
+});
+const flyoutNodes = computed(() => propertyNodes.value.flyout);
+const contentNodes = computed(() => propertyNodes.value.content);
+const ContentOutlet = defineComponent({
+  name: 'AppBarButtonContentOutlet',
+  setup() {
+    return () => h(Fragment, contentNodes.value);
+  }
+});
+const FlyoutOutlet = defineComponent({
+  name: 'AppBarButtonFlyoutOutlet',
+  setup() {
+    return () => h(Fragment, flyoutNodes.value);
+  }
+});
 const hasMenuFlyout = computed(() => Array.isArray(props.Flyout)
   || Boolean(props.Flyout && 'Items' in props.Flyout));
 const externalFlyout = computed<AppBarButtonFlyoutController | null>(() => {
@@ -167,7 +213,7 @@ const externalFlyout = computed<AppBarButtonFlyoutController | null>(() => {
   if (!flyout || Array.isArray(flyout) || !isFlyoutController(flyout)) return null;
   return flyout;
 });
-const hasFlyout = computed(() => hasMenuFlyout.value || externalFlyout.value !== null);
+const hasFlyout = computed(() => hasMenuFlyout.value || externalFlyout.value !== null || flyoutNodes.value.length > 0);
 const isFlyoutOpen = computed(() => externalFlyout.value?.IsOpen ?? showFlyout.value);
 const menuFlyoutDefinition = computed<AppBarButtonFlyoutDefinition>(() => {
   if (Array.isArray(props.Flyout)) return { Items: props.Flyout };
@@ -291,6 +337,8 @@ const handleClick = (event: MouseEvent) => {
   } else if (hasMenuFlyout.value) {
     updateAnchor();
     showFlyout.value = !showFlyout.value;
+  } else if (flyoutNodes.value.length) {
+    window.dispatchEvent(new CustomEvent('winui-flyout-toggle'));
   }
   isPressed.value = false;
   emit('Click', event);

@@ -276,7 +276,11 @@ const toggle = (event) => {
   anchorRect.value = { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
   isOpen.value = true;
 };
-const onSelect = (item) => { emit('Select', item); isOpen.value = false; };
+const onSelect = (item) => {
+  emit('Select', item);
+  resolveXamlHandler(attrs.Select, instance)?.(item);
+  isOpen.value = false;
+};
 </script>
 <style>
   .win-dd-chevron {

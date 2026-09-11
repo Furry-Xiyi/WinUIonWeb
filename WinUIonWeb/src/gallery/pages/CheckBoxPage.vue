@@ -12,7 +12,7 @@
           </div>
         </div>
       <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" SampleDefinition="CheckBox\CheckBoxTwoState.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind checkBoxTwoStateVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.checkbox.two-state'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="CheckBox\CheckBoxTwoState.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind checkBoxTwoStateVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.checkbox.two-state'), Mode=OneWay}">
               <ControlExample.Example>
                 <StackPanel Orientation="Horizontal">
                   <CheckBox IsChecked="{x:Bind twoStateChecked, Mode=TwoWay}" AutomationProperties.Name="Two-state" Checked="TwoState_Checked" Unchecked="TwoState_Unchecked">
@@ -24,7 +24,7 @@
                 <TextBlock AutomationProperties.AutomationId="Control1Output" Text="{x:Bind TwoStateOutput, Mode=OneWay}" />
               </ControlExample.Output>
             </ControlExample>
-            <ControlExample class="basic-input-example-theme" SampleDefinition="CheckBox\CheckBoxThreeState.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind checkBoxThreeStateVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.checkbox.three-state'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="CheckBox\CheckBoxThreeState.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind checkBoxThreeStateVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.checkbox.three-state'), Mode=OneWay}">
               <ControlExample.Example>
                 <StackPanel Orientation="Horizontal">
                   <CheckBox IsChecked="{x:Bind threeStateChecked, Mode=TwoWay}" AutomationProperties.Name="Three-state" IsThreeState Checked="ThreeState_Checked" Unchecked="ThreeState_Unchecked" Indeterminate="ThreeState_Indeterminate">
@@ -36,7 +36,7 @@
                 <TextBlock AutomationProperties.AutomationId="Control2Output" Text="{x:Bind ThreeStateOutput, Mode=OneWay}" />
               </ControlExample.Output>
             </ControlExample>
-            <ControlExample class="basic-input-example-theme" SampleDefinition="CheckBox\CheckBoxSelectAll.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind checkBoxSelectAllVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.checkbox.select-all'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="CheckBox\CheckBoxSelectAll.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind checkBoxSelectAllVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.checkbox.select-all'), Mode=OneWay}">
               <ControlExample.Example>
                 <StackPanel>
                   <CheckBox IsChecked="{x:Bind OptionsAllCheckBox, Mode=OneWay}" IsThreeState Checked="SelectAll_Checked" Unchecked="SelectAll_Unchecked" Indeterminate="SelectAll_Indeterminate">

@@ -301,9 +301,33 @@
   --layer-default: rgba(255, 255, 255, 0.50);
   --dialog-background: #FCFCFC;
   --dialog-content-bg: rgba(255, 255, 255, 0.95);
-  --dialog-overlay: rgba(0, 0, 0, 0.30);
+  --dialog-overlay: var(--SmokeFillColorDefaultBrush, rgba(0, 0, 0, 0.30));
   --dialog-divider: rgba(0, 0, 0, 0.06);
   --dialog-button-bg: #F3F3F3;
+  --SmokeFillColorDefaultBrush: rgba(0, 0, 0, 0.302);
+  --LayerFillColorAltBrush: #FFFFFF;
+  --ContentDialogCommandSpaceBackground: #F3F3F3;
+  --OverlayCornerRadius: 8px;
+  --FlyoutThemeMinWidth: 96px;
+  --FlyoutThemeMaxWidth: 456px;
+  --FlyoutThemeMinHeight: 40px;
+  --FlyoutThemeMaxHeight: 758px;
+  /* XAML Thickness is left,top,right,bottom: 16,15,16,17. */
+  --FlyoutContentPadding: 15px 16px 17px 16px;
+  --ContentDialogBackground: var(--SolidBackgroundFillColorBaseBrush, #F3F3F3);
+  --ContentDialogForeground: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ContentDialogBorderBrush: var(--SurfaceStrokeColorDefaultBrush, var(--flyout-border));
+  --ContentDialogSeparatorBorderBrush: var(--CardStrokeColorDefaultBrush, var(--card-stroke));
+  --ContentDialogBorderWidth: 1px;
+  --ContentDialogMinWidth: 320px;
+  --ContentDialogMaxWidth: 548px;
+  --ContentDialogMinHeight: 184px;
+  --ContentDialogMaxHeight: 756px;
+  --ContentDialogTopOverlay: var(--LayerFillColorAltBrush);
+  --SurfaceStrokeColorDefaultBrush: rgba(117, 117, 117, 0.4);
+  --SurfaceStrokeColorFlyoutBrush: rgba(0, 0, 0, 0.0588235);
+  --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.0588235);
+  --ContentDialogPadding: 24px;
   --TeachingTipBackgroundBrush: var(--SolidBackgroundFillColorTertiaryBrush, #F9F9F9);
   --TeachingTipBorderBrush: var(--SurfaceStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, var(--flyout-border)));
   --TeachingTipTransientBackground: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg));
@@ -412,7 +436,8 @@
   --AccentFillColorDisabledBrush: rgba(0, 0, 0, 0.22);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
   --NavigationViewContentGridBorderBrush: #E5E5E5;
-  --NavigationViewContentBackground: rgba(249, 249, 249, 0.50);
+  /* WinUI LayerFillColorDefault over the no-material base fallback (#F3F3F3). */
+  --NavigationViewContentBackground: #F9F9F9;
   --SystemFillColorAttentionBrush: #0067C0;
   --SystemFillColorSuccessBrush: #0F7B0F;
   --SystemFillColorCautionBrush: #9D5D00;
@@ -455,9 +480,18 @@
     --layer-default: rgba(58, 58, 58, 0.30);
     --dialog-background: #2C2C2C;
     --dialog-content-bg: rgba(43, 43, 43, 0);
-    --dialog-overlay: rgba(0, 0, 0, 0.30);
+    --dialog-overlay: var(--SmokeFillColorDefaultBrush, rgba(0, 0, 0, 0.30));
     --dialog-divider: rgba(0, 0, 0, 0.20);
     --dialog-button-bg: #202020;
+    --SmokeFillColorDefaultBrush: rgba(0, 0, 0, 0.302);
+    --LayerFillColorAltBrush: rgba(255, 255, 255, 0.051);
+    --ContentDialogCommandSpaceBackground: #202020;
+    --ContentDialogBackground: var(--SolidBackgroundFillColorBaseBrush, #202020);
+    --ContentDialogForeground: var(--TextFillColorPrimaryBrush, var(--text-primary));
+    --ContentDialogTopOverlay: var(--LayerFillColorAltBrush);
+    --SurfaceStrokeColorDefaultBrush: rgba(117, 117, 117, 0.4);
+    --SurfaceStrokeColorFlyoutBrush: rgba(0, 0, 0, 0.20);
+    --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.0980392);
     --TeachingTipBackgroundBrush: #282828;
     --SolidBackgroundFillColorTertiaryBrush: #282828;
     --flyout-bg: rgba(44, 44, 44, 0.86);
@@ -549,7 +583,8 @@
     --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
     --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
     --NavigationViewContentGridBorderBrush: #1D1D1D;
-    --NavigationViewContentBackground: rgba(40, 40, 40, 0.30);
+    /* WinUI LayerFillColorDefault over the no-material base fallback (#202020). */
+    --NavigationViewContentBackground: #282828;
     --SystemFillColorAttentionBrush: #4CC2FF;
     --SystemFillColorSuccessBrush: #6CCB5F;
     --SystemFillColorCautionBrush: #FCE100;
@@ -766,7 +801,7 @@ html.theme-light {
   --AccentFillColorDisabledBrush: rgba(0, 0, 0, 0.22);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
   --NavigationViewContentGridBorderBrush: #E5E5E5;
-  --NavigationViewContentBackground: rgba(249, 249, 249, 0.50);
+  --NavigationViewContentBackground: #F9F9F9;
   --SystemFillColorAttentionBrush: #0067C0;
   --SystemFillColorSuccessBrush: #0F7B0F;
   --SystemFillColorCautionBrush: #9D5D00;
@@ -913,7 +948,7 @@ html.theme-dark {
   --AccentFillColorDisabledBrush: rgba(255, 255, 255, 0.16);
   --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
   --NavigationViewContentGridBorderBrush: #1D1D1D;
-  --NavigationViewContentBackground: rgba(40, 40, 40, 0.30);
+  --NavigationViewContentBackground: #282828;
   --SystemFillColorAttentionBrush: #4CC2FF;
   --SystemFillColorSuccessBrush: #6CCB5F;
   --SystemFillColorCautionBrush: #FCE100;

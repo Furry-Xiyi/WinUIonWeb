@@ -13,7 +13,6 @@
         </div>
       <div class="gallery-page-content">
         <ControlExample class="basic-input-example-theme" SampleDefinition="ColorPicker\ColorPickerProperties.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind colorPickerPropertiesVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.colorpicker.properties'), Mode=OneWay}">
-              <ControlExample.Example>
                 <ColorPicker
                   Color="{x:Bind color, Mode=TwoWay}"
                   ColorSpectrumShape="{x:Bind ColorSpectrumShape, Mode=OneWay}"
@@ -24,7 +23,6 @@
                   IsAlphaEnabled="{x:Bind IsAlphaEnabled, Mode=OneWay}"
                   IsAlphaSliderVisible="{x:Bind IsAlphaSliderVisible, Mode=OneWay}"
                   IsAlphaTextInputVisible="{x:Bind IsAlphaTextInputVisible, Mode=OneWay}" />
-              </ControlExample.Example>
               <ControlExample.Options>
                 <StackPanel Width="250" Margin="0,-5,0,0">
                   <CheckBox IsChecked="{x:Bind IsMoreButtonVisible, Mode=TwoWay}"><TextBlock Text="{x:Bind $t('sample.colorpicker.more-button-visible'), Mode=OneWay}" /></CheckBox>
@@ -37,7 +35,7 @@
                   <RadioButtons
                     Header="{x:Bind $t('sample.colorspectrum-shape'), Mode=OneWay}"
                     SelectedIndex="{x:Bind ColorSpectrumShape === 'Box' ? 0 : 1, Mode=OneWay}"
-                    SelectionChanged="ColorSpectrumShape_SelectionChanged">
+                    SelectionChanged="ColorSpectrumShapeRadioButtons_SelectionChanged">
                     <RadioButton Content="{x:Bind $t('sample.box'), Mode=OneWay}" />
                     <RadioButton Content="{x:Bind $t('sample.ring'), Mode=OneWay}" />
                   </RadioButtons>
@@ -82,7 +80,7 @@ const IsAlphaSliderVisible = ref(true);
 const IsAlphaTextInputVisible = ref(true);
 const ColorSpectrumShape = ref('Box');
 
-const ColorSpectrumShape_SelectionChanged = (args) => {
+const ColorSpectrumShapeRadioButtons_SelectionChanged = (args) => {
   ColorSpectrumShape.value = args?.SelectedIndex === 0 ? 'Box' : 'Ring';
 };
 

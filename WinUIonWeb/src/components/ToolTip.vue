@@ -27,16 +27,17 @@
         @pointerenter="onToolTipPointerEnter"
         @pointerleave="onToolTipPointerLeave">
         <slot v-if="$slots.content" name="content"></slot>
-        <TextBlock v-else :Text="contentText" TextWrapping="WrapWholeWords" />
+        <TextBlock v-else Text="{x:Bind ToolTipContent}" TextWrapping="WrapWholeWords" />
       </div>
     </Transition>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, unref, useSlots, watch } from 'vue';
+import { computed, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, unref, useAttrs, useSlots, watch } from 'vue';
 import type { ComponentPublicInstance, CSSProperties, Ref } from 'vue';
 import TextBlock from './TextBlock.vue';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 
 type PlacementKey = 'bottom' | 'left' | 'mouse' | 'right' | 'top';
 type Position = { top: number; left: number };
@@ -48,8 +49,8 @@ defineOptions({ name: 'ToolTip', inheritAttrs: false });
 
 const props = defineProps({
   Content: { type: [String, Number, Object], default: '' },
-  IsOpen: { type: Boolean, default: undefined },
-  IsEnabled: { type: Boolean, default: true },
+  IsOpen: { type: [Boolean, String], default: undefined },
+  IsEnabled: { type: [Boolean, String], default: true },
   Placement: { type: String, default: 'Mouse' },
   PlacementTarget: { type: [Object, String], default: null },
   PlacementPoint: { type: Object, default: null },
@@ -79,11 +80,13 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed', 'Opening', 'Closing', 'tooltip-pointer-enter', 'tooltip-pointer-leave']);
+const instance = getCurrentInstance();
+const attrs = useAttrs();
 const slots = useSlots();
 const inheritedTheme = inject<string | Ref<string> | null>('winuiTheme', null);
 const anchorRef = ref<HTMLElement | null>(null);
 const tooltipRef = ref<HTMLElement | null>(null);
-const localIsOpen = ref(false);
+const localIsOpen = ref<boolean | undefined>(undefined);
 const isHoveringTarget = ref(false);
 const isHoveringTooltip = ref(false);
 const pointer = ref<Point | null>(null);
@@ -97,11 +100,17 @@ let openTimer: number | undefined;
 let closeTimer: number | undefined;
 let suppressFocusShowUntil = 0;
 
-const isEnabled = computed(() => props.IsEnabled !== false);
-const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
+const isEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
+const resolvedIsOpen = computed(() => resolveXamlValue(props.IsOpen, instance));
+const effectiveIsOpen = computed(() => localIsOpen.value !== undefined
+  ? localIsOpen.value
+  : resolvedIsOpen.value);
 const isVisible = computed(() => effectiveIsOpen.value && isEnabled.value);
 const serviceContent = computed(() => props['ToolTipService.ToolTip']);
-const contentValue = computed(() => props.Content !== '' && props.Content !== null ? props.Content : serviceContent.value);
+const contentValue = computed(() => {
+  const content = resolveXamlValue(props.Content, instance);
+  return content !== '' && content !== null ? content : resolveXamlValue(serviceContent.value, instance);
+});
 const contentText = computed(() => {
   const value = contentValue.value;
   if (value && typeof value === 'object') {
@@ -110,8 +119,16 @@ const contentText = computed(() => {
   }
   return String(value ?? '');
 });
-const placement = computed(() => props['ToolTipService.Placement'] || props.Placement || 'Mouse');
-const placementTarget = computed(() => props['ToolTipService.PlacementTarget'] || props.PlacementTarget);
+const ToolTipContent = computed(() => contentText.value);
+provide(xamlScopeKey, { ToolTipContent });
+const placement = computed(() => resolveXamlValue(
+  props['ToolTipService.Placement'] || props.Placement || 'Mouse',
+  instance
+));
+const placementTarget = computed(() => resolveXamlValue(
+  props['ToolTipService.PlacementTarget'] || props.PlacementTarget,
+  instance
+));
 const effectiveTheme = computed(() => {
   const explicitTheme = String(props.Theme || '').toLowerCase();
   if (explicitTheme === 'light' || explicitTheme === 'dark') return explicitTheme;
@@ -198,7 +215,12 @@ function setOpen(value: boolean, immediate = false, preservePosition = false) {
   else isHoveringTooltip.value = false;
   localIsOpen.value = value;
   emit('update:IsOpen', value);
+  updateXamlBinding(props.IsOpen, value, instance);
 }
+
+watch(resolvedIsOpen, (value) => {
+  if (value !== undefined) localIsOpen.value = value === true;
+}, { immediate: true });
 
 function clearTimers() {
   if (openTimer !== undefined) window.clearTimeout(openTimer);
@@ -392,12 +414,16 @@ async function updatePosition() {
 watch(effectiveIsOpen, async (value, oldValue) => {
   if (value === oldValue) return;
   clearTimers();
-  emit(value ? 'Opening' : 'Closing');
+  const changingEvent = value ? 'Opening' : 'Closing';
+  emit(changingEvent);
+  resolveXamlHandler(attrs[changingEvent], instance)?.();
   if (value) {
     await nextTick();
     await updatePosition();
   }
-  emit(value ? 'Opened' : 'Closed');
+  const changedEvent = value ? 'Opened' : 'Closed';
+  emit(changedEvent);
+  resolveXamlHandler(attrs[changedEvent], instance)?.();
 });
 watch(
   [isVisible, placement, placementTarget, () => props.PlacementPoint, () => props.PlacementRect, () => props.HorizontalOffset, () => props.VerticalOffset, contentText],

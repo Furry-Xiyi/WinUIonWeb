@@ -19,14 +19,14 @@
     :class="attrs.class"
     :style="buttonStyle"
     :disabled="isDisabled"
-    @click="emit('Click', $event)">
+    @click="onButtonClick">
     <slot>{{ resolvedContent }}</slot>
   </button>
 </template>
 
 <script setup>
 import { computed, getCurrentInstance, useAttrs } from 'vue';
-import { resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
 
 defineOptions({
   inheritAttrs: false
@@ -105,10 +105,17 @@ const buttonStyle = computed(() => {
 const onAnchorClick = (event) => {
   if (!isDisabled.value) {
     emit('Click', event);
+    resolveXamlHandler(attrs.Click, instance)?.(event);
     return;
   }
   event.preventDefault();
   event.stopPropagation();
+};
+
+const onButtonClick = (event) => {
+  if (isDisabled.value) return;
+  emit('Click', event);
+  resolveXamlHandler(attrs.Click, instance)?.(event);
 };
 </script>
 

@@ -23,7 +23,7 @@
               Theme="{x:Bind pageTheme, Mode=OneWay}"
               Vue="{x:Bind radioButtonGroupVue, Mode=OneWay}">
               <StackPanel>
-                <RadioButtons Header="{x:Bind $t('sample.options-colon'), Mode=OneWay}" SelectionChanged="onOptionSelectionChanged">
+                <RadioButtons Header="{x:Bind $t('sample.options-colon'), Mode=OneWay}">
                   <RadioButton AutomationProperties.AutomationId="Option1RadioButton" Checked="RadioButton_Checked" Content="{x:Bind $t('text.option-1'), Mode=OneWay}" />
                   <RadioButton AutomationProperties.AutomationId="Option2RadioButton" Checked="RadioButton_Checked" Content="{x:Bind $t('text.option-2'), Mode=OneWay}" />
                   <RadioButton AutomationProperties.AutomationId="Option3RadioButton" Checked="RadioButton_Checked" Content="{x:Bind $t('text.option-3'), Mode=OneWay}" />
@@ -108,12 +108,9 @@ const colors = {
   DarkGreen: '#006400'
 };
 
-const onOptionSelectionChanged = ({ SelectedIndex }) => {
-  const option = t(`text.option-${SelectedIndex + 1}`);
-  control1Output.value = t('sample.you-selected', { option });
+const RadioButton_Checked = (sender) => {
+  control1Output.value = t('sample.you-selected', { option: sender?.Content ?? '' });
 };
-
-const RadioButton_Checked = () => {};
 
 const BackgroundColor_SelectionChanged = ({ SelectedIndex, SelectedItem }) => {
   backgroundSelectedIndex.value = SelectedIndex;

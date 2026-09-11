@@ -12,7 +12,7 @@
           </div>
         </div>
       <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" SampleDefinition="RepeatButton\RepeatButtonSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind repeatButtonSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.repeat.simple'), Mode=OneWay}">
+        <ControlExample class="basic-input-example-theme" SampleDefinition="RepeatButton\RepeatButtonSimple.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind repeatButtonSimpleVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.repeat.simple'), Mode=OneWay}">
               <StackPanel Orientation="Horizontal">
                 <RepeatButton Content="{x:Bind $t('text.click-and-hold'), Mode=OneWay}" IsEnabled="{x:Bind DisableControl1.IsChecked.Value.Equals(x:False), Mode=OneWay}" Click="RepeatButton_Click" />
                 <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" AutomationProperties.Name="Control output" Text="{x:Bind Control1Output, Mode=OneWay}" />

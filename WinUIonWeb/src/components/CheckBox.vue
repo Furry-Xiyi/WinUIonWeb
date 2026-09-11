@@ -21,8 +21,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, ref, watch } from 'vue';
-import { resolveXamlValue } from './xamlRuntime';
+import { computed, getCurrentInstance, ref, useAttrs, watch } from 'vue';
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
 
 const props = defineProps({
   Content: { type: [String, Number], default: '' },
@@ -36,6 +36,7 @@ const props = defineProps({
   disabled: Boolean
 });
 const instance = getCurrentInstance();
+const attrs = useAttrs();
 const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
 const resolvedIsChecked = computed(() => resolveXamlValue(props.IsChecked, instance));
 const resolvedIsThreeState = computed(() => resolveXamlValue(props.IsThreeState, instance));
@@ -115,12 +116,15 @@ const emitState = (value) => {
 
   if (value === true) {
     emit('Checked', value);
+    resolveXamlHandler(attrs.Checked, instance)?.(value);
     emit('checked', value);
   } else if (value === null) {
     emit('Indeterminate', value);
+    resolveXamlHandler(attrs.Indeterminate, instance)?.(value);
     emit('indeterminate', value);
   } else {
     emit('Unchecked', value);
+    resolveXamlHandler(attrs.Unchecked, instance)?.(value);
     emit('unchecked', value);
   }
 };

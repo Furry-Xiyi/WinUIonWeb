@@ -75,16 +75,13 @@
         <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbarbutton.flyout')" :theme="pageTheme" :vue="flyoutCode">
           <template #example>
             <div class="sample-row">
-              <Flyout Placement="Bottom" :Theme="pageTheme">
-                <template #trigger="{ Flyout }">
-                  <AppBarButton
-                    AllowFocusOnInteraction
-                    :Flyout="Flyout"
-                    Icon="Edit"
-                    :Label="$t('text.edit')" />
-                </template>
-                <TextBox MinWidth="240" :PlaceholderText="$t('sample.appbarbutton.input-placeholder')" />
-              </Flyout>
+              <AppBarButton AllowFocusOnInteraction="True" Icon="Edit" Label="{x:Bind $t('text.edit'), Mode=OneWay}">
+                <AppBarButton.Flyout>
+                  <Flyout Placement="Bottom" Theme="{x:Bind pageTheme, Mode=OneWay}">
+                    <TextBox MinWidth="240" PlaceholderText="{x:Bind $t('sample.appbarbutton.input-placeholder'), Mode=OneWay}" />
+                  </Flyout>
+                </AppBarButton.Flyout>
+              </AppBarButton>
             </div>
           </template>
         </ControlExample>

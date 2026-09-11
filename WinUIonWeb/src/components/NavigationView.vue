@@ -2570,7 +2570,7 @@ watch(() => props.selectedValue, (val) => {
     }
 
     html.winui-webview-host .win-nav-shell.is-overlay-left > .win-nav-left-panel:not(.is-compact) {
-      --win-nav-pane-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+      --win-nav-pane-fill: var(--host-nav-pane-bg, var(--AcrylicInAppFillColorDefaultBrush));
       background: transparent;
       -webkit-backdrop-filter: var(--flyout-backdrop);
       backdrop-filter: var(--flyout-backdrop);
@@ -2722,6 +2722,10 @@ watch(() => props.selectedValue, (val) => {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: none;
+  }
+
+  html.winui-webview-host .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface {
+    --win-nav-pane-fill: var(--host-nav-pane-bg, var(--AcrylicInAppFillColorDefaultBrush));
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface {
@@ -3734,7 +3738,7 @@ watch(() => props.selectedValue, (val) => {
      it cannot hide the material behind a separate stacking context. */
   .win-nav-shell.is-left-compact > .win-nav-left-panel:not(.is-compact),
   html.winui-webview-host .win-nav-shell.is-overlay-left.is-left-compact > .win-nav-left-panel:not(.is-compact) {
-    --win-nav-pane-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+    --win-nav-pane-fill: var(--host-nav-pane-bg, var(--AcrylicInAppFillColorDefaultBrush));
     background: var(--win-nav-pane-fill);
     -webkit-backdrop-filter: var(--flyout-backdrop);
     backdrop-filter: var(--flyout-backdrop);
@@ -3747,7 +3751,7 @@ watch(() => props.selectedValue, (val) => {
   }
 
   .win-nav-shell.is-left-minimal > .win-nav-left-panel > .win-nav-pane-surface {
-    --win-nav-pane-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--host-nav-pane-bg));
+    --win-nav-pane-fill: var(--host-nav-pane-bg, var(--AcrylicInAppFillColorDefaultBrush));
     background: var(--win-nav-pane-fill);
     -webkit-backdrop-filter: var(--flyout-backdrop);
     backdrop-filter: var(--flyout-backdrop);

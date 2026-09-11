@@ -1,12 +1,202 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"><div class="gallery-item-page"><div class="page-heading"><TextBlock class="page-header" Text="{x:Bind $t('text.teachingtip'), Mode=OneWay}" /><TextBlock class="page-description" Text="{x:Bind $t('text.a-teaching-tip-is-a-notification-flyout-used-to'), Mode=OneWay}" TextWrapping="WrapWholeWords" /><div class="page-header-actions"><Button class="header-action" Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button><ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite"><TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" /></ToggleButton></div></div><div class="gallery-page-content">
-    <ControlExample HeaderText="{x:Bind $t('sample.teachingtip.targeted'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind targetedCode, Mode=OneWay}"><ControlExample.Example><Grid><Button ref="testButton1" Click="TestButton1Click" Content="{x:Bind $t('text.show-teachingtip'), Mode=OneWay}" /><TeachingTip IsOpen="{x:Bind testButton1TeachingTipOpen, Mode=TwoWay}" Title="{x:Bind $t('sample.teachingtip.title'), Mode=OneWay}" Subtitle="{x:Bind $t('sample.teachingtip.subtitle'), Mode=OneWay}" Target="{x:Bind testButton1, Mode=OneWay}"><TeachingTip.IconSource><SymbolIconSource Symbol="Refresh" /></TeachingTip.IconSource></TeachingTip></Grid></ControlExample.Example></ControlExample>
-    <ControlExample HeaderText="{x:Bind $t('sample.teachingtip.non-targeted'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind nonTargetedCode, Mode=OneWay}"><ControlExample.Example><Grid><Button Click="TestButton2Click" Content="{x:Bind $t('text.show-teachingtip'), Mode=OneWay}" /><TeachingTip IsOpen="{x:Bind testButton2TeachingTipOpen, Mode=TwoWay}" Title="{x:Bind $t('sample.teachingtip.title'), Mode=OneWay}" Subtitle="{x:Bind $t('sample.teachingtip.subtitle'), Mode=OneWay}" ActionButtonContent="{x:Bind $t('sample.teachingtip.action-button'), Mode=OneWay}" CloseButtonContent="{x:Bind $t('sample.teachingtip.close-button'), Mode=OneWay}" IsLightDismissEnabled="True" PlacementMargin="20" PreferredPlacement="Auto" /></Grid></ControlExample.Example></ControlExample>
-    <ControlExample HeaderText="{x:Bind $t('sample.teachingtip.hero'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind heroCode, Mode=OneWay}"><ControlExample.Example><Grid><Button ref="testButton3" Click="TestButton3Click" Content="{x:Bind $t('text.show-teachingtip'), Mode=OneWay}" /><TeachingTip IsOpen="{x:Bind testButton3TeachingTipOpen, Mode=TwoWay}" Title="{x:Bind $t('sample.teachingtip.title'), Mode=OneWay}" PreferredPlacement="Bottom" Subtitle="{x:Bind $t('sample.teachingtip.subtitle'), Mode=OneWay}" Target="{x:Bind testButton3, Mode=OneWay}"><TeachingTip.HeroContent><Image Source="{x:Bind sunsetImageUrl, Mode=OneWay}" /></TeachingTip.HeroContent><TeachingTip.Content><TextBlock Margin="0,16,0,0" Text="{x:Bind $t('sample.teachingtip.description'), Mode=OneWay}" TextWrapping="WrapWholeWords" /></TeachingTip.Content></TeachingTip></Grid></ControlExample.Example></ControlExample>
-  </div></div></ScrollViewer>
+  <ScrollViewer
+    class="gallery-page-scroll"
+    VerticalScrollBarVisibility="Auto"
+    VerticalScrollMode="Auto">
+    <div class="gallery-item-page">
+      <div class="page-heading">
+        <TextBlock class="page-header" Text="{x:Bind $t('text.teachingtip'), Mode=OneWay}" />
+        <TextBlock
+          class="page-description"
+          Text="{x:Bind $t('text.a-teaching-tip-is-a-notification-flyout-used-to'), Mode=OneWay}"
+          TextWrapping="WrapWholeWords" />
+        <div class="page-header-actions">
+          <Button class="header-action" Click="toggleTheme">
+            <TextBlock class="icon" Text="&#xE793;" />
+          </Button>
+          <ToggleButton
+            IsChecked="{x:Bind isFavoriteState, Mode=OneWay}"
+            class="header-action"
+            Click="toggleFavorite">
+            <TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" />
+          </ToggleButton>
+        </div>
+      </div>
+
+      <div class="gallery-page-content">
+        <ControlExample
+          HeaderText="{x:Bind $t('sample.teachingtip.targeted'), Mode=OneWay}"
+          Theme="{x:Bind pageTheme, Mode=OneWay}"
+          Vue="{x:Bind targetedCode, Mode=OneWay}">
+          <ControlExample.Example>
+            <Grid>
+              <Button
+                x:Name="TestButton1"
+                Click="TestButton1Click"
+                Content="{x:Bind $t('text.show-teachingtip'), Mode=OneWay}" />
+              <TeachingTip
+                x:Name="TestButton1TeachingTip"
+                IsOpen="{x:Bind testButton1TeachingTipOpen, Mode=TwoWay}"
+                Title="{x:Bind $t('sample.teachingtip.title'), Mode=OneWay}"
+                Subtitle="{x:Bind $t('sample.teachingtip.subtitle'), Mode=OneWay}"
+                Target="{x:Bind TestButton1, Mode=OneWay}">
+                <TeachingTip.IconSource>
+                  <SymbolIconSource Symbol="Refresh" />
+                </TeachingTip.IconSource>
+              </TeachingTip>
+            </Grid>
+          </ControlExample.Example>
+        </ControlExample>
+
+        <ControlExample
+          HeaderText="{x:Bind $t('sample.teachingtip.non-targeted'), Mode=OneWay}"
+          Theme="{x:Bind pageTheme, Mode=OneWay}"
+          Vue="{x:Bind nonTargetedCode, Mode=OneWay}">
+          <ControlExample.Example>
+            <Grid>
+              <Button
+                Click="TestButton2Click"
+                Content="{x:Bind $t('text.show-teachingtip'), Mode=OneWay}" />
+              <TeachingTip
+                x:Name="TestButton2TeachingTip"
+                IsOpen="{x:Bind testButton2TeachingTipOpen, Mode=TwoWay}"
+                Title="{x:Bind $t('sample.teachingtip.title'), Mode=OneWay}"
+                Subtitle="{x:Bind $t('sample.teachingtip.subtitle'), Mode=OneWay}"
+                ActionButtonContent="{x:Bind $t('sample.teachingtip.action-button'), Mode=OneWay}"
+                CloseButtonContent="{x:Bind $t('sample.teachingtip.close-button'), Mode=OneWay}"
+                IsLightDismissEnabled="True"
+                PlacementMargin="20"
+                PreferredPlacement="Auto" />
+            </Grid>
+          </ControlExample.Example>
+        </ControlExample>
+
+        <ControlExample
+          HeaderText="{x:Bind $t('sample.teachingtip.hero'), Mode=OneWay}"
+          Theme="{x:Bind pageTheme, Mode=OneWay}"
+          Vue="{x:Bind heroCode, Mode=OneWay}">
+          <ControlExample.Example>
+            <Grid>
+              <Button
+                x:Name="TestButton3"
+                Click="TestButton3Click"
+                Content="{x:Bind $t('text.show-teachingtip'), Mode=OneWay}" />
+              <TeachingTip
+                x:Name="TestButton3TeachingTip"
+                IsOpen="{x:Bind testButton3TeachingTipOpen, Mode=TwoWay}"
+                Title="{x:Bind $t('sample.teachingtip.title'), Mode=OneWay}"
+                PreferredPlacement="Bottom"
+                Subtitle="{x:Bind $t('sample.teachingtip.subtitle'), Mode=OneWay}"
+                Target="{x:Bind TestButton3, Mode=OneWay}">
+                <TeachingTip.HeroContent>
+                  <Image
+                    AutomationProperties.Name="Sunset"
+                    Source="{x:Bind sunsetImageUrl, Mode=OneWay}" />
+                </TeachingTip.HeroContent>
+                <TeachingTip.Content>
+                  <TextBlock
+                    Margin="0,16,0,0"
+                    Text="{x:Bind $t('sample.teachingtip.description'), Mode=OneWay}"
+                    TextWrapping="WrapWholeWords" />
+                </TeachingTip.Content>
+              </TeachingTip>
+            </Grid>
+          </ControlExample.Example>
+        </ControlExample>
+      </div>
+    </div>
+  </ScrollViewer>
 </template>
+
 <script setup>
-import { computed, inject, ref } from 'vue'; import Button from '../../components/Button.vue'; import ControlExample from '../../components/ControlExample.vue'; import Grid from '../../components/Grid.vue'; import Image from '../../components/Image.vue'; import ScrollViewer from '../../components/ScrollViewer.vue'; import SymbolIconSource from '../../components/SymbolIcon.vue'; import TeachingTip from '../../components/TeachingTip.vue'; import TextBlock from '../../components/TextBlock.vue'; import ToggleButton from '../../components/ToggleButton.vue'; import { createPageState } from '../../utils/pageState';
-const currentPage=inject('currentPage'); const pageKey=computed(()=>currentPage?.value||'teachingtip'); const {isFavoriteState,pageTheme,toggleTheme,toggleFavorite}=createPageState(pageKey.value); const favoriteGlyph=computed(()=>isFavoriteState.value?'\uE735':'\uE734'); const testButton1=ref(null); const testButton3=ref(null); const testButton1TeachingTipOpen=ref(false); const testButton2TeachingTipOpen=ref(false); const testButton3TeachingTipOpen=ref(false); const sunsetImageUrl='https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/sunset.jpg'; const TestButton1Click=()=>{testButton1TeachingTipOpen.value=true}; const TestButton2Click=()=>{testButton2TeachingTipOpen.value=true}; const TestButton3Click=()=>{testButton3TeachingTipOpen.value=true}; const targetedCode=`<Grid><Button Click="TestButton1Click" Content="Show TeachingTip" /><TeachingTip Title="This is the title" Subtitle="And this is the subtitle" Target="{x:Bind TestButton1}"><TeachingTip.IconSource><SymbolIconSource Symbol="Refresh" /></TeachingTip.IconSource></TeachingTip></Grid>`; const nonTargetedCode=`<TeachingTip Title="This is the title" Subtitle="And this is the subtitle" ActionButtonContent="Action button" CloseButtonContent="Close button" IsLightDismissEnabled="True" PlacementMargin="20" PreferredPlacement="Auto" />`; const heroCode=`<TeachingTip Title="This is the title" PreferredPlacement="Bottom" Subtitle="And this is the subtitle" Target="{x:Bind TestButton3}"><TeachingTip.HeroContent><Image Source="/Assets/SampleMedia/sunset.jpg" /></TeachingTip.HeroContent><TeachingTip.Content><TextBlock Text="Description can go here" /></TeachingTip.Content></TeachingTip>`;
+import sunsetImageUrl from '../../assets/sunset.jpg'
+import { computed, inject, ref } from 'vue'
+import Button from '../../components/Button.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import Grid from '../../components/Grid.vue'
+import Image from '../../components/Image.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import SymbolIconSource from '../../components/SymbolIcon.vue'
+import TeachingTip from '../../components/TeachingTip.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import ToggleButton from '../../components/ToggleButton.vue'
+import { createPageState } from '../../utils/pageState'
+
+const currentPage = inject('currentPage')
+const pageKey = computed(() => currentPage?.value || 'teachingtip')
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value)
+const favoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
+const testButton1 = ref(null)
+const testButton3 = ref(null)
+const testButton1TeachingTipOpen = ref(false)
+const testButton2TeachingTipOpen = ref(false)
+const testButton3TeachingTipOpen = ref(false)
+
+const TestButton1Click = () => { testButton1TeachingTipOpen.value = true }
+const TestButton2Click = () => { testButton2TeachingTipOpen.value = true }
+const TestButton3Click = () => { testButton3TeachingTipOpen.value = true }
+
+const targetedCode = `<Grid>
+  <Button
+    x:Name="TestButton1"
+    Click="TestButton1Click"
+    Content="Show TeachingTip" />
+  <TeachingTip
+    x:Name="TestButton1TeachingTip"
+    Title="This is the title"
+    Subtitle="And this is the subtitle"
+    Target="{x:Bind TestButton1}">
+    <TeachingTip.IconSource>
+      <SymbolIconSource Symbol="Refresh" />
+    </TeachingTip.IconSource>
+  </TeachingTip>
+</Grid>`
+
+const nonTargetedCode = `<Grid>
+  <Button
+    Click="TestButton2Click"
+    Content="Show TeachingTip" />
+  <TeachingTip
+    x:Name="TestButton2TeachingTip"
+    Title="This is the title"
+    Subtitle="And this is the subtitle"
+    ActionButtonContent="Action button"
+    CloseButtonContent="Close button"
+    IsLightDismissEnabled="True"
+    PlacementMargin="20"
+    PreferredPlacement="Auto" />
+</Grid>`
+
+const heroCode = `<Grid>
+  <Button
+    x:Name="TestButton3"
+    Click="TestButton3Click"
+    Content="Show TeachingTip" />
+  <TeachingTip
+    x:Name="TestButton3TeachingTip"
+    Title="This is the title"
+    PreferredPlacement="Bottom"
+    Subtitle="And this is the subtitle"
+    Target="{x:Bind TestButton3}">
+    <TeachingTip.HeroContent>
+      <Image
+        AutomationProperties.Name="Sunset"
+        Source="/Assets/SampleMedia/sunset.jpg" />
+    </TeachingTip.HeroContent>
+    <TeachingTip.Content>
+      <TextBlock
+        Margin="0,16,0,0"
+        Text="Description can go here"
+        TextWrapping="WrapWholeWords" />
+    </TeachingTip.Content>
+  </TeachingTip>
+</Grid>`
 </script>
-<style scoped>.page-heading{position:relative}.page-header{font-size:28px;font-weight:600;margin:0 0 8px;color:var(--text-primary)}.page-description{color:var(--text-secondary);margin:0 72px 16px 0;line-height:20px}.page-header-actions{position:absolute;top:0;right:0;display:flex;gap:4px}.icon{font-size:16px}</style>
+
+<style scoped>
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
+.icon { font-size: 16px; }
+</style>

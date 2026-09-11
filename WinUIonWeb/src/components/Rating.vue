@@ -34,7 +34,7 @@
       <TextBlock
         v-if="resolvedCaption"
         class="win-rating-caption"
-        :Text="resolvedCaption" />
+        Text="{x:Bind RatingCaption}" />
     </div>
 
     <div class="win-rating-foreground-presenter" aria-hidden="true">
@@ -54,9 +54,9 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, ref, watch } from 'vue';
+import { computed, getCurrentInstance, provide, ref, useAttrs, watch } from 'vue';
 import TextBlock from './TextBlock.vue';
-import { resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 
 const noValueSetSentinel = -1;
 
@@ -75,7 +75,9 @@ const props = defineProps({
   disabled: { type: Boolean, default: false }
 });
 const instance = getCurrentInstance();
+const attrs = useAttrs();
 const resolvedCaption = computed(() => resolveXamlValue(props.Caption, instance));
+const RatingCaption = computed(() => resolvedCaption.value);
 const resolvedValue = computed(() => resolveXamlValue(props.Value, instance));
 const resolvedMaxRating = computed(() => resolveXamlValue(props.MaxRating, instance));
 const resolvedPlaceholderValue = computed(() => resolveXamlValue(props.PlaceholderValue, instance));
@@ -115,6 +117,13 @@ const effectiveMax = computed(() => Math.max(1, Math.trunc(toNumber(props.max ??
 const isEnabled = computed(() => resolvedIsEnabled.value && !props.disabled);
 const actualValue = computed(() => internalValue.value);
 const placeholderValue = computed(() => coerceRatingValue(resolvedPlaceholderValue.value));
+const placeholderSource = computed(() => {
+  const binding = String(props.PlaceholderValue ?? '');
+  const match = binding.match(/^\{(?:x:Bind|Binding)\s+([A-Za-z_$][\w$]*)\./);
+  if (!match) return null;
+  return resolveXamlValue(`{x:Bind ${match[1]}}`, instance) || null;
+});
+const placeholderSourceIsDragging = computed(() => Boolean(placeholderSource.value?.IsDragging));
 const initialSetValue = computed(() => Math.max(1, Math.min(effectiveMax.value, Math.trunc(toNumber(resolvedInitialSetValue.value, 1)))));
 const itemIndexes = computed(() => Array.from({ length: effectiveMax.value }, (_, index) => index + 1));
 
@@ -125,6 +134,15 @@ watch(
   },
   { immediate: true }
 );
+
+// WinUI displays the coerced dependency-property value while a bound Slider
+// is being dragged. The TwoWay source is updated when the interaction ends,
+// which lets the thumb move freely and then returns values below one to 1.0.
+watch([placeholderValue, resolvedPlaceholderValue, placeholderSourceIsDragging], ([value, rawValue, isDragging]) => {
+  if (!isDragging && value > noValueSetSentinel && value !== rawValue) {
+    updateXamlBinding(props.PlaceholderValue, value, instance);
+  }
+}, { immediate: true });
 
 const displayedValue = computed(() => {
   if (isPointerOver.value && !resolvedIsReadOnly.value && isEnabled.value) return Math.max(0, Math.min(effectiveMax.value, pointerRating.value));
@@ -189,9 +207,13 @@ const commitRating = (newRating, originatedFromMouse = false) => {
     internalValue.value = nextValue;
     emit('update:Value', nextValue);
     emit('update:modelValue', nextValue);
-    emit('ValueChanged', { OldValue: oldValue, NewValue: nextValue });
+    const args = { OldValue: oldValue, NewValue: nextValue };
+    emit('ValueChanged', args);
+    resolveXamlHandler(attrs.ValueChanged, instance)?.(args);
   }
 };
+
+provide(xamlScopeKey, { RatingCaption });
 
 const changeRatingBy = (change, originatedFromMouse = false) => {
   if (change === 0) return;

@@ -3,37 +3,42 @@
     <slot name="trigger" :Flyout="flyoutController"></slot>
     <Teleport :to="teleportTarget">
       <div v-if="effectiveIsOpen" class="flyout-dismiss-layer" @pointerdown="onLightDismiss"></div>
-      <div
-        v-if="effectiveIsOpen"
-        ref="flyoutRef"
-        class="flyout"
-        :class="[themeClass, openDirection === 'up' ? 'opens-up' : 'opens-down']"
-        :style="flyoutStyle"
-        @pointerdown.stop>
-        <ScrollViewer
-          class="flyout-scroll"
-          VerticalScrollMode="Auto"
-          VerticalScrollBarVisibility="Auto"
-          HorizontalScrollMode="Disabled"
-          HorizontalScrollBarVisibility="Disabled">
-          <slot></slot>
-        </ScrollViewer>
-      </div>
+      <Transition :name="openDirection === 'up' ? 'flyout-up' : 'flyout-down'">
+        <div
+          v-if="effectiveIsOpen"
+          ref="flyoutRef"
+          class="flyout"
+          :class="[themeClass, openDirection === 'up' ? 'opens-up' : 'opens-down']"
+          :style="flyoutStyle"
+          @pointerdown.stop>
+          <ScrollViewer
+            class="flyout-scroll"
+            VerticalScrollMode="Auto"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollMode="Disabled"
+            HorizontalScrollBarVisibility="Disabled">
+            <slot v-if="slots.default"></slot>
+            <template v-else>{{ resolvedContent }}</template>
+          </ScrollViewer>
+        </div>
+      </Transition>
     </Teleport>
   </span>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useSlots, watch } from 'vue';
+import { computed, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref, unref, useAttrs, useSlots, watch } from 'vue';
 import ScrollViewer from './ScrollViewer.vue';
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
 
 defineOptions({ name: 'Flyout' });
 
 const props = defineProps({
-  IsOpen: { type: Boolean, default: undefined },
+  Content: { default: undefined },
+  IsOpen: { type: [Boolean, String], default: undefined },
   Placement: { type: String, default: 'Bottom' },
   ShowMode: { type: String, default: 'Standard' },
-  IsLightDismissEnabled: { type: Boolean, default: true },
+  IsLightDismissEnabled: { type: [Boolean, String], default: true },
   LightDismissOverlayMode: { type: String, default: 'Auto' },
   Theme: { type: String, default: '' }
 });
@@ -47,11 +52,26 @@ const localIsOpen = ref(false);
 const position = ref({ top: 0, left: 0, maxHeight: 0, minWidth: 0 });
 const openDirection = ref('down');
 const teleportTarget = ref<string | HTMLElement>('body');
+const attrs = useAttrs();
 const slots = useSlots();
+const inheritedTheme = inject<string | { value?: string } | null>('winuiTheme', null);
+const instance = getCurrentInstance();
+const resolve = (value: unknown) => resolveXamlValue(value, instance);
 
-const effectiveIsOpen = computed(() => props.IsOpen ?? localIsOpen.value);
-const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
-const requestedPlacement = computed(() => props.Placement || 'Bottom');
+const resolvedIsOpen = computed(() => {
+  const value = resolve(props.IsOpen);
+  return value === undefined || value === null ? undefined : value === true || value === 'True';
+});
+const effectiveIsOpen = computed(() => localIsOpen.value);
+const resolvedContent = computed(() => resolve(props.Content));
+const themeClass = computed(() => {
+  const explicit = String(resolve(props.Theme) || '').toLowerCase();
+  const provided = String(unref(inheritedTheme as never) || '').toLowerCase();
+  const theme = explicit === 'light' || explicit === 'dark' ? explicit : provided;
+  return theme === 'light' || theme === 'dark' ? `win-theme-scope theme-${theme}` : '';
+});
+const requestedPlacement = computed(() => String(resolve(props.Placement) || 'Bottom'));
+const lightDismissEnabled = computed(() => resolve(props.IsLightDismissEnabled) !== false);
 
 const flyoutStyle = computed(() => ({
   top: `${position.value.top}px`,
@@ -61,11 +81,18 @@ const flyoutStyle = computed(() => ({
 }));
 
 const setOpen = (value: boolean) => {
-  if (value === effectiveIsOpen.value && props.IsOpen !== undefined) return;
-  localIsOpen.value = value;
+  if (value === effectiveIsOpen.value) return;
   emit('update:IsOpen', value);
-  if (value) emit('Opening');
-  else emit('Closing');
+  const binding = typeof props.IsOpen === 'string'
+    ? props.IsOpen.match(/^\{(?:x:Bind|Binding)\s+([\s\S]*?)\}$/)
+    : null;
+  if (binding) {
+    const expression = binding[1]
+      .replace(/,\s*Mode\s*=\s*(?:OneWay|TwoWay|OneTime)\s*$/, '')
+      .trim();
+    resolveXamlHandler(`${expression} = $event`, instance)?.(value);
+  }
+  localIsOpen.value = value;
 };
 
 const updatePosition = async () => {
@@ -117,13 +144,11 @@ const show = async () => {
   setOpen(true);
   await nextTick();
   await updatePosition();
-  emit('Opened');
 };
 
 const hide = () => {
   if (!effectiveIsOpen.value) return;
   setOpen(false);
-  emit('Closed');
 };
 
 const toggle = () => {
@@ -139,23 +164,41 @@ const flyoutController = {
 };
 
 const onLightDismiss = () => {
-  if (props.IsLightDismissEnabled) hide();
+  if (lightDismissEnabled.value) hide();
 };
 const onGlobalHide = () => hide();
 
-watch(() => props.IsOpen, async (value: boolean | undefined) => {
+watch(resolvedIsOpen, (value) => {
+  if (value !== undefined) localIsOpen.value = value;
+}, { immediate: true, flush: 'sync' });
+
+let transitionVersion = 0;
+watch(effectiveIsOpen, async (value, previous) => {
+  if (value === previous) return;
+  const version = ++transitionVersion;
+  emit(value ? 'Opening' : 'Closing');
+  resolveXamlHandler(value ? attrs.Opening : attrs.Closing, instance)?.();
   if (value) {
     await nextTick();
     await updatePosition();
-    emit('Opened');
+    if (version === transitionVersion && effectiveIsOpen.value) {
+      emit('Opened');
+      resolveXamlHandler(attrs.Opened, instance)?.();
+    }
+  } else {
+    await nextTick();
+    if (version === transitionVersion && !effectiveIsOpen.value) {
+      emit('Closed');
+      resolveXamlHandler(attrs.Closed, instance)?.();
+    }
   }
-});
+}, { flush: 'sync' });
 
 const onViewportChanged = () => {
   if (effectiveIsOpen.value) void updatePosition();
 };
 const onWindowBlur = () => {
-  if (effectiveIsOpen.value && props.IsLightDismissEnabled) hide();
+  if (effectiveIsOpen.value && lightDismissEnabled.value) hide();
 };
 const onKeyDown = (event: KeyboardEvent) => {
   if (event.key !== 'Escape' || !effectiveIsOpen.value) return;
@@ -207,17 +250,19 @@ defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
 .flyout {
   position: fixed;
   z-index: 990;
-  min-width: 20px;
-  max-width: min(420px, calc(100vw - 16px));
-  /* DefaultFlyoutPresenterStyle in WinUI uses a 12px presenter inset. */
-  padding: 12px;
+  min-width: var(--FlyoutThemeMinWidth, 96px);
+  max-width: min(var(--FlyoutThemeMaxWidth, 456px), calc(100vw - 16px));
+  min-height: var(--FlyoutThemeMinHeight, 40px);
+  max-height: min(var(--FlyoutThemeMaxHeight, 758px), calc(100vh - 16px));
+  /* DefaultFlyoutPresenterStyle: FlyoutContentPadding = 16,15,16,17. */
+  padding: var(--FlyoutContentPadding, 15px 16px 17px 16px);
   overflow: hidden;
-  color: var(--text-primary);
-  --win-acrylic-fill: var(--flyout-background, var(--flyout-bg));
+  color: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --win-acrylic-fill: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-background, var(--flyout-bg)));
   isolation: isolate;
-  background: transparent;
-  border: 1px solid var(--surface-stroke-color-flyout, var(--flyout-border));
-  border-radius: 8px;
+  background: var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-background, var(--flyout-bg)));
+  border: var(--FlyoutBorderThemeThickness, 1px) solid var(--SurfaceStrokeColorFlyoutBrush, var(--surface-stroke-color-flyout, var(--flyout-border)));
+  border-radius: var(--OverlayCornerRadius, 8px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   --flyout-shadow-bleed: 32px;
   -webkit-backdrop-filter: var(--flyout-backdrop);
@@ -242,9 +287,32 @@ defineExpose({ show, hide, toggle, IsOpen: effectiveIsOpen });
   animation: flyout-open-up 250ms cubic-bezier(0.1, 0.9, 0.2, 1) both, flyout-opacity 83ms linear both;
 }
 
+.flyout.flyout-down-leave-active,
+.flyout.flyout-up-leave-active {
+  animation: flyout-exit 167ms cubic-bezier(0.7, 0, 1, 0.5) both;
+  pointer-events: none;
+}
+
+@keyframes flyout-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
 @keyframes flyout-opacity {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes flyout-open-down {

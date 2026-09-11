@@ -4,18 +4,18 @@
     class="win-toggle-button"
     :class="[stateClasses, attrs.class]"
     :style="buttonStyle"
-    :Style="buttonStyleName"
-    :IsEnabled="props.IsEnabled"
-    @Click="onClick">
+    Style="{x:Bind buttonStyleName, Mode=OneWay}"
+    IsEnabled="{x:Bind resolvedIsEnabled, Mode=OneWay}"
+    Click="OnButtonClick">
     <slot>{{ resolvedContent }}</slot>
   </Button>
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, useAttrs } from 'vue';
+import { computed, getCurrentInstance, provide, ref, useAttrs, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import Button from './Button.vue';
-import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 
 defineOptions({
   inheritAttrs: false
@@ -89,16 +89,33 @@ const attrs = useAttrs();
 const instance = getCurrentInstance();
 
 const buttonAttrs = computed(() => {
-  const { class: _class, style: _style, disabled: _disabled, Click: _click, ...rest } = attrs;
+  const {
+    class: _class,
+    style: _style,
+    disabled: _disabled,
+    Click: _click,
+    Checked: _checked,
+    Unchecked: _unchecked,
+    Indeterminate: _indeterminate,
+    ...rest
+  } = attrs;
   return { ...rest, 'aria-pressed': ariaPressed.value };
 });
 
 const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance));
 const resolvedIsChecked = computed(() => resolveXamlValue(props.IsChecked, instance));
 const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
+const localIsChecked = ref<ToggleButtonChecked | undefined>(undefined);
+const isUpdatingChecked = ref(false);
+watch(resolvedIsChecked, (value) => {
+  if (!isUpdatingChecked.value) localIsChecked.value = value as ToggleButtonChecked;
+}, { immediate: true });
 const isDisabled = computed(() => resolvedIsEnabled.value === false);
-const isChecked = computed(() => resolvedIsChecked.value === true);
-const isIndeterminate = computed(() => resolvedIsChecked.value === null);
+const currentIsChecked = computed<ToggleButtonChecked>(() => localIsChecked.value !== undefined
+  ? localIsChecked.value
+  : (resolvedIsChecked.value as ToggleButtonChecked | undefined) ?? false);
+const isChecked = computed(() => currentIsChecked.value === true);
+const isIndeterminate = computed(() => currentIsChecked.value === null);
 const ariaPressed = computed<boolean | 'mixed'>(() => isIndeterminate.value ? 'mixed' : isChecked.value);
 const buttonStyleName = computed(() => (isChecked.value || isIndeterminate.value ? 'AccentButtonStyle' : ''));
 
@@ -166,8 +183,8 @@ const nextCheckedValue = () => {
     return !isChecked.value;
   }
 
-  if (resolvedIsChecked.value === false) return true;
-  if (resolvedIsChecked.value === true) return null;
+  if (currentIsChecked.value === false) return true;
+  if (currentIsChecked.value === true) return null;
   return false;
 };
 
@@ -175,12 +192,29 @@ const onClick = (event: MouseEvent) => {
   if (isDisabled.value) return;
 
   const nextValue = nextCheckedValue();
+  localIsChecked.value = nextValue;
+  isUpdatingChecked.value = true;
   emit('Click', event);
   resolveXamlHandler(attrs.Click, instance)?.(event);
   emit('update:IsChecked', nextValue);
+  updateXamlBinding(props.IsChecked, nextValue, instance);
+  isUpdatingChecked.value = false;
 
-  if (nextValue === true) emit('Checked', event);
-  else if (nextValue === false) emit('Unchecked', event);
-  else emit('Indeterminate', event);
+  if (nextValue === true) {
+    emit('Checked', event);
+    resolveXamlHandler(attrs.Checked, instance)?.(event);
+  } else if (nextValue === false) {
+    emit('Unchecked', event);
+    resolveXamlHandler(attrs.Unchecked, instance)?.(event);
+  } else {
+    emit('Indeterminate', event);
+    resolveXamlHandler(attrs.Indeterminate, instance)?.(event);
+  }
 };
+
+provide(xamlScopeKey, {
+  buttonStyleName,
+  resolvedIsEnabled,
+  OnButtonClick: onClick
+});
 </script>

@@ -40,14 +40,16 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, h, useSlots, getCurrentInstance } from 'vue'
+import { computed, defineComponent, Fragment, h, provide, shallowReactive, useSlots, getCurrentInstance } from 'vue'
 import ControlExampleBase from './ControlExampleBase.vue'
 import { getControlExampleProperty, type ControlExamplePropertyName } from './ControlExampleProperties'
-import { normalizeXamlNodes, resolveXamlValue } from './xamlRuntime'
+import { normalizeXamlNodes, resolveXamlValue, xamlNameScopeKey } from './xamlRuntime'
 
 defineOptions({ inheritAttrs: false })
 const slots = useSlots()
 const instance = getCurrentInstance()
+const xamlNameScope = shallowReactive<Record<string, unknown>>({})
+provide(xamlNameScopeKey, xamlNameScope)
 const resolveProp = (value: unknown) => resolveXamlValue(value, instance)
 const propertyNodes = computed(() => {
   const result: Record<ControlExamplePropertyName, ReturnType<NonNullable<typeof slots.default>>> = {

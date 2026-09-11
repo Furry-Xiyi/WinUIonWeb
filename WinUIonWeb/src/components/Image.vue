@@ -32,7 +32,8 @@
 </template>
 
 <script setup>
-import { computed, ref, useAttrs } from 'vue';
+import { computed, getCurrentInstance, ref, useAttrs } from 'vue';
+import { resolveXamlValue } from './xamlRuntime';
 
 const props = defineProps({
   Source: { type: [String, Object], default: '' },
@@ -48,15 +49,17 @@ const props = defineProps({
 
 const emit = defineEmits(['ImageOpened', 'ImageFailed']);
 const attrs = useAttrs();
+const instance = getCurrentInstance();
 const rootRef = ref(null);
 const imageRef = ref(null);
 const canvasRef = ref(null);
 const isPlaying = ref(false);
 
 const sourceUri = computed(() => {
-  if (typeof props.Source === 'string') return props.Source;
-  if (props.Source && typeof props.Source === 'object') {
-    return props.Source.UriSource || '';
+  const resolved = resolveXamlValue(props.Source, instance);
+  if (typeof resolved === 'string') return resolved;
+  if (resolved && typeof resolved === 'object') {
+    return resolved.UriSource || '';
   }
   return '';
 });

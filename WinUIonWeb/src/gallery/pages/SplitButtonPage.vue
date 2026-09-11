@@ -12,7 +12,7 @@
           </div>
         </div>
       <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" SampleDefinition="SplitButton\SplitButtonColorPicker.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind splitButtonColorPickerVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.splitbutton.color-picker'), Mode=OneWay}">
+        <ControlExample class="basic-input-example-theme" SampleDefinition="SplitButton\SplitButtonColorPicker.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind splitButtonColorPickerVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.splitbutton.color-picker'), Mode=OneWay}">
               <Grid ColumnSpacing="24">
                   <SplitButton MinWidth="0" MinHeight="0" Padding="0" VerticalAlignment="Top" Theme="{x:Bind pageTheme, Mode=OneWay}" AutomationProperties.Name="Font color" Click="applyCurrentColor">
                     <Border class="color-swatch current-swatch" Background="{x:Bind currentColor, Mode=OneWay}" />
@@ -43,7 +43,7 @@
                   />
               </ControlExample.Options>
             </ControlExample>
-            <ControlExample class="basic-input-example-theme" SampleDefinition="SplitButton\SplitButtonText.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Vue="{x:Bind splitButtonTextVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.splitbutton.text'), Mode=OneWay}">
+            <ControlExample class="basic-input-example-theme" SampleDefinition="SplitButton\SplitButtonText.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind splitButtonTextVue, Mode=OneWay}" HeaderText="{x:Bind $t('sample.splitbutton.text'), Mode=OneWay}">
               <ControlExample.Example>
                 <SplitButton MinWidth="0" MinHeight="0" Padding="5" VerticalAlignment="Top" Theme="{x:Bind pageTheme, Mode=OneWay}" AutomationProperties.Name="Font color with text">
                   <TextBlock Text="{x:Bind $t('sample.choose-color'), Mode=OneWay}" />

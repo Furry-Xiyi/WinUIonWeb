@@ -1,18 +1,18 @@
 <template>
   <div class="win-split-button" :class="[attrs.class, { 'is-open': isOpen }]" :style="rootStyle" ref="wrap">
     <slot name="main" :isDisabled="isDisabled" :onClick="onClick">
-      <Button class="win-split-main-button" :IsEnabled="!isDisabled" @Click="onClick">
+      <Button class="win-split-main-button" IsEnabled="{x:Bind buttonIsEnabled, Mode=OneWay}" Click="OnMainButtonClick">
         <MainOutlet v-if="mainNodes.length" />
         <slot v-else>{{ resolvedContent }}</slot>
       </Button>
     </slot>
     <div class="win-btn-separator"></div>
     <Button class="win-btn-chevron"
-            :IsEnabled="!isDisabled"
+            IsEnabled="{x:Bind buttonIsEnabled, Mode=OneWay}"
             Width="35"
             MinWidth="35"
             Padding="0,0,12,0"
-            @Click="toggleFlyout"
+            Click="OnFlyoutButtonClick"
             @mousedown="onChevronDown"
             @mouseup="onChevronUp"
             @mouseleave="releaseChevron"
@@ -44,10 +44,10 @@ export const SplitButtonFlyout = defineComponent({
 export default { Flyout: SplitButtonFlyout }
 </script>
 <script setup lang="ts">
-import { ref, computed, defineComponent, Fragment, getCurrentInstance, h, onBeforeUnmount, onMounted, useAttrs, useSlots } from 'vue';
+import { ref, computed, defineComponent, Fragment, getCurrentInstance, h, onBeforeUnmount, onMounted, provide, useAttrs, useSlots } from 'vue';
 import Button from './Button.vue';
 import MenuFlyout from './MenuFlyout.vue';
-import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime';
 
 defineOptions({ inheritAttrs: false });
 
@@ -55,7 +55,6 @@ const props = defineProps({
   Content: { type: [String, Number], default: '' },
   Flyout: { type: [Object, Array], default: () => ({ Items: [] }) },
   IsEnabled: { type: [Boolean, String], default: true },
-  Options: { type: Array, default: () => [] },
   Theme: { type: String, default: '' },
   MinWidth: { type: [String, Number], default: '' },
   MinHeight: { type: [String, Number], default: '' },
@@ -63,10 +62,11 @@ const props = defineProps({
   Margin: { type: String, default: '' },
   VerticalAlignment: { type: String, default: '' }
 });
-const emit = defineEmits(['Click', 'Select', 'click', 'select']);
+const emit = defineEmits(['Click', 'Select']);
 const attrs = useAttrs();
 const slots = useSlots();
 const instance = getCurrentInstance();
+const parentXamlScope = (instance?.provides?.[xamlScopeKey] as Record<string, unknown> | undefined) ?? {};
 const isFlyoutContainer = (node) => {
   const type = node?.type;
   if (!type || typeof type !== 'object') return false;
@@ -115,7 +115,15 @@ let themeObserver;
 
 const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
 const isDisabled = computed(() => !resolvedIsEnabled.value);
+const buttonIsEnabled = computed(() => !isDisabled.value);
 const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
+const resolvedFlyout = computed(() => resolveXamlValue(props.Flyout, instance));
+const resolvedTheme = computed(() => resolveXamlValue(props.Theme, instance));
+const resolvedMinWidth = computed(() => resolveXamlValue(props.MinWidth, instance));
+const resolvedMinHeight = computed(() => resolveXamlValue(props.MinHeight, instance));
+const resolvedPadding = computed(() => resolveXamlValue(props.Padding, instance));
+const resolvedMargin = computed(() => resolveXamlValue(props.Margin, instance));
+const resolvedVerticalAlignment = computed(() => resolveXamlValue(props.VerticalAlignment, instance));
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
   if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return `${Number(value.trim())}px`;
@@ -129,26 +137,25 @@ const xamlThickness = (value) => {
   if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
   return value;
 };
-const flyoutDefinition = computed(() => Array.isArray(props.Flyout) ? { Items: props.Flyout } : props.Flyout || { Items: [] });
+const flyoutDefinition = computed(() => Array.isArray(resolvedFlyout.value)
+  ? { Items: resolvedFlyout.value }
+  : resolvedFlyout.value || { Items: [] });
 const flyoutPlacement = computed(() => propertyNodes.value.placement || flyoutDefinition.value.Placement || 'Bottom');
-const sourceItems = computed(() => flyoutDefinition.value.Items?.length ? flyoutDefinition.value.Items : props.Options);
+const sourceItems = computed(() => flyoutDefinition.value.Items ?? []);
 const flyoutItems = computed(() => sourceItems.value.map((item) => {
   if (typeof item === 'string') return { Text: item, Value: item };
   return { ...item, Text: item.Text ?? item.Content ?? item.label ?? String(item) };
 }));
 const rootStyle = computed(() => {
   const style = {};
-  if (props.MinWidth !== '') {
-    style.minWidth = cssLength(props.MinWidth);
-    style['--SplitButtonMainMinWidth'] = cssLength(props.MinWidth);
-  }
-  if (props.MinHeight !== '') style.minHeight = cssLength(props.MinHeight);
-  if (props.Padding) style['--SplitButtonPadding'] = xamlThickness(props.Padding);
-  if (props.Margin) style.margin = xamlThickness(props.Margin);
-  if (props.VerticalAlignment) style.alignSelf = props.VerticalAlignment.toLowerCase();
+  if (resolvedMinWidth.value !== '') style.minWidth = cssLength(resolvedMinWidth.value);
+  if (resolvedMinHeight.value !== '') style.minHeight = cssLength(resolvedMinHeight.value);
+  if (resolvedPadding.value) style['--SplitButtonPadding'] = xamlThickness(resolvedPadding.value);
+  if (resolvedMargin.value) style.margin = xamlThickness(resolvedMargin.value);
+  if (resolvedVerticalAlignment.value) style.alignSelf = String(resolvedVerticalAlignment.value).toLowerCase();
   return [attrs.style, style];
 });
-const menuTheme = computed(() => props.Theme || anchorTheme.value);
+const menuTheme = computed(() => resolvedTheme.value || anchorTheme.value);
 
 const resolveAnchorTheme = () => {
   const themeScope = wrap.value?.closest('.theme-light, .theme-dark');
@@ -204,14 +211,20 @@ const closeFlyout = () => { isOpen.value = false; };
 const onClick = (event) => {
   if (isDisabled.value) return;
   emit('Click', event);
-  emit('click', event);
   resolveXamlHandler(attrs.Click, instance)?.(event);
 };
 const onSelect = (item) => {
   emit('Select', item);
-  emit('select', item.Value ?? item);
+  resolveXamlHandler(attrs.Select, instance)?.(item);
   isOpen.value = false;
 };
+
+provide(xamlScopeKey, {
+  ...parentXamlScope,
+  buttonIsEnabled,
+  OnMainButtonClick: onClick,
+  OnFlyoutButtonClick: toggleFlyout
+});
 
 onMounted(observeAnchorTheme);
 onBeforeUnmount(() => themeObserver?.disconnect());
@@ -221,10 +234,7 @@ onBeforeUnmount(() => themeObserver?.disconnect());
     position: relative;
     display: inline-flex;
     box-sizing: border-box;
-    border-left: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushCurrent);
-    border-top: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushTopCurrent);
-    border-right: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushCurrent);
-    border-bottom: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushBottomCurrent);
+    border: 0;
     border-radius: 4px;
     overflow: hidden;
     min-height: 32px;
@@ -245,7 +255,21 @@ onBeforeUnmount(() => themeObserver?.disconnect());
     --ButtonBorderBrushBottomCurrent: var(--ButtonBorderBrushBottom);
     --SplitButtonPadding: 6px 11px 7px;
     --SplitButtonBorderBrushDivider: var(--ControlStrokeColorDefaultBrush);
-    --SplitButtonBorderBrushCheckedDivider: rgba(0, 0, 0, 0.2157);
+    --SplitButtonBorderBrushCheckedDivider: var(--ControlStrokeColorOnAccentTertiaryBrush, rgba(0, 0, 0, 0.2157));
+  }
+
+  .win-split-button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    box-sizing: border-box;
+    border-left: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushCurrent);
+    border-top: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushTopCurrent);
+    border-right: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushCurrent);
+    border-bottom: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushBottomCurrent);
+    border-radius: 4px;
+    pointer-events: none;
   }
 
   .win-split-button.is-checked {
@@ -275,13 +299,16 @@ onBeforeUnmount(() => themeObserver?.disconnect());
   }
 
   .win-split-button .win-btn {
-    border: none;
-    border-radius: 0;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 4px;
     min-height: 0;
     height: 100%;
     position: relative;
     padding: var(--SplitButtonPadding);
-    --ButtonBorderThemeThickness: 0px;
+    overflow: hidden;
+    background-clip: padding-box;
+    --ButtonBorderThemeThickness: 1px;
   }
 
   .win-split-button .win-btn:not(.win-toggle-button) {
@@ -328,7 +355,10 @@ onBeforeUnmount(() => themeObserver?.disconnect());
   }
 
   .win-split-button .win-split-main-button {
-    min-width: var(--SplitButtonMainMinWidth, 35px);
+    min-width: 35px;
+    border-right-width: 0;
+    border-radius: 4px 0 0 4px !important;
+    --ButtonCornerRadius: 4px 0 0 4px !important;
   }
 
   .win-split-button .win-btn-separator {
@@ -343,6 +373,9 @@ onBeforeUnmount(() => themeObserver?.disconnect());
     min-width: 35px;
     padding: 0 12px 0 0;
     justify-content: flex-end;
+    border-left-width: 0;
+    border-radius: 0 4px 4px 0 !important;
+    --ButtonCornerRadius: 0 4px 4px 0 !important;
   }
 
   .win-split-button .win-btn-chevron .icon {

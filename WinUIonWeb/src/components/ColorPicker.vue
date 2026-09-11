@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, nextTick, getCurrentInstance } from 'vue';
+import { ref, reactive, computed, watch, onMounted, nextTick, getCurrentInstance, useAttrs } from 'vue';
 import Button from './Button.vue';
 import ComboBox from './ComboBox.vue';
 import NumberBox from './NumberBox.vue';
@@ -89,10 +89,11 @@ import TextBlock from './TextBlock.vue';
 import TextBox from './TextBox.vue';
 import ToolTip from './ToolTip.vue';
 import { useI18n } from './i18n/index';
-import { resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding } from './xamlRuntime';
 
 const { t } = useI18n();
 const instance = getCurrentInstance();
+const attrs = useAttrs();
 
 const props = defineProps({
   Color: { type: [String, Object], default: undefined },
@@ -130,7 +131,8 @@ const alpha = ref(1);
 const moreExpanded = ref(false);
 const hexInputText = ref('');
 const selectedColorModelIndex = ref(0);
-const lastEmittedColor = ref(props.Color ?? props.modelValue);
+const resolvedColor = computed(() => String(resolveXamlValue(props.Color, instance) ?? props.modelValue ?? '#0067C0'));
+const lastEmittedColor = ref(resolvedColor.value);
 let draggingSpectrum = false;
 let draggingValue = false;
 let draggingAlpha = false;
@@ -239,7 +241,7 @@ function rgbToHsv(r, g, b) {
 }
 
 function parseColor(hex) {
-  let str = hex.replace('#', '');
+  let str = String(hex ?? '#0067C0').replace('#', '');
   if (str.length === 3) str = str.split('').map(c => c + c).join('');
   const r = parseInt(str.slice(0, 2), 16) || 0;
   const g = parseInt(str.slice(2, 4), 16) || 0;
@@ -313,9 +315,12 @@ function drawRingSpectrum(ctx, w, h) {
 }
 
 function emitColor() {
+  const args = { OldColor: lastEmittedColor.value, NewColor: currentHex.value };
   emit('update:modelValue', currentHex.value);
   emit('update:Color', currentHex.value);
-  emit('ColorChanged', { OldColor: lastEmittedColor.value, NewColor: currentHex.value });
+  updateXamlBinding(props.Color, currentHex.value, instance);
+  emit('ColorChanged', args);
+  resolveXamlHandler(attrs.ColorChanged, instance)?.(args);
   lastEmittedColor.value = currentHex.value;
 }
 
@@ -481,7 +486,7 @@ function syncFromProp(hex) {
   nextTick(() => drawSpectrum());
 }
 
-watch(() => props.Color ?? props.modelValue, (val) => {
+watch(resolvedColor, (val) => {
   if (val && val.toLowerCase() !== currentHex.value.toLowerCase()) {
     syncFromProp(val);
     lastEmittedColor.value = val;
@@ -499,8 +504,8 @@ watch([spectrumToolTipContent, spectrumThumbStyle], () => {
 }, { deep: true });
 
 onMounted(() => {
-  syncFromProp(props.Color ?? props.modelValue);
-  lastEmittedColor.value = currentHex.value;
+  syncFromProp(resolvedColor.value);
+  lastEmittedColor.value = resolvedColor.value;
 });
 </script>
 

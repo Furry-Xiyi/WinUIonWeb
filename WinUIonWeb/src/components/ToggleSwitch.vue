@@ -1,6 +1,6 @@
 <template>
   <div class="win-switch-root" :style="rootStyle">
-    <TextBlock v-if="resolvedHeader" class="win-switch-header" :Text="resolvedHeader" />
+    <TextBlock v-if="resolvedHeader" class="win-switch-header" Text="{x:Bind ToggleSwitchHeader}" />
     <div class="win-switch-wrap" :class="{ 'is-disabled': !IsEnabledResolved }" @click="onWrapClick">
     <div class="win-switch"
          :class="{ 'is-on': isOnValue, 'dragging': isDragging, 'is-pressed': isPressed, 'is-disabled': !IsEnabledResolved }"
@@ -11,18 +11,19 @@
       </div>
     </div>
       <TextBlock v-if="$slots.default" class="win-switch-label"><slot></slot></TextBlock>
-      <TextBlock v-else class="win-switch-label" :Text="isOnValue ? resolvedOnContent : resolvedOffContent" />
+      <TextBlock v-else class="win-switch-label" Text="{x:Bind ToggleSwitchContent}" />
     </div>
   </div>
 </template>
 <script setup>
-import { ref, computed, getCurrentInstance, watch } from 'vue';
+import { ref, computed, getCurrentInstance, provide, useAttrs, watch } from 'vue';
 import { useI18n } from './i18n/index';
 import TextBlock from './TextBlock.vue';
-import { resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime';
 
 const { t } = useI18n();
 const instance = getCurrentInstance();
+const attrs = useAttrs();
 const props = defineProps({
   IsOn: { type: [Boolean, String], default: undefined },
   Header: { type: [String, Number], default: '' },
@@ -47,6 +48,8 @@ const IsEnabledResolved = computed(() => resolveXamlValue(props.IsEnabled, insta
 const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
 const resolvedOnContent = computed(() => resolveXamlValue(props.OnContent || props.onContent || t('text.on'), instance));
 const resolvedOffContent = computed(() => resolveXamlValue(props.OffContent || props.offContent || t('text.off'), instance));
+const ToggleSwitchHeader = computed(() => resolvedHeader.value);
+const ToggleSwitchContent = computed(() => isOnValue.value ? resolvedOnContent.value : resolvedOffContent.value);
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
   if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return `${Number(value.trim())}px`;
@@ -77,8 +80,12 @@ const setIsOn = (value) => {
   internalIsOn.value = value;
   emit('update:IsOn', value);
   emit('update:modelValue', value);
-  emit('Toggled', { IsOn: value });
+  const args = { IsOn: value };
+  emit('Toggled', args);
+  resolveXamlHandler(attrs.Toggled, instance)?.(args);
 };
+
+provide(xamlScopeKey, { ToggleSwitchHeader, ToggleSwitchContent });
 
 const onDown = (e) => {
   if (!IsEnabledResolved.value) return;

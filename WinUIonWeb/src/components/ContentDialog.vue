@@ -1,10 +1,14 @@
 <template>
   <Teleport to="body">
-    <Transition name="content-dialog" :duration="{ enter: 250, leave: 167 }">
+    <Transition
+      appear
+      name="content-dialog"
+      :duration="{ enter: 250, leave: 167 }">
       <div
         v-if="effectiveIsOpen"
         class="content-dialog-overlay win-theme-scope"
         :class="dialogThemeClass"
+        :style="dialogThemeStyle"
         @pointerdown.self="onOverlayPointerDown">
         <section class="content-dialog" role="dialog" aria-modal="true" :aria-labelledby="Title ? titleId : undefined">
           <ScrollViewer
@@ -17,38 +21,38 @@
               v-if="Title"
               :id="titleId"
               class="content-dialog-title"
-              :Text="Title"
-              :FontSize="20"
-              :FontWeight="600"
+              Text="{x:Bind DialogTitle}"
+              FontSize="20"
+              FontWeight="600"
               TextWrapping="WrapWholeWords" />
             <div class="content-dialog-body">
               <slot v-if="hasContentSlot"></slot>
-              <TextBlock v-else-if="Content" :Text="Content" TextWrapping="WrapWholeWords" />
+              <TextBlock v-else-if="Content" Text="{x:Bind DialogContent}" TextWrapping="WrapWholeWords" />
             </div>
           </ScrollViewer>
           <div v-if="hasCommandButtons" class="content-dialog-command-space" :class="commandSpaceClass">
             <Button
               v-if="PrimaryButtonText"
               class="content-dialog-button content-dialog-primary"
-              :Style="DefaultButton === 'Primary' ? '{StaticResource AccentButtonStyle}' : '{StaticResource DefaultButtonStyle}'"
-              :IsEnabled="IsPrimaryButtonEnabled"
-              @Click="closeWithResult('Primary')">
-              <TextBlock :Text="PrimaryButtonText" :FontSize="14" :FontWeight="400" />
+              Style="{x:Bind PrimaryButtonStyle}"
+              IsEnabled="{x:Bind IsPrimaryButtonEnabled}"
+              Click="OnPrimaryButtonClick">
+              <TextBlock Text="{x:Bind PrimaryButtonText}" FontSize="14" FontWeight="400" />
             </Button>
             <Button
               v-if="SecondaryButtonText"
               class="content-dialog-button content-dialog-secondary"
-              :Style="DefaultButton === 'Secondary' ? '{StaticResource AccentButtonStyle}' : '{StaticResource DefaultButtonStyle}'"
-              :IsEnabled="IsSecondaryButtonEnabled"
-              @Click="closeWithResult('Secondary')">
-              <TextBlock :Text="SecondaryButtonText" :FontSize="14" :FontWeight="400" />
+              Style="{x:Bind SecondaryButtonStyle}"
+              IsEnabled="{x:Bind IsSecondaryButtonEnabled}"
+              Click="OnSecondaryButtonClick">
+              <TextBlock Text="{x:Bind SecondaryButtonText}" FontSize="14" FontWeight="400" />
             </Button>
             <Button
               v-if="CloseButtonText"
               class="content-dialog-button content-dialog-close"
-              :Style="DefaultButton === 'Close' ? '{StaticResource AccentButtonStyle}' : '{StaticResource DefaultButtonStyle}'"
-              @Click="closeWithResult('None')">
-              <TextBlock :Text="CloseButtonText" :FontSize="14" :FontWeight="400" />
+              Style="{x:Bind CloseButtonStyle}"
+              Click="OnCloseButtonClick">
+              <TextBlock Text="{x:Bind CloseButtonText}" FontSize="14" FontWeight="400" />
             </Button>
           </div>
         </section>
@@ -58,11 +62,11 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, ref, useSlots } from 'vue';
+import { computed, getCurrentInstance, inject, provide, ref, unref, useAttrs, useSlots } from 'vue';
 import Button from './Button.vue';
 import ScrollViewer from './ScrollViewer.vue';
 import TextBlock from './TextBlock.vue';
-import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime';
 
 defineOptions({ name: 'ContentDialog' });
 
@@ -92,25 +96,70 @@ const emit = defineEmits([
 
 const localIsOpen = ref(false);
 const instance = getCurrentInstance();
+const attrs = useAttrs();
 const slots = useSlots();
+const inheritedTheme = inject('winuiTheme', null);
 const titleId = `content-dialog-title-${Math.random().toString(36).slice(2)}`;
 
 const resolve = (value) => resolveXamlValue(value, instance);
 const effectiveIsOpen = computed(() => resolve(props.IsOpen) ?? localIsOpen.value);
 const Title = computed(() => resolve(props.Title));
 const Content = computed(() => resolve(props.Content));
+const DialogTitle = computed(() => Title.value);
+const DialogContent = computed(() => Content.value);
 const PrimaryButtonText = computed(() => resolve(props.PrimaryButtonText));
 const SecondaryButtonText = computed(() => resolve(props.SecondaryButtonText));
 const CloseButtonText = computed(() => resolve(props.CloseButtonText));
 const IsPrimaryButtonEnabled = computed(() => resolve(props.IsPrimaryButtonEnabled) !== false);
 const IsSecondaryButtonEnabled = computed(() => resolve(props.IsSecondaryButtonEnabled) !== false);
 const dialogThemeClass = computed(() => {
-  const theme = resolve(props.Theme);
+  const explicit = String(resolve(props.Theme) || '').toLowerCase();
+  const provided = String(unref(inheritedTheme) || '').toLowerCase();
+  const root = typeof document !== 'undefined' ? document.documentElement : null;
+  const system = typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const theme = explicit === 'light' || explicit === 'dark'
+    ? explicit
+    : provided === 'light' || provided === 'dark'
+      ? provided
+      : root?.classList.contains('theme-dark') || root?.dataset.theme === 'dark'
+        ? 'dark'
+        : root?.classList.contains('theme-light') || root?.dataset.theme === 'light'
+          ? 'light'
+          : system;
   return theme === 'light' || theme === 'dark' ? `theme-${theme}` : '';
+});
+const dialogThemeStyle = computed(() => {
+  const theme = dialogThemeClass.value === 'theme-dark' ? 'dark' : 'light';
+  return theme === 'dark'
+    ? {
+        '--ContentDialogBackground': '#2C2C2C',
+        '--ContentDialogTopOverlay': 'rgba(43, 43, 43, 0)',
+        '--ContentDialogCommandSpaceBackground': '#202020',
+        '--ContentDialogForeground': '#FFFFFF',
+        '--TextFillColorPrimaryBrush': '#FFFFFF',
+        '--LayerFillColorAltBrush': 'rgba(255, 255, 255, 0.051)',
+        '--SolidBackgroundFillColorBaseBrush': '#202020',
+        '--content-dialog-content-bg': 'rgba(43, 43, 43, 0)',
+        '--content-dialog-command-bg': '#202020'
+      }
+    : {
+        '--ContentDialogBackground': '#F3F3F3',
+        '--ContentDialogTopOverlay': '#FFFFFF',
+        '--ContentDialogCommandSpaceBackground': '#F3F3F3',
+        '--ContentDialogForeground': 'rgba(0, 0, 0, 0.8956)',
+        '--TextFillColorPrimaryBrush': 'rgba(0, 0, 0, 0.8956)',
+        '--LayerFillColorAltBrush': '#FFFFFF',
+        '--SolidBackgroundFillColorBaseBrush': '#F3F3F3',
+        '--content-dialog-content-bg': '#FFFFFF',
+        '--content-dialog-command-bg': '#F3F3F3'
+      };
 });
 const DefaultButton = computed(() => {
   return resolve(props.DefaultButton) || 'None';
 });
+const PrimaryButtonStyle = computed(() => DefaultButton.value === 'Primary' ? 'AccentButtonStyle' : 'DefaultButtonStyle');
+const SecondaryButtonStyle = computed(() => DefaultButton.value === 'Secondary' ? 'AccentButtonStyle' : 'DefaultButtonStyle');
+const CloseButtonStyle = computed(() => DefaultButton.value === 'Close' ? 'AccentButtonStyle' : 'DefaultButtonStyle');
 const hasPrimaryButton = computed(() => Boolean(PrimaryButtonText.value));
 const hasSecondaryButton = computed(() => Boolean(SecondaryButtonText.value));
 const hasCloseButton = computed(() => Boolean(CloseButtonText.value));
@@ -131,7 +180,10 @@ const setOpen = (value) => {
   emit('update:IsOpen', value);
   const binding = typeof props.IsOpen === 'string' ? props.IsOpen.match(/^\{(?:x:Bind|Binding)\s+([\s\S]*?)\}$/) : null;
   if (binding) resolveXamlHandler(`${binding[1].replace(/,\s*Mode\s*=\s*(?:OneWay|TwoWay|OneTime)\s*$/, '').trim()} = $event`, instance)?.(value);
-  if (value) emit('Opened');
+  if (value) {
+    emit('Opened');
+    resolveXamlHandler(attrs.Opened, instance)?.();
+  }
 };
 
 const showAsync = () => {
@@ -146,16 +198,39 @@ let pendingResolve = null;
 const closeWithResult = (result) => {
   if (result === 'Primary') {
     emit('PrimaryButtonClick');
+    resolveXamlHandler(attrs.PrimaryButtonClick, instance)?.();
   } else if (result === 'Secondary') {
     emit('SecondaryButtonClick');
+    resolveXamlHandler(attrs.SecondaryButtonClick, instance)?.();
   } else {
     emit('CloseButtonClick');
+    resolveXamlHandler(attrs.CloseButtonClick, instance)?.();
   }
   setOpen(false);
   emit('Closed', result);
+  resolveXamlHandler(attrs.Closed, instance)?.(result);
   pendingResolve?.(result);
   pendingResolve = null;
 };
+
+const OnPrimaryButtonClick = () => closeWithResult('Primary');
+const OnSecondaryButtonClick = () => closeWithResult('Secondary');
+const OnCloseButtonClick = () => closeWithResult('None');
+provide(xamlScopeKey, {
+  OnPrimaryButtonClick,
+  OnSecondaryButtonClick,
+  OnCloseButtonClick,
+  PrimaryButtonText,
+  SecondaryButtonText,
+  CloseButtonText,
+  IsPrimaryButtonEnabled,
+  IsSecondaryButtonEnabled,
+  PrimaryButtonStyle,
+  SecondaryButtonStyle,
+  CloseButtonStyle,
+  DialogTitle,
+  DialogContent
+});
 
 const onOverlayPointerDown = () => {
   if (resolve(props.IsLightDismissEnabled)) closeWithResult('None');
@@ -177,42 +252,42 @@ defineExpose({
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--dialog-overlay);
+  background: var(--SmokeFillColorDefaultBrush, var(--dialog-overlay, rgba(0, 0, 0, 0.30)));
 }
 
 .content-dialog {
-  width: min(100%, 548px);
-  min-width: min(100%, 320px);
-  min-height: 184px;
-  max-height: calc(100vh - 48px);
+  width: min(100%, var(--ContentDialogMaxWidth, 548px));
+  min-width: min(100%, var(--ContentDialogMinWidth, 320px));
+  min-height: var(--ContentDialogMinHeight, 184px);
+  max-height: min(var(--ContentDialogMaxHeight, 756px), calc(100vh - 48px));
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  color: var(--text-primary);
-  background: var(--dialog-background);
-  border: 1px solid var(--flyout-border);
-  border-radius: 8px;
+  color: var(--ContentDialogForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  background: var(--ContentDialogBackground, var(--SolidBackgroundFillColorBaseBrush, var(--dialog-background)));
+  border: var(--ContentDialogBorderWidth, 1px) solid var(--ContentDialogBorderBrush, var(--SurfaceStrokeColorDefaultBrush, var(--flyout-border)));
+  border-radius: var(--OverlayCornerRadius, 8px);
   box-shadow: 0 32px 64px rgba(0, 0, 0, 0.28);
 }
 
 .content-dialog-content {
   min-height: 0;
   flex: 1 1 auto;
-  padding: 24px;
-  background: var(--dialog-content-bg);
-  border-bottom: 1px solid var(--dialog-divider);
+  padding: var(--ContentDialogPadding, 24px);
+  background: var(--content-dialog-content-bg, var(--ContentDialogTopOverlay, var(--LayerFillColorAltBrush, var(--dialog-content-bg))));
+  border-bottom: var(--ContentDialogSeparatorThickness, 1px) solid var(--ContentDialogSeparatorBorderBrush, var(--CardStrokeColorDefaultBrush, var(--dialog-divider)));
 }
 
 .content-dialog-title {
   margin: 0 0 12px;
-  color: var(--text-primary);
+  color: var(--TextFillColorPrimaryBrush, var(--text-primary));
   font-size: 20px;
   font-weight: 600;
   line-height: 28px;
 }
 
 .content-dialog-body {
-  color: var(--text-primary);
+  color: var(--TextFillColorPrimaryBrush, var(--text-primary));
   font-size: 14px;
   line-height: 20px;
 }
@@ -221,8 +296,8 @@ defineExpose({
   display: grid;
   grid-template-columns: minmax(0, 1fr) 0 0 8px minmax(0, 1fr);
   column-gap: 0;
-  padding: 24px;
-  background: var(--dialog-button-bg);
+  padding: var(--ContentDialogPadding, 24px);
+  background: var(--content-dialog-command-bg, var(--ContentDialogCommandSpaceBackground, var(--SolidBackgroundFillColorBaseBrush, var(--dialog-button-bg))));
 }
 
 .content-dialog-command-space.all-visible {
@@ -273,6 +348,10 @@ defineExpose({
   animation: content-dialog-exit 167ms cubic-bezier(0, 0, 0, 1) both;
 }
 
+.content-dialog-appear-active .content-dialog {
+  animation: content-dialog-enter 250ms cubic-bezier(0, 0, 0, 1) both;
+}
+
 .content-dialog-enter-from,
 .content-dialog-leave-to {
   opacity: 0;
@@ -282,6 +361,7 @@ defineExpose({
   from {
     transform: scale(1.05);
   }
+
   to {
     transform: scale(1);
   }
@@ -291,6 +371,7 @@ defineExpose({
   from {
     transform: scale(1);
   }
+
   to {
     transform: scale(1.05);
   }

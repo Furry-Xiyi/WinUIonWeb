@@ -81,7 +81,7 @@ import CommandBarFlyout from './CommandBarFlyout.vue';
 import ScrollViewer from './ScrollViewer.vue';
 import TextBox from './TextBox.vue';
 import { useI18n } from './i18n/index';
-import { resolveXamlValue } from './xamlRuntime';
+import { resolveXamlValue, updateXamlBinding } from './xamlRuntime';
 
 const { t } = useI18n();
 const instance = getCurrentInstance();
@@ -178,6 +178,11 @@ const props = withDefaults(defineProps<{
 });
 const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
 const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
+const resolvedText = computed(() => String(resolveXamlValue(props.Text, instance) ?? ''));
+const resolvedHtml = computed(() => String(resolveXamlValue(props.Html, instance) ?? ''));
+const resolvedWidth = computed(() => resolveXamlValue(props.Width, instance) as number | string | undefined);
+const resolvedHeight = computed(() => resolveXamlValue(props.Height, instance) as number | string | undefined);
+const resolvedMinHeight = computed(() => resolveXamlValue(props.MinHeight, instance) as number | string | undefined);
 
 const emit = defineEmits<{
   'update:Text': [value: string];
@@ -202,7 +207,7 @@ const editorRef = ref<HTMLDivElement | null>(null);
 const isFocused = ref(false);
 const commandBarOpen = ref(false);
 const commandBarAnchor = ref<DOMRect | { x: number; y: number; top: number; bottom: number; left: number; right: number; width: number; height: number } | null>(null);
-const internalHtml = ref(props.Html || escapeText(props.Text));
+const internalHtml = ref(resolvedHtml.value || escapeText(resolvedText.value));
 const savedSelection = ref<Range | null>(null);
 
 const disabledFormatting = computed(() => props.DisabledFormattingAccelerators.toLowerCase());
@@ -260,13 +265,13 @@ const commandBarSecondaryCommands = computed<CommandBarFlyoutCommand[]>(() => {
 
 const cssSize = (value: number | string) => value === '' ? undefined : typeof value === 'number' ? `${value}px` : value;
 const rootStyle = computed<CSSProperties & Record<string, string | undefined>>(() => ({
-  width: cssSize(props.Width),
+  width: cssSize(resolvedWidth.value ?? ''),
   '--reb-selection-background-blur': props.SelectionHighlightColorWhenNotFocused || undefined
 }));
 
 const editorScrollStyle = computed<CSSProperties>(() => ({
-  height: cssSize(props.Height),
-  minHeight: cssSize(props.MinHeight) || '118px'
+  height: cssSize(resolvedHeight.value ?? ''),
+  minHeight: cssSize(resolvedMinHeight.value ?? '') || '118px'
 }));
 
 const editorStyle = computed<CSSProperties>(() => ({
@@ -338,6 +343,8 @@ const onInput = () => {
   emit('TextChanging', { IsContentChanging: true });
   emit('update:Text', text);
   emit('update:Html', internalHtml.value);
+  updateXamlBinding(props.Text, text, instance);
+  updateXamlBinding(props.Html, internalHtml.value, instance);
   emit('TextChanged');
 };
 
@@ -592,13 +599,13 @@ const onCompositionStart = () => emit('TextCompositionStarted');
 const onCompositionUpdate = () => emit('TextCompositionChanged');
 const onCompositionEnd = () => emit('TextCompositionEnded');
 
-watch(() => props.Text, (value) => {
-  if (props.Html) return;
+watch(resolvedText, (value) => {
+  if (resolvedHtml.value) return;
   internalHtml.value = escapeText(value ?? '');
   syncDom();
 });
 
-watch(() => props.Html, (value) => {
+watch(resolvedHtml, (value) => {
   internalHtml.value = value ?? '';
   syncDom();
 });
