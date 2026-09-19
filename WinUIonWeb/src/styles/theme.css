@@ -704,7 +704,9 @@ html, body, #app {
   font-weight: normal;
 }
 
-html.theme-light {
+html.theme-light,
+.example-theme-wrapper.theme-light,
+.win-theme-scope.theme-light {
   --app-bg: #F3F3F3;
   --layer-default: rgba(255, 255, 255, 0.50);
   --dialog-background: #FCFCFC;
@@ -850,7 +852,9 @@ html.theme-light {
   --ToolTipBackgroundBrush: var(--AcrylicInAppFillColorDefaultBrush);
 }
 
-html.theme-dark {
+html.theme-dark,
+.example-theme-wrapper.theme-dark,
+.win-theme-scope.theme-dark {
   --app-bg: #202020;
   --layer-default: rgba(58, 58, 58, 0.30);
   --dialog-background: #2C2C2C;

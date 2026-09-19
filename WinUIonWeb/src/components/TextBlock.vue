@@ -46,7 +46,7 @@ const props = defineProps({
   Foreground: { type: String, default: '' },
   HorizontalTextAlignment: { type: String, default: '' },
   IsColorFontEnabled: { type: Boolean, default: true },
-  IsTextSelectionEnabled: { type: Boolean, default: false },
+  IsTextSelectionEnabled: { type: [Boolean, String], default: false },
   IsTextScaleFactorEnabled: { type: Boolean, default: true },
   LineHeight: { type: [String, Number], default: '' },
   LineStackingStrategy: { type: String, default: '' },
@@ -61,12 +61,22 @@ const props = defineProps({
   TextLineBounds: { type: String, default: '' },
   TextReadingOrder: { type: String, default: '' },
   TextTrimming: { type: String, default: '' },
-  TextWrapping: { type: String, default: '' }
+  TextWrapping: { type: String, default: '' },
+  Width: { type: [String, Number], default: '' },
+  Height: { type: [String, Number], default: '' },
+  MinWidth: { type: [String, Number], default: '' },
+  MinHeight: { type: [String, Number], default: '' },
+  MaxWidth: { type: [String, Number], default: '' },
+  MaxHeight: { type: [String, Number], default: '' },
+  HorizontalAlignment: { type: String, default: '' },
+  VerticalAlignment: { type: String, default: '' },
+  Opacity: { type: [String, Number], default: '' }
 });
 
 const attrs = useAttrs();
 const instance = getCurrentInstance();
 const resolvedText = computed(() => resolveXamlValue(props.Text, instance));
+const resolvedIsTextSelectionEnabled = computed(() => resolveXamlValue(props.IsTextSelectionEnabled, instance) === true);
 const rootRef = ref(null);
 const contextMenuOpen = ref(false);
 const contextMenuAnchor = ref(null);
@@ -143,6 +153,24 @@ const overflowWrap = computed(() => {
 const textBlockStyle = computed(() => {
   const style = {};
 
+  for (const [property, value] of Object.entries({
+    width: props.Width,
+    height: props.Height,
+    minWidth: props.MinWidth,
+    minHeight: props.MinHeight,
+    maxWidth: props.MaxWidth,
+    maxHeight: props.MaxHeight
+  })) {
+    if (value !== '') style[property] = cssLength(value);
+  }
+  if (props.HorizontalAlignment) {
+    style.justifySelf = { Left: 'start', Center: 'center', Right: 'end', Stretch: 'stretch' }[props.HorizontalAlignment];
+  }
+  if (props.VerticalAlignment) {
+    style.alignSelf = { Top: 'start', Center: 'center', Bottom: 'end', Stretch: 'stretch' }[props.VerticalAlignment];
+  }
+  if (props.Opacity !== '') style.opacity = Number(props.Opacity);
+
   if (props.CharacterSpacing !== '') style.letterSpacing = `${Number(props.CharacterSpacing) / 1000}em`;
   if (props.FontFamily) style.fontFamily = props.FontFamily;
   if (props.FontSize !== '') style.fontSize = cssLength(props.FontSize);
@@ -164,7 +192,7 @@ const textBlockStyle = computed(() => {
   if (textWrapping.value) style.whiteSpace = textWrapping.value;
   if (overflowWrap.value) style.overflowWrap = overflowWrap.value;
 
-  if (props.IsTextSelectionEnabled) {
+  if (resolvedIsTextSelectionEnabled.value) {
     style.userSelect = 'text';
     style.cursor = 'text';
   }
@@ -172,7 +200,26 @@ const textBlockStyle = computed(() => {
   if (props.TextTrimming && props.TextTrimming !== 'None') {
     style.overflow = 'hidden';
     style.textOverflow = 'ellipsis';
-    style.whiteSpace = 'nowrap';
+    const wraps = props.TextWrapping === 'Wrap' || props.TextWrapping === 'WrapWholeWords';
+    if (!wraps) {
+      style.whiteSpace = 'nowrap';
+    } else if (props.MaxLines === '') {
+      const maxHeight = Number.parseFloat(String(props.MaxHeight));
+      const explicitLineHeight = Number.parseFloat(String(props.LineHeight));
+      const lineHeight = Number.isFinite(explicitLineHeight) && explicitLineHeight > 0
+        ? explicitLineHeight
+        : props.Style.includes('CaptionTextBlockStyle') ? 16
+          : props.Style.includes('BodyLargeTextBlockStyle') || props.Style.includes('BodyLargeStrongTextBlockStyle') ? 24
+            : props.Style.includes('SubtitleTextBlockStyle') ? 28
+              : props.Style.includes('TitleTextBlockStyle') ? 36
+                : props.Style.includes('TitleLargeTextBlockStyle') ? 52
+                  : props.Style.includes('DisplayTextBlockStyle') ? 92 : 20;
+      if (Number.isFinite(maxHeight) && maxHeight > 0) {
+        style.display = '-webkit-box';
+        style.WebkitLineClamp = String(Math.max(1, Math.floor(maxHeight / lineHeight)));
+        style.WebkitBoxOrient = 'vertical';
+      }
+    }
   }
 
   if (props.MaxLines !== '') {
@@ -186,11 +233,21 @@ const textBlockStyle = computed(() => {
 });
 
 const styleClass = computed(() => ({
-  CustomTextBlockStyle: props.Style.includes('CustomTextBlockStyle')
+  CustomTextBlockStyle: props.Style.includes('CustomTextBlockStyle'),
+  BaseTextBlockStyle: props.Style.includes('BaseTextBlockStyle'),
+  CaptionTextBlockStyle: props.Style.includes('CaptionTextBlockStyle'),
+  BodyTextBlockStyle: props.Style.includes('BodyTextBlockStyle'),
+  BodyStrongTextBlockStyle: props.Style.includes('BodyStrongTextBlockStyle'),
+  BodyLargeTextBlockStyle: props.Style.includes('BodyLargeTextBlockStyle'),
+  BodyLargeStrongTextBlockStyle: props.Style.includes('BodyLargeStrongTextBlockStyle'),
+  SubtitleTextBlockStyle: props.Style.includes('SubtitleTextBlockStyle'),
+  TitleTextBlockStyle: props.Style.includes('TitleTextBlockStyle'),
+  TitleLargeTextBlockStyle: props.Style.includes('TitleLargeTextBlockStyle'),
+  DisplayTextBlockStyle: props.Style.includes('DisplayTextBlockStyle')
 }));
 
 const onSelectStart = (event) => {
-  if (!props.IsTextSelectionEnabled) {
+  if (!resolvedIsTextSelectionEnabled.value) {
     event.preventDefault();
   }
 };
@@ -219,7 +276,7 @@ const onCopyingToClipboard = (event) => {
 };
 
 const onContextMenu = (event) => {
-  if (!props.IsTextSelectionEnabled) return;
+  if (!resolvedIsTextSelectionEnabled.value) return;
 
   event.preventDefault();
   contextMenuOpen.value = false;
@@ -294,6 +351,61 @@ onBeforeUnmount(() => {
 .win-text-block.CustomTextBlockStyle {
   font-family: 'Comic Sans MS';
   font-style: italic;
+}
+
+.win-text-block.BaseTextBlockStyle,
+.win-text-block.BodyStrongTextBlockStyle {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.win-text-block.CaptionTextBlockStyle {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.win-text-block.BodyTextBlockStyle {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.win-text-block.BodyLargeTextBlockStyle {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.win-text-block.BodyLargeStrongTextBlockStyle {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.win-text-block.SubtitleTextBlockStyle {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.win-text-block.TitleTextBlockStyle {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 36px;
+}
+
+.win-text-block.TitleLargeTextBlockStyle {
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 52px;
+}
+
+.win-text-block.DisplayTextBlockStyle {
+  font-size: 68px;
+  font-weight: 600;
+  line-height: 92px;
 }
 
 .win-text-block::selection {

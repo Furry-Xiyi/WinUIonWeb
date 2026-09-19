@@ -17,7 +17,7 @@ const props = defineProps({
   BorderBrush: { type: String, default: '' }, BorderThickness: { type: [String, Number], default: '' },
   CornerRadius: { type: [String, Number], default: '' }, Padding: { type: [String, Number], default: '' },
   Margin: { type: [String, Number], default: '' }, HorizontalAlignment: { type: String, default: '' },
-  VerticalAlignment: { type: String, default: '' }
+  VerticalAlignment: { type: String, default: '' }, Visibility: { type: String, default: 'Visible' }
 })
 const root = ref<HTMLElement | null>(null)
 const rootStyle = computed(() => {
@@ -38,6 +38,8 @@ const rootStyle = computed(() => {
   if (props.Margin !== '') style.margin = xamlThickness(props.Margin)
   if (props.HorizontalAlignment) style.justifySelf = alignment(props.HorizontalAlignment, 'horizontal')
   if (props.VerticalAlignment) style.alignSelf = alignment(props.VerticalAlignment, 'vertical')
+  if (props.Visibility === 'Collapsed') style.display = 'none'
+  else if (props.Visibility === 'Hidden') style.visibility = 'hidden'
   return style
 })
 useLayoutObserver(root, () => { if (root.value) applyStackChildren(root.value, props.Orientation) })

@@ -1,5 +1,5 @@
 <template>
-  <div class="win-grid-view" ref="containerRef"
+    <div class="win-grid-view" ref="containerRef" :style="rootStyle"
        @dragover.prevent="onContainerDragOver"
        @drop="onContainerDrop"
        @dragleave="onContainerDragLeave">
@@ -18,22 +18,21 @@
           </slot>
           <span class="win-grid-group-divider" aria-hidden="true"></span>
         </button>
-        <div class="win-grid-view-inner win-grid-group-items">
+        <div class="win-grid-view-inner win-grid-group-items" :style="itemsPanelStyle">
           <div
             v-for="(item, itemIndex) in getGroupItems(group)"
             :key="'group-' + groupIndex + '-' + getItemKey(item, itemIndex)"
             class="win-grid-item"
+            :style="itemStyle"
             :class="{ selected: isSelected(item), clickEnabled: isItemClickEnabled }"
             @click="onItemClick($event, item, itemIndex)">
-            <div class="grid-item-inner">
-              <slot name="item" :item="item" :index="itemIndex" :group="group"></slot>
-            </div>
+            <div class="grid-item-inner"><component :is="itemComponent(item, itemIndex, group)" /></div>
           </div>
         </div>
       </section>
     </div>
 
-    <TransitionGroup v-else name="grid-flip" tag="div" class="win-grid-view-inner" ref="innerRef">
+    <div v-else class="win-grid-view-inner" ref="innerRef" :style="itemsPanelStyle">
       <div v-for="entry in flatList" :key="entry.key"
            :class="entry.type === 'placeholder' ? 'win-grid-drop-placeholder' : {
              'win-grid-item': true,
@@ -42,7 +41,7 @@
              'drag-shrink': isDragging && !dragIndices.includes(entry.index),
              'dragging-source': isDragging && dragIndices.includes(entry.index)
            }"
-           :style="entry.type === 'placeholder' ? { width: dragItemWidth + 'px', height: dragItemHeight + 'px' } : undefined"
+           :style="entry.type === 'placeholder' ? { ...itemStyle, width: dragItemWidth + 'px', height: dragItemHeight + 'px' } : itemStyle"
            :draggable="entry.type === 'item' ? canDragItems : false"
            @click="entry.type === 'item' ? onItemClick($event, entry.item, entry.index) : null"
            @dragstart="entry.type === 'item' ? onDragStart($event, entry.index) : null"
@@ -54,9 +53,7 @@
             <CheckBox :modelValue="isSelected(entry.item)" @update:modelValue="onCheckboxToggle($event, entry.item)" />
           </div>
 
-          <div class="grid-item-inner">
-            <slot name="item" :item="entry.item" :index="entry.index"></slot>
-          </div>
+          <div class="grid-item-inner"><component :is="itemComponent(entry.item, entry.index)" /></div>
 
           <div v-if="isDragging && entry.index === dragOriginIndex && dragIndices.length > 1"
                class="drag-count-badge">
@@ -64,34 +61,56 @@
           </div>
         </template>
       </div>
-    </TransitionGroup>
+    </div>
   </div>
 </template>
+
+<script lang="ts">
+import { CollectionItemContainerStyle, CollectionItemTemplate, CollectionItemTemplateSelector, CollectionItemsPanel } from './CollectionProperties'
+
+export default {
+  ItemTemplate: CollectionItemTemplate,
+  ItemTemplateSelector: CollectionItemTemplateSelector,
+  ItemsPanel: CollectionItemsPanel,
+  ItemContainerStyle: CollectionItemContainerStyle
+}
+</script>
 
 <script setup lang="ts">
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck Legacy JavaScript implementation; public casing is preserved for WinUI compatibility.
-import { ref, computed, nextTick, useSlots } from 'vue';
+import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, nextTick, ref, shallowRef, useAttrs, useSlots } from 'vue';
 import CheckBox from './CheckBox.vue';
+import { getCollectionProperty, getVNodeChildren } from './CollectionProperties';
+import { xamlResourceDictionaryKey } from './Page.vue';
+import { materializeXamlVNode } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
 
 const props = defineProps({
-  ItemsSource: { type: Array, default: null },
-  IsItemClickEnabled: { type: Boolean, default: undefined },
-  CanDragItems: { type: Boolean, default: undefined },
-  CanReorderItems: { type: Boolean, default: undefined },
-  AllowDrop: { type: Boolean, default: undefined },
+  ItemsSource: { type: [String, Array, Object], default: null },
+  IsItemClickEnabled: { type: [Boolean, String], default: undefined },
+  CanDragItems: { type: [Boolean, String], default: undefined },
+  CanReorderItems: { type: [Boolean, String], default: undefined },
+  AllowDrop: { type: [Boolean, String], default: undefined },
+  FlowDirection: { type: String, default: 'LeftToRight' },
   SelectionMode: { type: String, default: undefined },
   SelectedItems: { type: Array, default: null },
-  items: { type: Array, default: () => [] },
-  isItemClickEnabled: { type: Boolean, default: true },
-  canDragItems: { type: Boolean, default: false },
-  canReorderItems: { type: Boolean, default: false },
-  allowDrop: { type: Boolean, default: false },
-  selectionMode: { type: String, default: 'Single' },
-  selectedItems: { type: Array, default: () => [] }
+  ItemTemplate: { type: [String, Object], default: '' },
+  Width: { type: [String, Number], default: '' },
+  Height: { type: [String, Number], default: '' },
+  MinWidth: { type: [String, Number], default: '' },
+  MinHeight: { type: [String, Number], default: '' },
+  MaxWidth: { type: [String, Number], default: '' },
+  MaxHeight: { type: [String, Number], default: '' },
+  Margin: { type: [String, Number], default: '' },
+  Padding: { type: [String, Number], default: '' },
+  Background: { type: String, default: '' },
+  BorderBrush: { type: String, default: '' },
+  BorderThickness: { type: [String, Number], default: '' },
+  CornerRadius: { type: [String, Number], default: '' },
 });
 
-const emit = defineEmits(['ItemClick', 'SelectionChanged', 'DragItemsStarting', 'DragItemsCompleted', 'itemClick', 'selectionChanged', 'update:SelectedItems', 'update:selectedItems', 'reorder']);
+const emit = defineEmits(['ItemClick', 'SelectionChanged', 'DragItemsStarting', 'DragItemsCompleted', 'update:SelectedItems', 'reorder']);
 
 const containerRef = ref(null);
 const innerRef = ref(null);
@@ -107,20 +126,176 @@ let cachedRects = [];
 const groupElements = new Map();
 
 const slots = useSlots();
-const items = computed(() => props.ItemsSource ?? props.items);
+const attrs = useAttrs();
+const instance = getCurrentInstance();
+const slotNodes = shallowRef(slots.default?.() ?? []);
+const flowDirectionStyle = computed(() => resolveXamlValue(props.FlowDirection, instance) === 'RightToLeft' ? 'rtl' : 'ltr');
+const pageResources = inject(xamlResourceDictionaryKey, null);
+const directChildren = (node) => {
+  if (!node) return [];
+  if (Array.isArray(node.children)) return node.children;
+  if (node.children && typeof node.children === 'object') {
+    const slot = node.children.default;
+    return typeof slot === 'function' ? slot() : [];
+  }
+  return [];
+};
+const typeName = (node) => {
+  const type = node?.type;
+  return typeof type === 'string' ? type : type?.name || type?.__name || '';
+};
+const flattenTemplateNodes = (nodes) => nodes.flatMap((node) => {
+  if (!node) return [];
+  const name = typeName(node);
+  // ItemTemplateSelector is a structural XAML node.  Unwrap it while keeping
+  // each keyed DataTemplate intact so the selected template can be materialized
+  // for one item without rendering all selector branches.
+  return node.type === Fragment || /DataTemplateSelector$/i.test(name)
+    ? flattenTemplateNodes(directChildren(node))
+    : [node];
+});
+const templateKey = (node) => {
+  const props = node?.props ?? {};
+  const key = props['x:Key'] ?? props['x:key'] ?? props.Key ?? props.key;
+  return typeof key === 'string' ? key : '';
+};
+const selectedTemplateKey = computed(() => {
+  const value = resolveXamlValue(props.ItemTemplate, instance);
+  if (typeof value !== 'string') return '';
+  const resource = value.match(/^\{\s*StaticResource\s+([^\s}]+)\s*\}$/i);
+  if (resource) return resource[1];
+  // Older normalized VNodes may have materialized this marker as a CSS var.
+  const cssVariable = value.match(/^var\(--([^,)]+)\)$/);
+  return cssVariable?.[1] ?? value;
+});
+const itemTemplateNodes = computed(() => {
+  const key = selectedTemplateKey.value;
+  if (key && pageResources?.[key]) return getVNodeChildren(pageResources[key]);
+  for (const node of slotNodes.value) {
+    const property = getCollectionProperty(node);
+    if (property !== 'itemTemplate' && property !== 'itemTemplateSelector') continue;
+    const candidates = flattenTemplateNodes(directChildren(node));
+    const templates = candidates.filter((candidate) => /DataTemplate$/i.test(typeName(candidate)));
+    if (templates.length) {
+      const selected = key ? templates.find((candidate) => templateKey(candidate) === key) : templates[0];
+      return getVNodeChildren(selected ?? templates[0]);
+    }
+    return getVNodeChildren(node);
+  }
+  return [];
+});
+const itemContainerStyle = computed(() => {
+  const property = slotNodes.value.find((node) => getCollectionProperty(node) === 'itemContainerStyle');
+  const styleNode = property ? getVNodeChildren(property)[0] : null;
+  if (!styleNode) return undefined;
+  const result = {};
+  for (const setter of getVNodeChildren(styleNode)) {
+    const propertyName = setter?.props?.Property;
+    if (!propertyName) continue;
+    const value = resolveXamlValue(setter?.props?.Value, instance);
+    if (value === undefined || value === null) continue;
+    if (propertyName === 'Margin') result.margin = xamlThickness(value);
+    else if (propertyName === 'Padding') result.padding = xamlThickness(value);
+    else if (propertyName === 'Width') result.width = cssLength(value);
+    else if (propertyName === 'Height') result.height = cssLength(value);
+    else if (propertyName === 'MinWidth') result.minWidth = cssLength(value);
+    else if (propertyName === 'MinHeight') result.minHeight = cssLength(value);
+    else if (propertyName === 'Background') result.background = String(value);
+    else if (propertyName === 'BorderBrush') result.borderColor = String(value);
+    else if (propertyName === 'BorderThickness') { result.borderWidth = xamlThickness(value); result.borderStyle = 'solid'; }
+    else if (propertyName === 'CornerRadius') result.borderRadius = cssLength(value);
+  }
+  return result;
+});
+const itemStyle = computed(() => ({ margin: '0 4px 4px 0', ...itemContainerStyle.value }));
+const itemsPanelStyle = computed(() => {
+  const panelElement = slotNodes.value.find((node) => getCollectionProperty(node) === 'itemsPanel');
+  const panel = panelElement ? getVNodeChildren(panelElement)[0] : null;
+  const maximum = Number(resolveXamlValue(panel?.props?.MaximumRowsOrColumns, instance));
+  const resolvedMargin = itemContainerStyle.value?.margin;
+  const orientation = resolveXamlValue(panel?.props?.Orientation, instance);
+  const style = {};
+  if (resolvedMargin) {
+    const values = String(resolvedMargin).split(/\s+/).map((value) => Number.parseFloat(value) || 0);
+    style.columnGap = `${values.length === 1 ? values[0] * 2 : values[1] + values[3]}px`;
+    style.rowGap = `${values.length === 1 ? values[0] * 2 : values[0] + values[2]}px`;
+  }
+  if (maximum > 0) {
+    style.display = 'grid';
+    style.gridAutoRows = 'max-content';
+    style.gridAutoFlow = orientation === 'Vertical' ? 'column' : 'row';
+    if (orientation === 'Vertical') style.gridTemplateRows = `repeat(${maximum}, max-content)`;
+    else style.gridTemplateColumns = `repeat(${maximum}, max-content)`;
+  } else {
+    style.gridTemplateColumns = 'repeat(auto-fill, max-content)';
+  }
+  return style;
+});
+const cssLength = (value) => {
+  if (value === '' || value === null || value === undefined) return undefined;
+  if (typeof value === 'number' || /^-?\d+(?:\.\d+)?$/.test(String(value).trim())) return `${value}px`;
+  return String(value);
+};
+const xamlThickness = (value) => {
+  if (value === '' || value === null || value === undefined) return undefined;
+  const parts = String(value).split(',').map((part) => cssLength(part.trim()));
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
+  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
+  return String(value);
+};
+const rootStyle = computed(() => ({
+  width: cssLength(props.Width), height: cssLength(props.Height),
+  minWidth: cssLength(props.MinWidth), minHeight: cssLength(props.MinHeight),
+  maxWidth: cssLength(props.MaxWidth), maxHeight: cssLength(props.MaxHeight),
+  margin: xamlThickness(props.Margin), padding: xamlThickness(props.Padding),
+  background: resolveXamlValue(props.Background, instance) || undefined,
+  borderColor: resolveXamlValue(props.BorderBrush, instance) || undefined,
+  borderWidth: xamlThickness(props.BorderThickness),
+  borderStyle: props.BorderBrush || props.BorderThickness !== '' ? 'solid' : undefined,
+  borderRadius: cssLength(props.CornerRadius)
+}));
+const items = computed(() => {
+  const source = resolveXamlValue(props.ItemsSource, instance);
+  return Array.isArray(source) ? source : [];
+});
 const isGrouped = computed(() => Boolean(slots.groupHeader) && items.value.some(item => Array.isArray(item?.Items) || Array.isArray(item?.items)));
-const isItemClickEnabled = computed(() => props.IsItemClickEnabled ?? props.isItemClickEnabled);
-const canDragItems = computed(() => props.CanDragItems ?? props.canDragItems);
-const canReorderItems = computed(() => props.CanReorderItems ?? props.canReorderItems);
-const allowDrop = computed(() => props.AllowDrop ?? props.allowDrop);
-const selectionMode = computed(() => props.SelectionMode ?? props.selectionMode);
-const selectedItems = computed(() => props.SelectedItems ?? props.selectedItems);
+const isItemClickEnabled = computed(() => resolveXamlValue(props.IsItemClickEnabled, instance) === true);
+const canDragItems = computed(() => resolveXamlValue(props.CanDragItems, instance) === true);
+const canReorderItems = computed(() => resolveXamlValue(props.CanReorderItems, instance) === true);
+const allowDrop = computed(() => resolveXamlValue(props.AllowDrop, instance) === true);
+const selectionMode = computed(() => resolveXamlValue(props.SelectionMode, instance) ?? 'Single');
+const internalSelectedItems = ref([]);
+const selectedItems = computed(() => {
+  const bound = resolveXamlValue(props.SelectedItems, instance);
+  return Array.isArray(bound) ? bound : internalSelectedItems.value;
+});
 
 const getItemKey = (item, index) => item.id || item.title || item.Title || index;
 const getGroupItems = (group) => group?.Items ?? group?.items ?? [];
 const getGroupKey = (group, index) => group?.id || group?.key || group?.title || group?.Title || index;
 const getGroupTitle = (group) => group?.title || group?.Title || group?.key || '';
 const isSelected = (item) => selectedItems.value.includes(item);
+
+const itemComponentCache = new Map();
+const itemComponent = (item, index, group) => {
+  const key = item && typeof item === 'object' ? item : `primitive:${group ? getGroupKey(group, 0) : ''}:${index}:${String(item)}`;
+  let component = itemComponentCache.get(key);
+  if (!component) {
+    component = defineComponent({
+      name: 'GridViewItemTemplate',
+      setup() {
+        return () => {
+          if (itemTemplateNodes.value.length) return h(Fragment, materializeXamlVNode(itemTemplateNodes.value, item, instance));
+          const slot = slots.item;
+          return slot ? h(Fragment, slot({ item, index, group })) : h(Fragment, [h('span', String(item ?? ''))]);
+        };
+      }
+    });
+    itemComponentCache.set(key, component);
+  }
+  return component;
+};
 
 const setGroupElement = (group, element) => {
   if (element) groupElements.set(group, element);
@@ -155,10 +330,16 @@ const onGroupHeaderClick = (event, group) => {
 };
 
 const emitSelection = (newSel) => {
+  const previous = selectedItems.value;
+  internalSelectedItems.value = [...newSel];
   emit('update:SelectedItems', newSel);
-  emit('update:selectedItems', newSel);
-  emit('SelectionChanged', { AddedItems: newSel, RemovedItems: [], SelectedItems: newSel });
-  emit('selectionChanged', newSel);
+  const args = {
+    AddedItems: newSel.filter(item => !previous.includes(item)),
+    RemovedItems: previous.filter(item => !newSel.includes(item)),
+    SelectedItems: newSel
+  };
+  emit('SelectionChanged', args);
+  resolveXamlHandler(attrs.SelectionChanged, instance)?.(args);
 };
 
 const onCheckboxToggle = (val, item) => {
@@ -172,15 +353,17 @@ const onCheckboxToggle = (val, item) => {
 const onItemClick = (e, item, index) => {
   if (selectionMode.value === 'None') {
     if (isItemClickEnabled.value) {
-      emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
-      emit('itemClick', { ClickedItem: item, OriginalSource: e.target });
+      const args = { ClickedItem: item, OriginalSource: e.target };
+      emit('ItemClick', args);
+      resolveXamlHandler(attrs.ItemClick, instance)?.(args);
     }
     return;
   }
   if (selectionMode.value === 'Single') {
     if (isItemClickEnabled.value) {
-      emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
-      emit('itemClick', { ClickedItem: item, OriginalSource: e.target });
+      const args = { ClickedItem: item, OriginalSource: e.target };
+      emit('ItemClick', args);
+      resolveXamlHandler(attrs.ItemClick, instance)?.(args);
     }
     emitSelection([item]);
     anchorIndex = index;
@@ -193,8 +376,9 @@ const onItemClick = (e, item, index) => {
     else newSel.push(item);
     emitSelection(newSel);
     if (isItemClickEnabled.value) {
-      emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
-      emit('itemClick', { ClickedItem: item, OriginalSource: e.target });
+      const args = { ClickedItem: item, OriginalSource: e.target };
+      emit('ItemClick', args);
+      resolveXamlHandler(attrs.ItemClick, instance)?.(args);
     }
     return;
   }
@@ -215,8 +399,9 @@ const onItemClick = (e, item, index) => {
     }
     emitSelection(newSel);
     if (isItemClickEnabled.value) {
-      emit('ItemClick', { ClickedItem: item, OriginalSource: e.target });
-      emit('itemClick', { ClickedItem: item, OriginalSource: e.target });
+      const args = { ClickedItem: item, OriginalSource: e.target };
+      emit('ItemClick', args);
+      resolveXamlHandler(attrs.ItemClick, instance)?.(args);
     }
   }
 };
@@ -425,6 +610,7 @@ defineExpose({ ScrollIntoGroup });
   .win-grid-view {
     display: flex;
     flex-direction: column;
+    direction: v-bind(flowDirectionStyle);
   }
 
   .win-grid-groups,
@@ -475,44 +661,61 @@ defineExpose({ ScrollIntoGroup });
   }
 
   .win-grid-view-inner {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, max-content);
+    grid-auto-rows: max-content;
+    grid-auto-flow: row;
+    column-gap: 4px;
+    row-gap: 4px;
+    align-content: start;
     position: relative;
   }
 
   .win-grid-item {
     position: relative;
-    border-radius: 4px;
+    border-radius: var(--GridViewItemCornerRadius, 4px);
     overflow: hidden;
-    border: 2px solid transparent;
+    border: 0 solid transparent;
+    margin: 0;
+    min-width: var(--GridViewItemMinWidth, 44px);
+    min-height: var(--GridViewItemMinHeight, 44px);
+    background: var(--GridViewItemBackground, var(--SubtleFillColorTransparentBrush, transparent));
     box-sizing: border-box;
     cursor: default;
-    transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1), filter 0.2s ease, opacity 0.2s ease, border-color 0.1s ease;
+    outline: none;
+    transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1), filter 0.2s ease, opacity 0.2s ease, outline-color 0.1s ease;
   }
 
     .win-grid-item.clickEnabled {
       cursor: pointer;
     }
 
-      .win-grid-item.clickEnabled:hover {
-        border-color: var(--stroke-divider, rgba(150, 150, 150, 0.4));
+      .win-grid-item:hover {
+        outline: 1px solid var(--GridViewItemPointerOverBorderBrush, var(--ControlStrokeColorOnAccentTertiaryBrush, rgba(150, 150, 150, 0.4)));
+        outline-offset: -1px;
+        background: var(--GridViewItemBackgroundPointerOver, var(--subtle-secondary));
       }
 
-      .win-grid-item.clickEnabled:active {
-        border-color: transparent;
+  .win-grid-item:not(.clickEnabled) { cursor: default; }
+
+      .win-grid-item:active {
+        background: var(--GridViewItemBackgroundPressed, var(--subtle-tertiary));
+        outline: 0;
       }
 
     .win-grid-item.selected {
-      border-color: var(--accent-base);
+      outline: var(--GridViewItemSelectedBorderThickness, 2px) solid var(--GridViewItemSelectedBorderBrush, var(--AccentFillColorDefaultBrush, var(--accent-base)));
+      outline-offset: -2px;
+      background: var(--GridViewItemBackgroundSelected, var(--subtle-tertiary));
     }
 
       .win-grid-item.selected:hover {
-        border-color: var(--accent-base);
+        outline-color: var(--GridViewItemSelectedPointerOverBorderBrush, var(--AccentFillColorSecondaryBrush, var(--accent-base)));
       }
 
       .win-grid-item.selected:active {
-        border-color: transparent;
+        background: var(--GridViewItemBackgroundSelectedPressed, var(--subtle-secondary));
+        outline: 0;
       }
 
     .win-grid-item.dragging-source {
@@ -561,8 +764,13 @@ defineExpose({ ScrollIntoGroup });
   }
 
   .grid-item-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
+    min-width: 0;
+    min-height: 0;
   }
 
   .grid-checkbox {

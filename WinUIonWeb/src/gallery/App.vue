@@ -590,8 +590,14 @@ const onWindowKeydown = (event) => {
 const onWindowResize = () => {
   void nextTick(() => {
     const titleBarElement = titleBarRef.value?.$el;
-    const searchElement = titleBarElement?.querySelector('.gallery-titlebar-search');
-    const searchVisible = searchElement && getComputedStyle(searchElement).display !== 'none';
+    // During route transitions a component ref can briefly expose a comment
+    // node (or another Vue proxy) instead of the title-bar element. Restrict
+    // DOM access to an actual Element so a resize cannot abort rendering.
+    const searchElement = typeof Element !== 'undefined' && titleBarElement instanceof Element
+      ? titleBarElement.querySelector('.gallery-titlebar-search')
+      : null;
+    const searchVisible = searchElement instanceof Element
+      && getComputedStyle(searchElement).display !== 'none';
     if ((!titlebarNarrow.value && !titlebarCompact.value) || searchVisible) {
       compactSearchOpen.value = false;
     }

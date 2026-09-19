@@ -21,11 +21,12 @@
       :src="sourceUri"
       :alt="automationName"
       :style="imageStyle"
+      draggable="false"
       decoding="async"
       @load="onImageOpened"
       @error="onImageFailed" />
     <div v-else class="win-image-nine-grid" :style="nineGridStyle" aria-hidden="true">
-      <img class="win-image-nine-grid-image" :src="sourceUri" alt="" />
+      <img class="win-image-nine-grid-image" :src="sourceUri" alt="" draggable="false" />
     </div>
     <slot />
   </div>
@@ -41,6 +42,10 @@ const props = defineProps({
   NineGrid: { type: [String, Number], default: '' },
   Width: { type: [String, Number], default: '' },
   Height: { type: [String, Number], default: '' },
+  MinWidth: { type: [String, Number], default: '' },
+  MinHeight: { type: [String, Number], default: '' },
+  MaxWidth: { type: [String, Number], default: '' },
+  MaxHeight: { type: [String, Number], default: '' },
   HorizontalAlignment: { type: String, default: '' },
   VerticalAlignment: { type: String, default: '' },
   Margin: { type: [String, Number], default: '' },
@@ -67,6 +72,13 @@ const sourceConfig = computed(() => ({
   UriSource: typeof props.Source === 'object' ? props.Source.UriSource || '' : sourceUri.value,
   AutoPlay: typeof props.Source === 'object' ? props.Source.AutoPlay !== false : true
 }));
+
+const resolvedWidth = computed(() => resolveXamlValue(props.Width, instance));
+const resolvedHeight = computed(() => resolveXamlValue(props.Height, instance));
+const resolvedMinWidth = computed(() => resolveXamlValue(props.MinWidth, instance));
+const resolvedMinHeight = computed(() => resolveXamlValue(props.MinHeight, instance));
+const resolvedMaxWidth = computed(() => resolveXamlValue(props.MaxWidth, instance));
+const resolvedMaxHeight = computed(() => resolveXamlValue(props.MaxHeight, instance));
 
 const automationName = computed(() => {
   const value = attrs['AutomationProperties.Name'];
@@ -99,9 +111,16 @@ const nineGrid = computed(() => parseNineGrid.value?.map((value) => `${value}px`
 const nineGridSlice = computed(() => parseNineGrid.value?.join(' ') || '');
 
 const hostStyle = computed(() => ({
-  width: nineGrid.value ? cssLength(props.Width || props.Height) : cssLength(props.Width),
-  height: cssLength(props.Height),
-  margin: cssLength(props.Margin),
+  width: nineGrid.value
+    ? cssLength(resolvedWidth.value || resolvedHeight.value)
+    : cssLength(resolvedWidth.value),
+  height: cssLength(resolvedHeight.value)
+    || (String(props.Stretch || '').toLowerCase() === 'fill' ? cssLength(resolvedMaxHeight.value) : undefined),
+  minWidth: cssLength(resolvedMinWidth.value),
+  minHeight: cssLength(resolvedMinHeight.value),
+  maxWidth: cssLength(resolvedMaxWidth.value),
+  maxHeight: cssLength(resolvedMaxHeight.value),
+  margin: cssLength(resolveXamlValue(props.Margin, instance)),
   opacity: props.Opacity === '' ? undefined : Number(props.Opacity),
   alignSelf: alignment[props.HorizontalAlignment] || undefined
 }));
@@ -110,10 +129,12 @@ const stretchClass = computed(() => `stretch-${String(props.Stretch || 'Uniform'
 const isStretchNone = computed(() => String(props.Stretch || 'Uniform').toLowerCase() === 'none');
 
 const imageStyle = computed(() => ({
-  width: isStretchNone.value ? 'auto' : cssLength(props.Width) || 'auto',
-  height: isStretchNone.value ? 'auto' : cssLength(props.Height) || 'auto',
-  maxWidth: isStretchNone.value ? 'none' : props.Width || props.Height ? '100%' : undefined,
-  maxHeight: isStretchNone.value ? 'none' : props.Width || props.Height ? '100%' : undefined,
+  width: isStretchNone.value ? 'auto' : String(props.Stretch || '').toLowerCase() === 'fill' ? '100%' : cssLength(resolvedWidth.value) || 'auto',
+  height: isStretchNone.value ? 'auto' : String(props.Stretch || '').toLowerCase() === 'fill' ? '100%' : cssLength(resolvedHeight.value) || 'auto',
+  minWidth: isStretchNone.value ? 'auto' : cssLength(resolvedMinWidth.value),
+  minHeight: isStretchNone.value ? 'auto' : cssLength(resolvedMinHeight.value),
+  maxWidth: isStretchNone.value ? 'none' : cssLength(resolvedMaxWidth.value) || (resolvedWidth.value || resolvedHeight.value ? '100%' : undefined),
+  maxHeight: isStretchNone.value ? 'none' : cssLength(resolvedMaxHeight.value) || (resolvedWidth.value || resolvedHeight.value ? '100%' : undefined),
   objectPosition: 'center'
 }));
 
@@ -170,13 +191,16 @@ defineExpose({ Play, Stop, rootRef, imageRef, canvasRef });
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  overflow: visible;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
 }
 
 .win-image {
   display: block;
   flex: 0 0 auto;
   background: transparent;
+  -webkit-user-drag: none;
 }
 
 .win-image.stretch-none { object-fit: none; }
@@ -186,5 +210,5 @@ defineExpose({ Play, Stop, rootRef, imageRef, canvasRef });
 .win-image.is-hidden { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
 .win-image-host.has-nine-grid { display: block; }
 .win-image-nine-grid { position: relative; }
-.win-image-nine-grid-image { position: absolute; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; object-fit: fill; }
+.win-image-nine-grid-image { position: absolute; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; object-fit: fill; -webkit-user-drag: none; }
 </style>

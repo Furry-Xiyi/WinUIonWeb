@@ -1,9 +1,13 @@
-import { getCurrentInstance, isRef, type ComponentInternalInstance, type VNode } from 'vue'
+import { cloneVNode, Fragment, getCurrentInstance, h, isRef, type ComponentInternalInstance, type VNode } from 'vue'
 
 type Scope = Record<string, unknown>
 
 export const xamlScopeKey = Symbol('WinUIonWeb.xamlScope')
 export const xamlNameScopeKey = Symbol('WinUIonWeb.xamlNameScope')
+// Collection item templates provide their current data item through this
+// scope so structural flyouts can invoke handlers with the same DataContext
+// that WinUI supplies to a MenuFlyoutItem.
+export const xamlItemContextKey = Symbol('WinUIonWeb.xamlItemContext')
 
 // Internal Vue contexts can contain keys that are not valid JavaScript
 // parameter names (or are reserved words).  Exclude those keys before
@@ -15,14 +19,15 @@ const RESERVED_FUNCTION_PARAMETERS = new Set([
   'false', 'null', 'undefined'
 ])
 
-const eventNames = new Set([
+export const eventNames = new Set([
   'Click', 'Checked', 'Unchecked', 'Indeterminate', 'SelectionChanged',
   'Selected', 'Select', 'ValueChanged', 'TextChanged', 'TextSubmitted',
   'IsCheckedChanged', 'IsOnChanged', 'Toggled',
   'DropDownOpened', 'DropDownClosed', 'Opening', 'Opened', 'Closing', 'Closed',
   'Expanding', 'Expanded', 'Collapsing', 'Collapsed',
   'DateChanged', 'ColorChanged', 'QuerySubmitted', 'ItemClick', 'GettingFocus',
-  'KeyDown', 'PointerPressed', 'PointerReleased', 'Tapped', 'Loaded',
+  'KeyDown', 'PointerPressed', 'PointerReleased', 'Tapped', 'Loaded', 'ItemInvoked',
+  'DragItemsStarting', 'DragItemsCompleted', 'DragOver', 'Drop', 'RefreshRequested',
   'PrimaryButtonClick', 'SecondaryButtonClick', 'CloseButtonClick', 'ActionButtonClick'
 ])
 
@@ -39,6 +44,11 @@ const reactiveComponentNames = new Set([
   'Rating', 'Rectangle', 'RepeatButton', 'RichEditBox', 'RichTextBlock', 'Slider',
   'SplitButton', 'SymbolIcon', 'TeachingTip', 'TextBlock', 'TextBox', 'ToggleButton',
   'ToggleSplitButton', 'ToggleSwitch', 'ToolTip'
+  , 'FlipView', 'GridView', 'ItemsRepeater', 'ItemsView', 'ListView', 'PullToRefresh', 'RefreshContainer', 'RefreshVisualizer', 'TreeView'
+  // ItemsStackPanel is a structural ItemsPanel child. Collection controls
+  // read its dependency properties from the VNode and resolve bindings on
+  // each computed pass, so keep those expressions live as well.
+  , 'ItemsStackPanel'
 ])
 
 const componentName = (type: unknown) => {
@@ -139,9 +149,34 @@ const scopeFor = (instance: ComponentInternalInstance | null): Scope => {
 }
 
 const stripBinding = (value: string) => {
-  const match = value.match(/^\{(?:x:Bind|Binding)\s+([\s\S]*?)\}$/)
+  const match = value.match(/^\{(?:x:Bind|Binding)(?:\s+([\s\S]*?))?\}$/)
   if (!match) return value
-  return match[1].replace(/,\s*Mode\s*=\s*(?:OneWay|TwoWay|OneTime)\s*$/, '').trim()
+  return (match[1] ?? '').replace(/,\s*Mode\s*=\s*(?:OneWay|TwoWay|OneTime)\s*$/, '').trim()
+}
+
+const canonicalXamlProperty = (value: string) => {
+  const aliases: Record<string, string> = {
+    'ControlExample.example': 'ControlExample.Example',
+    'ControlExample.options': 'ControlExample.Options',
+    'ControlExample.output': 'ControlExample.Output',
+    'Expander.header': 'Expander.Header',
+    'Expander.content': 'Expander.Content',
+    'ItemsRepeater.itemTemplate': 'ItemsRepeater.ItemTemplate',
+    'ItemsRepeater.layout': 'ItemsRepeater.Layout',
+    'ItemsView.itemTemplate': 'ItemsView.ItemTemplate',
+    'ItemsView.layout': 'ItemsView.Layout',
+    'ListView.itemTemplate': 'ListView.ItemTemplate',
+    'ListView.groupHeaderTemplate': 'ListView.GroupHeaderTemplate',
+    'ListView.groupStyle': 'ListView.GroupStyle',
+    'GroupStyle.headerTemplate': 'GroupStyle.HeaderTemplate',
+    'GridView.itemTemplate': 'GridView.ItemTemplate',
+    'GridView.itemTemplateSelector': 'GridView.ItemTemplateSelector',
+    'FlipView.itemTemplate': 'FlipView.ItemTemplate',
+    'TreeView.itemTemplate': 'TreeView.ItemTemplate',
+    'RefreshContainer.visualizer': 'RefreshContainer.Visualizer',
+    'RefreshVisualizer.content': 'RefreshVisualizer.Content'
+  }
+  return aliases[value] ?? value
 }
 
 const resourceName = (value: string) => {
@@ -166,9 +201,9 @@ const resourceCssVariable = (name: string) => {
 }
 
 const bindingDetails = (value: string) => {
-  const match = value.match(/^\{(?:x:Bind|Binding)\s+([\s\S]*?)\}$/)
+  const match = value.match(/^\{(?:x:Bind|Binding)(?:\s+([\s\S]*?))?\}$/)
   if (!match) return { expression: value, twoWay: false }
-  const body = match[1]
+  const body = match[1] ?? ''
   return {
     expression: body.replace(/,\s*Mode\s*=\s*(?:OneWay|TwoWay|OneTime)\s*$/, '').trim(),
     twoWay: /,\s*Mode\s*=\s*TwoWay\s*$/i.test(body)
@@ -249,7 +284,7 @@ const isExpressionString = (value: string) => {
     || /^\$\{\s*t\s*\(/.test(trimmed)
 }
 
-export const resolveXamlValue = (value: unknown, instance: ComponentInternalInstance | null): unknown => {
+export const resolveXamlValue = (value: unknown, instance: ComponentInternalInstance | null, extraScope?: Scope): unknown => {
   if (typeof value !== 'string') return value
   if (value === 'True') return true
   if (value === 'False') return false
@@ -260,10 +295,15 @@ export const resolveXamlValue = (value: unknown, instance: ComponentInternalInst
   const directExpression = isExpressionString(trimmed)
     ? trimmed.replace(/^\$\{\s*/, '').replace(/\s*\}$/, '')
     : expression
+  if (!directExpression.trim() && extraScope && Object.prototype.hasOwnProperty.call(extraScope, 'item')) return extraScope.item
   if (directExpression === value && !value.includes('{') && !isExpressionString(value)) return value
   let resolved: unknown
   try {
-    resolved = resolvePath(directExpression, scopeFor(instance))
+    const scope = scopeFor(instance)
+    if (extraScope) {
+      for (const [key, scopedValue] of Object.entries(extraScope)) scope[key] = unwrap(scopedValue)
+    }
+    resolved = resolvePath(directExpression, scope)
   } catch {
     // A malformed or unavailable binding must not break rendering of the
     // containing page.  XAML treats an unresolved value as its default.
@@ -277,6 +317,91 @@ export const resolveXamlValue = (value: unknown, instance: ComponentInternalInst
   if (/^\{\s*(?:x:Bind|Binding)\b/.test(value) || isExpressionString(value)) return undefined
   return value
 }
+
+/**
+ * Materialize an XAML DataTemplate against the current item.  Vue's compiler
+ * keeps property-element children as VNodes, so the collection controls can
+ * render the same tree for every item while resolving `{x:Bind Property}` in
+ * the item's data context.
+ */
+export const materializeXamlVNode = (node: unknown, item: unknown, instance: ComponentInternalInstance | null): unknown => {
+  if (!node || typeof node !== 'object') return node
+  if (Array.isArray(node)) return node.map((child) => materializeXamlVNode(child, item, instance))
+  const vnode = node as VNode
+  const propertyName = typeof vnode.type === 'string' ? canonicalXamlProperty(vnode.type).split('.').pop()?.replace(/^[A-Z]/, (letter) => letter.toLowerCase()) : undefined
+  const collectionProperty = (vnode.type as { __collectionProperty?: string; __controlExampleProperty?: string } | undefined)?.__collectionProperty
+    ?? (vnode.type as { __controlExampleProperty?: string } | undefined)?.__controlExampleProperty
+    ?? propertyName
+  // normalizeXamlVNode may have visited a DataTemplate before the collection
+  // control had an item context. Keep the original XAML values alongside the
+  // normalized props so item bindings such as `{x:Bind MsgAlignment}` can be
+  // resolved when the template is materialized for its actual item.
+  const originalProps = xamlPropSources.get(vnode as object)
+  const props = vnode.props
+    ? { ...vnode.props }
+    : originalProps ? { ...originalProps } : undefined
+  if (props) {
+    // Layout components are normalized before a collection item exists, so
+    // their item bindings may have become undefined. Restore only those
+    // binding-valued keys; normalized event listeners and static attributes
+    // must remain intact.
+    if (originalProps) {
+      for (const [key, value] of Object.entries(originalProps)) {
+        if (typeof value !== 'string' || (!value.includes('{') && !isExpressionString(value))) continue
+        if (props[key] === undefined || props[key] === null) props[key] = value
+      }
+    }
+    const itemScope: Scope = { item, Item: item }
+    if (item && typeof item === 'object') Object.assign(itemScope, item as Record<string, unknown>)
+    // The ListView messaging sample binds the template Grid's alignment to
+    // `MsgAlignment`. A parent ControlExample can normalize that binding
+    // before a collection item exists, leaving an undefined prop on the
+    // cached VNode. Recover the official item-context value here so the Grid
+    // keeps its left/right placement when the DataTemplate is materialized.
+    if (componentName(vnode.type) === 'Grid'
+      && props.HorizontalAlignment === undefined
+      && item && typeof item === 'object'
+      && 'MsgAlignment' in item) {
+      props.HorizontalAlignment = (item as Record<string, unknown>).MsgAlignment
+    }
+    for (const [key, value] of Object.entries(props)) {
+      if (key === 'key' || key === 'ref' || key.startsWith('on')) continue
+      if (eventNames.has(key)) {
+        props[`on${key}`] = resolveXamlHandler(value, instance, { item, Item: item, ...(item && typeof item === 'object' ? item as Record<string, unknown> : {}) })
+        delete props[key]
+        continue
+      }
+      if (typeof value === 'string' && (value.includes('{') || isExpressionString(value))) {
+        props[key] = resolveXamlValue(value, instance, itemScope)
+      }
+    }
+  }
+  // A nested DataTemplate owns a new item data context. Resolve the nested
+  // collection control itself against the current item, but leave the
+  // ItemTemplate body untouched until that collection materializes its item.
+  if (collectionProperty === 'itemTemplate' || collectionProperty === 'groupHeaderTemplate') {
+    return cloneVNode(vnode, props, true)
+  }
+  let children = vnode.children
+  if (Array.isArray(children)) children = children.map((child) => materializeXamlVNode(child, item, instance)) as VNode['children']
+  else if (children && typeof children === 'object') {
+    const slots = { ...(children as Record<string, unknown>) }
+    for (const [name, slot] of Object.entries(slots)) {
+      if (typeof slot !== 'function') continue
+      slots[name] = (...args: unknown[]) => {
+        const result = (slot as (...args: unknown[]) => unknown)(...args)
+        return materializeXamlVNode(result, item, instance)
+      }
+    }
+    children = slots
+  }
+  const clone = cloneVNode(vnode, props, true)
+  clone.children = children
+  return clone
+}
+
+export const xamlTemplateComponent = (nodes: unknown[], item: unknown, instance: ComponentInternalInstance | null) =>
+  h(Fragment, (materializeXamlVNode(nodes, item, instance) as VNode[]) ?? [])
 
 const assignPath = (expression: string, value: unknown, instance: ComponentInternalInstance | null) => {
   const parts = splitPath(expression)
@@ -357,11 +482,12 @@ const evaluateHandler = (expression: string, scope: Scope, event: unknown) => {
   }
 }
 
-export const resolveXamlHandler = (value: unknown, instance: ComponentInternalInstance | null) => {
+export const resolveXamlHandler = (value: unknown, instance: ComponentInternalInstance | null, extraScope?: Scope) => {
   if (typeof value === 'function') return value
   if (typeof value !== 'string') return undefined
   const expression = stripBinding(value)
   const scope = scopeFor(instance)
+  if (extraScope) Object.assign(scope, extraScope)
   const assignment = expression.match(/^([A-Za-z_$][\w$]*)\s*=\s*\$event(?:\.([A-Za-z_$][\w$]*))?(?:\s*(===|!==|==|!=)\s*(['"]?[^\s'"]+['"]?))?$/)
   if (assignment) {
     return (event: unknown) => {
@@ -468,11 +594,26 @@ export const normalizeXamlVNode = (node: VNode, instance: ComponentInternalInsta
       // Vue component props keep the XAML expression so their computed
       // resolvers remain reactive to page state. Native nodes need the
       // current value, and resources are always materialized as CSS vars.
-      props[name] = typeof node.type === 'string'
-        || resourceName(value)
-        || !reactiveComponentNames.has(componentName(node.type))
-        ? resolved
-        : value
+      // ItemTemplate and GroupHeaderTemplate use StaticResource as an object
+      // lookup, not as a CSS brush. Preserve that XAML marker for collection
+      // controls so `<GridView ItemTemplate="{StaticResource ImageTemplate}" />`
+      // can resolve the actual DataTemplate from Page.Resources.
+      const collectionTemplateResource = resourceName(value)
+        && (name === 'ItemTemplate' || name === 'GroupHeaderTemplate')
+      // Collection property elements are structural markers. Their values
+      // are consumed by the owning collection control (for example
+      // ItemsStackPanel.AreStickyGroupHeadersEnabled), so keep the original
+      // binding expression instead of freezing it to the value seen while
+      // the page's VNode tree is normalized. The control resolves it against
+      // the live page scope on every computed pass.
+      const collectionPropertyNode = Boolean((node.type as { __collectionProperty?: string } | undefined)?.__collectionProperty)
+      props[name] = collectionPropertyNode
+        ? value
+        : typeof node.type === 'string'
+          || (resourceName(value) && !collectionTemplateResource)
+          || !reactiveComponentNames.has(componentName(node.type))
+          ? resolved
+          : value
       if (details.twoWay && !name.includes('.')) {
         props[`onUpdate:${name}`] = (next: unknown) => assignPath(details.expression, next, instance)
       }

@@ -365,3 +365,30 @@ FodyWeavers.xsd
 /WinUIonWeb/WinUIonWeb.esproj
 
 /ref
+
+# Local browser/debug and visual-QA artifacts. Keep these outside version
+# control so temporary inspection runs do not pollute the workspace root.
+/.edge-*/
+/.vite-*
+/.listview.diff
+/.theme-dark-listview.png
+/audit*.png
+/collection*.png
+/itemsview-current*.png
+/list-*.png
+/list-dom*.*
+/message-qa.png
+/ptr-*.png
+/pulltorefresh-*.png
+/cdp-*.py
+/tmp-cdp-*.py
+/tmp-grouped.txt
+/edge-*.log
+/edge-*.html
+/WinUIonWeb/group-*.png
+/WinUIonWeb/tmp-*.js
+/WinUIonWeb/vite-*.log
+/WinUIonWeb/vite-*.err.log
+/WinUIonWeb/.vite/
+/WinUIonWeb/dist/
+/WinUIonWeb/obj/

@@ -30,7 +30,8 @@ const props = defineProps({
   SelectedItem: { type: null, default: undefined },
   MaxColumns: { type: [Number, String], default: 1 },
   IsEnabled: { type: [Boolean, String], default: true },
-  Margin: { type: String, default: '' }
+  Margin: { type: String, default: '' },
+  DisplayMemberPath: { type: [String, Number], default: '' }
 });
 
 const emit = defineEmits(['update:SelectedIndex', 'update:SelectedItem', 'SelectionChanged']);
@@ -124,9 +125,12 @@ const localizedString = (value) => {
   }[String(value)];
   return key ? t(key) : String(value);
 };
+const GetPathValue = (item, path) => path ? path.split('.').reduce((value, key) => value?.[key], item) : item;
 const normalizedItems = computed(() => resolvedItemsSource.value.map((item) => {
   if (typeof item === 'string' || typeof item === 'number') return { Text: localizedString(item), Value: item };
-  return { ...item, Text: item.Text ?? item.Content ?? String(item), Value: item.Value ?? item };
+  const displayPath = resolveXamlValue(props.DisplayMemberPath, instance);
+  const display = displayPath ? GetPathValue(item, displayPath) : (item.Text ?? item.Content ?? item.label ?? item.Name ?? item.Value);
+  return { ...item, Text: display === undefined || display === null ? '' : String(display), Value: item.Value ?? item };
 }));
 // A OneWay XAML binding supplies the initial selection but does not make the
 // control read-only. Keep the local selection authoritative until the source

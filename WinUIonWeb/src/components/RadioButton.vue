@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, inject, provide, ref, useAttrs } from 'vue';
+import { computed, getCurrentInstance, inject, onMounted, provide, ref, useAttrs } from 'vue';
 import TextBlock from './TextBlock.vue';
 import { resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime';
 
@@ -52,6 +52,7 @@ const props = defineProps({
   IsChecked: { type: [Boolean, String], default: undefined },
   IsEnabled: { type: [Boolean, String], default: true },
   GroupName: { type: String, default: '' },
+  Tag: { type: [String, Number, Boolean, Object], default: undefined },
   name: { type: String, default: '' },
   Header: { type: String, default: '' },
   ItemsSource: { type: [Array, String], default: () => [] },
@@ -107,9 +108,15 @@ const normalizedItems = computed(() => resolvedItemsSource.value.map((item) => {
 const selectedIndexValue = computed(() => resolvedSelectedIndex.value ?? internalSelectedIndex.value);
 const radioGroupName = computed(() => props.GroupName || props.name);
 const resolvedChecked = computed(() => {
-  if (resolvedIsChecked.value !== undefined) return resolvedIsChecked.value === true;
+  // RadioButtons owns the selection state for its direct RadioButton
+  // children.  A declarative IsChecked="True" establishes the initial
+  // selection only; it must not pin that item after the user picks another
+  // item, which is how WinUI's RadioButton group behaves.
   if (group && groupIndex !== undefined) return group.selectedIndex.value === groupIndex;
-  return props.modelValue === props.value;
+  if (resolvedIsChecked.value !== undefined) return resolvedIsChecked.value === true;
+  return props.modelValue !== undefined || props.value !== undefined
+    ? props.modelValue === props.value
+    : false;
 });
 const contentText = computed(() => {
   const value = resolveXamlValue(props.Content, instance);
@@ -117,6 +124,12 @@ const contentText = computed(() => {
 });
 const RadioButtonsHeader = computed(() => resolvedHeader.value);
 const RadioContent = computed(() => contentText.value);
+const eventSender = computed(() => ({
+  Tag: resolveXamlValue(props.Tag, instance),
+  Content: contentText.value,
+  IsChecked: resolvedChecked.value,
+  GroupName: radioGroupName.value
+}));
 const rootStyle = computed(() => props.Margin ? { margin: xamlThickness(resolveXamlValue(props.Margin, instance)) } : {});
 const itemsStyle = computed(() => {
   const maxColumns = Math.max(1, Number(props.MaxColumns) || 1);
@@ -129,10 +142,18 @@ const check = () => {
   if (!resolvedIsEnabled.value) return;
   if (group && groupIndex !== undefined) group.select(groupIndex);
   emit('update:IsChecked', true);
-  emit('Checked');
-  resolveXamlHandler(attrs.Checked, instance)?.();
+  const sender = eventSender.value;
+  const args = { OriginalSource: sender, RoutedEvent: 'Checked' };
+  emit('Checked', sender, args);
+  resolveXamlHandler(attrs.Checked, instance)?.(sender, args);
   if (props.value !== undefined) emit('update:modelValue', props.value);
 };
+
+onMounted(() => {
+  if (group && groupIndex !== undefined && resolvedIsChecked.value === true && group.selectedIndex.value < 0) {
+    group.select(groupIndex);
+  }
+});
 
 const select = (index) => {
   if (!resolvedIsEnabled.value) return;

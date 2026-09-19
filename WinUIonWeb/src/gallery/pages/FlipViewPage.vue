@@ -1,174 +1,105 @@
 <template>
   <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-          <TextBlock class="page-header" :Text="$t('text.flipview')" />
-          <TextBlock class="page-description" :Text="$t('text.the-flipview-lets-you-flip-through-a-collection')" TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <Button class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></Button>
-            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </ToggleButton>
-          </div>
-        </div>
-      <div class="gallery-page-content">
-        <ControlExample
-              class="basic-input-example-theme"
-              :headerText="$t('sample.flipview.simple')"
-              exampleHeight="270px"
-              :theme="pageTheme"
-              :vue="simpleFlipViewVue">
-              <template #example>
-                <FlipView :ItemsSource="imageItems" Orientation="Horizontal" style="width: 100%; max-width: 400px; height: 270px;">
-                  <template #item="{ item }">
-                    <img
-                      :src="item.src"
-                      :alt="item.alt"
-                      style="width: 100%; height: 100%; object-fit: cover;" />
-                  </template>
-                </FlipView>
-              </template>
-            </ControlExample>
+    <StackPanel class="gallery-item-page">
+      <StackPanel class="page-heading">
+        <TextBlock class="page-header" Text="{x:Bind $t('text.flipview'), Mode=OneWay}" />
+        <TextBlock class="page-description" Text="{x:Bind $t('text.the-flipview-lets-you-flip-through-a-collection'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
+        <StackPanel class="page-header-actions" Orientation="Horizontal">
+          <Button class="header-action" Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button>
+          <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=TwoWay}" Click="toggleFavorite"><TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" /></ToggleButton>
+        </StackPanel>
+      </StackPanel>
 
-            <ControlExample
-              class="basic-input-example-theme"
-              :headerText="$t('sample.flipview.bound-data-template')"
-              exampleHeight="180px"
-              :theme="pageTheme"
-              :vue="boundFlipViewVue">
-              <template #example>
-                <FlipView :ItemsSource="controlItems" Orientation="Horizontal" style="width: 100%; max-width: 400px; height: 180px; border: 1px solid Black;">
-                  <template #item="{ item }">
-                    <div style="width: 100%; height: 100%; display: flex; flex-direction: column;">
-                      <div style="flex: 1; display: flex; align-items: center; justify-content: center; background: var(--card-background-secondary);">
-                        <img :src="item.ImagePath" :alt="item.Title" style="width: 36px; height: 36px; object-fit: contain;" />
-                      </div>
-                      <div style="height: 60px; background: rgba(165, 165, 165, 0.2); display: flex; align-items: center; justify-content: center;">
-                        <TextBlock style="font-size: 20px; font-weight: 600;" :Text="item.Title" />
-                      </div>
-                    </div>
-                  </template>
-                </FlipView>
-              </template>
-            </ControlExample>
+      <StackPanel class="gallery-page-content">
+        <ControlExample HeaderText="{x:Bind $t('sample.flipview.simple'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind simpleXaml, Mode=OneWay}" ExampleHeight="270">
+          <ControlExample.Example>
+            <FlipView Height="270" MaxWidth="400">
+              <Image AutomationProperties.Name="Cliff" Source="{x:Bind cliffSource, Mode=OneWay}" Stretch="UniformToFill" />
+              <Image AutomationProperties.Name="Grapes" Source="{x:Bind grapesSource, Mode=OneWay}" Stretch="UniformToFill" />
+              <Image AutomationProperties.Name="Rainier" Source="{x:Bind rainierSource, Mode=OneWay}" Stretch="UniformToFill" />
+              <Image AutomationProperties.Name="Sunset" Source="{x:Bind sunsetSource, Mode=OneWay}" Stretch="UniformToFill" />
+              <Image AutomationProperties.Name="Valley" Source="{x:Bind valleySource, Mode=OneWay}" Stretch="UniformToFill" />
+            </FlipView>
+          </ControlExample.Example>
+        </ControlExample>
 
-            <ControlExample
-              class="basic-input-example-theme"
-              :headerText="$t('sample.flipview.vertical')"
-              exampleHeight="270px"
-              :theme="pageTheme"
-              :vue="verticalFlipViewVue">
-              <template #example>
-                <FlipView :ItemsSource="imageItems" Orientation="Vertical" style="width: 100%; max-width: 400px; height: 270px;">
-                  <template #item="{ item }">
-                    <img
-                      :src="item.src"
-                      :alt="item.alt"
-                      style="width: 100%; height: 100%; object-fit: cover;" />
-                  </template>
-                </FlipView>
-              </template>
-            </ControlExample>
-      </div>
-    </div>
+        <ControlExample HeaderText="{x:Bind $t('sample.flipview.bound-data-template'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind boundXaml, Mode=OneWay}" ExampleHeight="180">
+          <ControlExample.Example>
+            <FlipView Height="180" MaxWidth="400" BorderBrush="Black" BorderThickness="1" ItemsSource="{x:Bind controlItems, Mode=OneWay}">
+              <FlipView.ItemTemplate>
+                <DataTemplate>
+                  <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Image Width="36" VerticalAlignment="Center" Source="{x:Bind ImagePath}" Stretch="Uniform" />
+                    <Border Grid.Row="1" Height="60" Background="#A5FFFFFF">
+                      <TextBlock Padding="12,12" HorizontalAlignment="Center" Foreground="Black" Text="{x:Bind Title}" />
+                    </Border>
+                  </Grid>
+                </DataTemplate>
+              </FlipView.ItemTemplate>
+            </FlipView>
+          </ControlExample.Example>
+        </ControlExample>
+
+        <ControlExample HeaderText="{x:Bind $t('sample.flipview.vertical'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind verticalXaml, Mode=OneWay}" ExampleHeight="270">
+          <ControlExample.Example>
+            <FlipView Height="270" MaxWidth="400">
+              <Image AutomationProperties.Name="Cliff" Source="{x:Bind cliffSource, Mode=OneWay}" Stretch="UniformToFill" />
+              <Image AutomationProperties.Name="Grapes" Source="{x:Bind grapesSource, Mode=OneWay}" Stretch="UniformToFill" />
+              <Image AutomationProperties.Name="Rainier" Source="{x:Bind rainierSource, Mode=OneWay}" Stretch="UniformToFill" />
+              <Image AutomationProperties.Name="Sunset" Source="{x:Bind sunsetSource, Mode=OneWay}" Stretch="UniformToFill" />
+              <Image AutomationProperties.Name="Valley" Source="{x:Bind valleySource, Mode=OneWay}" Stretch="UniformToFill" />
+              <FlipView.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel Orientation="Vertical" /></ItemsPanelTemplate></FlipView.ItemsPanel>
+            </FlipView>
+          </ControlExample.Example>
+        </ControlExample>
+      </StackPanel>
+    </StackPanel>
   </ScrollViewer>
 </template>
 
 <script setup>
-import { computed, inject } from 'vue';
-import Button from '../../components/Button.vue';
-import FlipView from '../../components/FlipView.vue';
-import ControlExample from '../../components/ControlExample.vue';
-import TextBlock from '../../components/TextBlock.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import { createPageState } from '../../utils/pageState';
+import { computed, inject } from 'vue'
+import Button from '../../components/Button.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import FlipView from '../../components/FlipView.vue'
+import Grid from '../../components/Grid.vue'
+import Border from '../../components/Border.vue'
+import Image from '../../components/Image.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import ToggleButton from '../../components/ToggleButton.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import { createPageState } from '../../utils/pageState'
+import { useI18n } from '../../components/i18n/index'
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
-const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'flipview');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-
-// Image items for examples 1 and 3
-const imageItems = [
-  {
-    src: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg',
-    alt: 'Cliff'
-  },
-  {
-    src: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/grapes.jpg',
-    alt: 'Grapes'
-  },
-  {
-    src: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/rainier.jpg',
-    alt: 'Rainier'
-  },
-  {
-    src: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/sunset.jpg',
-    alt: 'Sunset'
-  },
-  {
-    src: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/valley.jpg',
-    alt: 'Valley'
-  }
-];
-
-// Control items for example 2
+const { t } = useI18n()
+const currentPage = inject('currentPage')
+const pageKey = computed(() => currentPage?.value || 'flipview')
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value)
+const favoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
+const media = (name) => 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/' + name
+const cliffSource = media('cliff.jpg')
+const grapesSource = media('grapes.jpg')
+const rainierSource = media('rainier.jpg')
+const sunsetSource = media('sunset.jpg')
+const valleySource = media('valley.jpg')
 const controlItems = [
-  { Title: 'Button', ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Button.png' },
-  { Title: 'CheckBox', ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Checkbox.png' },
-  { Title: 'ComboBox', ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/ComboBox.png' },
-  { Title: 'RadioButtons', ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/RadioButton.png' },
-  { Title: 'Slider', ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Slider.png' }
-];
-
-const simpleFlipViewVue = `<FlipView :ItemsSource="imageItems" Orientation="Horizontal" style="max-width: 400px; height: 270px;">
-  <template #item="{ item }">
-    <img :src="item.src" :alt="item.alt" style="width: 100%; height: 100%; object-fit: cover;" />
-  </template>
-</FlipView>`;
-
-const boundFlipViewVue = `<FlipView :ItemsSource="controlItems" Orientation="Horizontal" style="max-width: 400px; height: 180px; border: 1px solid Black;">
-  <template #item="{ item }">
-    <img :src="item.ImagePath" :alt="item.Title" />
-    <TextBlock :Text="item.Title" />
-  </template>
-</FlipView>`;
-
-const verticalFlipViewVue = `<FlipView :ItemsSource="imageItems" Orientation="Vertical" style="max-width: 400px; height: 270px;">
-  <template #item="{ item }">
-    <img :src="item.src" :alt="item.alt" style="width: 100%; height: 100%; object-fit: cover;" />
-  </template>
-</FlipView>`;
+  { Title: t('text.button'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Button.png' },
+  { Title: t('text.checkbox'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Checkbox.png' },
+  { Title: t('text.combobox'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/ComboBox.png' },
+  { Title: t('text.radiobuttons'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/RadioButton.png' },
+  { Title: t('text.slider'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Slider.png' }
+]
+const simpleXaml = '<FlipView Height="270" MaxWidth="400"><Image AutomationProperties.Name="Cliff" Source="ms-appx:///Assets/SampleMedia/cliff.jpg" /><Image AutomationProperties.Name="Grapes" Source="ms-appx:///Assets/SampleMedia/grapes.jpg" /><Image AutomationProperties.Name="Rainier" Source="ms-appx:///Assets/SampleMedia/rainier.jpg" /><Image AutomationProperties.Name="Sunset" Source="ms-appx:///Assets/SampleMedia/sunset.jpg" /><Image AutomationProperties.Name="Valley" Source="ms-appx:///Assets/SampleMedia/valley.jpg" /></FlipView>'
+const boundXaml = '<FlipView Height="180" MaxWidth="400" BorderBrush="Black" BorderThickness="1" ItemsSource="{x:Bind Items, Mode=OneWay}"><FlipView.ItemTemplate><DataTemplate><Grid><Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions><Image Width="36" VerticalAlignment="Center" Source="{x:Bind ImagePath}" Stretch="Uniform" /><Border Grid.Row="1" Height="60" Background="#A5FFFFFF"><TextBlock Padding="12,12" HorizontalAlignment="Center" Foreground="Black" Text="{x:Bind Title}" /></Border></Grid></DataTemplate></FlipView.ItemTemplate></FlipView>'
+const verticalXaml = '<FlipView Height="270"><FlipView.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel Orientation="Vertical" /></ItemsPanelTemplate></FlipView.ItemsPanel></FlipView>'
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-heading {
-  position: relative;
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-}
-
-.icon {
-  font-size: 16px;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-header-actions { position: absolute; top: 0; right: 0; gap: 4px; }
+.icon { font-size: 16px; }
 </style>

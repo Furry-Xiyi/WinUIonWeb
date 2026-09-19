@@ -14,7 +14,7 @@ import Canvas from './components/Canvas.vue'
 import { ButtonFlyout } from './components/Button.vue'
 import ControlExample from './components/ControlExample.vue'
 import ColumnDefinition from './components/ColumnDefinition.vue'
-import Grid from './components/Grid.vue'
+import Grid, { GridContextFlyout } from './components/Grid.vue'
 import GridColumnDefinitions from './components/GridColumnDefinitions.vue'
 import GridRowDefinitions from './components/GridRowDefinitions.vue'
 import RelativePanel from './components/RelativePanel.vue'
@@ -37,6 +37,9 @@ import {
 } from './components/TeachingTipProperties'
 import ToolTip from './components/ToolTip.vue'
 import { SplitButtonFlyout } from './components/SplitButton.vue'
+import { CollectionItemTemplate, CollectionItemsPanel, CollectionGroupHeaderTemplate, CollectionGroupStyle, CollectionGroupStyleHeaderTemplate, CollectionItemContainerStyle, CollectionLayout, StackLayout, UniformGridLayout, LinedFlowLayout, ActivityFeedLayout, VariedImageSizeLayout, DataTemplate, ItemsPanelTemplate, ItemsStackPanel, XamlStyle, XamlSetter } from './components/CollectionProperties'
+import PullToRefresh, { RefreshContainerVisualizer } from './components/PullToRefresh.vue'
+import RefreshVisualizer, { RefreshVisualizerContent } from './components/RefreshVisualizer.vue'
 import { ToolTipServiceToolTip } from './components/ToolTipServiceProperties'
 import { ToggleSplitButtonFlyout } from './components/ToggleSplitButton.vue'
 import Expander from './components/Expander.vue'
@@ -102,6 +105,7 @@ const app = createApp(App)
 app.use(router)
 // Layout controls use their XAML type names at the application boundary.
 app.component('Grid', Grid)
+app.component('Grid.ContextFlyout', GridContextFlyout)
 app.component('Button.Flyout', ButtonFlyout)
 app.component('StackPanel', StackPanel)
 app.component('Canvas', Canvas)
@@ -143,6 +147,40 @@ app.component('ColumnDefinition', ColumnDefinition)
 app.component('RowDefinition', RowDefinition)
 app.component('Grid.ColumnDefinitions', GridColumnDefinitions)
 app.component('Grid.RowDefinitions', GridRowDefinitions)
+app.component('FlipView.ItemTemplate', CollectionItemTemplate)
+app.component('FlipView.ItemsPanel', CollectionItemsPanel)
+app.component('GridView.ItemTemplate', CollectionItemTemplate)
+app.component('GridView.ItemsPanel', CollectionItemsPanel)
+app.component('ItemsRepeater.ItemTemplate', CollectionItemTemplate)
+app.component('ItemsRepeater.Layout', CollectionLayout)
+app.component('ItemsView.ItemTemplate', CollectionItemTemplate)
+app.component('ItemsView.Layout', CollectionLayout)
+app.component('ListView.ItemTemplate', CollectionItemTemplate)
+app.component('ListView.GroupHeaderTemplate', CollectionGroupHeaderTemplate)
+app.component('ListView.GroupStyle', CollectionGroupStyle)
+app.component('GroupStyle', CollectionGroupStyle)
+app.component('GroupStyle.HeaderTemplate', CollectionGroupStyleHeaderTemplate)
+app.component('ListView.ItemsPanel', CollectionItemsPanel)
+app.component('GridView.ItemContainerStyle', CollectionItemContainerStyle)
+app.component('ListView.ItemContainerStyle', CollectionItemContainerStyle)
+app.component('Style', XamlStyle)
+app.component('Setter', XamlSetter)
+app.component('TreeView.ItemTemplate', CollectionItemTemplate)
+app.component('DataTemplate', DataTemplate)
+app.component('ItemsPanelTemplate', ItemsPanelTemplate)
+app.component('ItemsStackPanel', ItemsStackPanel)
+app.component('CollectionLayout', CollectionLayout)
+app.component('StackLayout', StackLayout)
+app.component('UniformGridLayout', UniformGridLayout)
+app.component('LinedFlowLayout', LinedFlowLayout)
+app.component('ActivityFeedLayout', ActivityFeedLayout)
+app.component('VariedImageSizeLayout', VariedImageSizeLayout)
+app.component('ItemsWrapGrid', VariableSizedWrapGrid)
+app.component('VirtualizingStackPanel', StackPanel)
+app.component('RefreshContainer', PullToRefresh)
+app.component('RefreshContainer.Visualizer', RefreshContainerVisualizer)
+app.component('RefreshVisualizer', RefreshVisualizer)
+app.component('RefreshVisualizer.Content', RefreshVisualizerContent)
 app.provide(i18nKey, i18n)
 app.config.globalProperties.$t = i18n.t
 app.mount('#app')

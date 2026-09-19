@@ -45,6 +45,13 @@ provide('winuiTheme', resolvedTheme);
 /* Light theme overrides */
 .example-theme-wrapper.theme-light,
 .win-theme-scope.theme-light {
+  color-scheme: light;
+  /* ListView group headers are an opaque surface, including when sticky. */
+  --ListViewHeaderItemBackground: var(--SolidBackgroundFillColorBaseBrush, #F3F3F3);
+  --ListViewHeaderItemDividerStroke: var(--DividerStrokeColorDefaultBrush, var(--stroke-divider));
+  --GalleryBackgroundBrush: var(--SolidBackgroundFillColorBaseBrush, #F3F3F3);
+  --GalleryBorderBrush: var(--CardStrokeColorDefaultBrush, rgba(0, 0, 0, 0.06));
+  --ControlExampleDisplayBrush: var(--SolidBackgroundFillColorBaseBrush, #F3F3F3);
   --SmokeFillColorDefaultBrush: rgba(0, 0, 0, 0.302);
   --LayerFillColorAltBrush: #FFFFFF;
   --ContentDialogCommandSpaceBackground: #F3F3F3;
@@ -67,6 +74,10 @@ provide('winuiTheme', resolvedTheme);
   --accent-base: #0067C0;
   --accent-hover: rgba(0, 103, 192, 0.90);
   --accent-pressed: rgba(0, 103, 192, 0.80);
+  /* SystemColorHighlightColor/TextColor used by the official ListView
+     messaging template. */
+  --SystemColorHighlightColor: var(--accent-base);
+  --SystemColorHighlightTextColor: #FFFFFF;
   --accent-fill-disabled: rgba(0, 0, 0, 0.22);
   --AccentFillColorDefaultBrush: var(--accent-base);
   --AccentFillColorSecondaryBrush: var(--accent-hover);
@@ -186,6 +197,13 @@ provide('winuiTheme', resolvedTheme);
 /* Dark theme overrides */
 .example-theme-wrapper.theme-dark,
 .win-theme-scope.theme-dark {
+  color-scheme: dark;
+  /* Keep the sticky header opaque so scrolled content cannot show through. */
+  --ListViewHeaderItemBackground: var(--SolidBackgroundFillColorBaseBrush, #202020);
+  --ListViewHeaderItemDividerStroke: var(--DividerStrokeColorDefaultBrush, var(--stroke-divider));
+  --GalleryBackgroundBrush: var(--SolidBackgroundFillColorBaseBrush, #202020);
+  --GalleryBorderBrush: var(--CardStrokeColorDefaultBrush, rgba(0, 0, 0, 0.10));
+  --ControlExampleDisplayBrush: var(--SolidBackgroundFillColorBaseBrush, #202020);
   --SmokeFillColorDefaultBrush: rgba(0, 0, 0, 0.302);
   --LayerFillColorAltBrush: rgba(255, 255, 255, 0.051);
   --ContentDialogCommandSpaceBackground: #202020;
@@ -208,6 +226,8 @@ provide('winuiTheme', resolvedTheme);
   --accent-base: #4CC2FF;
   --accent-hover: rgba(96, 205, 255, 0.90);
   --accent-pressed: rgba(96, 205, 255, 0.80);
+  --SystemColorHighlightColor: var(--accent-base);
+  --SystemColorHighlightTextColor: #000000;
   --accent-fill-disabled: rgba(255, 255, 255, 0.16);
   --AccentFillColorDefaultBrush: var(--accent-base);
   --AccentFillColorSecondaryBrush: var(--accent-hover);

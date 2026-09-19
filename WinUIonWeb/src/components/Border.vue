@@ -72,12 +72,17 @@ const borderStyle = computed(() => {
   }
   if (props.Margin !== '') style.margin = thickness(props.Margin)
   if (props.Padding !== '') style.padding = thickness(props.Padding)
-  if (props.HorizontalAlignment) style.alignSelf = align(props.HorizontalAlignment, 'horizontal')
+  if (props.HorizontalAlignment) style.justifySelf = align(props.HorizontalAlignment, 'horizontal')
   if (props.VerticalAlignment) style.alignSelf = align(props.VerticalAlignment, 'vertical')
   return [attrs.style, style]
 })
 </script>
 
 <style>
-.win-border { box-sizing: border-box; min-width: 0; min-height: 0; }
+.win-border {
+  display: grid;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
 </style>

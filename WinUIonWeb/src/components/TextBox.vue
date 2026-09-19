@@ -203,6 +203,10 @@ const props = withDefaults(defineProps<{
 });
 const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
 const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
+const resolvedText = computed(() => {
+  const value = resolveXamlValue(props.Text, instance);
+  return value === undefined || value === null ? '' : String(value);
+});
 
 const emit = defineEmits<{
   'update:Text': [value: string];
@@ -225,7 +229,7 @@ const emit = defineEmits<{
 const fieldRef = ref<HTMLInputElement | HTMLTextAreaElement | null>(null);
 const isFocused = ref(false);
 const isHovered = ref(false);
-const localText = ref(props.Text ?? '');
+const localText = ref(resolvedText.value);
 const undoStack = ref<string[]>([]);
 const redoStack = ref<string[]>([]);
 const clipboardText = ref('');
@@ -244,7 +248,7 @@ const contextMenuAnchor = ref<DOMRect | {
 const contextSelection = ref({ start: 0, length: 0, text: '' });
 
 const isTextControlled = computed(() => props.Text !== undefined);
-const currentText = computed(() => isTextControlled.value ? props.Text ?? '' : localText.value);
+const currentText = computed(() => isTextControlled.value ? resolvedText.value : localText.value);
 const isDisabled = computed(() => !props.IsEnabled);
 const hasText = computed(() => currentText.value.length > 0);
 const showDeleteButton = computed(() =>
@@ -377,7 +381,7 @@ const resizeTextarea = () => {
 };
 
 watch(() => props.Text, () => {
-  localText.value = props.Text ?? '';
+  localText.value = resolvedText.value;
   void nextTick(resizeTextarea);
 }, { immediate: true });
 
