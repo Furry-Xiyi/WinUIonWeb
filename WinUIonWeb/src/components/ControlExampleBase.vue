@@ -36,10 +36,10 @@
         v-if="showSourceCode"
         :IsExpanded="false"
         :Header="t('text.source-code')"
+        Padding="0"
         class="code-expander">
         <div class="source-code-presenter">
           <SelectorBar
-            v-if="codeTabItems.length > 1"
             :Items="codeTabItems"
             :SelectedItem="codeTabItems[selectedCodeTab]"
             @SelectionChanged="onCodeTabChanged" />
@@ -50,17 +50,24 @@
               VerticalScrollBarVisibility="Auto"
               HorizontalScrollMode="Auto"
               HorizontalScrollBarVisibility="Auto">
-              <TextBlock
-                class="code-block"
-                :Text="activeCode"
-                IsTextSelectionEnabled />
+              <div class="code-content">
+                <TextBlock
+                  class="code-block"
+                  :Text="activeCode"
+                  IsTextSelectionEnabled />
+              </div>
             </ScrollViewer>
             <div class="copy-button-border">
               <Button
                 class="copy-code-button"
+                Width="30"
+                Height="30"
+                MinWidth="0"
+                MinHeight="0"
+                Padding="6"
                 v-bind="{ 'tooltipservice.tooltip': t('text.copy') }"
                 @Click="copyActiveCode">
-                <TextBlock class="icon" Text="&#xE8C8;" />
+                <TextBlock class="icon" Text="&#xE8C8;" FontSize="16" LineHeight="16" />
               </Button>
             </div>
           </div>
@@ -301,66 +308,71 @@ const copyActiveCode = async () => {
 }
 
 .code-expander :deep(.win-expander-content) {
-  padding: 0;
   gap: 0;
 }
 
 .source-code-presenter {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   row-gap: 16px;
   min-width: 0;
-  overflow: hidden;
 }
 
 .sample-code-presenter {
   position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-height: 30px;
   min-width: 0;
   width: 100%;
-  overflow: hidden;
 }
 
+/* SampleCodePresenter.xaml overlays the copy button in the same Grid cell
+   as the ScrollViewer, outside the padded, scrolling CodePresenter. */
 .copy-button-border {
-  position: absolute;
-  top: 0;
-  right: 8px;
+  grid-area: 1 / 1;
+  align-self: start;
+  justify-self: end;
+  margin-right: 8px;
   z-index: 2;
   border-radius: 4px;
-  background: var(--control-on-image-fill-color-default, rgba(243, 243, 243, 0.85));
+  background: var(--ControlOnImageFillColorDefaultBrush, var(--control-on-image-fill-color-default, #ffffffc9));
   color: var(--text-primary);
 }
 
-.copy-code-button {
-  width: 32px;
-  height: 32px;
-  min-width: 0;
-  padding: 6px;
-}
-
-.copy-code-button .icon {
-  font-size: 14px;
-}
-
 .source-code-scroll {
+  grid-area: 1 / 1;
+  z-index: 0;
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  padding: 0 0px 8px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.code-content {
+  /* ControlExample.xaml: CodePresenter padding is 16,0,16,16. Keep it
+     inside the viewport so the single horizontal scrollbar stays at the bottom. */
+  width: max-content;
+  min-width: 100%;
+  min-height: 30px;
+  padding: 0 16px 16px;
   box-sizing: border-box;
 }
 
 :global(html.theme-light .copy-button-border) {
-  --control-on-image-fill-color-default: rgba(243, 243, 243, 0.85);
+  --control-on-image-fill-color-default: #ffffffc9;
 }
 
 :global(html.theme-dark .copy-button-border) {
-  --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
+  --control-on-image-fill-color-default: #1c1c1cb3;
 }
 
 @media (prefers-color-scheme: dark) {
   :global(html:not(.theme-light):not(.theme-dark) .copy-button-border) {
-    --control-on-image-fill-color-default: rgba(32, 32, 32, 0.88);
+    --control-on-image-fill-color-default: #1c1c1cb3;
   }
 }
 
