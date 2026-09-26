@@ -88,9 +88,16 @@ export const applyGridChildren = (root: HTMLElement) => {
     const columnSpan = attachedValue(element, 'Grid.ColumnSpan')
     if (row !== undefined || rowSpan !== undefined) {
       setOrClear(element, 'gridRow', `${integerValue(element, 'Grid.Row', 0) + 1} / span ${positiveIntegerValue(element, 'Grid.RowSpan')}`)
+    } else {
+      // WinUI Grid places children without an attached row in the first
+      // cell. They are layered there (for example an Image with a caption
+      // Border), rather than auto-flowing into separate CSS grid rows.
+      setOrClear(element, 'gridRow', `1 / span ${positiveIntegerValue(element, 'Grid.RowSpan')}`)
     }
     if (column !== undefined || columnSpan !== undefined) {
       setOrClear(element, 'gridColumn', `${integerValue(element, 'Grid.Column', 0) + 1} / span ${positiveIntegerValue(element, 'Grid.ColumnSpan')}`)
+    } else {
+      setOrClear(element, 'gridColumn', `1 / span ${positiveIntegerValue(element, 'Grid.ColumnSpan')}`)
     }
 
     const horizontal = attachedValue(element, 'HorizontalAlignment')

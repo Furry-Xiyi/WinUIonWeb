@@ -18,6 +18,7 @@ import Grid, { GridContextFlyout } from './components/Grid.vue'
 import GridColumnDefinitions from './components/GridColumnDefinitions.vue'
 import GridRowDefinitions from './components/GridRowDefinitions.vue'
 import RelativePanel from './components/RelativePanel.vue'
+import Page from './components/Page.vue'
 import RowDefinition from './components/RowDefinition.vue'
 import StackPanel from './components/StackPanel.vue'
 import VariableSizedWrapGrid from './components/VariableSizedWrapGrid.vue'
@@ -147,6 +148,11 @@ app.component('ColumnDefinition', ColumnDefinition)
 app.component('RowDefinition', RowDefinition)
 app.component('Grid.ColumnDefinitions', GridColumnDefinitions)
 app.component('Grid.RowDefinitions', GridRowDefinitions)
+// Page.Resources is a XAML property element and therefore resolves by its
+// dotted component name at runtime. Register both names so page-level
+// DataTemplates are collected by Page instead of being rendered as content.
+app.component('Page', Page)
+app.component('Page.Resources', Page.Resources)
 app.component('FlipView.ItemTemplate', CollectionItemTemplate)
 app.component('FlipView.ItemsPanel', CollectionItemsPanel)
 app.component('GridView.ItemTemplate', CollectionItemTemplate)

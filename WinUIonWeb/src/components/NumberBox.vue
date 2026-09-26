@@ -1,34 +1,34 @@
 <template>
-  <div ref="rootRef" class="win-number-box" :class="{ 'is-disabled': !IsEnabled, 'is-inline': SpinButtonPlacementMode === 'Inline', 'is-compact': SpinButtonPlacementMode === 'Compact' }" :style="rootStyle">
+  <div ref="rootRef" class="win-number-box" :class="{ 'is-disabled': !resolvedIsEnabled, 'is-inline': resolvedSpinButtonPlacementMode === 'Inline', 'is-compact': resolvedSpinButtonPlacementMode === 'Compact' }" :style="rootStyle">
     <div class="win-number-shell">
       <TextBox
         class="win-number-textbox"
         :Text="displayText"
-        :Header="Header"
-        :Description="Description"
-        :PlaceholderText="PlaceholderText"
-        :IsEnabled="IsEnabled"
-        :InputScope="InputScope || 'Decimal'"
-        :AcceptsReturn="IsWrapEnabled"
-        :TextAlignment="TextAlignment"
-        :SelectionHighlightColor="SelectionHighlightColor"
-        :PreventKeyboardDisplayOnProgrammaticFocus="PreventKeyboardDisplayOnProgrammaticFocus"
+        :Header="resolvedHeader"
+        :Description="resolvedDescription"
+        :PlaceholderText="resolvedPlaceholderText"
+        :IsEnabled="resolvedIsEnabled"
+        :InputScope="resolvedInputScope || 'Decimal'"
+        :AcceptsReturn="resolvedIsWrapEnabled"
+        :TextAlignment="resolvedTextAlignment"
+        :SelectionHighlightColor="resolvedSelectionHighlightColor"
+        :PreventKeyboardDisplayOnProgrammaticFocus="resolvedPreventKeyboardDisplayOnProgrammaticFocus"
         :ShowDeleteButton="false"
         @update:Text="onTextInput"
         @GotFocus="onFocus"
         @LostFocus="onLostFocus"
         @keydown.capture="onKeydown">
         <template #actions>
-          <div v-if="SpinButtonPlacementMode === 'Inline'" class="win-number-spin inline">
-            <button type="button" class="win-textbox-action-button win-number-spin-button" :disabled="!canIncrease" @pointerdown.prevent @click="changeBy(SmallChange)">
+          <div v-if="resolvedSpinButtonPlacementMode === 'Inline'" class="win-number-spin inline">
+            <button type="button" class="win-textbox-action-button win-number-spin-button" :disabled="!canIncrease" @pointerdown.prevent @click="changeBy(resolvedSmallChange)">
               <span></span>
             </button>
-            <button type="button" class="win-textbox-action-button win-number-spin-button" :disabled="!canDecrease" @pointerdown.prevent @click="changeBy(-SmallChange)">
+            <button type="button" class="win-textbox-action-button win-number-spin-button" :disabled="!canDecrease" @pointerdown.prevent @click="changeBy(-resolvedSmallChange)">
               <span></span>
             </button>
           </div>
           <span
-            v-else-if="SpinButtonPlacementMode === 'Compact'"
+            v-else-if="resolvedSpinButtonPlacementMode === 'Compact'"
             class="win-number-compact-indicator"
             aria-hidden="true">
             <span></span>
@@ -44,10 +44,10 @@
         :class="compactPopupThemeClass"
         :style="compactPopupStyle"
         @pointerdown.prevent>
-        <button type="button" class="win-number-popup-button" :disabled="!canIncrease" @click="changeBy(SmallChange)">
+        <button type="button" class="win-number-popup-button" :disabled="!canIncrease" @click="changeBy(resolvedSmallChange)">
           <span>&#xE70E;</span>
         </button>
-        <button type="button" class="win-number-popup-button" :disabled="!canDecrease" @click="changeBy(-SmallChange)">
+        <button type="button" class="win-number-popup-button" :disabled="!canDecrease" @click="changeBy(-resolvedSmallChange)">
           <span>&#xE70D;</span>
         </button>
       </div>
@@ -56,21 +56,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue';
 import type { ComputedRef, CSSProperties } from 'vue';
 import TextBox from './TextBox.vue';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding } from './xamlRuntime';
 
 type SpinPlacement = 'Hidden' | 'Compact' | 'Inline';
 type ValidationMode = 'InvalidInputOverwritten' | 'Disabled';
 type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
 
 const props = withDefaults(defineProps<{
-  Value?: number;
+  Value?: number | string;
   Text?: string;
-  Minimum?: number;
-  Maximum?: number;
-  SmallChange?: number;
-  LargeChange?: number;
+  Minimum?: number | string;
+  Maximum?: number | string;
+  SmallChange?: number | string;
+  LargeChange?: number | string;
   Header?: string;
   HeaderTemplate?: unknown | null;
   Description?: string;
@@ -79,14 +80,14 @@ const props = withDefaults(defineProps<{
   SelectionFlyout?: unknown | null;
   SelectionHighlightColor?: string;
   TextReadingOrder?: string;
-  PreventKeyboardDisplayOnProgrammaticFocus?: boolean;
-  NumberFormatter?: Intl.NumberFormat | null;
-  SpinButtonPlacementMode?: SpinPlacement;
-  ValidationMode?: ValidationMode;
-  IsWrapEnabled?: boolean;
-  AcceptsExpression?: boolean;
-  IsEnabled?: boolean;
-  TextAlignment?: TextAlignment;
+  PreventKeyboardDisplayOnProgrammaticFocus?: boolean | string;
+  NumberFormatter?: Intl.NumberFormat | { format: (value: number) => string } | string | null;
+  SpinButtonPlacementMode?: SpinPlacement | string;
+  ValidationMode?: ValidationMode | string;
+  IsWrapEnabled?: boolean | string;
+  AcceptsExpression?: boolean | string;
+  IsEnabled?: boolean | string;
+  TextAlignment?: TextAlignment | string;
   MinWidth?: number | string;
   MinHeight?: number | string;
   MaxWidth?: number | string;
@@ -94,6 +95,7 @@ const props = withDefaults(defineProps<{
   VerticalAlignment?: string;
   HorizontalAlignment?: string;
   Width?: number | string;
+  Margin?: number | string;
 }>(), {
   Value: Number.NaN,
   Text: '',
@@ -123,7 +125,8 @@ const props = withDefaults(defineProps<{
   MaxHeight: '',
   VerticalAlignment: 'Stretch',
   HorizontalAlignment: 'Stretch',
-  Width: ''
+  Width: '',
+  Margin: ''
 });
 
 const emit = defineEmits<{
@@ -137,16 +140,77 @@ const isFocused = ref(false);
 const compactPopupStyle = ref<CSSProperties>({});
 const inheritedTheme = inject<ComputedRef<'light' | 'dark'> | null>('winuiTheme', null);
 const anchorTheme = ref<'light' | 'dark' | ''>('');
+const attrs = useAttrs();
+const instance = getCurrentInstance();
+
+const resolveNumber = (value: unknown, fallback: number) => {
+  const resolved = resolveXamlValue(value, instance);
+  if (resolved === undefined || resolved === null || (typeof resolved === 'string' && resolved.trim() === '')) return fallback;
+  const numeric = typeof resolved === 'number' ? resolved : Number(resolved);
+  return Number.isNaN(numeric) ? fallback : numeric;
+};
+
+const resolveBoolean = (value: unknown, fallback: boolean) => {
+  const resolved = resolveXamlValue(value, instance);
+  if (typeof resolved === 'boolean') return resolved;
+  if (typeof resolved === 'string') {
+    if (resolved.trim().toLowerCase() === 'true') return true;
+    if (resolved.trim().toLowerCase() === 'false') return false;
+  }
+  return fallback;
+};
+
+const resolvedValue = computed(() => resolveNumber(props.Value, Number.NaN));
+const resolvedMinimum = computed(() => resolveNumber(props.Minimum, Number.NEGATIVE_INFINITY));
+const resolvedMaximum = computed(() => resolveNumber(props.Maximum, Number.POSITIVE_INFINITY));
+const resolvedSmallChange = computed(() => resolveNumber(props.SmallChange, 1));
+const resolvedLargeChange = computed(() => resolveNumber(props.LargeChange, 10));
+const resolvedText = computed(() => {
+  const value = resolveXamlValue(props.Text, instance);
+  return value === undefined || value === null ? '' : String(value);
+});
+const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
+const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
+const resolvedPlaceholderText = computed(() => resolveXamlValue(props.PlaceholderText, instance));
+const resolvedInputScope = computed(() => resolveXamlValue(props.InputScope, instance));
+const resolvedValidationMode = computed(() => String(resolveXamlValue(props.ValidationMode, instance) ?? 'InvalidInputOverwritten'));
+const resolvedIsWrapEnabled = computed(() => resolveBoolean(props.IsWrapEnabled, false));
+const resolvedAcceptsExpression = computed(() => resolveBoolean(props.AcceptsExpression, false));
+const resolvedIsEnabled = computed(() => resolveBoolean(props.IsEnabled, true));
+const resolvedTextAlignment = computed(() => resolveXamlValue(props.TextAlignment, instance));
+const resolvedSpinButtonPlacementMode = computed<SpinPlacement>(() => {
+  const value = String(resolveXamlValue(props.SpinButtonPlacementMode, instance) ?? 'Hidden');
+  return value === 'Inline' || value === 'Compact' ? value : 'Hidden';
+});
+const resolvedSelectionHighlightColor = computed(() => resolveXamlValue(props.SelectionHighlightColor, instance));
+const resolvedPreventKeyboardDisplayOnProgrammaticFocus = computed(() => resolveBoolean(props.PreventKeyboardDisplayOnProgrammaticFocus, false));
+const resolvedNumberFormatter = computed(() => resolveXamlValue(props.NumberFormatter, instance));
+const resolvedWidth = computed(() => resolveXamlValue(props.Width, instance));
+const resolvedMinWidth = computed(() => resolveXamlValue(props.MinWidth, instance));
+const resolvedMinHeight = computed(() => resolveXamlValue(props.MinHeight, instance));
+const resolvedMaxWidth = computed(() => resolveXamlValue(props.MaxWidth, instance));
+const resolvedMaxHeight = computed(() => resolveXamlValue(props.MaxHeight, instance));
+const resolvedVerticalAlignment = computed(() => resolveXamlValue(props.VerticalAlignment, instance));
+const resolvedHorizontalAlignment = computed(() => resolveXamlValue(props.HorizontalAlignment, instance));
+const resolvedMargin = computed(() => resolveXamlValue(props.Margin, instance));
 
 const formatValue = (value: number) => {
   if (Number.isNaN(value)) return '';
-  return props.NumberFormatter?.format(value) ?? String(value);
+  const formatter = resolvedNumberFormatter.value;
+  if (formatter && typeof formatter === 'object' && 'format' in formatter && typeof formatter.format === 'function') {
+    try {
+      return formatter.format(value);
+    } catch {
+      // Fall back to the platform's default numeric representation.
+    }
+  }
+  return String(value);
 };
 
-const text = ref(props.Text || formatValue(props.Value));
+const text = ref(resolvedText.value || formatValue(resolvedValue.value));
 
 const displayText = computed(() => text.value);
-const compactPopupOpen = computed(() => props.SpinButtonPlacementMode === 'Compact' && props.IsEnabled && isFocused.value);
+const compactPopupOpen = computed(() => resolvedSpinButtonPlacementMode.value === 'Compact' && resolvedIsEnabled.value && isFocused.value);
 const compactPopupThemeClass = computed(() => {
   const theme = inheritedTheme?.value || anchorTheme.value;
   return theme === 'light' || theme === 'dark' ? `theme-${theme}` : '';
@@ -160,19 +224,35 @@ const alignmentStyle = (alignment: string, axis: 'vertical' | 'horizontal') => {
   const values: Record<string, string> = { left: 'flex-start', center: 'center', right: 'flex-end', stretch: 'stretch' };
   return values[value] || 'stretch';
 };
+const cssLength = (value: unknown) => {
+  if (value === '' || value === undefined || value === null) return undefined;
+  if (typeof value === 'number') return Number.isFinite(value) ? `${value}px` : undefined;
+  const source = String(value).trim();
+  if (!source) return undefined;
+  return /^-?\d+(?:\.\d+)?$/.test(source) ? `${source}px` : source;
+};
+const xamlThickness = (value: unknown) => {
+  if (value === '' || value === undefined || value === null) return undefined;
+  const parts = String(value).split(',').map((part) => cssLength(part.trim()) ?? '0px');
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
+  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
+  return String(value);
+};
 const rootStyle = computed<CSSProperties>(() => ({
-  width: props.Width === '' ? undefined : typeof props.Width === 'number' ? `${props.Width}px` : props.Width,
-  minWidth: typeof props.MinWidth === 'number' ? `${props.MinWidth}px` : props.MinWidth,
-  minHeight: props.MinHeight === '' ? undefined : typeof props.MinHeight === 'number' ? `${props.MinHeight}px` : props.MinHeight,
-  maxWidth: props.MaxWidth === '' ? undefined : typeof props.MaxWidth === 'number' ? `${props.MaxWidth}px` : props.MaxWidth,
-  maxHeight: props.MaxHeight === '' ? undefined : typeof props.MaxHeight === 'number' ? `${props.MaxHeight}px` : props.MaxHeight,
-  alignSelf: alignmentStyle(props.VerticalAlignment, 'vertical'),
-  justifySelf: alignmentStyle(props.HorizontalAlignment, 'horizontal')
+  width: cssLength(resolvedWidth.value),
+  minWidth: cssLength(resolvedMinWidth.value),
+  minHeight: cssLength(resolvedMinHeight.value),
+  maxWidth: cssLength(resolvedMaxWidth.value),
+  maxHeight: cssLength(resolvedMaxHeight.value),
+  margin: xamlThickness(resolvedMargin.value),
+  alignSelf: alignmentStyle(String(resolvedVerticalAlignment.value ?? ''), 'vertical'),
+  justifySelf: alignmentStyle(String(resolvedHorizontalAlignment.value ?? ''), 'horizontal')
 }));
-const canIncrease = computed(() => props.IsEnabled && (Number.isNaN(props.Value) || props.Value + props.SmallChange <= props.Maximum));
-const canDecrease = computed(() => props.IsEnabled && (Number.isNaN(props.Value) || props.Value - props.SmallChange >= props.Minimum));
+const canIncrease = computed(() => resolvedIsEnabled.value && (Number.isNaN(resolvedValue.value) || resolvedValue.value + resolvedSmallChange.value <= resolvedMaximum.value));
+const canDecrease = computed(() => resolvedIsEnabled.value && (Number.isNaN(resolvedValue.value) || resolvedValue.value - resolvedSmallChange.value >= resolvedMinimum.value));
 
-const clamp = (value: number) => Math.min(props.Maximum, Math.max(props.Minimum, value));
+const clamp = (value: number) => Math.min(resolvedMaximum.value, Math.max(resolvedMinimum.value, value));
 
 const evaluateExpression = (source: string) => {
   const normalized = source.replace(/\^/g, '**');
@@ -186,17 +266,17 @@ const evaluateExpression = (source: string) => {
 
 const parseText = (source: string) => {
   const normalized = source.replace(/,/g, '');
-  const value = props.AcceptsExpression ? evaluateExpression(normalized) : Number(normalized);
+  const value = resolvedAcceptsExpression.value ? evaluateExpression(normalized) : Number(normalized);
   return Number.isFinite(value) ? value : Number.NaN;
 };
 
 const sanitizeText = (value: string) => {
-  const allowed = props.AcceptsExpression ? /[0-9+\-*/().%\s^]/ : /[0-9+\-.]/;
+  const allowed = resolvedAcceptsExpression.value ? /[0-9+\-*/().%\s^]/ : /[0-9+\-.]/;
   let next = '';
   for (const char of value) {
     if (allowed.test(char)) next += char;
   }
-  if (!props.AcceptsExpression) {
+  if (!resolvedAcceptsExpression.value) {
     next = next.replace(/(?!^)-/g, '');
     const firstDot = next.indexOf('.');
     if (firstDot !== -1) next = next.slice(0, firstDot + 1) + next.slice(firstDot + 1).replace(/\./g, '');
@@ -204,12 +284,19 @@ const sanitizeText = (value: string) => {
   return next;
 };
 
-const setValue = (value: number, oldValue = props.Value) => {
+const setValue = (value: number, oldValue = resolvedValue.value) => {
   const newValue = Number.isNaN(value) ? Number.NaN : clamp(value);
+  const previousValue = resolveNumber(oldValue, Number.NaN);
   text.value = formatValue(newValue);
   emit('update:Value', newValue);
+  updateXamlBinding(props.Value, newValue, instance);
   emit('update:Text', text.value);
-  if (!Object.is(oldValue, newValue)) emit('ValueChanged', { OldValue: oldValue, NewValue: newValue });
+  updateXamlBinding(props.Text, text.value, instance);
+  if (!Object.is(previousValue, newValue)) {
+    const args = { OldValue: previousValue, NewValue: newValue };
+    emit('ValueChanged', args);
+    resolveXamlHandler(attrs.ValueChanged, instance)?.(args);
+  }
   return newValue;
 };
 
@@ -217,6 +304,7 @@ const onTextInput = (value: string) => {
   const sanitized = sanitizeText(value);
   text.value = sanitized;
   emit('update:Text', sanitized);
+  updateXamlBinding(props.Text, sanitized, instance);
 };
 
 const resolveAnchorTheme = () => {
@@ -257,8 +345,8 @@ const commitText = () => {
   }
   const parsed = parseText(text.value);
   if (Number.isNaN(parsed)) {
-    if (props.ValidationMode === 'InvalidInputOverwritten') text.value = formatValue(props.Value);
-    return props.Value;
+    if (resolvedValidationMode.value === 'InvalidInputOverwritten') text.value = formatValue(resolvedValue.value);
+    return resolvedValue.value;
   }
   return setValue(parsed);
 };
@@ -278,19 +366,19 @@ const onKeydown = (event: KeyboardEvent) => {
   }
   if (event.key === 'ArrowUp') {
     event.preventDefault();
-    changeBy(event.shiftKey ? props.LargeChange : props.SmallChange);
+    changeBy(event.shiftKey ? resolvedLargeChange.value : resolvedSmallChange.value);
   }
   if (event.key === 'ArrowDown') {
     event.preventDefault();
-    changeBy(event.shiftKey ? -props.LargeChange : -props.SmallChange);
+    changeBy(event.shiftKey ? -resolvedLargeChange.value : -resolvedSmallChange.value);
   }
   if (event.key === 'PageUp') {
     event.preventDefault();
-    changeBy(props.LargeChange);
+    changeBy(resolvedLargeChange.value);
   }
   if (event.key === 'PageDown') {
     event.preventDefault();
-    changeBy(-props.LargeChange);
+    changeBy(-resolvedLargeChange.value);
   }
 };
 
@@ -298,15 +386,15 @@ const onWindowMove = () => {
   if (compactPopupOpen.value) void updateCompactPopupPosition();
 };
 
-watch(() => props.Value, (value) => {
+watch(resolvedValue, (value) => {
   text.value = formatValue(value);
 });
 
-watch(() => props.NumberFormatter, () => {
-  text.value = formatValue(props.Value);
+watch(resolvedNumberFormatter, () => {
+  text.value = formatValue(resolvedValue.value);
 });
 
-watch(() => props.Text, (value) => {
+watch(resolvedText, (value) => {
   if (value !== undefined && value !== text.value) text.value = value;
 });
 

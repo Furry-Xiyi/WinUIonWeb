@@ -392,7 +392,10 @@ const RaiseSelectionChanged = (oldItem, selectedItem, selectedIndex) => {
   emit('update:Text', currentText.value);
   emit('SelectionChanged', {
     AddedItems: selectedItem === undefined ? [] : [selectedItem],
-    RemovedItems: oldItem === undefined ? [] : [oldItem]
+    RemovedItems: oldItem === undefined ? [] : [oldItem],
+    SelectedIndex: selectedIndex,
+    SelectedItem: selectedItem,
+    SelectedValue: selectedItem === undefined ? undefined : GetItemValue(selectedItem)
   });
 };
 

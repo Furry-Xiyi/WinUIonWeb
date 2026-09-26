@@ -122,7 +122,10 @@ const hostStyle = computed(() => ({
   maxHeight: cssLength(resolvedMaxHeight.value),
   margin: cssLength(resolveXamlValue(props.Margin, instance)),
   opacity: props.Opacity === '' ? undefined : Number(props.Opacity),
-  alignSelf: alignment[props.HorizontalAlignment] || undefined
+  // HorizontalAlignment is the inline-axis alignment of a Grid child.
+  // Mapping it to align-self leaves fixed-width images at the left edge.
+  justifySelf: alignment[props.HorizontalAlignment] || undefined,
+  alignSelf: alignment[props.VerticalAlignment] || undefined
 }));
 
 const stretchClass = computed(() => `stretch-${String(props.Stretch || 'Uniform').toLowerCase()}`);

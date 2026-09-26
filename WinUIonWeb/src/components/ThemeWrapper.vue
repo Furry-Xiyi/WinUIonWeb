@@ -132,6 +132,16 @@ provide('winuiTheme', resolvedTheme);
   --TextFillColorTertiaryBrush: var(--text-tertiary);
   --TextFillColorDisabledBrush: var(--text-disabled);
   --TextFillColorInverseBrush: #FFFFFF;
+  /* GridView/ListView item checkboxes use the on-image control brushes from
+     the WinUI theme resources. Keep these distinct from generic control
+     fills so an unchecked box stays legible over image templates. */
+  --ControlOnImageFillColorDefaultBrush: rgba(255, 255, 255, .7882353);
+  --ControlOnImageFillColorSecondaryBrush: #F3F3F3;
+  --ControlOnImageFillColorTertiaryBrush: #EBEBEB;
+  --ControlOnImageFillColorDisabledBrush: rgba(255, 255, 255, 0);
+  --SystemControlBackgroundBaseMediumBrush: rgba(255, 255, 255, .6);
+  --SystemControlForegroundAltHighBrush: #000000;
+  --SystemControlPageTextBaseMediumBrush: rgba(0, 0, 0, .6);
   --ControlFillColorDefaultBrush: var(--ctrl-fill-default);
   --ControlFillColorSecondaryBrush: var(--ctrl-fill-secondary);
   --ControlFillColorTertiaryBrush: var(--ctrl-fill-tertiary);
@@ -282,6 +292,13 @@ provide('winuiTheme', resolvedTheme);
   --TextFillColorTertiaryBrush: var(--text-tertiary);
   --TextFillColorDisabledBrush: var(--text-disabled);
   --TextFillColorInverseBrush: rgba(0, 0, 0, 0.89);
+  --ControlOnImageFillColorDefaultBrush: rgba(28, 28, 28, .7019608);
+  --ControlOnImageFillColorSecondaryBrush: #1A1A1A;
+  --ControlOnImageFillColorTertiaryBrush: #131313;
+  --ControlOnImageFillColorDisabledBrush: #1E1E1E;
+  --SystemControlBackgroundBaseMediumBrush: rgba(0, 0, 0, .6);
+  --SystemControlForegroundAltHighBrush: #FFFFFF;
+  --SystemControlPageTextBaseMediumBrush: rgba(255, 255, 255, .6);
   --ControlFillColorDefaultBrush: var(--ctrl-fill-default);
   --ControlFillColorSecondaryBrush: var(--ctrl-fill-secondary);
   --ControlFillColorTertiaryBrush: var(--ctrl-fill-tertiary);

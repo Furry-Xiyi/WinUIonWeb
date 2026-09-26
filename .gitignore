@@ -385,8 +385,14 @@ FodyWeavers.xsd
 /tmp-grouped.txt
 /edge-*.log
 /edge-*.html
+/*.png
+/*.py
+/*.html
+/*.err
+/*.out
 /WinUIonWeb/group-*.png
 /WinUIonWeb/tmp-*.js
+/WinUIonWeb/.edge-*/
 /WinUIonWeb/vite-*.log
 /WinUIonWeb/vite-*.err.log
 /WinUIonWeb/.vite/

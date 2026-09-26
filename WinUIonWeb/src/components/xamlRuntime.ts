@@ -41,7 +41,7 @@ const reactiveComponentNames = new Set([
   'AutoSuggestBox', 'Border', 'Button', 'CheckBox', 'ColorPicker', 'ComboBox',
   'ContentDialog', 'ControlExample', 'DropDownButton', 'Expander', 'ExpanderBase', 'Flyout',
   'FontIcon', 'HyperlinkButton', 'Image', 'Popup', 'RadioButton', 'RadioButtons',
-  'Rating', 'Rectangle', 'RepeatButton', 'RichEditBox', 'RichTextBlock', 'Slider',
+  'Rating', 'Rectangle', 'RepeatButton', 'RichEditBox', 'RichTextBlock', 'Slider', 'NumberBox',
   'SplitButton', 'SymbolIcon', 'TeachingTip', 'TextBlock', 'TextBox', 'ToggleButton',
   'ToggleSplitButton', 'ToggleSwitch', 'ToolTip'
   , 'FlipView', 'GridView', 'ItemsRepeater', 'ItemsView', 'ListView', 'PullToRefresh', 'RefreshContainer', 'RefreshVisualizer', 'TreeView'
@@ -60,6 +60,19 @@ const componentName = (type: unknown) => {
 const unwrap = (value: unknown): unknown => {
   if (isRef(value)) return value.value
   return value
+}
+
+/** Convert XAML's alpha-first 8-digit colors to the CSS rgba form. */
+export const xamlColor = (value: unknown): unknown => {
+  if (typeof value !== 'string') return value
+  const match = value.trim().match(/^#([\da-f]{8})$/i)
+  if (!match) return value
+  const hex = match[1]
+  const alpha = Number.parseInt(hex.slice(0, 2), 16) / 255
+  const red = Number.parseInt(hex.slice(2, 4), 16)
+  const green = Number.parseInt(hex.slice(4, 6), 16)
+  const blue = Number.parseInt(hex.slice(6, 8), 16)
+  return `rgba(${red}, ${green}, ${blue}, ${Number(alpha.toFixed(4))})`
 }
 
 const scopeFor = (instance: ComponentInternalInstance | null): Scope => {
@@ -296,7 +309,7 @@ export const resolveXamlValue = (value: unknown, instance: ComponentInternalInst
     ? trimmed.replace(/^\$\{\s*/, '').replace(/\s*\}$/, '')
     : expression
   if (!directExpression.trim() && extraScope && Object.prototype.hasOwnProperty.call(extraScope, 'item')) return extraScope.item
-  if (directExpression === value && !value.includes('{') && !isExpressionString(value)) return value
+  if (directExpression === value && !value.includes('{') && !isExpressionString(value)) return xamlColor(value)
   let resolved: unknown
   try {
     const scope = scopeFor(instance)
@@ -309,13 +322,13 @@ export const resolveXamlValue = (value: unknown, instance: ComponentInternalInst
     // containing page.  XAML treats an unresolved value as its default.
     resolved = undefined
   }
-  if (resolved !== undefined) return resolved
+  if (resolved !== undefined) return xamlColor(resolved)
 
   // Never leak an unresolved binding expression into a visual control.  A
   // static-resource marker is intentionally preserved because controls use
   // that literal to select a style/resource by name.
   if (/^\{\s*(?:x:Bind|Binding)\b/.test(value) || isExpressionString(value)) return undefined
-  return value
+  return xamlColor(value)
 }
 
 /**

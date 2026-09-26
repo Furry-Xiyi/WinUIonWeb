@@ -2,8 +2,8 @@
   <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <StackPanel class="gallery-item-page">
       <StackPanel class="page-heading">
-        <TextBlock class="page-header" Text="{x:Bind $t('text.flipview'), Mode=OneWay}" />
-        <TextBlock class="page-description" Text="{x:Bind $t('text.the-flipview-lets-you-flip-through-a-collection'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" Text="{x:Bind pageTitle, Mode=OneWay}" />
+        <TextBlock class="page-description" Text="{x:Bind pageDescription, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         <StackPanel class="page-header-actions" Orientation="Horizontal">
           <Button class="header-action" Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button>
           <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=TwoWay}" Click="toggleFavorite"><TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" /></ToggleButton>
@@ -11,28 +11,52 @@
       </StackPanel>
 
       <StackPanel class="gallery-page-content">
-        <ControlExample HeaderText="{x:Bind $t('sample.flipview.simple'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind simpleXaml, Mode=OneWay}" ExampleHeight="270">
+        <ControlExample HeaderText="{x:Bind simpleHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind simpleXaml, Mode=OneWay}" ExampleHeight="Auto">
           <ControlExample.Example>
-            <FlipView Height="270" MaxWidth="400">
-              <Image AutomationProperties.Name="Cliff" Source="{x:Bind cliffSource, Mode=OneWay}" Stretch="UniformToFill" />
-              <Image AutomationProperties.Name="Grapes" Source="{x:Bind grapesSource, Mode=OneWay}" Stretch="UniformToFill" />
-              <Image AutomationProperties.Name="Rainier" Source="{x:Bind rainierSource, Mode=OneWay}" Stretch="UniformToFill" />
-              <Image AutomationProperties.Name="Sunset" Source="{x:Bind sunsetSource, Mode=OneWay}" Stretch="UniformToFill" />
-              <Image AutomationProperties.Name="Valley" Source="{x:Bind valleySource, Mode=OneWay}" Stretch="UniformToFill" />
+            <FlipView
+              Height="270"
+              MaxWidth="400"
+              AutomationProperties.AutomationControlType="List"
+              AutomationProperties.LocalizedControlType="list">
+              <Image AutomationProperties.Name="Cliff" Source="{x:Bind cliffSource, Mode=OneWay}" />
+              <Image AutomationProperties.Name="Grapes" Source="{x:Bind grapesSource, Mode=OneWay}" />
+              <Image AutomationProperties.Name="Rainier" Source="{x:Bind rainierSource, Mode=OneWay}" />
+              <Image AutomationProperties.Name="Sunset" Source="{x:Bind sunsetSource, Mode=OneWay}" />
+              <Image AutomationProperties.Name="Valley" Source="{x:Bind valleySource, Mode=OneWay}" />
             </FlipView>
           </ControlExample.Example>
         </ControlExample>
 
-        <ControlExample HeaderText="{x:Bind $t('sample.flipview.bound-data-template'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind boundXaml, Mode=OneWay}" ExampleHeight="180">
+        <ControlExample HeaderText="{x:Bind boundDataHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind boundXaml, Mode=OneWay}">
           <ControlExample.Example>
-            <FlipView Height="180" MaxWidth="400" BorderBrush="Black" BorderThickness="1" ItemsSource="{x:Bind controlItems, Mode=OneWay}">
+            <FlipView
+              Height="180"
+              MaxWidth="400"
+              AutomationProperties.AutomationControlType="List"
+              AutomationProperties.LocalizedControlType="list"
+              BorderBrush="Black"
+              BorderThickness="1"
+              ItemsSource="{x:Bind controlItems, Mode=OneWay}">
               <FlipView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="models:ControlInfoDataItem">
                   <Grid>
-                    <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                    <Image Width="36" VerticalAlignment="Center" Source="{x:Bind ImagePath}" Stretch="Uniform" />
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Image
+                      Width="36"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Source="{x:Bind ImagePath}"
+                      Stretch="Uniform" />
                     <Border Grid.Row="1" Height="60" Background="#A5FFFFFF">
-                      <TextBlock Padding="12,12" HorizontalAlignment="Center" Foreground="Black" Text="{x:Bind Title}" />
+                      <TextBlock
+                        Text="{x:Bind Title}"
+                        Foreground="Black"
+                        Padding="12,12"
+                        Style="{StaticResource TitleTextBlockStyle}"
+                        HorizontalAlignment="Center" />
                     </Border>
                   </Grid>
                 </DataTemplate>
@@ -41,14 +65,18 @@
           </ControlExample.Example>
         </ControlExample>
 
-        <ControlExample HeaderText="{x:Bind $t('sample.flipview.vertical'), Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind verticalXaml, Mode=OneWay}" ExampleHeight="270">
+        <ControlExample HeaderText="{x:Bind verticalHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind verticalXaml, Mode=OneWay}">
           <ControlExample.Example>
-            <FlipView Height="270" MaxWidth="400">
-              <Image AutomationProperties.Name="Cliff" Source="{x:Bind cliffSource, Mode=OneWay}" Stretch="UniformToFill" />
-              <Image AutomationProperties.Name="Grapes" Source="{x:Bind grapesSource, Mode=OneWay}" Stretch="UniformToFill" />
-              <Image AutomationProperties.Name="Rainier" Source="{x:Bind rainierSource, Mode=OneWay}" Stretch="UniformToFill" />
-              <Image AutomationProperties.Name="Sunset" Source="{x:Bind sunsetSource, Mode=OneWay}" Stretch="UniformToFill" />
-              <Image AutomationProperties.Name="Valley" Source="{x:Bind valleySource, Mode=OneWay}" Stretch="UniformToFill" />
+            <FlipView
+              Height="270"
+              MaxWidth="400"
+              AutomationProperties.AutomationControlType="List"
+              AutomationProperties.LocalizedControlType="list">
+              <Image AutomationProperties.Name="Cliff" Source="{x:Bind cliffSource, Mode=OneWay}" />
+              <Image AutomationProperties.Name="Grapes" Source="{x:Bind grapesSource, Mode=OneWay}" />
+              <Image AutomationProperties.Name="Rainier" Source="{x:Bind rainierSource, Mode=OneWay}" />
+              <Image AutomationProperties.Name="Sunset" Source="{x:Bind sunsetSource, Mode=OneWay}" />
+              <Image AutomationProperties.Name="Valley" Source="{x:Bind valleySource, Mode=OneWay}" />
               <FlipView.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel Orientation="Vertical" /></ItemsPanelTemplate></FlipView.ItemsPanel>
             </FlipView>
           </ControlExample.Example>
@@ -74,6 +102,11 @@ import { createPageState } from '../../utils/pageState'
 import { useI18n } from '../../components/i18n/index'
 
 const { t } = useI18n()
+const pageTitle = t('text.flipview')
+const pageDescription = t('text.the-flipview-lets-you-flip-through-a-collection')
+const simpleHeader = t('sample.flipview.simple')
+const boundDataHeader = t('sample.flipview.bound-data-template')
+const verticalHeader = t('sample.flipview.vertical')
 const currentPage = inject('currentPage')
 const pageKey = computed(() => currentPage?.value || 'flipview')
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value)
@@ -85,15 +118,64 @@ const rainierSource = media('rainier.jpg')
 const sunsetSource = media('sunset.jpg')
 const valleySource = media('valley.jpg')
 const controlItems = [
-  { Title: t('text.button'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Button.png' },
-  { Title: t('text.checkbox'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Checkbox.png' },
-  { Title: t('text.combobox'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/ComboBox.png' },
-  { Title: t('text.radiobuttons'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/RadioButton.png' },
-  { Title: t('text.slider'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Slider.png' }
+  { Title: t('text.resources'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/CodeTagIcon.png' },
+  { Title: t('text.style'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/CodeTagIcon.png' },
+  { Title: t('text.binding'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/CodeTagIcon.png' },
+  { Title: t('text.templates'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/CodeTagIcon.png' },
+  { Title: t('text.custom-user-controls'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/CustomControls.png' },
+  { Title: t('text.xaml-conditions'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/CodeTagIcon.png' },
+  { Title: t('text.scratch-pad'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/ScratchPad.png' },
+  { Title: t('text.color'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/ColorPaletteResources.png' },
+  { Title: t('text.geometry'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Shape.png' },
+  { Title: t('text.iconography'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/IconElement.png' },
+  { Title: t('text.spacing'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/CompactSizing.png' },
+  { Title: t('text.typography'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/TextBlock.png' },
+  { Title: t('text.color-contrast'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Accessibility.png' },
+  { Title: t('text.keyboard-navigation'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Accessibility.png' },
+  { Title: t('text.screen-reader'), ImagePath: 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/ControlImages/Accessibility.png' }
 ]
-const simpleXaml = '<FlipView Height="270" MaxWidth="400"><Image AutomationProperties.Name="Cliff" Source="ms-appx:///Assets/SampleMedia/cliff.jpg" /><Image AutomationProperties.Name="Grapes" Source="ms-appx:///Assets/SampleMedia/grapes.jpg" /><Image AutomationProperties.Name="Rainier" Source="ms-appx:///Assets/SampleMedia/rainier.jpg" /><Image AutomationProperties.Name="Sunset" Source="ms-appx:///Assets/SampleMedia/sunset.jpg" /><Image AutomationProperties.Name="Valley" Source="ms-appx:///Assets/SampleMedia/valley.jpg" /></FlipView>'
-const boundXaml = '<FlipView Height="180" MaxWidth="400" BorderBrush="Black" BorderThickness="1" ItemsSource="{x:Bind Items, Mode=OneWay}"><FlipView.ItemTemplate><DataTemplate><Grid><Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions><Image Width="36" VerticalAlignment="Center" Source="{x:Bind ImagePath}" Stretch="Uniform" /><Border Grid.Row="1" Height="60" Background="#A5FFFFFF"><TextBlock Padding="12,12" HorizontalAlignment="Center" Foreground="Black" Text="{x:Bind Title}" /></Border></Grid></DataTemplate></FlipView.ItemTemplate></FlipView>'
-const verticalXaml = '<FlipView Height="270"><FlipView.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel Orientation="Vertical" /></ItemsPanelTemplate></FlipView.ItemsPanel></FlipView>'
+const simpleXaml = `<FlipView MaxWidth="400" Height="270"
+          AutomationProperties.AutomationControlType="List"
+          AutomationProperties.LocalizedControlType="list">
+    <Image Source="ms-appx:///Assets/SampleMedia/cliff.jpg" AutomationProperties.Name="Cliff" />
+    <Image Source="ms-appx:///Assets/SampleMedia/grapes.jpg" AutomationProperties.Name="Grapes" />
+    <Image Source="ms-appx:///Assets/SampleMedia/rainier.jpg" AutomationProperties.Name="Rainier" />
+    <Image Source="ms-appx:///Assets/SampleMedia/sunset.jpg" AutomationProperties.Name="Sunset" />
+    <Image Source="ms-appx:///Assets/SampleMedia/valley.jpg" AutomationProperties.Name="Valley" />
+</FlipView>`
+const boundXaml = `<FlipView MaxWidth="400" Height="180" BorderBrush="Black" BorderThickness="1"
+          AutomationProperties.AutomationControlType="List"
+          AutomationProperties.LocalizedControlType="list"
+          ItemsSource="{x:Bind Items, Mode=OneWay}">
+    <FlipView.ItemTemplate>
+        <DataTemplate x:DataType="models:ControlInfoDataItem">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Image Width="36" Source="{x:Bind ImagePath}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Border Grid.Row="1" Height="60" Background="#A5FFFFFF">
+                    <TextBlock Text="{x:Bind Title}" Foreground="Black" Padding="12,12" Style="{StaticResource TitleTextBlockStyle}" HorizontalAlignment="Center" />
+                </Border>
+            </Grid>
+        </DataTemplate>
+    </FlipView.ItemTemplate>
+</FlipView>`
+const verticalXaml = `<FlipView MaxWidth="400" Height="270"
+          AutomationProperties.AutomationControlType="List"
+          AutomationProperties.LocalizedControlType="list">
+    <Image Source="ms-appx:///Assets/SampleMedia/cliff.jpg" AutomationProperties.Name="Cliff" />
+    <Image Source="ms-appx:///Assets/SampleMedia/grapes.jpg" AutomationProperties.Name="Grapes" />
+    <Image Source="ms-appx:///Assets/SampleMedia/rainier.jpg" AutomationProperties.Name="Rainier" />
+    <Image Source="ms-appx:///Assets/SampleMedia/sunset.jpg" AutomationProperties.Name="Sunset" />
+    <Image Source="ms-appx:///Assets/SampleMedia/valley.jpg" AutomationProperties.Name="Valley" />
+    <FlipView.ItemsPanel>
+        <ItemsPanelTemplate>
+            <VirtualizingStackPanel Orientation="Vertical" />
+        </ItemsPanelTemplate>
+    </FlipView.ItemsPanel>
+</FlipView>`
 </script>
 
 <style scoped>

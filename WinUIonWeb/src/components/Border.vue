@@ -26,6 +26,17 @@ const props = defineProps({
 })
 const attrs = useAttrs()
 const instance = getCurrentInstance()
+const xamlColor = (value: unknown) => {
+  const color = String(value ?? '').trim()
+  const argb = color.match(/^#([0-9a-f]{8})$/i)
+  if (!argb) return color
+  const hex = argb[1]
+  const alpha = Number.parseInt(hex.slice(0, 2), 16) / 255
+  const red = Number.parseInt(hex.slice(2, 4), 16)
+  const green = Number.parseInt(hex.slice(4, 6), 16)
+  const blue = Number.parseInt(hex.slice(6, 8), 16)
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`
+}
 const cssLength = (value: unknown) => {
   const resolved = resolveXamlValue(value, instance)
   if (resolved === '' || resolved === undefined || resolved === null) return ''
@@ -62,8 +73,8 @@ const borderStyle = computed(() => {
   const style: Record<string, string> = {}
   const background = resolveXamlValue(props.Background, instance)
   const brush = resolveXamlValue(props.BorderBrush, instance)
-  if (background) style.background = String(background)
-  if (brush) { style.borderColor = String(brush); style.borderStyle = 'solid' }
+  if (background) style.background = xamlColor(background)
+  if (brush) { style.borderColor = xamlColor(brush); style.borderStyle = 'solid' }
   if (props.BorderThickness !== '') { style.borderWidth = cssLength(props.BorderThickness); style.borderStyle = 'solid' }
   if (props.CornerRadius !== '') style.borderRadius = cornerRadius(props.CornerRadius)
   for (const [key, value] of Object.entries({ Width: props.Width, Height: props.Height, MinWidth: props.MinWidth, MinHeight: props.MinHeight, MaxWidth: props.MaxWidth, MaxHeight: props.MaxHeight })) {

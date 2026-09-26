@@ -9,8 +9,8 @@
       LineHeight="20"
       Margin="0,12" />
 
-    <ThemeWrapper :theme="themeValue">
-      <div class="control-example-frame">
+    <div class="control-example-frame">
+      <ThemeWrapper :theme="themeValue">
         <div class="example-container" :class="{ 'has-output': hasOutput, 'has-options': hasOptions }">
           <div
             class="example-display"
@@ -30,70 +30,70 @@
             <slot name="options">{{ options }}</slot>
           </aside>
         </div>
-        <Expander
-          v-if="showSourceCode"
-          Padding="0"
-          HorizontalAlignment="Stretch"
-          HorizontalContentAlignment="Stretch"
-          class="code-expander">
-          <Expander.Header>
-            <TextBlock Text="{x:Bind t('text.source-code'), Mode=OneWay}" />
-          </Expander.Header>
-          <Grid class="source-code-presenter" RowSpacing="16">
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto" />
-              <RowDefinition />
-            </Grid.RowDefinitions>
-            <SelectorBar
+      </ThemeWrapper>
+      <Expander
+        v-if="showSourceCode"
+        Padding="0"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Stretch"
+        class="code-expander">
+        <Expander.Header>
+          <TextBlock Text="{x:Bind t('text.source-code'), Mode=OneWay}" />
+        </Expander.Header>
+        <Grid class="source-code-presenter" RowSpacing="16">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+          </Grid.RowDefinitions>
+          <SelectorBar
+            Grid.Row="0"
+            Grid.Column="0"
+            Margin="4,0,0,0"
+            :Items="codeTabItems"
+            :SelectedItem="codeTabItems[selectedCodeTab]"
+            @SelectionChanged="onCodeTabChanged" />
+          <Grid Grid.Row="1" Grid.Column="0" class="sample-code-presenter">
+            <ScrollViewer
               Grid.Row="0"
               Grid.Column="0"
-              Margin="4,0,0,0"
-              :Items="codeTabItems"
-              :SelectedItem="codeTabItems[selectedCodeTab]"
-              @SelectionChanged="onCodeTabChanged" />
-            <Grid Grid.Row="1" Grid.Column="0" class="sample-code-presenter">
-              <ScrollViewer
-                Grid.Row="0"
-                Grid.Column="0"
-                class="source-code-scroll"
-                VerticalAlignment="Top"
-                VerticalScrollMode="Auto"
-                VerticalScrollBarVisibility="Auto"
-                HorizontalScrollMode="Auto"
-                HorizontalScrollBarVisibility="Auto">
-                <ContentPresenter class="code-content" Padding="16,0,16,16" MinHeight="30">
-                  <TextBlock
-                    class="code-block"
-                    Text="{x:Bind activeCode, Mode=OneWay}"
-                    IsTextSelectionEnabled="True" />
-                </ContentPresenter>
-              </ScrollViewer>
-              <Border
-                Grid.Row="0"
-                Grid.Column="0"
-                class="copy-button-border"
-                Margin="0,0,8,0"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Background="{ThemeResource ControlOnImageFillColorDefaultBrush}"
-                CornerRadius="{ThemeResource ControlCornerRadius}">
-                <Button
-                  class="copy-code-button"
-                  Width="30"
-                  Height="30"
-                  MinWidth="0"
-                  MinHeight="0"
-                  Padding="6"
-                  ToolTipService.ToolTip="{x:Bind t('text.copy'), Mode=OneWay}"
-                  Click="CopyCodeButton_Click">
-                  <TextBlock class="icon" Text="&#xE8C8;" FontSize="16" LineHeight="16" />
-                </Button>
-              </Border>
-            </Grid>
+              class="source-code-scroll"
+              VerticalAlignment="Top"
+              VerticalScrollMode="Auto"
+              VerticalScrollBarVisibility="Auto"
+              HorizontalScrollMode="Auto"
+              HorizontalScrollBarVisibility="Auto">
+              <ContentPresenter class="code-content" Padding="16,0,16,16" MinHeight="30">
+                <TextBlock
+                  class="code-block"
+                  Text="{x:Bind activeCode, Mode=OneWay}"
+                  IsTextSelectionEnabled="True" />
+              </ContentPresenter>
+            </ScrollViewer>
+            <Border
+              Grid.Row="0"
+              Grid.Column="0"
+              class="copy-button-border"
+              Margin="0,0,8,0"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Top"
+              Background="{ThemeResource ControlOnImageFillColorDefaultBrush}"
+              CornerRadius="{ThemeResource ControlCornerRadius}">
+              <Button
+                class="copy-code-button"
+                Width="30"
+                Height="30"
+                MinWidth="0"
+                MinHeight="0"
+                Padding="6"
+                ToolTipService.ToolTip="{x:Bind t('text.copy'), Mode=OneWay}"
+                Click="CopyCodeButton_Click">
+                <TextBlock class="icon" Text="&#xE8C8;" FontSize="16" LineHeight="16" />
+              </Button>
+            </Border>
           </Grid>
-        </Expander>
+        </Grid>
+      </Expander>
       </div>
-    </ThemeWrapper>
   </section>
 </template>
 

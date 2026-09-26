@@ -7,6 +7,7 @@
     role="checkbox"
     :aria-checked="ariaChecked"
     :aria-disabled="isDisabled"
+    v-bind="forwardedAttrs"
     @click="toggle"
     @keydown.space.prevent="toggle"
     @keydown.enter.prevent="toggle">
@@ -37,6 +38,10 @@ const props = defineProps({
 });
 const instance = getCurrentInstance();
 const attrs = useAttrs();
+const forwardedAttrs = computed(() => {
+  const { class: _class, style: _style, onClick: _onClick, onPointerdown: _onPointerdown, ...rest } = attrs;
+  return rest;
+});
 const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
 const resolvedIsChecked = computed(() => resolveXamlValue(props.IsChecked, instance));
 const resolvedIsThreeState = computed(() => resolveXamlValue(props.IsThreeState, instance));
