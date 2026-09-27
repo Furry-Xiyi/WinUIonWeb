@@ -14,14 +14,25 @@ export interface SwipeIconSource {
   Symbol?: string;
   Glyph?: string;
   UriSource?: string;
+  FontFamily?: string;
+}
+
+export interface SwipeControlApi {
+  Close: () => void;
+  LeftItems: SwipeItems | null;
+  RightItems: SwipeItems | null;
+  TopItems: SwipeItems | null;
+  BottomItems: SwipeItems | null;
+  IsEnabled: boolean;
+  IsTabStop: boolean;
+  Content: unknown;
+  ContentTemplate: unknown;
+  DataContext: unknown;
+  readonly Element: HTMLElement | undefined;
 }
 
 export interface SwipeItemInvokedEventArgs {
-  SwipeControl: {
-    Close: () => void;
-    Content: HTMLElement | undefined;
-    Element: HTMLElement | undefined;
-  };
+  SwipeControl: SwipeControlApi;
 }
 
 export interface SwipeItem {
@@ -35,7 +46,18 @@ export interface SwipeItem {
   Invoked?: (sender: SwipeItem, args: SwipeItemInvokedEventArgs) => void;
 }
 
-export interface SwipeItems {
-  Mode?: SwipeMode;
-  Items: SwipeItem[];
+export interface SwipeItems extends Iterable<SwipeItem> {
+  Mode: SwipeMode;
+  readonly Size: number;
+  readonly Count: number;
+  GetAt(index: number): SwipeItem;
+  SetAt(index: number, value: SwipeItem): void;
+  InsertAt(index: number, value: SwipeItem): void;
+  RemoveAt(index: number): void;
+  Append(value: SwipeItem): void;
+  RemoveAtEnd(): void;
+  Clear(): void;
+  ReplaceAll(values: Iterable<SwipeItem>): void;
+  IndexOf(value: SwipeItem): { found: boolean; index: number };
+  GetView(): ReadonlyArray<SwipeItem>;
 }

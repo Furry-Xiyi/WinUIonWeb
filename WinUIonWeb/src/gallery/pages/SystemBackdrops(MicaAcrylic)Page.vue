@@ -1,293 +1,156 @@
 <template>
-  <div class="gallery-item-page">
-    <div class="page-heading">
-          <TextBlock class="page-header" Text="System Backdrops (Mica/Acrylic)" />
-          <TextBlock
-            class="page-description"
-            Text="System backdrops provide material effects for window backgrounds, including Mica and Desktop Acrylic."
-            TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <Button class="header-action" @click="toggleTheme"><span class="icon">&#xE793;</span></Button>
-            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </ToggleButton>
-          </div>
-        </div>
-    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <ControlExample
-              headerText="Backdrop types"
-              :theme="pageTheme"
-              :xaml="backdropTypesXaml"
-              :cSharp="backdropTypesCSharp">
-              <template #example>
-                <div class="backdrop-info">
-                  <TextBlock TextWrapping="WrapWholeWords">
-                    A window can use one of the following system backdrops:<br>
-                    <strong>1. Mica</strong> - An opaque material that samples the desktop wallpaper once to tint the window background. Best for main app windows.<br>
-                    <strong>2. Mica Alt</strong> - A variant of Mica with stronger tinting. Recommended for apps with a tabbed title bar.<br>
-                    <strong>3. Desktop Acrylic (Base)</strong> - A semi-transparent material that shows a blurred view of the content behind the window.<br>
-                    <strong>4. Desktop Acrylic (Thin)</strong> - A lighter variant of Desktop Acrylic with more transparency.<br><br>
-                    <strong>Mica vs. Acrylic:</strong> Mica is opaque and renders the desktop wallpaper within the window background.
-                    Desktop Acrylic is semi-transparent and reveals a blurred view of what is behind the window in real time.
-                    Mica is more performant because it captures the wallpaper only once, while Acrylic updates continuously.<br><br>
-                    There are three backdrop types in the API:<br>
-                    <strong>SystemBackdrop</strong> - The base class of every backdrop type.<br>
-                    <strong>MicaBackdrop</strong> - Applies the Mica material. Set the Kind property to switch between Base and Alt.<br>
-                    <strong>DesktopAcrylicBackdrop</strong> - Applies the Desktop Acrylic material (Base type only).<br><br>
-                    All Mica variants require Windows 11 build 22000 or later. In-app acrylic (AcrylicBrush) is a separate XAML brush used within UI elements, not a window backdrop.
-                  </TextBlock>
-                  <Button Content="Show window" />
-                </div>
-              </template>
-            </ControlExample>
-
-            <ControlExample
-              headerText="MicaController"
-              :theme="pageTheme"
-              :cSharp="micaControllerCSharp">
-              <template #example>
-                <div class="backdrop-info">
-                  <TextBlock TextWrapping="WrapWholeWords">
-                    MicaController provides a customizable way to apply the Mica material. You can modify: FallbackColor, Kind, LuminosityOpacity, TintColor, and TintOpacity.<br><br>
-                    There are 2 kinds of Mica:<br>
-                    <strong>1. Base</strong> - The default, lighter appearance.<br>
-                    <strong>2. Alt</strong> - A darker appearance with stronger tinting of the desktop wallpaper.
-                  </TextBlock>
-                  <Button Content="Show window" />
-                </div>
-              </template>
-            </ControlExample>
-
-            <ControlExample
-              headerText="DesktopAcrylicController"
-              :theme="pageTheme"
-              :cSharp="desktopAcrylicControllerCSharp">
-              <template #example>
-                <div class="backdrop-info">
-                  <TextBlock TextWrapping="WrapWholeWords">
-                    DesktopAcrylicController provides a customizable way to apply the Desktop Acrylic material. It supports the same customization properties as MicaController.<br><br>
-                    There are 2 kinds of Desktop Acrylic:<br>
-                    <strong>1. Base</strong> - The default, darker appearance with less transparency.<br>
-                    <strong>2. Thin</strong> - A lighter appearance with more transparency.<br><br>
-                    Note: DesktopAcrylicBackdrop always uses the Base kind. To use the Thin kind, you must use DesktopAcrylicController directly.
-                  </TextBlock>
-                  <Button Content="Show window" />
-                </div>
-              </template>
-            </ControlExample>
-      </div>
+  <Page>
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind Labels.title, Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind Labels.description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal" Spacing="4">
+            <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind Labels.toggleTheme, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind Labels.toggleTheme, Mode=OneWay}"><FontIcon Glyph="&#xE793;" FontSize="16" /></Button>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}"><FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" /></ToggleButton>
+          </StackPanel>
+        </StackPanel>
+        <StackPanel class="gallery-page-content">
+          <ControlExample SampleDefinition="SystemBackdrops\SystemBackdropsBackdropTypes.txt" HeaderText="{x:Bind Labels.typesHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind backdropTypesXaml, Mode=OneWay}" CSharp="{x:Bind backdropTypesCSharp, Mode=OneWay}">
+            <ControlExample.Example>
+              <StackPanel class="system-backdrop-example">
+                <TextBlock TextWrapping="WrapWholeWords">
+                  <Run Text="{x:Bind Labels.typesIntro, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.micaName, Mode=OneWay}" /><Run Text="{x:Bind Labels.micaDescription, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.micaAltName, Mode=OneWay}" /><Run Text="{x:Bind Labels.micaAltDescription, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.acrylicName, Mode=OneWay}" /><Run Text="{x:Bind Labels.acrylicDescription, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.acrylicThinName, Mode=OneWay}" /><Run Text="{x:Bind Labels.acrylicThinDescription, Mode=OneWay}" /><LineBreak /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.comparisonTitle, Mode=OneWay}" /><Run Text="{x:Bind Labels.comparisonDescription, Mode=OneWay}" /><LineBreak /><LineBreak />
+                  <Run Text="{x:Bind Labels.apiIntro, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.apiSystemName, Mode=OneWay}" /><Run Text="{x:Bind Labels.apiSystemDescription, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.apiMicaName, Mode=OneWay}" /><Run Text="{x:Bind Labels.apiMicaDescription, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.apiAcrylicName, Mode=OneWay}" /><Run Text="{x:Bind Labels.apiAcrylicDescription, Mode=OneWay}" /><LineBreak /><LineBreak />
+                  <Run Text="{x:Bind Labels.requirements, Mode=OneWay}" />
+                </TextBlock>
+                <Button Margin="0,10,0,0" HorizontalAlignment="Left" Click="createBuiltInWindow_Click" Content="{x:Bind Labels.showWindow, Mode=OneWay}" />
+              </StackPanel>
+            </ControlExample.Example>
+            <ControlExample.Output><TextBlock Text="{x:Bind BuiltInOutput, Mode=OneWay}" TextWrapping="WrapWholeWords" /></ControlExample.Output>
+            <ControlExample.Options />
+          </ControlExample>
+          <ControlExample SampleDefinition="SystemBackdrops\SystemBackdropsMicacontroller.txt" HeaderText="{x:Bind Labels.micaHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" CSharp="{x:Bind micaControllerCSharp, Mode=OneWay}">
+            <ControlExample.Example>
+              <StackPanel class="system-backdrop-example">
+                <TextBlock TextWrapping="WrapWholeWords">
+                  <Run Text="{x:Bind Labels.micaControllerDescription, Mode=OneWay}" /><LineBreak /><LineBreak />
+                  <Run Text="{x:Bind Labels.micaKindsIntro, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.micaBaseName, Mode=OneWay}" /><Run Text="{x:Bind Labels.micaBaseDescription, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.micaControllerAltName, Mode=OneWay}" /><Run Text="{x:Bind Labels.micaControllerAltDescription, Mode=OneWay}" /><LineBreak />
+                </TextBlock>
+                <Button Margin="0,10,0,0" HorizontalAlignment="Left" Click="createCustomMicaWindow_Click" Content="{x:Bind Labels.showWindow, Mode=OneWay}" />
+              </StackPanel>
+            </ControlExample.Example>
+            <ControlExample.Output><TextBlock Text="{x:Bind MicaOutput, Mode=OneWay}" TextWrapping="WrapWholeWords" /></ControlExample.Output>
+            <ControlExample.Options />
+          </ControlExample>
+          <ControlExample SampleDefinition="SystemBackdrops\SystemBackdropsDesktopacryliccontroller.txt" HeaderText="{x:Bind Labels.acrylicHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" CSharp="{x:Bind desktopAcrylicControllerCSharp, Mode=OneWay}">
+            <ControlExample.Example>
+              <StackPanel class="system-backdrop-example">
+                <TextBlock TextWrapping="WrapWholeWords">
+                  <Run Text="{x:Bind Labels.acrylicControllerDescription, Mode=OneWay}" /><LineBreak /><LineBreak />
+                  <Run Text="{x:Bind Labels.acrylicKindsIntro, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.acrylicBaseName, Mode=OneWay}" /><Run Text="{x:Bind Labels.acrylicBaseDescription, Mode=OneWay}" /><LineBreak />
+                  <Run FontWeight="Bold" Text="{x:Bind Labels.acrylicControllerThinName, Mode=OneWay}" /><Run Text="{x:Bind Labels.acrylicControllerThinDescription, Mode=OneWay}" /><LineBreak /><LineBreak />
+                  <Run Text="{x:Bind Labels.acrylicControllerNote, Mode=OneWay}" />
+                </TextBlock>
+                <Button Margin="0,10,0,0" HorizontalAlignment="Left" Click="createCustomDesktopAcrylicWindow_Click" Content="{x:Bind Labels.showWindow, Mode=OneWay}" />
+              </StackPanel>
+            </ControlExample.Example>
+            <ControlExample.Output><TextBlock Text="{x:Bind AcrylicOutput, Mode=OneWay}" TextWrapping="WrapWholeWords" /></ControlExample.Output>
+            <ControlExample.Options />
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
     </ScrollViewer>
-  </div>
+  </Page>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue';
-import Button from '../../components/Button.vue';
-import ControlExample from '../../components/ControlExample.vue';
-import TextBlock from '../../components/TextBlock.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import { createPageState } from '../../utils/pageState';
+<script setup lang="ts">
+import { computed, inject, onBeforeUnmount, provide, ref, shallowReactive } from 'vue'
+import Button from '../../components/Button.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import FontIcon from '../../components/FontIcon.vue'
+import Page from '../../components/Page.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import ToggleButton from '../../components/ToggleButton.vue'
+import { Run, LineBreak } from '../../components/TextInline'
+import { useI18n } from '../../components/i18n/index'
+import { createSystemBackdropWindow, type SystemBackdropWindowHandle, type SystemBackdropState } from '../../components/systemBackdropHostAdapter'
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime'
+import { createPageState } from '../../utils/pageState'
+import { mountSystemBackdropsWindow, type SampleBackdropType } from '../samples/SystemBackdrops/mountSystemBackdropsWindow'
+import backdropTypesDefinition from '../samples/SystemBackdrops/SystemBackdropsBackdropTypes.txt?raw'
+import micaControllerDefinition from '../samples/SystemBackdrops/SystemBackdropsMicacontroller.txt?raw'
+import acrylicControllerDefinition from '../samples/SystemBackdrops/SystemBackdropsDesktopacryliccontroller.txt?raw'
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
-const currentPage = inject('currentPage');
-const pageKey = computed(() => {
-  if (typeof currentPage === 'string') return currentPage;
-  return currentPage?.value || 'systembackdrops';
-});
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-
-const backdropTypesXaml = `<!-- Mica -->
-<Window.SystemBackdrop>
-    <MicaBackdrop/>
-</Window.SystemBackdrop>
-
-<!-- Mica Alt -->
-<Window.SystemBackdrop>
-    <MicaBackdrop Kind="BaseAlt"/>
-</Window.SystemBackdrop>
-
-<!-- Acrylic -->
-<Window.SystemBackdrop>
-    <DesktopAcrylicBackdrop/>
-</Window.SystemBackdrop>`;
-
-const backdropTypesCSharp = `bool TrySetMicaBackdrop(bool useMicaAlt)
-{
-    if (SystemBackdrops.MicaController.IsSupported())
-    {
-        MicaBackdrop micaBackdrop = new MicaBackdrop();
-        micaBackdrop.Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base;
-        SystemBackdrop = micaBackdrop;
-
-        return true; // Succeeded.
-    }
-
-    return false; // Mica is not supported on this system.
+const currentPage = inject<{ value: string }>('currentPage')
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'systembackdrops')
+const i18n = useI18n()
+const { t } = i18n
+const Labels = computed(() => ({
+  title: t('catalog.item.systembackdrops.title'), description: t('catalog.item.systembackdrops.subtitle'), toggleTheme: t('gallery.page-header.toggle-theme'),
+  typesHeader: t('sample.systembackdrops.types-header'), micaHeader: t('sample.systembackdrops.mica-header'), acrylicHeader: t('sample.systembackdrops.acrylic-header'), showWindow: t('sample.systembackdrops.show-window'),
+  typesIntro: t('sample.systembackdrops.types-intro'), micaName: t('sample.systembackdrops.mica-name'), micaDescription: t('sample.systembackdrops.mica-description'), micaAltName: t('sample.systembackdrops.mica-alt-name'), micaAltDescription: t('sample.systembackdrops.mica-alt-description'),
+  acrylicName: t('sample.systembackdrops.acrylic-name'), acrylicDescription: t('sample.systembackdrops.acrylic-description'), acrylicThinName: t('sample.systembackdrops.acrylic-thin-name'), acrylicThinDescription: t('sample.systembackdrops.acrylic-thin-description'),
+  comparisonTitle: t('sample.systembackdrops.comparison-title'), comparisonDescription: t('sample.systembackdrops.comparison-description'), apiIntro: t('sample.systembackdrops.api-intro'),
+  apiSystemName: t('sample.systembackdrops.api-system-name'), apiSystemDescription: t('sample.systembackdrops.api-system-description'), apiMicaName: t('sample.systembackdrops.api-mica-name'), apiMicaDescription: t('sample.systembackdrops.api-mica-description'), apiAcrylicName: t('sample.systembackdrops.api-acrylic-name'), apiAcrylicDescription: t('sample.systembackdrops.api-acrylic-description'), requirements: t('sample.systembackdrops.requirements'),
+  micaControllerDescription: t('sample.systembackdrops.mica-controller-description'), micaKindsIntro: t('sample.systembackdrops.mica-kinds-intro'), micaBaseName: t('sample.systembackdrops.mica-base-name'), micaBaseDescription: t('sample.systembackdrops.mica-base-description'), micaControllerAltName: t('sample.systembackdrops.mica-controller-alt-name'), micaControllerAltDescription: t('sample.systembackdrops.mica-controller-alt-description'),
+  acrylicControllerDescription: t('sample.systembackdrops.acrylic-controller-description'), acrylicKindsIntro: t('sample.systembackdrops.acrylic-kinds-intro'), acrylicBaseName: t('sample.systembackdrops.acrylic-base-name'), acrylicBaseDescription: t('sample.systembackdrops.acrylic-base-description'), acrylicControllerThinName: t('sample.systembackdrops.acrylic-controller-thin-name'), acrylicControllerThinDescription: t('sample.systembackdrops.acrylic-controller-thin-description'), acrylicControllerNote: t('sample.systembackdrops.acrylic-controller-note')
+}))
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'))
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
+const BuiltInOutput = ref('')
+const MicaOutput = ref('')
+const AcrylicOutput = ref('')
+const outputSubscriptions = new Set<() => void>()
+onBeforeUnmount(() => { outputSubscriptions.forEach(stop => stop()); outputSubscriptions.clear() })
+const sampleSection = (definition: string, section: string) => definition.match(new RegExp('(?:^|\\r?\\n)--- ' + section + '\\r?\\n([\\s\\S]*?)(?=\\r?\\n--- |$)'))?.[1]?.trim() ?? ''
+const backdropTypesXaml = sampleSection(backdropTypesDefinition, 'xaml')
+const backdropTypesCSharp = sampleSection(backdropTypesDefinition, 'c#')
+const micaControllerCSharp = sampleSection(micaControllerDefinition, 'c#')
+const desktopAcrylicControllerCSharp = sampleSection(acrylicControllerDefinition, 'c#')
+const outputForState = (state: SystemBackdropState) => {
+  if (state.Status === 'Closed') return t('sample.systembackdrops.closed')
+  if (state.Status === 'HighContrast') return t('sample.systembackdrops.high-contrast')
+  if (state.Status === 'Fallback') return t(state.Reason === 'Inactive' ? 'sample.systembackdrops.inactive' : state.Reason === 'MaterialUnsupported' ? 'sample.systembackdrops.effect-unavailable' : state.Reason === 'TransparencyDisabled' ? 'sample.systembackdrops.transparency-disabled' : state.Reason === 'EnergySaver' ? 'sample.systembackdrops.energy-saver' : state.Reason === 'HostError' ? 'sample.systembackdrops.operation-failed' : 'sample.systembackdrops.native-unavailable')
+  const material = state.AppliedBackdrop?.Type === 'DesktopAcrylic' ? state.AppliedBackdrop.Kind === 'Thin' ? 'acrylic-thin' : 'acrylic' : state.AppliedBackdrop?.Kind === 'BaseAlt' ? 'mica-alt' : state.AppliedBackdrop ? 'mica' : 'none'
+  return t('sample.systembackdrops.applied', { backdrop: t(`sample.systembackdrops.backdrop.${material}`) })
 }
-
-bool TrySetDesktopAcrylicBackdrop()
-{
-    if (DesktopAcrylicController.IsSupported())
-    {
-        DesktopAcrylicBackdrop DesktopAcrylicBackdrop = new DesktopAcrylicBackdrop();
-        SystemBackdrop = DesktopAcrylicBackdrop;
-
-        return true; // Succeeded.
-    }
-
-    return false; // DesktopAcrylic is not supported on this system.
-}`;
-
-const micaControllerCSharp = `using System.Runtime.InteropServices;
-using WinRT;
-using Microsoft.UI.Composition;
-using Microsoft.UI.Composition.SystemBackdrops;
-
-MicaController micaController;
-SystemBackdropConfiguration configurationSource;
-
-bool TrySetMicaBackdrop(bool useMicaAlt)
-{
-    if (MicaController.IsSupported())
-    {
-        DispatcherQueue.EnsureSystemDispatcherQueue();
-
-        // Hooking up the policy object
-        configurationSource = new SystemBackdropConfiguration();
-        Activated += Window_Activated;
-        Closed += Window_Closed;
-        ((FrameworkElement)Content).ActualThemeChanged += Window_ThemeChanged;
-
-        // Initial configuration state.
-        configurationSource.IsInputActive = true;
-        SetConfigurationSourceTheme();
-
-        micaController = new MicaController();
-        micaController.Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base;
-
-        // Enable the system backdrop.
-        micaController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
-        micaController.SetSystemBackdropConfiguration(configurationSource);
-        return true; // Succeeded.
-    }
-
-    return false; // Mica is not supported on this system.
+const openSample = async (mode: 'builtIn' | 'mica' | 'acrylic') => {
+  const output = mode === 'builtIn' ? BuiltInOutput : mode === 'mica' ? MicaOutput : AcrylicOutput
+  const allowed: SampleBackdropType[] = mode === 'builtIn' ? ['Mica', 'MicaAlt', 'Acrylic', 'None'] : mode === 'mica' ? ['Mica', 'MicaAlt', 'None'] : ['Acrylic', 'AcrylicThin', 'None']
+  try {
+    const handle = await createSystemBackdropWindow({ title: t('sample.systembackdrops.window-title'), width: 640, height: 480, theme: 'Default', backdrop: mode === 'acrylic' ? { Type: 'DesktopAcrylic', Kind: 'Base' } : { Type: 'Mica', Kind: 'Base' }, mountContent: (element: HTMLElement, windowHandle: SystemBackdropWindowHandle) => mountSystemBackdropsWindow(element, windowHandle, allowed, i18n.locale) })
+    let unsubscribe: (() => void) | undefined
+    unsubscribe = handle.Subscribe(state => {
+      output.value = outputForState(state)
+      if (state.Status === 'Closed' && unsubscribe) { unsubscribe(); outputSubscriptions.delete(unsubscribe) }
+    })
+    if (handle.State.Status !== 'Closed') outputSubscriptions.add(unsubscribe)
+  } catch (error) {
+    const code = (error as { Code?: string })?.Code
+    output.value = t(code === 'PopupBlocked' ? 'sample.systembackdrops.popup-blocked' : code === 'HostUnavailable' ? 'sample.systembackdrops.window-unavailable' : 'sample.systembackdrops.window-failed')
+  }
 }
-
-private void Window_Activated(object sender, WindowActivatedEventArgs args)
-{
-    configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
-}
-
-private void Window_Closed(object sender, WindowEventArgs args)
-{
-    // Make sure any Mica/Acrylic controller is disposed
-    if (micaController != null)
-    {
-        micaController.Dispose();
-        micaController = null;
-    }
-    this.Activated -= Window_Activated;
-    configurationSource = null;
-}
-
-private void Window_ThemeChanged(FrameworkElement sender, object args)
-{
-    if (configurationSource != null)
-    {
-        SetConfigurationSourceTheme();
-    }
-}
-
-private void SetConfigurationSourceTheme()
-{
-    switch (((FrameworkElement)Content).ActualTheme)
-    {
-        case ElementTheme.Dark:    configurationSource.Theme = SystemBackdropTheme.Dark; break;
-        case ElementTheme.Light:   configurationSource.Theme = SystemBackdropTheme.Light; break;
-        case ElementTheme.Default: configurationSource.Theme = SystemBackdropTheme.Default; break;
-    }
-}`;
-
-const desktopAcrylicControllerCSharp = `using System.Runtime.InteropServices;
-using WinRT;
-using Microsoft.UI.Composition;
-using Microsoft.UI.Composition.SystemBackdrops;
-
-SystemBackdrops.DesktopAcrylicController acrylicController;
-SystemBackdrops.SystemBackdropConfiguration configurationSource;
-
-bool TrySetAcrylicBackdrop(bool useAcrylicThin)
-{
-    if (DesktopAcrylicController.IsSupported())
-    {
-        DispatcherQueue.EnsureSystemDispatcherQueue();
-
-        // Hooking up the policy object
-        configurationSource = new SystemBackdropConfiguration();
-        Activated += Window_Activated;
-        Closed += Window_Closed;
-        ((FrameworkElement)Content).ActualThemeChanged += Window_ThemeChanged;
-
-        // Initial configuration state.
-        configurationSource.IsInputActive = true;
-        SetConfigurationSourceTheme();
-
-        acrylicController = new DesktopAcrylicController();
-        acrylicController.Kind = useAcrylicThin ? DesktopAcrylicKind.Thin : DesktopAcrylicKind.Base;
-
-        // Enable the system backdrop.
-        acrylicController.AddSystemBackdropTarget(As<ICompositionSupportsSystemBackdrop>());
-        acrylicController.SetSystemBackdropConfiguration(configurationSource);
-        return true; // Succeeded.
-    }
-
-    return false; // Acrylic is not supported on this system.
-}
-
-private void Window_Activated(object sender, WindowActivatedEventArgs args)
-{
-    configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
-}
-
-private void Window_Closed(object sender, WindowEventArgs args)
-{
-    // Make sure any Mica/Acrylic controller is disposed
-    if (acrylicController != null)
-    {
-        acrylicController.Dispose();
-        acrylicController = null;
-    }
-    Activated -= Window_Activated;
-    configurationSource = null;
-}
-
-private void Window_ThemeChanged(FrameworkElement sender, object args)
-{
-    if (configurationSource != null)
-    {
-        SetConfigurationSourceTheme();
-    }
-}
-
-private void SetConfigurationSourceTheme()
-{
-    switch (((FrameworkElement)this.Content).ActualTheme)
-    {
-        case ElementTheme.Dark:    configurationSource.Theme = SystemBackdropTheme.Dark; break;
-        case ElementTheme.Light:   configurationSource.Theme = SystemBackdropTheme.Light; break;
-        case ElementTheme.Default: configurationSource.Theme = SystemBackdropTheme.Default; break;
-    }
-}`;
+const createBuiltInWindow_Click = () => openSample('builtIn')
+const createCustomMicaWindow_Click = () => openSample('mica')
+const createCustomDesktopAcrylicWindow_Click = () => openSample('acrylic')
+provide(xamlNameScopeKey, shallowReactive({}))
+provide(xamlScopeKey, { Labels, FavoriteLabel, FavoriteGlyph, isFavoriteState, pageTheme, toggleTheme, toggleFavorite, backdropTypesXaml, backdropTypesCSharp, micaControllerCSharp, desktopAcrylicControllerCSharp, BuiltInOutput, MicaOutput, AcrylicOutput, createBuiltInWindow_Click, createCustomMicaWindow_Click, createCustomDesktopAcrylicWindow_Click })
 </script>
 
 <style scoped>
-.page-heading { position: relative; }
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
-.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-size: 16px; }
-.backdrop-info { display: flex; flex-direction: column; gap: 10px; max-width: 760px; }
-.backdrop-info :deep(.win-btn) { align-self: flex-start; }
+:deep(.page-heading) { position: relative; min-width: 0; }
+:deep(.page-header) { font-size: 28px; font-weight: 600; margin: 0 80px 8px 0; color: var(--text-primary); overflow-wrap: anywhere; }
+:deep(.page-description) { color: var(--text-secondary); margin: 0 80px 16px 0; }
+:deep(.page-header-actions) { position: absolute; top: 0; right: 0; }
+:deep(.system-backdrop-example) { min-width: 0; max-width: 100%; }
+:deep(.system-backdrop-example .win-textblock) { overflow-wrap: anywhere; }
 </style>

@@ -1,5 +1,9 @@
 <template>
-  <Grid class="win-page-header" RowDefinitions="Auto,Auto">
+  <Grid class="win-page-header">
+    <Grid.Resources>
+      <x:String x:Key="GitHubIconPath">M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z</x:String>
+    </Grid.Resources>
+    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
     <StackPanel class="win-page-header-title-row" Orientation="Horizontal" Spacing="4">
       <TextBlock
         class="win-page-header-title"
@@ -11,118 +15,195 @@
         LineHeight="36"
         TextTrimming="CharacterEllipsis"
         TextWrapping="NoWrap"
-        :Text="itemTitle" />
+        Text="{x:Bind itemTitle, Mode=OneWay}" />
       <Button
-        v-if="hasApiDetails"
+        Visibility="{x:Bind ApiButtonVisibility, Mode=OneWay}"
         ref="apiDetailsButton"
         class="win-page-header-api-button"
         Style="{StaticResource SubtleButtonStyle}"
         Padding="4"
-        v-bind="{ 'automationproperties.name': t('gallery.page-header.api-details'), 'tooltipservice.tooltip': t('gallery.page-header.api-tooltip') }"
-        @Click="openFlyout('api')">
-        <TextBlock class="icon" FontSize="14" Text="&#xE946;" />
+        AutomationProperties.Name="{x:Bind ApiDetailsLabel, Mode=OneWay}"
+        ToolTipService.ToolTip="{x:Bind ApiToolTip, Mode=OneWay}"
+        Click="OnApiDetailsClick">
+        <FontIcon FontSize="14" Glyph="&#xE946;" />
       </Button>
     </StackPanel>
 
-    <Grid class="win-page-header-command-row" RowDefinitions="Auto" Grid.Row="1">
+    <Grid class="win-page-header-command-row" Grid.Row="1">
       <StackPanel class="win-page-header-left-actions" Orientation="Horizontal" Spacing="4">
         <DropDownButton
-          v-if="hasDocs"
+          Visibility="{x:Bind DocumentationVisibility, Mode=OneWay}"
           class="win-page-header-drop-down"
-          v-bind="{ 'automationproperties.name': t('gallery.page-header.documentation'), 'tooltipservice.tooltip': t('gallery.page-header.documentation') }"
-          :Flyout="docsFlyout"
-          @Select="onDocumentationSelected">
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <TextBlock class="icon" FontSize="16" Text="&#xE8A5;" />
-            <TextBlock :Text="t('gallery.page-header.documentation')" />
-          </StackPanel>
+          AutomationProperties.Name="{x:Bind DocumentationLabel, Mode=OneWay}"
+          ToolTipService.ToolTip="{x:Bind DocumentationLabel, Mode=OneWay}">
+          <DropDownButton.Content>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <FontIcon FontSize="16" Glyph="&#xE8A5;" />
+              <TextBlock Text="{x:Bind DocumentationLabel, Mode=OneWay}" />
+            </StackPanel>
+          </DropDownButton.Content>
+          <DropDownButton.Flyout>
+            <Flyout Placement="Bottom">
+              <ItemsControl x:Name="DocsList" Margin="-12" IsTabStop="False" ItemsSource="{x:Bind DocumentationLinks, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><StackPanel Orientation="Vertical" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="models:ControlInfoDocLink">
+                    <HyperlinkButton HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind Uri}" ToolTipService.ToolTip="{x:Bind Uri}">
+                      <TextBlock Text="{x:Bind Title}" />
+                    </HyperlinkButton>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Flyout>
+          </DropDownButton.Flyout>
         </DropDownButton>
 
         <DropDownButton
           class="win-page-header-drop-down"
-          v-bind="{ 'automationproperties.name': t('gallery.page-header.source-code'), 'tooltipservice.tooltip': t('gallery.page-header.source-code-tooltip') }"
-          :Flyout="sourceFlyout"
-          @Select="onSourceSelected">
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <TextBlock class="icon" FontSize="16" Text="&#xE8A5;" />
-            <TextBlock :Text="t('gallery.page-header.source')" />
-          </StackPanel>
+          AutomationProperties.Name="{x:Bind SourceCodeLabel, Mode=OneWay}"
+          ToolTipService.ToolTip="{x:Bind SourceCodeToolTip, Mode=OneWay}">
+          <DropDownButton.Content>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Viewbox Height="18"><PathIcon Data="{StaticResource GitHubIconPath}" /></Viewbox>
+              <TextBlock Text="{x:Bind SourceLabel, Mode=OneWay}" />
+            </StackPanel>
+          </DropDownButton.Content>
+          <DropDownButton.Flyout>
+            <Flyout Placement="Bottom">
+              <StackPanel x:Name="SourcePanel" Margin="0,-8,0,-12">
+                <StackPanel x:Name="ControlSourcePanel" Margin="0,0,0,4" Visibility="{x:Bind ControlSourceVisibility, Mode=OneWay}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind ControlSourceLabel, Mode=OneWay}" />
+                    <Button Padding="6,5,6,6" AutomationProperties.HelpText="{x:Bind GetControlSourceInfoText(), Mode=OneWay}" AutomationProperties.Name="{x:Bind InfoLabel, Mode=OneWay}" Style="{ThemeResource SubtleButtonStyle}" ToolTipService.ToolTip="{x:Bind GetControlSourceInfoText(), Mode=OneWay}">
+                      <FontIcon VerticalAlignment="Center" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Glyph="&#xE946;" />
+                    </Button>
+                  </StackPanel>
+                  <HyperlinkButton x:Name="ControlSourceLink" Margin="-12,4,-12,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind effectiveControlSourceUri, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind effectiveControlSourceUri, Mode=OneWay}">
+                    <TextBlock Text="{x:Bind itemTitle, Mode=OneWay}" />
+                  </HyperlinkButton>
+                </StackPanel>
+                <MenuFlyoutSeparator x:Name="ControlSourceSeparator" Margin="-12" Visibility="{x:Bind ControlSourceVisibility, Mode=OneWay}" />
+                <StackPanel Margin="0,8,0,0" Orientation="Horizontal" Spacing="8">
+                  <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind SampleSourceLabel, Mode=OneWay}" />
+                  <Button Padding="6,5,6,6" AutomationProperties.HelpText="{x:Bind GetSamplePageSourceInfoText(), Mode=OneWay}" AutomationProperties.Name="{x:Bind InfoLabel, Mode=OneWay}" Style="{ThemeResource SubtleButtonStyle}" ToolTipService.ToolTip="{x:Bind GetSamplePageSourceInfoText(), Mode=OneWay}">
+                    <FontIcon VerticalAlignment="Center" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Glyph="&#xE946;" />
+                  </Button>
+                </StackPanel>
+                <HyperlinkButton x:Name="PageMarkupGitHubLink" Margin="-12,4,-12,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind effectivePageMarkupUri, Mode=OneWay}" IsEnabled="{x:Bind HasPageMarkupSource, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind effectivePageMarkupUri, Mode=OneWay}">
+                  <TextBlock Text="{x:Bind XamlLabel, Mode=OneWay}" />
+                </HyperlinkButton>
+                <HyperlinkButton x:Name="PageCodeGitHubLink" Margin="-12,4,-12,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind effectivePageCodeUri, Mode=OneWay}" IsEnabled="{x:Bind HasPageCodeSource, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind effectivePageCodeUri, Mode=OneWay}">
+                  <TextBlock Text="{x:Bind CSharpLabel, Mode=OneWay}" />
+                </HyperlinkButton>
+              </StackPanel>
+            </Flyout>
+          </DropDownButton.Flyout>
         </DropDownButton>
       </StackPanel>
 
       <StackPanel class="win-page-header-right-actions" Orientation="Horizontal" Spacing="0" HorizontalAlignment="Right">
         <Button
-          v-if="ThemeButtonVisibility !== 'Collapsed' && ThemeButtonVisibility !== 'Hidden'"
+          Visibility="{x:Bind ResolvedThemeButtonVisibility, Mode=OneWay}"
           class="win-page-header-action"
           Height="32"
           Margin="0,0,4,0"
-          v-bind="{ 'automationproperties.name': t('gallery.page-header.toggle-theme'), 'tooltipservice.tooltip': t('gallery.page-header.toggle-theme') }"
-          @Click="OnThemeButtonClick">
-          <TextBlock class="icon" FontSize="16" Text="&#xE793;" />
+          AutomationProperties.Name="{x:Bind ToggleThemeLabel, Mode=OneWay}"
+          ToolTipService.ToolTip="{x:Bind ToggleThemeLabel, Mode=OneWay}"
+          Click="OnThemeButtonClick">
+          <FontIcon FontSize="16" Glyph="&#xE793;" />
         </Button>
         <AppBarSeparator
-          v-if="ThemeButtonVisibility !== 'Collapsed' && ThemeButtonVisibility !== 'Hidden'"
           class="win-page-header-separator"
-          Visibility="Visible" />
+          Visibility="{x:Bind ResolvedThemeButtonVisibility, Mode=OneWay}" />
         <Button
           ref="copyLinkButton"
           class="win-page-header-action win-page-header-copy-button"
           Height="32"
           Margin="4,0,4,0"
           Padding="11,2,11,0"
-          v-bind="{ 'automationproperties.name': t('gallery.page-header.copy-link'), 'tooltipservice.tooltip': t('gallery.page-header.copy-link') }"
-          @Click="OnCopyLinkButtonClick">
-          <TextBlock class="icon" FontSize="16" Text="&#xE71B;" />
+          AutomationProperties.Name="{x:Bind CopyLinkLabel, Mode=OneWay}"
+          ToolTipService.ToolTip="{x:Bind CopyLinkLabel, Mode=OneWay}"
+          Click="OnCopyLinkButtonClick">
+          <FontIcon FontSize="16" Glyph="&#xE71B;" />
         </Button>
         <ToggleButton
           class="win-page-header-action win-page-header-favorite-button"
           Height="32"
           Margin="4,0,0,0"
-          :IsChecked="isFavorite"
-          v-bind="{ 'automationproperties.name': t('gallery.page-header.favorite'), 'tooltipservice.tooltip': favoriteToolTip }"
-          @update:IsChecked="FavoriteButton_Click">
-          <TextBlock class="icon" FontSize="16" :Text="favoriteGlyph" />
+          IsChecked="{x:Bind isFavorite, Mode=OneWay}"
+          AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}"
+          ToolTipService.ToolTip="{x:Bind favoriteToolTip, Mode=OneWay}"
+          Click="OnFavoriteButtonClick">
+          <FontIcon FontSize="16" Glyph="{x:Bind favoriteGlyph, Mode=OneWay}" />
         </ToggleButton>
       </StackPanel>
     </Grid>
 
-    <MenuFlyout
-      :Open="openFlyoutName === 'api'"
-      :AnchorRect="apiAnchorRect"
-      :MinWidth="420"
-      @Close="closeFlyouts">
+    <Flyout ref="apiFlyoutRef" Placement="Bottom" Closed="closeFlyouts">
+      <Flyout.FlyoutPresenterStyle><Style TargetType="FlyoutPresenter"><Setter Property="MinWidth" Value="420" /></Style></Flyout.FlyoutPresenterStyle>
       <StackPanel class="win-page-header-flyout-panel" Spacing="16">
-        <StackPanel v-if="item.ApiNamespace" Spacing="8">
-          <TextBlock class="win-page-header-secondary-label" :Text="t('gallery.page-header.namespace')" />
-          <TextBlock FontFamily="Consolas" IsTextSelectionEnabled :Text="item.ApiNamespace" />
+        <StackPanel Visibility="{x:Bind NamespaceVisibility, Mode=OneWay}" Spacing="8">
+          <TextBlock class="win-page-header-secondary-label" Text="{x:Bind NamespaceLabel, Mode=OneWay}" />
+          <TextBlock FontFamily="Consolas" IsTextSelectionEnabled="True" Text="{x:Bind item.ApiNamespace, Mode=OneWay}" />
         </StackPanel>
-        <AppBarSeparator
-          v-if="item.ApiNamespace && item.BaseClasses?.length"
-          class="win-page-header-separator-line is-horizontal"
-          UseOverflowStyle="True" />
-        <StackPanel v-if="item.BaseClasses?.length" Spacing="4">
-          <TextBlock class="win-page-header-secondary-label" :Text="t('gallery.page-header.inheritance')" />
-          <BreadcrumbBar :ItemsSource="item.BaseClasses" IsEnabled="false" />
+        <Border
+          Visibility="{x:Bind ApiSeparatorVisibility, Mode=OneWay}"
+          class="win-page-header-separator-line"
+          Height="1"
+          Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+        <StackPanel Visibility="{x:Bind InheritanceVisibility, Mode=OneWay}" Spacing="4">
+          <TextBlock class="win-page-header-secondary-label" Text="{x:Bind InheritanceLabel, Mode=OneWay}" />
+          <BreadcrumbBar ItemsSource="{x:Bind item.BaseClasses, Mode=OneWay}" IsEnabled="False" />
         </StackPanel>
       </StackPanel>
-    </MenuFlyout>
+    </Flyout>
   </Grid>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+
+import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import AppBarSeparator from '../../components/AppBarSeparator.vue';
 import BreadcrumbBar from '../../components/BreadcrumbBar.vue';
+import Border from '../../components/Border.vue';
 import Button from '../../components/Button.vue';
 import DropDownButton from '../../components/DropDownButton.vue';
+import FontIcon from '../../components/FontIcon.vue';
+import HyperlinkButton from '../../components/HyperlinkButton.vue';
+import ItemsControl from '../../components/ItemsControl.vue';
+import { DataTemplate, ItemsPanelTemplate } from '../../components/CollectionProperties';
+import { MenuFlyoutSeparator } from '../../components/MenuFlyoutItems';
 import Grid from '../../components/Grid.vue';
-import MenuFlyout from '../../components/MenuFlyout.vue';
+import Flyout from '../../components/Flyout.vue';
 import StackPanel from '../../components/StackPanel.vue';
 import TextBlock from '../../components/TextBlock.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
+import PathIcon from '../../components/PathIcon.vue';
+import Viewbox from '../../components/Viewbox.vue';
 import { useI18n } from '../../components/i18n/index';
+import { resolveXamlValue } from '../../components/xamlRuntime';
 
 const { t } = useI18n();
+const ApiDetailsLabel = computed(() => t('gallery.page-header.api-details'));
+const ApiToolTip = computed(() => t('gallery.page-header.api-tooltip'));
+const ToggleThemeLabel = computed(() => t('gallery.page-header.toggle-theme'));
+const CopyLinkLabel = computed(() => t('gallery.page-header.copy-link'));
+const FavoriteLabel = computed(() => t('gallery.page-header.favorite'));
+const DocumentationLabel = computed(() => t('gallery.page-header.documentation'));
+const SourceLabel = computed(() => t('gallery.page-header.source'));
+const SourceCodeLabel = computed(() => t('gallery.page-header.source-code'));
+const SourceCodeToolTip = computed(() => t('gallery.page-header.source-code-tooltip'));
+const ControlSourceLabel = computed(() => t('gallery.page-header.control-source'));
+const SampleSourceLabel = computed(() => t('gallery.page-header.sample-page-source'));
+const InfoLabel = computed(() => t('gallery.page-header.info'));
+const XamlLabel = computed(() => t('gallery.page-header.xaml'));
+const CSharpLabel = computed(() => t('gallery.page-header.csharp'));
+const NamespaceLabel = computed(() => t('gallery.page-header.namespace'));
+const InheritanceLabel = computed(() => t('gallery.page-header.inheritance'));
+const OnApiDetailsClick = () => openFlyout('api');
+const OnFavoriteButtonClick = () => FavoriteButton_Click();
 
 interface GalleryDocLink {
   Title?: string;
@@ -142,22 +223,14 @@ interface GalleryItem {
   PageCodeUri?: string;
 }
 
-interface FlyoutEntry {
-  Text?: string;
-  Value?: string;
-  Kind?: string;
-  IsEnabled?: boolean;
-  Foreground?: string;
-}
-
-type ElementWithRoot = HTMLElement | { $el?: HTMLElement };
+type ElementWithRoot = HTMLElement | { $el?: HTMLElement; Element?: HTMLElement };
 
 const props = withDefaults(defineProps<{
   ThemeButtonVisibility?: string;
   PageName?: string;
-  CopyLinkAction?: (() => void) | null;
-  ToggleThemeAction?: (() => void) | null;
-  Item?: GalleryItem;
+  CopyLinkAction?: (() => void) | string | null;
+  ToggleThemeAction?: (() => void) | string | null;
+  Item?: GalleryItem | string;
 }>(), {
   ThemeButtonVisibility: 'Visible',
   PageName: '',
@@ -167,51 +240,51 @@ const props = withDefaults(defineProps<{
 });
 
 const apiDetailsButton = ref<ElementWithRoot | null>(null);
+const instance = getCurrentInstance();
+const resolve = (value: unknown) => resolveXamlValue(value, instance);
+const ApiButtonVisibility = computed(() => hasApiDetails.value ? 'Visible' : 'Collapsed');
+const ResolvedThemeButtonVisibility = computed(() => resolve(props.ThemeButtonVisibility) === 'Collapsed' || resolve(props.ThemeButtonVisibility) === 'Hidden' ? 'Collapsed' : 'Visible');
+const apiFlyoutRef = ref<any>(null);
 const copyLinkButton = ref<ElementWithRoot | null>(null);
 const openFlyoutName = ref('');
 const apiAnchorRect = ref<Pick<DOMRect, 'top' | 'bottom' | 'left' | 'right' | 'width' | 'height'> | null>(null);
 const isFavorite = ref(false);
 const controlSourceUri = ref('');
-const samplePageSourceUri = ref('');
+const pageMarkupSourceUri = ref('');
+const pageCodeSourceUri = ref('');
 
-const item = computed(() => props.Item || {});
-const itemTitle = computed(() => item.value.Title || props.PageName);
+const item = computed(() => resolve(props.Item) as GalleryItem || {});
+const itemTitle = computed(() => item.value.Title || resolve(props.PageName));
 const hasApiDetails = computed(() => Boolean(item.value.ApiNamespace) || Boolean(item.value.BaseClasses?.length));
+const NamespaceVisibility = computed(() => item.value.ApiNamespace ? 'Visible' : 'Collapsed');
+const InheritanceVisibility = computed(() => item.value.BaseClasses?.length ? 'Visible' : 'Collapsed');
+const ApiSeparatorVisibility = computed(() => item.value.ApiNamespace && item.value.BaseClasses?.length ? 'Visible' : 'Collapsed');
 const hasDocs = computed(() => Array.isArray(item.value.Docs) && item.value.Docs.length > 0);
+const DocumentationVisibility = computed(() => hasDocs.value ? 'Visible' : 'Collapsed');
 const favoriteGlyph = computed(() => isFavorite.value ? '\uE735' : '\uE734');
 const favoriteToolTip = computed(() => isFavorite.value
   ? t('sample.navigationview.remove-favorite')
   : t('sample.navigationview.add-favorite'));
 const effectiveControlSourceUri = computed(() => controlSourceUri.value || item.value.SourceLink || '');
-const effectiveSamplePageSourceUri = computed(() => samplePageSourceUri.value || item.value.PageMarkupUri || item.value.PageCodeUri || '');
-const docsFlyout = computed(() => (item.value.Docs || []).map((doc) => ({
-  Text: doc.Title || doc.title || doc.Uri || doc.uri || '',
-  Value: doc.Uri || doc.uri || '',
-  Foreground: 'var(--accent-text-fill-color-primary)'
+const effectivePageMarkupUri = computed(() => pageMarkupSourceUri.value || item.value.PageMarkupUri || '');
+const effectivePageCodeUri = computed(() => pageCodeSourceUri.value || item.value.PageCodeUri || '');
+const DocumentationLinks = computed(() => (item.value.Docs || []).map((doc) => ({
+  Title: doc.Title || doc.title || doc.Uri || doc.uri || '',
+  Uri: doc.Uri || doc.uri || ''
 })));
-const sourceFlyout = computed(() => [
-  {
-    Text: t('gallery.page-header.control-source'),
-    Value: 'control-source',
-    IsEnabled: Boolean(effectiveControlSourceUri.value),
-    Foreground: 'var(--accent-text-fill-color-primary)'
-  },
-  { Kind: 'MenuFlyoutSeparator' },
-  {
-    Text: t('gallery.page-header.sample-page-source'),
-    Value: 'page-source',
-    IsEnabled: Boolean(effectiveSamplePageSourceUri.value),
-    Foreground: 'var(--accent-text-fill-color-primary)'
-  }
-]);
+const HasControlSource = computed(() => Boolean(effectiveControlSourceUri.value));
+const ControlSourceVisibility = computed(() => HasControlSource.value ? 'Visible' : 'Collapsed');
+const HasPageMarkupSource = computed(() => Boolean(effectivePageMarkupUri.value));
+const HasPageCodeSource = computed(() => Boolean(effectivePageCodeUri.value));
 
 const unwrap = (value: ElementWithRoot | null) => {
-  const element = value instanceof HTMLElement ? value : value?.$el;
+  const element = value instanceof HTMLElement ? value : value?.Element ?? value?.$el;
   return element instanceof HTMLElement ? element : null;
 };
 
 function closeFlyouts() {
   openFlyoutName.value = '';
+  apiFlyoutRef.value?.Hide?.();
 }
 
 async function openFlyout(name: string) {
@@ -221,10 +294,12 @@ async function openFlyout(name: string) {
   apiAnchorRect.value = { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, width: rect.width, height: rect.height };
   openFlyoutName.value = name;
   await nextTick();
+  void apiFlyoutRef.value?.ShowAt?.(target);
 }
 
 function SetSamplePageSourceLinks(BaseUri: string, PageName: string) {
-  samplePageSourceUri.value = `${BaseUri}${PageName}.vue`;
+  pageMarkupSourceUri.value = `${BaseUri}${PageName}.xaml`;
+  pageCodeSourceUri.value = `${BaseUri}${PageName}.xaml.cs`;
 }
 
 function SetControlSourceLink(BaseUri: string, SourceLink: string) {
@@ -233,21 +308,23 @@ function SetControlSourceLink(BaseUri: string, SourceLink: string) {
 
 function GetControlSourceInfoText() {
   const title = item.value.Title || t('gallery.page-header.this-control');
-  return `${t('gallery.page-header.source-code-of')} ${title}`;
+  return t('gallery.page-header.control-source-info', { 0: title });
 }
 
 function GetSamplePageSourceInfoText() {
-  const title = item.value.Title || t('gallery.page-header.this-sample-page');
-  return `${t('gallery.page-header.source-code-of')} ${title}`;
+  const title = item.value.Title ? t('gallery.page-header.sample-page-title', { 0: item.value.Title }) : t('gallery.page-header.this-sample-page');
+  return t('gallery.page-header.sample-source-info', { 0: title });
 }
 
 function OnCopyLinkButtonClick() {
-  if (props.CopyLinkAction) props.CopyLinkAction();
+  const action = resolve(props.CopyLinkAction);
+  if (typeof action === 'function') action();
   else void navigator.clipboard?.writeText(window.location.href);
 }
 
 function OnThemeButtonClick() {
-  props.ToggleThemeAction?.();
+  const action = resolve(props.ToggleThemeAction);
+  if (typeof action === 'function') action();
 }
 
 function FavoriteButton_Click() {
@@ -272,19 +349,6 @@ function readFavorites(): string[] {
 function syncFavorite() {
   const key = item.value.UniqueId;
   isFavorite.value = Boolean(key && readFavorites().includes(key));
-}
-
-function onDocumentationSelected(entry: FlyoutEntry | null) {
-  const uri = entry?.Value;
-  if (uri) window.open(uri, '_blank', 'noopener,noreferrer');
-}
-
-function onSourceSelected(entry: FlyoutEntry | null) {
-  const value = entry?.Value;
-  const uri = value === 'control-source'
-    ? effectiveControlSourceUri.value
-    : effectiveSamplePageSourceUri.value;
-  if (uri) window.open(uri, '_blank', 'noopener,noreferrer');
 }
 
 defineExpose({
@@ -312,6 +376,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('storage', syncFavorite);
   window.removeEventListener('winui-favorites-changed', syncFavorite);
 });
+
 </script>
 
 <style scoped>
@@ -369,7 +434,7 @@ onBeforeUnmount(() => {
   padding: 5px 11px 6px;
 }
 
-.win-page-header-drop-down :deep(.win-dropdown-content) {
+.win-page-header-drop-down :deep(.win-dropdown-content-presenter) {
   min-width: 0;
 }
 
@@ -398,6 +463,20 @@ onBeforeUnmount(() => {
 
   .win-page-header-command-row {
     margin: 8px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .win-page-header-left-actions {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .win-page-header-right-actions {
+    position: static;
+    margin-inline-start: auto;
   }
 
 }

@@ -1,220 +1,159 @@
 <template>
+  <Page>
+    <Page.Resources>
+      <x:String x:Key="MultipleButtonsSecondaryCommands" xml:space="preserve">
+        &lt;AppBarButton Icon="Add" Label="Button 1"&gt;
+            &lt;AppBarButton.KeyboardAccelerators&gt;
+                &lt;KeyboardAccelerator Modifiers="Control" Key="N" /&gt;
+            &lt;/AppBarButton.KeyboardAccelerators&gt;
+        &lt;/AppBarButton&gt;
+        &lt;AppBarButton Icon="Delete" Label="Button 2"&gt;
+            &lt;AppBarButton.KeyboardAccelerators&gt;
+                &lt;KeyboardAccelerator Key="Delete" /&gt;
+            &lt;/AppBarButton.KeyboardAccelerators&gt;
+        &lt;/AppBarButton&gt;
+        &lt;AppBarSeparator /&gt;
+        &lt;AppBarButton Icon="FontDecrease" Label="Button 3"&gt;
+            &lt;AppBarButton.KeyboardAccelerators&gt;
+                &lt;KeyboardAccelerator Modifiers="Control" Key="Subtract" /&gt;
+            &lt;/AppBarButton.KeyboardAccelerators&gt;
+        &lt;/AppBarButton&gt;
+        &lt;AppBarButton Icon="FontIncrease" Label="Button 4"&gt;
+            &lt;AppBarButton.KeyboardAccelerators&gt;
+                &lt;KeyboardAccelerator Modifiers="Control" Key="Add" /&gt;
+            &lt;/AppBarButton.KeyboardAccelerators&gt;
+        &lt;/AppBarButton&gt;
+      </x:String>
+    </Page.Resources>
   <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <TextBlock class="page-header" :Text="$t('text.commandbar')" />
-        <TextBlock class="page-description" :Text="$t('text.commandbar-subtitle')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" Text="{x:Bind Labels.PageTitle, Mode=OneWay}" FontSize="28" FontWeight="SemiBold" LineHeight="32" Margin="0,0,72,8" TextWrapping="Wrap" />
+        <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
-          <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-            <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-          </ToggleButton>
+          <Button class="header-action" Click="toggleTheme" ToolTipService.ToolTip="{x:Bind Labels.ToggleTheme, Mode=OneWay}" AutomationProperties.Name="{x:Bind Labels.ToggleTheme, Mode=OneWay}"><FontIcon Glyph="&#xE793;" FontSize="16" /></Button>
+          <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}"><FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" /></ToggleButton>
         </div>
       </div>
-      <div class="gallery-page-content">
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('text.a-command-bar-with-labels-on-the-side-free-float')"
-          :theme="pageTheme"
-          :vue="exampleCode">
-          <template #example>
-            <StackPanel class="commandbar-sample">
-              <CommandBar
-                Background="Transparent"
-                HorizontalAlignment="Left"
-                :Theme="pageTheme"
-                :IsOpen="isOpen"
-                :IsSticky="isSticky"
-                DefaultLabelPosition="Right"
-                :PrimaryCommands="primaryCommands"
-                :SecondaryCommands="secondaryCommands"
-                @update:IsOpen="isOpen = $event" />
-              <TextBlock :Text="selectedOption" Padding="0,8,0,0" />
-            </StackPanel>
-          </template>
-          <template #options>
+      <StackPanel class="gallery-page-content">
+        <ControlExample x:Name="Example3" class="commandbar-example" SampleDefinition="CommandBar\CommandBarLabelsSide.txt" HeaderText="{x:Bind Labels.Header, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind CommandBarXaml, Mode=OneWay}">
+          <ControlExample.Example>
             <StackPanel>
-              <TextBlock :Text="$t('sample.commandbar.show-or-hide')" />
-              <Button :Content="$t('sample.commandbar.open')" Margin="0,12,0,0" @Click="openCommandBar" />
-              <Button :Content="$t('sample.commandbar.close')" Margin="0,12,0,0" @Click="closeCommandBar" />
-              <TextBlock :Text="$t('sample.commandbar.modify-content')" Margin="0,16,0,0" />
-              <Button :Content="$t('sample.commandbar.add-secondary')" Margin="0,12,0,0" @Click="hasExtraCommands = true" />
-              <Button :Content="$t('sample.commandbar.remove-secondary')" Margin="0,12,0,0" @Click="hasExtraCommands = false" />
+              <CommandBar x:Name="PrimaryCommandBar" DefaultLabelPosition="Right" IsOpen="False">
+                <CommandBar.PrimaryCommands>
+                  <AppBarButton x:Name="addButton" Click="OnElementClicked" Icon="Add" Label="{x:Bind Labels.Add, Mode=OneWay}"><AppBarButton.KeyboardAccelerators><KeyboardAccelerator Key="A" Modifiers="Control" /></AppBarButton.KeyboardAccelerators></AppBarButton>
+                  <AppBarButton x:Name="editButton" Click="OnElementClicked" Icon="Edit" Label="{x:Bind Labels.Edit, Mode=OneWay}"><AppBarButton.KeyboardAccelerators><KeyboardAccelerator Key="E" Modifiers="Control" /></AppBarButton.KeyboardAccelerators></AppBarButton>
+                  <AppBarButton x:Name="shareButton" Click="OnElementClicked" Icon="Share" Label="{x:Bind Labels.Share, Mode=OneWay}"><AppBarButton.KeyboardAccelerators><KeyboardAccelerator Key="F4" /></AppBarButton.KeyboardAccelerators></AppBarButton>
+                </CommandBar.PrimaryCommands>
+                <CommandBar.SecondaryCommands>
+                  <AppBarButton x:Name="settingsButton" Click="OnElementClicked" Icon="Setting" Label="{x:Bind Labels.Settings, Mode=OneWay}"><AppBarButton.KeyboardAccelerators><KeyboardAccelerator Key="I" Modifiers="Control" /></AppBarButton.KeyboardAccelerators></AppBarButton>
+                </CommandBar.SecondaryCommands>
+              </CommandBar>
             </StackPanel>
-          </template>
+          </ControlExample.Example>
+          <ControlExample.Output><TextBlock x:Name="SelectedOptionText" Text="{x:Bind SelectedOptionOutput, Mode=OneWay}" Padding="0,8,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+          <ControlExample.Options>
+            <StackPanel>
+              <TextBlock Text="{x:Bind Labels.ShowOrHide, Mode=OneWay}" TextWrapping="Wrap" />
+              <Button Margin="0,12,0,0" Click="OpenButton_Click" Content="{x:Bind Labels.Open, Mode=OneWay}" />
+              <Button Margin="0,12,0,0" Click="CloseButton_Click" Content="{x:Bind Labels.Close, Mode=OneWay}" />
+              <TextBlock Margin="0,16,0,0" Text="{x:Bind Labels.ModifyContent, Mode=OneWay}" TextWrapping="Wrap" />
+              <Button Margin="0,12,0,0" Click="AddSecondaryCommands_Click" Content="{x:Bind Labels.AddSecondary, Mode=OneWay}" />
+              <Button Margin="0,12,0,0" Click="RemoveSecondaryCommands_Click" Content="{x:Bind Labels.RemoveSecondary, Mode=OneWay}" />
+            </StackPanel>
+          </ControlExample.Options>
+          <ControlExample.Substitutions>
+            <ControlExampleSubstitution Key="IsOpen" IsEnabled="True" Value="{x:Bind PrimaryCommandBar.IsOpen, Mode=OneWay}" />
+            <ControlExampleSubstitution Key="IsSticky" IsEnabled="{x:Bind PrimaryCommandBar.IsSticky, Mode=OneWay}" Value=" IsSticky=&quot;True&quot; " />
+            <ControlExampleSubstitution Key="MultipleButtonsSecondaryCommands" IsEnabled="{x:Bind MultipleButtons, Mode=OneWay}" Value="{StaticResource MultipleButtonsSecondaryCommands}" />
+          </ControlExample.Substitutions>
         </ControlExample>
-      </div>
+      </StackPanel>
     </div>
   </ScrollViewer>
+  </Page>
 </template>
 
-<script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+<script setup>
+import { computed, h, inject, onBeforeUnmount, provide, ref, shallowReactive } from 'vue';
 import AppBarButton from '../../components/AppBarButton.vue';
 import AppBarSeparator from '../../components/AppBarSeparator.vue';
 import Button from '../../components/Button.vue';
 import CommandBar from '../../components/CommandBar.vue';
 import ControlExample from '../../components/ControlExample.vue';
-import TextBlock from '../../components/TextBlock.vue';
-import StackPanel from '../../components/StackPanel.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import { useI18n } from '../../components/i18n/index';
-import { createPageState } from '../../utils/pageState';
-
+import FontIcon from '../../components/FontIcon.vue';
+import Page from '../../components/Page.vue';
 import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import { KeyboardAccelerator } from '../../components/MenuFlyoutItems';
+import { useI18n } from '../../components/i18n/index';
+import { xamlNameScopeKey } from '../../components/xamlRuntime';
+import { createPageState } from '../../utils/pageState';
+import commandBarDefinition from '../samples/CommandBar/CommandBarLabelsSide.txt?raw';
+
 const { t } = useI18n();
-const currentPage = inject<{ value: string }>('currentPage');
-const pageKey = computed(() => currentPage?.value || 'commandbar');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-
-const isOpen = ref(false);
-const isSticky = ref(false);
-const hasExtraCommands = ref(false);
-const selectedOption = ref('');
-
-const onElementClicked = (name: string) => {
-  selectedOption.value = t('sample.you-clicked', { name });
-};
-
-const primaryCommands = computed(() => [
-  {
-    Key: 'Add',
-    Component: AppBarButton,
-    Props: {
-      Icon: 'Add',
-      Label: t('text.add'),
-      KeyboardAccelerators: [{ Key: 'A', Modifiers: ['Control'] }]
-    },
-    Click: () => onElementClicked(t('text.add'))
-  },
-  {
-    Key: 'Edit',
-    Component: AppBarButton,
-    Props: {
-      Icon: 'Edit',
-      Label: t('text.edit'),
-      KeyboardAccelerators: [{ Key: 'E', Modifiers: ['Control'] }]
-    },
-    Click: () => onElementClicked(t('text.edit'))
-  },
-  {
-    Key: 'Share',
-    Component: AppBarButton,
-    Props: {
-      Icon: 'Share',
-      Label: t('text.share'),
-      KeyboardAccelerators: [{ Key: 'F4' }]
-    },
-    Click: () => onElementClicked(t('text.share'))
+const currentPage = inject('currentPage');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'commandbar');
+const Names = shallowReactive({});
+provide(xamlNameScopeKey, Names);
+const Labels = computed(() => ({
+  PageTitle: t('text.commandbar'), Description: t('text.commandbar-subtitle'), ToggleTheme: t('gallery.page-header.toggle-theme'), Header: t('text.a-command-bar-with-labels-on-the-side-free-float'),
+  Add: t('text.add'), Edit: t('text.edit'), Share: t('text.share'), Settings: t('text.settings'),
+  ShowOrHide: t('sample.commandbar.show-or-hide'), Open: t('sample.commandbar.open'), Close: t('sample.commandbar.close'), ModifyContent: t('sample.commandbar.modify-content'), AddSecondary: t('sample.commandbar.add-secondary'), RemoveSecondary: t('sample.commandbar.remove-secondary'),
+  SecondaryButton1: t('sample.commandbar.button-1'), SecondaryButton2: t('sample.commandbar.button-2'), SecondaryButton3: t('sample.commandbar.button-3'), SecondaryButton4: t('sample.commandbar.button-4')
+}));
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
+const clickedLabel = ref('');
+const MultipleButtons = ref(false);
+const OnElementClicked = (sender) => { clickedLabel.value = sender?.Label || ''; };
+const SelectedOptionOutput = computed(() => clickedLabel.value ? t('sample.you-clicked', { name: clickedLabel.value }) : '');
+const OpenButton_Click = () => { if (Names.PrimaryCommandBar) { Names.PrimaryCommandBar.IsOpen = true; Names.PrimaryCommandBar.IsSticky = true; } };
+const CloseButton_Click = () => { if (Names.PrimaryCommandBar) { Names.PrimaryCommandBar.IsOpen = false; Names.PrimaryCommandBar.IsSticky = false; } };
+const extraSpecs = [{ Icon: 'Add', Key: 'N', Modifiers: 'Control' }, { Icon: 'Delete', Key: 'Delete' }, { Icon: 'FontDecrease', Key: 'Subtract', Modifiers: 'Control' }, { Icon: 'FontIncrease', Key: 'Add', Modifiers: 'Control' }];
+const extraNode = (spec, index) => h(AppBarButton, { key: `secondaryButton${index + 1}`, Icon: spec.Icon, Label: `{x:Bind Labels.SecondaryButton${index + 1}, Mode=OneWay}`, KeyboardAccelerators: [{ Key: spec.Key, Modifiers: spec.Modifiers || '' }] });
+const AddSecondaryCommands_Click = () => {
+  const bar = Names.PrimaryCommandBar;
+  if (!bar) return;
+  if (bar.SecondaryCommands.Count === 1) {
+    bar.SecondaryCommands.Add(extraNode(extraSpecs[0], 0));
+    bar.SecondaryCommands.Add(extraNode(extraSpecs[1], 1));
+    bar.SecondaryCommands.Add(h(AppBarSeparator));
+    bar.SecondaryCommands.Add(extraNode(extraSpecs[2], 2));
+    bar.SecondaryCommands.Add(extraNode(extraSpecs[3], 3));
   }
-]);
-
-const secondaryCommands = computed(() => {
-  const commands: Array<{
-    Key: string;
-    Component: unknown;
-    Props: Record<string, unknown>;
-    Click?: () => void;
-  }> = [
-    {
-      Key: 'Settings',
-      Component: AppBarButton,
-      Props: {
-        Icon: 'Setting',
-        Label: t('text.settings'),
-        KeyboardAccelerators: [{ Key: 'I', Modifiers: ['Control'] }]
-      },
-      Click: () => onElementClicked(t('text.settings'))
-    }
-  ];
-  if (hasExtraCommands.value) {
-    commands.push(
-      {
-        Key: 'Button1',
-        Component: AppBarButton,
-        Props: {
-          Icon: 'Add',
-          Label: t('sample.commandbar.button-1'),
-          KeyboardAccelerators: [{ Key: 'N', Modifiers: ['Control'] }]
-        },
-        Click: () => onElementClicked(t('sample.commandbar.button-1'))
-      },
-      {
-        Key: 'Button2',
-        Component: AppBarButton,
-        Props: {
-          Icon: 'Delete',
-          Label: t('sample.commandbar.button-2'),
-          KeyboardAccelerators: [{ Key: 'Delete' }]
-        },
-        Click: () => onElementClicked(t('sample.commandbar.button-2'))
-      },
-      {
-        Key: 'Separator',
-        Component: AppBarSeparator,
-        Props: {}
-      },
-      {
-        Key: 'Button3',
-        Component: AppBarButton,
-        Props: {
-          Icon: 'FontDecrease',
-          Label: t('sample.commandbar.button-3'),
-          KeyboardAccelerators: [{ Key: 'Subtract', Modifiers: ['Control'] }],
-          KeyboardAcceleratorTextOverride: 'Ctrl+-'
-        },
-        Click: () => onElementClicked(t('sample.commandbar.button-3'))
-      },
-      {
-        Key: 'Button4',
-        Component: AppBarButton,
-        Props: {
-          Icon: 'FontIncrease',
-          Label: t('sample.commandbar.button-4'),
-          KeyboardAccelerators: [{ Key: 'Add', Modifiers: ['Control'] }],
-          KeyboardAcceleratorTextOverride: 'Ctrl++'
-        },
-        Click: () => onElementClicked(t('sample.commandbar.button-4'))
-      }
-    );
-  }
-  return commands;
-});
-
-const openCommandBar = () => {
-  isSticky.value = true;
-  isOpen.value = true;
+  MultipleButtons.value = true;
 };
-
-const closeCommandBar = () => {
-  isSticky.value = false;
-  isOpen.value = false;
+const RemoveSecondaryCommands = () => {
+  const commands = Names.PrimaryCommandBar?.SecondaryCommands;
+  while (commands?.Count > 1) commands.RemoveAt(commands.Count - 1);
+  MultipleButtons.value = false;
 };
-
-const exampleCode = `<CommandBar
-  Background="Transparent"
-  HorizontalAlignment="Left"
-  IsOpen="False"
-  IsSticky="False"
-  DefaultLabelPosition="Right">
-  <AppBarButton Icon="Add" Label="Add" Click="OnElementClicked" />
-  <AppBarButton Icon="Edit" Label="Edit" Click="OnElementClicked" />
-  <AppBarButton Icon="Share" Label="Share" Click="OnElementClicked" />
-  <CommandBar.SecondaryCommands>
-    <AppBarButton Icon="Setting" Label="Settings" Click="OnElementClicked">
-      <AppBarButton.KeyboardAccelerators>
-        <KeyboardAccelerator Key="I" Modifiers="Control" />
-      </AppBarButton.KeyboardAccelerators>
-    </AppBarButton>
-  </CommandBar.SecondaryCommands>
-</CommandBar>`;
+const RemoveSecondaryCommands_Click = () => RemoveSecondaryCommands();
+onBeforeUnmount(RemoveSecondaryCommands);
+const codePart = (definition) => definition.split('--- xaml')[1]?.split(/\r?\n--- /)[0].trim() ?? '';
+const CommandBarXaml = codePart(commandBarDefinition);
 </script>
 
 <style scoped>
-.page-heading { position: relative; }
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
+.page-heading { position: relative; min-width: 0; }
+.page-header { color: var(--text-primary); }
+.page-description { margin: 0 72px 16px 0; color: var(--text-secondary); line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-size: 16px; }
-.commandbar-sample { width: 100%; }
+.gallery-item-page { min-width: 0; width: 100%; }
+.commandbar-example :deep(.example-display), .commandbar-example :deep(.example-output), .commandbar-example :deep(.example-options) { min-width: 0; }
+:global(.commandbar-example .example-display > .win-stack-panel) {
+  justify-self: start !important;
+  width: max-content !important;
+  max-width: 100%;
+}
+:global(.commandbar-example .example-display > .win-stack-panel .win-commandbar) {
+  justify-self: start !important;
+  width: max-content !important;
+  max-width: 100%;
+}
+.commandbar-example :deep(.example-options .win-button) { max-width: 100%; white-space: normal; }
+.commandbar-example :deep(.example-output) { overflow-wrap: anywhere; }
 </style>

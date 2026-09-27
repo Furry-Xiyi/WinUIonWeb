@@ -70,6 +70,7 @@
             </StackPanel>
           </ControlExample.Example>
           <ControlExample.Output><TextBlock Text="{x:Bind basicOutput, Mode=OneWay}" /></ControlExample.Output>
+          <ControlExample.Options />
         </ControlExample>
 
         <ControlExample HeaderText="{x:Bind layoutHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind layoutXaml, Mode=OneWay}">
@@ -88,6 +89,7 @@
               </GridView>
             </StackPanel>
           </ControlExample.Example>
+          <ControlExample.Output />
           <ControlExample.Options>
             <StackPanel>
               <NumberBox Header="{x:Bind columnSpaceLabel, Mode=OneWay}" Minimum="0" Maximum="100" SmallChange="1" SpinButtonPlacementMode="Inline" MaxWidth="250" HorizontalAlignment="Stretch" Margin="0,0,0,16" Value="{x:Bind columnSpace, Mode=TwoWay}" ValueChanged="onColumnSpaceChanged" />
@@ -122,6 +124,7 @@
               </StackPanel>
             </Grid>
           </ControlExample.Example>
+          <ControlExample.Output />
           <ControlExample.Options>
             <StackPanel>
               <RadioButtons Header="{x:Bind itemTemplateLabel, Mode=OneWay}" ItemsSource="{x:Bind templateOptions, Mode=OneWay}" DisplayMemberPath="Text" SelectedIndex="{x:Bind templateIndex, Mode=TwoWay}" SelectionChanged="onTemplateSelectionChanged" />
@@ -230,17 +233,17 @@ const templateIndex = ref(0)
 const templateKeys = ['ImageTemplate', 'IconTextTemplate', 'ImageTextTemplate', 'TextTemplate']
 const selectedTemplate = computed(() => `{StaticResource ${templateKeys[templateIndex.value]}}`)
 const itemMargin = computed(() => `${columnSpace.value},${rowSpace.value},${columnSpace.value},${rowSpace.value}`)
-const onBasicItemClick = args => { basicOutput.value = t('sample.gridview.clicked-output', { item: args?.ClickedItem?.Title ?? '' }) }
-const onContentItemClick = args => { clickOutput.value = t('sample.gridview.clicked-output', { item: args?.ClickedItem?.Title ?? '' }) }
-const onContentSelectionChanged = args => { selectionOutput.value = t('sample.gridview.selection-output', { count: (args?.SelectedItems ?? []).length }) }
+const onBasicItemClick = (sender, args) => { basicOutput.value = t('sample.gridview.clicked-output', { item: args?.ClickedItem?.Title ?? '' }) }
+const onContentItemClick = (sender, args) => { clickOutput.value = t('sample.gridview.clicked-output', { item: args?.ClickedItem?.Title ?? '' }) }
+const onContentSelectionChanged = (_sender, args) => { selectionOutput.value = t('sample.gridview.selection-output', { count: (args?.SelectedItems ?? []).length }) }
 // Keep the live controls authoritative even when a host renders an XAML
 // binding as a one-way prop before its TwoWay update callback is attached.
 const onTemplateSelectionChanged = args => {
   const index = Number(args?.SelectedIndex)
   if (Number.isInteger(index) && index >= 0) templateIndex.value = index
 }
-const onSelectionModeChanged = args => {
-  const index = Number(args?.SelectedIndex)
+const onSelectionModeChanged = sender => {
+  const index = Number(sender.SelectedIndex)
   if (Number.isInteger(index) && index >= 0 && index < selectionModes.length) selectionModeIndex.value = index
 }
 const boolValue = value => value === true

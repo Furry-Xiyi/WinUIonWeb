@@ -1,0 +1,112 @@
+/* WinUI-Reference/controls/dev/ComboBox/ComboBox_themeresources.xaml */
+/* Common_themeresources_any.xaml uses a 3px absolute gradient, mirrored in Light. */
+:root, html.theme-light, .theme-light, .example-theme-wrapper.theme-light, .win-theme-scope.theme-light {
+  --ComboBoxControlStrokeColorDefaultBrush: rgba(0, 0, 0, 0.058824);
+  --ComboBoxControlElevationBorderBrush: linear-gradient(0deg, rgba(0, 0, 0, 0.160784) 0.99px, rgba(0, 0, 0, 0.058824) 3px);
+}
+html.theme-dark, .theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark {
+  --ComboBoxControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.070588);
+  --ComboBoxControlElevationBorderBrush: linear-gradient(180deg, rgba(255, 255, 255, 0.094118) 0.99px, rgba(255, 255, 255, 0.070588) 3px);
+}
+.theme-highcontrast, .theme-high-contrast {
+  --ComboBoxControlStrokeColorDefaultBrush: var(--SystemColorButtonTextColor, ButtonText);
+  --ComboBoxControlElevationBorderBrush: var(--SystemColorWindowTextColor, CanvasText);
+}
+.win-combo-box, .win-combo-flyout {
+  --ComboBoxBackground: var(--ControlFillColorDefaultBrush, var(--ctrl-fill-default));
+  --ComboBoxBackgroundPointerOver: var(--ControlFillColorSecondaryBrush, var(--ctrl-fill-secondary));
+  --ComboBoxBackgroundPressed: var(--ControlFillColorTertiaryBrush, var(--ctrl-fill-tertiary));
+  --ComboBoxBackgroundDisabled: var(--ControlFillColorDisabledBrush, var(--ctrl-fill-disabled));
+  --ComboBoxBackgroundFocused: var(--ControlFillColorDefaultBrush, var(--ctrl-fill-default));
+  --ComboBoxBackgroundBorderBrushFocused: var(--FocusStrokeColorOuterBrush, var(--text-primary));
+  --ComboBoxForeground: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ComboBoxForegroundPointerOver: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ComboBoxForegroundPressed: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+  --ComboBoxForegroundDisabled: var(--TextFillColorDisabledBrush, var(--text-disabled));
+  --ComboBoxForegroundFocused: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ComboBoxHeaderForeground: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ComboBoxHeaderForegroundDisabled: var(--TextFillColorDisabledBrush, var(--text-disabled));
+  --ComboBoxPlaceHolderForeground: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+  --ComboBoxPlaceHolderForegroundPointerOver: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+  --ComboBoxPlaceHolderForegroundPressed: var(--TextFillColorTertiaryBrush, var(--text-tertiary));
+  --ComboBoxPlaceHolderForegroundDisabled: var(--TextFillColorDisabledBrush, var(--text-disabled));
+  --ComboBoxPlaceHolderForegroundFocused: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+  --ComboBoxBorderBrush: var(--ComboBoxControlElevationBorderBrush);
+  --ComboBoxBorderBrushPointerOver: var(--ComboBoxControlElevationBorderBrush);
+  --ComboBoxBorderBrushPressed: var(--ComboBoxControlStrokeColorDefaultBrush);
+  --ComboBoxBorderBrushDisabled: var(--ComboBoxControlStrokeColorDefaultBrush);
+  --ComboBoxDropDownGlyphForeground: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+  --ComboBoxDropDownGlyphForegroundDisabled: var(--TextFillColorDisabledBrush, var(--text-disabled));
+  --ComboBoxDropDownGlyphForegroundFocused: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+  --ComboBoxDropDownForeground: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ComboBoxDropDownBorderBrush: var(--SurfaceStrokeColorFlyoutBrush, var(--stroke-surface-flyout));
+  --ComboBoxDropDownBackgroundPointerOver: var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary));
+  --ComboBoxDropDownBackgroundPointerPressed: var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary));
+  --ComboBoxFocusedDropDownBackgroundPointerPressed: var(--ControlAltFillColorQuarternaryBrush, var(--ctrl-fill-tertiary));
+  --ComboBoxItemForeground: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ComboBoxItemForegroundPointerOver: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ComboBoxItemForegroundPressed: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+  --ComboBoxItemForegroundDisabled: var(--TextFillColorDisabledBrush, var(--text-disabled));
+  --ComboBoxItemForegroundSelected: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ComboBoxItemForegroundSelectedPointerOver: var(--TextFillColorPrimaryBrush, var(--text-primary));
+  --ComboBoxItemForegroundSelectedPressed: var(--TextFillColorSecondaryBrush, var(--text-secondary));
+  --ComboBoxItemForegroundSelectedDisabled: var(--TextFillColorDisabledBrush, var(--text-disabled));
+  --ComboBoxItemBackground: var(--SubtleFillColorTransparentBrush, transparent);
+  --ComboBoxItemBackgroundPointerOver: var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary));
+  --ComboBoxItemBackgroundPressed: var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary));
+  --ComboBoxItemBackgroundDisabled: var(--SubtleFillColorDisabledBrush, transparent);
+  --ComboBoxItemBackgroundSelected: var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary));
+  --ComboBoxItemBackgroundSelectedUnfocused: var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary));
+  --ComboBoxItemBackgroundSelectedPointerOver: var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary));
+  --ComboBoxItemBackgroundSelectedPressed: var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary));
+  --ComboBoxItemBackgroundSelectedDisabled: var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary));
+  --ComboBoxItemPillFillBrush: var(--AccentFillColorDefaultBrush, var(--accent-base));
+  --ComboBoxThemeMinWidth: 64px;
+  --ComboBoxBorderThemeThickness: 1px;
+  --ComboBoxTopHeaderMargin: 0px 0px 8px 0px;
+  --ComboBoxItemThemePadding: var(--ComboBoxItemPadding, 5px 11px 7px 11px);
+  --ComboBoxCornerRadius: var(--ControlCornerRadius, 4px);
+}
+
+@media (forced-colors: active) {
+  .win-combo-box, .win-combo-flyout {
+    forced-color-adjust: none;
+    --ComboBoxBackground: Canvas;
+    --ComboBoxBackgroundPointerOver: Canvas;
+    --ComboBoxBackgroundPressed: Highlight;
+    --ComboBoxBackgroundDisabled: Canvas;
+    --ComboBoxBackgroundFocused: Highlight;
+    --ComboBoxForeground: CanvasText;
+    --ComboBoxForegroundPointerOver: CanvasText;
+    --ComboBoxForegroundPressed: CanvasText;
+    --ComboBoxForegroundDisabled: GrayText;
+    --ComboBoxHeaderForeground: CanvasText;
+    --ComboBoxHeaderForegroundDisabled: GrayText;
+    --ComboBoxPlaceHolderForeground: CanvasText;
+    --ComboBoxPlaceHolderForegroundDisabled: GrayText;
+    --ComboBoxBorderBrush: CanvasText;
+    --ComboBoxBorderBrushPointerOver: Highlight;
+    --ComboBoxBorderBrushPressed: Highlight;
+    --ComboBoxBorderBrushDisabled: GrayText;
+    --ComboBoxDropDownForeground: CanvasText;
+    --ComboBoxDropDownBorderBrush: CanvasText;
+    --ComboBoxDropDownGlyphForeground: CanvasText;
+    --ComboBoxDropDownGlyphForegroundDisabled: GrayText;
+    --ComboBoxItemForeground: CanvasText;
+    --ComboBoxItemForegroundPointerOver: HighlightText;
+    --ComboBoxItemForegroundPressed: HighlightText;
+    --ComboBoxItemForegroundSelected: HighlightText;
+    --ComboBoxItemForegroundSelectedPointerOver: HighlightText;
+    --ComboBoxItemForegroundSelectedPressed: HighlightText;
+    --ComboBoxItemForegroundDisabled: GrayText;
+    --ComboBoxItemForegroundSelectedDisabled: GrayText;
+    --ComboBoxItemBackground: transparent;
+    --ComboBoxItemBackgroundPointerOver: Highlight;
+    --ComboBoxItemBackgroundPressed: Highlight;
+    --ComboBoxItemBackgroundSelected: Highlight;
+    --ComboBoxItemBackgroundSelectedPointerOver: Highlight;
+    --ComboBoxItemBackgroundSelectedPressed: Highlight;
+    --ComboBoxItemBackgroundSelectedDisabled: transparent;
+    --ComboBoxItemPillFillBrush: HighlightText;
+  }
+}

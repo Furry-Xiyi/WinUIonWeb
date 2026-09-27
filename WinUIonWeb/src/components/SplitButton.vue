@@ -1,385 +1,245 @@
 <template>
-  <div class="win-split-button" :class="[attrs.class, { 'is-open': isOpen }]" :style="rootStyle" ref="wrap">
-    <slot name="main" :isDisabled="isDisabled" :onClick="onClick">
-      <Button class="win-split-main-button" IsEnabled="{x:Bind buttonIsEnabled, Mode=OneWay}" Click="OnMainButtonClick">
-        <MainOutlet v-if="mainNodes.length" />
-        <slot v-else>{{ resolvedContent }}</slot>
+  <div ref="root" v-bind="hostAttrs" class="win-split-button" :class="[attrs.class, { 'is-open': isOpen, 'is-disabled': !IsEnabled, 'keyboard-pressed': keyPressed, 'system-focus': boolValue(resolve(props.UseSystemFocusVisuals)), 'win-theme-scope': RequestedTheme === 'Light' || RequestedTheme === 'Dark', 'theme-light': RequestedTheme === 'Light', 'theme-dark': RequestedTheme === 'Dark' }]" :style="hostStyle"
+    role="button" :tabindex="IsEnabled && IsTabStop ? 0 : -1" :aria-disabled="!IsEnabled || undefined" :aria-expanded="isOpen"
+    @keydown="onKeyDown" @keyup="onKeyUp" @blur="clearKey">
+    <Grid class="win-split-root-grid" Background="Transparent" CornerRadius="{x:Bind CornerRadius}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" MinWidth="35" />
+        <ColumnDefinition Width="1" />
+        <ColumnDefinition Width="35" />
+      </Grid.ColumnDefinitions>
+      <Grid class="win-split-primary-background" Grid.ColumnSpan="2" Background="{x:Bind PrimaryBackground}" />
+      <Grid class="win-split-divider" Grid.Column="1" Background="{x:Bind DividerBackground}" />
+      <Grid class="win-split-secondary-background" Grid.Column="2" Background="{x:Bind SecondaryBackground}" />
+      <Button ref="primaryButton" class="win-split-main-button" Grid.Column="0"
+        IsEnabled="{x:Bind IsEnabled}" IsTabStop="False" Background="Transparent" BorderBrush="Transparent" BorderThickness="0"
+        Foreground="{x:Bind PrimaryForeground}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        HorizontalContentAlignment="{x:Bind HorizontalContentAlignment}" VerticalContentAlignment="{x:Bind VerticalContentAlignment}"
+        Padding="{x:Bind Padding}" FontFamily="{x:Bind FontFamily}" FontSize="{x:Bind FontSize}" FontWeight="{x:Bind FontWeight}"
+        Content="{x:Bind Content}" ContentTemplate="{x:Bind ContentTemplate}" ContentTransitions="{x:Bind ContentTransitions}"
+        Click="OnPrimaryClick" PointerEntered="OnPrimaryEntered" PointerExited="OnPrimaryExited" PointerMoved="OnPrimaryMoved" PointerPressed="OnPrimaryPressed" PointerReleased="OnPrimaryReleased" PointerCanceled="OnPrimaryReleased" PointerCaptureLost="OnPrimaryReleased">
+        <MainOutlet />
       </Button>
-    </slot>
-    <div class="win-btn-separator"></div>
-    <Button class="win-btn-chevron"
-            IsEnabled="{x:Bind buttonIsEnabled, Mode=OneWay}"
-            Width="35"
-            MinWidth="35"
-            Padding="0,0,12,0"
-            Click="OnFlyoutButtonClick"
-            @mousedown="onChevronDown"
-            @mouseup="onChevronUp"
-            @mouseleave="releaseChevron"
-            @pointercancel="releaseChevron"
-            @lostpointercapture="releaseChevron"
-            @blur="releaseChevron">
-      <span class="icon chevron-animate"
-            :class="chevronClass"
-            aria-hidden="true"
-            @animationend="onChevronAnimEnd"></span>
-    </Button>
-    <MenuFlyout :Open="isOpen" :AnchorRect="anchorRect" :Items="flyoutItems" :Placement="flyoutPlacement" :Theme="menuTheme" @Close="isOpen = false" @Select="onSelect">
-      <FlyoutOutlet v-if="flyoutNodes.length" />
-      <slot v-else name="flyout" :close="closeFlyout"></slot>
-    </MenuFlyout>
+      <Button ref="secondaryButton" class="win-split-secondary-button" Grid.Column="2"
+        IsEnabled="{x:Bind IsEnabled}" IsTabStop="False" Background="Transparent" BorderBrush="Transparent" BorderThickness="0"
+        Foreground="{x:Bind SecondaryForeground}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+        Padding="0,0,12,0" Click="OnSecondaryClick" PointerEntered="OnSecondaryEntered" PointerExited="OnSecondaryExited" PointerMoved="OnSecondaryMoved" PointerPressed="OnSecondaryPressed" PointerReleased="OnSecondaryReleased" PointerCanceled="OnSecondaryReleased" PointerCaptureLost="OnSecondaryReleased">
+        <Button.Content>
+          <AnimatedIcon Height="12" Width="12" VerticalAlignment="Center" HorizontalAlignment="Right" AutomationProperties.AccessibilityView="Raw">
+            <AnimatedChevronDownSmallVisualSource />
+            <AnimatedIcon.FallbackIconSource>
+              <FontIconSource FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="8" Glyph="&#xE96E;" IsTextScaleFactorEnabled="False" />
+            </AnimatedIcon.FallbackIconSource>
+          </AnimatedIcon>
+        </Button.Content>
+      </Button>
+      <Grid class="win-split-primary-border" Grid.Column="0" BorderBrush="{x:Bind PrimaryBorderBrush}" BorderThickness="1,1,0,1" CornerRadius="4,0,0,4" />
+      <Grid class="win-split-secondary-border" Grid.Column="2" BorderBrush="{x:Bind SecondaryBorderBrush}" BorderThickness="0,1,1,1" CornerRadius="0,4,4,0" />
+    </Grid>
+    <FlyoutOutlet v-if="flyoutNodes.length" />
   </div>
 </template>
+
 <script lang="ts">
-import { defineComponent, h, Fragment } from 'vue'
-
-export const SplitButtonFlyout = defineComponent({
-  name: 'SplitButton.Flyout',
-  __splitButtonProperty: 'flyout',
-  setup(_, { slots }) {
-    return () => h('span', { class: 'split-button-property' }, slots.default?.())
-  }
-})
-
-export default { Flyout: SplitButtonFlyout }
+import { defineComponent } from 'vue'
+import { buttonContentProperty } from './buttonContentRuntime'
+export const SplitButtonFlyout = defineComponent({ name: 'SplitButton.Flyout', __splitButtonProperty: 'flyout', setup() { return () => null } })
+export const SplitButtonContent = defineComponent({ name: 'SplitButton.Content', __splitButtonProperty: 'content', setup() { return () => null } })
+export default { Flyout: SplitButtonFlyout, Content: SplitButtonContent, ContentTemplate: buttonContentProperty('SplitButton', 'ContentTemplate'), ContentTransitions: buttonContentProperty('SplitButton', 'ContentTransitions'), Resources: buttonContentProperty('SplitButton', 'Resources') }
 </script>
+
 <script setup lang="ts">
-import { ref, computed, defineComponent, Fragment, getCurrentInstance, h, onBeforeUnmount, onMounted, provide, useAttrs, useSlots } from 'vue';
-import Button from './Button.vue';
-import MenuFlyout from './MenuFlyout.vue';
-import { resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime';
+import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch, type VNode } from 'vue'
+import Grid from './Grid.vue'
+import Button from './Button.vue'
+import AnimatedIcon from './AnimatedIcon.vue'
+import { FontIconSource } from './IconSource'
+import { animatedIconVisualSourceComponents } from './animatedIconVisuals'
+import { boolValue, alignment, cssLength, xamlThickness } from './layout'
+import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime'
+import { useUICommand } from './uiCommandRuntime'
+import { getButtonContentProperty, useButtonContent } from './buttonContentRuntime'
 
-defineOptions({ inheritAttrs: false });
-
+defineOptions({ name: 'SplitButton', inheritAttrs: false })
 const props = defineProps({
-  Content: { type: [String, Number], default: '' },
-  Flyout: { type: [Object, Array], default: () => ({ Items: [] }) },
-  IsEnabled: { type: [Boolean, String], default: true },
-  Theme: { type: String, default: '' },
-  MinWidth: { type: [String, Number], default: '' },
-  MinHeight: { type: [String, Number], default: '' },
-  Padding: { type: String, default: '' },
-  Margin: { type: String, default: '' },
-  VerticalAlignment: { type: String, default: '' }
-});
-const emit = defineEmits(['Click', 'Select']);
-const attrs = useAttrs();
-const slots = useSlots();
-const instance = getCurrentInstance();
-const parentXamlScope = (instance?.provides?.[xamlScopeKey] as Record<string, unknown> | undefined) ?? {};
-const isFlyoutContainer = (node) => {
-  const type = node?.type;
-  if (!type || typeof type !== 'object') return false;
-  const name = type.name || type.__name;
-  return name === 'Flyout' || name === 'Flyout';
-};
+  Content: { type: null, default: '' }, Flyout: { type: null, default: undefined },
+  ContentTemplate: { type: null, default: undefined }, ContentTransitions: { type: null, default: undefined },
+  Command: { type: [Object, String], default: undefined }, CommandParameter: { default: undefined },
+  IsEnabled: { type: [Boolean, String], default: true }, IsTabStop: { type: [Boolean, String], default: true },
+  Background: { type: String, default: '' }, Foreground: { type: String, default: '' }, BorderBrush: { type: String, default: '' }, BorderThickness: { type: [String, Number], default: 1 },
+  Width: { type: [String, Number], default: '' }, Height: { type: [String, Number], default: '' }, MinWidth: { type: [String, Number], default: '' }, MinHeight: { type: [String, Number], default: '' }, MaxWidth: { type: [String, Number], default: '' }, MaxHeight: { type: [String, Number], default: '' },
+  Padding: { type: [String, Number], default: '11,6,11,7' }, Margin: { type: [String, Number], default: '' },
+  HorizontalAlignment: { type: String, default: 'Left' }, VerticalAlignment: { type: String, default: 'Center' }, HorizontalContentAlignment: { type: String, default: 'Center' }, VerticalContentAlignment: { type: String, default: 'Center' },
+  FontFamily: { type: String, default: '{ThemeResource ContentControlThemeFontFamily}' }, FontSize: { type: [String, Number], default: 14 }, FontWeight: { type: String, default: 'Normal' },
+  CornerRadius: { type: [String, Number], default: 4 }, UseSystemFocusVisuals: { type: [Boolean, String], default: true }, FocusVisualMargin: { type: [String, Number], default: -1 },
+  Visibility: { type: String, default: 'Visible' }, RequestedTheme: { type: String, default: 'Default' }
+})
+const emit = defineEmits(['Click'])
+const attrs = useAttrs()
+const slots = useSlots()
+const instance = getCurrentInstance()
+provide('buttonFlyoutAnchor', null)
+provide('buttonFlyoutController', null)
+const resolve = (value: unknown) => resolveXamlValue(value, instance)
+const { ContentTemplate, ContentTransitions, renderTemplate } = useButtonContent(props, () => slots.default?.() ?? [], instance)
+const root = ref<HTMLElement | null>(null)
+const primaryButton = ref<any>(null)
+const secondaryButton = ref<any>(null)
+const attachedFlyout = ref<any>(null)
+const isOpen = ref(false)
+const keyPressed = ref('')
+const primaryOver = ref(false)
+const secondaryOver = ref(false)
+const primaryPressed = ref(false)
+const secondaryPressed = ref(false)
+const pointerType = ref('mouse')
+const internalChecked = inject<{ IsChecked: { value: boolean }; Invoke: (event?: Event) => void } | null>('toggleSplitButtonState', null)
+const checked = computed(() => internalChecked?.IsChecked.value ?? false)
+const sourceEnabled = computed(() => boolValue(resolve(props.IsEnabled)))
+const localEnabled = ref<boolean | undefined>()
+const IsEnabled = computed({ get: () => (localEnabled.value ?? sourceEnabled.value) && (Command.value?.CanExecute?.(CommandParameter.value) ?? true), set: value => { localEnabled.value = boolValue(value); updateXamlBinding(props.IsEnabled, localEnabled.value, instance) } })
+const IsTabStop = computed(() => boolValue(resolve(props.IsTabStop)))
+const sourceContent = computed(() => resolve(props.Content))
+const localContent = shallowRef<unknown>(undefined)
+watch(sourceContent, () => { localContent.value = undefined })
+const Content = computed({ get: () => localContent.value === undefined ? sourceContent.value : localContent.value, set: value => { localContent.value = value; updateXamlBinding(props.Content, value, instance) } })
+const sourceFlyout = computed(() => resolve(props.Flyout))
+const localFlyout = shallowRef<unknown>(undefined)
+watch(sourceFlyout, () => { localFlyout.value = undefined })
+const sourceRequestedTheme = computed(() => String(resolve(props.RequestedTheme)))
+const localRequestedTheme = ref<string | undefined>()
+watch(sourceRequestedTheme, () => { localRequestedTheme.value = undefined })
+const RequestedTheme = computed({ get: () => localRequestedTheme.value ?? sourceRequestedTheme.value, set: value => { localRequestedTheme.value = value; updateXamlBinding(props.RequestedTheme, value, instance) } })
+const Command = useUICommand(() => resolve(props.Command))
+const CommandParameter = computed(() => resolve(props.CommandParameter))
+const AnimatedChevronDownSmallVisualSource = animatedIconVisualSourceComponents.AnimatedChevronDownSmallVisualSource
 const propertyNodes = computed(() => {
-  const main = [];
-  const flyout = [];
-  let placement = '';
-  const appendFlyoutContent = (nodes) => {
-    for (const node of nodes ?? []) {
-      if (isFlyoutContainer(node)) {
-        const requestedPlacement = node.props?.Placement;
-        if (requestedPlacement) placement = requestedPlacement;
-        const contentSlot = node.children && typeof node.children === 'object' ? node.children.default : undefined;
-        if (contentSlot) appendFlyoutContent(contentSlot());
-      } else {
-        flyout.push(node);
-      }
-    }
-  };
-  for (const node of slots.default?.() ?? []) {
-    const type = node.type;
-    if (typeof type === 'object' && type?.__splitButtonProperty === 'flyout') {
-      const propertySlot = node.children && typeof node.children === 'object' ? node.children.default : undefined;
-      if (propertySlot) appendFlyoutContent(propertySlot());
-    } else {
-      main.push(node);
-    }
+  const main: VNode[] = [], flyout: VNode[] = []
+  const collect = (nodes: VNode[]) => { for (const node of nodes) {
+    if (node.type === Comment || node.type === Text && !String(node.children ?? '').trim()) continue
+    if (node.type === Fragment && Array.isArray(node.children)) { collect(node.children as VNode[]); continue }
+    if (getButtonContentProperty(node)) continue
+    const property = (node.type as { __splitButtonProperty?: string })?.__splitButtonProperty
+    if (property) {
+      const propertySlot = (node.children as { default?: () => VNode[] })?.default
+      if (propertySlot) (property === 'flyout' ? flyout : main).push(...propertySlot())
+    } else main.push(node)
+  } }
+  collect(slots.default?.() ?? [])
+  return { main, flyout }
+})
+const flyoutNodes = computed(() => {
+  if (localFlyout.value === undefined && propertyNodes.value.flyout.length) return propertyNodes.value.flyout
+  const value = localFlyout.value === undefined ? sourceFlyout.value : localFlyout.value
+  return isVNode(value) ? [value] : []
+})
+const MainOutlet = defineComponent({ setup: () => () => {
+  const templated = renderTemplate(Content.value)
+  if (templated) return templated
+  if (localContent.value === undefined && propertyNodes.value.main.length) {
+    const nodes = normalizeXamlNodes(propertyNodes.value.main, instance)
+    return nodes.every(node => node.type === Text)
+      ? h('span', { class: 'win-button-default-text' }, nodes.map(node => String(node.children ?? '')).join(''))
+      : h(Fragment, nodes)
   }
-  return { main, flyout, placement };
-});
-const MainOutlet = defineComponent({ setup() { return () => h(Fragment, propertyNodes.value.main); } });
-const FlyoutOutlet = defineComponent({ setup() { return () => h(Fragment, propertyNodes.value.flyout); } });
-const mainNodes = computed(() => propertyNodes.value.main);
-const flyoutNodes = computed(() => propertyNodes.value.flyout);
-const wrap = ref(null);
-const isOpen = ref(false);
-const anchorRect = ref(null);
-const chevronClass = ref('');
-const anchorTheme = ref('');
-let chevronPressed = false;
-let chevronPressDone = false;
-let themeObserver;
-
-const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
-const isDisabled = computed(() => !resolvedIsEnabled.value);
-const buttonIsEnabled = computed(() => !isDisabled.value);
-const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
-const resolvedFlyout = computed(() => resolveXamlValue(props.Flyout, instance));
-const resolvedTheme = computed(() => resolveXamlValue(props.Theme, instance));
-const resolvedMinWidth = computed(() => resolveXamlValue(props.MinWidth, instance));
-const resolvedMinHeight = computed(() => resolveXamlValue(props.MinHeight, instance));
-const resolvedPadding = computed(() => resolveXamlValue(props.Padding, instance));
-const resolvedMargin = computed(() => resolveXamlValue(props.Margin, instance));
-const resolvedVerticalAlignment = computed(() => resolveXamlValue(props.VerticalAlignment, instance));
-const cssLength = (value) => {
-  if (value === '' || value === undefined || value === null) return '';
-  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return `${Number(value.trim())}px`;
-  return typeof value === 'number' ? `${value}px` : value;
-};
-const xamlThickness = (value) => {
-  if (!value) return '';
-  const parts = String(value).split(',').map((part) => cssLength(Number.isNaN(Number(part.trim())) ? part.trim() : Number(part.trim())));
-  if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
-  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
-  return value;
-};
-const flyoutDefinition = computed(() => Array.isArray(resolvedFlyout.value)
-  ? { Items: resolvedFlyout.value }
-  : resolvedFlyout.value || { Items: [] });
-const flyoutPlacement = computed(() => propertyNodes.value.placement || flyoutDefinition.value.Placement || 'Bottom');
-const sourceItems = computed(() => flyoutDefinition.value.Items ?? []);
-const flyoutItems = computed(() => sourceItems.value.map((item) => {
-  if (typeof item === 'string') return { Text: item, Value: item };
-  return { ...item, Text: item.Text ?? item.Content ?? item.label ?? String(item) };
-}));
-const rootStyle = computed(() => {
-  const style = {};
-  if (resolvedMinWidth.value !== '') style.minWidth = cssLength(resolvedMinWidth.value);
-  if (resolvedMinHeight.value !== '') style.minHeight = cssLength(resolvedMinHeight.value);
-  if (resolvedPadding.value) style['--SplitButtonPadding'] = xamlThickness(resolvedPadding.value);
-  if (resolvedMargin.value) style.margin = xamlThickness(resolvedMargin.value);
-  if (resolvedVerticalAlignment.value) style.alignSelf = String(resolvedVerticalAlignment.value).toLowerCase();
-  return [attrs.style, style];
-});
-const menuTheme = computed(() => resolvedTheme.value || anchorTheme.value);
-
-const resolveAnchorTheme = () => {
-  const themeScope = wrap.value?.closest('.theme-light, .theme-dark');
-  if (themeScope?.classList.contains('theme-dark')) return 'dark';
-  if (themeScope?.classList.contains('theme-light')) return 'light';
-  return '';
-};
-
-const observeAnchorTheme = () => {
-  themeObserver?.disconnect();
-  const themeScope = wrap.value?.closest('.theme-light, .theme-dark');
-  anchorTheme.value = resolveAnchorTheme();
-  if (!themeScope) return;
-
-  themeObserver = new MutationObserver(() => {
-    anchorTheme.value = resolveAnchorTheme();
-  });
-  themeObserver.observe(themeScope, { attributes: true, attributeFilter: ['class'] });
-};
-
-const onChevronDown = () => {
-  chevronPressed = true;
-  chevronPressDone = false;
-  chevronClass.value = 'pressing';
-};
-const onChevronUp = () => {
-  if (!chevronPressed) return;
-  releaseChevron();
-};
-const releaseChevron = () => {
-  if (chevronClass.value === '') return;
-  chevronPressed = false;
-  if (chevronPressDone) chevronClass.value = 'releasing';
-};
-const onChevronAnimEnd = (event) => {
-  if (chevronClass.value === 'pressing' && event.animationName === 'chevron-press') {
-    chevronPressDone = true;
-    if (!chevronPressed) chevronClass.value = 'releasing';
-  } else if (chevronClass.value === 'releasing' && event.animationName === 'chevron-release') {
-    chevronClass.value = '';
-    chevronPressDone = false;
-  }
-};
-
-const toggleFlyout = () => {
-  if (isDisabled.value) return;
-  if (isOpen.value) { isOpen.value = false; return; }
-  const r = wrap.value.getBoundingClientRect();
-  anchorRect.value = { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
-  isOpen.value = true;
-};
-const closeFlyout = () => { isOpen.value = false; };
-const onClick = (event) => {
-  if (isDisabled.value) return;
-  emit('Click', event);
-  resolveXamlHandler(attrs.Click, instance)?.(event);
-};
-const onSelect = (item) => {
-  emit('Select', item);
-  resolveXamlHandler(attrs.Select, instance)?.(item);
-  isOpen.value = false;
-};
-
-provide(xamlScopeKey, {
-  ...parentXamlScope,
-  buttonIsEnabled,
-  OnMainButtonClick: onClick,
-  OnFlyoutButtonClick: toggleFlyout
-});
-
-onMounted(observeAnchorTheme);
-onBeforeUnmount(() => themeObserver?.disconnect());
+  return typeof Content.value === 'string' || typeof Content.value === 'number'
+    ? h('span', { class: 'win-button-default-text' }, String(Content.value))
+    : isVNode(Content.value) ? h(Fragment, normalizeXamlNodes([Content.value], instance)) : null
+} })
+const FlyoutOutlet = defineComponent({ setup: () => () => h(Fragment, normalizeXamlNodes(flyoutNodes.value, instance).map(node => cloneVNode(node, { ref: (api: unknown) => { attachedFlyout.value = api }, onOpened: () => { isOpen.value = true }, onClosed: () => { isOpen.value = false } }, true))) })
+const Flyout = computed({ get: () => localFlyout.value !== undefined && !isVNode(localFlyout.value) ? localFlyout.value : attachedFlyout.value ?? sourceFlyout.value, set: value => { Flyout.value?.Hide?.(); attachedFlyout.value = null; localFlyout.value = value; isOpen.value = false; updateXamlBinding(props.Flyout, value, instance) } })
+const Padding = computed(() => resolve(props.Padding))
+const CornerRadius = computed(() => resolve(props.CornerRadius))
+const FontFamily = computed(() => resolve(props.FontFamily))
+const FontSize = computed(() => resolve(props.FontSize))
+const FontWeight = computed(() => resolve(props.FontWeight))
+const HorizontalContentAlignment = computed(() => resolve(props.HorizontalContentAlignment))
+const VerticalContentAlignment = computed(() => resolve(props.VerticalContentAlignment))
+const resource = (name: string) => `var(--SplitButton${name})`
+const touchPressed = computed(() => Boolean(keyPressed.value) || pointerType.value === 'touch' && (primaryPressed.value || secondaryPressed.value))
+const commonSuffix = computed(() => isOpen.value || touchPressed.value ? 'Pressed' : '')
+const PrimaryBackground = computed(() => !IsEnabled.value ? 'transparent' : !checked.value && !commonSuffix.value && !primaryOver.value && !primaryPressed.value && props.Background ? resolve(props.Background) : resource(`Background${checked.value ? 'Checked' : ''}${commonSuffix.value || (primaryPressed.value ? 'Pressed' : primaryOver.value && pointerType.value !== 'touch' ? 'PointerOver' : '')}`))
+const SecondaryBackground = computed(() => !IsEnabled.value ? 'transparent' : !checked.value && !commonSuffix.value && !secondaryOver.value && !secondaryPressed.value && props.Background ? resolve(props.Background) : resource(`Background${checked.value ? 'Checked' : ''}${commonSuffix.value || (secondaryPressed.value ? 'Pressed' : secondaryOver.value && pointerType.value !== 'touch' ? 'PointerOver' : '')}`))
+const PrimaryForeground = computed(() => !IsEnabled.value ? resource('ForegroundDisabled') : !checked.value && !commonSuffix.value && !primaryOver.value && !primaryPressed.value && props.Foreground ? resolve(props.Foreground) : resource(`Foreground${checked.value ? 'Checked' : ''}${commonSuffix.value || (primaryPressed.value ? 'Pressed' : primaryOver.value && pointerType.value !== 'touch' ? 'PointerOver' : '')}`))
+const SecondaryForeground = computed(() => !IsEnabled.value ? resource('ForegroundDisabled') : checked.value ? resource(`ForegroundChecked${commonSuffix.value || (secondaryPressed.value ? 'Pressed' : secondaryOver.value ? 'PointerOver' : '')}`) : resource(commonSuffix.value || secondaryPressed.value ? 'ForegroundSecondaryPressed' : secondaryOver.value ? 'ForegroundPointerOver' : 'ForegroundSecondary'))
+const PrimaryBorderBrush = computed(() => !IsEnabled.value ? resource('BorderBrushDisabled') : !checked.value && !commonSuffix.value && !primaryPressed.value && props.BorderBrush ? resolve(props.BorderBrush) : resource(`BorderBrush${checked.value ? 'Checked' : ''}${commonSuffix.value || (!checked.value && primaryPressed.value ? 'Pressed' : '')}`))
+const SecondaryBorderBrush = computed(() => !IsEnabled.value ? resource('BorderBrushDisabled') : !checked.value && !commonSuffix.value && !secondaryPressed.value && props.BorderBrush ? resolve(props.BorderBrush) : resource(`BorderBrush${checked.value ? 'Checked' : ''}${commonSuffix.value || (!checked.value && secondaryPressed.value ? 'Pressed' : '')}`))
+const DividerBackground = computed(() => resource(checked.value ? 'BorderBrushCheckedDivider' : 'BorderBrushDivider'))
+const hostAttrs = computed(() => {
+  const rest = Object.fromEntries(Object.entries(attrs).filter(([key]) => !['class', 'style', 'Click', 'onClick'].includes(key)))
+  const automation = rest['AutomationProperties.Name']; delete rest['AutomationProperties.Name']
+  if (automation) rest['aria-label'] = String(resolve(automation))
+  return rest
+})
+const hostStyle = computed(() => {
+  const style: Record<string, unknown> = { margin: xamlThickness(resolve(props.Margin)), justifySelf: alignment(resolve(props.HorizontalAlignment), 'horizontal'), alignSelf: alignment(resolve(props.VerticalAlignment), 'vertical'), outlineOffset: cssLength(resolve(props.FocusVisualMargin)) }
+  style['--SplitButtonPrimaryBorderBrush'] = PrimaryBorderBrush.value
+  style['--SplitButtonSecondaryBorderBrush'] = SecondaryBorderBrush.value
+  for (const name of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) if (resolve(props[name]) !== '') style[name[0].toLowerCase() + name.slice(1)] = cssLength(resolve(props[name]))
+  if (resolve(props.Visibility) === 'Collapsed') style.display = 'none'
+  if (resolve(props.Visibility) === 'Hidden') style.visibility = 'hidden'
+  return [attrs.style, style]
+})
+const api = proxyRefs({ IsEnabled, RequestedTheme, ContentTemplate, ContentTransitions, Name: computed(() => attrs['data-xaml-ref'] ?? attrs['x:Name'] ?? attrs.Name ?? ''), Content: computed({ get: () => localContent.value !== undefined ? localContent.value : propertyNodes.value.main[0] ?? Content.value, set: value => { Content.value = value } }), Flyout, Command, CommandParameter, Element: root, IsFlyoutOpen: isOpen, Focus: () => { root.value?.focus(); return IsEnabled.value } })
+defineExpose(api)
+function invoke(event?: Event) {
+  if (!IsEnabled.value) return
+  internalChecked?.Invoke(event)
+  const args = { OriginalSource: api, OriginalEvent: event }
+  emit('Click', api, args)
+  resolveXamlHandler(attrs.Click, instance)?.(api, args)
+  if (Command.value?.CanExecute?.(CommandParameter.value) ?? true) Command.value?.Execute(CommandParameter.value)
+}
+function openFlyout() { if (IsEnabled.value && Flyout.value?.ShowAt) void Flyout.value.ShowAt(root.value, { Placement: 'BottomEdgeAlignedLeft' }) }
+function onPrimaryClick(_sender: unknown, args: { OriginalEvent?: Event }) { root.value?.focus({ preventScroll: true }); invoke(args?.OriginalEvent) }
+function onSecondaryClick() { root.value?.focus({ preventScroll: true }); openFlyout() }
+function pointer(args: { OriginalEvent?: PointerEvent }) { pointerType.value = args?.OriginalEvent?.pointerType ?? 'mouse' }
+function onPrimaryEntered(_s: unknown, a: any) { pointer(a); primaryOver.value = true }
+function onPrimaryExited(_s: unknown, a: any) { pointer(a); primaryOver.value = false; primaryPressed.value = false }
+function onPrimaryPressed(_s: unknown, a: any) { pointer(a); primaryPressed.value = true }
+function onPrimaryReleased(_s: unknown, a: any) { pointer(a); primaryPressed.value = false }
+function onPrimaryMoved(sender: { IsPressed: boolean; IsPointerOver: boolean }) { primaryPressed.value = sender.IsPressed; primaryOver.value = sender.IsPointerOver }
+function onSecondaryEntered(_s: unknown, a: any) { pointer(a); secondaryOver.value = true }
+function onSecondaryExited(_s: unknown, a: any) { pointer(a); secondaryOver.value = false; secondaryPressed.value = false }
+function onSecondaryPressed(_s: unknown, a: any) { pointer(a); secondaryPressed.value = true }
+function onSecondaryReleased(_s: unknown, a: any) { pointer(a); secondaryPressed.value = false }
+function onSecondaryMoved(sender: { IsPressed: boolean; IsPointerOver: boolean }) { secondaryPressed.value = sender.IsPressed; secondaryOver.value = sender.IsPointerOver }
+function clearKey() { keyPressed.value = ''; primaryPressed.value = false; secondaryPressed.value = false }
+function onKeyDown(event: KeyboardEvent) {
+  if (!IsEnabled.value || event.target !== root.value) return
+  if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); if (!event.repeat) keyPressed.value = event.key }
+  if (event.key === 'F4' || event.key === 'ArrowDown' && event.altKey) event.preventDefault()
+}
+function onKeyUp(event: KeyboardEvent) {
+  if (!IsEnabled.value || event.target !== root.value) return
+  if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); const click = keyPressed.value === event.key; clearKey(); if (click) invoke(event) }
+  else if (event.key === 'F4' || event.key === 'ArrowDown' && event.altKey) { event.preventDefault(); openFlyout() }
+}
+watch(sourceEnabled, () => { localEnabled.value = undefined })
+watch(IsEnabled, enabled => { if (!enabled) { clearKey(); Flyout.value?.Hide?.() } })
+onMounted(() => window.addEventListener('blur', clearKey))
+onBeforeUnmount(() => { window.removeEventListener('blur', clearKey); Flyout.value?.Hide?.() })
+provide(xamlScopeKey, { ...inject(xamlScopeKey, {}), IsEnabled, Content, ContentTemplate, ContentTransitions, CornerRadius, Padding, FontFamily, FontSize, FontWeight, HorizontalContentAlignment, VerticalContentAlignment, PrimaryBackground, SecondaryBackground, PrimaryForeground, SecondaryForeground, PrimaryBorderBrush, SecondaryBorderBrush, DividerBackground, OnPrimaryClick: onPrimaryClick, OnSecondaryClick: onSecondaryClick, OnPrimaryEntered: onPrimaryEntered, OnPrimaryExited: onPrimaryExited, OnPrimaryPressed: onPrimaryPressed, OnPrimaryReleased: onPrimaryReleased, OnPrimaryMoved: onPrimaryMoved, OnSecondaryEntered: onSecondaryEntered, OnSecondaryExited: onSecondaryExited, OnSecondaryPressed: onSecondaryPressed, OnSecondaryReleased: onSecondaryReleased, OnSecondaryMoved: onSecondaryMoved })
 </script>
+
 <style>
-  .win-split-button {
-    position: relative;
-    display: inline-flex;
-    box-sizing: border-box;
-    border: 0;
-    border-radius: 4px;
-    overflow: hidden;
-    min-height: 32px;
-    height: 32px;
-    background: transparent;
-    --ButtonBorderThemeThickness: 1px;
-    --ButtonBorderBrush: var(--ControlStrokeColorDefaultBrush, var(--ctrl-border));
-    --ButtonBorderBrushTop: var(--ButtonBorderBrushDefaultTop, var(--ButtonBorderBrush));
-    --ButtonBorderBrushBottom: var(--ButtonBorderBrushDefaultBottom, var(--ctrl-border-accent));
-    --ButtonBorderBrushPointerOver: var(--ButtonBorderBrush);
-    --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushTop);
-    --ButtonBorderBrushPointerOverBottom: var(--ButtonBorderBrushBottom);
-    --ButtonBorderBrushPressed: var(--ControlStrokeColorDefaultBrush);
-    --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
-    --ButtonBorderBrushPressedBottom: var(--ButtonBorderBrushPressed);
-    --ButtonBorderBrushCurrent: var(--ButtonBorderBrush);
-    --ButtonBorderBrushTopCurrent: var(--ButtonBorderBrushTop);
-    --ButtonBorderBrushBottomCurrent: var(--ButtonBorderBrushBottom);
-    --SplitButtonPadding: 6px 11px 7px;
-    --SplitButtonBorderBrushDivider: var(--ControlStrokeColorDefaultBrush);
-    --SplitButtonBorderBrushCheckedDivider: var(--ControlStrokeColorOnAccentTertiaryBrush, rgba(0, 0, 0, 0.2157));
-  }
-
-  .win-split-button::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    box-sizing: border-box;
-    border-left: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushCurrent);
-    border-top: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushTopCurrent);
-    border-right: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushCurrent);
-    border-bottom: var(--ButtonBorderThemeThickness) solid var(--ButtonBorderBrushBottomCurrent);
-    border-radius: 4px;
-    pointer-events: none;
-  }
-
-  .win-split-button.is-checked {
-    --ButtonBorderBrush: var(--AccentButtonBorderBrushDefault, var(--accent-border));
-    --ButtonBorderBrushTop: var(--ButtonBorderBrush);
-    --ButtonBorderBrushBottom: var(--AccentButtonBorderBrushDefaultBottom, var(--accent-border-accent));
-    --ButtonBorderBrushPointerOver: var(--ButtonBorderBrush);
-    --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushTop);
-    --ButtonBorderBrushPointerOverBottom: var(--ButtonBorderBrushBottom);
-    --ButtonBorderBrushPressed: var(--ControlFillColorTransparentBrush, transparent);
-    --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
-    --ButtonBorderBrushPressedBottom: var(--ButtonBorderBrushPressed);
-    --SplitButtonBorderBrushDivider: var(--SplitButtonBorderBrushCheckedDivider);
-  }
-
-  .win-split-button:has(.win-btn:hover) {
-    --ButtonBorderBrushCurrent: var(--ButtonBorderBrushPointerOver);
-    --ButtonBorderBrushTopCurrent: var(--ButtonBorderBrushPointerOverTop);
-    --ButtonBorderBrushBottomCurrent: var(--ButtonBorderBrushPointerOverBottom);
-  }
-
-  .win-split-button:has(.win-btn:active),
-  .win-split-button.is-open {
-    --ButtonBorderBrushCurrent: var(--ButtonBorderBrushPressed);
-    --ButtonBorderBrushTopCurrent: var(--ButtonBorderBrushPressedTop);
-    --ButtonBorderBrushBottomCurrent: var(--ButtonBorderBrushPressedBottom);
-  }
-
-  .win-split-button .win-btn {
-    border-width: 1px;
-    border-style: solid;
-    border-radius: 4px;
-    min-height: 0;
-    height: 100%;
-    position: relative;
-    padding: var(--SplitButtonPadding);
-    overflow: hidden;
-    background-clip: padding-box;
-    --ButtonBorderThemeThickness: 1px;
-  }
-
-  .win-split-button .win-btn:not(.win-toggle-button) {
-    --ButtonBackground: var(--ctrl-fill-default);
-    --ButtonBackgroundPointerOver: var(--ctrl-fill-secondary);
-    --ButtonBackgroundPressed: var(--ctrl-fill-tertiary);
-    --ButtonBorderBrush: transparent;
-    --ButtonBorderBrushPointerOver: transparent;
-    --ButtonBorderBrushPressed: transparent;
-    --ButtonBorderBrushDisabled: transparent;
-  }
-
-  .win-split-button .win-btn:hover {
-    --ButtonBackgroundCurrent: var(--ButtonBackgroundPointerOver);
-    --ButtonForegroundCurrent: var(--ButtonForeground);
-  }
-
-  .win-split-button .win-btn:active {
-    --ButtonBackgroundCurrent: var(--ButtonBackgroundPressed);
-    --ButtonForegroundCurrent: var(--ButtonForegroundPressed);
-  }
-
-  .win-split-button.is-open .win-btn:not(.win-toggle-button) {
-    --ButtonBackground: var(--ctrl-fill-tertiary);
-    --ButtonBackgroundPointerOver: var(--ctrl-fill-tertiary);
-    --ButtonForeground: var(--text-secondary);
-    --ButtonForegroundPointerOver: var(--text-secondary);
-  }
-
-  .win-split-button.is-checked .win-btn:not(.win-toggle-button) {
-    --ButtonBackground: var(--accent-base);
-    --ButtonBackgroundPointerOver: var(--accent-hover);
-    --ButtonBackgroundPressed: var(--accent-pressed);
-    --ButtonForeground: var(--accent-text);
-    --ButtonForegroundPointerOver: var(--accent-text);
-    --ButtonForegroundPressed: var(--accent-text-secondary);
-  }
-
-  .win-split-button.is-checked.is-open .win-btn:not(.win-toggle-button) {
-    --ButtonBackground: var(--accent-pressed);
-    --ButtonBackgroundPointerOver: var(--accent-pressed);
-    --ButtonForeground: var(--accent-text-secondary);
-    --ButtonForegroundPointerOver: var(--accent-text-secondary);
-  }
-
-  .win-split-button .win-split-main-button {
-    min-width: 35px;
-    border-right-width: 0;
-    border-radius: 4px 0 0 4px !important;
-    --ButtonCornerRadius: 4px 0 0 4px !important;
-  }
-
-  .win-split-button .win-btn-separator {
-    width: 1px;
-    margin: 0;
-    background: var(--SplitButtonBorderBrushDivider);
-  }
-
-  .win-split-button .win-btn-chevron {
-    flex: 0 0 35px;
-    width: 35px;
-    min-width: 35px;
-    padding: 0 12px 0 0;
-    justify-content: flex-end;
-    border-left-width: 0;
-    border-radius: 0 4px 4px 0 !important;
-    --ButtonCornerRadius: 0 4px 4px 0 !important;
-  }
-
-  .win-split-button .win-btn-chevron .icon {
-    font-size: 0;
-  }
-
+.win-split-button { position: relative; display: inline-grid; box-sizing: border-box; min-width: 71px; max-width: 100%; min-height: 0; outline: none; border: 0; padding: 0; background: transparent; border-radius: var(--ControlCornerRadius, 4px); }
+.win-split-root-grid { min-width: 0; min-height: 0; overflow: hidden; }
+.win-split-primary-background, .win-split-secondary-background { pointer-events: none; }
+.win-split-primary-border, .win-split-secondary-border { pointer-events: none; z-index: 2; border-color: transparent !important; }
+.win-split-primary-border::after, .win-split-secondary-border::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor;
+}
+.win-split-primary-border { position: relative; }
+.win-split-secondary-border { position: relative; }
+.win-split-primary-border::after { inset: -1px 0 -1px -1px; padding: 1px 0 1px 1px; background: var(--SplitButtonPrimaryBorderBrush); }
+.win-split-secondary-border::after { inset: -1px -1px -1px 0; padding: 1px 1px 1px 0; background: var(--SplitButtonSecondaryBorderBrush); }
+.win-split-root-grid .win-btn { min-height: 0; min-width: 0; height: 100%; border-radius: 0; background: transparent; transition: none; --ButtonBackgroundPointerOver: transparent; --ButtonBackgroundPressed: transparent; --ButtonBackgroundDisabled: var(--SplitButtonBackgroundDisabled); --ButtonForegroundPointerOver: var(--ButtonForeground); --ButtonForegroundPressed: var(--ButtonForeground); --ButtonForegroundDisabled: var(--SplitButtonForegroundDisabled); }
+.win-split-root-grid .win-button-content-presenter { transition: none; }
+.win-split-main-button { border-radius: 4px 0 0 4px !important; }
+.win-split-secondary-button { border-radius: 0 4px 4px 0 !important; }
+.win-split-button.keyboard-pressed .win-split-secondary-button { grid-column: 1 / 4 !important; z-index: 1; }
+.win-split-button.system-focus:focus-visible { outline: 2px solid var(--FocusStrokeColorOuterBrush, var(--text-primary)); box-shadow: inset 0 0 0 1px var(--FocusStrokeColorInnerBrush, var(--app-bg)); }
 </style>

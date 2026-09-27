@@ -8,9 +8,9 @@
             Text="{x:Bind $t('text.radiobutton-description'), Mode=OneWay}"
             TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <Button class="header-action" Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
+            <Button class="header-action" Click="toggleTheme"><FontIcon class="icon" Glyph="&#xe793;" /></Button>
             <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+              <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
             </ToggleButton>
           </div>
         </div>
@@ -73,6 +73,8 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { computed, inject, ref } from 'vue';
 import Button from '../../components/Button.vue';
 import Border from '../../components/Border.vue';
@@ -149,6 +151,7 @@ const radioButtonStringsVue = `<StackPanel>
   BorderBrush="#FFFFD700"
   BorderThickness="10" />
 </StackPanel>`;
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavoriteState) ? '' : '');
 </script>
 
 <style scoped>

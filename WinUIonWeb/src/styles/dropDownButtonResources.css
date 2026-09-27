@@ -1,0 +1,24 @@
+/* Generated from WinUI-Reference DropDownButton_themeresources.xaml. */
+:root, html.theme-light, .theme-light, .example-theme-wrapper.theme-light, .win-theme-scope.theme-light {
+  --DropDownButtonForegroundSecondary: var(--TextFillColorSecondaryBrush);
+  --DropDownButtonForegroundSecondaryPointerOver: var(--TextFillColorTertiaryBrush);
+  --DropDownButtonForegroundSecondaryPressed: var(--TextFillColorTertiaryBrush);
+}
+html.theme-dark, .theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark {
+  --DropDownButtonForegroundSecondary: var(--TextFillColorSecondaryBrush);
+  --DropDownButtonForegroundSecondaryPointerOver: var(--TextFillColorTertiaryBrush);
+  --DropDownButtonForegroundSecondaryPressed: var(--TextFillColorTertiaryBrush);
+}
+.theme-highcontrast, .theme-high-contrast {
+  --DropDownButtonForegroundSecondary: var(--SystemColorButtonTextColorBrush, ButtonText);
+  --DropDownButtonForegroundSecondaryPointerOver: var(--SystemColorHighlightColorBrush, Highlight);
+  --DropDownButtonForegroundSecondaryPressed: var(--SystemColorHighlightColorBrush, Highlight);
+}
+@media (forced-colors: active) {
+  :root, .theme-light, .theme-dark, .win-theme-scope {
+    --DropDownButtonForegroundSecondary: var(--SystemColorButtonTextColorBrush, ButtonText);
+    --DropDownButtonForegroundSecondaryPointerOver: var(--SystemColorHighlightColorBrush, Highlight);
+    --DropDownButtonForegroundSecondaryPressed: var(--SystemColorHighlightColorBrush, Highlight);
+  }
+  .win-dropdown-button { forced-color-adjust: none; }
+}

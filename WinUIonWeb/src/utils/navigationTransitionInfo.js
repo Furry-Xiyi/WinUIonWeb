@@ -1,10 +1,4 @@
-const SLIDE_NAVIGATION_TRANSITION_EFFECTS = new Set(['FromRight', 'FromLeft']);
-const NAVIGATION_TRIGGERS = new Set([
-  'NavigationTrigger_NavigatingTo',
-  'NavigationTrigger_NavigatingAway',
-  'NavigationTrigger_BackNavigatingTo',
-  'NavigationTrigger_BackNavigatingAway'
-]);
+const SLIDE_NAVIGATION_TRANSITION_EFFECTS = new Set(['FromRight', 'FromLeft', 'FromBottom']);
 
 export const NavigationTrigger_NavigatingTo = 'NavigationTrigger_NavigatingTo';
 export const NavigationTrigger_NavigatingAway = 'NavigationTrigger_NavigatingAway';
@@ -31,9 +25,9 @@ export const createContinuumNavigationTransitionInfo = () => ({
   Type: 'ContinuumNavigationTransitionInfo'
 });
 
-export const createSlideNavigationTransitionInfo = (Effect = 'FromRight') => ({
+export const createSlideNavigationTransitionInfo = (Effect = 'FromBottom') => ({
   Type: 'SlideNavigationTransitionInfo',
-  Effect: SLIDE_NAVIGATION_TRANSITION_EFFECTS.has(Effect) ? Effect : 'FromRight'
+  Effect: SLIDE_NAVIGATION_TRANSITION_EFFECTS.has(Effect) ? Effect : 'FromBottom'
 });
 
 export const DefaultNavigationTransitionInfo = null;
@@ -45,8 +39,15 @@ export const normalizeNavigationTransitionInfo = (NavigationTransitionInfo) => {
   if (Type === 'EntranceNavigationTransitionInfo') return createEntranceNavigationTransitionInfo();
   if (Type === 'DrillInNavigationTransitionInfo') return createDrillInNavigationTransitionInfo();
   if (Type === 'SuppressNavigationTransitionInfo') return createSuppressNavigationTransitionInfo();
-  if (Type === 'CommonNavigationTransitionInfo') return createCommonNavigationTransitionInfo();
-  if (Type === 'ContinuumNavigationTransitionInfo') return createContinuumNavigationTransitionInfo();
+  if (Type === 'CommonNavigationTransitionInfo') return {
+    ...createCommonNavigationTransitionInfo(),
+    ...(NavigationTransitionInfo.IsStaggeringEnabled !== undefined
+      ? { IsStaggeringEnabled: NavigationTransitionInfo.IsStaggeringEnabled } : {})
+  };
+  if (Type === 'ContinuumNavigationTransitionInfo') return {
+    ...createContinuumNavigationTransitionInfo(),
+    ...(NavigationTransitionInfo.ExitElement !== undefined ? { ExitElement: NavigationTransitionInfo.ExitElement } : {})
+  };
   if (Type === 'SlideNavigationTransitionInfo') {
     return createSlideNavigationTransitionInfo(NavigationTransitionInfo.Effect);
   }
@@ -71,23 +72,3 @@ export const stringifyNavigationTransitionInfo = (NavigationTransitionInfo) => (
 export const navigationTransitionInfoEquals = (left, right) => (
   stringifyNavigationTransitionInfo(left) === stringifyNavigationTransitionInfo(right)
 );
-
-export const normalizeNavigationTrigger = (NavigationTrigger = NavigationTrigger_NavigatingTo) => {
-  const value = String(NavigationTrigger ?? '').trim();
-  if (NAVIGATION_TRIGGERS.has(value)) return value;
-  const officialValue = `NavigationTrigger_${value}`;
-  return NAVIGATION_TRIGGERS.has(officialValue) ? officialValue : NavigationTrigger_NavigatingTo;
-};
-
-export const getNavigationTransitionInfoClassName = (
-  NavigationTransitionInfo,
-  NavigationTrigger = NavigationTrigger_NavigatingTo
-) => {
-  const normalized = normalizeNavigationTransitionInfo(NavigationTransitionInfo);
-  const triggerClassName = normalizeNavigationTrigger(NavigationTrigger);
-  if (!normalized) return `DefaultNavigationTransitionInfo ${triggerClassName}`;
-  if (normalized.Type === 'SlideNavigationTransitionInfo') {
-    return `SlideNavigationTransitionInfo ${normalized.Effect} ${triggerClassName}`;
-  }
-  return `${normalized.Type} ${triggerClassName}`;
-};

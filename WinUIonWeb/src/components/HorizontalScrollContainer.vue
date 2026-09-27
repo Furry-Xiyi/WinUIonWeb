@@ -1,63 +1,143 @@
 <template>
-  <div class="win-horizontal-scroll-container">
-    <div
+  <Grid v-bind="attrs" class="win-horizontal-scroll-container">
+    <ScrollViewer
       ref="scroller"
       class="win-horizontal-scroll-scroller"
-      @scroll="updateScrollButtonsVisibility"
-      @wheel="onWheel">
-      <div class="win-horizontal-scroll-content">
-        <slot></slot>
-      </div>
-    </div>
+      HorizontalScrollMode="Enabled"
+      HorizontalScrollBarVisibility="Hidden"
+      VerticalScrollMode="Disabled"
+      VerticalScrollBarVisibility="Hidden"
+      ZoomMode="Disabled"
+      IsTabStop="False"
+      ViewChanging="Scroller_ViewChanging"
+      ViewChanged="Scroller_ViewChanged">
+      <Grid class="win-horizontal-scroll-content" Margin="36,0,36,0">
+        <ContentPresenter Content="{x:Bind Source, Mode=OneWay}" />
+      </Grid>
+    </ScrollViewer>
 
-    <button
-      v-show="canScrollBack"
+    <Button
       ref="scrollBackButton"
+      :style="scrollBackButtonStyle"
       class="win-horizontal-scroll-button scroll-back"
-      type="button"
-      :aria-label="t('text.scroll-left')"
-      v-bind="{ 'tooltipservice.tooltip': t('text.scroll-left') }"
-      @click="scrollBack">
-      <span class="icon win-horizontal-scroll-arrow"></span>
-    </button>
+      Width="16"
+      Height="38"
+      Margin="8,-16,0,0"
+      Padding="0"
+      HorizontalAlignment="Left"
+      VerticalAlignment="Center"
+      BackgroundSizing="InnerBorderEdge"
+      BorderThickness="1"
+      CornerRadius="{ThemeResource ControlCornerRadius}"
+      UseSystemFocusVisuals="True"
+      FocusVisualMargin="-3"
+      AutomationProperties.Name="{x:Bind ScrollLeftLabel, Mode=OneWay}"
+      ToolTipService.ToolTip="{x:Bind ScrollLeftLabel, Mode=OneWay}"
+      Visibility="{x:Bind ScrollBackVisibility, Mode=OneWay}"
+      Click="ScrollBackBtn_Click">
+      <FontIcon FontSize="{ThemeResource FlipViewButtonFontSize}" Glyph="&#xEDD9;" />
+    </Button>
 
-    <button
-      v-show="canScrollForward"
+    <Button
       ref="scrollForwardButton"
+      :style="scrollForwardButtonStyle"
       class="win-horizontal-scroll-button scroll-forward"
-      type="button"
-      :aria-label="t('text.scroll-right')"
-      v-bind="{ 'tooltipservice.tooltip': t('text.scroll-right') }"
-      @click="scrollForward">
-      <span class="icon win-horizontal-scroll-arrow"></span>
-    </button>
-  </div>
+      Width="16"
+      Height="38"
+      Margin="0,-16,8,0"
+      Padding="0"
+      HorizontalAlignment="Right"
+      VerticalAlignment="Center"
+      BackgroundSizing="InnerBorderEdge"
+      BorderThickness="1"
+      CornerRadius="{ThemeResource ControlCornerRadius}"
+      UseSystemFocusVisuals="True"
+      FocusVisualMargin="-3"
+      AutomationProperties.Name="{x:Bind ScrollRightLabel, Mode=OneWay}"
+      ToolTipService.ToolTip="{x:Bind ScrollRightLabel, Mode=OneWay}"
+      Visibility="{x:Bind ScrollForwardVisibility, Mode=OneWay}"
+      Click="ScrollForwardBtn_Click">
+      <FontIcon FontSize="{ThemeResource FlipViewButtonFontSize}" Glyph="&#xEDDA;" />
+    </Button>
+  </Grid>
 </template>
 
-<script setup>
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import { useI18n } from './i18n/index';
+<script>
+import { defineComponent } from 'vue';
+const HorizontalScrollSource = defineComponent({ name: 'HorizontalScrollContainer.Source', __horizontalScrollProperty: 'Source', setup: () => () => null });
+export default { Source: HorizontalScrollSource };
+</script>
 
+<script setup>
+import { computed, Fragment, getCurrentInstance, h, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, useAttrs, useSlots, watch } from 'vue';
+import Button from './Button.vue';
+import ContentPresenter from './ContentPresenter.vue';
+import FontIcon from './FontIcon.vue';
+import Grid from './Grid.vue';
+import ScrollViewer from './ScrollViewer.vue';
+import { normalizeXamlNodes, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
+import { getVNodeChildren } from './CollectionProperties';
+import { useI18n } from './i18n/index';
+import { useAcrylicBrushStyle } from './AcrylicBrush';
+import { vAcrylicBrush } from './acrylicBrushVisual';
+
+defineOptions({ inheritAttrs: false });
+const props = defineProps({ Source: { type: null, default: undefined } });
 const { t } = useI18n();
+const instance = getCurrentInstance();
+const attrs = useAttrs(), slots = useSlots();
+const SourceOutlet = defineComponent({
+  setup() { return () => {
+    const nodes = slots.default?.() ?? [];
+    const property = nodes.find(node => node.type?.__horizontalScrollProperty === 'Source');
+    return h(Fragment, normalizeXamlNodes(property ? getVNodeChildren(property) : [], instance));
+  }; }
+});
+const resolvedSource = computed(() => resolveXamlValue(props.Source, instance));
+const localSource = shallowRef(undefined);
+watch(resolvedSource, () => { localSource.value = undefined; });
+const Source = computed({
+  get: () => localSource.value === undefined ? resolvedSource.value ?? h(SourceOutlet) : localSource.value,
+  set: value => { localSource.value = value; updateXamlBinding(props.Source, value, instance); }
+});
+defineExpose({ Source });
 
 const scroller = ref(null);
 const scrollBackButton = ref(null);
 const scrollForwardButton = ref(null);
+const buttonState = button => button.value?.IsPressed ? 'Pressed' : button.value?.IsPointerOver ? 'PointerOver' : '';
+const backButtonState = computed(() => buttonState(scrollBackButton));
+const forwardButtonState = computed(() => buttonState(scrollForwardButton));
+const scrollBackButtonStyle = useAcrylicBrushStyle(() => `{ThemeResource FlipViewNextPreviousButtonBackground${backButtonState.value}}`, instance);
+const scrollForwardButtonStyle = useAcrylicBrushStyle(() => `{ThemeResource FlipViewNextPreviousButtonBackground${forwardButtonState.value}}`, instance);
+
 const canScrollBack = ref(false);
 const canScrollForward = ref(false);
+const ScrollBackVisibility = computed(() => canScrollBack.value ? 'Visible' : 'Collapsed');
+const ScrollForwardVisibility = computed(() => canScrollForward.value ? 'Visible' : 'Collapsed');
+const ScrollLeftLabel = computed(() => t('text.scroll-left'));
+const ScrollRightLabel = computed(() => t('text.scroll-right'));
 let resizeObserver = null;
-let animationFrame = 0;
-let targetScrollLeft = 0;
-const edgeTolerance = 2;
+const brushVisuals = new Set();
+const edgeTolerance = 1;
+let pendingFocus = null;
+provide(xamlScopeKey, { ...inject(xamlScopeKey, {}),
+  Source, ScrollBackVisibility, ScrollForwardVisibility, ScrollLeftLabel, ScrollRightLabel,
+  ScrollBackBtn_Click: () => scrollBack(),
+  ScrollForwardBtn_Click: () => scrollForward(),
+  Scroller_ViewChanging: () => updateScrollButtonsVisibility(),
+  Scroller_ViewChanged: () => updateScrollButtonsVisibility()
+});
+const viewport = () => scroller.value?.scrollViewerRef?.value ?? scroller.value?.scrollViewerRef ?? null;
 
 const getScrollableWidth = () => {
-  const el = scroller.value;
+  const el = viewport();
   if (!el) return 0;
   return Math.max(0, el.scrollWidth - el.clientWidth);
 };
 
 const updateScrollButtonsVisibility = () => {
-  const el = scroller.value;
+  const el = viewport();
   if (!el) {
     canScrollBack.value = false;
     canScrollForward.value = false;
@@ -65,103 +145,73 @@ const updateScrollButtonsVisibility = () => {
   }
 
   const scrollableWidth = getScrollableWidth();
-  const horizontalOffset = animationFrame ? targetScrollLeft : el.scrollLeft;
+  const horizontalOffset = el.scrollLeft;
   canScrollBack.value = horizontalOffset > edgeTolerance;
   canScrollForward.value = scrollableWidth > edgeTolerance && horizontalOffset < scrollableWidth - edgeTolerance;
+  focusOppositeButton();
+};
+
+const focusOppositeButton = () => {
+  const control = pendingFocus === 'back' && canScrollBack.value ? scrollBackButton
+    : pendingFocus === 'forward' && canScrollForward.value ? scrollForwardButton : null;
+  if (!control) return;
+  pendingFocus = null;
+  nextTick(() => control.value?.Focus());
 };
 
 const ChangeView = (offset) => {
-  const el = scroller.value;
+  const el = viewport();
   if (!el) return;
 
-  setTargetScrollLeft(el.scrollLeft + offset);
-};
-
-const cancelSmoothWheelScroll = () => {
-  if (animationFrame) {
-    cancelAnimationFrame(animationFrame);
-    animationFrame = 0;
-  }
-};
-
-const setTargetScrollLeft = (value) => {
-  targetScrollLeft = Math.max(0, Math.min(getScrollableWidth(), value));
-  updateScrollButtonsVisibility();
-
-  if (!animationFrame) {
-    animateScroll();
-  }
+  scroller.value?.ChangeView(el.scrollLeft + offset, null, null);
 };
 
 const scrollBack = () => {
-  const el = scroller.value;
+  const el = viewport();
   if (!el) return;
 
+  pendingFocus = 'forward';
   ChangeView(-el.clientWidth);
-  nextTick(() => scrollForwardButton.value?.focus());
+  focusOppositeButton();
 };
 
 const scrollForward = () => {
-  const el = scroller.value;
+  const el = viewport();
   if (!el) return;
 
+  pendingFocus = 'back';
   ChangeView(el.clientWidth);
-  nextTick(() => scrollBackButton.value?.focus());
+  focusOppositeButton();
 };
 
-const onWheel = (event) => {
-  const el = scroller.value;
-  if (!el || getScrollableWidth() <= 0) return;
+// Button owns input state; its material is painted behind its existing presenter.
+for (const [button, style] of [[scrollBackButton, scrollBackButtonStyle], [scrollForwardButton, scrollForwardButtonStyle]]) {
+  watch([button, style], ([control, value]) => {
+    const element = control?.Element;
+    if (!element) return;
+    const binding = { value, modifiers: {} };
+    if (brushVisuals.has(element)) vAcrylicBrush.updated(element, binding);
+    else { vAcrylicBrush.mounted(element, binding); brushVisuals.add(element); }
+  }, { immediate: true, flush: 'post' });
+}
 
-  let delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-  if (delta === 0) return;
-
-  event.preventDefault();
-
-  if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
-    delta *= 16;
-  } else if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
-    delta *= el.clientWidth;
-  }
-
-  setTargetScrollLeft((animationFrame ? targetScrollLeft : el.scrollLeft) + delta);
-};
-
-const animateScroll = () => {
-  const el = scroller.value;
-  if (!el) {
-    animationFrame = 0;
-    return;
-  }
-
-  const distance = targetScrollLeft - el.scrollLeft;
-  if (Math.abs(distance) < 0.5) {
-    el.scrollLeft = targetScrollLeft;
-    animationFrame = 0;
-    updateScrollButtonsVisibility();
-    return;
-  }
-
-  el.scrollLeft += distance * 0.22;
+onMounted(async () => {
+  await nextTick();
   updateScrollButtonsVisibility();
-  animationFrame = requestAnimationFrame(animateScroll);
-};
-
-onMounted(() => {
-  nextTick(updateScrollButtonsVisibility);
 
   resizeObserver = new ResizeObserver(updateScrollButtonsVisibility);
-  if (scroller.value) {
-    resizeObserver.observe(scroller.value);
-    if (scroller.value.firstElementChild) {
-      resizeObserver.observe(scroller.value.firstElementChild);
-    }
+  const el = viewport();
+  if (el) {
+    resizeObserver.observe(el);
+    const contents = el.querySelector('.win-horizontal-scroll-content');
+    if (contents) resizeObserver.observe(contents);
   }
 });
 
 onBeforeUnmount(() => {
-  cancelSmoothWheelScroll();
   resizeObserver?.disconnect();
+  for (const element of brushVisuals) vAcrylicBrush.beforeUnmount(element);
+  brushVisuals.clear();
 });
 </script>
 
@@ -169,91 +219,45 @@ onBeforeUnmount(() => {
 .win-horizontal-scroll-container {
   position: relative;
   min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
 }
 
 .win-horizontal-scroll-scroller {
   min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
-  overscroll-behavior-y: auto;
-}
-
-.win-horizontal-scroll-scroller::-webkit-scrollbar {
-  display: none;
+  max-width: 100%;
 }
 
 .win-horizontal-scroll-content {
-  display: grid;
-  margin: 0 36px;
   width: max-content;
 }
 
-.win-horizontal-scroll-button {
-  position: absolute;
-  top: 50%;
-  width: 16px;
-  height: 38px;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-primary);
+.win-horizontal-scroll-container :deep(.win-horizontal-scroll-button) {
+  --ButtonBackground: transparent;
+  --ButtonBackgroundPointerOver: transparent;
+  --ButtonBackgroundPressed: transparent;
+  --ButtonForegroundPointerOver: var(--FlipViewNextPreviousArrowForegroundPointerOver);
+  --ButtonForegroundPressed: var(--FlipViewNextPreviousArrowForegroundPressed);
+  --ButtonBorderBrush: var(--FlipViewNextPreviousButtonBorderBrush);
+  --ButtonBorderBrushTop: var(--FlipViewNextPreviousButtonBorderBrush);
+  --ButtonBorderBrushBottom: var(--FlipViewNextPreviousButtonBorderBrush);
+  --ButtonBorderBrushPointerOver: var(--FlipViewNextPreviousButtonBorderBrushPointerOver);
+  --ButtonBorderBrushPointerOverTop: var(--FlipViewNextPreviousButtonBorderBrushPointerOver);
+  --ButtonBorderBrushPointerOverBottom: var(--FlipViewNextPreviousButtonBorderBrushPointerOver);
+  --ButtonBorderBrushPressed: var(--FlipViewNextPreviousButtonBorderBrushPressed);
+  --ButtonBorderBrushPressedTop: var(--FlipViewNextPreviousButtonBorderBrushPressed);
+  --ButtonBorderBrushPressedBottom: var(--FlipViewNextPreviousButtonBorderBrushPressed);
   isolation: isolate;
-  background: transparent;
-  background-clip: padding-box;
-  border: 1px solid var(--ControlStrokeColorDefaultBrush, var(--control-stroke-color-default, var(--ctrl-border)));
-  box-sizing: border-box;
-  border-radius: var(--ControlCornerRadius, 4px);
-  -webkit-backdrop-filter: var(--flyout-backdrop);
-  backdrop-filter: var(--flyout-backdrop);
-  cursor: pointer;
   z-index: 2;
-  transform: translateY(-50%);
-  transition: background var(--fast-duration), border-color var(--fast-duration), color var(--fast-duration);
+  transition: background-color 83ms linear;
 }
 
-.win-horizontal-scroll-button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: inherit;
-  background: var(--flyout-bg);
+.win-horizontal-scroll-container :deep(.win-horizontal-scroll-button > .win-acrylic-visual) {
+  inset: 1px !important;
+  border-radius: max(0px, calc(var(--ButtonCornerRadius) - 1px)) !important;
 }
 
-.win-horizontal-scroll-button:hover {
-  background: transparent;
-  border-color: var(--ControlStrokeColorDefaultBrush, var(--control-stroke-color-default, var(--ctrl-border)));
-}
-
-.win-horizontal-scroll-button:active {
-  color: var(--text-secondary);
-  background: transparent;
-  border-color: var(--ControlStrokeColorDefaultBrush, var(--control-stroke-color-default, var(--ctrl-border)));
-}
-
-.win-horizontal-scroll-button.scroll-back {
-  left: 8px;
-}
-
-.win-horizontal-scroll-button.scroll-forward {
-  right: 8px;
-}
-
-.win-horizontal-scroll-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 8px;
-  line-height: 1;
-  transition: transform 0.1s ease, color var(--fast-duration);
-}
-
-.win-horizontal-scroll-button:active .win-horizontal-scroll-arrow {
-  transform: scale(0.85);
+.win-horizontal-scroll-container :deep(.win-horizontal-scroll-button .win-font-icon) {
+  color: inherit;
 }
 </style>

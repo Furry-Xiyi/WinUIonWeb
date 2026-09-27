@@ -1,0 +1,63 @@
+// Optional camera switching extension to CaptureElementPreviewPage.
+public bool IsCameraSwitchingEnabled { get; set; } = $(CameraSwitchingEnabled);
+private IReadOnlyList<MediaFrameSourceGroup> cameraGroups = Array.Empty<MediaFrameSourceGroup>();
+private bool switchingCamera;
+
+private async void CameraSwitch_Loaded(object sender, RoutedEventArgs e)
+{
+    await RefreshCameraGroupsAsync();
+}
+
+private async Task RefreshCameraGroupsAsync()
+{
+    cameraGroups = await MediaFrameSourceGroup.FindAllAsync();
+    switchCameraButton.Visibility = IsCameraSwitchingEnabled && cameraGroups.Count > 1
+        ? Visibility.Visible : Visibility.Collapsed;
+}
+
+private void CameraSwitchingOption_Toggled(object sender, RoutedEventArgs e)
+{
+    IsCameraSwitchingEnabled = ((ToggleSwitch)sender).IsOn;
+    switchCameraButton.Visibility = IsCameraSwitchingEnabled && cameraGroups.Count > 1
+        ? Visibility.Visible : Visibility.Collapsed;
+}
+
+private async void SwitchCamera_Click(object sender, RoutedEventArgs e)
+{
+    if (!IsCameraSwitchingEnabled || switchingCamera) return;
+    switchingCamera = true;
+    switchCameraButton.IsEnabled = false;
+    captureButton.IsEnabled = false;
+    try
+    {
+        await RefreshCameraGroupsAsync();
+        if (cameraGroups.Count < 2) return;
+        int index = cameraGroups.ToList().FindIndex(group => group.Id == mediaFrameSourceGroup?.Id);
+        mediaFrameSourceGroup = cameraGroups[(index + 1) % cameraGroups.Count];
+        captureElement.Source = null;
+        mediaCapture?.Dispose();
+        mediaCapture = new MediaCapture();
+        await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
+        {
+            SourceGroup = mediaFrameSourceGroup,
+            SharingMode = MediaCaptureSharingMode.SharedReadOnly,
+            StreamingCaptureMode = StreamingCaptureMode.Video,
+            MemoryPreference = MediaCaptureMemoryPreference.Cpu
+        });
+        var frameSource = mediaCapture.FrameSources[mediaFrameSourceGroup.SourceInfos[0].Id];
+        captureElement.Source = Windows.Media.Core.MediaSource.CreateFromMediaFrameSource(frameSource);
+        frameSourceName.Text = "Viewing: " + mediaFrameSourceGroup.DisplayName;
+    }
+    catch (Exception)
+    {
+        captureElement.Source = null;
+        mediaCapture?.Dispose();
+        mediaCapture = null;
+    }
+    finally
+    {
+        switchingCamera = false;
+        switchCameraButton.IsEnabled = true;
+        captureButton.IsEnabled = mediaCapture != null;
+    }
+}

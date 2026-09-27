@@ -1,4 +1,5 @@
 <template>
+  <Page>
   <div class="gallery-item-page">
     <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
       <div class="gallery-page-content">
@@ -8,31 +9,38 @@
 
             <div class="icon-gallery-container">
               <AutoSuggestBox
-                v-model:Text="searchText"
+                Text="{x:Bind searchText, Mode=TwoWay}"
                 PlaceholderText="Search icons by name, code, or tags"
-                queryIcon="🔍"
+                QueryIcon="Find"
                 class="search-box"
-                @TextChanged="onSearchTextChanged"
+                TextChanged="onSearchTextChanged"
               />
 
               <div class="gallery-layout">
                 <div class="icons-grid-container">
                   <ItemsView
-                    :itemsSource="filteredIcons"
-                    layout="Grid"
-                    selectionMode="Single"
-                    :selectedItems="selectedItems"
-                    @update:selectedItems="onSelectionChanged"
+                    ItemsSource="{x:Bind filteredIcons, Mode=OneWay}"
+                    SelectionMode="Single"
+                    SelectedItem="{x:Bind selectedIcon, Mode=TwoWay}"
+                    SelectionChanged="onSelectionChanged"
+                    Height="600"
+                    MinWidth="100"
+                    Padding="16"
                     class="icons-grid"
                   >
-                    <template #item="{ item }">
-                      <div class="icon-card">
-                        <div class="icon-display">
-                          <span class="icon-glyph" v-html="item.textGlyph"></span>
-                        </div>
-                        <div class="icon-name">{{ item.name }}</div>
-                      </div>
-                    </template>
+                    <ItemsView.Layout>
+                      <UniformGridLayout MinItemWidth="96" MinItemHeight="96" MinColumnSpacing="8" MinRowSpacing="8" Orientation="Horizontal" />
+                    </ItemsView.Layout>
+                    <ItemsView.ItemTemplate>
+                      <DataTemplate x:DataType="models:IconData">
+                        <ItemContainer Width="96" Height="96" AutomationProperties.Name="{x:Bind name}" CornerRadius="{StaticResource ControlCornerRadius}" ToolTipService.ToolTip="{x:Bind name}">
+                          <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{StaticResource ControlCornerRadius}">
+                            <FontIcon class="icon-glyph" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="28" Margin="0,0,0,16" Glyph="{x:Bind character}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock class="icon-name" Margin="8,0,8,8" HorizontalAlignment="Center" VerticalAlignment="Bottom" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind name}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                          </Grid>
+                        </ItemContainer>
+                      </DataTemplate>
+                    </ItemsView.ItemTemplate>
                   </ItemsView>
 
                   <div v-if="filteredIcons.length === 0" class="no-results">
@@ -40,11 +48,11 @@
                   </div>
                 </div>
 
-                <div v-if="selectedIcon" class="side-panel">
+                <ScrollViewer v-if="selectedIcon" class="side-panel" MaxHeight="800" Padding="16" VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
                   <div class="icon-details">
                     <div class="icon-preview-container">
                       <div class="icon-preview">
-                        <span class="icon-preview-glyph" v-html="selectedIcon.textGlyph"></span>
+                        <FontIcon class="icon-preview-glyph" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="48" Glyph="{x:Bind selectedIcon.character, Mode=OneWay}" />
                       </div>
                       <div v-if="selectedIcon.isSegoeFluentOnly" class="icon-warning">
                         <span class="warning-icon">⚠️</span>
@@ -111,18 +119,26 @@
                       <div class="no-tags">No tags available.</div>
                     </div>
                   </div>
-                </div>
+                </ScrollViewer>
               </div>
             </div>
       </div>
     </ScrollViewer>
   </div>
+  </Page>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, inject } from 'vue';
 import AutoSuggestBox from '../../components/AutoSuggestBox.vue';
 import ItemsView from '../../components/ItemsView.vue';
+import ItemContainer from '../../components/ItemContainer.vue';
+import FontIcon from '../../components/FontIcon.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import Grid from '../../components/Grid.vue';
+import Page from '../../components/Page.vue';
+import { DataTemplate, UniformGridLayout } from '../../components/CollectionProperties';
+import iconsData from '../samples/Iconography/IconsData.json';
 
 import ScrollViewer from '../../components/ScrollViewer.vue';
 import { createPageState } from '../../utils/pageState';
@@ -132,14 +148,10 @@ const { pageTheme, isFavoriteState, toggleTheme, toggleFavorite } = createPageSt
 const searchText = ref('');
 const selectedItems = ref([]);
 const allIcons = ref([]);
-const isLoading = ref(true);
-
-// Load icons data
-onMounted(async () => {
-  try {
-    const response = await fetch('/assets/data/icons.json');
-    const data = await response.json();
-    allIcons.value = data.map(icon => ({
+// Use the official Gallery dataset instead of a missing deployment-relative
+// request and a small fallback collection with unrelated glyph code points.
+onMounted(() => {
+    allIcons.value = iconsData.map(icon => ({
       name: icon.Name,
       code: icon.Code,
       tags: icon.Tags || [],
@@ -154,16 +166,6 @@ onMounted(async () => {
     if (allIcons.value.length > 0) {
       selectedItems.value = [allIcons.value[0]];
     }
-  } catch (error) {
-    console.error('Failed to load icons:', error);
-    // Fallback to sample icons
-    allIcons.value = getSampleIcons();
-    if (allIcons.value.length > 0) {
-      selectedItems.value = [allIcons.value[0]];
-    }
-  } finally {
-    isLoading.value = false;
-  }
 });
 
 // Check if icon name matches a Symbol enum value
@@ -206,8 +208,9 @@ const filteredIcons = computed(() => {
   });
 });
 
-const selectedIcon = computed(() => {
-  return selectedItems.value.length > 0 ? selectedItems.value[0] : null;
+const selectedIcon = computed({
+  get: () => selectedItems.value[0] ?? null,
+  set: value => { selectedItems.value = value ? [value] : []; }
 });
 
 const onSearchTextChanged = () => {
@@ -220,8 +223,8 @@ const onSearchTextChanged = () => {
   }
 };
 
-const onSelectionChanged = (newSelection) => {
-  selectedItems.value = newSelection;
+const onSelectionChanged = args => {
+  selectedItems.value = args.SelectedItems ?? [];
 };
 
 const onTagClick = (tag) => {
@@ -229,91 +232,6 @@ const onTagClick = (tag) => {
   onSearchTextChanged();
 };
 
-// Sample icons for fallback
-const getSampleIcons = () => {
-  return [
-    {
-      name: 'GlobalNavButton',
-      code: 'E700',
-      tags: ['menu', 'hamburger', 'line', 'three'],
-      isSegoeFluentOnly: false,
-      character: '󰜀',
-      codeGlyph: '\\uE700',
-      textGlyph: '&#xE700;',
-      symbolName: null
-    },
-    {
-      name: 'Wifi',
-      code: 'E701',
-      tags: ['wireless', 'connect', 'internet', 'network'],
-      isSegoeFluentOnly: false,
-      character: '󰜁',
-      codeGlyph: '\\uE701',
-      textGlyph: '&#xE701;',
-      symbolName: null
-    },
-    {
-      name: 'Bluetooth',
-      code: 'E702',
-      tags: ['device', 'connection'],
-      isSegoeFluentOnly: false,
-      character: '󰜂',
-      codeGlyph: '\\uE702',
-      textGlyph: '&#xE702;',
-      symbolName: null
-    },
-    {
-      name: 'Accept',
-      code: 'E8FB',
-      tags: ['check', 'confirm', 'yes', 'ok'],
-      isSegoeFluentOnly: false,
-      character: '󰣻',
-      codeGlyph: '\\uE8FB',
-      textGlyph: '&#xE8FB;',
-      symbolName: 'Accept'
-    },
-    {
-      name: 'Cancel',
-      code: 'E711',
-      tags: ['close', 'x', 'no'],
-      isSegoeFluentOnly: false,
-      character: '󰜑',
-      codeGlyph: '\\uE711',
-      textGlyph: '&#xE711;',
-      symbolName: 'Cancel'
-    },
-    {
-      name: 'Home',
-      code: 'E80F',
-      tags: ['house', 'main'],
-      isSegoeFluentOnly: false,
-      character: '󰠏',
-      codeGlyph: '\\uE80F',
-      textGlyph: '&#xE80F;',
-      symbolName: 'Home'
-    },
-    {
-      name: 'Search',
-      code: 'E721',
-      tags: ['find', 'magnify'],
-      isSegoeFluentOnly: false,
-      character: '󰜡',
-      codeGlyph: '\\uE721',
-      textGlyph: '&#xE721;',
-      symbolName: 'Find'
-    },
-    {
-      name: 'Settings',
-      code: 'E713',
-      tags: ['gear', 'config'],
-      isSegoeFluentOnly: false,
-      character: '󰜓',
-      codeGlyph: '\\uE713',
-      textGlyph: '&#xE713;',
-      symbolName: 'Setting'
-    }
-  ];
-};
 </script>
 
 <style scoped>
@@ -352,71 +270,8 @@ const getSampleIcons = () => {
 
 .icons-grid {
   width: 100%;
-}
-
-.icons-grid :deep(.win-items-viewport) {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: 8px;
-  padding: 16px;
-  background: var(--layer-fill-alt);
-  border: 1px solid var(--control-stroke-default);
-  border-radius: 8px;
-}
-
-.icon-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  background: var(--card-background-fill);
-  border: 1px solid var(--card-stroke-default);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  height: 96px;
-}
-
-.icon-card:hover {
-  background: var(--subtle-fill-secondary);
-  border-color: var(--control-stroke-secondary);
-}
-
-.icons-grid :deep(.win-items-container.selected) .icon-card {
-  background: var(--accent-fill-default);
-  border-color: var(--accent-fill-default);
-}
-
-.icons-grid :deep(.win-items-container.selected) .icon-card .icon-name {
-  color: var(--text-on-accent-primary);
-}
-
-.icon-display {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-
-.icon-glyph {
-  font-size: 28px;
-  color: var(--text-primary);
-}
-
-.icons-grid :deep(.win-items-container.selected) .icon-glyph {
-  color: var(--text-on-accent-primary);
-}
-
-.icon-name {
-  font-size: 11px;
-  color: var(--text-secondary);
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .no-results {
@@ -427,12 +282,12 @@ const getSampleIcons = () => {
 
 .side-panel {
   width: 334px;
+  flex: 0 0 334px;
+  min-width: 0;
+  max-width: 100%;
   background: var(--card-background-fill);
   border: 1px solid var(--divider-stroke-default);
   border-radius: 8px;
-  padding: 16px;
-  overflow-y: auto;
-  max-height: 800px;
 }
 
 .icon-details {
@@ -502,8 +357,9 @@ const getSampleIcons = () => {
   font-family: 'Cascadia Mono', 'Consolas', monospace;
   font-size: 13px;
   color: var(--text-primary);
-  overflow-x: auto;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .code-multiline {
@@ -546,6 +402,7 @@ const getSampleIcons = () => {
 
   .side-panel {
     width: 100%;
+    flex-basis: auto;
     max-height: 600px;
   }
 }

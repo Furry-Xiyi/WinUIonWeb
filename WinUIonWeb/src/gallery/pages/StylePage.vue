@@ -11,11 +11,11 @@
                 </p>
               </div>
               <div class="header-actions">
-                <Button class="header-action" @Click="toggleTheme">
-                  <span class="icon">&#xE793;</span>
+                <Button class="header-action" Click="toggleTheme">
+                  <FontIcon class="icon" Glyph="&#xe793;" />
                 </Button>
-                <ToggleButton :IsChecked="isFavorite" class="header-action" @update:IsChecked="toggleFavorite">
-                  <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
+                <ToggleButton IsChecked="{x:Bind isFavorite, Mode=OneWay}" class="header-action" Click="toggleFavorite">
+                  <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
                 </ToggleButton>
               </div>
             </div>
@@ -36,13 +36,12 @@
             <ControlExample
               :theme="pageTheme"
               headerText="Creating and applying a style"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
+              Xaml="{x:Bind example1Template}">
               <template #example>
                 <div class="example-layout">
-                  <Button>Default button</Button>
-                  <Button :class="'styled-button'">Styled button</Button>
-                  <Button :class="'styled-button override-bg'">Styled button (overridden)</Button>
+                  <Button Content="{x:Bind DefaultButtonLabel, Mode=OneWay}" />
+                  <Button Background="{ThemeResource AccentFillColorDefaultBrush}" MinWidth="200" Content="{x:Bind StyledButtonLabel, Mode=OneWay}" />
+                  <Button Background="{ThemeResource SystemFillColorCriticalBrush}" MinWidth="200" Content="{x:Bind OverriddenButtonLabel, Mode=OneWay}" />
                 </div>
               </template>
             </ControlExample>
@@ -66,16 +65,23 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { ref, computed, inject } from 'vue';
 import ControlExample from '../../components/ControlExample.vue';
 import Button from '../../components/Button.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
+import { useI18n } from '../../components/i18n/index';
 
 import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'xamlstyles');
 const { pageTheme, isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const { t } = useI18n();
+const DefaultButtonLabel = computed(() => t('ButtonMigration_DefaultButton'));
+const StyledButtonLabel = computed(() => t('ButtonMigration_StyledButton'));
+const OverriddenButtonLabel = computed(() => t('ButtonMigration_OverriddenButton'));
 
 // 示例1代码
 const example1Template = `<StackPanel Spacing="8">
@@ -90,25 +96,6 @@ const example1Template = `<StackPanel Spacing="8">
     <Button Content="Styled button (overridden)" Style="{StaticResource CustomButtonStyle}"
             Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" />
 </StackPanel>`;
-
-const example1Vue = `<template>
-  <div class="example-layout">
-    <Button>Default button</Button>
-    <Button :class="'styled-button'">Styled button</Button>
-    <Button :class="'styled-button override-bg'">Styled button (overridden)</Button>
-  </div>
-</template>
-
-<style scoped>
-.styled-button {
-  background: var(--accent-default);
-  min-width: 200px;
-}
-
-.override-bg {
-  background: var(--system-fill-critical);
-}
-</style>`;
 
 // 示例2代码
 const example2Template = `<StackPanel>
@@ -138,6 +125,7 @@ const example2Vue = `<template>
   font-weight: bold;
 }
 </style>`;
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavorite) ? '' : '');
 </script>
 
 <style scoped>

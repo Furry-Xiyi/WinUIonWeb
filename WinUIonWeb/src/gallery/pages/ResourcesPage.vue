@@ -6,11 +6,11 @@
             <div class="page-header">
               <h1 class="page-title">Resources</h1>
               <div class="page-actions">
-                <Button @Click="toggleTheme" class="header-action">
-                  <span class="icon">&#xE793;</span>
+                <Button Click="toggleTheme" class="header-action">
+                  <FontIcon class="icon" Glyph="&#xe793;" />
                 </Button>
-                <ToggleButton :IsChecked="isFavorite" class="header-action" @update:IsChecked="toggleFavorite">
-                  <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
+                <ToggleButton IsChecked="{x:Bind isFavorite, Mode=OneWay}" class="header-action" Click="toggleFavorite">
+                  <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
                 </ToggleButton>
               </div>
             </div>
@@ -140,6 +140,8 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { ref, computed, inject } from 'vue';
 import ControlExample from '../../components/ControlExample.vue';
 import Button from '../../components/Button.vue';
@@ -297,6 +299,7 @@ const themeResources = computed(() => {
 }">
   {{ themeResources.themeLabel }}
 </div>`;
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavorite) ? '' : '');
 </script>
 
 <style scoped>

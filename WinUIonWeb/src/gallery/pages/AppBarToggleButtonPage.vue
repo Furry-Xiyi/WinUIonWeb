@@ -2,121 +2,93 @@
   <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
     <div class="gallery-item-page">
       <div class="page-heading">
-        <TextBlock class="page-header" :Text="$t('text.appbar-toggle-button')" />
-        <TextBlock class="page-description" :Text="$t('text.appbar-toggle-button-description')" TextWrapping="WrapWholeWords" />
+        <TextBlock class="page-header" Text="{x:Bind Labels.PageTitle, Mode=OneWay}" FontSize="28" FontWeight="SemiBold" LineHeight="32" Margin="0,0,72,8" TextWrapping="Wrap" />
+        <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <Button class="header-action" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
-          <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-            <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-          </ToggleButton>
+          <Button class="header-action" Click="toggleTheme" ToolTipService.ToolTip="{x:Bind Labels.ToggleTheme, Mode=OneWay}" AutomationProperties.Name="{x:Bind Labels.ToggleTheme, Mode=OneWay}"><FontIcon Glyph="&#xE793;" FontSize="16" /></Button>
+          <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}"><FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" /></ToggleButton>
         </div>
       </div>
-
-      <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.symbol')" :theme="pageTheme" :vue="symbolCode">
-          <template #example>
-            <div class="sample-row">
-              <AppBarToggleButton Icon="Shuffle" Label="SymbolIcon" v-model:IsChecked="checked[0]" @Click="onClicked(0)" />
-              <TextBlock class="output-text" :Text="outputs[0]" />
-            </div>
-          </template>
+      <StackPanel class="gallery-page-content">
+        <ControlExample x:Name="Example1" class="appbar-example" SampleDefinition="AppBarToggleButton\AppbartogglebuttonSymbolIcon.txt" HeaderText="{x:Bind Labels.SymbolHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind SymbolXaml}">
+          <ControlExample.Example><StackPanel Orientation="Horizontal"><AppBarToggleButton x:Name="Button1" Click="AppBarButton_Click" Icon="Shuffle" Label="{x:Bind Labels.SymbolLabel, Mode=OneWay}" /></StackPanel></ControlExample.Example>
+          <ControlExample.Output><TextBlock x:Name="Control1Output" Text="{x:Bind Output1, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+          <ControlExample.Options />
         </ControlExample>
-
-        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.bitmap')" :theme="pageTheme" :vue="bitmapCode">
-          <template #example>
-            <div class="sample-row">
-              <AppBarToggleButton Label="BitmapIcon" v-model:IsChecked="checked[1]" @Click="onClicked(1)">
-                <template #content><span class="bitmap-icon" :style="bitmapStyle" aria-hidden="true" /></template>
-              </AppBarToggleButton>
-              <TextBlock class="output-text" :Text="outputs[1]" />
-            </div>
-          </template>
+        <ControlExample x:Name="Example2" class="appbar-example" SampleDefinition="AppBarToggleButton\AppbartogglebuttonBitmapIcon.txt" HeaderText="{x:Bind Labels.BitmapHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind BitmapXaml}">
+          <ControlExample.Example><StackPanel Orientation="Horizontal"><AppBarToggleButton x:Name="Button2" Click="AppBarButton_Click" Label="{x:Bind Labels.BitmapLabel, Mode=OneWay}"><AppBarToggleButton.Icon><BitmapIcon UriSource="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/Slices2.png" /></AppBarToggleButton.Icon></AppBarToggleButton></StackPanel></ControlExample.Example>
+          <ControlExample.Output><TextBlock x:Name="Control2Output" Text="{x:Bind Output2, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+          <ControlExample.Options />
         </ControlExample>
-
-        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.font')" :theme="pageTheme" :vue="fontCode">
-          <template #example>
-            <div class="sample-row">
-              <AppBarToggleButton Label="FontIcon" v-model:IsChecked="checked[2]" @Click="onClicked(2)">
-                <template #content><span class="font-icon" aria-hidden="true">&#x03A3;</span></template>
-              </AppBarToggleButton>
-              <TextBlock class="output-text" :Text="outputs[2]" />
-            </div>
-          </template>
+        <ControlExample x:Name="Example3" class="appbar-example" SampleDefinition="AppBarToggleButton\AppbartogglebuttonFontIcon.txt" HeaderText="{x:Bind Labels.FontHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind FontXaml}">
+          <ControlExample.Example><StackPanel Orientation="Horizontal"><AppBarToggleButton x:Name="Button3" Click="AppBarButton_Click" Label="{x:Bind Labels.FontLabel, Mode=OneWay}"><AppBarToggleButton.Icon><FontIcon FontFamily="Candara" Glyph="&#x03A3;" /></AppBarToggleButton.Icon></AppBarToggleButton></StackPanel></ControlExample.Example>
+          <ControlExample.Output><TextBlock x:Name="Control3Output" Text="{x:Bind Output3, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+          <ControlExample.Options />
         </ControlExample>
-
-        <ControlExample class="basic-input-example-theme" :headerText="$t('sample.appbartogglebutton.path')" :theme="pageTheme" :vue="pathCode">
-          <template #example>
-            <div class="sample-row">
-              <AppBarToggleButton Label="PathIcon" IsThreeState="True" v-model:IsChecked="checked[3]" @Click="onClicked(3)">
-                <template #content>
-                  <svg class="path-icon" viewBox="4 9 21 16" aria-hidden="true"><path d="M20 20L24 10V24H5Z" /></svg>
-                </template>
-              </AppBarToggleButton>
-              <TextBlock class="output-text" :Text="outputs[3]" />
-            </div>
-          </template>
+        <ControlExample x:Name="Example4" class="appbar-example" SampleDefinition="AppBarToggleButton\ThreeStateAppbartogglebuttonPath.txt" HeaderText="{x:Bind Labels.PathHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind PathXaml}">
+          <ControlExample.Example><StackPanel Orientation="Horizontal"><AppBarToggleButton x:Name="Button4" Click="AppBarButton_Click" IsThreeState="True" Label="{x:Bind Labels.PathLabel, Mode=OneWay}"><AppBarToggleButton.Content><Viewbox><PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24" /></Viewbox></AppBarToggleButton.Content></AppBarToggleButton></StackPanel></ControlExample.Example>
+          <ControlExample.Output><TextBlock x:Name="Control4Output" Text="{x:Bind Output4, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+          <ControlExample.Options />
         </ControlExample>
-      </div>
+      </StackPanel>
     </div>
   </ScrollViewer>
 </template>
 
-<script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+<script setup>
+import { computed, inject, provide, ref, shallowReactive } from 'vue';
+import AppBarToggleButton from '../../components/AppBarToggleButton.vue';
+import BitmapIcon from '../../components/BitmapIcon.vue';
 import Button from '../../components/Button.vue';
 import ControlExample from '../../components/ControlExample.vue';
+import FontIcon from '../../components/FontIcon.vue';
+import PathIcon from '../../components/PathIcon.vue';
 import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
 import TextBlock from '../../components/TextBlock.vue';
-import AppBarToggleButton from '../../components/AppBarToggleButton.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
+import Viewbox from '../../components/Viewbox.vue';
 import { useI18n } from '../../components/i18n/index';
+import { xamlNameScopeKey } from '../../components/xamlRuntime';
 import { createPageState } from '../../utils/pageState';
+import symbolDefinition from '../samples/AppBarToggleButton/AppbartogglebuttonSymbolIcon.txt?raw';
+import bitmapDefinition from '../samples/AppBarToggleButton/AppbartogglebuttonBitmapIcon.txt?raw';
+import fontDefinition from '../samples/AppBarToggleButton/AppbartogglebuttonFontIcon.txt?raw';
+import pathDefinition from '../samples/AppBarToggleButton/ThreeStateAppbartogglebuttonPath.txt?raw';
 
-const slicesImage = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/Slices2.png';
 const { t } = useI18n();
-const currentPage = inject<{ value: string }>('currentPage');
-const pageKey = computed(() => currentPage?.value || 'toggleappbarbutton');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-const checked = ref<Array<boolean | null>>([false, false, false, false]);
-const outputs = ref(['', '', '', '']);
-
-const onClicked = (index: number) => {
-  const value = checked.value[index];
-  const display = value === null ? 'Null' : value ? 'True' : 'False';
-  outputs.value[index] = t('sample.appbartogglebutton.output', { value: display });
+const currentPage = inject('currentPage');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'toggleappbarbutton');
+const Names = shallowReactive({});
+provide(xamlNameScopeKey, Names);
+const Labels = computed(() => ({
+  PageTitle: t('text.appbar-toggle-button'), Description: t('text.appbar-toggle-button-description'), ToggleTheme: t('gallery.page-header.toggle-theme'),
+  SymbolHeader: t('sample.appbartogglebutton.symbol'), BitmapHeader: t('sample.appbartogglebutton.bitmap'), FontHeader: t('sample.appbartogglebutton.font'), PathHeader: t('sample.appbartogglebutton.path'),
+  SymbolLabel: t('sample.appbarbutton.symbol-label'), BitmapLabel: t('sample.appbarbutton.bitmap-label'), FontLabel: t('sample.appbarbutton.font-label'), PathLabel: t('sample.appbarbutton.path-label')
+}));
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
+const clicked = ref([false, false, false, false]);
+const AppBarButton_Click = (sender) => {
+  const index = Number(String(sender?.Name).replace('Button', '')) - 1;
+  if (index >= 0 && index < clicked.value.length) clicked.value[index] = true;
 };
-
-const bitmapStyle = computed(() => ({ '--bitmap-source': `url(${slicesImage})` }));
-
-const symbolCode = `<AppBarToggleButton Icon="Shuffle" Label="SymbolIcon" Click="AppBarButton_Click" />`;
-const bitmapCode = `<AppBarToggleButton Label="BitmapIcon" Click="AppBarButton_Click">
-  <AppBarToggleButton.Icon>
-    <BitmapIcon UriSource="/Assets/SampleMedia/Slices2.png" />
-  </AppBarToggleButton.Icon>
-</AppBarToggleButton>`;
-const fontCode = `<AppBarToggleButton Label="FontIcon" Click="AppBarButton_Click">
-  <AppBarToggleButton.Icon>
-    <FontIcon FontFamily="Candara" Glyph="&#x03A3;" />
-  </AppBarToggleButton.Icon>
-</AppBarToggleButton>`;
-const pathCode = `<AppBarToggleButton Label="PathIcon" Click="AppBarButton_Click" IsThreeState="True">
-  <AppBarToggleButton.Content>
-    <Viewbox Stretch="Uniform">
-      <PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24" />
-    </Viewbox>
-  </AppBarToggleButton.Content>
-</AppBarToggleButton>`;
+const output = (index) => {
+  if (!clicked.value[index]) return '';
+  const value = Names[`Button${index + 1}`]?.IsChecked;
+  return t('sample.appbartogglebutton.output', { value: value === null ? '' : t(value ? 'sample.appbartogglebutton.state.true' : 'sample.appbartogglebutton.state.false') });
+};
+const Output1 = computed(() => output(0)), Output2 = computed(() => output(1)), Output3 = computed(() => output(2)), Output4 = computed(() => output(3));
+const codePart = (definition) => definition.split('--- xaml')[1]?.split(/\r?\n--- /)[0].trim() ?? '';
+const SymbolXaml = codePart(symbolDefinition), BitmapXaml = codePart(bitmapDefinition), FontXaml = codePart(fontDefinition), PathXaml = codePart(pathDefinition);
 </script>
 
 <style scoped>
-.page-heading { position: relative; }
-.page-header { margin: 0 0 8px; color: var(--text-primary); font-size: 28px; font-weight: 600; }
+.page-heading { position: relative; min-width: 0; }
+.page-header { color: var(--text-primary); }
 .page-description { margin: 0 72px 16px 0; color: var(--text-secondary); line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-size: 16px; }
-.sample-row { display: flex; align-items: center; }
-.output-text { margin-left: 8px; }
-.bitmap-icon { display: block; width: 20px; height: 20px; background: currentColor; -webkit-mask: var(--bitmap-source) center / contain no-repeat; mask: var(--bitmap-source) center / contain no-repeat; }
-.font-icon { font-family: Candara, sans-serif; font-size: 20px; line-height: 20px; }
-.path-icon { width: 20px; height: 20px; fill: currentColor; }
+.gallery-item-page { min-width: 0; width: 100%; }
+.appbar-example :deep(.example-display), .appbar-example :deep(.example-output) { min-width: 0; }
+.appbar-example :deep(.example-output) { overflow-wrap: anywhere; }
 </style>

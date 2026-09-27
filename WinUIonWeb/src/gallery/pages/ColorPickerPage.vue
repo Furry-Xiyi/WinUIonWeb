@@ -5,9 +5,9 @@
           <TextBlock class="page-header" Text="{x:Bind $t('text.colorpicker'), Mode=OneWay}" />
           <TextBlock class="page-description" Text="{x:Bind $t('text.a-control-that-lets-users-pick-a-color-from-a-sp'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <Button class="header-action" Click="toggleTheme"><FontIcon class="icon" Glyph="&#xe793;" /></Button>
             <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+              <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
             </ToggleButton>
           </div>
         </div>
@@ -52,6 +52,8 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { computed, inject, ref } from 'vue';
 import Button from '../../components/Button.vue';
 import CheckBox from '../../components/CheckBox.vue';
@@ -94,6 +96,7 @@ const colorPickerPropertiesVue = `<ColorPicker
   IsAlphaEnabled="{x:Bind IsAlphaEnabled, Mode=OneWay}"
   IsAlphaSliderVisible="{x:Bind IsAlphaSliderVisible, Mode=OneWay}"
   IsAlphaTextInputVisible="{x:Bind IsAlphaTextInputVisible, Mode=OneWay}" />`;
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavoriteState) ? '' : '');
 </script>
 
 <style scoped>

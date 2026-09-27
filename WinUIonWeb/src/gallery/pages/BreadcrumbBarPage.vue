@@ -1,99 +1,106 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-        <TextBlock class="page-header" :Text="$t('text.breadcrumbbar')" />
-        <TextBlock
-          class="page-description"
-          :Text="$t('text.breadcrumbbar-description')"
-          TextWrapping="WrapWholeWords" />
-        <div class="page-header-actions">
-          <Button class="header-action" @Click="toggleTheme">
-            <TextBlock class="icon" Text="&#xE793;" />
-          </Button>
-          <ToggleButton
-            :IsChecked="isFavoriteState"
-            class="header-action"
-            @update:IsChecked="toggleFavorite">
-            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </ToggleButton>
-        </div>
-      </div>
+  <Page>
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind Labels.Title, Mode=OneWay}" FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal" Spacing="4">
+            <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind Labels.ToggleTheme, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind Labels.ToggleTheme, Mode=OneWay}">
+              <FontIcon Glyph="&#xE793;" FontSize="16" />
+            </Button>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}">
+              <FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" />
+            </ToggleButton>
+          </StackPanel>
+        </StackPanel>
 
-      <div class="gallery-page-content">
-        <StackPanel>
-          <ControlExample
-            class="basic-input-example-theme"
-            :theme="pageTheme"
-            :vue="BreadcrumbBarControlVue"
-            :headerText="$t('sample.breadcrumbbar.control')">
-            <template #example>
-              <BreadcrumbBar :ItemsSource="FoldersString" />
-            </template>
+        <StackPanel class="gallery-page-content">
+          <ControlExample x:Name="Example1" SampleDefinition="BreadcrumbBar\BreadcrumbbarControl.txt" HeaderText="{x:Bind Labels.BasicHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind BasicXaml}" CSharp="{x:Bind BasicCSharp}">
+            <ControlExample.Example>
+              <BreadcrumbBar x:Name="BreadcrumbBar1" ItemsSource="{x:Bind FoldersString}" />
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
           </ControlExample>
 
-          <ControlExample
-            class="basic-input-example-theme"
-            :theme="pageTheme"
-            :vue="BreadcrumbBarCustomDataTemplateVue"
-            :headerText="$t('sample.breadcrumbbar.custom-data-template')">
-            <template #example>
-              <BreadcrumbBar
-                :ItemsSource="Folders"
-                @ItemClicked="BreadcrumbBar2_ItemClicked">
-                <template #ItemTemplate="{ Item }">
-                  <TextBlock
-                    :Text="Item.Name"
-                    :aria-label="Item.Name"
-                    v-bind="{ 'AutomationProperties.Name': Item.Name }" />
-                </template>
+          <ControlExample x:Name="Example2" SampleDefinition="BreadcrumbBar\BreadcrumbbarControlCustomDatatemplate.txt" HeaderText="{x:Bind Labels.CustomHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind CustomXaml}" CSharp="{x:Bind CustomCSharp}">
+            <ControlExample.Example>
+              <BreadcrumbBar x:Name="BreadcrumbBar2" ItemsSource="{x:Bind Folders, Mode=OneWay}" ItemClicked="BreadcrumbBar2_ItemClicked">
+                <BreadcrumbBar.ItemTemplate>
+                  <DataTemplate x:DataType="l:Folder">
+                    <BreadcrumbBarItem>
+                      <BreadcrumbBarItem.ContentTemplate>
+                        <DataTemplate x:DataType="l:Folder">
+                          <TextBlock Text="{x:Bind Name}" AutomationProperties.Name="{x:Bind Name}" />
+                        </DataTemplate>
+                      </BreadcrumbBarItem.ContentTemplate>
+                    </BreadcrumbBarItem>
+                  </DataTemplate>
+                </BreadcrumbBar.ItemTemplate>
               </BreadcrumbBar>
-            </template>
-
-            <template #options>
-              <Button @Click="ResetSampleButton_Click">
-                <TextBlock :Text="$t('sample.breadcrumbbar.reset-sample')" />
-              </Button>
-              <TextBlock
-                class="accessibility-announcement"
-                :Text="ResetAnnouncement"
-                aria-live="polite"
-                AutomationProperties.LiveSetting="Polite" />
-            </template>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options>
+              <Button x:Name="ResetSampleBtn" Click="ResetSampleButton_Click" Content="{x:Bind Labels.ResetSample, Mode=OneWay}" />
+            </ControlExample.Options>
           </ControlExample>
         </StackPanel>
-      </div>
-    </div>
-  </ScrollViewer>
+
+        <TextBlock class="accessibility-announcement" Text="{x:Bind ResetAnnouncement, Mode=OneWay}" AutomationProperties.LiveSetting="Polite" aria-live="polite" />
+      </StackPanel>
+    </ScrollViewer>
+  </Page>
 </template>
 
 <script setup>
-import { computed, inject, nextTick, ref } from 'vue';
+import { computed, inject, nextTick, provide, ref, shallowReactive } from 'vue';
 import BreadcrumbBar from '../../components/BreadcrumbBar.vue';
+import BreadcrumbBarItem from '../../components/BreadcrumbBarItem.vue';
 import Button from '../../components/Button.vue';
+import { DataTemplate } from '../../components/CollectionProperties';
 import ControlExample from '../../components/ControlExample.vue';
+import FontIcon from '../../components/FontIcon.vue';
+import Page from '../../components/Page.vue';
 import ScrollViewer from '../../components/ScrollViewer.vue';
 import StackPanel from '../../components/StackPanel.vue';
 import TextBlock from '../../components/TextBlock.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime';
 import { createPageState } from '../../utils/pageState';
+import basicSample from '../samples/BreadcrumbBar/BreadcrumbbarControl.txt?raw';
+import customSample from '../samples/BreadcrumbBar/BreadcrumbbarControlCustomDatatemplate.txt?raw';
 
 const { t } = useI18n();
 const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'breadcrumbbar');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'breadcrumbbar');
+const Names = shallowReactive({});
+provide(xamlNameScopeKey, Names);
 
-const _defaultFolders = [
-  { Name: t('sample.breadcrumbbar.home') },
-  { Name: t('sample.breadcrumbbar.folder-1') },
-  { Name: t('sample.breadcrumbbar.folder-2') },
-  { Name: t('sample.breadcrumbbar.folder-3') }
-];
-
-const Folders = ref([]);
+const Labels = computed(() => ({
+  Title: t('text.breadcrumbbar'),
+  Description: t('text.breadcrumbbar-description'),
+  ToggleTheme: t('gallery.page-header.toggle-theme'),
+  BasicHeader: t('sample.breadcrumbbar.control'),
+  CustomHeader: t('sample.breadcrumbbar.custom-data-template'),
+  ResetSample: t('sample.breadcrumbbar.reset-sample')
+}));
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
 const ResetAnnouncement = ref('');
-const FoldersString = [
+
+const folderKeys = [
+  'sample.breadcrumbbar.home',
+  'sample.breadcrumbbar.folder-1',
+  'sample.breadcrumbbar.folder-2',
+  'sample.breadcrumbbar.folder-3'
+];
+// Preserve the original Folder identities, as the Gallery's ObservableCollection
+// is trimmed in place and Reset adds back its missing original objects.
+const _defaultFolders = folderKeys.map(key => ({ get Name() { return t(key); } }));
+const Folders = ref([..._defaultFolders]);
+const FoldersString = computed(() => [
   t('sample.breadcrumbbar.home'),
   t('sample.breadcrumbbar.documents'),
   t('sample.breadcrumbbar.design'),
@@ -102,77 +109,59 @@ const FoldersString = [
   t('sample.breadcrumbbar.folder-1'),
   t('sample.breadcrumbbar.folder-2'),
   t('sample.breadcrumbbar.folder-3')
-];
-
-for (const folder of _defaultFolders) {
-  Folders.value.push(folder);
-}
+]);
 
 const BreadcrumbBar2_ItemClicked = (sender, args) => {
-  const items = sender.ItemsSource;
-  for (let Index = items.length - 1; Index >= args.Index + 1; Index -= 1) {
-    items.splice(Index, 1);
+  const items = sender?.ItemsSource;
+  if (!Array.isArray(items)) return;
+  for (let i = items.length - 1; i >= args.Index + 1; i -= 1) {
+    items.splice(i, 1);
   }
 };
 
 const ResetSampleButton_Click = () => {
-  const items = Folders.value;
+  const items = Names.BreadcrumbBar2?.ItemsSource;
+  if (!Array.isArray(items)) return;
   for (const folder of _defaultFolders) {
-    if (!items.includes(folder)) {
-      items.push(folder);
-    }
+    if (!items.includes(folder)) items.push(folder);
   }
-
   ResetAnnouncement.value = '';
   nextTick(() => {
     ResetAnnouncement.value = t('sample.breadcrumbbar.reset-success');
   });
 };
 
-const BreadcrumbBarControlVue = `<BreadcrumbBar :ItemsSource="FoldersString" />
-
-<script setup>
-const FoldersString = ${JSON.stringify(FoldersString, null, 2)};
-<\/script>`;
-
-const BreadcrumbBarCustomDataTemplateVue = `<BreadcrumbBar
-  :ItemsSource="Folders"
-  @ItemClicked="BreadcrumbBar2_ItemClicked">
-  <template #ItemTemplate="{ Item }">
-    <TextBlock
-      :Text="Item.Name"
-      v-bind="{ 'AutomationProperties.Name': Item.Name }" />
-  </template>
-</BreadcrumbBar>
-
-<script setup>
-import { ref } from 'vue';
-
-const Folders = ref(${JSON.stringify(_defaultFolders, null, 2)});
-
-const BreadcrumbBar2_ItemClicked = (sender, args) => {
-  const items = sender.ItemsSource;
-  for (let Index = items.length - 1; Index >= args.Index + 1; Index -= 1) {
-    items.splice(Index, 1);
-  }
+const sampleSection = (source, section) => {
+  const sections = source.split(/^--- /m);
+  const content = sections.find(value => value.startsWith(`${section}\n`) || value.startsWith(`${section}\r\n`));
+  return content?.slice(section.length).trim() ?? '';
 };
-<\/script>`;
+const BasicXaml = sampleSection(basicSample, 'xaml');
+const BasicCSharp = sampleSection(basicSample, 'c#');
+const CustomXaml = sampleSection(customSample, 'xaml');
+const CustomCSharp = sampleSection(customSample, 'c#');
+
+provide(xamlScopeKey, {
+  Labels, FavoriteLabel, FavoriteGlyph, isFavoriteState, pageTheme, toggleTheme, toggleFavorite,
+  FoldersString, Folders, ResetAnnouncement, BreadcrumbBar2_ItemClicked, ResetSampleButton_Click,
+  BasicXaml, BasicCSharp, CustomXaml, CustomCSharp
+});
 </script>
 
 <style scoped>
 .page-heading {
   position: relative;
+  min-width: 0;
 }
 
 .page-header {
-  margin: 0 0 8px;
+  margin: 0 72px 8px 0;
   color: var(--text-primary);
-  font-size: 28px;
-  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .page-description {
-  margin: 0 72px 16px 0;
+  margin: 0 0 16px;
   color: var(--text-secondary);
 }
 
@@ -180,18 +169,14 @@ const BreadcrumbBar2_ItemClicked = (sender, args) => {
   position: absolute;
   top: 0;
   right: 0;
-  display: flex;
-  gap: 4px;
 }
 
-.icon {
-  color: inherit;
-  font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons');
-  font-size: 16px;
-  line-height: 16px;
+.gallery-page-content {
+  min-width: 0;
+  max-width: 100%;
 }
 
-.accessibility-announcement {
+.gallery-item-page :deep(.accessibility-announcement) {
   position: fixed;
   width: 1px;
   height: 1px;

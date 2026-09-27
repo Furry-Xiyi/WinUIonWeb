@@ -4,22 +4,34 @@
     class="win-list-view"
     :class="{ disabled: !resolvedIsEnabled }"
     :style="rootStyle"
+    v-acrylic-brush="backgroundStyle"
     role="listbox"
     :aria-disabled="!resolvedIsEnabled"
+    @keydown="onSemanticKeyDown"
     :aria-multiselectable="selectionMode === 'Multiple' || selectionMode === 'Extended'">
     <ScrollViewer
       class="win-list-viewport"
       :class="{ 'items-bottom-host': itemsPanelBottom }"
-      VerticalScrollMode="Auto"
-      VerticalScrollBarVisibility="Auto"
-      HorizontalScrollMode="Disabled"
-      HorizontalScrollBarVisibility="Disabled">
+      VerticalScrollMode="{x:Bind ScrollSettings.VerticalScrollMode, Mode=OneWay}"
+      VerticalScrollBarVisibility="{x:Bind ScrollSettings.VerticalScrollBarVisibility, Mode=OneWay}"
+      HorizontalScrollMode="{x:Bind ScrollSettings.HorizontalScrollMode, Mode=OneWay}"
+      HorizontalScrollBarVisibility="{x:Bind ScrollSettings.HorizontalScrollBarVisibility, Mode=OneWay}"
+      IsHorizontalRailEnabled="{x:Bind ScrollSettings.IsHorizontalRailEnabled, Mode=OneWay}"
+      IsVerticalRailEnabled="{x:Bind ScrollSettings.IsVerticalRailEnabled, Mode=OneWay}"
+      IsVerticalScrollChainingEnabled="{x:Bind ScrollSettings.IsVerticalScrollChainingEnabled, Mode=OneWay}"
+      IsHorizontalScrollChainingEnabled="{x:Bind ScrollSettings.IsHorizontalScrollChainingEnabled, Mode=OneWay}"
+      IsEnabled="{x:Bind ScrollTemplateIsEnabled, Mode=OneWay}"
+      ZoomMode="{x:Bind ScrollSettings.ZoomMode, Mode=OneWay}">
       <div ref="listRef"
            :class="{ 'items-bottom': itemsPanelBottom, 'drag-sinking': isDragging || isExternalDragOver }"
            class="win-list-content"
+           :style="contentPaddingStyle"
            @dragover="onViewportDragOver"
            @drop="onViewportDrop"
            @dragleave="onViewportDragLeave">
+        <div v-if="propertyTemplateNodes.headerTemplate.length" class="win-list-header-presenter">
+          <HeaderOutlet />
+        </div>
         <template v-if="isGrouped">
           <div v-for="(group, gIdx) in items" :key="getGroupKey(group, gIdx)" class="win-list-group">
             <div class="win-list-header" :class="{ sticky: stickyHeader }">
@@ -28,14 +40,16 @@
               </div>
               <div class="win-list-header-divider" aria-hidden="true"></div>
             </div>
-            <div v-for="(item, idx) in getGroupItems(group)" :key="getItemKey(item, idx)"
+            <div v-for="(item, idx) in getGroupItems(group)" :key="groupItemKeys.get(group)?.[idx]"
+                 :ref="itemContainerRef(groupItemKeys.get(group)?.[idx], item, idx, group)"
                  class="win-list-item"
                  :class="itemClasses(item)"
                  :style="itemContainerStyle"
                  :draggable="false"
-                 :tabindex="resolvedIsEnabled && selectionMode !== 'None' ? 0 : -1"
+                 :tabindex="resolvedIsEnabled && (selectionMode !== 'None' || semanticView.SemanticZoomOwner.value) ? 0 : -1"
                  :aria-selected="selectionMode === 'None' ? undefined : isSelected(item)"
                  @click="onItemClick($event, item)"
+                 @contextmenu="onItemContextRequested($event, item, idx, group)"
                  @pointerdown="onItemPointerDown($event, item)"
                  @pointermove="onItemPointerMove($event, idx)"
                  @pointerup="onItemPointerUp($event)"
@@ -46,11 +60,10 @@
                  @keydown.space.prevent="onItemClick($event, item)"
                  @dragstart.prevent>
               <div class="win-list-item-visual">
-                <CheckBox
+                <SelectionCheck
                   class="list-selection-check"
                   :class="{ 'is-visible': selectionMode === 'Multiple' }"
-                  :IsChecked="isSelected(item)"
-                  :IsEnabled="false"
+                  :Item="item"
                   aria-hidden="true" />
                 <div class="win-list-item-content" :style="itemContentStyle">
                   <component :is="itemComponent(item, idx, group)" />
@@ -66,20 +79,22 @@
           </div>
         </template>
         <template v-else>
-          <div v-if="hasHeaderSlot || propertyTemplateNodes.groupHeaderTemplate.length" class="win-list-header" :class="{ sticky: stickyHeader }">
+          <div v-if="propertyTemplateNodes.groupHeaderTemplate.length" class="win-list-header" :class="{ sticky: stickyHeader }">
             <div class="win-list-header-content">
               <component :is="groupHeaderComponent(null)" />
             </div>
             <div class="win-list-header-divider" aria-hidden="true"></div>
           </div>
-          <div v-for="(item, idx) in internalItems" :key="getItemKey(item, idx)"
+          <div v-for="(item, idx) in internalItems" :key="itemKeys[idx]"
+               :ref="itemContainerRef(itemKeys[idx], item, idx)"
                class="win-list-item"
                :class="itemClasses(item, idx)"
                :style="[itemContainerStyle, getItemStyle(idx)]"
                :draggable="false"
-               :tabindex="resolvedIsEnabled && selectionMode !== 'None' ? 0 : -1"
+               :tabindex="resolvedIsEnabled && (selectionMode !== 'None' || semanticView.SemanticZoomOwner.value) ? 0 : -1"
                :aria-selected="selectionMode === 'None' ? undefined : isSelected(item)"
                @click="onItemClick($event, item)"
+               @contextmenu="onItemContextRequested($event, item, idx)"
                @pointerdown="onItemPointerDown($event, item)"
                @pointermove="onItemPointerMove($event, idx)"
                @pointerup="onItemPointerUp($event)"
@@ -90,11 +105,10 @@
                @keydown.space.prevent="onItemClick($event, item)"
                @dragstart.prevent>
               <div class="win-list-item-visual">
-                <CheckBox
+                <SelectionCheck
                   class="list-selection-check"
                   :class="{ 'is-visible': selectionMode === 'Multiple' }"
-                  :IsChecked="isSelected(item)"
-                  :IsEnabled="false"
+                  :Item="item"
                   aria-hidden="true" />
                 <div class="win-list-item-content" :style="itemContentStyle">
                   <component :is="itemComponent(item, idx)" />
@@ -110,13 +124,25 @@
         </template>
       </div>
     </ScrollViewer>
+    <ContextFlyoutOutlet />
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent, Fragment, h } from 'vue'
 import { CollectionGroupHeaderTemplate, CollectionGroupStyle, CollectionItemContainerStyle, CollectionItemTemplate, CollectionItemsPanel } from './CollectionProperties'
 
+const ListViewHeader = defineComponent({
+  name: 'ListView.Header', __listViewHeader: true,
+  setup(_, { slots }) { return () => h(Fragment, slots.default?.()) }
+})
+const ListViewResources = defineComponent({
+  name: 'ListView.Resources', __xamlResourceProperty: 'resources',
+  setup() { return () => null }
+})
 export default {
+  Resources: ListViewResources,
+  Header: ListViewHeader,
   GroupHeaderTemplate: CollectionGroupHeaderTemplate,
   GroupStyle: CollectionGroupStyle,
   ItemTemplate: CollectionItemTemplate,
@@ -126,25 +152,60 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, toRaw, useAttrs, useSlots, watch } from 'vue';
+import { createSemanticZoomView } from './semanticZoomView';
+import { cloneVNode, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowReactive, shallowRef, toRaw, useAttrs, useSlots, watch, type VNode } from 'vue';
 import type { CSSProperties } from 'vue';
+import { scrollViewerTemplateBindings } from './scrollViewerTemplateBindings'
 import ScrollViewer from './ScrollViewer.vue';
+import { useAcrylicBrushStyle } from './AcrylicBrush';
+import { vAcrylicBrush } from './acrylicBrushVisual';
 import CheckBox from './CheckBox.vue';
 import { getCollectionProperty, getVNodeChildren } from './CollectionProperties';
-import { materializeXamlVNode, resolveXamlHandler, resolveXamlValue, xamlItemContextKey } from './xamlRuntime';
-
-defineSlots<{
-  item(props: { item: any; index: number; group?: any }): any;
-  header(props: { group: any }): any;
-}>();
+import { materializeXamlVNode, normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlItemContextKey, xamlNameScopeKey, xamlScopeKey } from './xamlRuntime';
+import { xamlResourceDictionaryKey } from './Page.vue';
 
 const slots = useSlots();
 const attrs = useAttrs();
-const hasHeaderSlot = computed(() => Boolean(slots.header));
 const instance = getCurrentInstance();
+const inheritedScrollTemplateScope = inject(xamlScopeKey, {});
+const ScrollSettings = scrollViewerTemplateBindings(name => attrs[name], instance);
+provide(xamlScopeKey, { ...inheritedScrollTemplateScope, ScrollSettings, get ScrollTemplateIsEnabled() { return resolvedIsEnabled.value } });
+const SelectionCheck = defineComponent({
+  name: 'ListViewSelectionCheck',
+  props: { Item: { default: undefined } },
+  setup(selectionProps) {
+    provide(xamlScopeKey, {
+      ...inheritedScrollTemplateScope,
+      Selected: computed(() => isSelected(selectionProps.Item))
+    });
+    return () => h(CheckBox, {
+      IsChecked: '{x:Bind Selected, Mode=OneWay}',
+      IsEnabled: 'False'
+    });
+  }
+});
+const inheritedResources = inject<Record<string, any>>(xamlResourceDictionaryKey, {});
+const localResources = computed(() => {
+  const dictionary: Record<string, any> = {};
+  const visit = (nodes: any[]) => {
+    for (const node of nodes) {
+      if (node.type === Fragment) visit(getVNodeChildren(node));
+      else if (typeof node.props?.['x:Key'] === 'string') dictionary[node.props['x:Key']] = node;
+    }
+  };
+  for (const node of slots.default?.() ?? []) {
+    if ((node.type as { __xamlResourceProperty?: string })?.__xamlResourceProperty) visit(getVNodeChildren(node));
+  }
+  return dictionary;
+});
+const resources = new Proxy(inheritedResources, {
+  get: (dictionary, key: string) => localResources.value[key] ?? dictionary[key]
+});
+provide(xamlResourceDictionaryKey, resources);
+const itemTemplateOverride = shallowRef<any>(null);
 const slotNodes = shallowRef(slots.default?.() ?? []);
 const propertyTemplateNodes = computed(() => {
-  const result: { itemTemplate: any[]; groupHeaderTemplate: any[]; itemContainerStyle: any[]; itemsPanel: any[] } = { itemTemplate: [], groupHeaderTemplate: [], itemContainerStyle: [], itemsPanel: [] };
+  const result: { itemTemplate: any[]; headerTemplate: any[]; groupHeaderTemplate: any[]; itemContainerStyle: any[]; itemsPanel: any[] } = { itemTemplate: [], headerTemplate: [], groupHeaderTemplate: [], itemContainerStyle: [], itemsPanel: [] };
   const visit = (nodes: any[]) => {
     for (const node of nodes) {
       if (!node) continue
@@ -155,6 +216,7 @@ const propertyTemplateNodes = computed(() => {
           ?? (node.type as { __name?: string } | undefined)?.__name
           ?? '');
       if (property === 'itemTemplate' || property === 'groupHeaderTemplate' || property === 'itemContainerStyle') result[property] = getVNodeChildren(node);
+      if ((node.type as { __listViewHeader?: boolean })?.__listViewHeader || typeName === 'ListView.Header') result.headerTemplate = getVNodeChildren(node);
       if (property === 'itemsPanel') result.itemsPanel = getVNodeChildren(node);
       if (property === 'groupStyle' || /(?:^|\.)GroupStyle$/i.test(typeName)) visit(getVNodeChildren(node));
       if (property === 'groupStyleHeaderTemplate') result.groupHeaderTemplate = getVNodeChildren(node);
@@ -162,6 +224,12 @@ const propertyTemplateNodes = computed(() => {
   };
   visit(slotNodes.value);
   return result;
+});
+// Header belongs to the list's page scope and appears once above every item
+// and group. GroupStyle.HeaderTemplate retains its separate group context.
+const HeaderOutlet = defineComponent({
+  name: 'ListViewHeaderOutlet',
+  setup() { return () => h(Fragment, normalizeXamlNodes(propertyTemplateNodes.value.headerTemplate, instance)); }
 });
 const itemsPanelProperty = (propertyName: string) => {
   const visit = (nodes: any[]): unknown => {
@@ -174,6 +242,17 @@ const itemsPanelProperty = (propertyName: string) => {
   };
   return visit(propertyTemplateNodes.value.itemsPanel);
 };
+const itemTemplateNodes = computed(() => {
+  const value = itemTemplateOverride.value ?? props.ItemTemplate;
+  const source = typeof value === 'string' && /^\{\s*(?:x:Bind|Binding)\b/.test(value)
+    ? resolveXamlValue(value, instance) : value;
+  const resourceKey = typeof source === 'string'
+    ? source.trim().match(/^\{\s*StaticResource\s+([^\s}]+)\s*\}$/)?.[1]
+    : undefined;
+  if (resourceKey && resources?.[resourceKey]) return getVNodeChildren(resources[resourceKey]);
+  if (source && typeof source === 'object' && (source as any).type) return getVNodeChildren(source as any);
+  return propertyTemplateNodes.value.itemTemplate;
+});
 const itemsPanelBottom = computed(() => (
   String(resolveXamlValue(itemsPanelProperty('VerticalAlignment'), instance) ?? '').toLowerCase() === 'bottom'
 ));
@@ -188,22 +267,32 @@ const itemComponent = (item: any, index: number, group: any = undefined) => {
   const component = defineComponent({
   name: 'ListViewItemTemplate',
   setup() {
+    const templateInstance = getCurrentInstance();
     provide(xamlItemContextKey, item);
+    provide(xamlNameScopeKey, shallowReactive({}));
     return () => {
-      if (propertyTemplateNodes.value.itemTemplate.length) return h(Fragment, materializeXamlVNode(propertyTemplateNodes.value.itemTemplate, item, instance));
-      const slot = slots.item;
-      return slot ? h(Fragment, slot({ item, index, group })) : h('span', String(item ?? ''));
+      if (itemTemplateNodes.value.length) return h(Fragment, normalizeXamlNodes(materializeXamlVNode(itemTemplateNodes.value, item, templateInstance) as VNode[], templateInstance));
+      return h('span', String(item ?? ''));
     };
   }
   });
   itemComponentCache.set(key, component);
   return component;
 };
+const implicitItemContainerStyles = inject<{ value: Record<string, Record<string, unknown>> } | null>(
+  Symbol.for('WinUIonWeb.StackPanel.ImplicitStyles'), null
+);
 const xamlItemContainerStyle = computed<CSSProperties>(() => {
-  const styleNode = propertyTemplateNodes.value.itemContainerStyle[0];
+  const resourceName = typeof props.ItemContainerStyle === 'string'
+    ? props.ItemContainerStyle.match(/^\{StaticResource\s+([^}]+)\}$/)?.[1] : undefined;
+  const styleNode = propertyTemplateNodes.value.itemContainerStyle[0] ?? (resourceName ? resources[resourceName] : undefined);
   const result: CSSProperties = {};
-  if (!styleNode) return result;
-  for (const setter of getVNodeChildren(styleNode)) {
+  const defaults = implicitItemContainerStyles?.value.ListViewItem ?? {};
+  const setters = [
+    ...Object.entries(defaults).map(([Property, Value]) => ({ props: { Property, Value } })),
+    ...(styleNode ? getVNodeChildren(styleNode) : [])
+  ];
+  for (const setter of setters) {
     const propertyName = setter?.props?.Property;
     if (!propertyName) continue;
     const value = resolveXamlValue(setter?.props?.Value, instance);
@@ -231,10 +320,12 @@ const groupHeaderComponent = (group) => {
   const component = defineComponent({
   name: 'ListViewGroupHeaderTemplate',
   setup() {
+    const templateInstance = getCurrentInstance();
+    provide(xamlItemContextKey, group);
+    provide(xamlNameScopeKey, shallowReactive({}));
     return () => {
-      if (propertyTemplateNodes.value.groupHeaderTemplate.length) return h(Fragment, materializeXamlVNode(propertyTemplateNodes.value.groupHeaderTemplate, group, instance));
-      const slot = slots.header;
-      return slot ? h(Fragment, slot({ group })) : h('span', getGroupTitle(group));
+      if (propertyTemplateNodes.value.groupHeaderTemplate.length) return h(Fragment, normalizeXamlNodes(materializeXamlVNode(propertyTemplateNodes.value.groupHeaderTemplate, group, templateInstance) as VNode[], templateInstance));
+      return h('span', getGroupTitle(group));
     };
   }
   });
@@ -270,7 +361,10 @@ const props = withDefaults(defineProps<{
   SelectedItems?: unknown[] | string;
   SelectedItem?: unknown | string;
   SelectedIndex?: number | string;
-  ItemContainerStyle?: ListViewItemStyle;
+  ItemContainerStyle?: ListViewItemStyle | string;
+  ItemTemplate?: unknown;
+  HorizontalAlignment?: string;
+  VerticalAlignment?: string;
   IsEnabled?: boolean | string;
   Width?: string | number;
   Height?: string | number;
@@ -280,7 +374,7 @@ const props = withDefaults(defineProps<{
   MaxHeight?: string | number;
   Margin?: string | number;
   Padding?: string | number;
-  Background?: string;
+  Background?: string | object;
   BorderBrush?: string;
   BorderThickness?: string | number;
   CornerRadius?: string | number;
@@ -295,7 +389,7 @@ const props = withDefaults(defineProps<{
   SelectionMode: 'Single',
   SelectedItems: undefined,
   SelectedItem: undefined,
-  SelectedIndex: -1,
+  SelectedIndex: undefined,
   ItemContainerStyle: () => ({}),
   IsEnabled: true,
   Width: '',
@@ -313,20 +407,30 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits([
-  'itemClick',
-  'selectionChanged',
-  'dragItemsStarting',
-  'dragItemsCompleted',
-  'dragOver',
-  'drop',
+  'Loaded',
+  'ContainerContentChanging',
+  'ItemClick',
+  'SelectionChanged',
+  'DragItemsStarting',
+  'DragItemsCompleted',
+  'DragOver',
+  'Drop',
   'update:SelectedItems',
   'update:SelectedItem',
   'update:SelectedIndex',
   'update:ItemsSource'
 ]);
 
+const itemsSourceOverride = shallowRef<unknown[] | undefined>(undefined);
+watch(() => resolveXamlValue(props.ItemsSource, instance), () => { itemsSourceOverride.value = undefined; });
+const resolvedItemsSource = computed(() => itemsSourceOverride.value ?? resolveXamlValue(props.ItemsSource, instance));
+const collectionViewGroups = computed(() => {
+  const source = resolvedItemsSource.value as { CollectionGroups?: { Group: unknown; GroupItems: unknown[] }[] } | undefined;
+  return Array.isArray(source?.CollectionGroups) ? source.CollectionGroups : [];
+});
 const items = computed(() => {
-  const source = resolveXamlValue(props.ItemsSource, instance);
+  if (collectionViewGroups.value.length) return collectionViewGroups.value.map(group => group.Group);
+  const source = resolvedItemsSource.value;
   return Array.isArray(source) ? source : [];
 });
 const isGrouped = computed(() => {
@@ -338,7 +442,7 @@ const isGrouped = computed(() => {
   // false. Treat a collection-shaped source as grouped in that case; an
   // explicit XAML string value of False still opts out of auto-detection.
   if (configured === false && typeof props.IsGrouped === 'string') return false;
-  return hasGroupItems;
+  return collectionViewGroups.value.length > 0 || hasGroupItems;
 });
 const isItemClickEnabled = computed(() => resolveXamlValue(props.IsItemClickEnabled, instance) === true);
 const canDragItems = computed(() => (
@@ -354,15 +458,39 @@ const stickyHeader = computed(() => {
 });
 const selectionMode = computed(() => resolveXamlValue(props.SelectionMode, instance) ?? 'Single');
 const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
-const getGroupItems = (group: unknown) => ((group as { Items?: unknown[] })?.Items ?? []);
+const getGroupItems = (group: unknown) => collectionViewGroups.value.find(entry => entry.Group === group)?.GroupItems
+  ?? (group as { Items?: unknown[] })?.Items ?? [];
 const getGroupKey = (group: unknown, index: number) => {
   const value = group as { Key?: string | number };
   return value?.Key ?? index;
 };
 const getGroupTitle = (group: unknown) => (group as { Key?: string | number })?.Key ?? '';
-const getItemKey = (item: unknown, index: number) => {
-  const value = item as { Key?: string | number; Id?: string | number };
-  return value?.Key ?? value?.Id ?? index;
+const objectItemKeys = new WeakMap<object, symbol[]>();
+const valueItemKeys = new Map<unknown, symbol[]>();
+const explicitItemKeys = new Map<string | number, symbol[]>();
+// Keep containers attached to their data when rows are inserted or moved.
+// Occurrence keys also prevent duplicate primitive values from sharing a key.
+const keysForItems = (source: unknown[]) => {
+  const occurrences = new Map<symbol[], number>();
+  return source.map(item => {
+    const raw = toRaw(item);
+    const object = raw !== null && typeof raw === 'object' ? raw as { Key?: string | number; Id?: string | number } : null;
+    const explicit = object?.Key ?? object?.Id;
+    let keys: symbol[];
+    if (explicit !== undefined) {
+      keys = explicitItemKeys.get(explicit) ?? [];
+      explicitItemKeys.set(explicit, keys);
+    } else if (object) {
+      keys = objectItemKeys.get(object) ?? [];
+      objectItemKeys.set(object, keys);
+    } else {
+      keys = valueItemKeys.get(raw) ?? [];
+      valueItemKeys.set(raw, keys);
+    }
+    const occurrence = occurrences.get(keys) ?? 0;
+    occurrences.set(keys, occurrence + 1);
+    return keys[occurrence] ?? (keys[occurrence] = Symbol('ListViewItem'));
+  });
 };
 const internalSelectedItems = ref<unknown[]>([]);
 const flatItems = computed(() => isGrouped.value
@@ -372,11 +500,13 @@ const configuredSelectedItems = computed(() => {
   const boundItems = resolveXamlValue(props.SelectedItems, instance);
   const boundItem = resolveXamlValue(props.SelectedItem, instance);
   if (Array.isArray(boundItems)) return boundItems;
-  if (boundItem !== undefined && boundItem !== null) return [boundItem];
-  const selectedIndex = Number(resolveXamlValue(props.SelectedIndex, instance));
-  return selectedIndex >= 0 && flatItems.value[selectedIndex] !== undefined
-    ? [flatItems.value[selectedIndex]]
-    : internalSelectedItems.value;
+  if (boundItem !== undefined) return boundItem === null ? [] : [boundItem];
+  const selectedIndex = resolveXamlValue(props.SelectedIndex, instance);
+  if (selectedIndex !== undefined && selectedIndex !== null && selectedIndex !== '') {
+    return Number(selectedIndex) >= 0 && flatItems.value[Number(selectedIndex)] !== undefined
+      ? [flatItems.value[Number(selectedIndex)]] : [];
+  }
+  return internalSelectedItems.value;
 });
 const selectedItems = computed(() => (
   selectionMode.value === 'None' ? [] : configuredSelectedItems.value
@@ -402,7 +532,10 @@ const alignment = (value: string | undefined) => ({
   Top: 'flex-start', Bottom: 'flex-end'
 }[value || ''] || undefined) as CSSProperties['justifyContent'] & CSSProperties['alignItems'];
 
+const backgroundStyle = useAcrylicBrushStyle(() => props.Background || undefined, instance);
 const rootStyle = computed<CSSProperties>(() => ({
+  justifySelf: { Left: 'start', Center: 'center', Right: 'end', Stretch: 'stretch' }[String(resolveXamlValue(props.HorizontalAlignment, instance) ?? '')] as CSSProperties['justifySelf'],
+  alignSelf: { Top: 'start', Center: 'center', Bottom: 'end', Stretch: 'stretch' }[String(resolveXamlValue(props.VerticalAlignment, instance) ?? '')] as CSSProperties['alignSelf'],
   width: cssLength(resolveXamlValue(props.Width, instance) as string | number) || undefined,
   height: cssLength(resolveXamlValue(props.Height, instance) as string | number) || undefined,
   minWidth: cssLength(resolveXamlValue(props.MinWidth, instance) as string | number) || undefined,
@@ -410,25 +543,28 @@ const rootStyle = computed<CSSProperties>(() => ({
   maxWidth: cssLength(resolveXamlValue(props.MaxWidth, instance) as string | number) || undefined,
   maxHeight: cssLength(resolveXamlValue(props.MaxHeight, instance) as string | number) || undefined,
   margin: xamlThickness(resolveXamlValue(props.Margin, instance) as string | number) || undefined,
-  padding: xamlThickness(resolveXamlValue(props.Padding, instance) as string | number) || undefined,
-  background: resolveXamlValue(props.Background, instance) || undefined,
+  ...backgroundStyle.value,
   borderColor: resolveXamlValue(props.BorderBrush, instance) || undefined,
   borderWidth: xamlThickness(props.BorderThickness) || undefined,
   borderStyle: resolveXamlValue(props.BorderThickness, instance) !== '' && resolveXamlValue(props.BorderThickness, instance) !== 0 ? 'solid' : undefined,
   borderRadius: cssLength(resolveXamlValue(props.CornerRadius, instance) as string | number) || undefined
 }));
+const contentPaddingStyle = computed<CSSProperties>(() => ({
+  padding: xamlThickness(resolveXamlValue(props.Padding, instance) as string | number) || undefined
+}));
 
+const configuredItemContainerStyle = computed(() => typeof props.ItemContainerStyle === 'object' ? props.ItemContainerStyle : {});
 const propItemContainerStyle = computed<CSSProperties>(() => ({
-  height: cssLength(props.ItemContainerStyle.Height) || undefined,
-  minHeight: cssLength(props.ItemContainerStyle.MinHeight) || undefined,
-  margin: xamlThickness(props.ItemContainerStyle.Margin) || undefined,
-  width: cssLength(props.ItemContainerStyle.Width) || undefined,
-  minWidth: cssLength(props.ItemContainerStyle.MinWidth) || undefined,
-  borderColor: props.ItemContainerStyle.BorderBrush || undefined,
-  borderWidth: xamlThickness(props.ItemContainerStyle.BorderThickness) || undefined,
-  borderStyle: props.ItemContainerStyle.BorderThickness !== undefined
-    && props.ItemContainerStyle.BorderThickness !== 0 ? 'solid' : undefined,
-  borderRadius: cssLength(props.ItemContainerStyle.CornerRadius) || undefined
+  height: cssLength(configuredItemContainerStyle.value.Height) || undefined,
+  minHeight: cssLength(configuredItemContainerStyle.value.MinHeight) || undefined,
+  margin: xamlThickness(configuredItemContainerStyle.value.Margin) || undefined,
+  width: cssLength(configuredItemContainerStyle.value.Width) || undefined,
+  minWidth: cssLength(configuredItemContainerStyle.value.MinWidth) || undefined,
+  borderColor: configuredItemContainerStyle.value.BorderBrush || undefined,
+  borderWidth: xamlThickness(configuredItemContainerStyle.value.BorderThickness) || undefined,
+  borderStyle: configuredItemContainerStyle.value.BorderThickness !== undefined
+    && configuredItemContainerStyle.value.BorderThickness !== 0 ? 'solid' : undefined,
+  borderRadius: cssLength(configuredItemContainerStyle.value.CornerRadius) || undefined
 }));
 const itemContainerStyle = computed<CSSProperties>(() => ({
   ...propItemContainerStyle.value,
@@ -454,7 +590,7 @@ const contentAlignment = computed(() => styleAlignment(
     ? (xamlItemContainerStyle.value.justifyContent === 'flex-start' ? 'Left'
       : xamlItemContainerStyle.value.justifyContent === 'flex-end' ? 'Right'
         : xamlItemContainerStyle.value.justifyContent === 'center' ? 'Center' : 'Stretch')
-    : props.ItemContainerStyle.HorizontalContentAlignment,
+    : configuredItemContainerStyle.value.HorizontalContentAlignment,
   'Stretch'
 ));
 const verticalContentAlignment = computed(() => styleAlignment(
@@ -462,7 +598,7 @@ const verticalContentAlignment = computed(() => styleAlignment(
     ? (xamlItemContainerStyle.value.alignItems === 'flex-start' ? 'Top'
       : xamlItemContainerStyle.value.alignItems === 'flex-end' ? 'Bottom'
         : xamlItemContainerStyle.value.alignItems === 'center' ? 'Center' : 'Stretch')
-    : props.ItemContainerStyle.VerticalContentAlignment,
+    : configuredItemContainerStyle.value.VerticalContentAlignment,
   'Center'
 ));
 
@@ -474,7 +610,9 @@ const itemContentStyle = computed<CSSProperties>(() => ({
   margin: '2px 4px',
   // Leave the default padding to CSS so the Multiple-selection rule can
   // reserve the checkbox lane without an inline declaration winning over it.
-  padding: xamlThickness(xamlItemContainerStyle.value.padding ?? props.ItemContainerStyle.Padding) || undefined,
+  padding: xamlThickness(xamlItemContainerStyle.value.padding ?? configuredItemContainerStyle.value.Padding) || undefined,
+  height: verticalContentAlignment.value === 'Stretch' && itemContainerStyle.value.height
+    ? `calc(${itemContainerStyle.value.height} - 4px)` : undefined,
   justifyContent: contentAlignment.value === 'Right'
     ? 'flex-end'
     : contentAlignment.value === 'Center' ? 'center' : 'flex-start',
@@ -494,8 +632,122 @@ const messageLayout = computed(() => (
 ));
 
 const containerRef = ref<HTMLElement>();
+const semanticView = createSemanticZoomView(containerRef, () => isGrouped.value ? items.value.flatMap(group => getGroupItems(group)) : internalItems.value, () => items.value, false);
+const onSemanticKeyDown = (event: KeyboardEvent) => {
+  if (!resolvedIsEnabled.value || !semanticView.SemanticZoomOwner.value || !semanticView.IsActiveView.value) return;
+  const navigationKeys = ['ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'];
+  if (!navigationKeys.includes(event.key)) return;
+  const rows = Array.from(containerRef.value?.querySelectorAll<HTMLElement>('.win-list-item') ?? []);
+  const index = Math.max(0, rows.findIndex(row => row.contains(document.activeElement)));
+  const pageSize = Math.max(1, Math.floor((containerRef.value?.clientHeight ?? 0) / (rows[index]?.offsetHeight || 40)));
+  const next = event.key === 'Home' ? 0 : event.key === 'End' ? rows.length - 1
+    : index + (event.key === 'ArrowUp' ? -1 : event.key === 'ArrowDown' ? 1 : event.key === 'PageUp' ? -pageSize : pageSize);
+  rows[Math.max(0, Math.min(rows.length - 1, next))]?.focus({ preventScroll: true });
+  semanticView.MakeVisible({ Item: internalItems.value[Math.max(0, Math.min(rows.length - 1, next))], Bounds: { X: 0, Y: 0, Width: 0, Height: 0 } });
+  event.preventDefault(); event.stopPropagation();
+};
+const listViewApi = {
+  ...semanticView,
+  get Element() { return containerRef.value; },
+  get ItemsSource() { return items.value; },
+  set ItemsSource(source: unknown[]) { itemsSourceOverride.value = source; updateXamlBinding(props.ItemsSource, source, instance); emit('update:ItemsSource', source); },
+  get SelectedIndex() { return selectedItems.value.length ? flatItems.value.findIndex(item => toRaw(item) === toRaw(selectedItems.value[0])) : -1; },
+  set SelectedIndex(index: number) { emitSelection(index >= 0 && flatItems.value[index] !== undefined ? [flatItems.value[index]] : []); },
+  ItemTemplate: computed({ get: () => itemTemplateOverride.value ?? props.ItemTemplate, set: (value) => { itemTemplateOverride.value = value; } })
+};
+defineExpose(listViewApi);
 const listRef = ref<HTMLElement>();
 const internalItems = ref<unknown[]>([...items.value]);
+const itemKeys = computed(() => keysForItems(internalItems.value));
+const groupContainerKeys = new WeakMap<object, Map<symbol, symbol>>();
+const groupItemKeys = computed(() => new Map(items.value.map(group => {
+  const identity = toRaw(group) as object;
+  const keys = groupContainerKeys.get(identity) ?? new Map<symbol, symbol>();
+  groupContainerKeys.set(identity, keys);
+  return [group, keysForItems(getGroupItems(group)).map(itemKey => {
+    let containerKey = keys.get(itemKey);
+    if (!containerKey) {
+      containerKey = Symbol('ListViewGroupItem');
+      keys.set(itemKey, containerKey);
+    }
+    return containerKey;
+  })] as const;
+})));
+type ItemContainer = {
+  Element: HTMLElement | null; Content: unknown; DataContext: unknown; ItemIndex: number; IsSelected: boolean;
+  ContextFlyout?: VNode | { ShowAt?: (target: unknown, options?: Record<string, unknown>) => unknown; Hide?: () => void };
+};
+const itemContainers = shallowReactive(new Map<symbol, ItemContainer>());
+const contextFlyoutControllers = new Map<symbol, { ShowAt?: (target: unknown, options?: Record<string, unknown>) => unknown; Hide?: () => void }>();
+const itemContainerRefs = new Map<symbol, {
+  Item: unknown; Index: number; Group?: unknown; Callback: (element: unknown) => void;
+}>();
+const itemContainerKey = (index: number, group?: unknown) => group ? groupItemKeys.value.get(group)?.[index] : itemKeys.value[index];
+const raiseContainerEvent = (name: 'Loaded' | 'ContainerContentChanging', args: Record<string, unknown>) => {
+  const listener = instance?.vnode.props?.[`on${name}`];
+  for (const callback of Array.isArray(listener) ? listener : [listener]) if (typeof callback === 'function') callback(listViewApi, args);
+  resolveXamlHandler(attrs[name], instance)?.(listViewApi, args);
+};
+const disposeContainerFlyout = (key: symbol) => {
+  const flyout = itemContainers.get(key)?.ContextFlyout;
+  const controller = contextFlyoutControllers.get(key) ?? (isVNode(flyout) ? undefined : flyout);
+  controller?.Hide?.();
+  contextFlyoutControllers.delete(key);
+};
+const selectContainerItem = (item: unknown, selected: boolean) => {
+  if (selectionMode.value === 'None') return;
+  const previous = selectedItems.value;
+  const withoutItem = previous.filter(candidate => toRaw(candidate) !== toRaw(item));
+  if (!selected) { if (withoutItem.length !== previous.length) emitSelection(withoutItem); return; }
+  if (previous.some(candidate => toRaw(candidate) === toRaw(item))) return;
+  emitSelection(selectionMode.value === 'Single' ? [item] : [...previous, item]);
+};
+const prepareItemContainer = (key: symbol, element: unknown, item: unknown, index: number) => {
+  if (!(element instanceof HTMLElement)) {
+    disposeContainerFlyout(key); itemContainers.delete(key); itemContainerRefs.delete(key); return;
+  }
+  const existing = itemContainers.get(key);
+  if (existing?.Element === element && existing.Content === item && existing.ItemIndex === index) return;
+  disposeContainerFlyout(key);
+  const container = shallowReactive({
+    Element: element, Content: item, DataContext: item, ItemIndex: index, ContextFlyout: undefined,
+    get IsSelected() { return isSelected(item); },
+    set IsSelected(value: boolean) { selectContainerItem(item, value); }
+  }) as ItemContainer;
+  itemContainers.set(key, container);
+  raiseContainerEvent('ContainerContentChanging', { Item: item, ItemIndex: index, ItemContainer: container, InRecycleQueue: false, Phase: 0, Handled: false });
+};
+const itemContainerRef = (key: symbol | undefined, item: unknown, index: number, group?: unknown) => {
+  if (!key) return undefined;
+  let reference = itemContainerRefs.get(key);
+  if (!reference) {
+    const state = {
+      Item: item, Index: index, Group: group,
+      Callback: (element: unknown) => prepareItemContainer(key, element, state.Item, state.Index)
+    };
+    reference = state;
+    itemContainerRefs.set(key, reference);
+  }
+  reference.Item = item; reference.Index = index; reference.Group = group;
+  return reference.Callback;
+};
+const ContextFlyoutOutlet = defineComponent({ name: 'ListViewContextFlyoutOutlet', setup: () => () => h(Fragment,
+  [...itemContainers.entries()].flatMap(([key, container]) => isVNode(container.ContextFlyout) ? [cloneVNode(container.ContextFlyout, {
+    key, ref: (controller: unknown) => { if (controller) contextFlyoutControllers.set(key, controller as any); else contextFlyoutControllers.delete(key); }
+  })] : [])) });
+const onItemContextRequested = async (event: MouseEvent, item: unknown, index: number, group?: unknown) => {
+  if (!resolvedIsEnabled.value) return;
+  const key = itemContainerKey(index, group);
+  if (!key) return;
+  const container = itemContainers.get(key);
+  if (!container?.ContextFlyout || !container.Element) return;
+  event.preventDefault(); event.stopPropagation();
+  await nextTick();
+  const controller = isVNode(container.ContextFlyout) ? contextFlyoutControllers.get(key) : container.ContextFlyout;
+  const rect = container.Element.getBoundingClientRect();
+  await controller?.ShowAt?.(container.Element, { Position: { X: event.clientX - rect.left, Y: event.clientY - rect.top } });
+};
+onBeforeUnmount(() => itemContainers.forEach((_container, key) => disposeContainerFlyout(key)));
 // ListView's default transition collection uses AddDeleteThemeTransition:
 // affected containers first settle into their new slots (300ms), then the
 // newly materialized container fades in.  Keep this state at the collection
@@ -571,6 +823,8 @@ watch(items, (val) => {
   const nextOrder = nextRenderedItems.map(item => toRaw(item));
   const structureChanged = previousOrder.length !== nextOrder.length
     || previousOrder.some((item, index) => item !== nextOrder[index]);
+
+  if (structureChanged) cancelSelectionIndicatorPresses();
 
   // Capture old positions before Vue patches the list.  This is deliberately
   // done for every structural mutation, including pure deletes and moves, so
@@ -828,9 +1082,12 @@ const emitSelection = (newSel: unknown[], previous = selectedItems.value) => {
   emit('update:SelectedItems', newSel);
   emit('update:SelectedItem', selectedItem);
   emit('update:SelectedIndex', selectedIndex);
+  updateXamlBinding(props.SelectedItems, newSel, instance);
+  updateXamlBinding(props.SelectedItem, selectedItem, instance);
+  updateXamlBinding(props.SelectedIndex, selectedIndex, instance);
   const args = { AddedItems: addedItems, RemovedItems: removedItems, SelectedItems: newSel };
-  emit('selectionChanged', args);
-  resolveXamlHandler(attrs.SelectionChanged, instance)?.(args);
+  emit('SelectionChanged', listViewApi, args);
+  resolveXamlHandler(attrs.SelectionChanged, instance)?.(listViewApi, args);
 };
 
 const selectionIndicatorAnimations = new Set<Animation>();
@@ -892,11 +1149,11 @@ const playSelectionIndicatorReveal = async (item: unknown) => {
       { transform: 'translateY(-50%) scaleY(0)' },
       { transform: 'translateY(-50%) scaleY(1)' }
     ],
-    { duration: 167, easing: 'cubic-bezier(0.167, 0.167, 0, 1)', fill: 'both' }
+    { duration: 167, easing: 'cubic-bezier(0.167, 0.167, 0, 1)' }
   );
   const opacityAnimation = indicator.animate(
     [{ opacity: 0 }, { opacity: 1 }],
-    { duration: 83, easing: 'linear', fill: 'both' }
+    { duration: 83, easing: 'linear' }
   );
   trackSelectionIndicatorAnimation(scaleAnimation);
   trackSelectionIndicatorAnimation(opacityAnimation);
@@ -968,6 +1225,11 @@ const cancelSelectionIndicatorPresses = () => {
     press.indicator.style.removeProperty('--selection-indicator-pressed-height');
   }
   selectionIndicatorPresses.clear();
+  // Finished fill animations are no longer in the tracking set, but can
+  // still override CSS after a container's selection state changes.
+  for (const indicator of listRef.value?.querySelectorAll<HTMLElement>('.win-list-view-selection-indicator') ?? []) {
+    for (const animation of indicator.getAnimations()) animation.cancel();
+  }
   // Reveal animations are tracked separately because they can outlive the
   // pointer press. Stop them as soon as selection visuals are no longer
   // applicable (for example when dragging starts or the mode changes).
@@ -1133,10 +1395,14 @@ const commitPointerSelection = (event: PointerEvent) => {
 
 const onItemClick = (event: MouseEvent | KeyboardEvent, item: unknown) => {
   if (!resolvedIsEnabled.value || isDragging.value || Date.now() < suppressClickUntil) return;
+  if (semanticView.SemanticZoomOwner.value && semanticView.IsActiveView.value && !semanticView.IsZoomedInView.value) {
+    semanticView.SemanticZoomOwner.value.ToggleActiveView({ Item: item, OriginalSource: event.currentTarget as HTMLElement });
+    return;
+  }
   if (isItemClickEnabled.value) {
     const args = { ClickedItem: item, OriginalSource: event.target };
-    emit('itemClick', args);
-    resolveXamlHandler(attrs.ItemClick, instance)?.(args);
+    emit('ItemClick', listViewApi, args);
+    resolveXamlHandler(attrs.ItemClick, instance)?.(listViewApi, args);
   }
   if (event instanceof MouseEvent
     && event.detail > 0
@@ -1251,8 +1517,8 @@ const startPointerDrag = (event: PointerEvent, index: number) => {
     dropResult: 'None'
   };
   const args = { Items: [...pointerDraggedItems], OriginalSource: event.target };
-  emit('dragItemsStarting', args);
-  resolveXamlHandler(attrs.DragItemsStarting, instance)?.(args);
+  emit('DragItemsStarting', listViewApi, args);
+  resolveXamlHandler(attrs.DragItemsStarting, instance)?.(listViewApi, args);
 };
 
 const updatePointerDragPosition = (event: PointerEvent, index = pointerDrag.value?.index ?? -1) => {
@@ -1309,8 +1575,8 @@ const onItemPointerUp = (event?: PointerEvent) => {
       DropResult: detail?.dropResult ?? 'None',
       OriginalSource: event.target
     };
-    emit('dragItemsCompleted', args);
-    resolveXamlHandler(attrs.DragItemsCompleted, instance)?.(args);
+    emit('DragItemsCompleted', listViewApi, args);
+    resolveXamlHandler(attrs.DragItemsCompleted, instance)?.(listViewApi, args);
     resetDrag();
     return;
   }
@@ -1331,8 +1597,8 @@ const onItemPointerCancel = (event?: PointerEvent) => {
   }
   if (pointerDragActive.value && pointerDraggedItems.length) {
     const args = { Items: [...pointerDraggedItems], DropResult: 'None', OriginalSource: event?.target };
-    emit('dragItemsCompleted', args);
-    resolveXamlHandler(attrs.DragItemsCompleted, instance)?.(args);
+    emit('DragItemsCompleted', listViewApi, args);
+    resolveXamlHandler(attrs.DragItemsCompleted, instance)?.(listViewApi, args);
   }
   releasePointerDragCapture();
   resetDrag();
@@ -1667,8 +1933,8 @@ const onPointerListDragOver = (event: Event) => {
     AcceptedOperation: 'Move',
     OriginalSource: document.elementFromPoint(detail.clientX, detail.clientY)
   };
-  emit('dragOver', args);
-  resolveXamlHandler(attrs.DragOver, instance)?.(args);
+  emit('DragOver', listViewApi, args);
+  resolveXamlHandler(attrs.DragOver, instance)?.(listViewApi, args);
 };
 
 const onPointerListDragLeave = (event: Event) => {
@@ -1700,6 +1966,7 @@ const onPointerListDrop = (event: Event) => {
     const reordered = [...remaining];
     reordered.splice(Math.max(0, actualInsert), 0, ...detail.items);
     internalItems.value = reordered;
+    updateXamlBinding(props.ItemsSource, reordered, instance);
     emit('update:ItemsSource', reordered);
   }
 
@@ -1710,8 +1977,8 @@ const onPointerListDrop = (event: Event) => {
     Items: [...detail.items],
     OriginalSource: document.elementFromPoint(detail.clientX, detail.clientY)
   };
-  emit('drop', dropArgs);
-  resolveXamlHandler(attrs.Drop, instance)?.(dropArgs);
+  emit('Drop', listViewApi, dropArgs);
+  resolveXamlHandler(attrs.Drop, instance)?.(listViewApi, dropArgs);
   detail.dropResult = 'Move';
   clearPointerDropVisual(detail);
 };
@@ -1754,7 +2021,26 @@ const onGlobalPointerCancel = (event: PointerEvent) => {
   }
 };
 
+const cancelActiveInteractions = () => {
+  onItemPointerCancel();
+  pendingPointerSelection = null;
+  cancelSelectionIndicatorPresses();
+  resetDrag();
+};
+const onGlobalKeyDown = (event: KeyboardEvent) => {
+  if (event.key !== 'Escape' || (!pointerDrag.value && !pointerDragActive.value)) return;
+  event.preventDefault();
+  cancelActiveInteractions();
+};
+const onVisibilityChange = () => {
+  if (document.hidden) cancelActiveInteractions();
+};
+const onWindowPointerLeave = (event: PointerEvent) => {
+  if (event.relatedTarget === null && pointerDragActive.value) cancelActiveInteractions();
+};
+
 onMounted(() => {
+  raiseContainerEvent('Loaded', { OriginalSource: listViewApi, Handled: false });
   const root = containerRef.value;
   root?.addEventListener(pointerDragOverEvent, onPointerListDragOver);
   root?.addEventListener(pointerDragLeaveEvent, onPointerListDragLeave);
@@ -1764,6 +2050,10 @@ onMounted(() => {
   document.addEventListener('pointermove', onGlobalPointerMove);
   document.addEventListener('pointerup', onGlobalPointerUp);
   document.addEventListener('pointercancel', onGlobalPointerCancel);
+  document.addEventListener('keydown', onGlobalKeyDown, true);
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  document.addEventListener('pointerout', onWindowPointerLeave);
+  window.addEventListener('blur', cancelActiveInteractions);
   globalPointerListenersAttached = true;
 });
 
@@ -1775,8 +2065,8 @@ const onViewportDragOver = (e: DragEvent) => {
   if (!ownsDrag) isExternalDragOver.value = true;
   if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
   const args = { DataTransfer: e.dataTransfer, AcceptedOperation: 'Move', OriginalSource: e.target };
-  emit('dragOver', args);
-  resolveXamlHandler(attrs.DragOver, instance)?.(args);
+  emit('DragOver', listViewApi, args);
+  resolveXamlHandler(attrs.DragOver, instance)?.(listViewApi, args);
 
   const now = Date.now();
   if (now - lastCalcTime < 80) return;
@@ -1836,8 +2126,8 @@ const onViewportDrop = (event: DragEvent) => {
       InsertIndex: insertIndex,
       OriginalSource: event.target
     };
-    emit('drop', args);
-    resolveXamlHandler(attrs.Drop, instance)?.(args);
+    emit('Drop', listViewApi, args);
+    resolveXamlHandler(attrs.Drop, instance)?.(listViewApi, args);
     resetDrag();
     return;
   }
@@ -1863,6 +2153,7 @@ const onViewportDrop = (event: DragEvent) => {
   const newItems = [...remaining];
   newItems.splice(actualInsert, 0, ...draggedItems);
   internalItems.value = newItems;
+  updateXamlBinding(props.ItemsSource, newItems, instance);
   emit('update:ItemsSource', newItems);
   const dropArgs = {
     DataTransfer: event.dataTransfer,
@@ -1870,11 +2161,11 @@ const onViewportDrop = (event: DragEvent) => {
     InsertIndex: actualInsert,
     OriginalSource: event.target
   };
-  emit('drop', dropArgs);
-  resolveXamlHandler(attrs.Drop, instance)?.(dropArgs);
+  emit('Drop', listViewApi, dropArgs);
+  resolveXamlHandler(attrs.Drop, instance)?.(listViewApi, dropArgs);
   const completedArgs = { Items: draggedItems, DropResult: 'Move', OriginalSource: event.target };
-  emit('dragItemsCompleted', completedArgs);
-  resolveXamlHandler(attrs.DragItemsCompleted, instance)?.(completedArgs);
+  emit('DragItemsCompleted', listViewApi, completedArgs);
+  resolveXamlHandler(attrs.DragItemsCompleted, instance)?.(listViewApi, completedArgs);
   resetDrag();
 };
 
@@ -1921,6 +2212,10 @@ onBeforeUnmount(() => {
     document.removeEventListener('pointermove', onGlobalPointerMove);
     document.removeEventListener('pointerup', onGlobalPointerUp);
     document.removeEventListener('pointercancel', onGlobalPointerCancel);
+    document.removeEventListener('keydown', onGlobalKeyDown, true);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+    document.removeEventListener('pointerout', onWindowPointerLeave);
+    window.removeEventListener('blur', cancelActiveInteractions);
     globalPointerListenersAttached = false;
   }
   const root = containerRef.value;
@@ -1999,6 +2294,11 @@ onBeforeUnmount(() => {
     width: 100%;
   }
 
+  .win-list-header-presenter {
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
   .win-list-header {
     min-height: 44px;
     margin: 0 0 4px;
@@ -2047,8 +2347,8 @@ onBeforeUnmount(() => {
     position: relative;
     isolation: isolate;
     width: 100%;
-    min-width: 88px;
-    min-height: 40px;
+    min-width: var(--ListViewItemMinWidth, 88px);
+    min-height: var(--ListViewItemMinHeight, 40px);
     box-sizing: border-box;
     /* DefaultListViewItemStyle.Padding belongs to the ContentPresenter. */
     padding: 0;
@@ -2101,6 +2401,7 @@ onBeforeUnmount(() => {
      their original dimensions. */
   .win-list-item-visual {
     position: relative;
+    display: flow-root;
     width: 100%;
     min-height: inherit;
     box-sizing: border-box;
@@ -2128,7 +2429,7 @@ onBeforeUnmount(() => {
     width: auto;
     max-width: 100%;
     min-width: 0;
-    min-height: 36px;
+    min-height: calc(var(--ListViewItemMinHeight, 40px) - 4px);
     box-sizing: border-box;
     /* ListViewItemPresenter's Border uses Margin="4,2,4,2".  The
        corresponding content presenter therefore occupies the inset box,
@@ -2137,13 +2438,13 @@ onBeforeUnmount(() => {
     padding: 0 12px 0 16px;
   }
 
-  .win-list-item-content > * {
+  .win-list-item-content > :deep(*) {
     flex: 0 1 auto;
     min-width: 0;
     max-width: 100%;
   }
 
-  .win-list-item.content-stretch .win-list-item-content > * {
+  .win-list-item.content-stretch .win-list-item-content > :deep(*) {
     flex: 1 1 auto;
   }
 

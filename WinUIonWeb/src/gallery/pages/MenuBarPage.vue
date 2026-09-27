@@ -1,219 +1,237 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-          <TextBlock class="page-header" :Text="$t('text.menubar')" />
-          <TextBlock class="page-description" :Text="$t('text.the-menubar-simplifies-the-creation-of-basic-men')" TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
-            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+  <Page>
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind Labels.Title, Mode=OneWay}" FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal" Spacing="4">
+            <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind Labels.ToggleTheme, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind Labels.ToggleTheme, Mode=OneWay}">
+              <FontIcon Glyph="&#xE793;" FontSize="16" />
+            </Button>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}">
+              <FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" />
             </ToggleButton>
-          </div>
-        </div>
-      <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" :headerText="$t('text.a-simple-menubar')" :theme="pageTheme" :vue="simpleCode">
-              <template #example>
-                <div class="sample-stack">
-                  <TextBlock :Text="simpleOutput" TextWrapping="WrapWholeWords" />
-                  <MenuBar :Items="simpleItems" :Theme="pageTheme" @ItemClick="simpleOutput = itemClickText($event.Item)" />
-                </div>
-              </template>
-            </ControlExample>
+          </StackPanel>
+        </StackPanel>
 
-            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menubar.keyboard')" :theme="pageTheme" :vue="acceleratorCode">
-              <template #example>
-                <div class="sample-stack">
-                  <TextBlock :Text="acceleratorOutput" TextWrapping="WrapWholeWords" />
-                  <MenuBar :Items="acceleratorItems" :Theme="pageTheme" @ItemClick="acceleratorOutput = itemClickText($event.Item)" />
-                </div>
-              </template>
-            </ControlExample>
+        <StackPanel class="gallery-page-content">
+          <ControlExample SampleDefinition="MenuBar\SimpleMenubar.txt" HeaderText="{x:Bind Labels.SimpleHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind SimpleXaml}">
+            <ControlExample.Example>
+              <StackPanel class="menubar-example-stack">
+                <TextBlock x:Name="SelectedOptionText" class="menubar-output" Text="{x:Bind Outputs.Simple, Mode=OneWay}" TextWrapping="Wrap" />
+                <MenuBar x:Name="Example1">
+                  <MenuBarItem x:Uid="MenuBarSample_File" Title="{x:Bind Labels.File, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="o1" x:Uid="MenuBarSample_New" Text="{x:Bind Labels.New, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="o2" x:Uid="MenuBarSample_Open" Text="{x:Bind Labels.Open, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="o3" x:Uid="MenuBarSample_Save" Text="{x:Bind Labels.Save, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="o4" x:Uid="MenuBarSample_Exit" Text="{x:Bind Labels.Exit, Mode=OneWay}" Click="OnElementClicked" />
+                  </MenuBarItem>
+                  <MenuBarItem x:Uid="MenuBarSample_Edit" Title="{x:Bind Labels.Edit, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="o5" x:Uid="MenuBarSample_Undo" Text="{x:Bind Labels.Undo, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="o6" x:Uid="MenuBarSample_Cut" Text="{x:Bind Labels.Cut, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="o7" x:Uid="MenuBarSample_Copy" Text="{x:Bind Labels.Copy, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="o8" x:Uid="MenuBarSample_Paste" Text="{x:Bind Labels.Paste, Mode=OneWay}" Click="OnElementClicked" />
+                  </MenuBarItem>
+                  <MenuBarItem x:Uid="MenuBarSample_Help" Title="{x:Bind Labels.Help, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="o9" x:Uid="MenuBarSample_About" Text="{x:Bind Labels.About, Mode=OneWay}" Click="OnElementClicked" />
+                  </MenuBarItem>
+                </MenuBar>
+              </StackPanel>
+            </ControlExample.Example>
+          </ControlExample>
 
-            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menubar.submenus')" :theme="pageTheme" :vue="submenuCode">
-              <template #example>
-                <div class="sample-stack">
-                  <TextBlock :Text="submenuOutput" TextWrapping="WrapWholeWords" />
-                  <MenuBar :Items="submenuItems" :Theme="pageTheme" @ItemClick="submenuOutput = itemClickText($event.Item)" />
-                </div>
-              </template>
-            </ControlExample>
-      </div>
-    </div>
-  </ScrollViewer>
+          <ControlExample SampleDefinition="MenuBar\MenubarKeyboardAccelerators.txt" HeaderText="{x:Bind Labels.KeyboardHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind KeyboardXaml}">
+            <ControlExample.Example>
+              <StackPanel class="menubar-example-stack">
+                <TextBlock x:Name="SelectedOptionText1" class="menubar-output" Text="{x:Bind Outputs.Keyboard, Mode=OneWay}" TextWrapping="Wrap" />
+                <MenuBar x:Name="Example2">
+                  <MenuBarItem x:Uid="MenuBarSample_File" Title="{x:Bind Labels.File, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="t2" x:Uid="MenuBarSample_New" Text="{x:Bind Labels.New, Mode=OneWay}" Click="OnElementClicked">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="N" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="t1" x:Uid="MenuBarSample_Open" Text="{x:Bind Labels.Open, Mode=OneWay}" Click="OnElementClicked">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="O" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="t3" x:Uid="MenuBarSample_Save" Text="{x:Bind Labels.Save, Mode=OneWay}" Click="OnElementClicked">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="S" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="t4" x:Uid="MenuBarSample_Exit" Text="{x:Bind Labels.Exit, Mode=OneWay}" Click="OnElementClicked">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="E" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                  </MenuBarItem>
+                  <MenuBarItem x:Uid="MenuBarSample_Edit" Title="{x:Bind Labels.Edit, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="t5" x:Uid="MenuBarSample_Undo" Text="{x:Bind Labels.Undo, Mode=OneWay}" Click="OnElementClicked">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Z" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="t6" x:Uid="MenuBarSample_Cut" Text="{x:Bind Labels.Cut, Mode=OneWay}" Click="OnElementClicked">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="X" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="t7" x:Uid="MenuBarSample_Copy" Text="{x:Bind Labels.Copy, Mode=OneWay}" Click="OnElementClicked">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="C" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="t8" x:Uid="MenuBarSample_Paste" Text="{x:Bind Labels.Paste, Mode=OneWay}" Click="OnElementClicked">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="V" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                  </MenuBarItem>
+                  <MenuBarItem x:Uid="MenuBarSample_Help" Title="{x:Bind Labels.Help, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="t9" x:Uid="MenuBarSample_About" Text="{x:Bind Labels.About, Mode=OneWay}" Click="OnElementClicked">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="I" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                  </MenuBarItem>
+                </MenuBar>
+              </StackPanel>
+            </ControlExample.Example>
+          </ControlExample>
+
+          <ControlExample SampleDefinition="MenuBar\MenubarSubmenusSeparatorsRadio.txt" HeaderText="{x:Bind Labels.SubmenusHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind SubmenusXaml}">
+            <ControlExample.Example>
+              <StackPanel class="menubar-example-stack">
+                <TextBlock x:Name="SelectedOptionText2" class="menubar-output" Text="{x:Bind Outputs.Submenus, Mode=OneWay}" TextWrapping="Wrap" />
+                <MenuBar x:Name="Example3">
+                  <MenuBarItem x:Uid="MenuBarSample_File" Title="{x:Bind Labels.File, Mode=OneWay}">
+                    <MenuFlyoutSubItem x:Uid="MenuBarSample_New" Text="{x:Bind Labels.New, Mode=OneWay}">
+                      <MenuFlyoutItem x:Name="z1" x:Uid="MenuBarSample_PlainText" Text="{x:Bind Labels.PlainText, Mode=OneWay}" Click="OnElementClicked" />
+                      <MenuFlyoutItem x:Name="z2" x:Uid="MenuBarSample_RichText" Text="{x:Bind Labels.RichText, Mode=OneWay}" Click="OnElementClicked" />
+                      <MenuFlyoutItem x:Name="z3" x:Uid="MenuBarSample_OtherFormats" Text="{x:Bind Labels.OtherFormats, Mode=OneWay}" Click="OnElementClicked" />
+                    </MenuFlyoutSubItem>
+                    <MenuFlyoutItem x:Name="z4" x:Uid="MenuBarSample_Open" Text="{x:Bind Labels.Open, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="z5" x:Uid="MenuBarSample_Save" Text="{x:Bind Labels.Save, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem x:Name="z6" x:Uid="MenuBarSample_Exit" Text="{x:Bind Labels.Exit, Mode=OneWay}" Click="OnElementClicked" />
+                  </MenuBarItem>
+                  <MenuBarItem x:Uid="MenuBarSample_Edit" Title="{x:Bind Labels.Edit, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="z7" x:Uid="MenuBarSample_Undo" Text="{x:Bind Labels.Undo, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="z8" x:Uid="MenuBarSample_Cut" Text="{x:Bind Labels.Cut, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="z9" x:Uid="MenuBarSample_Copy" Text="{x:Bind Labels.Copy, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutItem x:Name="z11" x:Uid="MenuBarSample_Paste" Text="{x:Bind Labels.Paste, Mode=OneWay}" Click="OnElementClicked" />
+                  </MenuBarItem>
+                  <MenuBarItem x:Uid="MenuBarSample_View" Title="{x:Bind Labels.View, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="z12" x:Uid="MenuBarSample_Output" Text="{x:Bind Labels.Output, Mode=OneWay}" Click="OnElementClicked" />
+                    <MenuFlyoutSeparator />
+                    <RadioMenuFlyoutItem x:Name="z13" x:Uid="MenuBarSample_Landscape" Text="{x:Bind Labels.Landscape, Mode=OneWay}" Click="OnElementClicked" GroupName="OrientationGroup" />
+                    <RadioMenuFlyoutItem x:Name="z14" x:Uid="MenuBarSample_Portrait" Text="{x:Bind Labels.Portrait, Mode=OneWay}" Click="OnElementClicked" GroupName="OrientationGroup" IsChecked="True" />
+                    <MenuFlyoutSeparator />
+                    <RadioMenuFlyoutItem x:Name="z15" x:Uid="MenuBarSample_SmallIcons" Text="{x:Bind Labels.SmallIcons, Mode=OneWay}" Click="OnElementClicked" GroupName="SizeGroup" />
+                    <RadioMenuFlyoutItem x:Name="z16" x:Uid="MenuBarSample_MediumIcons" Text="{x:Bind Labels.MediumIcons, Mode=OneWay}" Click="OnElementClicked" GroupName="SizeGroup" IsChecked="True" />
+                    <RadioMenuFlyoutItem x:Name="z17" x:Uid="MenuBarSample_LargeIcons" Text="{x:Bind Labels.LargeIcons, Mode=OneWay}" Click="OnElementClicked" GroupName="SizeGroup" />
+                  </MenuBarItem>
+                  <MenuBarItem x:Uid="MenuBarSample_Help" Title="{x:Bind Labels.Help, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="z18" x:Uid="MenuBarSample_About" Text="{x:Bind Labels.About, Mode=OneWay}" Click="OnElementClicked" />
+                  </MenuBarItem>
+                </MenuBar>
+              </StackPanel>
+            </ControlExample.Example>
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Page>
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue';
+import { computed, inject, provide, shallowReactive } from 'vue';
 import Button from '../../components/Button.vue';
 import ControlExample from '../../components/ControlExample.vue';
+import FontIcon from '../../components/FontIcon.vue';
 import MenuBar from '../../components/MenuBar.vue';
+import MenuBarItem from '../../components/MenuBarItem.vue';
+import { KeyboardAccelerator, MenuFlyoutItem, MenuFlyoutSeparator, MenuFlyoutSubItem, RadioMenuFlyoutItem } from '../../components/MenuFlyoutItems';
+import Page from '../../components/Page.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
 import TextBlock from '../../components/TextBlock.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
-import { createPageState } from '../../utils/pageState';
-
 import { useI18n } from '../../components/i18n/index';
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime';
+import { createPageState } from '../../utils/pageState';
+import simpleSample from '../samples/MenuBar/SimpleMenubar.txt?raw';
+import keyboardSample from '../samples/MenuBar/MenubarKeyboardAccelerators.txt?raw';
+import submenusSample from '../samples/MenuBar/MenubarSubmenusSeparatorsRadio.txt?raw';
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'menubar');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'menubar');
+const Names = shallowReactive({});
+provide(xamlNameScopeKey, Names);
 
-const simpleOutput = ref('');
-const acceleratorOutput = ref('');
-const submenuOutput = ref('');
-const itemClickText = (item) => t('sample.you-clicked', { name: item.Text });
+const Labels = computed(() => ({
+  Title: t('text.menubar'),
+  Description: t('text.the-menubar-simplifies-the-creation-of-basic-men'),
+  ToggleTheme: t('gallery.page-header.toggle-theme'),
+  SimpleHeader: t('text.a-simple-menubar'),
+  KeyboardHeader: t('sample.menubar.keyboard'),
+  SubmenusHeader: t('sample.menubar.submenus'),
+  File: t('MenuBarSample_File.Title'),
+  Edit: t('MenuBarSample_Edit.Title'),
+  View: t('MenuBarSample_View.Title'),
+  Help: t('MenuBarSample_Help.Title'),
+  New: t('MenuBarSample_New.Text'),
+  Open: t('MenuBarSample_Open.Text'),
+  Save: t('MenuBarSample_Save.Text'),
+  Exit: t('MenuBarSample_Exit.Text'),
+  Undo: t('MenuBarSample_Undo.Text'),
+  Cut: t('MenuBarSample_Cut.Text'),
+  Copy: t('MenuBarSample_Copy.Text'),
+  Paste: t('MenuBarSample_Paste.Text'),
+  About: t('MenuBarSample_About.Text'),
+  PlainText: t('MenuBarSample_PlainText.Text'),
+  RichText: t('MenuBarSample_RichText.Text'),
+  OtherFormats: t('MenuBarSample_OtherFormats.Text'),
+  Output: t('MenuBarSample_Output.Text'),
+  Landscape: t('MenuBarSample_Landscape.Text'),
+  Portrait: t('MenuBarSample_Portrait.Text'),
+  SmallIcons: t('MenuBarSample_SmallIcons.Text'),
+  MediumIcons: t('MenuBarSample_MediumIcons.Text'),
+  LargeIcons: t('MenuBarSample_LargeIcons.Text')
+}));
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
+const SelectedItems = shallowReactive({ o: null, t: null, z: null });
+const selectedOutput = (item) => item ? t('sample.menubar.clicked-output', { value: item.Text }) : '';
+const Outputs = computed(() => ({
+  Simple: selectedOutput(SelectedItems.o),
+  Keyboard: selectedOutput(SelectedItems.t),
+  Submenus: selectedOutput(SelectedItems.z)
+}));
+const OnElementClicked = (sender) => {
+  const example = String(sender?.Name ?? '').slice(0, 1);
+  if (Object.prototype.hasOwnProperty.call(SelectedItems, example)) SelectedItems[example] = sender;
+};
+const sampleXaml = (source) => source.split(/^--- xaml\s*\r?\n/m)[1]?.trim() ?? '';
+const SimpleXaml = sampleXaml(simpleSample);
+const KeyboardXaml = sampleXaml(keyboardSample);
+const SubmenusXaml = sampleXaml(submenusSample);
 
-const baseMenus = [
-  { Title: t('text.file'), Items: [{ Text: t('sample.standarduicommand.new') }, { Text: t('sample.standarduicommand.open') }, { Text: t('text.save') }, { Text: t('sample.standarduicommand.exit') }] },
-  { Title: t('text.edit'), Items: [{ Text: t('sample.menubar.undo') }, { Text: t('sample.menubar.cut') }, { Text: t('sample.copy') }, { Text: t('sample.menubar.paste') }] },
-  { Title: t('text.help'), Items: [{ Text: t('text.about') }] }
-];
-
-const simpleItems = baseMenus;
-const acceleratorItems = [
-  { Title: t('text.file'), Items: [{ Text: t('sample.standarduicommand.new'), KeyboardAccelerators: [{ Key: 'N', Modifiers: ['Control'] }] }, { Text: t('sample.open'), KeyboardAccelerators: [{ Key: 'O', Modifiers: ['Control'] }] }, { Text: t('text.save'), KeyboardAccelerators: [{ Key: 'S', Modifiers: ['Control'] }] }, { Text: t('sample.standarduicommand.exit'), KeyboardAccelerators: [{ Key: 'E', Modifiers: ['Control'] }] }] },
-  { Title: t('text.edit'), Items: [{ Text: t('sample.menubar.undo'), KeyboardAccelerators: [{ Key: 'Z', Modifiers: ['Control'] }] }, { Text: t('sample.menubar.cut'), KeyboardAccelerators: [{ Key: 'X', Modifiers: ['Control'] }] }, { Text: t('sample.copy'), KeyboardAccelerators: [{ Key: 'C', Modifiers: ['Control'] }] }, { Text: t('sample.menubar.paste'), KeyboardAccelerators: [{ Key: 'V', Modifiers: ['Control'] }] }] },
-  { Title: t('text.help'), Items: [{ Text: t('text.about'), KeyboardAccelerators: [{ Key: 'I', Modifiers: ['Control'] }] }] }
-];
-const submenuItems = ref([
-  {
-    Title: t('text.file'),
-    Items: [
-      { Kind: 'MenuFlyoutSubItem', Text: t('sample.standarduicommand.new'), Items: [{ Text: t('sample.menubar.plain-text') }, { Text: t('sample.menubar.rich-text') }, { Text: t('sample.menubar.other-formats') }] },
-      { Text: t('sample.open') },
-      { Text: t('text.save') },
-      { Kind: 'MenuFlyoutSeparator' },
-      { Text: t('sample.standarduicommand.exit') }
-    ]
-  },
-  { Title: t('text.edit'), Items: [{ Text: t('sample.menubar.undo') }, { Text: t('sample.menubar.cut') }, { Text: t('sample.copy') }, { Text: t('sample.menubar.paste') }] },
-  {
-    Title: t('text.view'),
-    Items: [
-      { Text: t('sample.menubar.output') },
-      { Kind: 'MenuFlyoutSeparator' },
-      { Kind: 'RadioMenuFlyoutItem', Text: t('sample.landscape'), GroupName: 'OrientationGroup', IsChecked: false },
-      { Kind: 'RadioMenuFlyoutItem', Text: t('sample.portrait'), GroupName: 'OrientationGroup', IsChecked: true },
-      { Kind: 'MenuFlyoutSeparator' },
-      { Kind: 'RadioMenuFlyoutItem', Text: t('sample.small-icons'), GroupName: 'SizeGroup', IsChecked: false },
-      { Kind: 'RadioMenuFlyoutItem', Text: t('sample.medium-icons'), GroupName: 'SizeGroup', IsChecked: true },
-      { Kind: 'RadioMenuFlyoutItem', Text: t('sample.large-icons'), GroupName: 'SizeGroup', IsChecked: false }
-    ]
-  },
-  { Title: t('text.help'), Items: [{ Text: t('text.about') }] }
-]);
-
-const simpleCode = `<MenuBar>
-  <MenuBarItem Title="File">
-    <MenuFlyoutItem Text="New" />
-    <MenuFlyoutItem Text="Open..." />
-    <MenuFlyoutItem Text="Save" />
-    <MenuFlyoutItem Text="Exit" />
-  </MenuBarItem>
-  <MenuBarItem Title="Edit">
-    <MenuFlyoutItem Text="Undo" />
-    <MenuFlyoutItem Text="Cut" />
-    <MenuFlyoutItem Text="Copy" />
-    <MenuFlyoutItem Text="Paste" />
-  </MenuBarItem>
-  <MenuBarItem Title="Help">
-    <MenuFlyoutItem Text="About" />
-  </MenuBarItem>
-</MenuBar>`;
-const acceleratorCode = `<MenuBar>
-  <MenuBarItem Title="File">
-    <MenuFlyoutItem Text="New">
-      <MenuFlyoutItem.KeyboardAccelerators>
-        <KeyboardAccelerator Key="N" Modifiers="Control" />
-      </MenuFlyoutItem.KeyboardAccelerators>
-    </MenuFlyoutItem>
-    <MenuFlyoutItem Text="Open...">
-      <MenuFlyoutItem.KeyboardAccelerators>
-        <KeyboardAccelerator Key="O" Modifiers="Control" />
-      </MenuFlyoutItem.KeyboardAccelerators>
-    </MenuFlyoutItem>
-    <MenuFlyoutItem Text="Save">
-      <MenuFlyoutItem.KeyboardAccelerators>
-        <KeyboardAccelerator Key="S" Modifiers="Control" />
-      </MenuFlyoutItem.KeyboardAccelerators>
-    </MenuFlyoutItem>
-    <MenuFlyoutItem Text="Exit">
-      <MenuFlyoutItem.KeyboardAccelerators>
-        <KeyboardAccelerator Key="E" Modifiers="Control" />
-      </MenuFlyoutItem.KeyboardAccelerators>
-    </MenuFlyoutItem>
-  </MenuBarItem>
-  <MenuBarItem Title="Edit">
-    <MenuFlyoutItem Text="Undo">
-      <MenuFlyoutItem.KeyboardAccelerators>
-        <KeyboardAccelerator Key="Z" Modifiers="Control" />
-      </MenuFlyoutItem.KeyboardAccelerators>
-    </MenuFlyoutItem>
-    <MenuFlyoutItem Text="Cut">
-      <MenuFlyoutItem.KeyboardAccelerators>
-        <KeyboardAccelerator Key="X" Modifiers="Control" />
-      </MenuFlyoutItem.KeyboardAccelerators>
-    </MenuFlyoutItem>
-    <MenuFlyoutItem Text="Copy">
-      <MenuFlyoutItem.KeyboardAccelerators>
-        <KeyboardAccelerator Key="C" Modifiers="Control" />
-      </MenuFlyoutItem.KeyboardAccelerators>
-    </MenuFlyoutItem>
-    <MenuFlyoutItem Text="Paste">
-      <MenuFlyoutItem.KeyboardAccelerators>
-        <KeyboardAccelerator Key="V" Modifiers="Control" />
-      </MenuFlyoutItem.KeyboardAccelerators>
-    </MenuFlyoutItem>
-  </MenuBarItem>
-  <MenuBarItem Title="Help">
-    <MenuFlyoutItem Text="About">
-      <MenuFlyoutItem.KeyboardAccelerators>
-        <KeyboardAccelerator Key="I" Modifiers="Control" />
-      </MenuFlyoutItem.KeyboardAccelerators>
-    </MenuFlyoutItem>
-  </MenuBarItem>
-</MenuBar>`;
-const submenuCode = `<MenuBar>
-  <MenuBarItem Title="File">
-    <MenuFlyoutSubItem Text="New">
-      <MenuFlyoutItem Text="Plain Text Document" />
-      <MenuFlyoutItem Text="Rich Text Document" />
-      <MenuFlyoutItem Text="Other Formats..." />
-    </MenuFlyoutSubItem>
-    <MenuFlyoutItem Text="Open..." />
-    <MenuFlyoutItem Text="Save" />
-    <MenuFlyoutSeparator />
-    <MenuFlyoutItem Text="Exit" />
-  </MenuBarItem>
-  <MenuBarItem Title="Edit">
-    <MenuFlyoutItem Text="Undo" />
-    <MenuFlyoutItem Text="Cut" />
-    <MenuFlyoutItem Text="Copy" />
-    <MenuFlyoutItem Text="Paste" />
-  </MenuBarItem>
-  <MenuBarItem Title="View">
-    <MenuFlyoutItem Text="Output" />
-    <MenuFlyoutSeparator />
-    <RadioMenuFlyoutItem Text="Landscape" GroupName="OrientationGroup" />
-    <RadioMenuFlyoutItem Text="Portrait" GroupName="OrientationGroup" IsChecked="True" />
-    <MenuFlyoutSeparator />
-    <RadioMenuFlyoutItem Text="Small icons" GroupName="SizeGroup" />
-    <RadioMenuFlyoutItem Text="Medium icons" GroupName="SizeGroup" IsChecked="True" />
-    <RadioMenuFlyoutItem Text="Large icons" GroupName="SizeGroup" />
-  </MenuBarItem>
-  <MenuBarItem Title="Help">
-    <MenuFlyoutItem Text="About" />
-  </MenuBarItem>
-</MenuBar>`;
+provide(xamlScopeKey, {
+  Labels, FavoriteLabel, FavoriteGlyph, isFavoriteState, pageTheme, toggleTheme, toggleFavorite,
+  Outputs, OnElementClicked, SimpleXaml, KeyboardXaml, SubmenusXaml
+});
 </script>
 
 <style scoped>
-.page-heading { position: relative; }
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; }
-.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-size: 16px; }
-.sample-stack { width: 100%; display: flex; flex-direction: column; }
+.page-heading { position: relative; min-width: 0; }
+.page-header { margin: 0 72px 8px 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.page-description { color: var(--text-secondary); margin: 0 0 16px; }
+.page-header-actions { position: absolute; top: 0; right: 0; }
+.gallery-page-content, .menubar-example-stack { min-width: 0; max-width: 100%; }
+.menubar-output { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 </style>

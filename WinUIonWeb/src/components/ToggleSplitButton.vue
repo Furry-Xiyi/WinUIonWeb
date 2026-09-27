@@ -1,183 +1,71 @@
 <template>
-  <SplitButton
-    :class="[attrs.class, { 'is-checked': checkedState }]"
-    :style="attrs.style"
-    Flyout="{x:Bind splitFlyout, Mode=OneWay}"
-    IsEnabled="{x:Bind resolvedIsEnabled, Mode=OneWay}"
-    Theme="{x:Bind Theme, Mode=OneWay}"
-    MinWidth="{x:Bind MinWidth, Mode=OneWay}"
-    MinHeight="{x:Bind MinHeight, Mode=OneWay}"
-    Padding="{x:Bind Padding, Mode=OneWay}"
-    Margin="{x:Bind Margin, Mode=OneWay}"
-    VerticalAlignment="{x:Bind VerticalAlignment, Mode=OneWay}"
-    Click="OnSplitClick"
-    Select="OnSelect">
-    <MainOutlet />
-    <template #flyout>
-      <FlyoutOutlet v-if="flyoutNodes.length" />
-    </template>
+  <SplitButton ref="split" v-bind="splitAttrs" class="win-toggle-split-button" :aria-pressed="IsChecked"
+    IsEnabled="{x:Bind IsEnabled}" Content="{x:Bind Content}" ContentTemplate="{x:Bind ContentTemplate}" ContentTransitions="{x:Bind ContentTransitions}" Flyout="{x:Bind Flyout}" RequestedTheme="{x:Bind RequestedTheme}" Click="OnSplitClick">
+    <slot v-if="hasContent" />
   </SplitButton>
 </template>
+
 <script lang="ts">
-import { defineComponent, h } from 'vue'
-
-export const ToggleSplitButtonFlyout = defineComponent({
-  name: 'ToggleSplitButton.Flyout',
-  __splitButtonProperty: 'flyout',
-  setup(_, { slots }) {
-    return () => h('span', { class: 'split-button-property' }, slots.default?.())
-  }
-})
-
-export default { Flyout: ToggleSplitButtonFlyout }
+import { defineComponent } from 'vue'
+import { buttonContentProperty } from './buttonContentRuntime'
+export const ToggleSplitButtonFlyout = defineComponent({ name: 'ToggleSplitButton.Flyout', __splitButtonProperty: 'flyout', setup() { return () => null } })
+export const ToggleSplitButtonContent = defineComponent({ name: 'ToggleSplitButton.Content', __splitButtonProperty: 'content', setup() { return () => null } })
+export default { Flyout: ToggleSplitButtonFlyout, Content: ToggleSplitButtonContent, ContentTemplate: buttonContentProperty('ToggleSplitButton', 'ContentTemplate'), ContentTransitions: buttonContentProperty('ToggleSplitButton', 'ContentTransitions'), Resources: buttonContentProperty('ToggleSplitButton', 'Resources') }
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, provide, ref, useAttrs, useSlots, watch, type VNode } from 'vue';
-import SplitButton from './SplitButton.vue';
-import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
+import { computed, getCurrentInstance, inject, provide, proxyRefs, ref, useAttrs, useSlots, watch } from 'vue'
+import SplitButton from './SplitButton.vue'
+import { boolValue } from './layout'
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime'
+import { useUICommand } from './uiCommandRuntime'
+import { useButtonContent } from './buttonContentRuntime'
 
-defineOptions({ inheritAttrs: false });
-
-const props = defineProps({
-  Content: { type: [String, Number], default: '' },
-  IsChecked: { type: [Boolean, String], default: undefined },
-  Flyout: { type: [Object, Array], default: () => ({ Items: [] }) },
-  IsEnabled: { type: [Boolean, String], default: true },
-  Theme: { type: String, default: '' },
-  MinWidth: { type: [String, Number], default: '' },
-  MinHeight: { type: [String, Number], default: '' },
-  Padding: { type: String, default: '' },
-  Margin: { type: String, default: '' },
-  VerticalAlignment: { type: String, default: '' }
-});
-
-const emit = defineEmits(['update:IsChecked', 'Click', 'IsCheckedChanged', 'Select']);
-const attrs = useAttrs();
-const slots = useSlots();
-const instance = getCurrentInstance();
-const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
-
-const isFlyoutProperty = (node: VNode) => {
-  const type = node.type as { __splitButtonProperty?: string } | undefined;
-  return type?.__splitButtonProperty === 'flyout';
-};
-
-const isFlyoutContainer = (node: VNode) => {
-  const type = node?.type as { name?: string; __name?: string } | undefined;
-  const name = type?.name || type?.__name;
-  return name === 'Flyout' || name === 'Flyout';
-};
-
-const propertyNodes = computed(() => {
-  const main: VNode[] = [];
-  const flyout: VNode[] = [];
-
-  const collect = (nodes: VNode[]) => {
-    for (const node of nodes) {
-      if (isFlyoutProperty(node)) {
-        const propertySlot = node.children && typeof node.children === 'object'
-          ? (node.children as { default?: () => VNode[] }).default
-          : undefined;
-        if (propertySlot) {
-          for (const child of propertySlot()) {
-            if (isFlyoutContainer(child)) {
-              const contentSlot = child.children && typeof child.children === 'object'
-                ? (child.children as { default?: () => VNode[] }).default
-                : undefined;
-              if (contentSlot) flyout.push(...contentSlot());
-            } else {
-              flyout.push(child);
-            }
-          }
-        }
-        continue;
-      }
-
-      // Vue can add a Fragment around template content.  A Fragment is only
-      // compiler structure; it is not XAML content and must not hide a
-      // ToggleSplitButton.Flyout property element from the parser.
-      if (node.type === Fragment && Array.isArray(node.children)) {
-        collect(node.children as VNode[]);
-        continue;
-      }
-
-      main.push(node);
-    }
-  };
-
-  collect(slots.default?.() ?? []);
-  return { main, flyout };
-});
-
-const mainNodes = computed(() => propertyNodes.value.main);
-const flyoutNodes = computed(() => propertyNodes.value.flyout);
-const MainOutlet = defineComponent({
-  name: 'ToggleSplitButtonMainOutlet',
-  setup() {
-    return () => mainNodes.value.length
-      ? h(Fragment, mainNodes.value)
-      : String(resolvedContent.value ?? '');
-  }
-});
-const FlyoutOutlet = defineComponent({
-  name: 'ToggleSplitButtonFlyoutOutlet',
-  setup() {
-    return () => h(Fragment, flyoutNodes.value);
-  }
-});
-
-const resolvedIsChecked = computed(() => resolveXamlValue(props.IsChecked, instance));
-const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
-const localIsChecked = ref<boolean | undefined>(undefined);
-const isUpdatingChecked = ref(false);
-watch(resolvedIsChecked, (value) => {
-  if (!isUpdatingChecked.value) localIsChecked.value = value === true;
-}, { immediate: true });
-const checkedState = computed(() => localIsChecked.value !== undefined
-  ? localIsChecked.value
-  : resolvedIsChecked.value === true);
-const isDisabled = computed(() => !resolvedIsEnabled.value);
-const flyoutDefinition = computed(() => Array.isArray(props.Flyout) ? { Items: props.Flyout } : props.Flyout || { Items: [] });
-const sourceItems = computed(() => flyoutDefinition.value.Items ?? []);
-const splitOptions = computed(() => sourceItems.value.map((item, idx) => {
-  if (typeof item === 'string') return { Text: item, Value: idx };
-  return { ...item, Text: item.Text ?? item.Content ?? item.label ?? String(item), Value: item.Value ?? idx };
-}));
-const splitFlyout = computed(() => ({ ...flyoutDefinition.value, Items: splitOptions.value }));
-
-const setChecked = (next, event) => {
-  if (isDisabled.value) return;
-  localIsChecked.value = next;
-  isUpdatingChecked.value = true;
-  emit('update:IsChecked', next);
-  updateXamlBinding(props.IsChecked, next, instance);
-  isUpdatingChecked.value = false;
-  emit('Click', event);
-  resolveXamlHandler(attrs.Click, instance)?.(event);
-  emit('IsCheckedChanged', { IsChecked: next });
-  resolveXamlHandler(attrs.IsCheckedChanged, instance)?.({ IsChecked: next });
-};
-
-const onSplitClick = (event) => {
-  setChecked(!checkedState.value, event);
-};
-
-const onSelect = (item) => {
-  emit('Select', item);
-  resolveXamlHandler(attrs.Select, instance)?.(item);
-};
-
-provide(xamlScopeKey, {
-  splitFlyout,
-  resolvedIsEnabled,
-  Theme: computed(() => props.Theme),
-  MinWidth: computed(() => props.MinWidth),
-  MinHeight: computed(() => props.MinHeight),
-  Padding: computed(() => props.Padding),
-  Margin: computed(() => props.Margin),
-  VerticalAlignment: computed(() => props.VerticalAlignment),
-  OnSplitClick: onSplitClick,
-  OnSelect: onSelect
-});
+defineOptions({ name: 'ToggleSplitButton', inheritAttrs: false })
+const props = defineProps({ Content: { type: null, default: '' }, ContentTemplate: { type: null, default: undefined }, ContentTransitions: { type: null, default: undefined }, Flyout: { type: null, default: undefined }, IsChecked: { type: [Boolean, String], default: false }, IsEnabled: { type: [Boolean, String], default: true }, RequestedTheme: { type: String, default: 'Default' } })
+const emit = defineEmits(['Click', 'IsCheckedChanged'])
+const attrs = useAttrs()
+const slots = useSlots()
+const instance = getCurrentInstance()
+const split = ref<any>(null)
+const resolve = (value: unknown) => resolveXamlValue(value, instance)
+const { ContentTemplate, ContentTransitions } = useButtonContent(props, () => slots.default?.() ?? [], instance)
+const Command = useUICommand(() => resolve(attrs.Command))
+const CommandParameter = computed(() => resolve(attrs.CommandParameter))
+const Content = computed(() => resolve(props.Content))
+const sourceRequestedTheme = computed(() => String(resolve(props.RequestedTheme)))
+const localRequestedTheme = ref<string | undefined>()
+watch(sourceRequestedTheme, () => { localRequestedTheme.value = undefined })
+const RequestedTheme = computed({ get: () => localRequestedTheme.value ?? sourceRequestedTheme.value, set: value => { localRequestedTheme.value = value; updateXamlBinding(props.RequestedTheme, value, instance) } })
+const Flyout = computed(() => resolve(props.Flyout))
+const sourceChecked = computed(() => boolValue(resolve(props.IsChecked)))
+const localChecked = ref<boolean | undefined>()
+const IsChecked = computed({ get: () => localChecked.value ?? sourceChecked.value, set: value => setChecked(boolValue(value)) })
+const sourceEnabled = computed(() => boolValue(resolve(props.IsEnabled)))
+const localEnabled = ref<boolean | undefined>()
+const IsEnabled = computed({ get: () => (localEnabled.value ?? sourceEnabled.value) && (Command.value?.CanExecute?.(CommandParameter.value) ?? true), set: value => { localEnabled.value = boolValue(value); updateXamlBinding(props.IsEnabled, localEnabled.value, instance) } })
+const splitAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([key]) => !['Click', 'onClick', 'IsCheckedChanged', 'onIsCheckedChanged'].includes(key))))
+const hasContent = computed(() => Boolean(slots.default))
+const api = proxyRefs({ IsChecked, IsEnabled, RequestedTheme, ContentTemplate, ContentTransitions, Name: computed(() => attrs['data-xaml-ref'] ?? attrs['x:Name'] ?? attrs.Name ?? ''), Content: computed({ get: () => split.value?.Content ?? Content.value, set: value => { if (split.value) split.value.Content = value; updateXamlBinding(props.Content, value, instance) } }), Flyout: computed({ get: () => split.value?.Flyout, set: value => { if (split.value) split.value.Flyout = value; updateXamlBinding(props.Flyout, value, instance) } }), Element: computed(() => split.value?.Element), Focus: () => split.value?.Focus?.() })
+defineExpose(api)
+function raiseChanged(event?: Event) {
+  const args = { OriginalSource: api, OriginalEvent: event }
+  emit('IsCheckedChanged', api, args)
+  resolveXamlHandler(attrs.IsCheckedChanged, instance)?.(api, args)
+}
+function setChecked(value: boolean, event?: Event) {
+  if (value === IsChecked.value) return
+  localChecked.value = value
+  updateXamlBinding(props.IsChecked, value, instance)
+  raiseChanged(event)
+}
+function onSplitClick(_sender: unknown, args: { OriginalEvent?: Event }) {
+  const eventArgs = { OriginalSource: api, OriginalEvent: args?.OriginalEvent }
+  emit('Click', api, eventArgs)
+  resolveXamlHandler(attrs.Click, instance)?.(api, eventArgs)
+}
+watch(sourceChecked, (value, previous) => { const alreadyRaised = localChecked.value !== undefined && localChecked.value === value; localChecked.value = undefined; if (!alreadyRaised && value !== previous) raiseChanged() })
+watch(sourceEnabled, () => { localEnabled.value = undefined })
+provide('toggleSplitButtonState', { IsChecked, Invoke: (event?: Event) => setChecked(!IsChecked.value, event) })
+provide(xamlScopeKey, { ...inject(xamlScopeKey, {}), IsEnabled, Content, ContentTemplate, ContentTransitions, Flyout, RequestedTheme, OnSplitClick: onSplitClick })
 </script>

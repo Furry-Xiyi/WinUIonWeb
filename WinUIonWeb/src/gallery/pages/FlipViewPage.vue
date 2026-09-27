@@ -25,6 +25,8 @@
               <Image AutomationProperties.Name="Valley" Source="{x:Bind valleySource, Mode=OneWay}" />
             </FlipView>
           </ControlExample.Example>
+          <ControlExample.Output />
+          <ControlExample.Options />
         </ControlExample>
 
         <ControlExample HeaderText="{x:Bind boundDataHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind boundXaml, Mode=OneWay}">
@@ -63,6 +65,8 @@
               </FlipView.ItemTemplate>
             </FlipView>
           </ControlExample.Example>
+          <ControlExample.Output />
+          <ControlExample.Options />
         </ControlExample>
 
         <ControlExample HeaderText="{x:Bind verticalHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind verticalXaml, Mode=OneWay}">
@@ -80,6 +84,8 @@
               <FlipView.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel Orientation="Vertical" /></ItemsPanelTemplate></FlipView.ItemsPanel>
             </FlipView>
           </ControlExample.Example>
+          <ControlExample.Output />
+          <ControlExample.Options />
         </ControlExample>
       </StackPanel>
     </StackPanel>

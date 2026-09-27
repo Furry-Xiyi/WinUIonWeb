@@ -1,443 +1,208 @@
 <template>
-  <span
-    ref="rootRef"
-    v-bind="badgeAttrs"
-    class="win-infobadge"
-    :class="[styleClass, displayKindClass, valueShapeClass, alignmentClass, attrs.class]"
-    :style="badgeStyle"
-    role="status"
-    :aria-label="automationName">
-    <TextBlock
-      v-if="displayKind === 'Value'"
-      class="win-infobadge-value-text"
-      :Text="displayValue"
-      :Foreground="badgeForeground"
-      FontSize="11"
-      LineHeight="14" />
-    <span
-      v-else-if="displayKind !== 'Dot'"
-      class="win-infobadge-icon-presenter"
-      aria-hidden="true">
-      <TextBlock
-        class="win-infobadge-icon-glyph"
-        :Text="iconGlyph"
-        :FontFamily="resolvedIconFontFamily"
-        :Foreground="iconForeground"
-        :FontSize="iconFontSize"
-        :LineHeight="iconLineHeight" />
-    </span>
+  <span ref="rootRef" v-bind="badgeAttrs" class="win-infobadge win-theme-scope" :HorizontalAlignment="value(props.HorizontalAlignment)" :VerticalAlignment="value(props.VerticalAlignment)" :class="[displayKindClass, themeClass, attrs.class]" :style="badgeStyle" :aria-label="automationName">
+    <Grid x:Name="RootGrid" class="win-infobadge-root-grid" Background="{x:Bind BadgeBackground, Mode=OneWay}" CornerRadius="{x:Bind TemplateSettings.InfoBadgeCornerRadius, Mode=OneWay}" Padding="{x:Bind BadgePadding, Mode=OneWay}">
+      <TextBlock x:Name="ValueTextBlock" class="win-infobadge-value-text" Text="{x:Bind BadgeValue, Mode=OneWay}" Foreground="{x:Bind BadgeForeground, Mode=OneWay}" FontSize="{ThemeResource InfoBadgeValueFontSize}" Visibility="{x:Bind ValueVisibility, Mode=OneWay}" Margin="{x:Bind ValueMargin, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      <Viewbox x:Name="IconPresenter" class="win-infobadge-icon-presenter" Width="{x:Bind IconViewportWidth, Mode=OneWay}" Height="{x:Bind IconViewportHeight, Mode=OneWay}" Visibility="{x:Bind IconVisibility, Mode=OneWay}" Margin="{x:Bind IconMargin, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+        <ContentPresenter><IconElementPresenter /></ContentPresenter>
+      </Viewbox>
+    </Grid>
   </span>
 </template>
 
-<script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue';
-import TextBlock from './TextBlock.vue';
-import { useI18n } from './i18n/index';
+<script lang="ts">
+import { defineComponent } from 'vue'
+export const InfoBadgeIconSourceProperty = defineComponent({
+  name: 'InfoBadge.IconSource',
+  __infoBadgeIconSourceProperty: true,
+  setup() { return () => null }
+})
+export default { IconSource: InfoBadgeIconSourceProperty }
+</script>
 
-defineOptions({
-  inheritAttrs: false
-});
+<script setup lang="ts">
+import { computed, defineComponent, Fragment, getCurrentInstance, h, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch, type VNode } from 'vue'
+import ContentPresenter from './ContentPresenter.vue'
+import FontIcon from './FontIcon.vue'
+import Grid from './Grid.vue'
+import Image from './Image.vue'
+import SymbolIcon from './SymbolIcon.vue'
+import TextBlock from './TextBlock.vue'
+import Viewbox from './Viewbox.vue'
+import { useI18n } from './i18n/index'
+import { frameworkLayoutStyle } from './frameworkLayout'
+import { cssLength } from './layout'
+import { iconSourceKind } from './IconSource'
+import { resolveXamlValue, updateXamlBinding, xamlNameScopeKey, xamlScopeKey } from './xamlRuntime'
 
-const { t } = useI18n();
-const attrs = useAttrs();
-const rootRef = ref(null);
-const measuredCornerRadius = ref('');
-const measuredSquareWidth = ref('');
-let resizeObserver = null;
-
+defineOptions({ inheritAttrs: false })
 const props = defineProps({
-  Value: { type: Number, default: -1 },
-  IconSource: { type: Object, default: null },
-  Style: { type: String, default: '' },
-  Background: { type: String, default: '' },
-  Foreground: { type: String, default: '' },
-  Opacity: { type: Number, default: 1 },
-  Padding: { type: [String, Number], default: '' },
-  CornerRadius: { type: [String, Number], default: '' },
-  HorizontalAlignment: { type: String, default: '' },
-  VerticalAlignment: { type: String, default: '' },
-  Width: { type: [String, Number], default: '' },
-  Height: { type: [String, Number], default: '' },
-  MinWidth: { type: [String, Number], default: '' },
-  MinHeight: { type: [String, Number], default: '' },
-  MaxWidth: { type: [String, Number], default: '' },
-  MaxHeight: { type: [String, Number], default: '' },
+  Value: { type: [Number, String], default: -1 },
+  IconSource: { type: [Object, String], default: null },
+  Style: { type: [Object, String], default: '' },
+  Background: { type: String, default: '' }, Foreground: { type: String, default: '' },
+  IsEnabled: { type: [Boolean, String], default: true }, IsTabStop: { type: [Boolean, String], default: false },
+  Visibility: { type: String, default: 'Visible' }, Opacity: { type: [Number, String], default: 1 },
+  RequestedTheme: { type: String, default: 'Default' },
+  Padding: { type: [String, Number], default: '' }, CornerRadius: { type: [String, Number], default: '' },
+  HorizontalAlignment: { type: String, default: 'Stretch' }, VerticalAlignment: { type: String, default: 'Stretch' },
+  Width: { type: [String, Number], default: '' }, Height: { type: [String, Number], default: '' },
+  MinWidth: { type: [String, Number], default: '' }, MinHeight: { type: [String, Number], default: '' },
+  MaxWidth: { type: [String, Number], default: '' }, MaxHeight: { type: [String, Number], default: '' },
   Margin: { type: [String, Number], default: '' }
-});
-
-const styleResourceMatch = computed(() => props.Style.trim().match(
-  /^\{StaticResource (Attention|Informational|Success|Caution|Critical)(Dot|Value|Icon)InfoBadgeStyle\}$/
-));
-const styleKind = computed(() => styleResourceMatch.value?.[1] ?? 'Default');
-const styleDisplayKind = computed(() => styleResourceMatch.value?.[2] ?? '');
-
-const validatedValue = computed(() => {
-  const value = Math.trunc(props.Value);
-  if (value < -1) {
-    throw new RangeError('InfoBadge Value must be equal to or greater than -1.');
+})
+const emit = defineEmits(['update:Value', 'update:IconSource', 'update:Style', 'update:RequestedTheme'])
+const attrs = useAttrs()
+const slots = useSlots()
+const instance = getCurrentInstance()
+provide(xamlNameScopeKey, shallowReactive<Record<string, unknown>>({}))
+const { t } = useI18n()
+const rootRef = ref<HTMLElement | null>(null)
+const actualHeight = ref(0)
+const localValue = ref<number | undefined>()
+const localStyle = shallowRef<unknown>()
+const localIconSource = shallowRef<unknown>()
+const localRequestedTheme = ref<string | undefined>()
+const value = (input: unknown) => resolveXamlValue(input, instance)
+const sourceValue = computed(() => value(props.Value))
+const sourceStyle = computed(() => value(props.Style))
+const sourceIconSource = computed(() => value(props.IconSource))
+const sourceRequestedTheme = computed(() => String(value(props.RequestedTheme) ?? 'Default'))
+watch(sourceValue, () => { localValue.value = undefined })
+watch(sourceStyle, () => { localStyle.value = undefined })
+watch(sourceIconSource, () => { localIconSource.value = undefined })
+watch(sourceRequestedTheme, () => { localRequestedTheme.value = undefined })
+const RequestedTheme = computed({
+  get: () => localRequestedTheme.value ?? sourceRequestedTheme.value,
+  set: (next: string) => {
+    const requested = ['Light', 'Dark'].includes(next) ? next : 'Default'
+    localRequestedTheme.value = requested
+    updateXamlBinding(props.RequestedTheme, requested, instance)
+    emit('update:RequestedTheme', requested)
   }
-  return value;
-});
-
-const styleIconSource = computed(() => {
-  if (styleDisplayKind.value !== 'Icon') return null;
-
-  switch (styleKind.value) {
-    case 'Attention':
-      return { Glyph: '\uEA38' };
-    case 'Informational':
-      return { Glyph: '\uF13F' };
-    case 'Success':
-      return { Symbol: 'Accept' };
-    case 'Caution':
-      return { Symbol: 'Important' };
-    case 'Critical':
-      return { Symbol: 'Cancel' };
-    default:
-      return null;
+})
+const themeClass = computed(() => ['Light', 'Dark'].includes(RequestedTheme.value) ? `theme-${RequestedTheme.value.toLowerCase()}` : '')
+const validateValue = (input: unknown) => {
+  const number = Number(input)
+  const integer = Number.isFinite(number) ? Math.trunc(number) : -1
+  if (integer < -1 || integer > 2147483647) throw new RangeError('InfoBadge.Value must be an Int32 equal to or greater than -1.')
+  return integer
+}
+const BadgeValue = computed(() => localValue.value ?? validateValue(sourceValue.value))
+const styleName = computed(() => {
+  const style = localStyle.value !== undefined ? localStyle.value : sourceStyle.value
+  if (typeof style !== 'string') return ''
+  return style.match(/^\{(?:StaticResource|ThemeResource)\s+([^}]+)\}$/)?.[1] ?? style.match(/^var\(--([^,)]+)\)$/)?.[1] ?? style
+})
+const styleMatch = computed(() => styleName.value.match(/^(Attention|Informational|Success|Caution|Critical)(Dot|Value|Icon)InfoBadgeStyle$/))
+const styleSeverity = computed(() => styleMatch.value?.[1] ?? '')
+const styleIcon = computed(() => {
+  if (styleMatch.value?.[2] !== 'Icon') return null
+  const sources: Record<string, Record<string, unknown>> = {
+    Attention: { Kind: 'FontIcon', Glyph: '\uEA38' }, Informational: { Kind: 'FontIcon', Glyph: '\uF13F' },
+    Success: { Kind: 'SymbolIcon', Symbol: 'Accept' }, Caution: { Kind: 'SymbolIcon', Symbol: 'Important' }, Critical: { Kind: 'SymbolIcon', Symbol: 'Cancel' }
   }
-});
-
-const resolvedIconSource = computed(() => props.IconSource ?? styleIconSource.value);
-
-const symbolGlyphs = {
-  Accept: '\uE8FB',
-  Cancel: '\uE711',
-  Important: '\uE7BA',
-  Sync: '\uE895',
-  Mail: '\uE715',
-  Contact: '\uE77B',
-  Home: '\uE80F'
-};
-
-const decodeGlyph = (value) => {
-  const glyph = String(value ?? '');
-  if (glyph.startsWith('\\u')) return String.fromCodePoint(Number.parseInt(glyph.slice(2), 16));
-  if (glyph.startsWith('&#x') && glyph.endsWith(';')) return String.fromCodePoint(Number.parseInt(glyph.slice(3, -1), 16));
-  if (glyph.startsWith('0x')) return String.fromCodePoint(Number.parseInt(glyph, 16));
-  if (/^[0-9A-Fa-f]{4,5}$/.test(glyph)) return String.fromCodePoint(Number.parseInt(glyph, 16));
-  return glyph;
-};
-
-const iconGlyph = computed(() => {
-  const source = resolvedIconSource.value;
-  if (!source) return '';
-  if (source.Glyph !== undefined) return decodeGlyph(source.Glyph);
-  if (source.Symbol !== undefined) return symbolGlyphs[source.Symbol] ?? String(source.Symbol);
-  return '';
-});
-
-const displayKind = computed(() => {
-  if (validatedValue.value >= 0) return 'Value';
-  if (!iconGlyph.value) return 'Dot';
-  return resolvedIconSource.value?.Glyph !== undefined ? 'FontIcon' : 'Icon';
-});
-
-const displayValue = computed(() => String(validatedValue.value));
-const resolvedIconFontFamily = computed(() => (
-  resolvedIconSource.value?.FontFamily || 'WinUIonWebIcons'
-));
-const badgeForeground = computed(() => (
-  props.Foreground || 'var(--InfoBadgeForeground, var(--TextOnAccentFillColorPrimaryBrush, var(--accent-text, #ffffff)))'
-));
-const iconForeground = computed(() => resolvedIconSource.value?.Foreground || badgeForeground.value);
-const iconFontSize = computed(() => {
-  if (resolvedIconSource.value?.FontSize !== undefined) return resolvedIconSource.value.FontSize;
-  if (displayKind.value === 'FontIcon') return 8;
-  return 8;
-});
-const iconLineHeight = computed(() => iconFontSize.value);
-
-const badgeAttrs = computed(() => {
-  const { class: _class, style: _style, ...rest } = attrs;
-  return rest;
-});
-
-const cssLength = (value) => {
-  if (value === '' || value === undefined || value === null) return '';
-  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) {
-    return `${Number(value.trim())}px`;
+  return sources[styleSeverity.value] ?? null
+})
+const childrenOf = (node: VNode): VNode[] => Array.isArray(node.children) ? node.children as VNode[] : (node.children as { default?: () => VNode[] } | null)?.default?.() ?? []
+const structuralIconSource = computed(() => {
+  const find = (nodes: VNode[]): VNode | undefined => {
+    for (const node of nodes) {
+      if (node.type === Fragment) { const found = find(childrenOf(node)); if (found) return found }
+      if ((node.type as { __infoBadgeIconSourceProperty?: boolean })?.__infoBadgeIconSourceProperty) return childrenOf(node).find(child => iconSourceKind(child))
+    }
   }
-  return typeof value === 'number' ? `${value}px` : value;
-};
-
-const xamlThickness = (value) => {
-  if (value === '' || value === undefined || value === null) return '';
-
-  const parts = String(value)
-    .split(',')
-    .map((part) => {
-      const trimmed = part.trim();
-      return cssLength(Number.isNaN(Number(trimmed)) ? trimmed : Number(trimmed));
-    });
-
-  if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
-  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
-  return String(value);
-};
-
-const xamlCornerRadius = (value) => {
-  const parts = String(value).split(',').map((part) => cssLength(part.trim()));
-  return parts.length === 4 ? parts.join(' ') : cssLength(value);
-};
-
-const selfAlignment = (value) => ({
-  Left: 'start',
-  Center: 'center',
-  Right: 'end',
-  Stretch: 'stretch',
-  Top: 'start',
-  Bottom: 'end'
-}[value] ?? '');
-
-const initialCornerRadius = computed(() => `${displayKind.value === 'Dot' ? 2 : 8}px`);
-
-const updateCornerRadius = () => {
-  if (!rootRef.value) return;
-  const { width, height } = rootRef.value.getBoundingClientRect();
-  if (props.CornerRadius === '' && height > 0) measuredCornerRadius.value = `${height / 2}px`;
-  if (props.Width === '' && props.MinWidth === '' && width > 0 && width < height) {
-    measuredSquareWidth.value = `${height}px`;
-  } else if (measuredSquareWidth.value && width > height + 0.5) {
-    measuredSquareWidth.value = '';
+  const node = find(slots.default?.() ?? [])
+  return node ? { Kind: iconSourceKind(node), ...node.props } : null
+})
+const IconElement = computed<Record<string, unknown> | null>(() => {
+  const hasIconSourceProperty = Object.keys(instance?.vnode.props ?? {}).some(key => key.replace(/-/g, '').toLowerCase() === 'iconsource')
+  const source = localIconSource.value !== undefined ? localIconSource.value
+    : hasIconSourceProperty ? sourceIconSource.value
+      : structuralIconSource.value ?? styleIcon.value
+  if (!source || typeof source !== 'object') return null
+  if (isVNode(source)) return { Kind: iconSourceKind(source), ...source.props }
+  return Object.fromEntries(Object.entries(source).map(([key, input]) => [key, value(input)]))
+})
+const iconKind = computed(() => String(IconElement.value?.Kind ?? (IconElement.value?.Glyph !== undefined ? 'FontIcon' : IconElement.value?.Symbol !== undefined ? 'SymbolIcon' : IconElement.value?.Data !== undefined ? 'PathIcon' : IconElement.value?.UriSource !== undefined ? 'BitmapIcon' : 'ImageIcon')))
+const displayKind = computed(() => BadgeValue.value >= 0 ? 'Value' : IconElement.value ? iconKind.value === 'FontIcon' ? 'FontIcon' : 'Icon' : 'Dot')
+const displayKindClass = computed(() => `win-infobadge-${displayKind.value.toLowerCase()}`)
+const ValueVisibility = computed(() => displayKind.value === 'Value' ? 'Visible' : 'Collapsed')
+const IconVisibility = computed(() => ['Icon', 'FontIcon'].includes(displayKind.value) ? 'Visible' : 'Collapsed')
+const ValueMargin = computed(() => ValueVisibility.value === 'Visible' ? '4,0,4,2' : '0')
+const IconMargin = computed(() => displayKind.value === 'FontIcon' ? '4,0,4,2' : displayKind.value === 'Icon' ? '4' : '0')
+const BadgePadding = computed(() => value(props.Padding) !== '' ? value(props.Padding) : styleMatch.value?.[2] === 'Icon' && ['Attention', 'Informational'].includes(styleSeverity.value) ? '0,4,0,2' : '0')
+const BadgeBackground = computed(() => value(props.Background) || ({ Attention: 'var(--SystemFillColorAttentionBrush)', Informational: 'var(--SystemFillColorSolidNeutralBrush)', Success: 'var(--SystemFillColorSuccessBrush)', Caution: 'var(--SystemFillColorCautionBrush)', Critical: 'var(--SystemFillColorCriticalBrush)' } as Record<string, string>)[styleSeverity.value] || 'var(--InfoBadgeBackground, var(--AccentFillColorDefaultBrush))')
+const BadgeForeground = computed(() => value(props.Foreground) || 'var(--InfoBadgeForeground, var(--TextOnAccentFillColorPrimaryBrush))')
+const thickness = (input: unknown): number[] => {
+  const parts = String(input ?? '0').split(',').map(Number)
+  return parts.length === 1 ? [parts[0], parts[0], parts[0], parts[0]] : parts.length === 2 ? [parts[0], parts[1], parts[0], parts[1]] : parts
+}
+const numeric = (input: unknown, fallback: number) => {
+  const resolved = value(input)
+  if (resolved === '' || resolved === undefined || resolved === 'Auto') return fallback
+  const number = Number(resolved)
+  return Number.isFinite(number) ? number : fallback
+}
+const desiredHeight = computed(() => {
+  const padding = thickness(BadgePadding.value)
+  const contentHeight = displayKind.value === 'Dot' ? 0 : displayKind.value === 'Value' ? 16 : numeric(IconElement.value?.FontSize, 20) + (displayKind.value === 'FontIcon' ? 2 : 8)
+  return numeric(props.Height, Math.max(numeric(props.MinHeight, 4), Math.min(numeric(props.MaxHeight, 16), contentHeight + (padding[1] || 0) + (padding[3] || 0))))
+})
+const IconViewportHeight = computed(() => {
+  const padding = thickness(BadgePadding.value)
+  return Math.max(0, desiredHeight.value - (padding[1] || 0) - (padding[3] || 0) - (displayKind.value === 'FontIcon' ? 2 : 8))
+})
+const IconViewportWidth = computed(() => IconViewportHeight.value)
+const TemplateSettings = computed(() => ({ InfoBadgeCornerRadius: value(props.CornerRadius) !== '' ? value(props.CornerRadius) : (actualHeight.value || desiredHeight.value) / 2, IconElement: IconElement.value }))
+const decodeGlyph = (input: unknown) => {
+  const glyph = String(input ?? '')
+  const match = glyph.match(/^(?:\\u|&#x|0x)([\da-f]+);?$/i)
+  return match ? String.fromCodePoint(parseInt(match[1], 16)) : glyph
+}
+const IconElementPresenter = defineComponent({
+  name: 'InfoBadgeIconElementPresenter',
+  setup() {
+    return () => {
+      const source = IconElement.value
+      if (!source) return null
+      const foreground = source.Foreground || BadgeForeground.value
+      if (iconKind.value === 'FontIcon') return h(FontIcon, { Glyph: decodeGlyph(source.Glyph), FontFamily: source.FontFamily || 'var(--SymbolThemeFontFamily)', FontSize: source.FontSize ?? 20, Foreground: foreground })
+      if (iconKind.value === 'SymbolIcon') return h(SymbolIcon, { Symbol: source.Symbol, Foreground: foreground, FontSize: source.FontSize ?? 20 })
+      if (iconKind.value === 'PathIcon') return h('svg', { viewBox: '0 0 20 20', width: 20, height: 20, 'aria-hidden': 'true', style: { fill: foreground } }, [h('path', { d: source.Data })])
+      return h(Image, { Source: source.ImageSource ?? source.UriSource, Stretch: 'Uniform', Width: source.Width ?? 20, Height: source.Height ?? 20 })
+    }
   }
-};
-
+})
+const badgeAttrs = computed(() => { const { class: _class, style: _style, ...rest } = attrs; return { ...rest, tabindex: value(props.IsTabStop) === true ? 0 : undefined } })
 const badgeStyle = computed(() => {
-  const style = {};
-  if (props.Background) style['--InfoBadgeBackground'] = props.Background;
-  if (props.Foreground) style['--InfoBadgeForeground'] = props.Foreground;
-  if (resolvedIconSource.value?.Foreground) style['--InfoBadgeIconForeground'] = resolvedIconSource.value.Foreground;
-  if (props.Opacity !== 1) style.opacity = props.Opacity;
-  if (props.Padding !== '') style.padding = xamlThickness(props.Padding);
-  if (props.CornerRadius !== '') {
-    style.borderRadius = xamlCornerRadius(props.CornerRadius);
-  } else {
-    style['--InfoBadgeCornerRadius'] = measuredCornerRadius.value || initialCornerRadius.value;
-  }
-  if (measuredSquareWidth.value) style.minWidth = measuredSquareWidth.value;
-  if (props.Width !== '') style.width = cssLength(props.Width);
-  if (props.Height !== '') style.height = cssLength(props.Height);
-  if (props.MinWidth !== '') style.minWidth = cssLength(props.MinWidth);
-  if (props.MinHeight !== '') style.minHeight = cssLength(props.MinHeight);
-  if (props.MaxWidth !== '') style.maxWidth = cssLength(props.MaxWidth);
-  if (props.MaxHeight !== '') style.maxHeight = cssLength(props.MaxHeight);
-  if (props.Margin !== '') style.margin = xamlThickness(props.Margin);
-  if (props.HorizontalAlignment) style.justifySelf = selfAlignment(props.HorizontalAlignment);
-  if (props.VerticalAlignment) style.alignSelf = selfAlignment(props.VerticalAlignment);
-  return [attrs.style, style];
-});
-
-const styleClass = computed(() => ({
-  'win-infobadge-attention': styleKind.value === 'Attention',
-  'win-infobadge-informational': styleKind.value === 'Informational',
-  'win-infobadge-success': styleKind.value === 'Success',
-  'win-infobadge-caution': styleKind.value === 'Caution',
-  'win-infobadge-critical': styleKind.value === 'Critical',
-  'win-infobadge-style-fonticon-padding': (
-    styleDisplayKind.value === 'Icon' &&
-    ['Attention', 'Informational'].includes(styleKind.value)
-  )
-}));
-
-const displayKindClass = computed(() => `win-infobadge-${displayKind.value.toLowerCase()}`);
-const valueShapeClass = computed(() => ({
-  'win-infobadge-single-value': displayKind.value === 'Value' && validatedValue.value <= 9
-}));
-const alignmentClass = computed(() => ({
-  'horizontal-left': props.HorizontalAlignment === 'Left',
-  'horizontal-center': props.HorizontalAlignment === 'Center',
-  'horizontal-right': props.HorizontalAlignment === 'Right',
-  'vertical-top': props.VerticalAlignment === 'Top',
-  'vertical-center': props.VerticalAlignment === 'Center',
-  'vertical-bottom': props.VerticalAlignment === 'Bottom'
-}));
-
-const automationName = computed(() => {
-  if (displayKind.value === 'Value') {
-    return t('control.infobadge.value', { value: validatedValue.value });
-  }
-  if (displayKind.value === 'Dot') {
-    return t('control.infobadge.dot');
-  }
-  return t('control.infobadge.icon');
-});
-
-onMounted(() => {
-  updateCornerRadius();
-  resizeObserver = new ResizeObserver(updateCornerRadius);
-  if (rootRef.value) resizeObserver.observe(rootRef.value);
-});
-
-watch(
-  () => [
-    displayKind.value,
-    props.Padding,
-    props.Width,
-    props.Height,
-    props.MinWidth,
-    props.MinHeight,
-    props.MaxWidth,
-    props.MaxHeight
-  ],
-  () => nextTick(updateCornerRadius)
-);
-
-onBeforeUnmount(() => resizeObserver?.disconnect());
+  const style = frameworkLayoutStyle(props, instance)
+  // WinUI MeasureOverride ensures the desired width is at least the desired height.
+  style.minWidth = cssLength(Math.max(numeric(props.MinWidth, 4), desiredHeight.value))
+  style.height = cssLength(desiredHeight.value)
+  style.color = String(BadgeForeground.value)
+  style.background = ''; style.padding = ''; style.borderRadius = ''
+  return [attrs.style, style]
+})
+const automationName = computed(() => value(attrs['AutomationProperties.Name']) || (displayKind.value === 'Value' ? t('control.infobadge.value', { value: BadgeValue.value }) : t(`control.infobadge.${displayKind.value === 'Dot' ? 'dot' : 'icon'}`)))
+const Value = computed({ get: () => BadgeValue.value, set: (input: unknown) => { const next = validateValue(input); localValue.value = next; updateXamlBinding(props.Value, next, instance); emit('update:Value', next) } })
+const Style = computed({ get: () => localStyle.value !== undefined ? localStyle.value : sourceStyle.value, set: (next: unknown) => { localStyle.value = next; updateXamlBinding(props.Style, next, instance); emit('update:Style', next) } })
+const IconSource = computed({ get: () => IconElement.value, set: (next: unknown) => { localIconSource.value = next; updateXamlBinding(props.IconSource, next, instance); emit('update:IconSource', next) } })
+defineExpose({ Value, Style, IconSource, RequestedTheme, TemplateSettings, Element: rootRef })
+provide(xamlScopeKey, { RequestedTheme, BadgeValue, BadgeBackground, BadgeForeground, BadgePadding, TemplateSettings, ValueVisibility, IconVisibility, ValueMargin, IconMargin, IconViewportWidth, IconViewportHeight })
+let resizeObserver: ResizeObserver | undefined
+const measure = () => { if (rootRef.value) actualHeight.value = rootRef.value.offsetHeight }
+onMounted(() => { measure(); if (typeof ResizeObserver !== 'undefined' && rootRef.value) { resizeObserver = new ResizeObserver(measure); resizeObserver.observe(rootRef.value) } })
+watch(desiredHeight, () => nextTick(measure))
+onBeforeUnmount(() => resizeObserver?.disconnect())
 </script>
 
 <style scoped>
-.win-infobadge {
-  box-sizing: border-box;
-  min-width: var(--InfoBadgeMinWidth, 4px);
-  min-height: var(--InfoBadgeMinHeight, 4px);
-  max-height: var(--InfoBadgeMaxHeight, 16px);
-  padding: var(--InfoBadgePadding, 0);
-  display: inline-grid;
-  place-items: center;
-  overflow: hidden;
-  flex: 0 0 auto;
-  vertical-align: middle;
-  border-radius: var(--InfoBadgeCornerRadius, 8px);
-  background: var(--InfoBadgeBackground, var(--AccentFillColorDefaultBrush, var(--accent-base, #0067c0)));
-  color: var(--InfoBadgeForeground, var(--TextOnAccentFillColorPrimaryBrush, var(--accent-text, #ffffff)));
-  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
-  transition: opacity var(--fast-duration) var(--fast-out-slow-in), width var(--normal-duration) var(--fast-out-slow-in), min-width var(--normal-duration) var(--fast-out-slow-in);
-  --InfoBadgeInformationalBackground: light-dark(#8a8a8a, #9d9d9d);
-  --InfoBadgeSuccessBackground: light-dark(#0f7b0f, #6ccb5f);
-  --InfoBadgeCautionBackground: light-dark(#9d5d00, #fce100);
-  --InfoBadgeCriticalBackground: light-dark(#c42b1c, #ff99a4);
-}
-
-.win-infobadge-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 2px;
-}
-
-.win-infobadge-value,
-.win-infobadge-fonticon,
-.win-infobadge-icon {
-  width: max-content;
-}
-
-.win-infobadge-value,
-.win-infobadge-fonticon,
-.win-infobadge-icon {
-  min-width: 16px;
-}
-
-.win-infobadge-value {
-  height: 16px;
-}
-
-.win-infobadge-single-value {
-  width: 16px;
-}
-
-.win-infobadge :deep(.win-infobadge-value-text) {
-  display: inline-block;
-  width: max-content;
-  margin: 0 4px 2px;
-  color: inherit;
-  font-size: 11px;
-  font-weight: 400;
-  line-height: 14px;
-  text-align: center;
-  white-space: nowrap;
-  justify-self: center;
-  align-self: center;
-}
-
-.win-infobadge-icon-presenter {
-  box-sizing: border-box;
-  display: grid;
-  place-items: center;
-  justify-self: center;
-  align-self: stretch;
-  overflow: visible;
-}
-
-.win-infobadge-fonticon .win-infobadge-icon-presenter {
-  width: 12px;
-  height: 14px;
-  margin: 0 4px 2px;
-  flex: 0 0 12px;
-}
-
-.win-infobadge-style-fonticon-padding {
-  min-width: 16px;
-}
-
-.win-infobadge-style-fonticon-padding .win-infobadge-icon-presenter {
-  width: 8px;
-  height: 8px;
-  flex-basis: 8px;
-}
-
-.win-infobadge-icon .win-infobadge-icon-presenter {
-  width: 8px;
-  height: 8px;
-  margin: 4px;
-  flex: 0 0 8px;
-}
-
-.win-infobadge :deep(.win-infobadge-icon-glyph) {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  color: var(--InfoBadgeIconForeground, inherit);
-  text-align: center;
-  white-space: nowrap;
-}
-
-.win-infobadge-style-fonticon-padding {
-  padding: 4px 0 2px;
-}
-
-.win-infobadge-attention {
-  --InfoBadgeBackground: var(--SystemFillColorAttentionBrush, var(--AccentFillColorDefaultBrush, var(--accent-base, #0067c0)));
-}
-
-.win-infobadge-informational {
-  --InfoBadgeBackground: var(--SystemFillColorSolidNeutralBrush, var(--InfoBadgeInformationalBackground));
-}
-
-.win-infobadge-success {
-  --InfoBadgeBackground: var(--SystemFillColorSuccessBrush, var(--InfoBadgeSuccessBackground));
-}
-
-.win-infobadge-caution {
-  --InfoBadgeBackground: var(--SystemFillColorCautionBrush, var(--InfoBadgeCautionBackground));
-}
-
-.win-infobadge-critical {
-  --InfoBadgeBackground: var(--SystemFillColorCriticalBrush, var(--InfoBadgeCriticalBackground));
-}
-
-.horizontal-left {
-  justify-self: start;
-}
-
-.horizontal-center {
-  justify-self: center;
-}
-
-.horizontal-right {
-  justify-self: end;
-}
-
-.vertical-top {
-  align-self: start;
-}
-
-.vertical-center {
-  align-self: center;
-}
-
-.vertical-bottom {
-  align-self: end;
+.win-infobadge { box-sizing: border-box; display: inline-grid; width: max-content; min-width: var(--InfoBadgeMinWidth, 4px); min-height: var(--InfoBadgeMinHeight, 4px); max-height: var(--InfoBadgeMaxHeight, 16px); flex: 0 0 auto; vertical-align: middle; font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif); }
+.win-infobadge :deep(.win-infobadge-root-grid) { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); min-width: 0; min-height: 0; width: 100%; height: 100%; overflow: hidden; }
+.win-infobadge :deep(.win-infobadge-value-text) { line-height: 14px !important; font-weight: 400; text-align: center; white-space: nowrap; }
+.win-infobadge :deep(.win-infobadge-icon-presenter), .win-infobadge :deep(.win-content-presenter) { min-width: 0; min-height: 0; }
+@media (forced-colors: active) {
+  .win-infobadge :deep(.win-infobadge-root-grid) { background: Highlight !important; forced-color-adjust: none; }
+  .win-infobadge :deep(.win-infobadge-value-text), .win-infobadge :deep(.win-font-icon), .win-infobadge :deep(.win-symbol-icon) { color: HighlightText !important; }
 }
 </style>

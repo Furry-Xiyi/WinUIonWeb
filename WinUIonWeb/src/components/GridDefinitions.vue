@@ -3,7 +3,10 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ axis: 'columns' | 'rows' }>()
+import { provide } from 'vue'
+import { gridDefinitionTargetKey } from './layout'
+const props = defineProps<{ axis: 'columns' | 'rows' }>()
+provide(gridDefinitionTargetKey, props.axis)
 </script>
 
 <style scoped>

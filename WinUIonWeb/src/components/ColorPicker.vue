@@ -30,14 +30,14 @@
     </div>
 
     <div v-if="IsMoreButtonVisible" class="cp-more-row">
-      <Button class="cp-more-button" Style="SubtleButtonStyle" @Click="moreExpanded = !moreExpanded">
-        <TextBlock class="cp-more-label" :Text="t('text.more')" />
-        <span class="icon">{{ moreGlyph }}</span>
+      <Button class="cp-more-button" Style="{StaticResource SubtleButtonStyle}" Click="OnMoreButtonClick">
+        <TextBlock class="cp-more-label" Text="{x:Bind ButtonContent1, Mode=OneWay}" />
+        <FontIcon class="icon" Glyph="{x:Bind moreGlyph, Mode=OneWay}" />
       </Button>
     </div>
 
     <div v-if="detailsVisible" class="cp-details-grid">
-      <ComboBox Width="120" :ItemsSource="colorModelItems" :SelectedIndex="selectedColorModelIndex" @update:SelectedIndex="onColorModelChanged" />
+      <ComboBox Width="120" ItemsSource="{x:Bind colorModelItems, Mode=OneWay}" SelectedIndex="{x:Bind selectedColorModelIndex, Mode=TwoWay}" />
       <TextBox
         v-if="IsHexInputVisible"
         class="cp-hex-box"
@@ -72,16 +72,17 @@
 
     <ToolTip
       ref="spectrumToolTipRef"
-      IsServiceHost
-      :IsOpen="spectrumToolTipOpen"
-      :Content="spectrumToolTipContent"
+      IsOpen="{x:Bind spectrumToolTipOpen, Mode=TwoWay}"
+      Content="{x:Bind spectrumToolTipContent, Mode=OneWay}"
       Placement="Top"
-      :PlacementTarget="spectrumThumbRef" />
+      PlacementTarget="{x:Bind spectrumThumbRef, Mode=OneWay}" />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, nextTick, getCurrentInstance, useAttrs } from 'vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
+import FontIcon from './/FontIcon.vue';
+import { ref, reactive, computed, watch, onMounted, nextTick, getCurrentInstance, provide, useAttrs } from 'vue';
 import Button from './Button.vue';
 import ComboBox from './ComboBox.vue';
 import NumberBox from './NumberBox.vue';
@@ -89,7 +90,7 @@ import TextBlock from './TextBlock.vue';
 import TextBox from './TextBox.vue';
 import ToolTip from './ToolTip.vue';
 import { useI18n } from './i18n/index';
-import { resolveXamlHandler, resolveXamlValue, updateXamlBinding } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 
 const { t } = useI18n();
 const instance = getCurrentInstance();
@@ -152,7 +153,7 @@ const IsAlphaEnabled = computed(() => boolValue(props.IsAlphaEnabled, props.isAl
 const IsAlphaSliderVisible = computed(() => boolValue(props.IsAlphaSliderVisible, props.isAlphaSliderVisible));
 const IsAlphaTextInputVisible = computed(() => boolValue(props.IsAlphaTextInputVisible, props.isAlphaTextInputVisible));
 const detailsVisible = computed(() => !IsMoreButtonVisible.value || moreExpanded.value);
-const colorModelItems = computed(() => ['RGB', 'HSV']);
+const colorModelItems = computed(() => [t('control.colorpicker.rgb'), t('control.colorpicker.hsv')]);
 const selectedColorModel = computed(() => selectedColorModelIndex.value === 1 ? 'HSV' : 'RGB');
 const isRing = computed(() => ColorSpectrumShape.value === 'Ring');
 const moreGlyph = computed(() => moreExpanded.value ? '\uE70E' : '\uE70D');
@@ -173,6 +174,8 @@ const currentHex = computed(() => {
 
 const hexDisplay = computed(() => currentHex.value.toUpperCase());
 const spectrumToolTipContent = computed(() => hexDisplay.value);
+const OnMoreButtonClick = () => { moreExpanded.value = !moreExpanded.value; };
+provide(xamlScopeKey, { spectrumToolTipOpen, spectrumToolTipContent, spectrumThumbRef, OnMoreButtonClick, colorModelItems, selectedColorModelIndex });
 const opacityPercent = computed(() => Math.round(alpha.value * 100));
 const hsvHue = computed(() => Math.round(hsv.h) % 360);
 const hsvSaturation = computed(() => Math.round(hsv.s * 100));
@@ -445,10 +448,6 @@ function onHsvValueInput(channel, value) {
   emitColor();
 }
 
-function onColorModelChanged(value) {
-  selectedColorModelIndex.value = value ?? 0;
-}
-
 function onOpacityInput(value) {
   const percent = Math.max(0, Math.min(100, Number(value) || 0));
   alpha.value = percent / 100;
@@ -507,6 +506,8 @@ onMounted(() => {
   syncFromProp(resolvedColor.value);
   lastEmittedColor.value = resolvedColor.value;
 });
+
+const ButtonContent1 = ButtonContentComputed(() => t('text.more'));
 </script>
 
 <style>

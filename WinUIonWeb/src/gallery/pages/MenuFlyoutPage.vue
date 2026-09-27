@@ -1,364 +1,333 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-          <TextBlock class="page-header" :Text="$t('text.menuflyout')" />
-          <TextBlock class="page-description" :Text="$t('text.a-menuflyout-displays-a-lightweight-menu-of-comm')" TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
-            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+  <Page>
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind Labels.Title, Mode=OneWay}" FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal" Spacing="4">
+            <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind Labels.ToggleTheme, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind Labels.ToggleTheme, Mode=OneWay}">
+              <FontIcon Glyph="&#xE793;" FontSize="16" />
+            </Button>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}">
+              <FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" />
             </ToggleButton>
-          </div>
-        </div>
-      <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" :headerText="$t('text.a-menuflyout-attached-to-an-appbarbutton')" :theme="pageTheme" :vue="appBarCode">
-              <template #example>
-                <div class="sample-row">
-                  <AppBarButton
-                    Icon="Sort"
-                    :IsCompact="true"
-                    v-bind="{
-                      'ToolTipService.ToolTip': $t('sample.sort'),
-                      'AutomationProperties.Name': $t('sample.sort')
-                    }"
-                    :Flyout="sortFlyout"
-                    @Select="onSortSelect" />
-                  <TextBlock class="output-text" :Text="sortOutput" />
-                </div>
-              </template>
-            </ControlExample>
+          </StackPanel>
+        </StackPanel>
 
-            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.toggle-items')" :theme="pageTheme" :vue="toggleCode">
-              <template #example>
-                <Button @Click="openMenu($event, toggleMenu)">
-                  <TextBlock :Text="$t('sample.options')" />
+        <StackPanel class="gallery-page-content">
+          <ControlExample x:Name="Example1" SampleDefinition="MenuFlyout\AppbarbuttonMenuflyout.txt" HeaderText="{x:Bind Labels.AppBarHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind AppBarXaml}" CSharp="{x:Bind SortCSharp}">
+            <ControlExample.Example>
+              <StackPanel x:Name="Control1" class="menu-example-row" Orientation="Horizontal">
+                <AppBarButton AutomationProperties.Name="{x:Bind Labels.Sort, Mode=OneWay}" Icon="Sort" IsCompact="True" ToolTipService.ToolTip="{x:Bind Labels.Sort, Mode=OneWay}">
+                  <Button.Flyout>
+                    <MenuFlyout>
+                      <MenuFlyoutItem Click="MenuFlyoutItem_Click" Tag="rating" Text="{x:Bind Labels.ByRating, Mode=OneWay}" />
+                      <MenuFlyoutItem Click="MenuFlyoutItem_Click" Tag="match" Text="{x:Bind Labels.ByMatch, Mode=OneWay}" />
+                      <MenuFlyoutItem Click="MenuFlyoutItem_Click" Tag="distance" Text="{x:Bind Labels.ByDistance, Mode=OneWay}" />
+                    </MenuFlyout>
+                  </Button.Flyout>
+                </AppBarButton>
+                <TextBlock x:Name="Control1Output" class="menu-output" Style="{StaticResource OutputTextBlockStyle}" Text="{x:Bind SortOutput, Mode=OneWay}" TextWrapping="Wrap" />
+              </StackPanel>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+          </ControlExample>
+
+          <ControlExample x:Name="Example2" SampleDefinition="MenuFlyout\MenuflyoutTogglemenuflyoutitemsMenuflyoutseparator.txt" HeaderText="{x:Bind Labels.ToggleHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind ToggleXaml}">
+            <ControlExample.Example>
+              <Button x:Name="Control2" Content="{x:Bind Labels.Options, Mode=OneWay}">
+                <Button.Flyout>
+                  <MenuFlyout>
+                    <MenuFlyoutItem Text="{x:Bind Labels.Reset, Mode=OneWay}" />
+                    <MenuFlyoutSeparator />
+                    <ToggleMenuFlyoutItem x:Name="RepeatToggleMenuFlyoutItem" IsChecked="True" Text="{x:Bind Labels.Repeat, Mode=OneWay}" />
+                    <ToggleMenuFlyoutItem x:Name="ShuffleToggleMenuFlyoutItem" IsChecked="True" Text="{x:Bind Labels.Shuffle, Mode=OneWay}" />
+                  </MenuFlyout>
+                </Button.Flyout>
+              </Button>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+            <ControlExample.Substitutions>
+              <ControlExampleSubstitution Key="RepeatToggle" Value="{x:Bind RepeatToggleMenuFlyoutItem.IsChecked, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="ShuffleToggle" Value="{x:Bind ShuffleToggleMenuFlyoutItem.IsChecked, Mode=OneWay}" />
+            </ControlExample.Substitutions>
+          </ControlExample>
+
+          <ControlExample x:Name="Example3" SampleDefinition="MenuFlyout\MenuflyoutCascadingMenus.txt" HeaderText="{x:Bind Labels.CascadingHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind CascadingXaml}">
+            <ControlExample.Example>
+              <Button x:Name="Control3" Content="{x:Bind Labels.FileOptions, Mode=OneWay}">
+                <Button.Flyout>
+                  <MenuFlyout>
+                    <MenuFlyoutItem Text="{x:Bind Labels.Open, Mode=OneWay}" />
+                    <MenuFlyoutSubItem Text="{x:Bind Labels.SendTo, Mode=OneWay}">
+                      <MenuFlyoutItem Text="{x:Bind Labels.Bluetooth, Mode=OneWay}" />
+                      <MenuFlyoutItem Text="{x:Bind Labels.DesktopShortcut, Mode=OneWay}" />
+                      <MenuFlyoutSubItem Text="{x:Bind Labels.CompressedFile, Mode=OneWay}">
+                        <MenuFlyoutItem Text="{x:Bind Labels.CompressEmail, Mode=OneWay}" />
+                        <MenuFlyoutItem Text="{x:Bind Labels.Compress7z, Mode=OneWay}" />
+                        <MenuFlyoutItem Text="{x:Bind Labels.CompressZip, Mode=OneWay}" />
+                      </MenuFlyoutSubItem>
+                    </MenuFlyoutSubItem>
+                  </MenuFlyout>
+                </Button.Flyout>
+              </Button>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+          </ControlExample>
+
+          <ControlExample x:Name="Example3b" SampleDefinition="MenuFlyout\MenuflyoutSplitmenuflyoutitems.txt" HeaderText="{x:Bind Labels.SplitHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind SplitXaml}" CSharp="{x:Bind SplitCSharp}">
+            <ControlExample.Example>
+              <StackPanel x:Name="Control3b" class="menu-example-row" Orientation="Horizontal">
+                <Button Content="{x:Bind Labels.FileOptions, Mode=OneWay}">
+                  <Button.Flyout>
+                    <MenuFlyout>
+                      <SplitMenuFlyoutItem x:Name="SaveSplitItem" Click="SplitMenuFlyoutItem_Click" Text="{x:Bind Labels.Save, Mode=OneWay}">
+                        <SplitMenuFlyoutItem.Icon>
+                          <FontIcon Glyph="&#xE74E;" />
+                        </SplitMenuFlyoutItem.Icon>
+                        <MenuFlyoutItem Click="SplitMenuFlyoutItem_Click" Text="{x:Bind Labels.SaveDocx, Mode=OneWay}" />
+                        <MenuFlyoutItem Click="SplitMenuFlyoutItem_Click" Text="{x:Bind Labels.SavePdf, Mode=OneWay}" />
+                        <MenuFlyoutItem Click="SplitMenuFlyoutItem_Click" Text="{x:Bind Labels.SaveTxt, Mode=OneWay}" />
+                      </SplitMenuFlyoutItem>
+                      <SplitMenuFlyoutItem Click="SplitMenuFlyoutItem_Click" Icon="Share" Text="{x:Bind Labels.Share, Mode=OneWay}">
+                        <MenuFlyoutItem Click="SplitMenuFlyoutItem_Click" Text="{x:Bind Labels.ShareEmail, Mode=OneWay}" />
+                        <MenuFlyoutItem Click="SplitMenuFlyoutItem_Click" Text="{x:Bind Labels.ShareLink, Mode=OneWay}" />
+                      </SplitMenuFlyoutItem>
+                    </MenuFlyout>
+                  </Button.Flyout>
                 </Button>
-                <MenuFlyout
-                  :Open="toggleMenu.open"
-                  :AnchorRect="toggleMenu.anchor"
-                  :Items="toggleItems"
-                  :Theme="pageTheme"
-                  @Close="toggleMenu.open = false" />
-              </template>
-            </ControlExample>
+                <TextBlock x:Name="Control3bOutput" class="menu-output" Style="{StaticResource OutputTextBlockStyle}" Text="{x:Bind SplitOutput, Mode=OneWay}" TextWrapping="Wrap" />
+              </StackPanel>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+          </ControlExample>
 
-            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.cascading')" :theme="pageTheme" :vue="cascadeCode">
-              <template #example>
-                <Button @Click="openMenu($event, cascadeMenu)">
-                  <TextBlock :Text="$t('sample.file-options')" />
-                </Button>
-                <MenuFlyout
-                  :Open="cascadeMenu.open"
-                  :AnchorRect="cascadeMenu.anchor"
-                  :Items="cascadeItems"
-                  :Theme="pageTheme"
-                  @Close="cascadeMenu.open = false" />
-              </template>
-            </ControlExample>
+          <ControlExample x:Name="Example4" SampleDefinition="MenuFlyout\MenuflyoutIcons.txt" HeaderText="{x:Bind Labels.IconsHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind IconsXaml}">
+            <ControlExample.Example>
+              <Button x:Name="Control4" Content="{x:Bind Labels.EditOptions, Mode=OneWay}">
+                <Button.Flyout>
+                  <MenuFlyout>
+                    <MenuFlyoutItem Text="{x:Bind Labels.Share, Mode=OneWay}">
+                      <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="&#xE72D;" />
+                      </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Icon="Copy" Text="{x:Bind Labels.Copy, Mode=OneWay}" />
+                    <MenuFlyoutItem Icon="Delete" Text="{x:Bind Labels.Delete, Mode=OneWay}" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="{x:Bind Labels.Rename, Mode=OneWay}" />
+                    <MenuFlyoutItem Text="{x:Bind Labels.Select, Mode=OneWay}" />
+                  </MenuFlyout>
+                </Button.Flyout>
+              </Button>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+          </ControlExample>
 
-            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.split-items')" :theme="pageTheme" :vue="splitCode">
-              <template #example>
-                <div class="sample-row">
-                  <Button @Click="openMenu($event, splitMenu)">
-                    <TextBlock :Text="$t('sample.file-options')" />
-                  </Button>
-                  <TextBlock class="output-text" :Text="splitOutput" />
-                </div>
-                <MenuFlyout
-                  :Open="splitMenu.open"
-                  :AnchorRect="splitMenu.anchor"
-                  :Items="splitItems"
-                  :Theme="pageTheme"
-                  @Close="splitMenu.open = false"
-                  @Select="onSplitSelect" />
-              </template>
-            </ControlExample>
+          <ControlExample x:Name="Example5" FontFamily="Segoe UI" SampleDefinition="MenuFlyout\MenuflyoutIconsKeyboardAccelerators.txt" Loaded="Example5_Loaded" HeaderText="{x:Bind Labels.KeyboardHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind KeyboardXaml}">
+            <ControlExample.Example>
+              <Button x:Name="Control5" Content="{x:Bind Labels.EditOptions, Mode=OneWay}">
+                <Button.Flyout>
+                  <MenuFlyout>
+                    <MenuFlyoutItem Text="{x:Bind Labels.Share, Mode=OneWay}">
+                      <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="&#xE72D;" />
+                      </MenuFlyoutItem.Icon>
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="S" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem FontFamily="Consolas" Icon="Copy" Text="{x:Bind Labels.Copy, Mode=OneWay}">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="C" Modifiers="Control" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem FontFamily="Segoe UI" Icon="Delete" Text="{x:Bind Labels.Delete, Mode=OneWay}">
+                      <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Delete" />
+                      </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="{x:Bind Labels.Rename, Mode=OneWay}" />
+                    <MenuFlyoutItem Text="{x:Bind Labels.Select, Mode=OneWay}" />
+                  </MenuFlyout>
+                </Button.Flyout>
+              </Button>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+          </ControlExample>
 
-            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.icons')" :theme="pageTheme" :vue="iconsCode">
-              <template #example>
-                <Button @Click="openMenu($event, iconsMenu)">
-                  <TextBlock :Text="$t('sample.edit-options')" />
-                </Button>
-                <MenuFlyout
-                  :Open="iconsMenu.open"
-                  :AnchorRect="iconsMenu.anchor"
-                  :Items="iconItems"
-                  :Theme="pageTheme"
-                  @Close="iconsMenu.open = false" />
-              </template>
-            </ControlExample>
-
-            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.keyboard')" :theme="pageTheme" :vue="keyboardCode">
-              <template #example>
-                <Button @Click="openMenu($event, keyboardMenu)">
-                  <TextBlock :Text="$t('sample.edit-options')" />
-                </Button>
-                <MenuFlyout
-                  :Open="keyboardMenu.open"
-                  :AnchorRect="keyboardMenu.anchor"
-                  :Items="keyboardItems"
-                  :Theme="pageTheme"
-                  @Close="keyboardMenu.open = false" />
-              </template>
-            </ControlExample>
-
-            <ControlExample class="basic-input-example-theme" :headerText="$t('sample.menuflyout.radio')" :theme="pageTheme" :vue="radioCode">
-              <template #example>
-                <Button @Click="openMenu($event, radioMenu)">
-                  <TextBlock :Text="$t('sample.options')" />
-                </Button>
-                <MenuFlyout
-                  :Open="radioMenu.open"
-                  :AnchorRect="radioMenu.anchor"
-                  :Items="radioItems"
-                  :Theme="pageTheme"
-                  @Close="radioMenu.open = false" />
-              </template>
-            </ControlExample>
-      </div>
-    </div>
-  </ScrollViewer>
+          <ControlExample x:Name="Example6" SampleDefinition="MenuFlyout\MenuflyoutRadiomenuflyoutitems.txt" HeaderText="{x:Bind Labels.RadioHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind RadioXaml}">
+            <ControlExample.Example>
+              <Button x:Name="Control6" Content="{x:Bind Labels.Options, Mode=OneWay}">
+                <Button.Flyout>
+                  <MenuFlyout>
+                    <RadioMenuFlyoutItem GroupName="OrientationGroup" Text="{x:Bind Labels.Landscape, Mode=OneWay}" />
+                    <RadioMenuFlyoutItem GroupName="OrientationGroup" IsChecked="True" Text="{x:Bind Labels.Portrait, Mode=OneWay}" />
+                    <MenuFlyoutSeparator />
+                    <RadioMenuFlyoutItem GroupName="SizeGroup" Text="{x:Bind Labels.SmallIcons, Mode=OneWay}" />
+                    <RadioMenuFlyoutItem GroupName="SizeGroup" IsChecked="True" Text="{x:Bind Labels.MediumIcons, Mode=OneWay}" />
+                    <RadioMenuFlyoutItem GroupName="SizeGroup" Text="{x:Bind Labels.LargeIcons, Mode=OneWay}" />
+                  </MenuFlyout>
+                </Button.Flyout>
+              </Button>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Page>
 </template>
 
 <script setup>
-import { computed, inject, reactive, ref } from 'vue';
+import { computed, inject, provide, ref, shallowReactive, shallowRef } from 'vue';
 import AppBarButton from '../../components/AppBarButton.vue';
 import Button from '../../components/Button.vue';
 import ControlExample from '../../components/ControlExample.vue';
+import { ControlExampleSubstitution } from '../../components/ControlExampleProperties';
+import FontIcon from '../../components/FontIcon.vue';
 import MenuFlyout from '../../components/MenuFlyout.vue';
+import { KeyboardAccelerator, MenuFlyoutItem, MenuFlyoutSeparator, MenuFlyoutSubItem, RadioMenuFlyoutItem, SplitMenuFlyoutItem, ToggleMenuFlyoutItem } from '../../components/MenuFlyoutItems';
+import Page from '../../components/Page.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
 import TextBlock from '../../components/TextBlock.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime';
 import { createPageState } from '../../utils/pageState';
+import appBarSample from '../samples/MenuFlyout/AppbarbuttonMenuflyout.txt?raw';
+import toggleSample from '../samples/MenuFlyout/MenuflyoutTogglemenuflyoutitemsMenuflyoutseparator.txt?raw';
+import cascadingSample from '../samples/MenuFlyout/MenuflyoutCascadingMenus.txt?raw';
+import splitSample from '../samples/MenuFlyout/MenuflyoutSplitmenuflyoutitems.txt?raw';
+import iconsSample from '../samples/MenuFlyout/MenuflyoutIcons.txt?raw';
+import keyboardSample from '../samples/MenuFlyout/MenuflyoutIconsKeyboardAccelerators.txt?raw';
+import radioSample from '../samples/MenuFlyout/MenuflyoutRadiomenuflyoutitems.txt?raw';
+import officialCodeBehind from '../samples/MenuFlyout/MenuFlyoutPage.xaml.cs?raw';
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
 const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'menuflyout');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'menuflyout');
+const Names = shallowReactive({});
+provide(xamlNameScopeKey, Names);
 
-const makeMenu = () => reactive({ open: false, anchor: null });
-const toggleMenu = makeMenu();
-const cascadeMenu = makeMenu();
-const splitMenu = makeMenu();
-const iconsMenu = makeMenu();
-const keyboardMenu = makeMenu();
-const radioMenu = makeMenu();
-const allMenus = [toggleMenu, cascadeMenu, splitMenu, iconsMenu, keyboardMenu, radioMenu];
+const Labels = computed(() => ({
+  Title: t('text.menuflyout'),
+  Description: t('text.a-menuflyout-displays-a-lightweight-menu-of-comm'),
+  ToggleTheme: t('gallery.page-header.toggle-theme'),
+  AppBarHeader: t('text.a-menuflyout-attached-to-an-appbarbutton'),
+  ToggleHeader: t('sample.menuflyout.toggle-items'),
+  CascadingHeader: t('sample.menuflyout.cascading'),
+  SplitHeader: t('sample.menuflyout.split-items'),
+  IconsHeader: t('sample.menuflyout.icons'),
+  KeyboardHeader: t('sample.menuflyout.keyboard'),
+  RadioHeader: t('sample.menuflyout.radio'),
+  Sort: t('sample.menuflyout.sort'),
+  ByRating: t('sample.menuflyout.by-rating'),
+  ByMatch: t('sample.menuflyout.by-match'),
+  ByDistance: t('sample.menuflyout.by-distance'),
+  Options: t('sample.menuflyout.options'),
+  Reset: t('sample.menuflyout.reset'),
+  Repeat: t('sample.menuflyout.repeat'),
+  Shuffle: t('sample.menuflyout.shuffle'),
+  FileOptions: t('sample.menuflyout.file-options'),
+  Open: t('sample.menuflyout.open'),
+  SendTo: t('sample.menuflyout.send-to'),
+  Bluetooth: t('sample.menuflyout.bluetooth'),
+  DesktopShortcut: t('sample.menuflyout.desktop-shortcut'),
+  CompressedFile: t('sample.menuflyout.compressed-file'),
+  CompressEmail: t('sample.menuflyout.compress-email'),
+  Compress7z: t('sample.menuflyout.compress-7z'),
+  CompressZip: t('sample.menuflyout.compress-zip'),
+  Save: t('sample.menuflyout.save'),
+  SaveDocx: t('sample.menuflyout.save-docx'),
+  SavePdf: t('sample.menuflyout.save-pdf'),
+  SaveTxt: t('sample.menuflyout.save-txt'),
+  Share: t('sample.menuflyout.share'),
+  ShareEmail: t('sample.menuflyout.share-email'),
+  ShareLink: t('sample.menuflyout.share-link'),
+  EditOptions: t('sample.menuflyout.edit-options'),
+  Copy: t('sample.menuflyout.copy'),
+  Delete: t('sample.menuflyout.delete'),
+  Rename: t('sample.menuflyout.rename'),
+  Select: t('sample.menuflyout.select'),
+  Landscape: t('sample.menuflyout.landscape'),
+  Portrait: t('sample.menuflyout.portrait'),
+  SmallIcons: t('sample.menuflyout.small-icons'),
+  MediumIcons: t('sample.menuflyout.medium-icons'),
+  LargeIcons: t('sample.menuflyout.large-icons')
+}));
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
 
-const sortOutput = ref('');
-const splitOutput = ref('');
-
-const openMenu = (event, menu) => {
-  allMenus.forEach((candidate) => { if (candidate !== menu) candidate.open = false; });
-  menu.anchor = event.currentTarget.getBoundingClientRect();
-  menu.open = !menu.open;
+const SelectedSort = ref('');
+const SelectedSplitItem = shallowRef(null);
+const sortResourceKeys = {
+  rating: 'sample.menuflyout.rating',
+  match: 'sample.menuflyout.match',
+  distance: 'sample.menuflyout.distance'
 };
+const SortOutput = computed(() => SelectedSort.value
+  ? t('sample.menuflyout.sort-output', { value: t(sortResourceKeys[SelectedSort.value]) }) : '');
+const SplitOutput = computed(() => SelectedSplitItem.value
+  ? t('sample.menuflyout.clicked-output', { value: SelectedSplitItem.value.Text }) : '');
+const MenuFlyoutItem_Click = (sender) => {
+  if (Object.prototype.hasOwnProperty.call(sortResourceKeys, sender?.Tag)) SelectedSort.value = sender.Tag;
+};
+const SplitMenuFlyoutItem_Click = (sender) => {
+  if (sender?.Text) SelectedSplitItem.value = sender;
+};
+const Example5_Loaded = () => {};
 
-const sortItems = reactive([
-  { Text: t('sample.by-rating'), Tag: 'rating' },
-  { Text: t('sample.by-match'), Tag: 'match' },
-  { Text: t('sample.by-distance'), Tag: 'distance' }
-]);
-const sortFlyout = computed(() => ({ Items: sortItems, Theme: pageTheme.value }));
-
-const toggleItems = reactive([
-  { Text: t('sample.reset') },
-  { Kind: 'MenuFlyoutSeparator' },
-  { Kind: 'ToggleMenuFlyoutItem', Text: t('sample.repeat'), IsChecked: true },
-  { Kind: 'ToggleMenuFlyoutItem', Text: t('sample.shuffle'), IsChecked: true }
-]);
-
-const cascadeItems = reactive([
-  { Text: t('sample.open') },
-  {
-    Kind: 'MenuFlyoutSubItem',
-    Text: t('sample.send-to'),
-    Items: [
-      { Text: t('sample.bluetooth') },
-      { Text: t('sample.desktop-shortcut') },
-      {
-        Kind: 'MenuFlyoutSubItem',
-        Text: t('sample.compressed-file'),
-        Items: [
-          { Text: t('sample.compress-email') },
-          { Text: t('sample.compress-7z') },
-          { Text: t('sample.compress-zip') }
-        ]
-      }
-    ]
+const sampleSection = (source, section) => {
+  const content = source.split(/^--- /m).find(value => value.startsWith(`${section}\n`) || value.startsWith(`${section}\r\n`));
+  return content?.slice(section.length).trim() ?? '';
+};
+const officialHandler = (name) => {
+  const start = officialCodeBehind.indexOf(`    private void ${name}(`);
+  if (start < 0) return '';
+  const bodyStart = officialCodeBehind.indexOf('{', start);
+  let depth = 0;
+  for (let index = bodyStart; index < officialCodeBehind.length; index += 1) {
+    if (officialCodeBehind[index] === '{') depth += 1;
+    else if (officialCodeBehind[index] === '}') {
+      depth -= 1;
+      if (depth === 0) return officialCodeBehind.slice(start, index + 1).replace(/^ {4}/gm, '').trim();
+    }
   }
-]);
-
-const splitItems = reactive([
-  {
-    Kind: 'SplitMenuFlyoutItem',
-    Text: t('sample.save'),
-    Icon: '\uE74E',
-    Items: [
-      { Text: t('sample.save-docx') },
-      { Text: t('sample.save-pdf') },
-      { Text: t('sample.save-txt') }
-    ]
-  },
-  {
-    Kind: 'SplitMenuFlyoutItem',
-    Text: t('sample.share'),
-    Icon: '\uE72D',
-    Items: [
-      { Text: t('sample.share-email') },
-      { Text: t('sample.share-link') }
-    ]
-  }
-]);
-
-const iconItems = reactive([
-  { Text: t('sample.share'), Icon: '\uE72D' },
-  { Text: t('sample.copy'), Icon: '\uE8C8' },
-  { Text: t('sample.delete'), Icon: '\uE74D' },
-  { Kind: 'MenuFlyoutSeparator' },
-  { Text: t('sample.rename') },
-  { Text: t('sample.select') }
-]);
-
-const keyboardItems = reactive([
-  { Text: t('sample.share'), Icon: '\uE72D', KeyboardAccelerators: [{ Key: 'S', Modifiers: ['Control'] }], KeyboardAcceleratorTextOverride: 'Ctrl+S' },
-  { Text: t('sample.copy'), Icon: '\uE8C8', KeyboardAccelerators: [{ Key: 'C', Modifiers: ['Control'] }], KeyboardAcceleratorTextOverride: 'Ctrl+C' },
-  { Text: t('sample.delete'), Icon: '\uE74D', KeyboardAccelerators: [{ Key: 'Delete' }], KeyboardAcceleratorTextOverride: 'Delete' },
-  { Kind: 'MenuFlyoutSeparator' },
-  { Text: t('sample.rename') },
-  { Text: t('sample.select') }
-]);
-
-const radioItems = reactive([
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'OrientationGroup', Text: t('sample.landscape') },
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'OrientationGroup', Text: t('sample.portrait'), IsChecked: true },
-  { Kind: 'MenuFlyoutSeparator' },
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'SizeGroup', Text: t('sample.small-icons') },
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'SizeGroup', Text: t('sample.medium-icons'), IsChecked: true },
-  { Kind: 'RadioMenuFlyoutItem', GroupName: 'SizeGroup', Text: t('sample.large-icons') }
-]);
-
-const onSortSelect = (item) => {
-  sortOutput.value = t('sample.sort-by', { value: item.Tag });
+  return '';
 };
+const AppBarXaml = sampleSection(appBarSample, 'xaml');
+const ToggleXaml = sampleSection(toggleSample, 'xaml');
+const CascadingXaml = sampleSection(cascadingSample, 'xaml');
+const SplitXaml = sampleSection(splitSample, 'xaml');
+const IconsXaml = sampleSection(iconsSample, 'xaml');
+const KeyboardXaml = sampleSection(keyboardSample, 'xaml');
+const RadioXaml = sampleSection(radioSample, 'xaml');
+const SortCSharp = officialHandler('MenuFlyoutItem_Click');
+const SplitCSharp = officialHandler('SplitMenuFlyoutItem_Click');
 
-const onSplitSelect = (item) => {
-  splitOutput.value = t('sample.clicked', { value: item.Text });
-  splitMenu.open = false;
-};
-
-const appBarCode = `<AppBarButton
-  Icon="Sort"
-  IsCompact="True"
-  ToolTipService.ToolTip="Sort"
-  AutomationProperties.Name="Sort">
-  <AppBarButton.Flyout>
-    <MenuFlyout>
-      <MenuFlyoutItem Text="By rating" Tag="rating" Click="MenuFlyoutItem_Click" />
-      <MenuFlyoutItem Text="By match" Tag="match" Click="MenuFlyoutItem_Click" />
-      <MenuFlyoutItem Text="By distance" Tag="distance" Click="MenuFlyoutItem_Click" />
-    </MenuFlyout>
-  </AppBarButton.Flyout>
-</AppBarButton>`;
-const toggleCode = `<Button Content="Options" Click="Control2_Click">
-  <Button.Flyout>
-    <MenuFlyout>
-      <MenuFlyoutItem Text="Reset" />
-      <MenuFlyoutSeparator />
-      <ToggleMenuFlyoutItem Text="Repeat" IsChecked="True" />
-      <ToggleMenuFlyoutItem Text="Shuffle" IsChecked="True" />
-    </MenuFlyout>
-  </Button.Flyout>
-</Button>`;
-const cascadeCode = `<Button Content="File Options" Click="Control3_Click">
-  <Button.Flyout>
-    <MenuFlyout>
-      <MenuFlyoutItem Text="Open" />
-      <MenuFlyoutSubItem Text="Send to">
-        <MenuFlyoutItem Text="Bluetooth" />
-        <MenuFlyoutItem Text="Desktop (shortcut)" />
-        <MenuFlyoutSubItem Text="Compressed file">
-          <MenuFlyoutItem Text="Compress and email" />
-          <MenuFlyoutItem Text="Compress to .7z" />
-          <MenuFlyoutItem Text="Compress to .zip" />
-        </MenuFlyoutSubItem>
-      </MenuFlyoutSubItem>
-    </MenuFlyout>
-  </Button.Flyout>
-</Button>`;
-const splitCode = `<Button Content="File Options" Click="Control3b_Click">
-  <Button.Flyout>
-    <MenuFlyout>
-      <SplitMenuFlyoutItem Text="Save" Icon="Save" Click="SplitMenuFlyoutItem_Click">
-        <MenuFlyoutItem Text="Save as .docx" Click="SplitMenuFlyoutItem_Click" />
-        <MenuFlyoutItem Text="Save as .pdf" Click="SplitMenuFlyoutItem_Click" />
-        <MenuFlyoutItem Text="Save as .txt" Click="SplitMenuFlyoutItem_Click" />
-      </SplitMenuFlyoutItem>
-      <SplitMenuFlyoutItem Text="Share" Icon="Share" Click="SplitMenuFlyoutItem_Click">
-        <MenuFlyoutItem Text="Share via email" Click="SplitMenuFlyoutItem_Click" />
-        <MenuFlyoutItem Text="Share via link" Click="SplitMenuFlyoutItem_Click" />
-      </SplitMenuFlyoutItem>
-    </MenuFlyout>
-  </Button.Flyout>
-</Button>`;
-const iconsCode = `<Button Content="Edit Options" Click="Control4_Click">
-  <Button.Flyout>
-    <MenuFlyout>
-      <MenuFlyoutItem Text="Share" Icon="Share" />
-      <MenuFlyoutItem Text="Copy" Icon="Copy" />
-      <MenuFlyoutItem Text="Delete" Icon="Delete" />
-      <MenuFlyoutSeparator />
-      <MenuFlyoutItem Text="Rename" />
-      <MenuFlyoutItem Text="Select" />
-    </MenuFlyout>
-  </Button.Flyout>
-</Button>`;
-const keyboardCode = `<Button Content="Edit Options" Click="Control5_Click">
-  <Button.Flyout>
-    <MenuFlyout>
-      <MenuFlyoutItem Text="Share" Icon="Share">
-        <MenuFlyoutItem.KeyboardAccelerators>
-          <KeyboardAccelerator Key="S" Modifiers="Control" />
-        </MenuFlyoutItem.KeyboardAccelerators>
-      </MenuFlyoutItem>
-      <MenuFlyoutItem Text="Copy" Icon="Copy" FontFamily="Consolas">
-        <MenuFlyoutItem.KeyboardAccelerators>
-          <KeyboardAccelerator Key="C" Modifiers="Control" />
-        </MenuFlyoutItem.KeyboardAccelerators>
-      </MenuFlyoutItem>
-      <MenuFlyoutItem Text="Delete" Icon="Delete" FontFamily="Segoe UI">
-        <MenuFlyoutItem.KeyboardAccelerators>
-          <KeyboardAccelerator Key="Delete" />
-        </MenuFlyoutItem.KeyboardAccelerators>
-      </MenuFlyoutItem>
-      <MenuFlyoutSeparator />
-      <MenuFlyoutItem Text="Rename" />
-      <MenuFlyoutItem Text="Select" />
-    </MenuFlyout>
-  </Button.Flyout>
-</Button>`;
-const radioCode = `<Button Content="Options" Click="Control6_Click">
-  <Button.Flyout>
-    <MenuFlyout>
-      <RadioMenuFlyoutItem GroupName="OrientationGroup" Text="Landscape" />
-      <RadioMenuFlyoutItem GroupName="OrientationGroup" IsChecked="True" Text="Portrait" />
-      <MenuFlyoutSeparator />
-      <RadioMenuFlyoutItem GroupName="SizeGroup" Text="Small icons" />
-      <RadioMenuFlyoutItem GroupName="SizeGroup" IsChecked="True" Text="Medium icons" />
-      <RadioMenuFlyoutItem GroupName="SizeGroup" Text="Large icons" />
-    </MenuFlyout>
-  </Button.Flyout>
-</Button>`;
+provide(xamlScopeKey, {
+  Labels, FavoriteLabel, FavoriteGlyph, isFavoriteState, pageTheme, toggleTheme, toggleFavorite,
+  SortOutput, SplitOutput, MenuFlyoutItem_Click, SplitMenuFlyoutItem_Click, Example5_Loaded,
+  AppBarXaml, ToggleXaml, CascadingXaml, SplitXaml, IconsXaml, KeyboardXaml, RadioXaml, SortCSharp, SplitCSharp
+});
 </script>
 
 <style scoped>
-.page-heading { position: relative; }
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
-.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-size: 16px; }
-.sample-row { display: flex; align-items: flex-start; }
-.output-text { margin: 8px 0 0 8px; color: var(--text-secondary); }
+.page-heading { position: relative; min-width: 0; }
+.page-header { margin: 0 72px 8px 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.page-description { color: var(--text-secondary); margin: 0 0 16px; }
+.page-header-actions { position: absolute; top: 0; right: 0; }
+.gallery-page-content, .menu-example-row { min-width: 0; max-width: 100%; }
+.menu-output { min-width: 0; overflow-wrap: anywhere; flex: 1 1 auto; }
 </style>

@@ -1,502 +1,358 @@
 <template>
-  <span
-    v-if="!IsServiceHost"
-    ref="anchorRef"
-    class="tooltip-anchor"
-    :aria-describedby="isVisible ? tooltipId : undefined"
-    :aria-label="contentText || undefined"
-    @pointerenter="onPointerEnter"
-    @pointermove="onPointerMove"
-    @pointerleave="onPointerLeave"
-    @pointerdown="onPointerDown"
-    @focusin="onFocusIn"
-    @focusout="onFocusOut">
-    <slot name="target"><slot></slot></slot>
-  </span>
-
   <Teleport :to="teleportTarget">
-    <Transition name="tooltip">
-      <div
-        v-if="isVisible"
-        :id="tooltipId"
-        ref="tooltipRef"
-        class="tooltip"
-        :class="[themeClass, `placement-${actualPlacement.toLowerCase()}`]"
-        :style="tooltipStyle"
-        role="tooltip"
-        @pointerenter="onToolTipPointerEnter"
-        @pointerleave="onToolTipPointerLeave">
-        <slot v-if="$slots.content" name="content"></slot>
-        <TextBlock v-else Text="{x:Bind ToolTipContent}" TextWrapping="WrapWholeWords" />
+    <div :id="tooltipId" ref="tooltipRef"
+      v-acrylic-brush="backgroundStyle"
+      v-theme-shadow="{ Translation: 16, Enabled: present }"
+      :class="[present ? 'tooltip win-tooltip LayoutRoot' : 'tooltip-content-cache', themeClass]"
+      :style="[tooltipStyle, { display: present ? 'flex' : 'none' }]" :data-placement="actualPlacement"
+      :role="present ? 'tooltip' : undefined" :aria-hidden="!isVisible || undefined" :aria-description="fullDescription || undefined">
+      <div class="tooltip-content-clip">
+        <ContentOutlet v-if="contentNodes.length || hasContentTemplate || hasVisualContent" />
+        <TextBlock v-else Text="{x:Bind ToolTipText}" TextWrapping="WrapWholeWords" />
       </div>
-    </Transition>
+    </div>
   </Teleport>
 </template>
-
+<script lang="ts">
+import { ToolTipContent, ToolTipContentTemplate, ToolTipContentTransitions } from './ToolTipServiceProperties'
+export default { Content: ToolTipContent, ContentTemplate: ToolTipContentTemplate, ContentTransitions: ToolTipContentTransitions }
+</script>
 <script setup lang="ts">
-import { computed, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, unref, useAttrs, useSlots, watch } from 'vue';
-import type { ComponentPublicInstance, CSSProperties, Ref } from 'vue';
-import TextBlock from './TextBlock.vue';
-import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
+import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, unref, useAttrs, useSlots, watch, type Component, type CSSProperties, type Ref, type VNode } from 'vue'
+import TextBlock from './TextBlock.vue'
+import { boolValue, cssLength, xamlThickness } from './layout'
+import { normalizeXamlNodes, resolveXamlHandler, resolveXamlResourceObject, resolveXamlValue, updateXamlBinding, xamlColor, xamlScopeKey, xamlTemplateComponent } from './xamlRuntime'
+import { isToolTipContentProperty } from './ToolTipServiceProperties'
+import { registerToolTip, toolTipOwnerContextKey, type ToolTipController, type ToolTipInputMode, type ToolTipPoint } from './toolTipRuntime'
+import { xamlResourceDictionaryKey } from './Page.vue'
+import { useAcrylicBrushStyle } from './AcrylicBrush'
+import { vAcrylicBrush } from './acrylicBrushVisual'
+import { vThemeShadow } from './themeShadowVisual'
+import { xamlThemeKey } from './brushCore'
 
-type PlacementKey = 'bottom' | 'left' | 'mouse' | 'right' | 'top';
-type Position = { top: number; left: number };
-type Point = { x: number; y: number };
-type PlacementTargetValue = HTMLElement | ComponentPublicInstance | { value?: unknown; $el?: unknown } | string | null;
-type PlacementRectValue = { x?: number; y?: number; left?: number; top?: number; width?: number; height?: number; getBoundingClientRect?: () => DOMRect } | string | null;
-
-defineOptions({ name: 'ToolTip', inheritAttrs: false });
-
+defineOptions({ name: 'ToolTip', inheritAttrs: false })
 const props = defineProps({
   Content: { type: [String, Number, Object], default: '' },
-  IsOpen: { type: [Boolean, String], default: undefined },
+  ContentTemplate: { type: [String, Object, Function], default: null },
+  ContentTransitions: { type: [String, Object, Array], default: null },
+  IsOpen: { type: [Boolean, String], default: false },
   IsEnabled: { type: [Boolean, String], default: true },
-  Placement: { type: String, default: 'Mouse' },
+  Placement: { type: String, default: 'Top' },
   PlacementTarget: { type: [Object, String], default: null },
-  PlacementPoint: { type: Object, default: null },
   PlacementRect: { type: [Object, String], default: null },
-  HorizontalOffset: { type: [String, Number], default: 0 },
-  VerticalOffset: { type: [String, Number], default: 0 },
-  Background: { type: String, default: '' },
-  Foreground: { type: String, default: '' },
-  BorderBrush: { type: String, default: '' },
-  BorderThickness: { type: [String, Number], default: '' },
-  Padding: { type: String, default: '' },
-  FontFamily: { type: String, default: '' },
-  FontSize: { type: [String, Number], default: '' },
+  HorizontalOffset: { type: [String, Number], default: undefined },
+  VerticalOffset: { type: [String, Number], default: undefined },
+  Background: { type: [String, Object], default: '{ThemeResource ToolTipBackgroundBrush}' },
+  Foreground: { type: [String, Object], default: '{ThemeResource ToolTipForegroundBrush}' },
+  BorderBrush: { type: [String, Object], default: '{ThemeResource ToolTipBorderBrush}' },
+  BorderThickness: { type: [String, Number], default: 1 },
+  Padding: { type: [String, Number], default: '9,6,9,8' },
+  FontFamily: { type: String, default: '{ThemeResource ContentControlThemeFontFamily}' },
+  FontSize: { type: [String, Number], default: 12 },
   MaxWidth: { type: [String, Number], default: 320 },
-  CornerRadius: { type: [String, Number], default: '' },
+  MaxHeight: { type: [String, Number], default: '' },
+  Width: { type: [String, Number], default: '' }, Height: { type: [String, Number], default: '' },
+  CornerRadius: { type: [String, Number], default: '{ThemeResource ControlCornerRadius}' },
   BackgroundSizing: { type: String, default: 'InnerBorderEdge' },
-  InitialShowDelay: { type: Number, default: 800 },
-  BetweenShowDelay: { type: Number, default: 200 },
-  ShowOnDisabled: { type: Boolean, default: false },
-  IsServiceHost: { type: Boolean, default: false },
-  Theme: { type: String, default: '' },
-  UseNativeToolTip: { type: Boolean, default: true },
-  NativeToolTip: { type: [String, Boolean], default: '' },
-  'ToolTipService.ToolTip': { type: [String, Number, Object], default: '' },
-  'ToolTipService.Placement': { type: String, default: '' },
-  'ToolTipService.PlacementTarget': { type: [Object, String], default: null }
-});
-
-const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed', 'Opening', 'Closing', 'tooltip-pointer-enter', 'tooltip-pointer-leave']);
-const instance = getCurrentInstance();
-const attrs = useAttrs();
-const slots = useSlots();
-const inheritedTheme = inject<string | Ref<string> | null>('winuiTheme', null);
-const anchorRef = ref<HTMLElement | null>(null);
-const tooltipRef = ref<HTMLElement | null>(null);
-const localIsOpen = ref<boolean | undefined>(undefined);
-const isHoveringTarget = ref(false);
-const isHoveringTooltip = ref(false);
-const pointer = ref<Point | null>(null);
-const position = ref({ top: 0, left: 0 });
-const isPositioned = ref(false);
-const isSuppressedUntilPointerLeave = ref(false);
-const actualPlacement = ref('Mouse');
-const teleportTarget = ref<HTMLElement | string>('body');
-const tooltipId = `tooltip-${Math.random().toString(36).slice(2, 10)}`;
-let openTimer: number | undefined;
-let closeTimer: number | undefined;
-let suppressFocusShowUntil = 0;
-
-const isEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
-const resolvedIsOpen = computed(() => resolveXamlValue(props.IsOpen, instance));
-const effectiveIsOpen = computed(() => localIsOpen.value !== undefined
-  ? localIsOpen.value
-  : resolvedIsOpen.value);
-const isVisible = computed(() => effectiveIsOpen.value && isEnabled.value);
-const serviceContent = computed(() => props['ToolTipService.ToolTip']);
-const contentValue = computed(() => {
-  const content = resolveXamlValue(props.Content, instance);
-  return content !== '' && content !== null ? content : resolveXamlValue(serviceContent.value, instance);
-});
-const contentText = computed(() => {
-  const value = contentValue.value;
-  if (value && typeof value === 'object') {
-    const record = value as Record<string, unknown>;
-    return String(record.Content ?? record.content ?? '');
-  }
-  return String(value ?? '');
-});
-const ToolTipContent = computed(() => contentText.value);
-provide(xamlScopeKey, { ToolTipContent });
-const placement = computed(() => resolveXamlValue(
-  props['ToolTipService.Placement'] || props.Placement || 'Mouse',
-  instance
-));
-const placementTarget = computed(() => resolveXamlValue(
-  props['ToolTipService.PlacementTarget'] || props.PlacementTarget,
-  instance
-));
+  HorizontalContentAlignment: { type: String, default: 'Left' },
+  VerticalContentAlignment: { type: String, default: 'Top' },
+  RequestedTheme: { type: String, default: 'Default' }
+})
+const emit = defineEmits(['update:IsOpen', 'Opened', 'Closed'])
+const instance = getCurrentInstance()
+const attrs = useAttrs()
+const slots = useSlots()
+const ownerContext = inject(toolTipOwnerContextKey, null)
+const inheritedXamlScope = inject<Record<string, unknown>>(xamlScopeKey, {})
+const inheritedTheme = inject<string | Ref<string> | null>('winuiTheme', null)
+const pageResources = inject<Record<string, VNode> | null>(xamlResourceDictionaryKey, null)
+const tooltipRef = ref<HTMLElement | null>(null)
+const tooltipId = `tooltip-${instance?.uid ?? Math.random().toString(36).slice(2)}`
+const present = ref(false), positioned = ref(false)
+const position = ref({ top: 0, left: 0 })
+const bounds = ref({ width: 320, height: 10000 })
+const actualPlacement = ref('Top')
+const teleportTarget = ref<HTMLElement | string>('body')
+const localIsOpen = ref<boolean>()
+const automaticInput = ref<ToolTipInputMode>('none')
+const pointer = ref<ToolTipPoint | null>(null), automaticTheme = ref('')
+const value = (input: unknown) => resolveXamlValue(input, instance)
+const isEnabled = computed(() => boolValue(value(props.IsEnabled)))
+const boundIsOpen = computed(() => boolValue(value(props.IsOpen)))
+const isVisible = computed(() => isEnabled.value && (localIsOpen.value ?? boundIsOpen.value))
+const content = computed(() => value(props.Content))
+const ToolTipText = computed(() => {
+  const current = content.value
+  if (current === undefined || current === null) return ''
+  if (typeof current === 'object') return String((current as { Content?: unknown }).Content ?? '')
+  return String(current)
+})
+provide(xamlScopeKey, { ...inheritedXamlScope, ToolTipText })
+const propertyNodes = computed(() => slots.default?.() ?? [])
+const contentNodes = computed(() => propertyNodes.value.flatMap(node => {
+  if ((node.type as { __toolTipProperty?: string })?.__toolTipProperty) return []
+  if (!isToolTipContentProperty(node)) return [node]
+  return (node.children as { default?: () => ReturnType<NonNullable<typeof slots.default>> } | null)?.default?.() ?? []
+}))
+const templateNodes = computed(() => propertyNodes.value.flatMap(node => (node.type as { __toolTipProperty?: string })?.__toolTipProperty === 'ContentTemplate'
+  ? (node.children as { default?: () => VNode[] })?.default?.() ?? [] : []))
+const contentTemplate = computed(() => {
+  const input = props.ContentTemplate
+  const key = typeof input === 'string' ? input.match(/^\{(?:StaticResource|ThemeResource)\s+([^\s}]+)\}$/)?.[1] ?? input.match(/^var\(--([^,)]+)\)$/)?.[1] : undefined
+  return key ? resolveXamlResourceObject(key, instance) ?? pageResources?.[key] : value(input)
+})
+const hasContentTemplate = computed(() => Boolean(templateNodes.value.length || contentTemplate.value))
+const isComponent = (input: unknown) => input && typeof input === 'object' && ('render' in input || 'setup' in input)
+const hasVisualContent = computed(() => isVNode(content.value) || Boolean(isComponent(content.value)))
+const unwrapTemplate = (nodes: VNode[]) => nodes.flatMap(node => (node.type as { name?: string })?.name === 'DataTemplate'
+  ? (node.children as { default?: () => VNode[] })?.default?.() ?? [] : [node])
+const ContentOutlet = defineComponent({ setup: () => () => {
+  if (templateNodes.value.length) return xamlTemplateComponent(unwrapTemplate(templateNodes.value), content.value, instance)
+  const template = contentTemplate.value
+  if (typeof template === 'function') return template(content.value)
+  if (isVNode(template)) return xamlTemplateComponent(unwrapTemplate([template]), content.value, instance)
+  if (isComponent(template)) return h(template as Component, { Content: content.value })
+  if (isVNode(content.value)) return h(Fragment, normalizeXamlNodes([content.value], instance))
+  if (isComponent(content.value)) return h(content.value as Component)
+  return h(Fragment, normalizeXamlNodes(contentNodes.value, instance))
+} })
+const fullDescription = computed(() => String(value(attrs['AutomationProperties.FullDescription']) ?? ''))
 const effectiveTheme = computed(() => {
-  const explicitTheme = String(props.Theme || '').toLowerCase();
-  if (explicitTheme === 'light' || explicitTheme === 'dark') return explicitTheme;
-  const providedTheme = String(unref(inheritedTheme) || '').toLowerCase();
-  return providedTheme === 'light' || providedTheme === 'dark' ? providedTheme : '';
-});
-const themeClass = computed(() => effectiveTheme.value
-  ? `win-theme-scope theme-${effectiveTheme.value}`
-  : 'tooltip-theme');
-const templateSettings = computed(() => ({
-  FromHorizontalOffset: Number(props.HorizontalOffset || 0),
-  FromVerticalOffset: Number(props.VerticalOffset || 0)
-}));
-
-const cssLength = (value: string | number | null | undefined) => {
-  if (value === '' || value === undefined || value === null) return '';
-  if (typeof value === 'number' || (typeof value === 'string' && /^-?\d+(\.\d+)?$/.test(value.trim()))) return `${value}px`;
-  return value;
-};
-
-const xamlThickness = (value: string | number | null | undefined) => {
-  if (!value) return '';
-  const parts = String(value).split(',').map(part => cssLength(part.trim()));
-  if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
-  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
-  return value;
-};
-
+  const explicit = String(value(props.RequestedTheme)).toLowerCase()
+  if (explicit === 'light' || explicit === 'dark') return explicit
+  return String(ownerContext?.theme.value || automaticTheme.value || unref(inheritedTheme) || '').toLowerCase()
+})
+const themeClass = computed(() => ['light', 'dark'].includes(effectiveTheme.value) ? `win-theme-scope theme-${effectiveTheme.value}` : '')
+provide(xamlThemeKey, effectiveTheme)
+provide('winuiTheme', effectiveTheme)
+const brush = (input: unknown) => {
+  const result = value(input)
+  return xamlColor(result && typeof result === 'object' ? (result as { Color?: unknown }).Color : result) as string | undefined
+}
+const backgroundStyle = useAcrylicBrushStyle(() => props.Background, instance)
+const contentAlignment = (input: unknown) => ({ Left: 'flex-start', Top: 'flex-start', Center: 'center', Right: 'flex-end', Bottom: 'flex-end', Stretch: 'stretch' }[String(value(input))] ?? 'flex-start')
 const tooltipStyle = computed<CSSProperties>(() => ({
-  top: `${position.value.top}px`,
-  left: `${position.value.left}px`,
-  visibility: isPositioned.value ? undefined : 'hidden',
-  animationPlayState: isPositioned.value ? 'running' : 'paused',
-  background: props.Background || undefined,
-  backgroundImage: props.Background ? 'none' : undefined,
-  color: props.Foreground || undefined,
-  borderColor: props.BorderBrush || undefined,
-  borderWidth: props.BorderThickness !== '' ? cssLength(props.BorderThickness) : undefined,
-  padding: props.Padding ? xamlThickness(props.Padding) : undefined,
-  fontFamily: props.FontFamily || undefined,
-  fontSize: props.FontSize !== '' ? cssLength(props.FontSize) : undefined,
-  maxWidth: cssLength(props.MaxWidth),
-  borderRadius: props.CornerRadius !== '' ? cssLength(props.CornerRadius) : undefined,
-  boxSizing: props.BackgroundSizing === 'InnerBorderEdge' ? 'border-box' : undefined
-}));
-
-function targetElement(): HTMLElement | null {
-  const target = placementTarget.value as PlacementTargetValue;
-  if (!target) return anchorRef.value;
-  if (typeof target === 'string') return document.querySelector<HTMLElement>(target) || anchorRef.value;
-  if (target instanceof HTMLElement) return target;
-  const targetObject = target as { value?: unknown; $el?: unknown };
-  if (targetObject.$el instanceof HTMLElement) return targetObject.$el;
-  if (targetObject.value instanceof HTMLElement) return targetObject.value;
-  if ((targetObject.value as ComponentPublicInstance | undefined)?.$el instanceof HTMLElement) {
-    return (targetObject.value as ComponentPublicInstance).$el as HTMLElement;
+  // Keep the Teleport popup in viewport coordinates. The acrylic visual
+  // directive adds an internal composition layer and must not turn this
+  // window-positioned element into a flow-relative host.
+  position: 'fixed', top: `${position.value.top}px`, left: `${position.value.left}px`, visibility: positioned.value ? 'visible' : 'hidden',
+  ...backgroundStyle.value, color: brush(props.Foreground), borderColor: brush(props.BorderBrush),
+  borderWidth: xamlThickness(value(props.BorderThickness)), padding: xamlThickness(value(props.Padding)),
+  fontFamily: String(value(props.FontFamily)), fontSize: cssLength(value(props.FontSize)),
+  width: cssLength(value(props.Width)) || undefined, height: cssLength(value(props.Height)) || undefined,
+  maxWidth: `min(${cssLength(value(props.MaxWidth)) || '320px'}, ${bounds.value.width}px)`,
+  maxHeight: props.MaxHeight ? `min(${cssLength(value(props.MaxHeight))}, ${bounds.value.height}px)` : `${bounds.value.height}px`,
+  borderRadius: cssLength(value(props.CornerRadius)), alignItems: contentAlignment(props.VerticalContentAlignment),
+  justifyContent: contentAlignment(props.HorizontalContentAlignment),
+  backgroundClip: value(props.BackgroundSizing) === 'InnerBorderEdge' ? 'padding-box' : 'border-box'
+} as CSSProperties))
+function elementFrom(input: unknown): HTMLElement | null {
+  const candidate = unref(input)
+  if (candidate instanceof HTMLElement) return candidate
+  if (typeof candidate === 'string') {
+    const named = document.querySelector<HTMLElement>(`[data-xaml-ref="${CSS.escape(candidate)}"]`)
+    if (named) return named
+    try { return document.querySelector<HTMLElement>(candidate) } catch { return null }
   }
-  return anchorRef.value;
-}
-
-function rectFromPlacementRect(): DOMRect | Position & { right: number; bottom: number; width: number; height: number } | null {
-  const rect = props.PlacementRect as PlacementRectValue;
-  if (!rect) return null;
-  if (typeof rect !== 'string' && typeof rect.getBoundingClientRect === 'function') return rect.getBoundingClientRect();
-  const values = typeof rect === 'string'
-    ? rect.split(',').map(value => Number(value.trim()))
-    : null;
-  if (values && (values.length !== 4 || values.some(value => !Number.isFinite(value)))) return null;
-  const targetRect = targetElement()?.getBoundingClientRect();
-  const rectValue = typeof rect === 'string' ? null : rect;
-  const x = values ? values[0] : Number(rectValue?.x ?? rectValue?.left ?? 0);
-  const y = values ? values[1] : Number(rectValue?.y ?? rectValue?.top ?? 0);
-  const width = values ? values[2] : Number(rectValue?.width ?? 0);
-  const height = values ? values[3] : Number(rectValue?.height ?? 0);
-  const left = (targetRect?.left ?? 0) + x;
-  const top = (targetRect?.top ?? 0) + y;
-  return { left, top, right: left + width, bottom: top + height, width, height };
-}
-
-function setOpen(value: boolean, immediate = false, preservePosition = false) {
-  if (value === effectiveIsOpen.value && !immediate) return;
-  if (value && !preservePosition) isPositioned.value = false;
-  else isHoveringTooltip.value = false;
-  localIsOpen.value = value;
-  emit('update:IsOpen', value);
-  updateXamlBinding(props.IsOpen, value, instance);
-}
-
-watch(resolvedIsOpen, (value) => {
-  if (value !== undefined) localIsOpen.value = value === true;
-}, { immediate: true });
-
-function clearTimers() {
-  if (openTimer !== undefined) window.clearTimeout(openTimer);
-  if (closeTimer !== undefined) window.clearTimeout(closeTimer);
-  openTimer = undefined;
-  closeTimer = undefined;
-}
-
-function show(immediate = false, delayOverride?: number) {
-  const target = targetElement();
-  const targetIsDisabled = Boolean(target?.matches?.(':disabled') || target?.querySelector?.(':disabled'));
-  if (!isEnabled.value || (targetIsDisabled && !props.ShowOnDisabled) || (!contentText.value && !slots.content)) return;
-  clearTimers();
-  if (effectiveIsOpen.value) return;
-  const delay = immediate ? 0 : Math.max(0, delayOverride ?? props.InitialShowDelay);
-  openTimer = window.setTimeout(async () => {
-    setOpen(true);
-    await nextTick();
-    await updatePosition();
-  }, delay);
-}
-
-function hide(force = false) {
-  clearTimers();
-  if (!force && (isHoveringTarget.value || isHoveringTooltip.value)) return;
-  if (!effectiveIsOpen.value) return;
-  setOpen(false);
-}
-
-function toggle() {
-  if (effectiveIsOpen.value) hide(true);
-  else show(true);
-}
-
-function onPointerEnter(event: PointerEvent) {
-  if (event.pointerType === 'touch') return;
-  if (isSuppressedUntilPointerLeave.value) return;
-  isHoveringTarget.value = true;
-  if (!effectiveIsOpen.value) pointer.value = { x: event.clientX, y: event.clientY };
-  show(false);
-}
-function onPointerMove(event: PointerEvent) {
-  if (event.pointerType === 'touch' || effectiveIsOpen.value || !isHoveringTarget.value) return;
-  pointer.value = { x: event.clientX, y: event.clientY };
-}
-function onPointerLeave() {
-  isHoveringTarget.value = false;
-  isSuppressedUntilPointerLeave.value = false;
-  hide();
-}
-function onPointerDown(event: PointerEvent) {
-  pointer.value = { x: event.clientX, y: event.clientY };
-  if (event.pointerType === 'touch') {
-    isHoveringTarget.value = true;
-    suppressFocusShowUntil = performance.now() + 100;
-    show(false, props.InitialShowDelay / 2);
-  } else {
-    isSuppressedUntilPointerLeave.value = true;
-    hide(true);
-  }
-}
-function onFocusIn() {
-  if (isSuppressedUntilPointerLeave.value || performance.now() < suppressFocusShowUntil) return;
-  const rect = targetElement()?.getBoundingClientRect();
-  if (rect) pointer.value = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-  show(false);
-}
-function onFocusOut() {
-  isHoveringTarget.value = false;
-  hide();
-}
-function onToolTipPointerEnter() {
-  isHoveringTooltip.value = true;
-  if (closeTimer !== undefined) window.clearTimeout(closeTimer);
-  closeTimer = undefined;
-  emit('tooltip-pointer-enter');
-  if (props.IsOpen === undefined && !effectiveIsOpen.value) setOpen(true, true, true);
-}
-function onToolTipPointerLeave() {
-  isHoveringTooltip.value = false;
-  emit('tooltip-pointer-leave');
-  hide();
-}
-function clamp(value: number, min: number, max: number) {
-  if (max < min) return min;
-  return Math.max(min, Math.min(max, value));
-}
-
-async function updatePosition() {
-  await nextTick();
-  const tooltip = tooltipRef.value;
-  if (!tooltip) return;
-  const placementRect = rectFromPlacementRect();
-  const targetRect = placementRect || targetElement()?.getBoundingClientRect();
-  if (!targetRect) return;
-  const tipRect = tooltip.getBoundingClientRect();
-  const gap = 20;
-  const viewportMargin = 8;
-  const requestedMode = String(placement.value || 'Mouse').toLowerCase();
-  const mode: PlacementKey = ['bottom', 'left', 'mouse', 'right', 'top'].includes(requestedMode)
-    ? requestedMode as PlacementKey
-    : 'mouse';
-  const placementPoint = props.PlacementPoint as { x?: number; y?: number } | null;
-  const mousePoint = placementPoint && Number.isFinite(placementPoint.x) && Number.isFinite(placementPoint.y)
-    ? { x: Number(placementPoint.x), y: Number(placementPoint.y) }
-    : pointer.value || { x: targetRect.left + targetRect.width / 2, y: targetRect.top + targetRect.height / 2 };
-  const horizontalOffset = Number(props.HorizontalOffset || 0);
-  const verticalOffset = Number(props.VerticalOffset || 0);
-  const horizontalCenter = placementRect
-    ? mousePoint.x - tipRect.width / 2
-    : targetRect.left + (targetRect.width - tipRect.width) / 2;
-  const verticalCenter = placementRect
-    ? mousePoint.y - tipRect.height / 2
-    : targetRect.top + (targetRect.height - tipRect.height) / 2;
-  const candidates: Record<Exclude<PlacementKey, 'mouse'>, Position> = {
-    top: { top: targetRect.top - tipRect.height - gap - verticalOffset, left: horizontalCenter },
-    bottom: { top: targetRect.bottom + gap + verticalOffset, left: horizontalCenter },
-    left: { top: verticalCenter, left: targetRect.left - tipRect.width - gap - horizontalOffset },
-    right: { top: verticalCenter, left: targetRect.right + gap + horizontalOffset }
-  };
-  const fallbackOrder: Record<Exclude<PlacementKey, 'mouse'>, Exclude<PlacementKey, 'mouse'>[]> = {
-    top: ['top', 'bottom', 'left', 'right'],
-    bottom: ['bottom', 'top', 'left', 'right'],
-    left: ['left', 'right', 'top', 'bottom'],
-    right: ['right', 'left', 'top', 'bottom']
-  };
-  const canPlaceOnSide = (candidateMode: Exclude<PlacementKey, 'mouse'>) => {
-    const candidate = candidates[candidateMode];
-    if (candidateMode === 'top') return candidate.top >= viewportMargin;
-    if (candidateMode === 'bottom') return candidate.top + tipRect.height <= window.innerHeight - viewportMargin;
-    if (candidateMode === 'left') return candidate.left >= viewportMargin;
-    return candidate.left + tipRect.width <= window.innerWidth - viewportMargin;
-  };
-
-  let resolved: PlacementKey;
-  let resolvedPosition: Position;
-  if (mode === 'mouse') {
-    const mouseLeft = mousePoint.x - tipRect.width / 2 + horizontalOffset;
-    const above = {
-      top: mousePoint.y - tipRect.height - gap,
-      left: mouseLeft
-    };
-    const below = {
-      top: mousePoint.y + gap,
-      left: mouseLeft
-    };
-    if (verticalOffset !== 0) {
-      const offsetPosition = {
-        top: mousePoint.y - verticalOffset,
-        left: mouseLeft
-      };
-      const offsetIsAbove = offsetPosition.top + tipRect.height / 2 < mousePoint.y;
-      const offsetFits = offsetPosition.top >= viewportMargin
-        && offsetPosition.top + tipRect.height <= window.innerHeight - viewportMargin;
-      const opposite = offsetIsAbove ? below : above;
-      const oppositeFits = opposite.top >= viewportMargin
-        && opposite.top + tipRect.height <= window.innerHeight - viewportMargin;
-      if (offsetFits) {
-        resolved = offsetIsAbove ? 'top' : 'bottom';
-        resolvedPosition = offsetPosition;
-      } else if (oppositeFits) {
-        resolved = offsetIsAbove ? 'bottom' : 'top';
-        resolvedPosition = opposite;
-      } else {
-        resolved = offsetIsAbove ? 'top' : 'bottom';
-        resolvedPosition = offsetPosition;
-      }
-    } else if (above.top >= viewportMargin) {
-      resolved = 'top';
-      resolvedPosition = above;
-    } else if (below.top + tipRect.height <= window.innerHeight - viewportMargin) {
-      resolved = 'bottom';
-      resolvedPosition = below;
-    } else {
-      resolved = 'top';
-      resolvedPosition = above;
+  if (candidate && typeof candidate === 'object') {
+    const record = candidate as { Element?: unknown; $el?: unknown; value?: unknown }
+    for (const entry of [record.Element, record.$el, record.value]) {
+      if (entry !== undefined && entry !== candidate) { const result = elementFrom(entry); if (result) return result }
     }
+  }
+  return null
+}
+function targetElement() {
+  const owner = ownerContext?.owner.value ?? null
+  return elementFrom(owner?.getAttribute('tooltipservice.placementtarget')) ?? elementFrom(value(props.PlacementTarget)) ?? owner
+}
+function placementRect(target: HTMLElement) {
+  const input = value(props.PlacementRect)
+  if (!input) return null
+  const values = typeof input === 'string' ? input.split(',').map(Number) : null
+  const record = typeof input === 'object' ? input as Record<string, number> : null
+  if (values && (values.length !== 4 || values.some(number => !Number.isFinite(number)))) return null
+  const x = values ? values[0] : Number(record?.X ?? record?.x ?? 0), y = values ? values[1] : Number(record?.Y ?? record?.y ?? 0)
+  const width = values ? values[2] : Number(record?.Width ?? record?.width ?? 0), height = values ? values[3] : Number(record?.Height ?? record?.height ?? 0)
+  if (!(width > 0 && height > 0)) return null
+  const rect = target.getBoundingClientRect()
+  // Compose target and ancestor 2D transforms. Layout translations and
+  // transform origins are recovered from the target's measured bounding box.
+  // This is TransformBounds: transform all four local rectangle corners.
+  let matrix = new DOMMatrix()
+  let current: HTMLElement | null = target
+  let is2D = true
+  while (current) {
+    const style = getComputedStyle(current)
+    const transform = style.transform === 'none' ? new DOMMatrix() : new DOMMatrix(style.transform)
+    if (!transform.is2D) { is2D = false; break }
+    const zoom = Number(style.zoom) || 1
+    matrix = new DOMMatrix([transform.a * zoom, transform.b * zoom, transform.c * zoom, transform.d * zoom, 0, 0]).multiply(matrix)
+    current = current.parentElement
+  }
+  const corners = (left: number, top: number, localWidth: number, localHeight: number) =>
+    [[left, top], [left + localWidth, top], [left + localWidth, top + localHeight], [left, top + localHeight]]
+      .map(([localX, localY]) => matrix.transformPoint(new DOMPoint(localX, localY)))
+  if (is2D && target.offsetWidth > 0 && target.offsetHeight > 0) {
+    const ownerCorners = corners(0, 0, target.offsetWidth, target.offsetHeight)
+    const offsetX = rect.left - Math.min(...ownerCorners.map(corner => corner.x))
+    const offsetY = rect.top - Math.min(...ownerCorners.map(corner => corner.y))
+    const transformed = corners(x, y, width, height)
+    return { left: offsetX + Math.min(...transformed.map(corner => corner.x)), top: offsetY + Math.min(...transformed.map(corner => corner.y)), right: offsetX + Math.max(...transformed.map(corner => corner.x)), bottom: offsetY + Math.max(...transformed.map(corner => corner.y)) }
+  }
+  const scaleX = target.offsetWidth > 0 ? rect.width / target.offsetWidth : 1
+  const scaleY = target.offsetHeight > 0 ? rect.height / target.offsetHeight : 1
+  return { left: rect.left + x * scaleX, top: rect.top + y * scaleY, right: rect.left + (x + width) * scaleX, bottom: rect.top + (y + height) * scaleY }
+}
+function viewportBounds() {
+  const viewport = window.visualViewport
+  // Native windowed ToolTips use the available monitor; their unwindowed path
+  // uses the XAML content window. A web popup uses the visible browser viewport,
+  // independently of the owner, ScrollViewer and Gallery example bounds.
+  return { left: viewport?.offsetLeft ?? 0, top: viewport?.offsetTop ?? 0, right: (viewport?.offsetLeft ?? 0) + (viewport?.width ?? innerWidth), bottom: (viewport?.offsetTop ?? 0) + (viewport?.height ?? innerHeight) }
+}
+const clamp = (number: number, min: number, max: number) => Math.max(min, Math.min(Math.max(min, max), number))
+async function updatePosition() {
+  await nextTick()
+  const tip = tooltipRef.value, target = targetElement()
+  if (!tip || !target || !target.isConnected) return
+  syncTheme()
+  const available = viewportBounds()
+  const width = Math.max(0, available.right - available.left), height = Math.max(0, available.bottom - available.top)
+  if (bounds.value.width !== width || bounds.value.height !== height) { bounds.value = { width, height }; await nextTick() }
+  const tipRect = tip.getBoundingClientRect()
+  const mode = ownerContext?.inputMode.value ?? automaticInput.value, point = ownerContext?.point.value ?? pointer.value
+  const requested = ownerContext?.owner.value?.getAttribute('tooltipservice.placement') || String(value(props.Placement))
+  const placement = ['Top', 'Bottom', 'Left', 'Right', 'Mouse'].includes(requested) ? requested : 'Top'
+  const pointerRect = point && (mode === 'mouse' || mode === 'touch')
+    ? { left: point.x, right: point.x, top: point.y + (mode === 'touch' ? -5 : 0), bottom: point.y + (mode === 'touch' ? -5 : 0) } : null
+  const docking = placementRect(target) ?? pointerRect ?? target.getBoundingClientRect()
+  const defaultOffset = mode === 'mouse' ? 20 : mode === 'touch' ? 44 : mode === 'keyboard' ? 12 : 0
+  const horizontalOffset = props.HorizontalOffset === undefined ? defaultOffset : Number(value(props.HorizontalOffset)) || 0
+  const verticalOffset = props.VerticalOffset === undefined ? defaultOffset : Number(value(props.VerticalOffset)) || 0
+  const rtl = getComputedStyle(target).direction === 'rtl'
+  const centerX = (docking.left + docking.right - tipRect.width) / 2, centerY = (docking.top + docking.bottom - tipRect.height) / 2
+  const candidates = {
+    Top: { left: centerX, top: docking.top - verticalOffset - tipRect.height },
+    Bottom: { left: centerX, top: docking.bottom + verticalOffset },
+    Left: { left: docking.left - horizontalOffset - tipRect.width, top: centerY },
+    Right: { left: docking.right + horizontalOffset, top: centerY }
+  }
+  let chosen: keyof typeof candidates = placement === 'Mouse' ? 'Top' : placement as keyof typeof candidates
+  let result: { left: number; top: number }
+  if (placement === 'Mouse' && point && mode !== 'keyboard') {
+    result = { left: rtl ? point.x - tipRect.width : point.x + (Number(value(props.HorizontalOffset)) || 0), top: point.y + 11 + (Number(value(props.VerticalOffset)) || 0) }
   } else {
-    resolved = fallbackOrder[mode].find(canPlaceOnSide) || mode;
-    resolvedPosition = candidates[resolved];
+    if (rtl && (chosen === 'Right' || chosen === 'Left')) chosen = chosen === 'Right' ? 'Left' : 'Right'
+    // QueryRelativePosition: preferred, opposite, then the two other sides.
+    // Browsers do not expose SPI_GETMENUDROPALIGNMENT; use the native fallback
+    // preference (Right before Left) for vertical placement.
+    const orders = { Top: ['Top', 'Bottom', 'Right', 'Left'], Bottom: ['Bottom', 'Top', 'Right', 'Left'], Left: ['Left', 'Right', 'Top', 'Bottom'], Right: ['Right', 'Left', 'Top', 'Bottom'] } as const
+    const fits = (side: keyof typeof candidates) => {
+      const candidate = candidates[side]
+      return side === 'Top' || side === 'Bottom'
+        ? tipRect.width <= width && candidate.top >= available.top && candidate.top + tipRect.height <= available.bottom
+        : tipRect.height <= height && candidate.left >= available.left && candidate.left + tipRect.width <= available.right
+    }
+    chosen = orders[chosen].find(fits) ?? chosen
+    result = candidates[chosen]
   }
-
-  position.value = {
-    top: clamp(resolvedPosition.top, viewportMargin, window.innerHeight - tipRect.height - viewportMargin),
-    left: clamp(resolvedPosition.left, viewportMargin, window.innerWidth - tipRect.width - viewportMargin)
-  };
-  actualPlacement.value = resolved[0].toUpperCase() + resolved.slice(1);
-  isPositioned.value = true;
+  position.value = { left: clamp(result.left, available.left, available.right - tipRect.width), top: clamp(result.top, available.top, available.bottom - tipRect.height) }
+  actualPlacement.value = placement === 'Mouse' && mode !== 'keyboard' ? 'Mouse' : chosen
+  positioned.value = true
 }
-
-watch(effectiveIsOpen, async (value, oldValue) => {
-  if (value === oldValue) return;
-  clearTimers();
-  const changingEvent = value ? 'Opening' : 'Closing';
-  emit(changingEvent);
-  resolveXamlHandler(attrs[changingEvent], instance)?.();
-  if (value) {
-    await nextTick();
-    await updatePosition();
+let animation: Animation | null = null, transitionSequence = 0, openTimer: number | undefined
+let resizeObserver: ResizeObserver | null = null, unregister: (() => void) | undefined
+function setOpen(open: boolean) { localIsOpen.value = open; updateXamlBinding(props.IsOpen, open, instance); emit('update:IsOpen', open) }
+function show(immediate = true) {
+  window.clearTimeout(openTimer)
+  if (!isEnabled.value || (!ToolTipText.value && !contentNodes.value.length && !hasContentTemplate.value && !hasVisualContent.value)) return
+  if (immediate) setOpen(true)
+  else openTimer = window.setTimeout(() => setOpen(true), 800)
+}
+function hide() { window.clearTimeout(openTimer); setOpen(false) }
+function raise(event: 'Opened' | 'Closed') {
+  const sender = instance?.exposeProxy ?? instance?.proxy
+  emit(event, sender, {}); resolveXamlHandler(attrs[event], instance)?.(sender, {})
+}
+function syncTheme() {
+  const scope = targetElement()?.closest('.theme-light, .theme-dark')
+  automaticTheme.value = scope?.classList.contains('theme-dark') ? 'dark' : scope?.classList.contains('theme-light') ? 'light' : ''
+  if (ownerContext) ownerContext.theme.value = automaticTheme.value
+}
+async function changeVisibility(open: boolean) {
+  const sequence = ++transitionSequence, opacity = present.value && tooltipRef.value ? getComputedStyle(tooltipRef.value).opacity : '0'
+  animation?.cancel(); animation = null
+  if (open) {
+    present.value = true; positioned.value = false; syncTheme(); await updatePosition()
+    if (sequence !== transitionSequence || !isVisible.value) return
   }
-  const changedEvent = value ? 'Opened' : 'Closed';
-  emit(changedEvent);
-  resolveXamlHandler(attrs[changedEvent], instance)?.();
-});
-watch(
-  [isVisible, placement, placementTarget, () => props.PlacementPoint, () => props.PlacementRect, () => props.HorizontalOffset, () => props.VerticalOffset, contentText],
-  () => { if (isVisible.value) void updatePosition(); },
-  { deep: true }
-);
-
-function onViewportChanged() {
-  if (isVisible.value) void updatePosition();
+  const element = tooltipRef.value
+  if (!element) return
+  const duration = matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 167
+  animation = element.animate([{ opacity }, { opacity: open ? 1 : 0 }], { duration, easing: 'linear', fill: 'forwards' })
+  try { await animation.finished } catch { return }
+  if (sequence !== transitionSequence) return
+  element.style.opacity = open ? '1' : '0'; animation.cancel(); animation = null
+  if (!open) { present.value = false; positioned.value = false }
+  raise(open ? 'Opened' : 'Closed')
 }
-
-function onFullscreenChanged() {
-  teleportTarget.value = (document.fullscreenElement as HTMLElement | null) || 'body';
-  if (isVisible.value) void updatePosition();
+watch(boundIsOpen, () => { localIsOpen.value = undefined })
+watch(isVisible, changeVisibility, { immediate: true })
+watch([content, hasContentTemplate, () => props.Placement, () => props.PlacementRect, () => props.PlacementTarget, () => props.HorizontalOffset, () => props.VerticalOffset], () => { if (present.value) void updatePosition() }, { deep: true })
+watch([() => unref(inheritedTheme), () => value(props.RequestedTheme)], () => { if (present.value) void updatePosition() }, { flush: 'post' })
+const controller: ToolTipController = {
+  Open(mode, point) {
+    automaticInput.value = mode; pointer.value = point ?? null
+    if (ownerContext) { ownerContext.inputMode.value = mode; ownerContext.point.value = point ?? null }
+    syncTheme(); show()
+  }, Close: hide, IsOpen: () => isVisible.value, IsEnabled: () => isEnabled.value && Boolean(ToolTipText.value || contentNodes.value.length || hasContentTemplate.value || hasVisualContent.value),
+  Element: () => tooltipRef.value, UpdatePosition: updatePosition
 }
-
+watch(() => ownerContext?.owner.value, owner => {
+  unregister?.(); unregister = owner && ownerContext?.attached !== false ? registerToolTip(owner, controller) : undefined
+  if (owner) syncTheme()
+}, { immediate: true, flush: 'post' })
+function onViewportChanged() { if (present.value) { syncTheme(); void updatePosition() } }
+function onFullscreenChanged() { teleportTarget.value = document.fullscreenElement as HTMLElement || 'body'; onViewportChanged() }
+function observeLayout() {
+  resizeObserver?.disconnect()
+  const target = targetElement()
+  if (target) resizeObserver?.observe(target)
+  if (tooltipRef.value) resizeObserver?.observe(tooltipRef.value)
+}
+watch([tooltipRef, () => ownerContext?.owner.value, () => props.PlacementTarget], observeLayout, { flush: 'post' })
 onMounted(() => {
-  teleportTarget.value = (document.fullscreenElement as HTMLElement | null) || 'body';
-  window.addEventListener('resize', onViewportChanged);
-  window.addEventListener('scroll', onViewportChanged, true);
-  document.addEventListener('fullscreenchange', onFullscreenChanged);
-  if (isVisible.value) void updatePosition();
-});
+  teleportTarget.value = document.fullscreenElement as HTMLElement || 'body'
+  window.addEventListener('resize', onViewportChanged); window.addEventListener('scroll', onViewportChanged, true)
+  window.visualViewport?.addEventListener('resize', onViewportChanged); window.visualViewport?.addEventListener('scroll', onViewportChanged)
+  document.addEventListener('fullscreenchange', onFullscreenChanged)
+  if (typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(onViewportChanged)
+    observeLayout()
+  }
+  if (isVisible.value) void updatePosition()
+})
 onBeforeUnmount(() => {
-  clearTimers();
-  window.removeEventListener('resize', onViewportChanged);
-  window.removeEventListener('scroll', onViewportChanged, true);
-  document.removeEventListener('fullscreenchange', onFullscreenChanged);
-});
-
-defineExpose({ show, hide, toggle, updatePosition, IsOpen: isVisible, TemplateSettings: templateSettings });
+  transitionSequence += 1; window.clearTimeout(openTimer); animation?.cancel(); unregister?.(); resizeObserver?.disconnect()
+  window.removeEventListener('resize', onViewportChanged); window.removeEventListener('scroll', onViewportChanged, true)
+  window.visualViewport?.removeEventListener('resize', onViewportChanged); window.visualViewport?.removeEventListener('scroll', onViewportChanged)
+  document.removeEventListener('fullscreenchange', onFullscreenChanged)
+})
+defineExpose({ Controller: controller, IsOpen: computed({ get: () => isVisible.value, set: setOpen }), TemplateSettings: { FromHorizontalOffset: 0, FromVerticalOffset: 0 }, show, hide, updatePosition })
 </script>
-
 <style>
-.tooltip-anchor { display: inline-flex; position: relative; }
-.tooltip {
-  position: fixed;
-  z-index: var(--tooltip-z-index, var(--win-tip-z-index, 2147483647));
-  min-width: max-content;
-  max-width: 320px;
-  padding: 6px 9px 8px;
-  overflow-wrap: anywhere;
-  color: var(--ToolTipForegroundBrush, var(--text-primary));
-  --win-acrylic-fill: color-mix(
-    in srgb,
-    var(--ToolTipBackgroundBrush, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-background, var(--flyout-bg)))) 78%,
-    transparent
-  );
-  background: transparent;
-  background-clip: padding-box;
-  border: 1px solid var(--ToolTipBorderBrush, var(--surface-stroke-color-flyout, var(--flyout-border)));
-  border-radius: var(--ControlCornerRadius, 4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, .14), 0 0 2px rgba(0, 0, 0, .18);
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px) saturate(160%));
-  backdrop-filter: var(--flyout-backdrop, blur(30px) saturate(160%));
+.tooltip.win-tooltip {
+  position: fixed; display: flex; width: max-content; min-width: 0; box-sizing: border-box;
+  overflow: visible; overflow-wrap: anywhere; color: var(--ToolTipForegroundBrush, var(--text-primary));
+  border: 1px solid var(--ToolTipBorderBrush); border-radius: var(--ControlCornerRadius, 4px);
   font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
-  font-size: 12px;
-  line-height: 16px;
-  pointer-events: auto;
-  isolation: isolate;
+  font-size: 12px; line-height: 16px; opacity: 0; pointer-events: auto; isolation: isolate;
 }
-
-.tooltip .win-text-block {
-  display: inline;
-  color: inherit;
-  font-size: inherit;
-  line-height: inherit;
-}
-.tooltip-enter-active { animation: tooltip-fade-in 167ms linear both; }
-.tooltip-leave-active { animation: tooltip-fade-out 167ms linear both; }
-@keyframes tooltip-fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes tooltip-fade-out { from { opacity: 1; } to { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) {
-  .tooltip-enter-active, .tooltip-leave-active { animation-duration: 1ms; }
+.tooltip.win-tooltip .win-text-block { min-width: 0; max-width: 100%; color: inherit; font-size: inherit; line-height: inherit; overflow-wrap: inherit; }
+.tooltip.win-tooltip > :not(.win-theme-shadow-visual) { max-width: 100%; max-height: 100%; }
+.tooltip-content-clip { display: flex; min-width: 0; overflow: hidden; border-radius: inherit; align-items: inherit; justify-content: inherit; }
+@media (forced-colors: active) {
+  .tooltip.win-tooltip { color: CanvasText; border-color: CanvasText; }
 }
 </style>

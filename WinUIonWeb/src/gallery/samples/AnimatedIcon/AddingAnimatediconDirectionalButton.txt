@@ -1,0 +1,73 @@
+--- header
+Adding AnimatedIcon to a button
+--- xaml
+<Button Click="Button_Click"
+        PointerEntered="Button_PointerEntered"
+        PointerExited="Button_PointerExited"
+        PointerPressed="Button_PointerPressed"
+        PointerReleased="Button_PointerReleased"
+        PointerCanceled="Button_PointerCanceled"
+        PointerCaptureLost="Button_PointerCaptureLost"
+        Width="75" HorizontalAlignment="Left">
+    <AnimatedIcon x:Name="SearchAnimatedIcon" AnimatedIcon.State="NormalOff">
+        <AnimatedIcon.Source>
+            <animatedvisuals:$(AnimatedVisualSourceKind)/>
+        </AnimatedIcon.Source>
+        <AnimatedIcon.FallbackIconSource>
+            <SymbolIconSource Symbol="Find"/>
+        </AnimatedIcon.FallbackIconSource>
+    </AnimatedIcon>
+</Button>
+--- c#
+private bool isDirectionOn;
+private bool isPointerOver;
+
+private string DirectionalState(string state)
+{
+    return state + (isDirectionOn ? "On" : "Off");
+}
+
+private void RestoreDirectionalState()
+{
+    AnimatedIcon.SetState(this.SearchAnimatedIcon,
+        DirectionalState(isPointerOver ? "PointerOver" : "Normal"));
+}
+
+private void Button_Click(object sender, RoutedEventArgs e)
+{
+    isDirectionOn = !isDirectionOn;
+    RestoreDirectionalState();
+}
+
+private void Button_PointerEntered(object sender, PointerRoutedEventArgs e)
+{
+    isPointerOver = true;
+    AnimatedIcon.SetState(this.SearchAnimatedIcon, DirectionalState("PointerOver"));
+}
+
+private void Button_PointerExited(object sender, PointerRoutedEventArgs e)
+{
+    isPointerOver = false;
+    RestoreDirectionalState();
+}
+
+private void Button_PointerPressed(object sender, PointerRoutedEventArgs e)
+{
+    AnimatedIcon.SetState(this.SearchAnimatedIcon, DirectionalState("Pressed"));
+}
+
+private void Button_PointerReleased(object sender, PointerRoutedEventArgs e)
+{
+    RestoreDirectionalState();
+}
+
+private void Button_PointerCanceled(object sender, PointerRoutedEventArgs e)
+{
+    isPointerOver = false;
+    RestoreDirectionalState();
+}
+
+private void Button_PointerCaptureLost(object sender, PointerRoutedEventArgs e)
+{
+    RestoreDirectionalState();
+}

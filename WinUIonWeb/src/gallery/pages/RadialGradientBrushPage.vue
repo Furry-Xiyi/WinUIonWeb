@@ -1,309 +1,216 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">RadialGradientBrush</h1>
-          <p class="page-description">
-            Paints an area with a radial gradient. A center point defines the origin of the gradient, and an ellipse defines the outer bounds of the gradient.
-          </p>
-          <div class="page-header-actions">
-            <Button class="header-action" @click="toggleTheme"
-             >
-              <span class="icon">&#xE793;</span>
-            </Button>
-            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-             >
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </ToggleButton>
-          </div>
-        </div>
+  <Page>
     <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example: RadialGradientBrush Sample -->
-            <ControlExample
-              headerText="RadialGradientBrush Sample"
-              :theme="pageTheme"
-              :templateCode="exampleTemplate"
-              :vueCode="exampleVue">
-              <template #example>
-                <div class="gradient-container">
-                  <div
-                    class="gradient-rectangle"
-                    :style="gradientStyle"></div>
-                </div>
-              </template>
-              <template #options>
-                <div class="options-grid">
-                  <ComboBox
-                    v-model:SelectedValue="mappingMode"
-                    Header="MappingMode"
-                    :ItemsSource="mappingModeOptions"
-                    DisplayMemberPath="label"
-                    SelectedValuePath="value"
-                    style="grid-column: span 2;" />
-
-                  <Slider
-                    v-model="centerX"
-                    header="Center.X"
-                    :minimum="0"
-                    :maximum="sliderMaximum"
-                    :stepFrequency="sliderStepFrequency"
-                    :smallChange="sliderSmallChange" />
-
-                  <Slider
-                    v-model="centerY"
-                    header="Center.Y"
-                    :minimum="0"
-                    :maximum="sliderMaximum"
-                    :stepFrequency="sliderStepFrequency"
-                    :smallChange="sliderSmallChange" />
-
-                  <Slider
-                    v-model="radiusX"
-                    header="RadiusX"
-                    :minimum="0"
-                    :maximum="sliderMaximum"
-                    :stepFrequency="sliderStepFrequency"
-                    :smallChange="sliderSmallChange" />
-
-                  <Slider
-                    v-model="radiusY"
-                    header="RadiusY"
-                    :minimum="0"
-                    :maximum="sliderMaximum"
-                    :stepFrequency="sliderStepFrequency"
-                    :smallChange="sliderSmallChange" />
-
-                  <Slider
-                    v-model="originX"
-                    header="GradientOrigin.X"
-                    :minimum="0"
-                    :maximum="sliderMaximum"
-                    :stepFrequency="sliderStepFrequency"
-                    :smallChange="sliderSmallChange" />
-
-                  <Slider
-                    v-model="originY"
-                    header="GradientOrigin.Y"
-                    :minimum="0"
-                    :maximum="sliderMaximum"
-                    :stepFrequency="sliderStepFrequency"
-                    :smallChange="sliderSmallChange" />
-
-                  <ComboBox
-                    v-model:SelectedValue="spreadMethod"
-                    Header="SpreadMethod"
-                    :ItemsSource="spreadMethodOptions"
-                    DisplayMemberPath="label"
-                    SelectedValuePath="value"
-                    style="grid-column: span 2; margin-top: 10px;" />
-                </div>
-              </template>
-            </ControlExample>
-      </div>
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind PageTitle, Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind PageDescription, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal">
+            <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind ThemeButtonLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind ThemeButtonLabel, Mode=OneWay}"><FontIcon Glyph="&#xE793;" /></Button>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind FavoriteButtonLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind FavoriteButtonLabel, Mode=OneWay}"><FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" /></ToggleButton>
+          </StackPanel>
+        </StackPanel>
+        <StackPanel class="gallery-page-content">
+          <ControlExample class="radial-gradient-example" SampleDefinition="RadialGradientBrush\RadialgradientbrushSample.txt" HeaderText="{x:Bind SampleHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind SampleXaml, Mode=OneWay}" Loaded="OnPageLoaded">
+            <ControlExample.Example>
+              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+                <Rectangle x:Name="Rect" Width="200" Height="200">
+                  <Rectangle.Fill>
+                    <media:RadialGradientBrush x:Name="RadialGradientBrushExample" Center="0.25,0.25" GradientOrigin="0.5,.25" MappingMode="RelativeToBoundingBox" RadiusX=".5" RadiusY=".5" SpreadMethod="Pad">
+                      <GradientStop Offset="0.0" Color="Yellow" />
+                      <GradientStop Offset="1" Color="Blue" />
+                    </media:RadialGradientBrush>
+                  </Rectangle.Fill>
+                </Rectangle>
+              </StackPanel>
+            </ControlExample.Example>
+            <ControlExample.Output>
+              <TextBlock Text="{x:Bind SampleOutput, Mode=OneWay}" TextWrapping="Wrap" />
+            </ControlExample.Output>
+            <ControlExample.Options>
+              <Grid class="radial-gradient-options">
+                <Grid.RowDefinitions><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /></Grid.RowDefinitions>
+                <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <ComboBox x:Name="MappingModeComboBox" Grid.ColumnSpan="2" Header="{x:Bind MappingModeHeader, Mode=OneWay}" SelectedIndex="0" SelectionChanged="OnMappingModeChanged">
+                  <x:String x:Uid="ComboBoxMigration_RelativeToBoundingBox" />
+                  <x:String x:Uid="ComboBoxMigration_Absolute" />
+                </ComboBox>
+                <Slider x:Name="CenterXSlider" Grid.Row="1" Header="{x:Bind CenterXHeader, Mode=OneWay}" SmallChange="0.05" ValueChanged="OnSliderValueChanged" />
+                <Slider x:Name="CenterYSlider" Grid.Row="1" Grid.Column="1" Header="{x:Bind CenterYHeader, Mode=OneWay}" SmallChange="0.05" ValueChanged="OnSliderValueChanged" />
+                <Slider x:Name="RadiusXSlider" Grid.Row="2" Header="{x:Bind RadiusXHeader, Mode=OneWay}" SmallChange="0.05" ValueChanged="OnSliderValueChanged" />
+                <Slider x:Name="RadiusYSlider" Grid.Row="2" Grid.Column="1" Header="{x:Bind RadiusYHeader, Mode=OneWay}" SmallChange="0.05" ValueChanged="OnSliderValueChanged" />
+                <Slider x:Name="OriginXSlider" Grid.Row="3" Header="{x:Bind OriginXHeader, Mode=OneWay}" SmallChange="0.05" ValueChanged="OnSliderValueChanged" />
+                <Slider x:Name="OriginYSlider" Grid.Row="3" Grid.Column="1" Header="{x:Bind OriginYHeader, Mode=OneWay}" SmallChange="0.05" ValueChanged="OnSliderValueChanged" />
+                <ComboBox x:Name="SpreadMethodComboBox" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,10,0,0" Header="{x:Bind SpreadMethodHeader, Mode=OneWay}" SelectedIndex="0" SelectionChanged="OnSpreadMethodChanged">
+                  <x:String x:Uid="ComboBoxMigration_Pad" />
+                  <x:String x:Uid="ComboBoxMigration_Reflect" />
+                  <x:String x:Uid="ComboBoxMigration_Repeat" />
+                </ComboBox>
+              </Grid>
+            </ControlExample.Options>
+            <ControlExample.Substitutions>
+              <ControlExampleSubstitution Key="SpreadMethod" Value="{x:Bind RadialGradientBrushExample.SpreadMethod, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="MappingMode" Value="{x:Bind RadialGradientBrushExample.MappingMode, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="CenterX" Value="{x:Bind CenterXSlider.Value, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="CenterY" Value="{x:Bind CenterYSlider.Value, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="RadiusX" Value="{x:Bind RadiusXSlider.Value, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="RadiusY" Value="{x:Bind RadiusYSlider.Value, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="OriginX" Value="{x:Bind OriginXSlider.Value, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="OriginY" Value="{x:Bind OriginYSlider.Value, Mode=OneWay}" />
+            </ControlExample.Substitutions>
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
     </ScrollViewer>
-  </div>
+  </Page>
 </template>
 
 <script setup>
-import { ref, computed, inject, watch, onMounted } from 'vue';
-import ControlExample from '../../components/ControlExample.vue';
-import Button from '../../components/Button.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import ComboBox from '../../components/ComboBox.vue';
-import Slider from '../../components/Slider.vue';
-import { createPageState } from '../../utils/pageState';
+import { computed, inject, provide, shallowReactive } from 'vue'
+import Button from '../../components/Button.vue'
+import ColumnDefinition from '../../components/ColumnDefinition.vue'
+import ComboBox, { XamlString } from '../../components/ComboBox.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import { ControlExampleSubstitution } from '../../components/ControlExampleProperties'
+import FontIcon from '../../components/FontIcon.vue'
+import Grid from '../../components/Grid.vue'
+import Page from '../../components/Page.vue'
+import RadialGradientBrush, { GradientStop } from '../../components/RadialGradientBrush.vue'
+import Rectangle from '../../components/Rectangle.vue'
+import RowDefinition from '../../components/RowDefinition.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import Slider from '../../components/Slider.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import ToggleButton from '../../components/ToggleButton.vue'
+import { useI18n } from '../../components/i18n/index'
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime'
+import { createPageState } from '../../utils/pageState'
+import sample from '../samples/RadialGradientBrush/RadialgradientbrushSample.txt?raw'
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
-const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'radialgradientbrush');
-
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-
-// RadialGradientBrush properties
-const mappingMode = ref('RelativeToBoundingBox');
-const centerX = ref(0.25);
-const centerY = ref(0.25);
-const radiusX = ref(0.5);
-const radiusY = ref(0.5);
-const originX = ref(0.5);
-const originY = ref(0.25);
-const spreadMethod = ref('Pad');
-
-const mappingModeOptions = [
-  { label: 'RelativeToBoundingBox', value: 'RelativeToBoundingBox' },
-  { label: 'Absolute', value: 'Absolute' }
-];
-
-const spreadMethodOptions = [
-  { label: 'Pad', value: 'Pad' },
-  { label: 'Reflect', value: 'Reflect' },
-  { label: 'Repeat', value: 'Repeat' }
-];
-
-// Slider configuration based on mapping mode
-const sliderMaximum = computed(() => {
-  return mappingMode.value === 'Absolute' ? 200 : 1.0;
-});
-
-const sliderStepFrequency = computed(() => {
-  return mappingMode.value === 'Absolute' ? 4 : 0.02;
-});
-
-const sliderSmallChange = computed(() => {
-  return mappingMode.value === 'Absolute' ? 10 : 0.05;
-});
-
-// Initialize slider values when mapping mode changes
-watch(mappingMode, (newMode) => {
-  if (newMode === 'Absolute') {
-    centerX.value = 100;
-    centerY.value = 100;
-    radiusX.value = 100;
-    radiusY.value = 100;
-    originX.value = 100;
-    originY.value = 100;
-  } else {
-    centerX.value = 0.5;
-    centerY.value = 0.5;
-    radiusX.value = 0.5;
-    radiusY.value = 0.5;
-    originX.value = 0.5;
-    originY.value = 0.5;
+defineOptions({ components: { 'media:RadialGradientBrush': RadialGradientBrush, 'x:String': XamlString } })
+const { t } = useI18n()
+const currentPage = inject('currentPage')
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'radialgradientbrush')
+const namescope = shallowReactive({})
+provide(xamlNameScopeKey, namescope)
+const resource = key => computed(() => t(key))
+const PageTitle = resource('sample.radialgradient.page-title')
+const PageDescription = resource('sample.radialgradient.page-description')
+const SampleHeader = resource('sample.radialgradient.header')
+const MappingModeHeader = resource('ComboBoxMigration_MappingMode')
+const SpreadMethodHeader = resource('ComboBoxMigration_SpreadMethod')
+const CenterXHeader = resource('sample.radialgradient.center-x')
+const CenterYHeader = resource('sample.radialgradient.center-y')
+const RadiusXHeader = resource('sample.radialgradient.radius-x')
+const RadiusYHeader = resource('sample.radialgradient.radius-y')
+const OriginXHeader = resource('sample.radialgradient.origin-x')
+const OriginYHeader = resource('sample.radialgradient.origin-y')
+const ThemeButtonLabel = resource('gallery.toggle-theme')
+const FavoriteButtonLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'))
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
+const SampleXaml = sample.split(/--- xaml\s*\r?\n/)[1]?.trim() ?? ''
+const formatNumber = value => String(Number(Number(value).toFixed(4)))
+const SampleOutput = computed(() => {
+  const brush = namescope.RadialGradientBrushExample
+  if (!brush) return ''
+  return t('sample.radialgradient.output-format', {
+    mappingMode: t(`ComboBoxMigration_${brush.MappingMode}`),
+    center: `${formatNumber(brush.Center.X)}, ${formatNumber(brush.Center.Y)}`,
+    radiusX: formatNumber(brush.RadiusX), radiusY: formatNumber(brush.RadiusY),
+    origin: `${formatNumber(brush.GradientOrigin.X)}, ${formatNumber(brush.GradientOrigin.Y)}`,
+    spreadMethod: t(`ComboBoxMigration_${brush.SpreadMethod}`)
+  })
+})
+let initialized = false
+let initializing = false
+const sliderNames = ['CenterXSlider', 'CenterYSlider', 'RadiusXSlider', 'RadiusYSlider', 'OriginXSlider', 'OriginYSlider']
+const OnSliderValueChanged = () => {
+  const brush = namescope.RadialGradientBrushExample
+  if (!brush || !initialized || initializing) return
+  brush.Center = { X: namescope.CenterXSlider.Value, Y: namescope.CenterYSlider.Value }
+  brush.RadiusX = namescope.RadiusXSlider.Value
+  brush.RadiusY = namescope.RadiusYSlider.Value
+  brush.GradientOrigin = { X: namescope.OriginXSlider.Value, Y: namescope.OriginYSlider.Value }
+}
+const InitializeSliders = () => {
+  if (!namescope.RadialGradientBrushExample || sliderNames.some(name => !namescope[name])) return
+  initializing = true
+  const absolute = namescope.RadialGradientBrushExample.MappingMode === 'Absolute'
+  const { X: width = 200, Y: height = 200 } = namescope.Rect?.ActualSize ?? {}
+  try {
+    for (const name of sliderNames) {
+      const slider = namescope[name]
+      slider.Maximum = absolute ? width : 1
+      slider.Value = absolute ? width / 2 : .5
+      slider.StepFrequency = absolute ? (name.includes('Y') ? height : width) / 50 : .02
+      slider.SmallChange = absolute ? 10 : .05
+    }
+  } finally {
+    initializing = false
   }
-});
-
-// Compute CSS gradient style
-const gradientStyle = computed(() => {
-  const isRelative = mappingMode.value === 'RelativeToBoundingBox';
-
-  let cx, cy, rx, ry, ox, oy;
-
-  if (isRelative) {
-    // Convert to percentage
-    cx = centerX.value * 100;
-    cy = centerY.value * 100;
-    rx = radiusX.value * 100;
-    ry = radiusY.value * 100;
-    ox = originX.value * 100;
-    oy = originY.value * 100;
-  } else {
-    // Use pixel values directly
-    cx = centerX.value;
-    cy = centerY.value;
-    rx = radiusX.value;
-    ry = radiusY.value;
-    ox = originX.value;
-    oy = originY.value;
-  }
-
-  const unit = isRelative ? '%' : 'px';
-
-  // CSS radial-gradient syntax
-  // Note: CSS doesn't support all WinUI RadialGradientBrush features like separate GradientOrigin
-  // This is a simplified representation
-  let gradient = `radial-gradient(ellipse ${rx}${unit} ${ry}${unit} at ${cx}${unit} ${cy}${unit}, yellow 0%, blue 100%)`;
-
-  return {
-    background: gradient
-  };
-});
-
-// Code examples
-const exampleTemplate = computed(() => {
-  const isRelative = mappingMode.value === 'RelativeToBoundingBox';
-  const cx = isRelative ? centerX.value.toFixed(2) : Math.round(centerX.value);
-  const cy = isRelative ? centerY.value.toFixed(2) : Math.round(centerY.value);
-  const rx = isRelative ? radiusX.value.toFixed(2) : Math.round(radiusX.value);
-  const ry = isRelative ? radiusY.value.toFixed(2) : Math.round(radiusY.value);
-  const ox = isRelative ? originX.value.toFixed(2) : Math.round(originX.value);
-  const oy = isRelative ? originY.value.toFixed(2) : Math.round(originY.value);
-
-  return `<Rectangle Width="200" Height="200">
-  <Rectangle.Fill>
-    <media:RadialGradientBrush
-      MappingMode="${mappingMode.value}"
-      Center="${cx},${cy}"
-      RadiusX="${rx}"
-      RadiusY="${ry}"
-      GradientOrigin="${ox},${oy}"
-      SpreadMethod="${spreadMethod.value}">
-      <GradientStop Color="Yellow" Offset="0.0" />
-      <GradientStop Color="Blue" Offset="1" />
-    </media:RadialGradientBrush>
-  </Rectangle.Fill>
-</Rectangle>`;
-});
-
-const exampleVue = `const mappingMode = ref('RelativeToBoundingBox');
-const centerX = ref(0.25);
-const centerY = ref(0.25);
-const radiusX = ref(0.5);
-const radiusY = ref(0.5);
-const originX = ref(0.5);
-const originY = ref(0.25);
-const spreadMethod = ref('Pad');
-
-const gradientStyle = computed(() => {
-  const cx = centerX.value * 100;
-  const cy = centerY.value * 100;
-  const rx = radiusX.value * 100;
-  const ry = radiusY.value * 100;
-
-  return {
-    background: \`radial-gradient(
-      ellipse \${rx}% \${ry}% at \${cx}% \${cy}%,
-      yellow 0%, blue 100%
-    )\`
-  };
-});`;
+  initialized = true
+  OnSliderValueChanged()
+}
+const OnMappingModeChanged = () => {
+  if (!initialized) return
+  const value = ['RelativeToBoundingBox', 'Absolute'][namescope.MappingModeComboBox.SelectedIndex]
+  if (value !== 'Absolute' && value !== 'RelativeToBoundingBox') return
+  namescope.RadialGradientBrushExample.MappingMode = value
+  InitializeSliders()
+}
+const OnSpreadMethodChanged = () => {
+  if (!initialized) return
+  const value = ['Pad', 'Reflect', 'Repeat'][namescope.SpreadMethodComboBox.SelectedIndex]
+  if (value === 'Pad' || value === 'Reflect' || value === 'Repeat') namescope.RadialGradientBrushExample.SpreadMethod = value
+}
+const OnPageLoaded = () => {
+  if (!initialized) InitializeSliders()
+}
+provide(xamlScopeKey, { PageTitle, PageDescription, SampleHeader, MappingModeHeader, SpreadMethodHeader,
+  CenterXHeader, CenterYHeader,
+  RadiusXHeader, RadiusYHeader, OriginXHeader, OriginYHeader, ThemeButtonLabel, FavoriteButtonLabel,
+  FavoriteGlyph, SampleXaml, SampleOutput, isFavoriteState, pageTheme, toggleTheme, toggleFavorite,
+  OnPageLoaded, OnSliderValueChanged, OnMappingModeChanged, OnSpreadMethodChanged })
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 72px 8px 0; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; gap: 4px; }
+.page-heading { min-width: 0; }
+.page-header, .page-description { overflow-wrap: anywhere; }
+.gallery-page-content { container-type: inline-size; }
+.gallery-page-content :deep(.radial-gradient-example .example-container.has-output.has-options) {
+  grid-template-columns: minmax(224px, 1fr) 252px 320px;
 }
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
+.gallery-page-content :deep(.radial-gradient-example .example-output) {
+  width: 240px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
+.gallery-page-content :deep(.radial-gradient-example .example-options) {
+  width: 320px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
-
-.icon {
-  font-size: 16px;
-}
-
-.gradient-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
-
-.gradient-rectangle {
-  width: 200px;
-  height: 200px;
-  border-radius: 4px;
-}
-
-.options-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px 12px;
-  width: 100%;
+.radial-gradient-options { width: 100%; max-width: 100%; min-width: 0; }
+@container (max-width: 820px) {
+  .gallery-page-content :deep(.radial-gradient-example .example-container.has-output.has-options) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+  .gallery-page-content :deep(.radial-gradient-example .example-display) { grid-column: 1; grid-row: 1; min-height: 224px; }
+  .gallery-page-content :deep(.radial-gradient-example .example-output) { grid-column: 1; grid-row: 2; width: 100%; margin: 0; align-self: stretch; }
+  .gallery-page-content :deep(.radial-gradient-example .example-options) {
+    grid-column: 1;
+    grid-row: 3;
+    width: 100%;
+    border-left: 0;
+    border-top: 1px solid var(--DividerStrokeColorDefaultBrush, var(--stroke-divider));
+  }
 }
 </style>

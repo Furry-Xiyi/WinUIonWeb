@@ -58,8 +58,8 @@
               :HeaderIcon="'\uF594'"
               :Height="70">
               <ComboBox
-                v-model:SelectedValue="navPosition"
-                :ItemsSource="navPositionOptions"
+                SelectedValue="{x:Bind navPosition, Mode=TwoWay}"
+                ItemsSource="{x:Bind navPositionOptions, Mode=OneWay}"
                 DisplayMemberPath="label"
                 SelectedValuePath="value" />
             </SettingsCard>
@@ -75,8 +75,8 @@
               </template>
               <template #HeaderControls>
                 <Button
-                  @Click="openRepository"
-                  :Content="$t('text.open-code-repository')" />
+                  Click="openRepository"
+                  Content="{x:Bind OpenRepositoryLabel, Mode=OneWay}" />
                 <TextBlock :Text="versionText" FontSize="14.4" Foreground="var(--TextFillColorSecondaryBrush, var(--text-secondary))" />
               </template>
               <div class="about-content">
@@ -84,12 +84,12 @@
                   NavigateUri="https://qm.qq.com/q/UPnTGW164m"
                   TargetName="_blank"
                   HorizontalAlignment="Left"
-                  :Content="$t('text.qq-group')" />
+                  Content="{x:Bind QQGroupLabel, Mode=OneWay}" />
                 <HyperlinkButton
                   NavigateUri="https://discord.gg/4NScc8sEzw"
                   TargetName="_blank"
                   HorizontalAlignment="Left"
-                  :Content="$t('text.discord-group')" />
+                  Content="{x:Bind DiscordGroupLabel, Mode=OneWay}" />
               </div>
             </Expander>
           </div>
@@ -126,6 +126,9 @@ import {
 
 import ScrollViewer from '../../components/ScrollViewer.vue';
 const { t } = useI18n();
+const OpenRepositoryLabel = computed(() => t('text.open-code-repository'));
+const QQGroupLabel = computed(() => t('text.qq-group'));
+const DiscordGroupLabel = computed(() => t('text.discord-group'));
 const themeSetting = inject('themeSetting');
 const materialSetting = inject('materialSetting');
 const navigationTransitionInfo = inject('navigationTransitionInfo');
@@ -189,10 +192,10 @@ const OnNavigationTransitionInfoSelectionChanged = ({ SelectedIndex }) => {
   const Option = NavigationTransitionInfoOptions[SelectedIndex];
   if (Option) navigationTransitionInfo.value = Option.NavigationTransitionInfo;
 };
-const navPositionOptions = [
+const navPositionOptions = computed(() => [
   { label: t('text.left'), value: 'Auto' },
   { label: t('text.top'), value: 'Top' }
-];
+]);
 const appTitle = t('app.title');
 const currentYear = new Date().getFullYear();
 const copyrightText = computed(() => t('text.about-copyright', {

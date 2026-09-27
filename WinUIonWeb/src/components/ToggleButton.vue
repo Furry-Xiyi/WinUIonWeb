@@ -1,220 +1,123 @@
 <template>
-  <Button
-    v-bind="buttonAttrs"
-    class="win-toggle-button"
-    :class="[stateClasses, attrs.class]"
-    :style="buttonStyle"
-    Style="{x:Bind buttonStyleName, Mode=OneWay}"
-    IsEnabled="{x:Bind resolvedIsEnabled, Mode=OneWay}"
-    Click="OnButtonClick">
-    <slot>{{ resolvedContent }}</slot>
+  <Button ref="button" v-bind="buttonAttrs" class="win-toggle-button"
+    :class="{ 'is-checked': IsChecked === true, 'is-indeterminate': IsChecked === null }"
+    :aria-pressed="IsChecked === null ? 'mixed' : IsChecked"
+    Content="{x:Bind Content, Mode=OneWay}" ContentTemplate="{x:Bind ContentTemplate}" ContentTransitions="{x:Bind ContentTransitions}" IsEnabled="{x:Bind IsEnabled, Mode=OneWay}" RequestedTheme="{x:Bind RequestedTheme}" Click="OnButtonClick">
+    <slot v-if="hasContent" />
   </Button>
 </template>
 
-<script setup lang="ts">
-import { computed, getCurrentInstance, provide, ref, useAttrs, watch } from 'vue';
-import type { CSSProperties } from 'vue';
-import Button from './Button.vue';
-import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
-
-defineOptions({
-  inheritAttrs: false
-});
-
-type ToggleButtonChecked = boolean | null;
-
-const props = withDefaults(defineProps<{
-  IsChecked?: ToggleButtonChecked | string;
-  IsThreeState?: boolean;
-  IsEnabled?: boolean | string;
-  Content?: string | number;
-  Background?: string;
-  BackgroundSizing?: string;
-  Foreground?: string;
-  BorderBrush?: string;
-  BorderThickness?: string | number;
-  Padding?: string;
-  Margin?: string;
-  Width?: string | number;
-  Height?: string | number;
-  MaxWidth?: string | number;
-  MaxHeight?: string | number;
-  MinWidth?: string | number;
-  MinHeight?: string | number;
-  HorizontalAlignment?: string;
-  VerticalAlignment?: string;
-  FontFamily?: string;
-  FontWeight?: string | number;
-  FontSize?: string | number;
-  UseSystemFocusVisuals?: boolean;
-  FocusVisualMargin?: string | number;
-  CornerRadius?: string | number;
-}>(), {
-  IsChecked: false,
-  IsThreeState: false,
-  IsEnabled: true,
-  Content: '',
-  Background: '',
-  BackgroundSizing: 'InnerBorderEdge',
-  Foreground: '',
-  BorderBrush: '',
-  BorderThickness: '',
-  Padding: '',
-  Margin: '',
-  Width: '',
-  Height: '',
-  MaxWidth: '',
-  MaxHeight: '',
-  MinWidth: '',
-  MinHeight: '',
-  HorizontalAlignment: '',
-  VerticalAlignment: '',
-  FontFamily: '',
-  FontWeight: '',
-  FontSize: '',
-  UseSystemFocusVisuals: true,
-  FocusVisualMargin: '',
-  CornerRadius: ''
-});
-
-const emit = defineEmits<{
-  'update:IsChecked': [value: ToggleButtonChecked];
-  Click: [event: MouseEvent];
-  Checked: [event: MouseEvent];
-  Unchecked: [event: MouseEvent];
-  Indeterminate: [event: MouseEvent];
-}>();
-
-const attrs = useAttrs();
-const instance = getCurrentInstance();
-
-const buttonAttrs = computed(() => {
-  const {
-    class: _class,
-    style: _style,
-    disabled: _disabled,
-    Click: _click,
-    Checked: _checked,
-    Unchecked: _unchecked,
-    Indeterminate: _indeterminate,
-    ...rest
-  } = attrs;
-  return { ...rest, 'aria-pressed': ariaPressed.value };
-});
-
-const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance));
-const resolvedIsChecked = computed(() => resolveXamlValue(props.IsChecked, instance));
-const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
-const localIsChecked = ref<ToggleButtonChecked | undefined>(undefined);
-const isUpdatingChecked = ref(false);
-watch(resolvedIsChecked, (value) => {
-  if (!isUpdatingChecked.value) localIsChecked.value = value as ToggleButtonChecked;
-}, { immediate: true });
-const isDisabled = computed(() => resolvedIsEnabled.value === false);
-const currentIsChecked = computed<ToggleButtonChecked>(() => localIsChecked.value !== undefined
-  ? localIsChecked.value
-  : (resolvedIsChecked.value as ToggleButtonChecked | undefined) ?? false);
-const isChecked = computed(() => currentIsChecked.value === true);
-const isIndeterminate = computed(() => currentIsChecked.value === null);
-const ariaPressed = computed<boolean | 'mixed'>(() => isIndeterminate.value ? 'mixed' : isChecked.value);
-const buttonStyleName = computed(() => (isChecked.value || isIndeterminate.value ? 'AccentButtonStyle' : ''));
-
-const stateClasses = computed(() => ({
-  'is-checked': isChecked.value,
-  'is-indeterminate': isIndeterminate.value,
-  'is-disabled': isDisabled.value,
-  'use-system-focus-visuals': props.UseSystemFocusVisuals
-}));
-
-const cssLength = (value: string | number | undefined) => {
-  if (value === '' || value === undefined || value === null) return '';
-  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) {
-    return `${Number(value.trim())}px`;
-  }
-  return typeof value === 'number' ? `${value}px` : value;
-};
-
-const xamlThickness = (value: string | number | undefined) => {
-  if (value === '' || value === undefined || value === null) return '';
-
-  const parts = String(value)
-    .split(',')
-    .map((part) => {
-      const trimmed = part.trim();
-      return cssLength(Number.isNaN(Number(trimmed)) ? trimmed : Number(trimmed));
-    });
-
-  if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
-  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
-  return String(value);
-};
-
-const buttonStyle = computed(() => {
-  const style: CSSProperties & Record<string, string | number | undefined> = {};
-
-  if (props.Background) style['--ButtonBackground'] = props.Background;
-  if (props.Foreground) style['--ButtonForeground'] = props.Foreground;
-  if (props.BorderBrush) {
-    style['--ButtonBorderBrush'] = props.BorderBrush;
-  }
-  if (props.BorderThickness !== '') style['--ButtonBorderThemeThickness'] = cssLength(props.BorderThickness);
-  if (props.Padding) style.padding = xamlThickness(props.Padding);
-  if (props.Margin) style.margin = xamlThickness(props.Margin);
-  if (props.Width !== '') style.width = cssLength(props.Width);
-  if (props.Height !== '') style.height = cssLength(props.Height);
-  if (props.MaxWidth !== '') style.maxWidth = cssLength(props.MaxWidth);
-  if (props.MaxHeight !== '') style.maxHeight = cssLength(props.MaxHeight);
-  if (props.MinWidth !== '') style.minWidth = cssLength(props.MinWidth);
-  if (props.MinHeight !== '') style.minHeight = cssLength(props.MinHeight);
-  if (props.HorizontalAlignment) style.justifySelf = props.HorizontalAlignment.toLowerCase();
-  if (props.VerticalAlignment) style.alignSelf = props.VerticalAlignment.toLowerCase();
-  if (props.FontFamily) style.fontFamily = props.FontFamily;
-  if (props.FontWeight !== '') style.fontWeight = props.FontWeight;
-  if (props.FontSize !== '') style.fontSize = cssLength(props.FontSize);
-  if (props.FocusVisualMargin !== '') style.outlineOffset = cssLength(props.FocusVisualMargin);
-  if (props.CornerRadius !== '') style.borderRadius = cssLength(props.CornerRadius);
-
-  return [attrs.style as CSSProperties | undefined, style];
-});
-
-const nextCheckedValue = () => {
-  if (!props.IsThreeState) {
-    return !isChecked.value;
-  }
-
-  if (currentIsChecked.value === false) return true;
-  if (currentIsChecked.value === true) return null;
-  return false;
-};
-
-const onClick = (event: MouseEvent) => {
-  if (isDisabled.value) return;
-
-  const nextValue = nextCheckedValue();
-  localIsChecked.value = nextValue;
-  isUpdatingChecked.value = true;
-  emit('Click', event);
-  resolveXamlHandler(attrs.Click, instance)?.(event);
-  emit('update:IsChecked', nextValue);
-  updateXamlBinding(props.IsChecked, nextValue, instance);
-  isUpdatingChecked.value = false;
-
-  if (nextValue === true) {
-    emit('Checked', event);
-    resolveXamlHandler(attrs.Checked, instance)?.(event);
-  } else if (nextValue === false) {
-    emit('Unchecked', event);
-    resolveXamlHandler(attrs.Unchecked, instance)?.(event);
-  } else {
-    emit('Indeterminate', event);
-    resolveXamlHandler(attrs.Indeterminate, instance)?.(event);
-  }
-};
-
-provide(xamlScopeKey, {
-  buttonStyleName,
-  resolvedIsEnabled,
-  OnButtonClick: onClick
-});
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { buttonContentProperty } from './buttonContentRuntime'
+export const ToggleButtonContent = defineComponent({ name: 'ToggleButton.Content', __buttonProperty: 'content', setup() { return () => null } })
+export default { Content: ToggleButtonContent, ContentTemplate: buttonContentProperty('ToggleButton', 'ContentTemplate'), ContentTransitions: buttonContentProperty('ToggleButton', 'ContentTransitions'), Resources: buttonContentProperty('ToggleButton', 'Resources') }
 </script>
+
+<script setup lang="ts">
+import { computed, getCurrentInstance, inject, provide, proxyRefs, ref, useAttrs, useSlots, watch } from 'vue'
+import Button from './Button.vue'
+import { boolValue } from './layout'
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime'
+import { useUICommand } from './uiCommandRuntime'
+import { useButtonContent } from './buttonContentRuntime'
+
+defineOptions({ name: 'ToggleButton', inheritAttrs: false })
+type CheckedState = boolean | null
+const props = defineProps({ Content: { type: null, default: '' }, ContentTemplate: { type: null, default: undefined }, ContentTransitions: { type: null, default: undefined }, IsChecked: { type: [Boolean, String], default: false }, IsThreeState: { type: [Boolean, String], default: false }, IsEnabled: { type: [Boolean, String], default: true }, RequestedTheme: { type: String, default: 'Default' } })
+const emit = defineEmits(['Click', 'Checked', 'Unchecked', 'Indeterminate'])
+const attrs = useAttrs()
+const slots = useSlots()
+const instance = getCurrentInstance()
+const button = ref<any>(null)
+const resolve = (value: unknown) => resolveXamlValue(value, instance)
+const { ContentTemplate, ContentTransitions } = useButtonContent(props, () => slots.default?.() ?? [], instance)
+const Command = useUICommand(() => resolve(attrs.Command))
+const CommandParameter = computed(() => resolve(attrs.CommandParameter))
+const Content = computed(() => resolve(props.Content))
+const sourceRequestedTheme = computed(() => String(resolve(props.RequestedTheme)))
+const localRequestedTheme = ref<string | undefined>()
+watch(sourceRequestedTheme, () => { localRequestedTheme.value = undefined })
+const RequestedTheme = computed({ get: () => localRequestedTheme.value ?? sourceRequestedTheme.value, set: value => { localRequestedTheme.value = value; updateXamlBinding(props.RequestedTheme, value, instance) } })
+const checkedValue = (value: unknown): CheckedState => value === null || value === '{x:Null}' ? null : boolValue(value)
+const sourceChecked = computed(() => checkedValue(resolve(props.IsChecked)))
+const localChecked = ref<CheckedState | undefined>()
+const IsChecked = computed({ get: () => localChecked.value === undefined ? sourceChecked.value : localChecked.value, set: value => setChecked(checkedValue(value)) })
+const sourceIsEnabled = computed(() => boolValue(resolve(props.IsEnabled)))
+const localIsEnabled = ref<boolean | undefined>()
+const IsEnabled = computed({ get: () => (localIsEnabled.value ?? sourceIsEnabled.value) && (Command.value?.CanExecute?.(CommandParameter.value) ?? true), set: value => { localIsEnabled.value = boolValue(value); updateXamlBinding(props.IsEnabled, localIsEnabled.value, instance) } })
+const IsThreeState = computed(() => boolValue(resolve(props.IsThreeState)))
+const buttonAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([key]) => !['Click', 'onClick', 'Checked', 'onChecked', 'Unchecked', 'onUnchecked', 'Indeterminate', 'onIndeterminate'].includes(key))))
+const hasContent = computed(() => Boolean(slots.default))
+const api = proxyRefs({ IsChecked, IsEnabled, IsThreeState, RequestedTheme, Command, CommandParameter, ContentTemplate, ContentTransitions, Name: computed(() => attrs['data-xaml-ref'] ?? attrs['x:Name'] ?? attrs.Name ?? ''), Content: computed({ get: () => button.value?.Content ?? Content.value, set: value => { if (button.value) button.value.Content = value; updateXamlBinding(props.Content, value, instance) } }), Element: computed(() => button.value?.Element), IsPressed: computed(() => button.value?.IsPressed ?? false), Focus: () => button.value?.Focus?.() })
+defineExpose(api)
+function raise(name: 'Click' | 'Checked' | 'Unchecked' | 'Indeterminate', event?: Event) {
+  const args = { OriginalSource: api, OriginalEvent: event, Handled: false }
+  emit(name, api, args)
+  resolveXamlHandler(attrs[name], instance)?.(api, args)
+}
+function setChecked(value: CheckedState, event?: Event) {
+  if (value === IsChecked.value) return
+  localChecked.value = value
+  updateXamlBinding(props.IsChecked, value, instance)
+  raise(value === true ? 'Checked' : value === false ? 'Unchecked' : 'Indeterminate', event)
+}
+function onClick(_sender: unknown, args: { OriginalEvent?: Event }) {
+  if (!IsEnabled.value) return
+  const next = IsChecked.value === true ? IsThreeState.value ? null : false : IsChecked.value === false ? true : false
+  setChecked(next, args?.OriginalEvent)
+  raise('Click', args?.OriginalEvent)
+}
+watch(sourceChecked, (value, previous) => { const alreadyRaised = localChecked.value !== undefined && localChecked.value === value; localChecked.value = undefined; if (!alreadyRaised && value !== previous) raise(value === true ? 'Checked' : value === false ? 'Unchecked' : 'Indeterminate') })
+watch(sourceIsEnabled, () => { localIsEnabled.value = undefined })
+provide(xamlScopeKey, { ...inject(xamlScopeKey, {}), Content, ContentTemplate, ContentTransitions, IsEnabled, RequestedTheme, OnButtonClick: onClick })
+</script>
+
+<style>
+.win-toggle-button {
+  --ButtonBackground: var(--ToggleButtonBackground);
+  --ButtonBackgroundPointerOver: var(--ToggleButtonBackgroundPointerOver);
+  --ButtonBackgroundPressed: var(--ToggleButtonBackgroundPressed);
+  --ButtonBackgroundDisabled: var(--ToggleButtonBackgroundDisabled);
+  --ButtonForeground: var(--ToggleButtonForeground);
+  --ButtonForegroundPointerOver: var(--ToggleButtonForegroundPointerOver);
+  --ButtonForegroundPressed: var(--ToggleButtonForegroundPressed);
+  --ButtonForegroundDisabled: var(--ToggleButtonForegroundDisabled);
+  --ButtonBorderBrush: var(--ToggleButtonBorderBrush);
+  --ButtonBorderBrushPointerOver: var(--ToggleButtonBorderBrushPointerOver);
+  --ButtonBorderBrushPressed: var(--ToggleButtonBorderBrushPressed);
+  --ButtonBorderBrushDisabled: var(--ToggleButtonBorderBrushDisabled);
+}
+.win-toggle-button.is-checked {
+  background-clip: border-box;
+  --ButtonBackground: var(--ToggleButtonBackgroundChecked);
+  --ButtonBackgroundPointerOver: var(--ToggleButtonBackgroundCheckedPointerOver);
+  --ButtonBackgroundPressed: var(--ToggleButtonBackgroundCheckedPressed);
+  --ButtonBackgroundDisabled: var(--ToggleButtonBackgroundCheckedDisabled);
+  --ButtonForeground: var(--ToggleButtonForegroundChecked);
+  --ButtonForegroundPointerOver: var(--ToggleButtonForegroundCheckedPointerOver);
+  --ButtonForegroundPressed: var(--ToggleButtonForegroundCheckedPressed);
+  --ButtonForegroundDisabled: var(--ToggleButtonForegroundCheckedDisabled);
+  --ButtonBorderBrush: var(--ToggleButtonBorderBrushChecked);
+  --ButtonBorderBrushPointerOver: var(--ToggleButtonBorderBrushCheckedPointerOver);
+  --ButtonBorderBrushTop: var(--ButtonBorderBrush);
+  --ButtonBorderBrushBottom: var(--AccentButtonBorderBrushDefaultBottom, var(--accent-border-accent));
+  --ButtonBorderBrushPressed: var(--ToggleButtonBorderBrushCheckedPressed);
+  --ButtonBorderBrushDisabled: var(--ToggleButtonBorderBrushCheckedDisabled);
+}
+.win-toggle-button.is-checked .win-button-content-presenter { background-clip: border-box !important; }
+.win-toggle-button.is-indeterminate {
+  --ButtonBackground: var(--ToggleButtonBackgroundIndeterminate);
+  --ButtonBackgroundPointerOver: var(--ToggleButtonBackgroundIndeterminatePointerOver);
+  --ButtonBackgroundPressed: var(--ToggleButtonBackgroundIndeterminatePressed);
+  --ButtonBackgroundDisabled: var(--ToggleButtonBackgroundIndeterminateDisabled);
+  --ButtonForeground: var(--ToggleButtonForegroundIndeterminate);
+  --ButtonForegroundPointerOver: var(--ToggleButtonForegroundIndeterminatePointerOver);
+  --ButtonForegroundPressed: var(--ToggleButtonForegroundIndeterminatePressed);
+  --ButtonForegroundDisabled: var(--ToggleButtonForegroundIndeterminateDisabled);
+  --ButtonBorderBrush: var(--ToggleButtonBorderBrushIndeterminate);
+  --ButtonBorderBrushPointerOver: var(--ToggleButtonBorderBrushIndeterminatePointerOver);
+  --ButtonBorderBrushPressed: var(--ToggleButtonBorderBrushIndeterminatePressed);
+  --ButtonBorderBrushDisabled: var(--ToggleButtonBorderBrushIndeterminateDisabled);
+}
+</style>

@@ -41,16 +41,22 @@
       <div
         v-if="showDetailLabel && detailLabelContent"
         class="detail-label"
-        :style="detailLabelStyle"
+        :style="[detailLabelStyle, detailBackgroundStyle]"
+        v-acrylic-brush="detailBackgroundStyle"
+        v-theme-shadow="{ Translation: 16 }"
       >
-        {{ detailLabelContent }}
+        <span class="detail-label-content">{{ detailLabelContent }}</span>
       </div>
     </Transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, getCurrentInstance, watch, onMounted, onBeforeUnmount } from 'vue';
+import { useAcrylicBrushStyle } from './AcrylicBrush';
+import { vAcrylicBrush } from './acrylicBrushVisual';
+import { vThemeShadow } from './themeShadowVisual';
+const detailBackgroundStyle = useAcrylicBrushStyle('{ThemeResource ToolTipBackgroundBrush}', getCurrentInstance());
 
 const props = defineProps({
   // 标签集合 - 对齐官方API: Labels (IVector<AnnotatedScrollBarLabel>)
@@ -401,9 +407,7 @@ defineExpose({
   right: 0;
   transform: translateY(-50%);
   padding: 2px 6px;
-  --win-annotated-label-fill: var(--layer-on-acrylic-fill-color-default);
-  isolation: isolate;
-  background: transparent;
+  background: var(--AnnotatedScrollBarLabelBackground, transparent);
   border: 1px solid var(--card-stroke-color-default);
   border-radius: 4px;
   font-size: 11px;
@@ -413,23 +417,10 @@ defineExpose({
   pointer-events: auto;
   cursor: pointer;
   transition: all var(--fast-duration) var(--fast-out-slow-in);
-  -webkit-backdrop-filter: blur(30px);
-  backdrop-filter: blur(30px);
-}
-
-.scrollbar-label::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: inherit;
-  background: var(--win-annotated-label-fill);
-  transition: background var(--fast-duration) var(--fast-out-slow-in);
 }
 
 .scrollbar-label:hover {
-  --win-annotated-label-fill: var(--subtle-fill-color-secondary);
+  background: var(--SubtleFillColorSecondaryBrush);
   border-color: var(--control-stroke-color-default);
   color: var(--text-fill-color-primary);
   transform: translateY(-50%) scale(1.05);
@@ -487,28 +478,16 @@ defineExpose({
   background: transparent;
   border: 1px solid var(--surface-stroke-color-flyout);
   border-radius: 6px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   font-size: 12px;
   line-height: 16px;
   color: var(--text-fill-color-primary);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
   pointer-events: none;
   z-index: 100;
-  -webkit-backdrop-filter: blur(30px);
-  backdrop-filter: blur(30px);
 }
 
-.detail-label::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: inherit;
-  background: var(--layer-fill-color-default);
-}
+.detail-label-content { display: block; overflow: hidden; text-overflow: ellipsis; }
 
 .detail-label::after {
   content: '';

@@ -1,0 +1,296 @@
+/* Templates and resource aliases from CommonStyles/AppBar*_themeresources.xaml. */
+.win-appbar-button {
+  --appbar-background: var(--AppBarButtonBackground, var(--SubtleFillColorTransparentBrush, transparent));
+  --appbar-foreground: var(--AppBarButtonForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  --appbar-border: var(--AppBarButtonBorderBrush, var(--ControlFillColorTransparentBrush, transparent));
+  --appbar-accelerator-foreground: var(--AppBarButtonKeyboardAcceleratorTextForeground, var(--TextFillColorSecondaryBrush, var(--text-secondary)));
+  --appbar-chevron-foreground: var(--AppBarButtonSubItemChevronForeground, var(--TextFillColorSecondaryBrush, var(--text-secondary)));
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 68px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--AppBarButtonCornerRadius, var(--ControlCornerRadius, 4px));
+  background: transparent;
+  color: var(--appbar-foreground);
+  box-sizing: border-box;
+  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', sans-serif);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0;
+  text-align: center;
+  cursor: default;
+  user-select: none;
+  touch-action: manipulation;
+  vertical-align: top;
+  isolation: isolate;
+  overflow: hidden;
+}
+.win-appbar-button .appbar-button-inner-border {
+  position: absolute;
+  inset: 6px 2px;
+  border: var(--AppBarButtonBorderThickness, 0px) solid var(--appbar-border);
+  border-radius: inherit;
+  background: var(--appbar-background);
+  background-clip: padding-box;
+  transition: background-color 83ms linear;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+.win-appbar-button .appbar-button-content-root {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-rows: auto auto;
+  align-content: start;
+  min-width: 0;
+  min-height: var(--AppBarThemeMinHeight, 64px);
+  pointer-events: none;
+}
+.win-appbar-button .appbar-button-content-viewbox {
+  grid-area: 1 / 1 / 2 / 2;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  align-self: start;
+  width: 100% !important;
+  height: 16px;
+  min-width: 0;
+  min-height: 0;
+  margin: 16px 0 2px;
+  overflow: hidden;
+}
+.win-appbar-button .appbar-button-content-viewbox img,
+.win-appbar-button .appbar-button-content-viewbox svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+.win-appbar-button .appbar-button-label {
+  grid-area: 2 / 1 / 3 / 4;
+  margin: 0 2px 8px;
+  min-width: 0;
+  max-width: 100%;
+  font-size: var(--AppBarButtonLabelFontSize, 12px);
+  line-height: 16px;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.win-appbar-button .appbar-button-overflow-label,
+.win-appbar-button .appbar-button-accelerator-label,
+.win-appbar-button .appbar-button-overflow-chevron,
+.win-appbar-button .appbar-toggle-check-glyph {
+  display: none;
+}
+.win-appbar-button .appbar-button-chevron,
+.win-appbar-button .appbar-button-overflow-chevron,
+.win-appbar-button .appbar-toggle-check-glyph {
+  font-family: 'WinUIOnWebSymbolIcons', 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  font-style: normal;
+  font-weight: 400;
+  font-synthesis: none;
+  line-height: 1;
+}
+.win-appbar-button .appbar-button-chevron {
+  grid-area: 1 / 3 / 2 / 4;
+  justify-self: end;
+  align-self: start;
+  margin: 20px 12px 0 -23px;
+  font-size: var(--AppBarButtonSubItemChevronFontSize, 8px);
+  color: var(--appbar-chevron-foreground);
+}
+.win-appbar-button.compact .appbar-button-inner-border { bottom: 22px; }
+.win-appbar-button.compact .appbar-button-label,
+.win-appbar-button.label-collapsed .appbar-button-label { display: none; }
+.win-appbar-button.label-right { width: auto; }
+.win-appbar-button.label-right .appbar-button-content-root {
+  min-height: var(--AppBarThemeCompactHeight, 48px);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto;
+}
+.win-appbar-button.label-right .appbar-button-content-viewbox { width: 16px !important; margin: 16px 0 10px 12px; }
+.win-appbar-button.label-right .appbar-button-label {
+  grid-area: 1 / 2 / 2 / 3;
+  margin: 16px 12px 10px 8px;
+  text-align: start;
+  white-space: nowrap;
+}
+.win-appbar-button.label-right .appbar-button-chevron { margin-inline-start: -7px; }
+.win-appbar-button.label-collapsed .appbar-button-content-root { min-height: var(--AppBarThemeCompactHeight, 48px); }
+.win-appbar-button.pointer-over {
+  --appbar-background: var(--AppBarButtonBackgroundPointerOver, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)));
+  --appbar-foreground: var(--AppBarButtonForegroundPointerOver, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  --appbar-border: var(--AppBarButtonBorderBrushPointerOver, var(--ControlFillColorTransparentBrush, transparent));
+  --appbar-accelerator-foreground: var(--AppBarButtonKeyboardAcceleratorTextForegroundPointerOver, var(--TextFillColorSecondaryBrush, var(--text-secondary)));
+  --appbar-chevron-foreground: var(--AppBarButtonSubItemChevronForegroundPointerOver, var(--TextFillColorSecondaryBrush, var(--text-secondary)));
+}
+.win-appbar-button.submenu-opened {
+  --appbar-background: var(--AppBarButtonBackgroundSubMenuOpened, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)));
+  --appbar-foreground: var(--AppBarButtonForegroundSubMenuOpened, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  --appbar-border: var(--AppBarButtonBorderBrushSubMenuOpened, var(--ControlFillColorTransparentBrush, transparent));
+}
+.win-appbar-button.pressed {
+  --appbar-background: var(--AppBarButtonBackgroundPressed, var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary)));
+  --appbar-foreground: var(--AppBarButtonForegroundPressed, var(--TextFillColorSecondaryBrush, var(--text-secondary)));
+  --appbar-border: var(--AppBarButtonBorderBrushPressed, var(--ControlFillColorTransparentBrush, transparent));
+  --appbar-accelerator-foreground: var(--AppBarButtonKeyboardAcceleratorTextForegroundPressed, var(--TextFillColorTertiaryBrush, var(--text-tertiary)));
+  --appbar-chevron-foreground: var(--AppBarButtonSubItemChevronForegroundPressed, var(--TextFillColorTertiaryBrush, var(--text-tertiary)));
+}
+.win-appbar-button:disabled {
+  --appbar-background: var(--AppBarButtonBackgroundDisabled, var(--SubtleFillColorDisabledBrush, transparent));
+  --appbar-foreground: var(--AppBarButtonForegroundDisabled, var(--TextFillColorDisabledBrush, var(--text-disabled)));
+  --appbar-border: var(--AppBarButtonBorderBrushDisabled, var(--ControlFillColorTransparentBrush, transparent));
+  --appbar-accelerator-foreground: var(--AppBarButtonKeyboardAcceleratorTextForegroundDisabled, var(--TextFillColorDisabledBrush, var(--text-disabled)));
+  --appbar-chevron-foreground: var(--AppBarButtonSubItemChevronForegroundDisabled, var(--TextFillColorDisabledBrush, var(--text-disabled)));
+  opacity: 1;
+}
+.win-appbar-button:focus { outline: none; }
+.win-appbar-button:focus-visible .appbar-button-inner-border {
+  outline: 2px solid var(--FocusStrokeColorOuterBrush, var(--text-primary));
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 3px var(--FocusStrokeColorInnerBrush, var(--control-fill-primary));
+}
+.win-appbar-button.is-overflow {
+  width: 100%;
+  justify-self: stretch;
+  align-self: stretch;
+  text-align: start;
+}
+.win-appbar-button.is-overflow .appbar-button-content-root { min-height: 0; grid-template-rows: auto; }
+.win-appbar-button.is-overflow .appbar-button-inner-border { inset: 0 4px; }
+.win-appbar-button.is-overflow .appbar-button-label,
+.win-appbar-button.is-overflow .appbar-button-content-viewbox,
+.win-appbar-button.is-overflow .appbar-button-chevron { display: none; }
+.win-appbar-button.is-overflow .appbar-button-overflow-label {
+  display: block;
+  grid-area: 1 / 1 / 2 / 2;
+  margin: 0 12px;
+  padding: 5px 0 8px;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.win-appbar-button.is-overflow.overflow-with-icons .appbar-button-content-viewbox {
+  display: grid;
+  width: 16px !important;
+  grid-area: 1 / 1 / 2 / 2;
+  justify-self: start;
+  align-self: center;
+  margin: 0 12px;
+}
+.win-appbar-button.is-overflow.overflow-with-icons .appbar-button-overflow-label,
+.win-appbar-button.is-overflow.overflow-with-toggles .appbar-button-overflow-label { margin-inline-start: 38px; }
+.win-appbar-button.is-overflow.overflow-with-icons.overflow-with-toggles .appbar-button-content-viewbox { margin-inline-start: 38px; }
+.win-appbar-button.is-overflow.overflow-with-icons.overflow-with-toggles .appbar-button-overflow-label { margin-inline-start: 76px; }
+.win-appbar-button.is-overflow .appbar-button-accelerator-label {
+  display: block;
+  grid-area: 1 / 2 / 2 / 3;
+  align-self: center;
+  margin: 0 12px 0 24px;
+  color: var(--appbar-accelerator-foreground);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.win-appbar-button.is-overflow .appbar-button-accelerator-label:empty { display: none; }
+.win-appbar-button.is-overflow .appbar-button-overflow-chevron {
+  display: block;
+  grid-area: 1 / 3 / 2 / 4;
+  align-self: center;
+  margin: 0 16px 0 0;
+  color: var(--appbar-chevron-foreground);
+  font-size: 12px;
+}
+.win-appbar-button.win-appbar-toggle-button {
+  --AppBarButtonBorderThickness: 1px;
+  --appbar-background: var(--AppBarToggleButtonBackground, var(--SubtleFillColorTransparentBrush, transparent));
+  --appbar-foreground: var(--AppBarToggleButtonForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  --appbar-border: var(--AppBarToggleButtonBorderBrush, var(--ControlFillColorTransparentBrush, transparent));
+}
+.win-appbar-button.win-appbar-toggle-button.pointer-over {
+  --appbar-background: var(--AppBarToggleButtonBackgroundPointerOver, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)));
+  --appbar-foreground: var(--AppBarToggleButtonForegroundPointerOver, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  --appbar-border: var(--AppBarToggleButtonBorderBrushPointerOver, transparent);
+}
+.win-appbar-button.win-appbar-toggle-button.pressed {
+  --appbar-background: var(--AppBarToggleButtonBackgroundPressed, var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary)));
+  --appbar-foreground: var(--AppBarToggleButtonForegroundPressed, var(--TextFillColorSecondaryBrush, var(--text-secondary)));
+  --appbar-border: var(--AppBarToggleButtonBorderBrushPressed, transparent);
+}
+.win-appbar-button.win-appbar-toggle-button.appbar-toggle-button-checked {
+  --appbar-background: var(--AppBarToggleButtonBackgroundChecked, var(--AccentFillColorDefaultBrush, var(--accent-base)));
+  --appbar-foreground: var(--AppBarToggleButtonForegroundChecked, var(--TextOnAccentFillColorPrimaryBrush, var(--accent-text)));
+  --appbar-border: var(--AppBarToggleButtonBorderBrushChecked, var(--AccentControlElevationBorderBrush, var(--accent-base)));
+}
+.win-appbar-button.win-appbar-toggle-button.appbar-toggle-button-checked .appbar-button-inner-border { background-clip: border-box; }
+.win-appbar-button.win-appbar-toggle-button.appbar-toggle-button-checked.pointer-over {
+  --appbar-background: var(--AppBarToggleButtonBackgroundCheckedPointerOver, var(--AccentFillColorSecondaryBrush, var(--accent-hover)));
+  --appbar-foreground: var(--AppBarToggleButtonForegroundCheckedPointerOver, var(--TextOnAccentFillColorPrimaryBrush, var(--accent-text)));
+  --appbar-border: var(--AppBarToggleButtonBorderBrushCheckedPointerOver, var(--AccentControlElevationBorderBrush, var(--accent-base)));
+}
+.win-appbar-button.win-appbar-toggle-button.appbar-toggle-button-checked.pressed {
+  --appbar-background: var(--AppBarToggleButtonBackgroundCheckedPressed, var(--AccentFillColorTertiaryBrush, var(--accent-pressed)));
+  --appbar-foreground: var(--AppBarToggleButtonForegroundCheckedPressed, var(--TextOnAccentFillColorSecondaryBrush, var(--accent-text)));
+  --appbar-border: var(--AppBarToggleButtonBorderBrushCheckedPressed, transparent);
+}
+.win-appbar-button.win-appbar-toggle-button:disabled {
+  --appbar-background: var(--AppBarToggleButtonBackgroundDisabled, var(--SubtleFillColorDisabledBrush, transparent));
+  --appbar-foreground: var(--AppBarToggleButtonForegroundDisabled, var(--TextFillColorDisabledBrush, var(--text-disabled)));
+  --appbar-border: var(--AppBarToggleButtonBorderBrushDisabled, transparent);
+}
+.win-appbar-button.win-appbar-toggle-button.appbar-toggle-button-checked:disabled {
+  --appbar-background: var(--AppBarToggleButtonBackgroundCheckedDisabled, var(--AccentFillColorDisabledBrush, var(--accent-fill-disabled)));
+  --appbar-foreground: var(--AppBarToggleButtonForegroundCheckedDisabled, var(--TextOnAccentFillColorDisabled, var(--text-disabled)));
+  --appbar-border: var(--AppBarToggleButtonBorderBrushCheckedDisabled, transparent);
+}
+.win-appbar-button.win-appbar-toggle-button.is-overflow {
+  --appbar-foreground: var(--AppBarToggleButtonForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  --appbar-background: var(--AppBarToggleButtonBackgroundHighLightOverlay, transparent);
+  --appbar-border: transparent;
+}
+.win-appbar-button.win-appbar-toggle-button.is-overflow.appbar-toggle-button-checked:not(.pointer-over):not(.pressed):not(:disabled) { --appbar-border: var(--AppBarToggleButtonBorderBrushChecked, var(--AccentControlElevationBorderBrush, var(--accent-base))); }
+.win-appbar-button.win-appbar-toggle-button.is-overflow.pointer-over { --appbar-background: var(--AppBarToggleButtonBackgroundHighLightOverlayCheckedPointerOver, var(--subtle-secondary)); }
+.win-appbar-button.win-appbar-toggle-button.is-overflow.pressed { --appbar-background: var(--AppBarToggleButtonBackgroundHighLightOverlayCheckedPressed, var(--subtle-tertiary)); }
+.win-appbar-button.win-appbar-toggle-button.is-overflow:disabled { --appbar-background: transparent; --appbar-foreground: var(--TextFillColorDisabledBrush, var(--text-disabled)); }
+.win-appbar-button.win-appbar-toggle-button.is-overflow .appbar-toggle-check-glyph {
+  display: block;
+  position: absolute;
+  inset-inline-start: 12px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  font-size: 16px;
+  visibility: hidden;
+}
+.win-appbar-button.win-appbar-toggle-button.is-overflow.appbar-toggle-button-checked .appbar-toggle-check-glyph { visibility: visible; }
+.win-appbar-button.win-appbar-toggle-button.is-overflow.appbar-toggle-button-indeterminate .appbar-toggle-check-glyph { visibility: visible; }
+.win-appbar-separator {
+  display: grid;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 5px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  align-self: stretch;
+  color: var(--AppBarSeparatorForeground, var(--DividerStrokeColorDefaultBrush, var(--stroke-divider)));
+}
+.win-appbar-separator .appbar-separator-rectangle {
+  display: block;
+  width: 1px;
+  min-height: 0;
+  margin: var(--AppBarSeparatorPadding, 8px 2px);
+  border-radius: 0.5px;
+  background: currentColor;
+  align-self: stretch;
+}
+.win-appbar-separator.is-compact { height: var(--AppBarThemeCompactHeight, 48px); align-self: start; }
+.win-appbar-separator.is-overflow { width: 100%; height: 9px; align-self: stretch; }
+.win-appbar-separator.is-overflow .appbar-separator-rectangle { width: auto; height: 1px; margin: 4px 0; }

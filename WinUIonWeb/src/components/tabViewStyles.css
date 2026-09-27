@@ -1,0 +1,78 @@
+.win-tab-view { display: grid; grid-template-rows: auto minmax(0,1fr); min-width: 0; min-height: 0; max-width: 100%; box-sizing: border-box; overflow: clip; font-family: var(--ContentControlThemeFontFamily,'Segoe UI Variable','Segoe UI',sans-serif); }
+.win-tab-view-tab-container-grid { display: flex; align-items: stretch; min-width: 0; min-height: 40px; position: relative; }
+.win-tab-view-tab-container-grid::after { content: ''; position: absolute; inset-inline: 0; bottom: 0; height: 1px; pointer-events: none; background: var(--TabViewBorderBrush,var(--CardStrokeColorDefaultBrush,var(--card-stroke))); }
+.win-tab-view-left-content-presenter { flex: 0 0 auto; min-width: 2px; overflow: clip; }
+.win-tab-view-right-content-presenter { flex: 1 0 auto; min-width: 0; max-width: 100%; overflow: clip; display: grid; }
+.win-tab-view-right-content-content { width: 100%; max-width: 100%; min-width: 0; justify-self: stretch; overflow: clip; display: grid; }
+.win-tab-view-list-view { position: relative; flex: 0 1 auto; display: flex; min-width: 0; max-width: 100%; box-sizing: border-box; overflow: clip; }
+.win-tab-view-scroll-viewer { position: relative; min-width: 0; overflow: hidden; scrollbar-width: none; overscroll-behavior: contain; }
+.win-tab-view-scroll-viewer::-webkit-scrollbar { display: none; }
+.win-tab-view-items-presenter { display: flex; align-items: stretch; width: max-content; min-height: var(--TabViewItemMinHeight,32px); isolation: isolate; }
+.win-tab-view-items-edge { flex: 0 0 4px; position: relative; }
+.win-tab-view-items-edge::after { content: ''; position: absolute; bottom: 0; height: 1px; inset-inline: 0; background: var(--TabViewBorderBrush,var(--CardStrokeColorDefaultBrush,var(--card-stroke))); }
+.win-tab-view-add-container { flex: 0 0 auto; box-sizing: border-box; padding: var(--TabViewItemAddButtonContainerPadding,0 0 3px 3px); align-self: flex-end; z-index: 1; }
+.win-tab-view-add-button,.win-tab-view-scroll-button,.win-tab-view-close-button { appearance: none; border: 0; padding: 0; margin: 0; box-sizing: border-box; outline: none; display: grid; place-items: center; cursor: default; border-radius: var(--ControlCornerRadius,4px); color: var(--TabViewButtonForeground,var(--text-primary)); background: var(--TabViewButtonBackground,transparent); width: var(--TabViewItemAddButtonWidth,32px); height: var(--TabViewItemAddButtonHeight,24px); flex: 0 0 auto; }
+.win-tab-view-glyph { font-family: var(--SymbolThemeFontFamily,'Segoe Fluent Icons','Segoe MDL2 Assets'); font-size: var(--TabViewItemAddButtonFontSize,12px); line-height: 1; }
+.win-tab-view-add-button:hover:not(:disabled) { background: var(--TabViewButtonBackgroundPointerOver,var(--subtle-secondary)); color: var(--TabViewButtonForegroundPointerOver,var(--text-primary)); }
+.win-tab-view-add-button:active:not(:disabled) { background: var(--TabViewButtonBackgroundPressed,var(--subtle-tertiary)); color: var(--TabViewButtonForegroundPressed,var(--text-secondary)); }
+.win-tab-view-add-button:disabled { color: var(--TabViewButtonForegroundDisabled,var(--text-disabled)); background: var(--TabViewButtonBackgroundDisabled,transparent); }
+.win-tab-view-scroll-button-container { flex: 0 0 auto; display: flex; align-items: flex-end; z-index: 1; }
+.win-tab-view-scroll-button-container.is-decrease { padding: var(--TabViewItemLeftScrollButtonContainerPadding,0 3px 3px 8px); }
+.win-tab-view-scroll-button-container.is-increase { padding: var(--TabViewItemRightScrollButtonContainerPadding,0 8px 3px 3px); }
+.win-tab-view-scroll-button { width: var(--TabViewItemScrollButtonWidth,32px); height: var(--TabViewItemScrollButtonHeight,24px); background: var(--TabViewScrollButtonBackground,transparent); color: var(--TabViewScrollButtonForeground,var(--text-secondary)); }
+.win-tab-view-scroll-button .win-tab-view-glyph { font-size: var(--TabViewItemScrollButonFontSize,8px); }
+.win-tab-view-scroll-button:hover:not(:disabled) { background: var(--TabViewScrollButtonBackgroundPointerOver,var(--subtle-secondary)); }
+.win-tab-view-scroll-button:active:not(:disabled) { background: var(--TabViewScrollButtonBackgroundPressed,var(--subtle-tertiary)); }
+.win-tab-view-scroll-button:disabled { color: var(--TabViewScrollButtonForegroundDisabled,var(--text-disabled)); }
+.win-tab-view-item { position: relative; flex: 0 0 auto; display: grid; min-width: 0; min-height: var(--TabViewItemMinHeight,32px); max-width: none; margin: 0; box-sizing: border-box; outline: none; overflow: visible; font-size: var(--TabViewItemHeaderFontSize,12px); line-height: 16px; background: transparent; user-select: none; touch-action: pan-y; cursor: default; z-index: 1; }
+.win-tab-view-tab-container { position: relative; display: flex; align-items: center; gap: 0; min-width: 0; margin: 0 1px 1px; padding: var(--TabViewItemHeaderPadding,3px 4px 3px 8px); border: 1px solid var(--tab-custom-border,var(--TabViewItemBorderBrush,transparent)); border-bottom: 0; border-radius: var(--tab-corner-radius,var(--OverlayCornerRadius,8px)) var(--tab-corner-radius,var(--OverlayCornerRadius,8px)) 0 0; box-sizing: border-box; color: var(--TabViewItemHeaderForeground,var(--text-secondary)); background: var(--tab-custom-background,var(--TabViewItemHeaderBackground,transparent)); }
+.win-tab-view-item.is-pointer-over:not(.is-selected):not(.is-disabled) .win-tab-view-tab-container { background: var(--TabViewItemHeaderBackgroundPointerOver,var(--subtle-secondary)); color: var(--TabViewItemHeaderForegroundPointerOver,var(--text-secondary)); }
+.win-tab-view-item.is-pressed:not(.is-selected):not(.is-disabled) .win-tab-view-tab-container { background: var(--TabViewItemHeaderBackgroundPressed,var(--subtle-tertiary)); color: var(--TabViewItemHeaderForegroundPressed,var(--text-tertiary)); }
+.win-tab-view-item.is-selected .win-tab-view-tab-container { background: var(--tab-custom-background,var(--TabViewItemHeaderBackgroundSelected,var(--SolidBackgroundFillColorTertiaryBrush,var(--background-solid-tertiary,var(--background-layer))))); color: var(--TabViewItemHeaderForegroundSelected,var(--text-primary)); border-color: var(--TabViewBorderBrush,var(--CardStrokeColorDefaultBrush,var(--card-stroke))); margin-bottom: 0; padding-bottom: 4px; }
+.win-tab-view-header-content { display: grid; flex: 1 1 auto; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: inherit; font-weight: 400; }
+.win-tab-view-header-value,.win-tab-view-header-measure { grid-area: 1 / 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.win-tab-view-header-measure { visibility: hidden; font-weight: 600; pointer-events: none; }
+.win-tab-view-header-content > * { min-width: 0; max-width: 100%; }
+.win-tab-view-item.is-selected .win-tab-view-header-content { font-weight: 600; }
+.win-tab-view-icon-box { display: grid; place-items: center; width: var(--TabViewItemHeaderIconSize,16px); height: var(--TabViewItemHeaderIconSize,16px); flex: 0 0 var(--TabViewItemHeaderIconSize,16px); overflow: hidden; margin: var(--TabViewItemHeaderIconMargin,0 10px 0 0); color: var(--tab-custom-foreground,var(--TabViewItemIconForeground,var(--text-secondary))); }
+.win-tab-view-icon-box > * { max-width: 100%; max-height: 100%; }
+.win-tab-view-icon-viewbox { flex: 0 0 auto; }
+.win-tab-view-item.is-selected .win-tab-view-icon-box { color: var(--tab-custom-foreground,var(--TabViewItemIconForegroundSelected,var(--text-primary))); }
+.win-tab-view-item.is-pressed:not(.is-selected):not(.is-disabled) .win-tab-view-icon-box { color: var(--tab-custom-foreground,var(--TabViewItemIconForegroundPressed,var(--text-tertiary))); }
+.win-tab-view-close-button { width: var(--TabViewItemHeaderCloseButtonWidth,32px); height: var(--TabViewItemHeaderCloseButtonHeight,24px); margin: var(--TabViewItemHeaderCloseMargin,0 0 0 4px); visibility: hidden; pointer-events: none; color: var(--TabViewItemHeaderCloseButtonForeground,var(--text-primary)); background: var(--TabViewItemHeaderCloseButtonBackground,transparent); }
+.win-tab-view-close-button.is-visible { visibility: visible; pointer-events: auto; }
+.win-tab-view-close-button:hover:not(:disabled) { background: var(--TabViewItemHeaderCloseButtonBackgroundPointerOver,var(--subtle-secondary)); color: var(--TabViewItemHeaderCloseButtonForegroundPointerOver,var(--text-primary)); }
+.win-tab-view-close-button:active:not(:disabled) { background: var(--TabViewItemHeaderCloseButtonBackgroundPressed,var(--subtle-tertiary)); color: var(--TabViewItemHeaderCloseButtonForegroundPressed,var(--text-secondary)); }
+.win-tab-view-item:not(.is-closable) .win-tab-view-tab-container { padding-inline-end: 8px; }
+.win-tab-view-item.is-disabled .win-tab-view-tab-container { color: var(--TabViewItemHeaderForegroundDisabled,var(--text-disabled)); background: var(--TabViewItemHeaderBackgroundDisabled,transparent); }
+.win-tab-view-item.is-disabled .win-tab-view-icon-box { color: var(--tab-custom-foreground,var(--TabViewItemIconForegroundDisabled,var(--text-disabled))); }
+.win-tab-view-item.is-disabled .win-tab-view-close-button { color: var(--TabViewItemHeaderDisabledCloseButtonForeground,var(--text-disabled)); }
+.win-tab-view-item .win-tab-view-tab-container { color: var(--tab-custom-foreground,var(--TabViewItemHeaderForeground,var(--text-secondary))); }
+.win-tab-view-item.is-selected .win-tab-view-tab-container { color: var(--tab-custom-foreground,var(--TabViewItemHeaderForegroundSelected,var(--text-primary))); }
+.win-tab-view-item.is-pressed:not(.is-selected):not(.is-disabled) .win-tab-view-tab-container { color: var(--tab-custom-foreground,var(--TabViewItemHeaderForegroundPressed,var(--text-tertiary))); }
+.win-tab-view-item.is-disabled .win-tab-view-tab-container { color: var(--tab-custom-foreground,var(--TabViewItemHeaderForegroundDisabled,var(--text-disabled))); }
+.win-tab-view-bottom-border-line { position: absolute; height: 1px; bottom: 0; inset-inline: 0; background: var(--TabViewBorderBrush,var(--CardStrokeColorDefaultBrush,var(--card-stroke))); pointer-events: none; }
+.win-tab-view-item.is-selected .win-tab-view-bottom-border-line { visibility: hidden; }
+.win-tab-view-tab-separator { position: absolute; width: 1px; inset-inline-end: 0; top: 8px; bottom: 8px; background: var(--TabViewItemSeparator,var(--stroke-divider)); pointer-events: none; }
+.win-tab-view-item.is-pointer-over .win-tab-view-tab-separator,.win-tab-view-item.is-pressed .win-tab-view-tab-separator { visibility: hidden; }
+.win-tab-view-selected-background { position: absolute; inset-inline: -3px; height: 4px; bottom: 0; background: var(--TabViewItemHeaderBackgroundSelected,var(--SolidBackgroundFillColorTertiaryBrush,var(--background-solid-tertiary,var(--background-layer)))); pointer-events: none; }
+.win-tab-view-selected-background::before,.win-tab-view-selected-background::after { content: ''; position: absolute; width: 4px; height: 4px; bottom: 0; box-sizing: border-box; border-bottom: 1px solid var(--TabViewBorderBrush,var(--CardStrokeColorDefaultBrush,var(--card-stroke))); }
+.win-tab-view-selected-background::before { inset-inline-start: -1px; border-inline-end: 1px solid var(--TabViewBorderBrush,var(--CardStrokeColorDefaultBrush,var(--card-stroke))); border-end-end-radius: 4px; }
+.win-tab-view-selected-background::after { inset-inline-end: -1px; border-inline-start: 1px solid var(--TabViewBorderBrush,var(--CardStrokeColorDefaultBrush,var(--card-stroke))); border-end-start-radius: 4px; }
+.win-tab-view-tab-drag-visual { display: none; position: absolute; inset: 0 1px; border: solid var(--TabViewBorderBrush,var(--CardStrokeColorDefaultBrush,var(--card-stroke))); border-width: var(--tab-border-thickness,1px); border-radius: var(--tab-corner-radius,var(--OverlayCornerRadius,8px)); background: var(--TabViewItemHeaderDragBackground,var(--SolidBackgroundFillColorTertiaryBrush,var(--background-solid-tertiary,var(--background-layer)))); box-sizing: border-box; }
+.win-tab-view-item.is-dragging { opacity: var(--ListViewItemDragThemeOpacity,.8); }
+.win-tab-view-item.is-dragging .win-tab-view-tab-drag-visual,.win-tab-view-item.is-drag-visual .win-tab-view-tab-drag-visual { display: block; }
+.win-tab-view-item.is-dragging .win-tab-view-selected-background,.win-tab-view-item.is-drag-visual .win-tab-view-selected-background { opacity: 0; }
+.win-tab-view.is-dragging .win-tab-view-bottom-border-line,.win-tab-view-item.is-drag-visual .win-tab-view-bottom-border-line { opacity: 0; }
+.win-tab-view-item.is-dragging .win-tab-view-tab-container,.win-tab-view-item.is-drag-visual .win-tab-view-tab-container { border-color: transparent; background: transparent; }
+.win-tab-view-item.is-drag-visual .win-tab-view-tab-separator { opacity: 0; }
+.win-tab-view-item.is-compact .win-tab-view-header-content { display: none; }
+.win-tab-view-item.is-compact .win-tab-view-icon-box { margin: 0; }
+.win-tab-view-item.is-compact { min-width: 40px; }
+.win-tab-view-content-presenter { min-width: 0; min-height: 0; max-width: 100%; box-sizing: border-box; overflow: clip; border-style: solid; }
+.win-tab-view-content-presenter > * { min-width: 0; max-width: 100%; }
+.win-tab-view-drop-indicator { position: absolute; top: 1px; bottom: 1px; width: 2px; z-index: 4; pointer-events: none; background: var(--AccentFillColorDefaultBrush,var(--accent-default)); border-radius: 1px; }
+.win-tab-view-item:focus-visible .win-tab-view-tab-container { outline: 2px solid var(--ControlStrongFillColorDefaultBrush,var(--text-primary)); outline-offset: -3px; }
+.win-tab-view-add-button:focus-visible,.win-tab-view-scroll-button:focus-visible { outline: 2px solid var(--ControlStrongFillColorDefaultBrush,var(--text-primary)); outline-offset: 3px; }
+.win-tab-view-drag-ghost { position: fixed !important; top: 0; left: 0; z-index: 2147483000; pointer-events: none; transform-origin: 0 0; }
+@media (forced-colors: active) { .win-tab-view-tab-container { forced-color-adjust: none; background: Canvas; color: CanvasText; } .win-tab-view-item.is-selected .win-tab-view-tab-container { border-color: Highlight; color: Highlight; } .win-tab-view-item.is-disabled .win-tab-view-tab-container { color: GrayText; } }

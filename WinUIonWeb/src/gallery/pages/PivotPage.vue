@@ -1,118 +1,96 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-        <TextBlock class="page-header" :Text="$t('text.pivot')" />
+  <Page>
+    <ScrollViewer
+      class="gallery-page-scroll"
+      VerticalScrollBarVisibility="Auto"
+      VerticalScrollMode="Auto">
+      <StackPanel class="gallery-item-page">
         <TextBlock
-          class="page-description"
-          :Text="$t('text.pivot-description')"
+          MaxWidth="1064"
+          HorizontalAlignment="Left"
+          Margin="0,4,24,0"
+          Style="{ThemeResource BodyTextBlockStyle}"
+          Text="{x:Bind pageDescription, Mode=OneWay}"
           TextWrapping="WrapWholeWords" />
-        <div class="page-header-actions">
-          <Button class="header-action" @Click="toggleTheme">
-            <TextBlock class="icon" Text="&#xE793;" />
-          </Button>
-          <ToggleButton
-            :IsChecked="isFavoriteState"
-            class="header-action"
-            @update:IsChecked="toggleFavorite">
-            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </ToggleButton>
-        </div>
-      </div>
 
-      <div class="gallery-page-content">
-        <ControlExample
-          class="basic-input-example-theme"
-          :theme="pageTheme"
-          :vue="BasicPivotVue"
-          :headerText="$t('sample.pivot.basic')">
-          <template #example>
-            <Pivot :Title="$t('sample.pivot.email')" MinHeight="400">
-              <PivotItem :Header="$t('sample.pivot.all')">
-                <TextBlock :Text="$t('sample.pivot.all-content')" />
-              </PivotItem>
-              <PivotItem :Header="$t('sample.pivot.unread')">
-                <TextBlock :Text="$t('sample.pivot.unread-content')" />
-              </PivotItem>
-              <PivotItem :Header="$t('sample.pivot.flagged')">
-                <TextBlock :Text="$t('sample.pivot.flagged-content')" />
-              </PivotItem>
-              <PivotItem :Header="$t('sample.pivot.urgent')">
-                <TextBlock :Text="$t('sample.pivot.urgent-content')" />
-              </PivotItem>
-            </Pivot>
-          </template>
-        </ControlExample>
-      </div>
-    </div>
-  </ScrollViewer>
+        <StackPanel class="gallery-page-content" MaxWidth="1028" HorizontalAlignment="Left">
+          <ControlExample
+            Margin="0,0,24,0"
+            HeaderText="{x:Bind basicHeader, Mode=OneWay}"
+            Theme="{x:Bind pageTheme, Mode=OneWay}"
+            Xaml="{x:Bind basicXaml, Mode=OneWay}">
+            <ControlExample.Example>
+              <Pivot
+                Title="{x:Bind emailTitle, Mode=OneWay}"
+                MinHeight="400">
+                <PivotItem Header="{x:Bind allHeader, Mode=OneWay}">
+                  <TextBlock Text="{x:Bind allContent, Mode=OneWay}" />
+                </PivotItem>
+                <PivotItem Header="{x:Bind unreadHeader, Mode=OneWay}">
+                  <TextBlock Text="{x:Bind unreadContent, Mode=OneWay}" />
+                </PivotItem>
+                <PivotItem Header="{x:Bind flaggedHeader, Mode=OneWay}">
+                  <TextBlock Text="{x:Bind flaggedContent, Mode=OneWay}" />
+                </PivotItem>
+                <PivotItem Header="{x:Bind urgentHeader, Mode=OneWay}">
+                  <TextBlock Text="{x:Bind urgentContent, Mode=OneWay}" />
+                </PivotItem>
+              </Pivot>
+            </ControlExample.Example>
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Page>
 </template>
 
 <script setup>
-import { computed, inject } from 'vue';
-import Button from '../../components/Button.vue';
-import ControlExample from '../../components/ControlExample.vue';
-import Pivot from '../../components/Pivot.vue';
-import PivotItem from '../../components/PivotItem.vue';
-import ScrollViewer from '../../components/ScrollViewer.vue';
-import TextBlock from '../../components/TextBlock.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import { useI18n } from '../../components/i18n/index';
-import { createPageState } from '../../utils/pageState';
+import { computed, inject } from 'vue'
+import ControlExample from '../../components/ControlExample.vue'
+import Page from '../../components/Page.vue'
+import Pivot from '../../components/Pivot.vue'
+import PivotItem from '../../components/PivotItem.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import { useI18n } from '../../components/i18n/index'
+import { createPageState } from '../../utils/pageState'
 
-const { t } = useI18n();
-const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'pivot');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const { t } = useI18n()
+const currentPage = inject('currentPage')
+const pageKey = computed(() => currentPage?.value || 'pivot')
+const { pageTheme } = createPageState(pageKey.value)
 
-const EscapeAttribute = (value) => String(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+const pageDescription = computed(() => t('text.pivot-description'))
+const basicHeader = computed(() => t('sample.pivot.basic'))
+const emailTitle = computed(() => t('sample.pivot.email'))
+const allHeader = computed(() => t('sample.pivot.all'))
+const allContent = computed(() => t('sample.pivot.all-content'))
+const unreadHeader = computed(() => t('sample.pivot.unread'))
+const unreadContent = computed(() => t('sample.pivot.unread-content'))
+const flaggedHeader = computed(() => t('sample.pivot.flagged'))
+const flaggedContent = computed(() => t('sample.pivot.flagged-content'))
+const urgentHeader = computed(() => t('sample.pivot.urgent'))
+const urgentContent = computed(() => t('sample.pivot.urgent-content'))
 
-const BasicPivotVue = computed(() => `<Pivot Title="${EscapeAttribute(t('sample.pivot.email'))}" MinHeight="400">
-  <PivotItem Header="${EscapeAttribute(t('sample.pivot.all'))}">
-    <TextBlock Text="${EscapeAttribute(t('sample.pivot.all-content'))}" />
-  </PivotItem>
-  <PivotItem Header="${EscapeAttribute(t('sample.pivot.unread'))}">
-    <TextBlock Text="${EscapeAttribute(t('sample.pivot.unread-content'))}" />
-  </PivotItem>
-  <PivotItem Header="${EscapeAttribute(t('sample.pivot.flagged'))}">
-    <TextBlock Text="${EscapeAttribute(t('sample.pivot.flagged-content'))}" />
-  </PivotItem>
-  <PivotItem Header="${EscapeAttribute(t('sample.pivot.urgent'))}">
-    <TextBlock Text="${EscapeAttribute(t('sample.pivot.urgent-content'))}" />
-  </PivotItem>
-</Pivot>`);
+const escapeXaml = (value) => String(value)
+  .replaceAll('&', '&amp;')
+  .replaceAll('"', '&quot;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+
+const basicXaml = computed(() => `<Pivot Title="${escapeXaml(emailTitle.value)}">
+    <PivotItem Header="${escapeXaml(allHeader.value)}">
+        <TextBlock Text="${escapeXaml(allContent.value)}" />
+    </PivotItem>
+    <PivotItem Header="${escapeXaml(unreadHeader.value)}">
+        <TextBlock Text="${escapeXaml(unreadContent.value)}" />
+    </PivotItem>
+    <PivotItem Header="${escapeXaml(flaggedHeader.value)}">
+        <TextBlock Text="${escapeXaml(flaggedContent.value)}" />
+    </PivotItem>
+    <PivotItem Header="${escapeXaml(urgentHeader.value)}">
+        <TextBlock Text="${escapeXaml(urgentContent.value)}" />
+    </PivotItem>
+</Pivot>`)
 </script>
-
-<style scoped>
-.page-heading {
-  position: relative;
-}
-
-.page-header {
-  margin: 0 0 8px;
-  color: var(--text-primary);
-  font-size: 28px;
-  font-weight: 600;
-}
-
-.page-description {
-  margin: 0 72px 16px 0;
-  color: var(--text-secondary);
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-}
-
-.icon {
-  color: inherit;
-  font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons');
-  font-size: 16px;
-  line-height: 16px;
-}
-
-</style>

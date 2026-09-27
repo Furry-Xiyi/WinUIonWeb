@@ -1,0 +1,4 @@
+.win-theme-shadow-visual { pointer-events: none; }
+@media (forced-colors: active) {
+  .win-theme-shadow-visual { display: none !important; }
+}

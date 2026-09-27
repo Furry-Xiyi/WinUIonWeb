@@ -1,0 +1,716 @@
+[
+  {
+    "UniqueId": "FundamentalsItem",
+    "TitleKey": "sample.semanticzoom.data.group.FundamentalsItem",
+    "Items": [
+      {
+        "UniqueId": "XamlResources",
+        "TitleKey": "sample.semanticzoom.data.item.XamlResources.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.XamlResources.subtitle"
+      },
+      {
+        "UniqueId": "XamlStyles",
+        "TitleKey": "sample.semanticzoom.data.item.XamlStyles.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.XamlStyles.subtitle"
+      },
+      {
+        "UniqueId": "Binding",
+        "TitleKey": "sample.semanticzoom.data.item.Binding.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Binding.subtitle"
+      },
+      {
+        "UniqueId": "Templates",
+        "TitleKey": "sample.semanticzoom.data.item.Templates.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Templates.subtitle"
+      },
+      {
+        "UniqueId": "CustomUserControls",
+        "TitleKey": "sample.semanticzoom.data.item.CustomUserControls.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CustomUserControls.subtitle"
+      },
+      {
+        "UniqueId": "CustomXamlConditionals",
+        "TitleKey": "sample.semanticzoom.data.item.CustomXamlConditionals.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CustomXamlConditionals.subtitle"
+      },
+      {
+        "UniqueId": "ScratchPad",
+        "TitleKey": "sample.semanticzoom.data.item.ScratchPad.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ScratchPad.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "DesignItem",
+    "TitleKey": "sample.semanticzoom.data.group.DesignItem",
+    "Items": [
+      {
+        "UniqueId": "Color",
+        "TitleKey": "sample.semanticzoom.data.item.Color.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Color.subtitle"
+      },
+      {
+        "UniqueId": "Geometry",
+        "TitleKey": "sample.semanticzoom.data.item.Geometry.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Geometry.subtitle"
+      },
+      {
+        "UniqueId": "Iconography",
+        "TitleKey": "sample.semanticzoom.data.item.Iconography.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Iconography.subtitle"
+      },
+      {
+        "UniqueId": "Spacing",
+        "TitleKey": "sample.semanticzoom.data.item.Spacing.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Spacing.subtitle"
+      },
+      {
+        "UniqueId": "Typography",
+        "TitleKey": "sample.semanticzoom.data.item.Typography.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Typography.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "AccessibilityItem",
+    "TitleKey": "sample.semanticzoom.data.group.AccessibilityItem",
+    "Items": [
+      {
+        "UniqueId": "AccessibilityColorContrast",
+        "TitleKey": "sample.semanticzoom.data.item.AccessibilityColorContrast.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AccessibilityColorContrast.subtitle"
+      },
+      {
+        "UniqueId": "AccessibilityKeyboard",
+        "TitleKey": "sample.semanticzoom.data.item.AccessibilityKeyboard.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AccessibilityKeyboard.subtitle"
+      },
+      {
+        "UniqueId": "AccessibilityScreenReader",
+        "TitleKey": "sample.semanticzoom.data.item.AccessibilityScreenReader.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AccessibilityScreenReader.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "MenusAndToolbars",
+    "TitleKey": "sample.semanticzoom.data.group.MenusAndToolbars",
+    "Items": [
+      {
+        "UniqueId": "AppBarButton",
+        "TitleKey": "sample.semanticzoom.data.item.AppBarButton.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AppBarButton.subtitle"
+      },
+      {
+        "UniqueId": "AppBarSeparator",
+        "TitleKey": "sample.semanticzoom.data.item.AppBarSeparator.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AppBarSeparator.subtitle"
+      },
+      {
+        "UniqueId": "AppBarToggleButton",
+        "TitleKey": "sample.semanticzoom.data.item.AppBarToggleButton.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AppBarToggleButton.subtitle"
+      },
+      {
+        "UniqueId": "CommandBar",
+        "TitleKey": "sample.semanticzoom.data.item.CommandBar.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CommandBar.subtitle"
+      },
+      {
+        "UniqueId": "CommandBarFlyout",
+        "TitleKey": "sample.semanticzoom.data.item.CommandBarFlyout.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CommandBarFlyout.subtitle"
+      },
+      {
+        "UniqueId": "MenuBar",
+        "TitleKey": "sample.semanticzoom.data.item.MenuBar.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.MenuBar.subtitle"
+      },
+      {
+        "UniqueId": "MenuFlyout",
+        "TitleKey": "sample.semanticzoom.data.item.MenuFlyout.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.MenuFlyout.subtitle"
+      },
+      {
+        "UniqueId": "SwipeControl",
+        "TitleKey": "sample.semanticzoom.data.item.SwipeControl.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.SwipeControl.subtitle"
+      },
+      {
+        "UniqueId": "StandardUICommand",
+        "TitleKey": "sample.semanticzoom.data.item.StandardUICommand.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.StandardUICommand.subtitle"
+      },
+      {
+        "UniqueId": "XamlUICommand",
+        "TitleKey": "sample.semanticzoom.data.item.XamlUICommand.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.XamlUICommand.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "Collections",
+    "TitleKey": "sample.semanticzoom.data.group.Collections",
+    "Items": [
+      {
+        "UniqueId": "FlipView",
+        "TitleKey": "sample.semanticzoom.data.item.FlipView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.FlipView.subtitle"
+      },
+      {
+        "UniqueId": "GridView",
+        "TitleKey": "sample.semanticzoom.data.item.GridView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.GridView.subtitle"
+      },
+      {
+        "UniqueId": "ItemsRepeater",
+        "TitleKey": "sample.semanticzoom.data.item.ItemsRepeater.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ItemsRepeater.subtitle"
+      },
+      {
+        "UniqueId": "ItemsView",
+        "TitleKey": "sample.semanticzoom.data.item.ItemsView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ItemsView.subtitle"
+      },
+      {
+        "UniqueId": "ListView",
+        "TitleKey": "sample.semanticzoom.data.item.ListView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ListView.subtitle"
+      },
+      {
+        "UniqueId": "PullToRefresh",
+        "TitleKey": "sample.semanticzoom.data.item.PullToRefresh.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.PullToRefresh.subtitle"
+      },
+      {
+        "UniqueId": "TreeView",
+        "TitleKey": "sample.semanticzoom.data.item.TreeView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.TreeView.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "DateAndTime",
+    "TitleKey": "sample.semanticzoom.data.group.DateAndTime",
+    "Items": [
+      {
+        "UniqueId": "CalendarDatePicker",
+        "TitleKey": "sample.semanticzoom.data.item.CalendarDatePicker.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CalendarDatePicker.subtitle"
+      },
+      {
+        "UniqueId": "CalendarView",
+        "TitleKey": "sample.semanticzoom.data.item.CalendarView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CalendarView.subtitle"
+      },
+      {
+        "UniqueId": "DatePicker",
+        "TitleKey": "sample.semanticzoom.data.item.DatePicker.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.DatePicker.subtitle"
+      },
+      {
+        "UniqueId": "TimePicker",
+        "TitleKey": "sample.semanticzoom.data.item.TimePicker.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.TimePicker.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "BasicInput",
+    "TitleKey": "sample.semanticzoom.data.group.BasicInput",
+    "Items": [
+      {
+        "UniqueId": "Button",
+        "TitleKey": "sample.semanticzoom.data.item.Button.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Button.subtitle"
+      },
+      {
+        "UniqueId": "DropDownButton",
+        "TitleKey": "sample.semanticzoom.data.item.DropDownButton.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.DropDownButton.subtitle"
+      },
+      {
+        "UniqueId": "HyperlinkButton",
+        "TitleKey": "sample.semanticzoom.data.item.HyperlinkButton.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.HyperlinkButton.subtitle"
+      },
+      {
+        "UniqueId": "RepeatButton",
+        "TitleKey": "sample.semanticzoom.data.item.RepeatButton.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.RepeatButton.subtitle"
+      },
+      {
+        "UniqueId": "ToggleButton",
+        "TitleKey": "sample.semanticzoom.data.item.ToggleButton.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ToggleButton.subtitle"
+      },
+      {
+        "UniqueId": "SplitButton",
+        "TitleKey": "sample.semanticzoom.data.item.SplitButton.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.SplitButton.subtitle"
+      },
+      {
+        "UniqueId": "ToggleSplitButton",
+        "TitleKey": "sample.semanticzoom.data.item.ToggleSplitButton.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ToggleSplitButton.subtitle"
+      },
+      {
+        "UniqueId": "CheckBox",
+        "TitleKey": "sample.semanticzoom.data.item.CheckBox.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CheckBox.subtitle"
+      },
+      {
+        "UniqueId": "ColorPicker",
+        "TitleKey": "sample.semanticzoom.data.item.ColorPicker.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ColorPicker.subtitle"
+      },
+      {
+        "UniqueId": "ComboBox",
+        "TitleKey": "sample.semanticzoom.data.item.ComboBox.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ComboBox.subtitle"
+      },
+      {
+        "UniqueId": "RadioButton",
+        "TitleKey": "sample.semanticzoom.data.item.RadioButton.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.RadioButton.subtitle"
+      },
+      {
+        "UniqueId": "RatingControl",
+        "TitleKey": "sample.semanticzoom.data.item.RatingControl.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.RatingControl.subtitle"
+      },
+      {
+        "UniqueId": "Slider",
+        "TitleKey": "sample.semanticzoom.data.item.Slider.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Slider.subtitle"
+      },
+      {
+        "UniqueId": "ToggleSwitch",
+        "TitleKey": "sample.semanticzoom.data.item.ToggleSwitch.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ToggleSwitch.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "StatusAndInfo",
+    "TitleKey": "sample.semanticzoom.data.group.StatusAndInfo",
+    "Items": [
+      {
+        "UniqueId": "InfoBadge",
+        "TitleKey": "sample.semanticzoom.data.item.InfoBadge.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.InfoBadge.subtitle"
+      },
+      {
+        "UniqueId": "InfoBar",
+        "TitleKey": "sample.semanticzoom.data.item.InfoBar.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.InfoBar.subtitle"
+      },
+      {
+        "UniqueId": "ProgressBar",
+        "TitleKey": "sample.semanticzoom.data.item.ProgressBar.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ProgressBar.subtitle"
+      },
+      {
+        "UniqueId": "ProgressRing",
+        "TitleKey": "sample.semanticzoom.data.item.ProgressRing.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ProgressRing.subtitle"
+      },
+      {
+        "UniqueId": "ToolTip",
+        "TitleKey": "sample.semanticzoom.data.item.ToolTip.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ToolTip.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "DialogsAndFlyouts",
+    "TitleKey": "sample.semanticzoom.data.group.DialogsAndFlyouts",
+    "Items": [
+      {
+        "UniqueId": "ContentDialog",
+        "TitleKey": "sample.semanticzoom.data.item.ContentDialog.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ContentDialog.subtitle"
+      },
+      {
+        "UniqueId": "Flyout",
+        "TitleKey": "sample.semanticzoom.data.item.Flyout.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Flyout.subtitle"
+      },
+      {
+        "UniqueId": "Popup",
+        "TitleKey": "sample.semanticzoom.data.item.Popup.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Popup.subtitle"
+      },
+      {
+        "UniqueId": "TeachingTip",
+        "TitleKey": "sample.semanticzoom.data.item.TeachingTip.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.TeachingTip.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "Scrolling",
+    "TitleKey": "sample.semanticzoom.data.group.Scrolling",
+    "Items": [
+      {
+        "UniqueId": "AnnotatedScrollBar",
+        "TitleKey": "sample.semanticzoom.data.item.AnnotatedScrollBar.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AnnotatedScrollBar.subtitle"
+      },
+      {
+        "UniqueId": "PipsPager",
+        "TitleKey": "sample.semanticzoom.data.item.PipsPager.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.PipsPager.subtitle"
+      },
+      {
+        "UniqueId": "ScrollView",
+        "TitleKey": "sample.semanticzoom.data.item.ScrollView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ScrollView.subtitle"
+      },
+      {
+        "UniqueId": "ScrollViewer",
+        "TitleKey": "sample.semanticzoom.data.item.ScrollViewer.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ScrollViewer.subtitle"
+      },
+      {
+        "UniqueId": "SemanticZoom",
+        "TitleKey": "sample.semanticzoom.data.item.SemanticZoom.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.SemanticZoom.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "Layout",
+    "TitleKey": "sample.semanticzoom.data.group.Layout",
+    "Items": [
+      {
+        "UniqueId": "Border",
+        "TitleKey": "sample.semanticzoom.data.item.Border.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Border.subtitle"
+      },
+      {
+        "UniqueId": "Canvas",
+        "TitleKey": "sample.semanticzoom.data.item.Canvas.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Canvas.subtitle"
+      },
+      {
+        "UniqueId": "Expander",
+        "TitleKey": "sample.semanticzoom.data.item.Expander.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Expander.subtitle"
+      },
+      {
+        "UniqueId": "Grid",
+        "TitleKey": "sample.semanticzoom.data.item.Grid.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Grid.subtitle"
+      },
+      {
+        "UniqueId": "RelativePanel",
+        "TitleKey": "sample.semanticzoom.data.item.RelativePanel.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.RelativePanel.subtitle"
+      },
+      {
+        "UniqueId": "SplitView",
+        "TitleKey": "sample.semanticzoom.data.item.SplitView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.SplitView.subtitle"
+      },
+      {
+        "UniqueId": "StackPanel",
+        "TitleKey": "sample.semanticzoom.data.item.StackPanel.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.StackPanel.subtitle"
+      },
+      {
+        "UniqueId": "VariableSizedWrapGrid",
+        "TitleKey": "sample.semanticzoom.data.item.VariableSizedWrapGrid.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.VariableSizedWrapGrid.subtitle"
+      },
+      {
+        "UniqueId": "Viewbox",
+        "TitleKey": "sample.semanticzoom.data.item.Viewbox.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Viewbox.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "Navigation",
+    "TitleKey": "sample.semanticzoom.data.group.Navigation",
+    "Items": [
+      {
+        "UniqueId": "BreadcrumbBar",
+        "TitleKey": "sample.semanticzoom.data.item.BreadcrumbBar.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.BreadcrumbBar.subtitle"
+      },
+      {
+        "UniqueId": "NavigationView",
+        "TitleKey": "sample.semanticzoom.data.item.NavigationView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.NavigationView.subtitle"
+      },
+      {
+        "UniqueId": "Pivot",
+        "TitleKey": "sample.semanticzoom.data.item.Pivot.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Pivot.subtitle"
+      },
+      {
+        "UniqueId": "SelectorBar",
+        "TitleKey": "sample.semanticzoom.data.item.SelectorBar.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.SelectorBar.subtitle"
+      },
+      {
+        "UniqueId": "TabView",
+        "TitleKey": "sample.semanticzoom.data.item.TabView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.TabView.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "Media",
+    "TitleKey": "sample.semanticzoom.data.group.Media",
+    "Items": [
+      {
+        "UniqueId": "AnimatedVisualPlayer",
+        "TitleKey": "sample.semanticzoom.data.item.AnimatedVisualPlayer.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AnimatedVisualPlayer.subtitle"
+      },
+      {
+        "UniqueId": "CaptureElementPreview",
+        "TitleKey": "sample.semanticzoom.data.item.CaptureElementPreview.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CaptureElementPreview.subtitle"
+      },
+      {
+        "UniqueId": "Image",
+        "TitleKey": "sample.semanticzoom.data.item.Image.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Image.subtitle"
+      },
+      {
+        "UniqueId": "MapControl",
+        "TitleKey": "sample.semanticzoom.data.item.MapControl.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.MapControl.subtitle"
+      },
+      {
+        "UniqueId": "MediaPlayerElement",
+        "TitleKey": "sample.semanticzoom.data.item.MediaPlayerElement.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.MediaPlayerElement.subtitle"
+      },
+      {
+        "UniqueId": "PersonPicture",
+        "TitleKey": "sample.semanticzoom.data.item.PersonPicture.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.PersonPicture.subtitle"
+      },
+      {
+        "UniqueId": "Sound",
+        "TitleKey": "sample.semanticzoom.data.item.Sound.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Sound.subtitle"
+      },
+      {
+        "UniqueId": "WebView2",
+        "TitleKey": "sample.semanticzoom.data.item.WebView2.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.WebView2.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "Styles",
+    "TitleKey": "sample.semanticzoom.data.group.Styles",
+    "Items": [
+      {
+        "UniqueId": "Acrylic",
+        "TitleKey": "sample.semanticzoom.data.item.Acrylic.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Acrylic.subtitle"
+      },
+      {
+        "UniqueId": "AnimatedIcon",
+        "TitleKey": "sample.semanticzoom.data.item.AnimatedIcon.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AnimatedIcon.subtitle"
+      },
+      {
+        "UniqueId": "CompactSizing",
+        "TitleKey": "sample.semanticzoom.data.item.CompactSizing.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CompactSizing.subtitle"
+      },
+      {
+        "UniqueId": "IconElement",
+        "TitleKey": "sample.semanticzoom.data.item.IconElement.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.IconElement.subtitle"
+      },
+      {
+        "UniqueId": "Line",
+        "TitleKey": "sample.semanticzoom.data.item.Line.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Line.subtitle"
+      },
+      {
+        "UniqueId": "Shape",
+        "TitleKey": "sample.semanticzoom.data.item.Shape.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Shape.subtitle"
+      },
+      {
+        "UniqueId": "RadialGradientBrush",
+        "TitleKey": "sample.semanticzoom.data.item.RadialGradientBrush.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.RadialGradientBrush.subtitle"
+      },
+      {
+        "UniqueId": "SystemBackdrops",
+        "TitleKey": "sample.semanticzoom.data.item.SystemBackdrops.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.SystemBackdrops.subtitle"
+      },
+      {
+        "UniqueId": "SystemBackdropElement",
+        "TitleKey": "sample.semanticzoom.data.item.SystemBackdropElement.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.SystemBackdropElement.subtitle"
+      },
+      {
+        "UniqueId": "ThemeShadow",
+        "TitleKey": "sample.semanticzoom.data.item.ThemeShadow.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ThemeShadow.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "Text",
+    "TitleKey": "sample.semanticzoom.data.group.Text",
+    "Items": [
+      {
+        "UniqueId": "AutoSuggestBox",
+        "TitleKey": "sample.semanticzoom.data.item.AutoSuggestBox.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AutoSuggestBox.subtitle"
+      },
+      {
+        "UniqueId": "NumberBox",
+        "TitleKey": "sample.semanticzoom.data.item.NumberBox.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.NumberBox.subtitle"
+      },
+      {
+        "UniqueId": "PasswordBox",
+        "TitleKey": "sample.semanticzoom.data.item.PasswordBox.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.PasswordBox.subtitle"
+      },
+      {
+        "UniqueId": "RichEditBox",
+        "TitleKey": "sample.semanticzoom.data.item.RichEditBox.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.RichEditBox.subtitle"
+      },
+      {
+        "UniqueId": "RichTextBlock",
+        "TitleKey": "sample.semanticzoom.data.item.RichTextBlock.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.RichTextBlock.subtitle"
+      },
+      {
+        "UniqueId": "TextBlock",
+        "TitleKey": "sample.semanticzoom.data.item.TextBlock.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.TextBlock.subtitle"
+      },
+      {
+        "UniqueId": "TextBox",
+        "TitleKey": "sample.semanticzoom.data.item.TextBox.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.TextBox.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "Motion",
+    "TitleKey": "sample.semanticzoom.data.group.Motion",
+    "Items": [
+      {
+        "UniqueId": "XamlCompInterop",
+        "TitleKey": "sample.semanticzoom.data.item.XamlCompInterop.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.XamlCompInterop.subtitle"
+      },
+      {
+        "UniqueId": "ConnectedAnimation",
+        "TitleKey": "sample.semanticzoom.data.item.ConnectedAnimation.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ConnectedAnimation.subtitle"
+      },
+      {
+        "UniqueId": "EasingFunction",
+        "TitleKey": "sample.semanticzoom.data.item.EasingFunction.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.EasingFunction.subtitle"
+      },
+      {
+        "UniqueId": "ImplicitTransition",
+        "TitleKey": "sample.semanticzoom.data.item.ImplicitTransition.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ImplicitTransition.subtitle"
+      },
+      {
+        "UniqueId": "PageTransition",
+        "TitleKey": "sample.semanticzoom.data.item.PageTransition.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.PageTransition.subtitle"
+      },
+      {
+        "UniqueId": "ThemeTransition",
+        "TitleKey": "sample.semanticzoom.data.item.ThemeTransition.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ThemeTransition.subtitle"
+      },
+      {
+        "UniqueId": "ParallaxView",
+        "TitleKey": "sample.semanticzoom.data.item.ParallaxView.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ParallaxView.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "MultipleWindows",
+    "TitleKey": "sample.semanticzoom.data.group.MultipleWindows",
+    "Items": [
+      {
+        "UniqueId": "AppWindow",
+        "TitleKey": "sample.semanticzoom.data.item.AppWindow.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AppWindow.subtitle"
+      },
+      {
+        "UniqueId": "AppWindowTitleBar",
+        "TitleKey": "sample.semanticzoom.data.item.AppWindowTitleBar.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AppWindowTitleBar.subtitle"
+      },
+      {
+        "UniqueId": "CreateMultipleWindows",
+        "TitleKey": "sample.semanticzoom.data.item.CreateMultipleWindows.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.CreateMultipleWindows.subtitle"
+      },
+      {
+        "UniqueId": "TitleBar",
+        "TitleKey": "sample.semanticzoom.data.item.TitleBar.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.TitleBar.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "System",
+    "TitleKey": "sample.semanticzoom.data.group.System",
+    "Items": [
+      {
+        "UniqueId": "Clipboard",
+        "TitleKey": "sample.semanticzoom.data.item.Clipboard.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.Clipboard.subtitle"
+      },
+      {
+        "UniqueId": "ContentIsland",
+        "TitleKey": "sample.semanticzoom.data.item.ContentIsland.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.ContentIsland.subtitle"
+      },
+      {
+        "UniqueId": "StoragePickers",
+        "TitleKey": "sample.semanticzoom.data.item.StoragePickers.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.StoragePickers.subtitle"
+      }
+    ]
+  },
+  {
+    "UniqueId": "Shell",
+    "TitleKey": "sample.semanticzoom.data.group.Shell",
+    "Items": [
+      {
+        "UniqueId": "AppNotification",
+        "TitleKey": "sample.semanticzoom.data.item.AppNotification.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.AppNotification.subtitle"
+      },
+      {
+        "UniqueId": "BadgeNotificationManager",
+        "TitleKey": "sample.semanticzoom.data.item.BadgeNotificationManager.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.BadgeNotificationManager.subtitle"
+      },
+      {
+        "UniqueId": "JumpList",
+        "TitleKey": "sample.semanticzoom.data.item.JumpList.title",
+        "SubtitleKey": "sample.semanticzoom.data.item.JumpList.subtitle"
+      }
+    ]
+  }
+]

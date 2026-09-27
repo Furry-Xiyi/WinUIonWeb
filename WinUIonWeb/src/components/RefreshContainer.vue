@@ -1,306 +1,342 @@
 <template>
   <div
-    ref="containerRef"
+    ref="rootRef"
     class="win-refresh-container"
-    :class="{ 'refreshing': isRefreshing }"
-    @touchstart="handleTouchStart"
-    @touchmove="handleTouchMove"
-    @touchend="handleTouchEnd"
-    @mousedown="handleMouseDown"
-  >
-    <!-- RefreshVisualizer slot -->
-    <div
-      class="refresh-visualizer-host"
-      :style="visualizerStyle"
-    >
-      <slot name="visualizer">
-        <RefreshVisualizer
-          :refreshState="currentRefreshState"
-          @refreshStateChanged="handleRefreshStateChanged"
-        />
-      </slot>
+    v-bind="rootAttrs"
+    :style="rootStyle"
+    :aria-disabled="enabled ? undefined : true"
+    :inert="enabled ? undefined : true"
+    @pointerdown="onPointerDown"
+    @pointermove="onPointerMove"
+    @pointerup="onPointerUp"
+    @pointercancel="cancelGesture"
+    @lostpointercapture="onLostPointerCapture"
+    @scroll.capture="updateScrollBoundary">
+    <div class="refresh-container-content-presenter" :style="contentPresenterStyle">
+      <ContentOutlet />
     </div>
-
-    <!-- Scrollable content -->
-    <ScrollViewer
-      ref="contentRef"
-      class="refresh-container-content"
-      :style="contentStyle"
-      VerticalScrollMode="Auto"
-      VerticalScrollBarVisibility="Auto"
-      HorizontalScrollMode="Disabled"
-      HorizontalScrollBarVisibility="Disabled"
-      @ViewChanged="onContentViewChanged"
-    >
-      <slot></slot>
-    </ScrollViewer>
+    <div class="refresh-visualizer-presenter" :style="visualizerPresenterStyle" aria-hidden="true">
+      <VisualizerOutlet />
+    </div>
   </div>
 </template>
 
+<script lang="ts">
+import { RefreshContainerContent, RefreshContainerVisualizer } from './RefreshProperties'
+export { RefreshContainerContent, RefreshContainerVisualizer }
+export default {
+  Visualizer: RefreshContainerVisualizer,
+  Content: RefreshContainerContent
+}
+</script>
+
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import ScrollViewer from './ScrollViewer.vue'
+import { cloneVNode, computed, defineComponent, Fragment, getCurrentInstance, h, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, useAttrs, useSlots, watch } from 'vue'
+import { alignment, cssLength, xamlThickness } from './layout'
+import { getRefreshContainerProperty, refreshChildren, refreshNodes } from './RefreshProperties'
 import RefreshVisualizer from './RefreshVisualizer.vue'
+import {
+  createRefreshContext, DEFAULT_EXECUTION_RATIO, DEFAULT_PULL_DIMENSION_SIZE,
+  INITIAL_OFFSET_THRESHOLD, isFarPull, isVerticalPull, raiseRefreshRequested,
+  refreshContextKey, REFRESH_ANIMATION_DURATION, type RefreshRequestedEventArgs
+} from './refreshRuntime'
+import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime'
 
-// Props - 对齐官方 RefreshContainer API
-interface Props {
-  // 官方属性：拉取阈值
-  pullThreshold?: number
-  // 官方属性：RefreshVisualizer 实例（通过 slot 实现）
-  visualizer?: unknown
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  pullThreshold: 100
+defineOptions({ inheritAttrs: false })
+const props = defineProps({
+  Visualizer: { type: [String, Object], default: '' },
+  Content: { type: [String, Number, Object], default: '' },
+  PullDirection: { type: String, default: 'TopToBottom' },
+  Width: { type: [String, Number], default: '' }, Height: { type: [String, Number], default: '' },
+  MinWidth: { type: [String, Number], default: '' }, MinHeight: { type: [String, Number], default: '' },
+  MaxWidth: { type: [String, Number], default: '' }, MaxHeight: { type: [String, Number], default: '' },
+  Margin: { type: [String, Number], default: '' }, Padding: { type: [String, Number], default: '' },
+  HorizontalAlignment: { type: String, default: 'Stretch' }, VerticalAlignment: { type: String, default: 'Stretch' },
+  HorizontalContentAlignment: { type: String, default: 'Left' }, VerticalContentAlignment: { type: String, default: 'Top' },
+  Background: { type: String, default: '{ThemeResource RefreshContainerBackgroundBrush}' },
+  Foreground: { type: String, default: '{ThemeResource RefreshContainerForegroundBrush}' },
+  IsEnabled: { type: [Boolean, String], default: true }, Visibility: { type: String, default: 'Visible' }
 })
-
-// Events - 对齐官方事件
-const emit = defineEmits<{
-  // 官方事件：RefreshRequested - 当用户触发刷新时
-  refreshRequested: [args: RefreshRequestedEventArgs]
-}>()
-
-// 官方 RefreshRequestedEventArgs 接口
-interface RefreshRequestedEventArgs {
-  // 获取延迟完成对象
-  getDeferral(): Deferral
-}
-
-// 官方 Deferral 接口
-interface Deferral {
-  // 标记异步操作完成
-  complete(): void
-}
-
-// Refresh states - 对齐官方 RefreshVisualizerState 枚举
-enum RefreshVisualizerState {
-  Idle = 0,           // 空闲状态
-  Peeking = 1,        // 开始拉取
-  Interacting = 2,    // 用户正在拉取
-  Pending = 3,        // 达到阈值，等待释放
-  Refreshing = 4      // 正在刷新
-}
-
-// State
-const containerRef = ref<HTMLElement | null>(null)
-const contentRef = ref<InstanceType<typeof ScrollViewer>>()
-const contentScrollTop = ref(0)
-const currentRefreshState = ref<RefreshVisualizerState>(RefreshVisualizerState.Idle)
-const isRefreshing = ref(false)
+const emit = defineEmits<{ RefreshRequested: [sender: unknown, args: RefreshRequestedEventArgs] }>()
+const instance = getCurrentInstance()
+const attrs = useAttrs()
+const rootAttrs = computed(() => {
+  const { RefreshRequested: _handler, ...rest } = attrs
+  return rest
+})
+const slots = useSlots()
+const rootRef = ref<HTMLElement | null>(null)
+const visualizerRef = ref<{ RequestRefresh: () => void } | null>(null)
+const value = (input: unknown) => resolveXamlValue(input, instance)
+const direction = computed(() => {
+  const name = value(props.PullDirection)
+  return name === 'BottomToTop' || name === 'LeftToRight' || name === 'RightToLeft' ? name : 'TopToBottom'
+})
+const context = createRefreshContext({ pullDirection: direction.value, executionRatio: DEFAULT_EXECUTION_RATIO })
+provide(refreshContextKey, context)
+const vertical = computed(() => isVerticalPull(context.pullDirection))
+const sign = computed(() => isFarPull(context.pullDirection) ? -1 : 1)
+const enabled = computed(() => ![false, 'False', 'false'].includes(value(props.IsEnabled) as boolean | string))
+const atBoundary = ref(false)
+const activePointerId = ref<number | null>(null)
 const pullDistance = ref(0)
-const startY = ref(0)
-const isDragging = ref(false)
-const deferralCallbacks = ref<(() => void)[]>([])
+let pointerStart = 0
+let initialScrollOffset = 0
+let interacting = false
+let disposed = false
+let adaptedViewport: HTMLElement | null = null
+let previousTouchAction = ''
+let previousOverscrollBehavior = ''
 
-// Computed styles
-const visualizerStyle = computed(() => ({
-  height: `${Math.min(pullDistance.value, props.pullThreshold * 1.5)}px`,
-  opacity: pullDistance.value > 0 ? 1 : 0,
-  transform: `translateY(${Math.max(0, pullDistance.value - props.pullThreshold)}px)`
-}))
-
-const contentStyle = computed(() => ({
-  transform: `translateY(${pullDistance.value}px)`,
-  transition: isDragging.value ? 'none' : 'transform 0.3s ease-out'
-}))
-
-// Touch/Mouse handlers
-const handleTouchStart = (e: TouchEvent) => {
-  if (isRefreshing.value) return
-
-  const scrollTop = contentScrollTop.value
-  if (scrollTop === 0) {
-    startY.value = e.touches[0].clientY
-    isDragging.value = true
-    currentRefreshState.value = RefreshVisualizerState.Peeking
-  }
+// RefreshContainer.xaml: Root -> ContentPresenter + RefreshVisualizerPresenter.
+// The content supplies its own ScrollViewer; the container never inserts one.
+const nodes = computed(() => refreshNodes(slots.default?.() ?? []))
+const propertyNodes = (name: 'content' | 'visualizer') => {
+  const property = nodes.value.find(node => getRefreshContainerProperty(node) === name)
+  return property ? refreshChildren(property) : []
 }
-
-const handleTouchMove = (e: TouchEvent) => {
-  if (!isDragging.value || isRefreshing.value) return
-
-  const currentY = e.touches[0].clientY
-  const diff = currentY - startY.value
-
-  if (diff > 0) {
-    e.preventDefault()
-    pullDistance.value = Math.min(diff * 0.5, props.pullThreshold * 1.5)
-
-    if (pullDistance.value >= props.pullThreshold) {
-      currentRefreshState.value = RefreshVisualizerState.Pending
-    } else if (pullDistance.value > 0) {
-      currentRefreshState.value = RefreshVisualizerState.Interacting
-    }
-  }
-}
-
-const handleTouchEnd = () => {
-  if (!isDragging.value || isRefreshing.value) return
-
-  isDragging.value = false
-
-  if (pullDistance.value >= props.pullThreshold) {
-    // 触发刷新
-    triggerRefresh()
-  } else {
-    // 未达到阈值，重置
-    resetPull()
-  }
-}
-
-const handleMouseDown = (e: MouseEvent) => {
-  if (isRefreshing.value) return
-
-  const scrollTop = contentScrollTop.value
-  if (scrollTop === 0) {
-    startY.value = e.clientY
-    isDragging.value = true
-    currentRefreshState.value = RefreshVisualizerState.Peeking
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (!isDragging.value) return
-
-      const diff = moveEvent.clientY - startY.value
-      if (diff > 0) {
-        pullDistance.value = Math.min(diff * 0.5, props.pullThreshold * 1.5)
-
-        if (pullDistance.value >= props.pullThreshold) {
-          currentRefreshState.value = RefreshVisualizerState.Pending
-        } else if (pullDistance.value > 0) {
-          currentRefreshState.value = RefreshVisualizerState.Interacting
+const ContentOutlet = defineComponent({
+  setup() {
+    return () => {
+      const property = propertyNodes('content')
+      const children = property.length ? property : nodes.value.filter(node => !getRefreshContainerProperty(node))
+      if (children.length) return h(Fragment, children.map(node => cloneVNode(node, {
+        style: {
+          justifySelf: node.props?.HorizontalAlignment ? alignment(value(node.props.HorizontalAlignment), 'horizontal') : undefined,
+          alignSelf: node.props?.VerticalAlignment ? alignment(value(node.props.VerticalAlignment), 'vertical') : undefined
         }
-      }
+      })))
+      const content = value(props.Content)
+      return isVNode(content) ? cloneVNode(content) : typeof content === 'string' || typeof content === 'number' ? content : null
     }
-
-    const handleMouseUp = () => {
-      if (!isDragging.value) return
-
-      isDragging.value = false
-
-      if (pullDistance.value >= props.pullThreshold) {
-        triggerRefresh()
-      } else {
-        resetPull()
-      }
-
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
   }
+})
+const VisualizerOutlet = defineComponent({
+  setup() {
+    return () => {
+      const property = propertyNodes('visualizer')
+      if (property.length) return h(Fragment, property)
+      const visualizer = value(props.Visualizer)
+      return isVNode(visualizer) ? cloneVNode(visualizer) : h(RefreshVisualizer, { ref: visualizerRef })
+    }
+  }
+})
+
+context.containerRefreshRequested = (visualizerArgs) => {
+  const deferral = visualizerArgs.GetDeferral()
+  raiseRefreshRequested(args => {
+    emit('RefreshRequested', publicApi, args)
+    resolveXamlHandler(attrs.RefreshRequested, instance)?.(publicApi, args)
+  }, () => deferral.Complete())
+}
+context.containerStateChanged = (_oldState, next) => {
+  if (next === 'Idle' && activePointerId.value === null) pullDistance.value = 0
 }
 
-// 官方 Deferral 模式实现
-const triggerRefresh = () => {
-  isRefreshing.value = true
-  currentRefreshState.value = RefreshVisualizerState.Refreshing
-  pullDistance.value = props.pullThreshold
-
-  let deferralCompleted = false
-
-  const deferral: Deferral = {
-    complete: () => {
-      if (deferralCompleted) return
-      deferralCompleted = true
-
-      // 执行所有回调
-      deferralCallbacks.value.forEach(cb => cb())
-      deferralCallbacks.value = []
-
-      // 重置状态
-      setTimeout(() => {
-        isRefreshing.value = false
-        resetPull()
-      }, 300)
-    }
+// ScrollViewerIRefreshInfoProviderDefaultAnimationHandler.cpp. Only transforms
+// change during interaction, so content and surrounding examples keep their size.
+const size = computed(() => context.visualizerSize || DEFAULT_PULL_DIMENSION_SIZE)
+const contentOffset = computed(() => sign.value * (context.state === 'Refreshing'
+  ? size.value * context.executionRatio : Math.min(size.value, pullDistance.value)))
+const visualizerOffset = computed(() => sign.value * (context.state === 'Refreshing'
+  ? -size.value * (1 - context.executionRatio) : -size.value + Math.min(size.value, pullDistance.value)))
+const transform = (offset: number) => vertical.value ? `translateY(${offset}px)` : `translateX(${offset}px)`
+const transition = computed(() => activePointerId.value === null
+  ? `transform ${REFRESH_ANIMATION_DURATION}ms cubic-bezier(0.5, 0, 0, 1)` : 'none')
+const contentPresenterStyle = computed(() => ({
+  transform: transform(contentOffset.value), transition: transition.value,
+  justifyItems: alignment(value(props.HorizontalContentAlignment), 'horizontal'),
+  alignItems: alignment(value(props.VerticalContentAlignment), 'vertical')
+}))
+const visualizerPresenterStyle = computed(() => ({
+  transform: transform(visualizerOffset.value), transition: transition.value,
+  ...(vertical.value
+    ? { left: '0', right: '0', [isFarPull(context.pullDirection) ? 'bottom' : 'top']: '0' }
+    : { top: '0', bottom: '0', [isFarPull(context.pullDirection) ? 'right' : 'left']: '0' })
+}))
+const rootStyle = computed(() => {
+  const style: Record<string, unknown> = {
+    background: value(props.Background), color: value(props.Foreground),
+    justifySelf: alignment(value(props.HorizontalAlignment), 'horizontal'),
+    alignSelf: alignment(value(props.VerticalAlignment), 'vertical'),
+    margin: xamlThickness(value(props.Margin)), padding: xamlThickness(value(props.Padding)),
+    // Resolve touch-action before pointerdown. Permit scrolling toward the
+    // content and reserve only the outward pull for the adapter.
+    touchAction: enabled.value && atBoundary.value
+      ? ({ TopToBottom: 'pan-x pan-down', BottomToTop: 'pan-x pan-up', LeftToRight: 'pan-y pan-right', RightToLeft: 'pan-y pan-left' }[context.pullDirection])
+      : 'pan-x pan-y'
   }
-
-  const args: RefreshRequestedEventArgs = {
-    getDeferral: () => deferral
+  for (const key of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) {
+    const length = cssLength(value(props[key]))
+    if (length) style[key[0].toLowerCase() + key.slice(1)] = length
   }
+  if (value(props.Visibility) === 'Collapsed') style.display = 'none'
+  if (value(props.Visibility) === 'Hidden') style.visibility = 'hidden'
+  return style
+})
 
-  // 触发官方 RefreshRequested 事件
-  emit('refreshRequested', args)
-
-  // 如果 3 秒内未调用 Complete，自动完成
-  setTimeout(() => {
-    if (!deferralCompleted) {
-      deferral.complete()
-    }
-  }, 3000)
+const viewport = () => rootRef.value?.querySelector<HTMLElement>('.win-scroll-viewer-viewport, .win-scroll-presenter') ?? null
+const offset = (element: HTMLElement) => vertical.value ? element.scrollTop : element.scrollLeft
+const withinBoundary = (element: HTMLElement) => {
+  const position = offset(element)
+  const extent = vertical.value ? element.scrollHeight - element.clientHeight : element.scrollWidth - element.clientWidth
+  return isFarPull(context.pullDirection) ? position >= Math.max(0, extent) - INITIAL_OFFSET_THRESHOLD : position < INITIAL_OFFSET_THRESHOLD
 }
-
-const resetPull = () => {
+const updateScrollBoundary = () => {
+  const scroller = viewport()
+  atBoundary.value = Boolean(scroller && withinBoundary(scroller))
+  // The viewport is the browser's nearest scroll container, so its own
+  // touch-action must reserve the outward gesture (an ancestor is ignored).
+  if (scroller) {
+    if (adaptedViewport !== scroller) {
+      if (adaptedViewport) {
+        adaptedViewport.style.touchAction = previousTouchAction
+        adaptedViewport.style.overscrollBehavior = previousOverscrollBehavior
+      }
+      adaptedViewport = scroller
+      previousTouchAction = scroller.style.touchAction
+      previousOverscrollBehavior = scroller.style.overscrollBehavior
+    }
+    scroller.style.touchAction = String(rootStyle.value.touchAction)
+    scroller.style.overscrollBehavior = 'contain'
+  }
+  if (activePointerId.value !== null && scroller && Math.abs(offset(scroller) - initialScrollOffset) >= INITIAL_OFFSET_THRESHOLD) cancelGesture()
+}
+const publishRatio = () => context.publishInteractionRatio(Math.min(1, pullDistance.value / size.value))
+const setInteracting = (next: boolean) => {
+  if (interacting === next) return
+  interacting = next
+  context.publishIsInteractingForRefresh(next)
+}
+const releaseCapture = (pointerId: number | null) => {
+  if (pointerId !== null && rootRef.value?.hasPointerCapture?.(pointerId)) rootRef.value.releasePointerCapture(pointerId)
+}
+const cancelGesture = (event?: PointerEvent) => {
+  if (event && activePointerId.value !== event.pointerId) return
+  const pointerId = activePointerId.value
+  activePointerId.value = null
   pullDistance.value = 0
-  currentRefreshState.value = RefreshVisualizerState.Idle
+  // Clear Pending before publishing the release: cancellation must never
+  // enter RequestRefresh through InteractingForRefreshChanged.
+  publishRatio()
+  setInteracting(false)
+  releaseCapture(pointerId)
 }
-
-const onContentViewChanged = () => {
-  contentScrollTop.value = Number(contentRef.value?.VerticalOffset ?? 0)
-}
-
-// RefreshStateChanged 事件处理
-interface RefreshStateChangedEventArgs {
-  oldState: RefreshVisualizerState
-  newState: RefreshVisualizerState
-}
-
-const handleRefreshStateChanged = (args: RefreshStateChangedEventArgs) => {
-  currentRefreshState.value = args.newState
-  // 可以在这里添加额外的状态变更逻辑
-}
-
-// Lifecycle
-onMounted(() => {
-  // 初始化
-})
-
-onUnmounted(() => {
-  // 清理
-})
-
-// 暴露方法（官方 RefreshContainer 的公共方法）
-defineExpose({
-  // 官方方法：请求刷新
-  requestRefresh: () => {
-    if (!isRefreshing.value) {
-      triggerRefresh()
-    }
+const onPointerDown = (event: PointerEvent) => {
+  if (activePointerId.value !== null) {
+    if (activePointerId.value !== event.pointerId) cancelGesture()
+    return
   }
+  // The official ScrollViewer adapter redirects touch pointers only.
+  if (!enabled.value || event.pointerType !== 'touch' || !event.isPrimary || event.button > 0 || context.state === 'Refreshing') return
+  const scroller = viewport()
+  if (!scroller || !withinBoundary(scroller) || !(event.target instanceof Node) || !scroller.contains(event.target)) return
+  activePointerId.value = event.pointerId
+  pointerStart = vertical.value ? event.clientY : event.clientX
+  initialScrollOffset = offset(scroller)
+  pullDistance.value = 0
+  publishRatio()
+  setInteracting(true)
+}
+const onPointerMove = (event: PointerEvent) => {
+  if (activePointerId.value !== event.pointerId) return
+  const scroller = viewport()
+  if (!scroller || !withinBoundary(scroller) || Math.abs(offset(scroller) - initialScrollOffset) >= INITIAL_OFFSET_THRESHOLD) {
+    cancelGesture()
+    return
+  }
+  const delta = sign.value * ((vertical.value ? event.clientY : event.clientX) - pointerStart)
+  pullDistance.value = Math.max(0, delta)
+  if (delta > 0) {
+    event.preventDefault()
+    rootRef.value?.setPointerCapture?.(event.pointerId)
+  }
+  publishRatio()
+}
+const onPointerUp = (event: PointerEvent) => {
+  if (activePointerId.value !== event.pointerId) return
+  activePointerId.value = null
+  setInteracting(false)
+  pullDistance.value = 0
+  if (context.state !== 'Refreshing') publishRatio()
+  releaseCapture(event.pointerId)
+}
+const onLostPointerCapture = (event: PointerEvent) => {
+  // Transferring the implicit touch capture from a ListViewItem to Root also
+  // bubbles lostpointercapture from that item; only losing Root's capture
+  // cancels the adapter's own gesture.
+  if (event.target === rootRef.value && activePointerId.value === event.pointerId) cancelGesture(event)
+}
+const onWindowBlur = () => cancelGesture()
+const onVisibilityChanged = () => { if (document.hidden) cancelGesture() }
+const RequestRefresh = () => {
+  if (disposed || context.state === 'Refreshing') return
+  cancelGesture()
+  context.visualizerHandle?.RequestRefresh()
+}
+
+watch(direction, next => {
+  cancelGesture()
+  context.pullDirection = next
+  context.visualizerHandle?.setInternalPullDirection(next)
+  nextTick(updateScrollBoundary)
 })
+watch(enabled, next => {
+  if (!next) cancelGesture()
+  nextTick(updateScrollBoundary)
+})
+let resizeObserver: ResizeObserver | undefined
+onMounted(() => {
+  updateScrollBoundary()
+  if (typeof ResizeObserver === 'function') {
+    resizeObserver = new ResizeObserver(updateScrollBoundary)
+    if (rootRef.value) resizeObserver.observe(rootRef.value)
+  }
+  window.addEventListener('blur', onWindowBlur)
+  document.addEventListener('visibilitychange', onVisibilityChanged)
+})
+onBeforeUnmount(() => {
+  disposed = true
+  cancelGesture()
+  resizeObserver?.disconnect()
+  if (adaptedViewport) {
+    adaptedViewport.style.touchAction = previousTouchAction
+    adaptedViewport.style.overscrollBehavior = previousOverscrollBehavior
+  }
+  context.containerRefreshRequested = null
+  context.containerStateChanged = null
+  window.removeEventListener('blur', onWindowBlur)
+  document.removeEventListener('visibilitychange', onVisibilityChanged)
+})
+const publicApi = { RequestRefresh, get Visualizer() { return context.visualizerHandle?.publicInstance ?? visualizerRef.value } }
+defineExpose(publicApi)
 </script>
 
 <style scoped>
 .win-refresh-container {
   position: relative;
-  width: 100%;
-  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   overflow: hidden;
-  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
-
-.refresh-visualizer-host {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  pointer-events: none;
-  transition: opacity 0.2s ease-out;
-  z-index: 10;
-}
-
-.refresh-container-content {
-  width: 100%;
-  height: 100%;
+.refresh-container-content-presenter {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  background: transparent;
   will-change: transform;
 }
-
-.win-refresh-container.refreshing .refresh-container-content {
-  transition: transform 0.3s ease-out;
+.refresh-visualizer-presenter {
+  position: absolute;
+  display: grid;
+  pointer-events: none;
+  will-change: transform;
 }
 </style>

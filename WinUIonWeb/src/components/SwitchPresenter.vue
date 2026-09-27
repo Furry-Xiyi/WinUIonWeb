@@ -1,11 +1,13 @@
 <template>
-  <div class="win-switch-presenter" v-bind="$attrs">
+  <div class="win-switch-presenter" v-bind="$attrs" :style="layoutStyle">
     <slot />
   </div>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, provide, ref } from 'vue';
+import { computed, getCurrentInstance, onBeforeUnmount, provide, ref, useAttrs } from 'vue';
+import { resolveXamlValue } from './xamlRuntime';
+import { frameworkLayoutStyle } from './frameworkLayout';
 
 defineOptions({ inheritAttrs: false });
 
@@ -16,6 +18,9 @@ const props = defineProps({
 });
 
 const registeredCases = ref([]);
+const instance = getCurrentInstance(), attrs = useAttrs();
+const value = computed(() => resolveXamlValue(props.Value, instance));
+const layoutStyle = computed(() => frameworkLayoutStyle(attrs, instance));
 let nextCaseId = 0;
 
 const valuesEqual = (left, right) => {
@@ -35,13 +40,13 @@ const caseEntries = computed(() => [
 
 const currentCase = computed(() => {
   const entries = caseEntries.value;
-  return entries.find((entry) => valuesEqual(entry.Value, props.Value))
+  return entries.find((entry) => valuesEqual(entry.Value, value.value))
     || entries.find((entry) => entry.IsDefault)
     || null;
 });
 
 const isCaseActive = (Value, IsDefault = false) => {
-  if (valuesEqual(Value, props.Value)) return true;
+  if (valuesEqual(Value, value.value)) return true;
   return IsDefault && !currentCase.value;
 };
 

@@ -1,10 +1,11 @@
 <template>
   <ControlExampleBase
+    :height="resolveProp(Height)"
     v-bind="$attrs"
     :headerText="resolveProp(HeaderText)"
     :exampleHeight="resolveProp(ExampleHeight)"
-    :webViewHeight="resolveProp(WebViewHeight)"
-    :webViewWidth="resolveProp(WebViewWidth)"
+    :webViewHeight="Number(resolveProp(WebViewHeight))"
+    :webViewWidth="Number(resolveProp(WebViewWidth))"
     :HorizontalContentAlignment="resolveProp(HorizontalContentAlignment)"
     :sourceCodeVisibility="resolveProp(SourceCodeVisibility)"
     :theme="resolveProp(Theme)"
@@ -15,18 +16,20 @@
     :xamlSource="resolveProp(XamlSource)"
     :cSharpSource="resolveProp(CSharpSource)"
     :sampleDefinition="resolveProp(SampleDefinition)"
-    :substitutions="resolveProp(Substitutions)">
+    :substitutions="resolvedSubstitutions">
     <template #example><ExampleOutlet /></template>
     <template v-if="hasOutput" #output><OutputOutlet /></template>
     <template v-if="hasOptions" #options><OptionsOutlet /></template>
   </ControlExampleBase>
+  <SubstitutionsOutlet />
 </template>
 
 <script lang="ts">
 import {
   ControlExampleExample,
   ControlExampleOptions,
-  ControlExampleOutput
+  ControlExampleOutput,
+  ControlExampleSubstitutions
 } from './ControlExampleProperties'
 
 // Vue compiles <ControlExample.Example> as ControlExample.Example when the
@@ -35,27 +38,44 @@ import {
 export default {
   Example: ControlExampleExample,
   Output: ControlExampleOutput,
-  Options: ControlExampleOptions
+  Options: ControlExampleOptions,
+  Substitutions: ControlExampleSubstitutions
 }
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, h, provide, shallowReactive, useSlots, getCurrentInstance } from 'vue'
+import { computed, defineComponent, Fragment, h, inject, nextTick, onMounted, onBeforeUnmount, provide, shallowReactive, useSlots, getCurrentInstance } from 'vue'
 import ControlExampleBase from './ControlExampleBase.vue'
 import { getControlExampleProperty, type ControlExamplePropertyName } from './ControlExampleProperties'
-import { normalizeXamlNodes, resolveXamlValue, xamlNameScopeKey } from './xamlRuntime'
+import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, xamlNameScopeKey } from './xamlRuntime'
 
 defineOptions({ inheritAttrs: false })
 const slots = useSlots()
 const instance = getCurrentInstance()
-const xamlNameScope = shallowReactive<Record<string, unknown>>({})
+defineEmits(['Loaded'])
+let loaded = false
+onMounted(async () => {
+  // Suspense and Teleport child mount hooks populate the XAML namescope.
+  // Loaded must observe that completed subtree before running page handlers.
+  await nextTick()
+  if (loaded) return
+  loaded = true
+  const sender = instance?.exposeProxy ?? instance?.proxy
+  const args = { OriginalSource: sender, Handled: false }
+  const listener = instance?.vnode.props?.onLoaded
+  for (const callback of Array.isArray(listener) ? listener : [listener]) if (typeof callback === 'function') callback(sender, args)
+  resolveXamlHandler(instance?.attrs.Loaded, instance)?.(sender, args)
+})
+onBeforeUnmount(() => { loaded = true })
+const xamlNameScope = inject(xamlNameScopeKey, null) ?? shallowReactive<Record<string, unknown>>({})
 provide(xamlNameScopeKey, xamlNameScope)
 const resolveProp = (value: unknown) => resolveXamlValue(value, instance)
 const propertyNodes = computed(() => {
   const result: Record<ControlExamplePropertyName, ReturnType<NonNullable<typeof slots.default>>> = {
     example: [],
     output: [],
-    options: []
+    options: [],
+    substitutions: []
   }
   const defaultContent: ReturnType<NonNullable<typeof slots.default>> = []
   const collect = (nodes: ReturnType<NonNullable<typeof slots.default>>) => {
@@ -92,13 +112,26 @@ const outlet = (name: ControlExamplePropertyName) => defineComponent({
 const ExampleOutlet = outlet('example')
 const OutputOutlet = outlet('output')
 const OptionsOutlet = outlet('options')
+const SubstitutionsOutlet = outlet('substitutions')
 const hasOutput = computed(() => propertyNodes.value.output.length > 0)
 const hasOptions = computed(() => propertyNodes.value.options.length > 0)
-defineProps({
+const resolvedSubstitutions = computed(() => propertyNodes.value.substitutions.length
+  ? propertyNodes.value.substitutions.map(node => {
+    const name = String(node.props?.['data-xaml-ref'] ?? '')
+    const named = name ? xamlNameScope[name] as { Value?: unknown; IsEnabled?: unknown } | undefined : undefined
+    return {
+      Key: node.props?.Key,
+      Value: named ? named.Value : resolveProp(node.props?.Value),
+      IsEnabled: named ? named.IsEnabled : resolveProp(node.props?.IsEnabled) !== false
+    }
+  })
+  : resolveProp(props.Substitutions))
+const props = defineProps({
   HeaderText: { type: String, default: '' },
+  Height: { type: [String, Number], default: 'auto' },
   ExampleHeight: { type: [String, Number], default: 'auto' },
-  WebViewHeight: { type: Number, default: 400 },
-  WebViewWidth: { type: Number, default: 800 },
+  WebViewHeight: { type: [Number, String], default: 400 },
+  WebViewWidth: { type: [Number, String], default: 800 },
   HorizontalContentAlignment: { type: String, default: 'Left' },
   SourceCodeVisibility: { type: [Boolean, String], default: true },
   Theme: { type: String, default: 'light' },

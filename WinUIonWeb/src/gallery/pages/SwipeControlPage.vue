@@ -1,348 +1,264 @@
 <template>
+  <Page>
   <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-        <TextBlock class="page-header" :Text="$t('text.swipecontrol')" role="heading" aria-level="1" />
-        <TextBlock class="page-description" :Text="$t('text.swipecontrol-subtitle')" TextWrapping="WrapWholeWords" />
-        <div class="page-header-actions">
-          <Button class="header-action" @Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button>
-          <ToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite">
-            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </ToggleButton>
-        </div>
-      </div>
+    <StackPanel class="gallery-item-page">
+      <StackPanel class="page-heading">
+        <TextBlock class="page-header" Text="{x:Bind Labels.PageTitle, Mode=OneWay}" FontSize="28" FontWeight="SemiBold" LineHeight="32" Margin="0,0,72,8" TextWrapping="Wrap" />
+        <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+        <StackPanel class="page-header-actions" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
+          <Button class="header-action" Click="toggleTheme" ToolTipService.ToolTip="{x:Bind Labels.ToggleTheme, Mode=OneWay}" AutomationProperties.Name="{x:Bind Labels.ToggleTheme, Mode=OneWay}"><FontIcon Glyph="&#xE793;" FontSize="16" /></Button>
+          <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}"><FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" /></ToggleButton>
+        </StackPanel>
+      </StackPanel>
 
-      <div class="gallery-page-content">
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('sample.swipecontrol.reveal-actions')"
-          :theme="pageTheme"
-          :vue="example1Code">
-          <template #example>
-            <SwipeControl
-              BorderThickness="1"
-              BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
-              Width="500"
-              Height="68"
-              Margin="12"
-              :LeftItems="leftRevealItems">
-              <Grid class="swipe-demo-content">
-                <TextBlock :Text="revealOutput" />
-              </Grid>
-            </SwipeControl>
-          </template>
-        </ControlExample>
+      <StackPanel class="gallery-page-content">
+        <StackPanel.Resources>
+          <Style TargetType="ListViewItem"><Setter Property="Padding" Value="0" /></Style>
+        </StackPanel.Resources>
 
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('sample.swipecontrol.execute')"
-          :theme="pageTheme"
-          :vue="example2Code">
-          <template #example>
-            <SwipeControl
-              BorderThickness="1"
-              BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
-              Width="500"
-              Height="68"
-              Margin="12"
-              :RightItems="rightExecuteItems">
-              <Grid class="swipe-demo-content">
-                <TextBlock :Text="executeOutput" />
-              </Grid>
-            </SwipeControl>
-          </template>
-        </ControlExample>
-
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('sample.swipecontrol.custom-list')"
-          :theme="pageTheme"
-          :vue="example3Code">
-          <template #example>
-            <ListView
-              class="swipe-list"
-              :ItemsSource="listItems"
-              Width="800"
-              Height="300"
-              MinWidth="200"
-              Margin="12">
-              <!-- @vue-ignore ListView is currently a JavaScript component without typed slots. -->
-              <template #item="{ item }">
-                <SwipeControl
-                  BorderThickness="0,1,0,0"
-                  BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
-                  Height="68"
-                  MinWidth="200"
-                  :LeftItems="listLeftItems"
-                  :RightItems="deleteItems(item)">
-                  <TextBlock class="list-item-content" :Text="item" FontSize="24" />
+        <StackPanel>
+          <ControlExample x:Name="Example1" class="swipe-example" SampleDefinition="SwipeControl\SwipeControlSwipeRightRevealActions.txt" HeaderText="{x:Bind Labels.RevealHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind RevealXaml}" CSharp="{x:Bind SwipeControlCSharp}">
+            <ControlExample.Example>
+              <ScrollViewer class="swipe-example-host" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled" Padding="0">
+              <Border>
+                <Border.Resources>
+                  <FontIconSource x:Key="AcceptIcon" Glyph="{x:Bind AcceptGlyph, Mode=OneWay}" />
+                  <FontIconSource x:Key="FlagIcon" Glyph="{x:Bind FlagGlyph, Mode=OneWay}" />
+                  <SwipeItems x:Key="left" Mode="Reveal">
+                    <SwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" IconSource="{StaticResource AcceptIcon}" Invoked="Accept_ItemInvoked" Text="{x:Bind AcceptText, Mode=OneWay}" />
+                    <SwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" IconSource="{StaticResource FlagIcon}" Invoked="Flag_ItemInvoked" Text="{x:Bind FlagText, Mode=OneWay}" />
+                  </SwipeItems>
+                </Border.Resources>
+                <SwipeControl Width="500" Height="68" Margin="12" BorderBrush="{ThemeResource ButtonBackground}" BorderThickness="1" LeftItems="{StaticResource left}">
+                  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{x:Bind RevealText, Mode=OneWay}" TextWrapping="Wrap" />
                 </SwipeControl>
-              </template>
-            </ListView>
-          </template>
-        </ControlExample>
+              </Border>
+              </ScrollViewer>
+            </ControlExample.Example>
+            <ControlExample.Output><TextBlock Text="{x:Bind RevealText, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+            <ControlExample.Options />
+          </ControlExample>
 
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('sample.swipecontrol.gradient')"
-          :theme="pageTheme"
-          :vue="example4Code">
-          <template #example>
-            <SwipeControl
-              BorderThickness="1"
-              BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
-              Width="500"
-              Height="68"
-              Margin="12"
-              :RightItems="gradientItems">
-              <Grid class="swipe-demo-content">
-                <TextBlock :Text="$t('sample.swipecontrol.swipe-left')" />
-              </Grid>
-            </SwipeControl>
-          </template>
-        </ControlExample>
+          <ControlExample x:Name="Example2" class="swipe-example" SampleDefinition="SwipeControl\SwipeControlSwipeLeftInvokeExecute.txt" HeaderText="{x:Bind Labels.ExecuteHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind ExecuteXaml}" CSharp="{x:Bind SwipeControlCSharp}">
+            <ControlExample.Example>
+              <ScrollViewer class="swipe-example-host" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled" Padding="0">
+              <Border>
+                <Border.Resources>
+                  <FontIconSource x:Key="ArchiveIcon" Glyph="&#xE7B8;" />
+                  <SwipeItems x:Key="right" Mode="Execute">
+                    <SwipeItem BehaviorOnInvoked="Close" IconSource="{StaticResource ArchiveIcon}" Invoked="DeleteOne_ItemInvoked" Text="{x:Bind Labels.Archive, Mode=OneWay}" />
+                  </SwipeItems>
+                </Border.Resources>
+                <SwipeControl Width="500" Height="68" Margin="12" BorderBrush="{ThemeResource ButtonBackground}" BorderThickness="1" RightItems="{StaticResource right}">
+                  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{x:Bind ArchiveText, Mode=OneWay}" TextWrapping="Wrap" />
+                </SwipeControl>
+              </Border>
+              </ScrollViewer>
+            </ControlExample.Example>
+            <ControlExample.Output><TextBlock Text="{x:Bind ArchiveText, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+            <ControlExample.Options />
+          </ControlExample>
 
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('sample.swipecontrol.custom-icons')"
-          :theme="pageTheme"
-          :vue="example5Code">
-          <template #example>
-            <SwipeControl
-              BorderThickness="1"
-              BorderBrush="var(--ButtonBackground, var(--ctrl-fill-default))"
-              Width="500"
-              Height="68"
-              Margin="12"
-              :LeftItems="customIconItems">
-              <Grid class="swipe-demo-content">
-                <TextBlock :Text="$t('sample.swipecontrol.swipe-right')" />
-              </Grid>
-            </SwipeControl>
-          </template>
-        </ControlExample>
-      </div>
-    </div>
+          <ControlExample x:Name="Example3" class="swipe-example" SampleDefinition="SwipeControl\SwipeControlCustomSwipeListview.txt" HeaderText="{x:Bind Labels.ListHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind ListXaml}" CSharp="{x:Bind SwipeControlCSharp}">
+            <ControlExample.Example>
+              <ScrollViewer class="swipe-example-host" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled" Padding="0">
+              <ListView x:Name="lv" class="swipe-list" Width="800" Height="300" MinWidth="200" Margin="12" ItemsSource="{x:Bind items, Mode=OneWay}">
+                <ListView.Resources>
+                  <FontIconSource x:Key="ReplyAllIcon" Glyph="&#xE8C2;" />
+                  <FontIconSource x:Key="ReadIcon" Glyph="&#xE8C3;" />
+                  <FontIconSource x:Key="DeleteIcon" Glyph="&#xE74D;" />
+                  <SwipeItems x:Key="left" Mode="Reveal">
+                    <SwipeItem Background="#FF3e6fa7" Foreground="White" IconSource="{StaticResource ReplyAllIcon}" Invoked="ReplyAll_ItemInvoked" Text="{x:Bind Labels.ReplyAll, Mode=OneWay}" />
+                    <SwipeItem Background="#FFff9501" Foreground="White" IconSource="{StaticResource ReadIcon}" Invoked="Open_ItemInvoked" Text="{x:Bind Labels.Open, Mode=OneWay}" />
+                  </SwipeItems>
+                  <SwipeItems x:Key="right" Mode="Execute">
+                    <SwipeItem Background="Red" IconSource="{StaticResource DeleteIcon}" Invoked="DeleteItem_ItemInvoked" Text="{x:Bind Labels.Delete, Mode=OneWay}" />
+                  </SwipeItems>
+                </ListView.Resources>
+                <ListView.ItemTemplate>
+                  <DataTemplate>
+                    <SwipeControl Height="68" MinWidth="200" BorderBrush="{ThemeResource ButtonBackground}" BorderThickness="0,1,0,0" LeftItems="{StaticResource left}" RightItems="{StaticResource right}">
+                      <TextBlock Margin="12" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontSize="24" Text="{Binding}" TextTrimming="CharacterEllipsis" />
+                    </SwipeControl>
+                  </DataTemplate>
+                </ListView.ItemTemplate>
+              </ListView>
+              </ScrollViewer>
+            </ControlExample.Example>
+            <ControlExample.Output><TextBlock Text="{x:Bind ListOutput, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+            <ControlExample.Options />
+          </ControlExample>
+
+          <ControlExample x:Name="Example4" class="swipe-example" SampleDefinition="SwipeControl\SwipeControlGradientBackground.txt" HeaderText="{x:Bind Labels.GradientHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind GradientXaml}" CSharp="{x:Bind SwipeControlCSharp}">
+            <ControlExample.Example>
+              <ScrollViewer class="swipe-example-host" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled" Padding="0">
+              <Border>
+                <Border.Resources>
+                  <FontIconSource x:Key="LockIcon" Glyph="&#xE72E;" />
+                  <LinearGradientBrush x:Key="PurpleGradient" StartPoint="0,0.5" EndPoint="1,0.5">
+                    <GradientStop Offset="0.0" Color="#ff8990f9" />
+                    <GradientStop Offset="0.5" Color="#ff5b66fb" />
+                    <GradientStop Offset="1.0" Color="#ff5c1df4" />
+                  </LinearGradientBrush>
+                  <SwipeItems x:Key="right" Mode="Execute">
+                    <SwipeItem Background="{StaticResource PurpleGradient}" BehaviorOnInvoked="Close" IconSource="{StaticResource LockIcon}" Invoked="Lock_ItemInvoked" Text="{x:Bind Labels.Lock, Mode=OneWay}" />
+                  </SwipeItems>
+                </Border.Resources>
+                <SwipeControl Width="500" Height="68" Margin="12" BorderBrush="{ThemeResource ButtonBackground}" BorderThickness="1" RightItems="{StaticResource right}">
+                  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{x:Bind Labels.SwipeLeft, Mode=OneWay}" TextWrapping="Wrap" />
+                </SwipeControl>
+              </Border>
+              </ScrollViewer>
+            </ControlExample.Example>
+            <ControlExample.Output><TextBlock Text="{x:Bind LockOutput, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+            <ControlExample.Options />
+          </ControlExample>
+
+          <ControlExample x:Name="Example5" class="swipe-example" SampleDefinition="SwipeControl\SwipeControlCustomIcons.txt" HeaderText="{x:Bind Labels.IconsHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind IconsXaml}" CSharp="{x:Bind SwipeControlCSharp}">
+            <ControlExample.Example>
+              <ScrollViewer class="swipe-example-host" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled" Padding="0">
+              <Border>
+                <Border.Resources>
+                  <SwipeItems x:Key="left" Mode="Reveal">
+                    <SwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" Invoked="Coffee_ItemInvoked" Text="{x:Bind Labels.Coffee, Mode=OneWay}">
+                      <SwipeItem.IconSource><BitmapIconSource UriSource="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/CoffeeCup.png" /></SwipeItem.IconSource>
+                    </SwipeItem>
+                  </SwipeItems>
+                </Border.Resources>
+                <SwipeControl Width="500" Height="68" Margin="12" BorderBrush="{ThemeResource ButtonBackground}" BorderThickness="1" LeftItems="{StaticResource left}">
+                  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{x:Bind Labels.SwipeRight, Mode=OneWay}" TextWrapping="Wrap" />
+                </SwipeControl>
+              </Border>
+              </ScrollViewer>
+            </ControlExample.Example>
+            <ControlExample.Output><TextBlock Text="{x:Bind CoffeeOutput, Mode=OneWay}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /></ControlExample.Output>
+            <ControlExample.Options />
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
+    </StackPanel>
   </ScrollViewer>
+  </Page>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, reactive, ref } from 'vue';
+import { computed, inject, provide, ref, shallowReactive, shallowRef, watch } from 'vue';
+import Border from '../../components/Border.vue';
 import Button from '../../components/Button.vue';
 import ControlExample from '../../components/ControlExample.vue';
-import Grid from '../../components/Grid.vue';
+import FontIcon from '../../components/FontIcon.vue';
 import ListView from '../../components/ListView.vue';
+import Page from '../../components/Page.vue';
 import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
 import SwipeControl from '../../components/SwipeControl.vue';
-import type { SwipeItems, SwipeItem } from '../../components/SwipeControl.types';
+import type { SwipeControlApi, SwipeItem, SwipeItemInvokedEventArgs } from '../../components/SwipeControl.types';
 import TextBlock from '../../components/TextBlock.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
+import { xamlNameScopeKey } from '../../components/xamlRuntime';
 import { createPageState } from '../../utils/pageState';
+import revealDefinition from '../samples/SwipeControl/SwipeControlSwipeRightRevealActions.txt?raw';
+import executeDefinition from '../samples/SwipeControl/SwipeControlSwipeLeftInvokeExecute.txt?raw';
+import listDefinition from '../samples/SwipeControl/SwipeControlCustomSwipeListview.txt?raw';
+import gradientDefinition from '../samples/SwipeControl/SwipeControlGradientBackground.txt?raw';
+import iconsDefinition from '../samples/SwipeControl/SwipeControlCustomIcons.txt?raw';
+import SwipeControlCSharp from '../samples/SwipeControl/SwipeControlPage.xaml.cs?raw';
 
-const coffeeCupUrl = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/CoffeeCup.png';
-
-const currentPage = inject<{ value: string }>('currentPage');
-const pageKey = computed(() => currentPage?.value || 'swipecontrol');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 const { t } = useI18n();
+const currentPage = inject<{ value: string }>('currentPage');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'swipecontrol');
+provide(xamlNameScopeKey, shallowReactive({}));
 
-const revealOutput = ref(t('sample.swipecontrol.swipe-right'));
-const executeOutput = ref(t('sample.swipecontrol.swipe-left'));
-const listItems = ref(Array.from({ length: 4 }, (_, index) => t('sample.swipecontrol.list-item', { index: index + 1 })));
-const isAccepted = ref(false);
-const isFlagged = ref(false);
-const isArchived = ref(false);
+const Labels = computed(() => ({
+  PageTitle: t('text.swipecontrol'), Description: t('text.swipecontrol-subtitle'), ToggleTheme: t('gallery.page-header.toggle-theme'),
+  RevealHeader: t('sample.swipecontrol.reveal-actions'), ExecuteHeader: t('sample.swipecontrol.execute'), ListHeader: t('sample.swipecontrol.custom-list'), GradientHeader: t('sample.swipecontrol.gradient'), IconsHeader: t('sample.swipecontrol.custom-icons'),
+  SwipeRight: t('sample.swipecontrol.swipe-right'), SwipeLeft: t('sample.swipecontrol.swipe-left'),
+  Archive: t('sample.swipecontrol.archive'), ReplyAll: t('sample.swipecontrol.reply-all'), Open: t('sample.swipecontrol.open'), Delete: t('sample.swipecontrol.delete'), Lock: t('sample.swipecontrol.lock'), Coffee: t('sample.swipecontrol.coffee')
+}));
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
+const isArchived = ref(false), isAccepted = ref(false), isFlagged = ref(false);
+const hasAccepted = ref(false), hasFlagged = ref(false);
+const itemNumbers = ref([1, 2, 3, 4]);
+const items = computed(() => itemNumbers.value.map(index => t('sample.swipecontrol.list-item', { index })));
+const AcceptText = computed(() => t(isAccepted.value ? 'sample.swipecontrol.cancel' : 'sample.swipecontrol.accept'));
+const FlagText = computed(() => t(isFlagged.value ? 'sample.swipecontrol.unmark' : 'sample.swipecontrol.flag'));
+const AcceptGlyph = computed(() => isAccepted.value ? '\uE711' : hasAccepted.value ? '\uE10B' : '\uE8FB');
+const FlagGlyph = computed(() => isFlagged.value ? '\uEB4B' : hasFlagged.value ? '\uE129' : '\uE7C1');
+const RevealText = computed(() => t(isAccepted.value
+  ? isFlagged.value ? 'sample.swipecontrol.accepted-flagged' : 'sample.swipecontrol.accepted'
+  : isFlagged.value ? 'sample.swipecontrol.flagged' : 'sample.swipecontrol.swipe-right'));
+const ArchiveText = computed(() => t(isArchived.value ? 'sample.swipecontrol.archived' : 'sample.swipecontrol.swipe-left'));
+const revealControl = shallowRef<SwipeControlApi>(), archiveControl = shallowRef<SwipeControlApi>();
+const invokedAcceptItem = shallowRef<SwipeItem>(), invokedFlagItem = shallowRef<SwipeItem>();
+watch(RevealText, text => { if (revealControl.value) (revealControl.value.Content as { Text: string }).Text = text; });
+watch(ArchiveText, text => { if (archiveControl.value) (archiveControl.value.Content as { Text: string }).Text = text; });
+watch(AcceptText, text => { if (invokedAcceptItem.value) invokedAcceptItem.value.Text = text; });
+watch(FlagText, text => { if (invokedFlagItem.value) invokedFlagItem.value.Text = text; });
 
-const updateRevealOutput = () => {
-  if (isAccepted.value && isFlagged.value) revealOutput.value = t('sample.swipecontrol.accepted-flagged');
-  else if (isAccepted.value) revealOutput.value = t('sample.swipecontrol.accepted');
-  else if (isFlagged.value) revealOutput.value = t('sample.swipecontrol.flagged');
-  else revealOutput.value = t('sample.swipecontrol.swipe-right');
-};
+function Accept_ItemInvoked(sender: SwipeItem, args: SwipeItemInvokedEventArgs) {
+  revealControl.value = args.SwipeControl;
+  invokedAcceptItem.value = sender;
+  isAccepted.value = !isAccepted.value;
+  hasAccepted.value = true;
+  (args.SwipeControl.Content as { Text: string }).Text = RevealText.value;
+  sender.IconSource = { Glyph: AcceptGlyph.value };
+  sender.Text = AcceptText.value;
+}
 
-const acceptItem = reactive<SwipeItem>({
-  Text: t('sample.swipecontrol.accept'),
-  IconSource: '\uE8FB',
-  Background: 'var(--ButtonBackgroundThemeBrush, var(--ctrl-fill-default))',
-  Foreground: 'var(--AppBarItemForegroundThemeBrush, var(--text-primary))',
-  Invoked: (sender) => {
-    isAccepted.value = !isAccepted.value;
-    updateRevealOutput();
-    sender.IconSource = isAccepted.value ? '\uE711' : '\uE10B';
-    sender.Text = t(isAccepted.value ? 'sample.swipecontrol.cancel' : 'sample.swipecontrol.accept');
-  }
-});
-const flagItem = reactive<SwipeItem>({
-  Text: t('sample.swipecontrol.flag'),
-  IconSource: '\uE7C1',
-  Background: 'var(--ButtonBackgroundThemeBrush, var(--ctrl-fill-default))',
-  Foreground: 'var(--AppBarItemForegroundThemeBrush, var(--text-primary))',
-  Invoked: (sender) => {
-    isFlagged.value = !isFlagged.value;
-    updateRevealOutput();
-    sender.IconSource = isFlagged.value ? '\uEB4B' : '\uE129';
-    sender.Text = t(isFlagged.value ? 'sample.swipecontrol.unmark' : 'sample.swipecontrol.flag');
-  }
-});
-const leftRevealItems = reactive<SwipeItems>({ Mode: 'Reveal', Items: [acceptItem, flagItem] });
+function Flag_ItemInvoked(sender: SwipeItem, args: SwipeItemInvokedEventArgs) {
+  revealControl.value = args.SwipeControl;
+  invokedFlagItem.value = sender;
+  isFlagged.value = !isFlagged.value;
+  hasFlagged.value = true;
+  (args.SwipeControl.Content as { Text: string }).Text = RevealText.value;
+  sender.IconSource = { Glyph: FlagGlyph.value };
+  sender.Text = FlagText.value;
+}
 
-const rightExecuteItems: SwipeItems = {
-  Mode: 'Execute',
-  Items: [{
-    Text: t('sample.swipecontrol.archive'),
-    IconSource: '\uE7B8',
-    BehaviorOnInvoked: 'Close',
-    Invoked: () => {
-      isArchived.value = !isArchived.value;
-      executeOutput.value = t(isArchived.value ? 'sample.swipecontrol.archived' : 'sample.swipecontrol.swipe-left');
-    }
-  }]
-};
+function DeleteOne_ItemInvoked(_sender: SwipeItem, args: SwipeItemInvokedEventArgs) {
+  archiveControl.value = args.SwipeControl;
+  isArchived.value = !isArchived.value;
+  (args.SwipeControl.Content as { Text: string }).Text = ArchiveText.value;
+}
 
-const listLeftItems: SwipeItems = {
-  Mode: 'Reveal',
-  Items: [
-    { Text: t('sample.swipecontrol.reply-all'), IconSource: '\uE8C2', Background: '#3e6fa7', Foreground: 'white' },
-    { Text: t('sample.swipecontrol.open'), IconSource: '\uE8C3', Background: '#ff9501', Foreground: 'white' }
-  ]
-};
+type ListAction = 'reply-all' | 'open' | 'delete';
+const lastListAction = ref<{ action: ListAction; index: number } | null>(null);
+function listItemInvoked(action: ListAction, args: SwipeItemInvokedEventArgs) {
+  const position = items.value.indexOf(args.SwipeControl.DataContext as string);
+  if (position < 0) return;
+  lastListAction.value = { action, index: itemNumbers.value[position]! };
+  if (action === 'delete') itemNumbers.value.splice(position, 1);
+}
+function DeleteItem_ItemInvoked(_sender: SwipeItem, args: SwipeItemInvokedEventArgs) { listItemInvoked('delete', args); }
+function ReplyAll_ItemInvoked(_sender: SwipeItem, args: SwipeItemInvokedEventArgs) { listItemInvoked('reply-all', args); }
+function Open_ItemInvoked(_sender: SwipeItem, args: SwipeItemInvokedEventArgs) { listItemInvoked('open', args); }
+const ListOutput = computed(() => lastListAction.value
+  ? t('sample.swipecontrol.item-action-output', {
+    action: t(`sample.swipecontrol.${lastListAction.value.action}`),
+    item: t('sample.swipecontrol.list-item', { index: lastListAction.value.index }),
+    count: items.value.length
+  })
+  : t('sample.swipecontrol.remaining-items', { count: items.value.length }));
 
-const deleteItems = (item: string): SwipeItems => ({
-  Mode: 'Execute',
-  Items: [{
-    Text: t('sample.swipecontrol.delete'),
-    IconSource: '\uE74D',
-    Background: 'Red',
-    BehaviorOnInvoked: 'Close',
-    Invoked: () => { listItems.value = listItems.value.filter((candidate) => candidate !== item); }
-  }]
-});
+const lockInvoked = ref(false), coffeeInvoked = ref(false);
+function Lock_ItemInvoked() { lockInvoked.value = true; }
+function Coffee_ItemInvoked() { coffeeInvoked.value = true; }
+const LockOutput = computed(() => lockInvoked.value ? t('sample.swipecontrol.lock-invoked') : '');
+const CoffeeOutput = computed(() => coffeeInvoked.value ? t('sample.swipecontrol.coffee-invoked') : '');
 
-const gradientItems: SwipeItems = {
-  Mode: 'Execute',
-  Items: [{
-    Text: t('sample.swipecontrol.lock'),
-    IconSource: '\uE72E',
-    Background: 'linear-gradient(90deg, #8990f9 0%, #5b66fb 50%, #5c1df4 100%)',
-    BehaviorOnInvoked: 'Close'
-  }]
-};
-
-const customIconItems: SwipeItems = {
-  Mode: 'Reveal',
-  Items: [{
-    Text: t('sample.swipecontrol.coffee'),
-    IconSource: { UriSource: coffeeCupUrl },
-    Background: 'var(--ButtonBackgroundThemeBrush, var(--ctrl-fill-default))',
-    Foreground: 'var(--AppBarItemForegroundThemeBrush, var(--text-primary))'
-  }]
-};
-
-const example1Code = computed(() => `<SwipeControl
-  BorderThickness="1"
-  BorderBrush="{ThemeResource ButtonBackground}"
-  Width="500"
-  Height="68"
-  Margin="12">
-  <SwipeControl.LeftItems>
-    <SwipeItems Mode="Reveal">
-      <SwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" IconSource="Accept" Text="Accept" Invoked="Accept_ItemInvoked" />
-      <SwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" IconSource="Flag" Text="Flag" Invoked="Flag_ItemInvoked" />
-    </SwipeItems>
-  </SwipeControl.LeftItems>
-  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Right" />
-</SwipeControl>`);
-
-const example2Code = computed(() => `<SwipeControl
-  BorderThickness="1"
-  BorderBrush="{ThemeResource ButtonBackground}"
-  Width="500"
-  Height="68"
-  Margin="12">
-  <SwipeControl.RightItems>
-    <SwipeItems Mode="Execute">
-      <SwipeItem BehaviorOnInvoked="Close" IconSource="Archive" Text="Archive" Invoked="DeleteOne_ItemInvoked" />
-    </SwipeItems>
-  </SwipeControl.RightItems>
-  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Left" />
-</SwipeControl>`);
-
-const example3Code = computed(() => `<ListView ItemsSource="listItems" Width="800" Height="300" MinWidth="200" Margin="12">
-  <ListView.ItemTemplate>
-    <DataTemplate>
-      <SwipeControl
-        Height="68"
-        MinWidth="200"
-        BorderBrush="{ThemeResource ButtonBackground}"
-        BorderThickness="0,1,0,0">
-        <SwipeControl.LeftItems>
-          <SwipeItems Mode="Reveal">
-            <SwipeItem Background="#FF3e6fa7" Foreground="White" IconSource="ReplyAll" Text="Reply All" />
-            <SwipeItem Background="#FFff9501" Foreground="White" IconSource="Read" Text="Open" />
-          </SwipeItems>
-        </SwipeControl.LeftItems>
-        <SwipeControl.RightItems>
-          <SwipeItems Mode="Execute">
-            <SwipeItem Background="Red" IconSource="Delete" Text="Delete" Invoked="DeleteItem_ItemInvoked" />
-          </SwipeItems>
-        </SwipeControl.RightItems>
-        <TextBlock Margin="12" HorizontalAlignment="Stretch" VerticalAlignment="Center" FontSize="24" Text="{Binding}" />
-      </SwipeControl>
-    </DataTemplate>
-  </ListView.ItemTemplate>
-</ListView>`);
-
-const example4Code = computed(() => `<SwipeControl
-  BorderThickness="1"
-  BorderBrush="{ThemeResource ButtonBackground}"
-  Width="500"
-  Height="68"
-  Margin="12">
-  <SwipeControl.RightItems>
-    <SwipeItems Mode="Execute">
-      <SwipeItem BehaviorOnInvoked="Close" IconSource="Lock" Text="Lock">
-        <SwipeItem.Background>
-          <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
-            <GradientStop Offset="0.0" Color="#ff8990f9" />
-            <GradientStop Offset="0.5" Color="#ff5b66fb" />
-            <GradientStop Offset="1.0" Color="#ff5c1df4" />
-          </LinearGradientBrush>
-        </SwipeItem.Background>
-      </SwipeItem>
-    </SwipeItems>
-  </SwipeControl.RightItems>
-  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Left" />
-</SwipeControl>`);
-
-const example5Code = computed(() => `<SwipeControl
-  BorderThickness="1"
-  BorderBrush="{ThemeResource ButtonBackground}"
-  Width="500"
-  Height="68"
-  Margin="12">
-  <SwipeControl.LeftItems>
-    <SwipeItems Mode="Reveal">
-      <SwipeItem Background="{ThemeResource ButtonBackgroundThemeBrush}" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" Text="Coffee">
-        <SwipeItem.IconSource>
-          <BitmapIconSource UriSource="/Assets/SampleMedia/CoffeeCup.png" />
-        </SwipeItem.IconSource>
-      </SwipeItem>
-    </SwipeItems>
-  </SwipeControl.LeftItems>
-  <TextBlock Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Swipe Right" />
-</SwipeControl>`);
+const codePart = (definition: string) => definition.split('--- xaml')[1]?.split(/\r?\n--- /)[0]?.trim() ?? '';
+const RevealXaml = codePart(revealDefinition), ExecuteXaml = codePart(executeDefinition), ListXaml = codePart(listDefinition), GradientXaml = codePart(gradientDefinition), IconsXaml = codePart(iconsDefinition);
 </script>
 
 <style scoped>
-.page-heading { position: relative; }
-.page-header { margin: 0 0 8px; color: var(--text-primary); font-size: 28px; font-weight: 600; }
-.page-description { margin: 0 72px 16px 0; color: var(--text-secondary); font-size: 14px; line-height: 20px; }
+.gallery-item-page { min-width: 0; width: 100%; }
+.page-heading { position: relative; min-width: 0; }
+.page-header { color: var(--text-primary); }
+.page-description { margin: 0 72px 16px 0; color: var(--text-secondary); line-height: 20px; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif; font-size: 16px; }
-.swipe-demo-content { display: grid; place-items: center; width: 100%; height: 100%; padding: 12px; box-sizing: border-box; text-align: center; }
-.list-item-content { display: flex; align-items: center; width: calc(100% - 24px); height: calc(100% - 24px); margin: 12px; box-sizing: border-box; }
-.swipe-list { width: min(800px, calc(100% - 24px)); height: 300px; min-width: 200px; }
-.swipe-list :deep(.win-list-item) { align-items: stretch; padding: 0; border-radius: 0; gap: 0; }
-.swipe-list :deep(.win-list-item > .win-swipe-control) { flex: 1 1 100%; width: 100%; }
+.swipe-example :deep(.example-display), .swipe-example :deep(.example-output) { min-width: 0; }
+.swipe-example :deep(.example-output) { overflow-wrap: anywhere; }
+.swipe-example-host { min-width: 0; max-width: 100%; }
 </style>

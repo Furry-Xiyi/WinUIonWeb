@@ -77,10 +77,69 @@ const applyFrameworkChildStyles = (element: HTMLElement) => {
   if (padding !== undefined) setOrClear(element, 'padding', xamlThickness(padding))
 }
 
+const gridZIndices = new WeakMap<HTMLElement, { previousInline: string; lastApplied: string }>()
+
+type ContentPresenterStyleProperty = 'width' | 'height' | 'justifySelf' | 'alignSelf'
+type ContentPresenterStyles = Partial<Record<ContentPresenterStyleProperty, { previous: string; applied: string }>>
+const contentPresenterStyles = new WeakMap<HTMLElement, ContentPresenterStyles>()
+
+/** ContentPresenter arranges its sole UIElement inside the content alignment slot. */
+export const applyContentPresenterChildren = (root: HTMLElement, horizontalContentAlignment: unknown, verticalContentAlignment: unknown) => {
+  for (const child of Array.from(root.children)) {
+    const element = child as HTMLElement
+    if (element.classList.contains('win-acrylic-visual') || element.classList.contains('win-radial-gradient-background') || element.classList.contains('win-theme-shadow-visual')) continue
+    const saved = contentPresenterStyles.get(element)
+    for (const property of Object.keys(saved ?? {}) as ContentPresenterStyleProperty[]) {
+      const value = saved?.[property]
+      if (value && element.style[property] === value.applied) element.style[property] = value.previous
+    }
+    const changes: ContentPresenterStyles = {}
+    const arrange = (property: ContentPresenterStyleProperty, value: string) => {
+      changes[property] = { previous: element.style[property], applied: value }
+      element.style[property] = value
+    }
+    applyFrameworkChildStyles(element)
+    for (const [axis, contentAlignment, alignmentProperty, sizeProperty, maxProperty] of [
+      ['horizontal', horizontalContentAlignment, 'justifySelf', 'width', 'MaxWidth'],
+      ['vertical', verticalContentAlignment, 'alignSelf', 'height', 'MaxHeight']
+    ] as const) {
+      const childAlignment = attachedValue(element, axis === 'horizontal' ? 'HorizontalAlignment' : 'VerticalAlignment')
+      const ownAlignment = childAlignment ? alignment(childAlignment, axis) : element.style[alignmentProperty] || 'stretch'
+      const content = alignment(contentAlignment, axis)
+      arrange(alignmentProperty, content === 'stretch' ? ownAlignment : content)
+      // WinUI centers a Stretch element when an explicit or maximum size limits
+      // its arrange rectangle. CSS grid otherwise pins that constrained item to start.
+      if (content === 'stretch' && ownAlignment === 'stretch') {
+        const size = element.style[sizeProperty]
+        const max = attachedValue(element, maxProperty) ?? element.style[axis === 'horizontal' ? 'maxWidth' : 'maxHeight']
+        if (size && size !== '100%' && size !== 'auto') arrange(alignmentProperty, 'center')
+        else if (max && max !== 'none' && max !== '100%' && max !== 'Infinity') {
+          arrange(sizeProperty, '100%')
+          arrange(alignmentProperty, 'center')
+        }
+      }
+    }
+    contentPresenterStyles.set(element, changes)
+  }
+}
+
 export const applyGridChildren = (root: HTMLElement) => {
   Array.from(root.children).forEach((child) => {
     const element = child as HTMLElement
+    if (element.classList.contains('win-acrylic-visual') || element.classList.contains('win-radial-gradient-background') || element.classList.contains('win-theme-shadow-visual')) return
     applyFrameworkChildStyles(element)
+
+    const zIndex = attachedValue(element, 'Canvas.ZIndex')
+    const savedZIndex = gridZIndices.get(element)
+    if (zIndex !== undefined) {
+      const value = Number(zIndex)
+      const next = String(Number.isFinite(value) ? Math.trunc(value) : 0)
+      gridZIndices.set(element, { previousInline: savedZIndex?.previousInline ?? element.style.zIndex, lastApplied: next })
+      if (element.style.zIndex !== next) element.style.zIndex = next
+    } else if (savedZIndex) {
+      if (element.style.zIndex === savedZIndex.lastApplied) element.style.zIndex = savedZIndex.previousInline
+      gridZIndices.delete(element)
+    }
 
     const row = attachedValue(element, 'Grid.Row')
     const column = attachedValue(element, 'Grid.Column')
@@ -111,95 +170,34 @@ export const applyStackChildren = (root: HTMLElement, orientation: string) => {
   const horizontal = orientation === 'Horizontal'
   Array.from(root.children).forEach((child) => {
     const element = child as HTMLElement
+    if (element.classList.contains('win-acrylic-visual') || element.classList.contains('win-radial-gradient-background') || element.classList.contains('win-theme-shadow-visual')) return
     applyFrameworkChildStyles(element)
-    const crossAxis = attachedValue(element, horizontal ? 'VerticalAlignment' : 'HorizontalAlignment')
-    if (crossAxis !== undefined) setOrClear(element, 'alignSelf', alignment(crossAxis, horizontal ? 'vertical' : 'horizontal'))
-  })
-}
-
-export const applyCanvasChildren = (root: HTMLElement) => {
-  Array.from(root.children).forEach((child) => {
-    const element = child as HTMLElement
-    applyFrameworkChildStyles(element)
-    element.style.position = 'absolute'
-    const left = attachedValue(element, 'Canvas.Left')
-    const top = attachedValue(element, 'Canvas.Top')
-    const zIndex = attachedValue(element, 'Canvas.ZIndex')
-    if (left !== undefined) setOrClear(element, 'left', cssLength(left))
-    if (top !== undefined) setOrClear(element, 'top', cssLength(top))
-    if (zIndex !== undefined) setOrClear(element, 'zIndex', Number(zIndex) || 0)
-  })
-}
-
-const elementName = (element: Element): string | undefined =>
-  attachedValue(element, 'x:Name') ?? attachedValue(element, 'Name')
-
-/** Resolve the commonly used RelativePanel relations after every DOM/layout update. */
-export const applyRelativeChildren = (root: HTMLElement) => {
-  const children = Array.from(root.children).map((child) => child as HTMLElement)
-  const named = new Map<string, HTMLElement>()
-  children.forEach((child) => {
-    const name = elementName(child)
-    if (name) named.set(name, child)
-  })
-  const panelWidth = root.clientWidth
-  const panelHeight = root.clientHeight
-
-  children.forEach((element) => {
-    applyFrameworkChildStyles(element)
-    element.style.position = 'absolute'
-    const hasRelation = ['LeftOf', 'RightOf', 'Above', 'Below', 'AlignHorizontalCenterWith', 'AlignVerticalCenterWith', 'AlignLeftWith', 'AlignTopWith', 'AlignRightWith', 'AlignBottomWith', 'AlignLeftWithPanel', 'AlignTopWithPanel', 'AlignRightWithPanel', 'AlignBottomWithPanel', 'AlignHorizontalCenterWithPanel', 'AlignVerticalCenterWithPanel']
-      .some((name) => attachedValue(element, `RelativePanel.${name}`) !== undefined)
-    if (!hasRelation) return
-
-    const margin = (attachedValue(element, 'Margin') ?? '').split(',').map(Number).map((part) => Number.isFinite(part) ? part : 0)
-    const leftMargin = margin[0] ?? 0
-    const topMargin = margin[1] ?? leftMargin
-    const rightMargin = margin[2] ?? leftMargin
-    const bottomMargin = margin[3] ?? topMargin
-    const width = element.offsetWidth
-    const height = element.offsetHeight
-    let left = element.offsetLeft
-    let top = element.offsetTop
-    const target = (relation: string) => named.get(attachedValue(element, `RelativePanel.${relation}`) ?? '')
-
-    if (boolValue(attachedValue(element, 'RelativePanel.AlignLeftWithPanel'))) left = leftMargin
-    if (boolValue(attachedValue(element, 'RelativePanel.AlignRightWithPanel'))) left = panelWidth - width - rightMargin
-    if (boolValue(attachedValue(element, 'RelativePanel.AlignHorizontalCenterWithPanel'))) left = (panelWidth - width) / 2 + (leftMargin - rightMargin) / 2
-    if (boolValue(attachedValue(element, 'RelativePanel.AlignTopWithPanel'))) top = topMargin
-    if (boolValue(attachedValue(element, 'RelativePanel.AlignBottomWithPanel'))) top = panelHeight - height - bottomMargin
-    if (boolValue(attachedValue(element, 'RelativePanel.AlignVerticalCenterWithPanel'))) top = (panelHeight - height) / 2 + (topMargin - bottomMargin) / 2
-
-    const rightOf = target('RightOf')
-    const leftOf = target('LeftOf')
-    const below = target('Below')
-    const above = target('Above')
-    if (rightOf) left = rightOf.offsetLeft + rightOf.offsetWidth + leftMargin
-    if (leftOf) left = leftOf.offsetLeft - width - rightMargin
-    if (below) top = below.offsetTop + below.offsetHeight + topMargin
-    if (above) top = above.offsetTop - height - bottomMargin
-
-    const horizontal = target('AlignHorizontalCenterWith')
-    const vertical = target('AlignVerticalCenterWith')
-    if (horizontal) left = horizontal.offsetLeft + (horizontal.offsetWidth - width) / 2 + (leftMargin - rightMargin) / 2
-    if (vertical) top = vertical.offsetTop + (vertical.offsetHeight - height) / 2 + (topMargin - bottomMargin) / 2
-    const alignLeft = target('AlignLeftWith')
-    const alignRight = target('AlignRightWith')
-    const alignTop = target('AlignTopWith')
-    const alignBottom = target('AlignBottomWith')
-    if (alignLeft) left = alignLeft.offsetLeft + leftMargin
-    if (alignRight) left = alignRight.offsetLeft + alignRight.offsetWidth - width - rightMargin
-    if (alignTop) top = alignTop.offsetTop + topMargin
-    if (alignBottom) top = alignBottom.offsetTop + alignBottom.offsetHeight - height - bottomMargin
-
-    setOrClear(element, 'left', `${left}px`)
-    setOrClear(element, 'top', `${top}px`)
+    const crossAxis = attachedValue(element, horizontal ? 'data-stack-panel-vertical-alignment' : 'data-stack-panel-horizontal-alignment')
+      ?? attachedValue(element, horizontal ? 'VerticalAlignment' : 'HorizontalAlignment')
+    if (crossAxis === undefined) {
+      element.removeAttribute('data-stack-panel-cross-alignment')
+      return
+    }
+    const crossSize = attachedValue(element, horizontal ? 'data-stack-panel-height' : 'data-stack-panel-width')
+      ?? attachedValue(element, horizontal ? 'Height' : 'Width')
+    const renderedCrossSize = horizontal ? element.style.height : element.style.width
+    const hasCrossSize = crossSize !== undefined && crossSize !== ''
+      ? !/^(Auto|NaN|Infinity)$/i.test(crossSize)
+      : /^\d+(?:\.\d+)?px$/.test(renderedCrossSize)
+    const crossAlignment = crossAxis === 'Stretch' && hasCrossSize
+      ? 'center'
+      : alignment(crossAxis, horizontal ? 'vertical' : 'horizontal')
+    setOrClear(element, 'alignSelf', crossAlignment)
+    // The parent owns the cross-axis arrange slot even when a control
+    // updates its own inline alignment during an input state change.
+    element.setAttribute('data-stack-panel-cross-alignment', crossAlignment)
   })
 }
 
 export const applyVariableSizedChildren = (root: HTMLElement) => {
   Array.from(root.children).forEach((child) => {
     const element = child as HTMLElement
+    if (element.classList.contains('win-acrylic-visual') || element.classList.contains('win-radial-gradient-background') || element.classList.contains('win-theme-shadow-visual')) return
     applyFrameworkChildStyles(element)
     const rowSpan = attachedValue(element, 'VariableSizedWrapGrid.RowSpan')
     const columnSpan = attachedValue(element, 'VariableSizedWrapGrid.ColumnSpan')
@@ -210,6 +208,7 @@ export const applyVariableSizedChildren = (root: HTMLElement) => {
 
 export const useLayoutObserver = (root: Ref<HTMLElement | null>, apply: () => void) => {
   let observer: MutationObserver | undefined
+  let resizeObserver: ResizeObserver | undefined
   const update = () => void nextTick(apply)
   onMounted(() => {
     update()
@@ -222,9 +221,19 @@ export const useLayoutObserver = (root: Ref<HTMLElement | null>, apply: () => vo
       'RelativePanel.AlignLeftWith', 'RelativePanel.AlignTopWith', 'RelativePanel.AlignRightWith', 'RelativePanel.AlignBottomWith',
       'RelativePanel.AlignLeftWithPanel', 'RelativePanel.AlignTopWithPanel', 'RelativePanel.AlignRightWithPanel',
       'RelativePanel.AlignBottomWithPanel', 'RelativePanel.AlignHorizontalCenterWithPanel', 'RelativePanel.AlignVerticalCenterWithPanel',
-      'HorizontalAlignment', 'VerticalAlignment', 'Width', 'Height', 'Margin', 'Padding'
-    ] })
+      'HorizontalAlignment', 'VerticalAlignment', 'Width', 'Height', 'MinWidth', 'MaxWidth', 'MinHeight', 'MaxHeight', 'Margin', 'Padding',
+      'data-stack-panel-horizontal-alignment', 'data-stack-panel-vertical-alignment',
+      'data-stack-panel-width', 'data-stack-panel-height',
+      'data-xaml-ref', 'x:name', 'x:Name'
+    ].flatMap((name) => [name, name.toLowerCase()]) })
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(update)
+      resizeObserver.observe(root.value)
+    }
   })
   onUpdated(update)
-  onBeforeUnmount(() => observer?.disconnect())
+  onBeforeUnmount(() => {
+    observer?.disconnect()
+    resizeObserver?.disconnect()
+  })
 }

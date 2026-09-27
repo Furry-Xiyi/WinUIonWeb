@@ -2,12 +2,16 @@
 <template>
   <div
     ref="rootRef"
+    v-bind="forwardedAttrs"
     class="win-flip-view"
     :class="[
       orientationClass,
       { disabled: !isEnabled, rtl: isRtl, focused: hasFocus }
     ]"
     :style="rootStyle"
+    v-acrylic-brush="backgroundStyle"
+    :HorizontalAlignment="horizontalAlignment"
+    :VerticalAlignment="verticalAlignment"
     role="listbox"
     :tabindex="rootTabIndex"
     :aria-disabled="!isEnabled"
@@ -50,28 +54,40 @@
     <button
       type="button"
       class="flip-btn prev"
+      :style="previousButtonBackgroundStyle"
+      v-acrylic-brush="previousButtonBackgroundStyle"
       :class="{ visible: previousButtonVisible }"
       :disabled="!isEnabled || selectedIndex <= 0"
       :aria-hidden="!previousButtonVisible"
       :aria-label="previousLabel"
       tabindex="-1"
-      @pointerenter="onButtonEnter"
-      @pointerleave="onButtonLeave"
+      @pointerenter="previousButtonState = 'PointerOver'; onButtonEnter()"
+      @pointerdown="previousButtonState = 'Pressed'"
+      @pointerup="previousButtonState = 'PointerOver'"
+      @pointercancel="previousButtonState = ''"
+      @pointerleave="previousButtonState = ''; onButtonLeave()"
       @click="prev">
-      <span class="icon flip-arrow" aria-hidden="true">{{ previousGlyph }}</span>
+      <FontIcon v-if="orientationClass === 'horizontal'" class="flip-arrow" Glyph="&#xEDD9;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="{ThemeResource FlipViewButtonFontSize}" Foreground="{ThemeResource FlipViewNextPreviousArrowForeground}" HorizontalAlignment="Center" VerticalAlignment="Center" MirroredWhenRightToLeft="True" UseLayoutRounding="False" aria-hidden="true" />
+      <FontIcon v-else class="flip-arrow" Glyph="&#xEDDB;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="{ThemeResource FlipViewButtonFontSize}" Foreground="{ThemeResource FlipViewNextPreviousArrowForeground}" HorizontalAlignment="Center" VerticalAlignment="Center" UseLayoutRounding="False" aria-hidden="true" />
     </button>
     <button
       type="button"
       class="flip-btn next"
+      :style="nextButtonBackgroundStyle"
+      v-acrylic-brush="nextButtonBackgroundStyle"
       :class="{ visible: nextButtonVisible }"
       :disabled="!isEnabled || selectedIndex >= items.length - 1"
       :aria-hidden="!nextButtonVisible"
       :aria-label="nextLabel"
       tabindex="-1"
-      @pointerenter="onButtonEnter"
-      @pointerleave="onButtonLeave"
+      @pointerenter="nextButtonState = 'PointerOver'; onButtonEnter()"
+      @pointerdown="nextButtonState = 'Pressed'"
+      @pointerup="nextButtonState = 'PointerOver'"
+      @pointercancel="nextButtonState = ''"
+      @pointerleave="nextButtonState = ''; onButtonLeave()"
       @click="next">
-      <span class="icon flip-arrow" aria-hidden="true">{{ nextGlyph }}</span>
+      <FontIcon v-if="orientationClass === 'horizontal'" class="flip-arrow" Glyph="&#xEDDA;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="{ThemeResource FlipViewButtonFontSize}" Foreground="{ThemeResource FlipViewNextPreviousArrowForeground}" HorizontalAlignment="Center" VerticalAlignment="Center" MirroredWhenRightToLeft="True" UseLayoutRounding="False" aria-hidden="true" />
+      <FontIcon v-else class="flip-arrow" Glyph="&#xEDDC;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="{ThemeResource FlipViewButtonFontSize}" Foreground="{ThemeResource FlipViewNextPreviousArrowForeground}" HorizontalAlignment="Center" VerticalAlignment="Center" UseLayoutRounding="False" aria-hidden="true" />
     </button>
   </div>
 </template>
@@ -89,6 +105,7 @@ export default {
 <script setup lang="ts">
 // @ts-nocheck The public XAML property casing is intentionally preserved.
 import {
+  cloneVNode,
   computed,
   defineComponent,
   Fragment,
@@ -104,9 +121,12 @@ import {
   watch
 } from 'vue'
 import { useI18n } from './i18n/index'
+import FontIcon from './FontIcon.vue'
 import { xamlResourceDictionaryKey } from './Page.vue'
 import { getCollectionProperty, getVNodeChildren } from './CollectionProperties'
-import { materializeXamlVNode, resolveXamlHandler, resolveXamlValue, xamlItemContextKey } from './xamlRuntime'
+import { materializeXamlVNode, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlItemContextKey } from './xamlRuntime'
+import { useAcrylicBrushStyle } from './AcrylicBrush'
+import { vAcrylicBrush } from './acrylicBrushVisual'
 
 const props = defineProps({
   ItemsSource: { type: [String, Array, Object], default: null },
@@ -114,6 +134,8 @@ const props = defineProps({
   SelectedItem: { type: [Object, String, Number, Boolean], default: undefined },
   Orientation: { type: String, default: undefined },
   FlowDirection: { type: String, default: undefined },
+  HorizontalAlignment: { type: String, default: 'Stretch' },
+  VerticalAlignment: { type: String, default: 'Stretch' },
   HorizontalContentAlignment: { type: String, default: 'Stretch' },
   VerticalContentAlignment: { type: String, default: 'Stretch' },
   IsEnabled: { type: [Boolean, String], default: true },
@@ -135,6 +157,12 @@ const props = defineProps({
 
 const emit = defineEmits(['SelectionChanged', 'update:SelectedIndex', 'update:SelectedItem'])
 const attrs = useAttrs()
+// Keep framework layout markers and x:Name on the actual FlipView host.
+// StackPanel and Grid arrange these attributes on the control's root;
+// inheritAttrs:false previously discarded them along with classes.
+const forwardedAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([name]) =>
+  !['AutomationProperties.Name', 'AutomationProperties.AutomationControlType', 'AutomationProperties.LocalizedControlType', 'SelectionChanged'].includes(name)
+)))
 const slots = useSlots()
 const instance = getCurrentInstance()
 const resources = inject(xamlResourceDictionaryKey, null)
@@ -195,7 +223,12 @@ const orientationClass = computed(() => orientation.value.toLowerCase() === 'ver
 const flowDirection = computed(() => String(resolveXamlValue(props.FlowDirection, instance) || 'LeftToRight'))
 const isRtl = computed(() => flowDirection.value.toLowerCase() === 'righttoleft')
 const isEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false)
+const previousButtonState = ref(''), nextButtonState = ref('')
+const previousButtonBackgroundStyle = useAcrylicBrushStyle(() => !isEnabled.value || selectedIndex.value <= 0 ? '{ThemeResource ButtonBackgroundDisabled}' : `{ThemeResource FlipViewNextPreviousButtonBackground${previousButtonState.value}}`, instance)
+const nextButtonBackgroundStyle = useAcrylicBrushStyle(() => !isEnabled.value || selectedIndex.value >= items.value.length - 1 ? '{ThemeResource ButtonBackgroundDisabled}' : `{ThemeResource FlipViewNextPreviousButtonBackground${nextButtonState.value}}`, instance)
 const isTabStop = computed(() => resolveXamlValue(props.IsTabStop, instance) === true)
+const horizontalAlignment = computed(() => String(resolveXamlValue(props.HorizontalAlignment, instance) || 'Stretch'))
+const verticalAlignment = computed(() => String(resolveXamlValue(props.VerticalAlignment, instance) || 'Stretch'))
 
 const resolvedSelectedIndex = computed(() => {
   const value = resolveXamlValue(props.SelectedIndex, instance)
@@ -261,8 +294,8 @@ const xamlThickness = (value) => {
   if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`
   return String(resolved)
 }
+const backgroundStyle = useAcrylicBrushStyle(() => props.Background || undefined, instance)
 const rootStyle = computed(() => {
-  const background = resolveXamlValue(props.Background, instance)
   const borderBrush = resolveXamlValue(props.BorderBrush, instance)
   const borderThickness = xamlThickness(props.BorderThickness)
   return {
@@ -274,11 +307,13 @@ const rootStyle = computed(() => {
     maxHeight: cssLength(props.MaxHeight),
     margin: xamlThickness(props.Margin),
     padding: xamlThickness(props.Padding),
-    background: background || undefined,
+    ...backgroundStyle.value,
     borderColor: borderBrush || undefined,
     borderWidth: borderThickness,
     borderStyle: borderBrush || borderThickness ? 'solid' : undefined,
-    borderRadius: xamlThickness(props.CornerRadius)
+    borderRadius: xamlThickness(props.CornerRadius),
+    justifySelf: ({ Left: 'start', Center: 'center', Right: 'end', Stretch: 'stretch' })[horizontalAlignment.value],
+    alignSelf: ({ Top: 'start', Center: 'center', Bottom: 'end', Stretch: 'stretch' })[verticalAlignment.value]
   }
 })
 
@@ -323,16 +358,28 @@ const ItemRenderer = defineComponent({
   },
   setup(itemProps) {
     provide(xamlItemContextKey, itemProps.item)
+    const arrangeTemplateRoot = (node) => {
+      if (!node || typeof node !== 'object') return node
+      if (node.type === Fragment && Array.isArray(node.children)) {
+        return h(Fragment, node.children.map(arrangeTemplateRoot))
+      }
+      const name = node.type?.name ?? node.type?.__name
+      if (name !== 'Image') return node
+      const dimensions = node.props ?? {}
+      const isAutoSize = (value) => value === undefined || value === null || value === '' || value === 'Auto'
+      return cloneVNode(node, {
+        'data-flip-view-auto-width': isAutoSize(dimensions.Width) && (dimensions.HorizontalAlignment ?? 'Stretch') === 'Stretch' ? '' : undefined,
+        'data-flip-view-auto-height': isAutoSize(dimensions.Height) && (dimensions.VerticalAlignment ?? 'Stretch') === 'Stretch' ? '' : undefined
+      })
+    }
     return () => {
       if (templateNodes.value.length) {
         const rendered = materializeXamlVNode(templateNodes.value, itemProps.item, instance)
-        return h(Fragment, Array.isArray(rendered) ? rendered : [rendered])
+        return h(Fragment, (Array.isArray(rendered) ? rendered : [rendered]).map(arrangeTemplateRoot))
       }
       if (sourceItems.value === null && declaredNodes.value[itemProps.index]) {
-        return h(Fragment, [declaredNodes.value[itemProps.index]])
+        return h(Fragment, [arrangeTemplateRoot(declaredNodes.value[itemProps.index])])
       }
-      const itemSlot = slots.item
-      if (itemSlot) return h(Fragment, itemSlot({ item: itemProps.item, index: itemProps.index }))
       return h(Fragment, [h('span', displayItem(itemProps.item))])
     }
   }
@@ -349,13 +396,13 @@ const trackStyle = computed(() => {
   return { transform: `translateX(-${horizontalOffset}%)` }
 })
 
-const invokeUnnormalizedHandler = (name, args) => {
+const invokeUnnormalizedHandler = (name, sender, args) => {
   // Normalized XAML listeners are invoked by Vue's emit() path. Only invoke
-  // the legacy raw attribute form here, preventing duplicate callbacks.
+  // the original XAML attribute form here, preventing duplicate callbacks.
   if (attrs[`on${name}`]) return
   const raw = attrs[name]
   const handler = resolveXamlHandler(raw, instance)
-  if (handler) handler(args)
+  if (handler) handler(sender, args)
 }
 
 const setSelectedIndex = (index, { focus = false } = {}) => {
@@ -368,14 +415,17 @@ const setSelectedIndex = (index, { focus = false } = {}) => {
   currentIndex.value = bounded
   emit('update:SelectedIndex', bounded)
   emit('update:SelectedItem', nextItem)
+  updateXamlBinding(props.SelectedIndex, bounded, instance)
+  updateXamlBinding(props.SelectedItem, nextItem, instance)
   const args = {
     AddedItems: nextItem === undefined ? [] : [nextItem],
     RemovedItems: oldItem === undefined ? [] : [oldItem],
     SelectedIndex: bounded,
     SelectedItem: nextItem
   }
-  emit('SelectionChanged', args)
-  invokeUnnormalizedHandler('SelectionChanged', args)
+  const sender = instance?.exposeProxy ?? instance?.proxy
+  emit('SelectionChanged', sender, args)
+  invokeUnnormalizedHandler('SelectionChanged', sender, args)
   showNavigationButtons()
   if (focus) focusSelectedItem()
   return true
@@ -604,8 +654,6 @@ function onKeyDown(event) {
   if (moved) event.preventDefault()
 }
 
-const previousGlyph = computed(() => orientationClass.value === 'vertical' ? '\uEDDB' : '\uEDD9')
-const nextGlyph = computed(() => orientationClass.value === 'vertical' ? '\uEDDC' : '\uEDDA')
 const previousButtonVisible = computed(() => showButtons.value && selectedIndex.value > 0)
 const nextButtonVisible = computed(() => showButtons.value && selectedIndex.value < items.value.length - 1)
 const previousLabel = computed(() => t('text.previous'))
@@ -655,7 +703,7 @@ defineExpose({
     overflow: hidden;
     isolation: isolate;
     border-radius: var(--ControlCornerRadius, 4px);
-    background: var(--FlipViewBackground, var(--SolidBackgroundFillColorBaseBrush, var(--ctrl-solid-fill)));
+    background: var(--FlipViewBackground);
     border: 0 solid transparent;
     color: var(--TextFillColorPrimaryBrush, var(--text-primary));
     outline: none;
@@ -700,7 +748,7 @@ defineExpose({
     min-height: 1px;
     overflow: hidden;
     box-sizing: border-box;
-    background: var(--FlipViewItemBackground, transparent);
+    background: var(--FlipViewItemBackground);
     outline: none;
   }
 
@@ -711,6 +759,17 @@ defineExpose({
     min-height: 0;
     max-width: 100%;
     max-height: 100%;
+  }
+
+  /* A template Image is arranged in the FlipViewItem content slot. Its
+     natural dimensions are only the measure result, so Stretch alignment
+     must use the page bounds even while its URI is still loading. */
+  .flip-view-item > .win-image-host[data-flip-view-auto-width] {
+    width: var(--flip-view-content-width, auto) !important;
+  }
+
+  .flip-view-item > .win-image-host[data-flip-view-auto-height] {
+    height: var(--flip-view-content-height, auto) !important;
   }
 
   /* Data-template roots fill the FlipView page; their children decide their
@@ -748,14 +807,12 @@ defineExpose({
     box-sizing: border-box;
     margin: 1px;
     padding: 0;
-    border: var(--FlipViewButtonBorderThemeThickness, 0) solid var(--FlipViewNextPreviousButtonBorderBrush, var(--ControlStrokeColorDefaultBrush, transparent));
+    border: var(--FlipViewButtonBorderThemeThickness) solid var(--FlipViewNextPreviousButtonBorderBrush);
     border-radius: var(--ControlCornerRadius, 4px);
-    background: var(--FlipViewNextPreviousButtonBackground, var(--AcrylicInAppFillColorDefaultBrush, rgba(255, 255, 255, .72)));
-    color: var(--FlipViewNextPreviousArrowForeground, var(--ControlStrongFillColorDefaultBrush, var(--ctrl-strong-fill)));
     cursor: pointer;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 167ms cubic-bezier(.1, .9, .2, 1), background 83ms linear, color 83ms linear;
+    transition: opacity 167ms cubic-bezier(.1, .9, .2, 1);
   }
 
   .flip-btn.visible {
@@ -787,43 +844,28 @@ defineExpose({
   .win-flip-view.vertical .flip-btn.prev { top: 0; }
   .win-flip-view.vertical .flip-btn.next { bottom: 0; }
 
-  .flip-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    pointer-events: none;
-    background: var(--FlipViewNextPreviousButtonBackground, var(--AcrylicInAppFillColorDefaultBrush, rgba(255, 255, 255, .72)));
-  }
-
   .flip-btn:hover {
-    background: var(--FlipViewNextPreviousButtonBackgroundPointerOver, var(--AcrylicInAppFillColorDefaultBrush, rgba(255, 255, 255, .84)));
-    border-color: var(--FlipViewNextPreviousButtonBorderBrushPointerOver, var(--ControlStrokeColorDefaultBrush, transparent));
-    color: var(--FlipViewNextPreviousArrowForegroundPointerOver, var(--TextFillColorSecondaryBrush, var(--text-secondary)));
+    --FlipViewNextPreviousArrowForeground: var(--FlipViewNextPreviousArrowForegroundPointerOver);
+    border-color: var(--FlipViewNextPreviousButtonBorderBrushPointerOver);
   }
 
   .flip-btn:active {
-    background: var(--FlipViewNextPreviousButtonBackgroundPressed, var(--AcrylicInAppFillColorDefaultBrush, rgba(255, 255, 255, .92)));
-    border-color: var(--FlipViewNextPreviousButtonBorderBrushPressed, var(--ControlStrokeColorDefaultBrush, transparent));
-    color: var(--FlipViewNextPreviousArrowForegroundPressed, var(--TextFillColorSecondaryBrush, var(--text-secondary)));
+    --FlipViewNextPreviousArrowForeground: var(--FlipViewNextPreviousArrowForegroundPressed);
+    border-color: var(--FlipViewNextPreviousButtonBorderBrushPressed);
   }
 
   .flip-btn:active .flip-arrow {
-    transform: scale(.875);
+    animation: flip-view-arrow-pressed 16ms step-end forwards;
   }
 
   .flip-btn .flip-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif);
-    font-size: var(--FlipViewButtonFontSize, 8px);
-    font-weight: 400;
-    line-height: 1;
-    transition: transform 100ms ease, color 83ms linear;
+    transform-origin: center;
+    scale: 1;
+  }
+
+  @keyframes flip-view-arrow-pressed {
+    from { scale: 1; }
+    to { scale: var(--FlipViewButtonScalePressed); }
   }
 
   .win-flip-view.rtl.horizontal .flip-btn.prev .flip-arrow,
@@ -831,7 +873,4 @@ defineExpose({
     transform: scaleX(-1);
   }
 
-  .win-flip-view.rtl.horizontal .flip-btn:active .flip-arrow {
-    transform: scaleX(-1) scale(.875);
-  }
 </style>

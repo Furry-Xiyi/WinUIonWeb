@@ -8,20 +8,36 @@
 </template>
 
 <script setup lang="ts">
-import { computed, provide } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, unref } from 'vue';
+import { xamlThemeKey } from './brushCore';
 
 const props = defineProps<{
   theme?: 'light' | 'dark' | 'system';
 }>();
 
+const inheritedTheme = inject(xamlThemeKey, null);
+const themeRevision = ref(0);
+const systemTheme = typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+let themeObserver: MutationObserver | undefined;
+const refreshTheme = () => { themeRevision.value += 1; };
+onMounted(() => {
+  themeObserver = new MutationObserver(refreshTheme);
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+  systemTheme?.addEventListener('change', refreshTheme);
+});
+onBeforeUnmount(() => {
+  themeObserver?.disconnect();
+  systemTheme?.removeEventListener('change', refreshTheme);
+});
 const resolvedTheme = computed(() => {
+  themeRevision.value;
   if (!props.theme || props.theme === 'system') {
-    // 使用全局主题
+    const parentTheme = unref(inheritedTheme);
+    if (parentTheme === 'light' || parentTheme === 'dark') return parentTheme;
     const html = document.documentElement;
-    if (html.classList.contains('theme-dark')) return 'dark';
-    if (html.classList.contains('theme-light')) return 'light';
-    // 检查系统偏好
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    if (html.classList.contains('theme-dark') || html.dataset.theme === 'dark') return 'dark';
+    if (html.classList.contains('theme-light') || html.dataset.theme === 'light') return 'light';
+    if (systemTheme?.matches) {
       return 'dark';
     }
     return 'light';
@@ -34,6 +50,7 @@ const themeClass = computed(() => {
 });
 
 provide('winuiTheme', resolvedTheme);
+provide(xamlThemeKey, resolvedTheme);
 </script>
 
 <style>
@@ -42,8 +59,36 @@ provide('winuiTheme', resolvedTheme);
   display: contents;
 }
 
-/* Light theme overrides */
+/* These aliases must resolve in the requested theme's resource scope.
+   An alias inherited after resolving on html retains html's old color. */
 .example-theme-wrapper.theme-light,
+.example-theme-wrapper.theme-dark,
+.win-theme-scope.theme-light,
+.win-theme-scope.theme-dark {
+  --ExpanderHeaderBackground: var(--CardBackgroundFillColorDefaultBrush);
+  --ExpanderHeaderForeground: var(--TextFillColorPrimaryBrush);
+  --ExpanderHeaderForegroundPointerOver: var(--TextFillColorPrimaryBrush);
+  --ExpanderHeaderForegroundPressed: var(--TextFillColorPrimaryBrush);
+  --ExpanderHeaderBorderBrush: var(--CardStrokeColorDefaultBrush);
+  --ExpanderHeaderBorderPointerOverBrush: var(--CardStrokeColorDefaultBrush);
+  --ExpanderHeaderBorderPressedBrush: var(--CardStrokeColorDefaultBrush);
+  --ExpanderHeaderDisabledForeground: var(--TextFillColorDisabledBrush);
+  --ExpanderHeaderDisabledBorderBrush: var(--CardStrokeColorDefaultBrush);
+  --ExpanderChevronBackground: transparent;
+  --ExpanderChevronPointerOverBackground: var(--SubtleFillColorSecondaryBrush);
+  --ExpanderChevronPressedBackground: var(--SubtleFillColorTertiaryBrush);
+  --ExpanderChevronForeground: var(--TextFillColorPrimaryBrush);
+  --ExpanderChevronPointerOverForeground: var(--TextFillColorPrimaryBrush);
+  --ExpanderChevronPressedForeground: var(--TextFillColorPrimaryBrush);
+  --ExpanderChevronBorderBrush: transparent;
+  --ExpanderChevronBorderPointerOverBrush: transparent;
+  --ExpanderChevronBorderPressedBrush: transparent;
+  --ExpanderContentBackground: var(--CardBackgroundFillColorSecondaryBrush);
+  --ExpanderContentBorderBrush: var(--CardStrokeColorDefaultBrush);
+}
+
+/* Light theme overrides */
+.example-theme-wrapper.theme-light[data-theme="light"],
 .win-theme-scope.theme-light {
   color-scheme: light;
   /* ListView group headers are an opaque surface, including when sticky. */
@@ -66,10 +111,10 @@ provide('winuiTheme', resolvedTheme);
   --TeachingTipForegroundBrush: rgba(0, 0, 0, 0.8956);
   --TeachingTipTitleForegroundBrush: rgba(0, 0, 0, 0.8956);
   --TeachingTipSubtitleForegroundBrush: rgba(0, 0, 0, 0.8956);
-  --text-primary: rgba(0, 0, 0, 0.8956);
-  --text-secondary: rgba(0, 0, 0, 0.6063);
-  --text-tertiary: rgba(0, 0, 0, 0.4458);
-  --text-disabled: rgba(0, 0, 0, 0.3614);
+  --text-primary: #000000e4;
+  --text-secondary: #0000009e;
+  --text-tertiary: #00000072;
+  --text-disabled: #0000005c;
 
   --accent-base: #0067C0;
   --accent-hover: rgba(0, 103, 192, 0.90);
@@ -120,8 +165,8 @@ provide('winuiTheme', resolvedTheme);
   --ctrl-strong-stroke: rgba(0, 0, 0, 0.6555);
   --ctrl-strong-stroke-disabled: rgba(0, 0, 0, 0.3665);
 
-  --subtle-secondary: rgba(0, 0, 0, 0.0373);
-  --subtle-tertiary: rgba(0, 0, 0, 0.0241);
+  --subtle-secondary: #00000009;
+  --subtle-tertiary: #00000006;
   --subtle-fill-color-secondary: var(--subtle-secondary);
   --subtle-fill-color-tertiary: var(--subtle-tertiary);
   --SubtleFillColorSecondaryBrush: var(--subtle-secondary);
@@ -135,12 +180,12 @@ provide('winuiTheme', resolvedTheme);
   /* GridView/ListView item checkboxes use the on-image control brushes from
      the WinUI theme resources. Keep these distinct from generic control
      fills so an unchecked box stays legible over image templates. */
-  --ControlOnImageFillColorDefaultBrush: rgba(255, 255, 255, .7882353);
+  --ControlOnImageFillColorDefaultBrush: #ffffffc9;
   --ControlOnImageFillColorSecondaryBrush: #F3F3F3;
   --ControlOnImageFillColorTertiaryBrush: #EBEBEB;
   --ControlOnImageFillColorDisabledBrush: rgba(255, 255, 255, 0);
   --SystemControlBackgroundBaseMediumBrush: rgba(255, 255, 255, .6);
-  --SystemControlForegroundAltHighBrush: #000000;
+  --SystemControlForegroundAltHighBrush: #FFFFFF;
   --SystemControlPageTextBaseMediumBrush: rgba(0, 0, 0, .6);
   --ControlFillColorDefaultBrush: var(--ctrl-fill-default);
   --ControlFillColorSecondaryBrush: var(--ctrl-fill-secondary);
@@ -168,15 +213,15 @@ provide('winuiTheme', resolvedTheme);
   --TextControlButtonForegroundPointerOver: var(--TextFillColorSecondaryBrush);
   --TextControlButtonForegroundPressed: var(--TextFillColorTertiaryBrush);
 
-  --card-bg-default: rgba(255, 255, 255, 0.7);
-  --card-bg-secondary: rgba(246, 246, 246, 0.5);
+  --card-bg-default: #ffffffb3;
+  --card-bg-secondary: #f6f6f680;
   --card-bg: var(--card-bg-default);
   --CardBackgroundFillColorDefaultBrush: var(--card-bg-default);
   --CardBackgroundFillColorSecondaryBrush: var(--card-bg-secondary);
-  --card-stroke: rgba(0, 0, 0, 0.06);
-  --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
-  --NavigationViewContentGridBorderBrush: #E5E5E5;
-  --NavigationViewContentBackground: #F9F9F9;
+  --card-stroke: #0000000f;
+  --CardStrokeColorDefaultBrush: #0000000f;
+  --NavigationViewContentGridBorderBrush: var(--CardStrokeColorDefaultBrush);
+  --NavigationViewContentBackground: var(--LayerFillColorDefaultBrush, var(--layer-default));
   --SystemFillColorAttentionBrush: #0067C0;
   --SystemFillColorSuccessBrush: #0F7B0F;
   --SystemFillColorCautionBrush: #9D5D00;
@@ -187,13 +232,13 @@ provide('winuiTheme', resolvedTheme);
   --SystemFillColorCautionBackgroundBrush: #FFF4CE;
   --SystemFillColorCriticalBackgroundBrush: #FDE7E9;
   --SystemFillColorSolidNeutralBackgroundBrush: #F3F3F3;
-  --stroke-divider: rgba(0, 0, 0, 0.06);
+  --stroke-divider: #0000000f;
+  --DividerStrokeColorDefaultBrush: var(--stroke-divider);
   --NavigationViewItemSeparatorForeground: var(--stroke-divider);
   --stroke-surface-flyout: rgba(0, 0, 0, 0.06);
   --flyout-border: rgba(0, 0, 0, 0.06);
   --flyout-bg: rgba(252, 252, 252, 0.92);
   --flyout-background: var(--flyout-bg);
-  --flyout-backdrop: blur(30px) saturate(160%) brightness(1.02);
   --AcrylicInAppFillColorDefaultBrush: var(--flyout-bg);
   --ToolTipBackgroundBrush: var(--AcrylicInAppFillColorDefaultBrush);
   --ToolTipForegroundBrush: var(--text-primary);
@@ -205,7 +250,7 @@ provide('winuiTheme', resolvedTheme);
 }
 
 /* Dark theme overrides */
-.example-theme-wrapper.theme-dark,
+.example-theme-wrapper.theme-dark[data-theme="dark"],
 .win-theme-scope.theme-dark {
   color-scheme: dark;
   /* Keep the sticky header opaque so scrolled content cannot show through. */
@@ -228,10 +273,10 @@ provide('winuiTheme', resolvedTheme);
   --TeachingTipForegroundBrush: rgba(255, 255, 255, 1);
   --TeachingTipTitleForegroundBrush: rgba(255, 255, 255, 1);
   --TeachingTipSubtitleForegroundBrush: rgba(255, 255, 255, 1);
-  --text-primary: rgba(255, 255, 255, 1);
-  --text-secondary: rgba(255, 255, 255, 0.786);
-  --text-tertiary: rgba(255, 255, 255, 0.5442);
-  --text-disabled: rgba(255, 255, 255, 0.3628);
+  --text-primary: #ffffff;
+  --text-secondary: #ffffffc5;
+  --text-tertiary: #ffffff87;
+  --text-disabled: #ffffff5d;
 
   --accent-base: #4CC2FF;
   --accent-hover: rgba(96, 205, 255, 0.90);
@@ -280,8 +325,8 @@ provide('winuiTheme', resolvedTheme);
   --ctrl-strong-stroke: rgba(255, 255, 255, 0.5442);
   --ctrl-strong-stroke-disabled: rgba(255, 255, 255, 0.1581);
 
-  --subtle-secondary: rgba(255, 255, 255, 0.0605);
-  --subtle-tertiary: rgba(255, 255, 255, 0.0419);
+  --subtle-secondary: #ffffff0f;
+  --subtle-tertiary: #ffffff0a;
   --subtle-fill-color-secondary: var(--subtle-secondary);
   --subtle-fill-color-tertiary: var(--subtle-tertiary);
   --SubtleFillColorSecondaryBrush: var(--subtle-secondary);
@@ -292,12 +337,12 @@ provide('winuiTheme', resolvedTheme);
   --TextFillColorTertiaryBrush: var(--text-tertiary);
   --TextFillColorDisabledBrush: var(--text-disabled);
   --TextFillColorInverseBrush: rgba(0, 0, 0, 0.89);
-  --ControlOnImageFillColorDefaultBrush: rgba(28, 28, 28, .7019608);
+  --ControlOnImageFillColorDefaultBrush: #1c1c1cb3;
   --ControlOnImageFillColorSecondaryBrush: #1A1A1A;
   --ControlOnImageFillColorTertiaryBrush: #131313;
   --ControlOnImageFillColorDisabledBrush: #1E1E1E;
   --SystemControlBackgroundBaseMediumBrush: rgba(0, 0, 0, .6);
-  --SystemControlForegroundAltHighBrush: #FFFFFF;
+  --SystemControlForegroundAltHighBrush: #000000;
   --SystemControlPageTextBaseMediumBrush: rgba(255, 255, 255, .6);
   --ControlFillColorDefaultBrush: var(--ctrl-fill-default);
   --ControlFillColorSecondaryBrush: var(--ctrl-fill-secondary);
@@ -325,15 +370,15 @@ provide('winuiTheme', resolvedTheme);
   --TextControlButtonForegroundPointerOver: var(--TextFillColorSecondaryBrush);
   --TextControlButtonForegroundPressed: var(--TextFillColorTertiaryBrush);
 
-  --card-bg-default: rgba(255, 255, 255, 0.0512);
-  --card-bg-secondary: rgba(255, 255, 255, 0.0326);
+  --card-bg-default: #ffffff0d;
+  --card-bg-secondary: #ffffff08;
   --card-bg: var(--card-bg-default);
   --CardBackgroundFillColorDefaultBrush: var(--card-bg-default);
   --CardBackgroundFillColorSecondaryBrush: var(--card-bg-secondary);
-  --card-stroke: rgba(0, 0, 0, 0.10);
-  --CardStrokeColorDefaultBrush: rgba(0, 0, 0, 0.10);
-  --NavigationViewContentGridBorderBrush: #1D1D1D;
-  --NavigationViewContentBackground: #282828;
+  --card-stroke: #00000019;
+  --CardStrokeColorDefaultBrush: #00000019;
+  --NavigationViewContentGridBorderBrush: var(--CardStrokeColorDefaultBrush);
+  --NavigationViewContentBackground: var(--LayerFillColorDefaultBrush, var(--layer-default));
   --SystemFillColorAttentionBrush: #4CC2FF;
   --SystemFillColorSuccessBrush: #6CCB5F;
   --SystemFillColorCautionBrush: #FCE100;
@@ -344,13 +389,13 @@ provide('winuiTheme', resolvedTheme);
   --SystemFillColorCautionBackgroundBrush: #433519;
   --SystemFillColorCriticalBackgroundBrush: #442726;
   --SystemFillColorSolidNeutralBackgroundBrush: #2E2E2E;
-  --stroke-divider: rgba(255, 255, 255, 0.08);
+  --stroke-divider: #ffffff15;
+  --DividerStrokeColorDefaultBrush: var(--stroke-divider);
   --NavigationViewItemSeparatorForeground: var(--stroke-divider);
   --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
   --flyout-border: rgba(0, 0, 0, 0.20);
   --flyout-bg: rgba(44, 44, 44, 0.86);
   --flyout-background: var(--flyout-bg);
-  --flyout-backdrop: blur(44px) saturate(190%) brightness(1.22) contrast(1.05);
   --AcrylicInAppFillColorDefaultBrush: var(--flyout-bg);
   --ToolTipBackgroundBrush: var(--AcrylicInAppFillColorDefaultBrush);
   --ToolTipForegroundBrush: var(--text-primary);

@@ -1,0 +1,4 @@
+<MediaPlayerElement Source="/Assets/SampleMedia/ladybug.wmv"
+                    MaxWidth="400"
+                    AutoPlay="False"
+                    AreTransportControlsEnabled="True" />

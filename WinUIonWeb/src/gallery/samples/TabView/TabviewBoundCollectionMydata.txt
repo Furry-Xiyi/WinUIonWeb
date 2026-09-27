@@ -1,0 +1,36 @@
+--- header
+A TabView bound to a collection of MyData objects
+--- xaml
+<TabView TabItemsSource="{x:Bind myDatas, Mode=OneWay}"
+         AddTabButtonClick="TabViewItemsSourceSample_AddTabButtonClick"
+         TabCloseRequested="TabViewItemsSourceSample_TabCloseRequested">
+    <TabView.TabItemTemplate>
+        <DataTemplate x:DataType="local:MyData">
+            <TabViewItem Content="{x:Bind DataContent}"
+                         Header="{x:Bind DataHeader}"
+                         IconSource="{x:Bind DataIconSource}" />
+        </DataTemplate>
+    </TabView.TabItemTemplate>
+</TabView>
+--- c#
+public class MyData
+{
+    public string DataHeader { get; set; } = string.Empty;
+    public required IconSource DataIconSource { get; set; }
+    public required object DataContent { get; set; }
+}
+
+private ObservableCollection<MyData> myDatas = new();
+
+private void TabViewItemsSourceSample_AddTabButtonClick(TabView sender, object args)
+{
+    myDatas.Add(CreateNewMyData(myDatas.Count));
+}
+
+private void TabViewItemsSourceSample_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
+{
+    if (args.Item is MyData myData)
+    {
+        myDatas.Remove(myData);
+    }
+}

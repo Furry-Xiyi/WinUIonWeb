@@ -55,8 +55,6 @@ const copyToClipboard = async () => {
   isolation: isolate;
   background: transparent;
   border-radius: 4px;
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
 }
 
 .typography-row.has-background::before {

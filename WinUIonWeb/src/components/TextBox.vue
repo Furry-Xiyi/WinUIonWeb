@@ -1,45 +1,61 @@
 <template>
   <div
+    ref="rootRef"
     class="win-textbox"
+    v-bind="forwardedAttrs"
     :class="{
-      'is-readonly': IsReadOnly,
+      'is-readonly': props.IsReadOnly,
       'is-disabled': isDisabled,
       'is-focused': isFocused,
       'is-hovered': isHovered,
-      'candidate-window-bottom-edge': DesiredCandidateWindowAlignment === 'BottomEdge'
+      'candidate-window-bottom-edge': props.DesiredCandidateWindowAlignment === 'BottomEdge'
     }"
     :style="rootStyle">
-    <div v-if="resolvedHeader || $slots.header" class="win-textbox-header">
-      <slot name="header">{{ resolvedHeader }}</slot>
+    <div v-if="resolvedHeader || headerNodes.length" class="win-textbox-header">
+      <HeaderOutlet />
     </div>
 
     <div
       class="win-textbox-border"
+      v-acrylic-brush="backgroundStyle"
+      :style="backgroundStyle"
       @pointerenter="onPointerEnter"
       @pointerleave="onPointerLeave">
       <div class="win-textbox-focus-border" aria-hidden="true"></div>
       <div class="win-textbox-content">
-        <slot
-          name="field"
-          :onFocus="onFocus"
-          :onBlur="onBlur"
-          :onPointerEnter="onPointerEnter"
-          :onPointerLeave="onPointerLeave">
+        <FieldOutlet v-if="inputTemplate?.Field" />
+        <template v-else>
+          <ScrollViewer
+            class="win-textbox-content-element"
+            HorizontalScrollMode="{x:Bind ScrollSettings.HorizontalScrollMode, Mode=OneWay}"
+            VerticalScrollMode="{x:Bind ScrollSettings.VerticalScrollMode, Mode=OneWay}"
+            HorizontalScrollBarVisibility="{x:Bind ScrollSettings.HorizontalScrollBarVisibility, Mode=OneWay}"
+            VerticalScrollBarVisibility="{x:Bind ScrollSettings.VerticalScrollBarVisibility, Mode=OneWay}"
+            IsHorizontalRailEnabled="{x:Bind ScrollSettings.IsHorizontalRailEnabled, Mode=OneWay}"
+            IsVerticalRailEnabled="{x:Bind ScrollSettings.IsVerticalRailEnabled, Mode=OneWay}"
+            IsHorizontalScrollChainingEnabled="{x:Bind ScrollSettings.IsHorizontalScrollChainingEnabled, Mode=OneWay}"
+            IsVerticalScrollChainingEnabled="{x:Bind ScrollSettings.IsVerticalScrollChainingEnabled, Mode=OneWay}"
+            IsDeferredScrollingEnabled="{x:Bind ScrollSettings.IsDeferredScrollingEnabled, Mode=OneWay}"
+            IsEnabled="{x:Bind TextBoxScrollEnabled, Mode=OneWay}"
+            ZoomMode="Disabled"
+            IsTabStop="False">
           <textarea
-            v-if="AcceptsReturn"
+            v-if="props.AcceptsReturn"
+            rows="1"
             ref="fieldRef"
             class="win-textbox-field win-textbox-textarea"
             :value="currentText"
-            :placeholder="PlaceholderText"
-            :readonly="IsReadOnly"
+            :placeholder="props.PlaceholderText"
+            :readonly="props.IsReadOnly"
             :disabled="isDisabled"
-            :maxlength="MaxLength > 0 ? MaxLength : undefined"
-            :spellcheck="IsSpellCheckEnabled"
+            :maxlength="props.MaxLength > 0 ? props.MaxLength : undefined"
+            :spellcheck="props.IsSpellCheckEnabled"
             :inputmode="inputMode"
-            :autocomplete="IsTextPredictionEnabled ? 'on' : 'off'"
+            :autocomplete="props.IsTextPredictionEnabled ? 'on' : 'off'"
             :autocapitalize="textPredictionAttr"
             :autocorrect="textPredictionAttr"
             :style="fieldStyle"
+            :aria-label="resolveXamlValue(attrs['AutomationProperties.Name'], instance) || resolvedHeader"
             @input="onInput"
             @focus="onFocus"
             @blur="onBlur"
@@ -47,6 +63,7 @@
             @paste="onPaste"
             @contextmenu="onContextMenu"
             @select="onSelect"
+            @pointerup="onSelectionPointerUp"
             @cut="onCuttingToClipboard"
             @copy="onCopyingToClipboard"
             @compositionstart="onCompositionStart"
@@ -61,16 +78,17 @@
             class="win-textbox-field"
             type="text"
             :value="currentText"
-            :placeholder="PlaceholderText"
-            :readonly="IsReadOnly"
+            :placeholder="props.PlaceholderText"
+            :readonly="props.IsReadOnly"
             :disabled="isDisabled"
-            :maxlength="MaxLength > 0 ? MaxLength : undefined"
-            :spellcheck="IsSpellCheckEnabled"
+            :maxlength="props.MaxLength > 0 ? props.MaxLength : undefined"
+            :spellcheck="props.IsSpellCheckEnabled"
             :inputmode="inputMode"
-            :autocomplete="IsTextPredictionEnabled ? 'on' : 'off'"
+            :autocomplete="props.IsTextPredictionEnabled ? 'on' : 'off'"
             :autocapitalize="textPredictionAttr"
             :autocorrect="textPredictionAttr"
             :style="fieldStyle"
+            :aria-label="resolveXamlValue(attrs['AutomationProperties.Name'], instance) || resolvedHeader"
             @input="onInput"
             @focus="onFocus"
             @blur="onBlur"
@@ -78,6 +96,7 @@
             @paste="onPaste"
             @contextmenu="onContextMenu"
             @select="onSelect"
+            @pointerup="onSelectionPointerUp"
             @cut="onCuttingToClipboard"
             @copy="onCopyingToClipboard"
             @compositionstart="onCompositionStart"
@@ -85,7 +104,8 @@
             @compositionend="onCompositionEnd"
             @pointerenter="onPointerEnter"
             @pointerleave="onPointerLeave" />
-        </slot>
+          </ScrollViewer>
+        </template>
 
         <button
           v-if="showDeleteButton"
@@ -100,34 +120,84 @@
           </span>
         </button>
 
-        <slot name="actions"></slot>
+        <ActionsOutlet v-if="inputTemplate?.Actions" />
       </div>
     </div>
 
-    <div v-if="resolvedDescription || $slots.description" class="win-textbox-description">
-      <slot name="description">{{ resolvedDescription }}</slot>
+    <div v-if="resolvedDescription || descriptionNodes.length" class="win-textbox-description">
+      <DescriptionOutlet v-if="descriptionNodes.length" />
+      <template v-else>{{ resolvedDescription }}</template>
     </div>
 
-    <MenuFlyout
-      :Open="contextMenuOpen"
-      :AnchorRect="contextMenuAnchor"
-      :Items="contextMenuItems"
-      :MinWidth="160"
-      Placement="Right"
-      @Close="closeContextMenu"
-      @Select="onContextMenuSelect" />
+    <ContextMenu />
+    <CustomFlyouts />
   </div>
 </template>
 
+<script lang="ts">
+import { brushProperty } from './brushProperties';
+import { defineComponent } from 'vue';
+const textBoxProperty = (name: string) => defineComponent({ name: `TextBox.${name}`, __textInputProperty: name, setup: () => () => null });
+export const TextBoxHeader = textBoxProperty('Header');
+export const TextBoxHeaderTemplate = textBoxProperty('HeaderTemplate');
+export const TextBoxDescription = textBoxProperty('Description');
+export const TextBoxContextFlyout = textBoxProperty('ContextFlyout');
+export const TextBoxSelectionFlyout = textBoxProperty('SelectionFlyout');
+export default { Background: brushProperty('TextBox', 'Background'), Header: TextBoxHeader, HeaderTemplate: TextBoxHeaderTemplate, Description: TextBoxDescription, ContextFlyout: TextBoxContextFlyout, SelectionFlyout: TextBoxSelectionFlyout };
+</script>
+
 <script setup lang="ts">
-import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { cloneVNode, computed, defineComponent, Fragment, h, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, useAttrs, useSlots, watch } from 'vue';
 import type { CSSProperties } from 'vue';
-import MenuFlyout from './MenuFlyout.vue';
+import { textCommandFlyout } from './textCommandFlyout';
 import { useI18n } from './i18n/index';
-import { resolveXamlValue } from './xamlRuntime';
+import { eventNames, normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
+import { textInputTemplateKey } from './textInputTemplate';
+import { alignment, cssLength, xamlThickness } from './layout';
+import ScrollViewer from './ScrollViewer.vue';
+import { scrollViewerTemplateBindings } from './scrollViewerTemplateBindings';
+import { useAcrylicBrushStyle } from './AcrylicBrush';
+import { vAcrylicBrush } from './acrylicBrushVisual';
+import { useBrushProperty } from './brushProperties';
+import { getVNodeChildren } from './CollectionProperties';
+import ContentPresenter from './ContentPresenter.vue';
+import { xamlResourceDictionaryKey } from './Page.vue';
+
+defineOptions({ inheritAttrs: false });
 
 const { t } = useI18n();
 const instance = getCurrentInstance();
+const attrs = useAttrs();
+const slots = useSlots();
+const propertyNodes = (name: string) => {
+  const collect = (nodes: ReturnType<NonNullable<typeof slots.default>>): ReturnType<NonNullable<typeof slots.default>> => nodes.flatMap(node => node.type === Fragment ? collect(getVNodeChildren(node)) : (node.type as { __textInputProperty?: string })?.__textInputProperty === name ? getVNodeChildren(node) : []);
+  return normalizeXamlNodes(collect(slots.default?.() ?? []),instance);
+};
+const headerNodes = computed(() => propertyNodes('Header'));
+const resources = inject(xamlResourceDictionaryKey, {});
+const headerTemplate = computed(() => {
+  const declaration = propertyNodes('HeaderTemplate')[0];
+  if (declaration) return declaration;
+  const name = String(rawProps.HeaderTemplate ?? '').match(/^\{(?:StaticResource|ThemeResource)\s+([^}]+)\}$/)?.[1];
+  return name && resources[name] ? resources[name] : resolveXamlValue(rawProps.HeaderTemplate, instance);
+});
+const descriptionNodes = computed(() => propertyNodes('Description'));
+const HeaderOutlet = defineComponent({ setup: () => () => headerNodes.value.length ? h(Fragment,headerNodes.value)
+  : h(ContentPresenter, { Content: resolvedHeader.value, ContentTemplate: headerTemplate.value }) });
+const DescriptionOutlet = defineComponent({ setup: () => () => h(Fragment,descriptionNodes.value) });
+const inputTemplate = inject(textInputTemplateKey, null);
+const FieldOutlet = defineComponent({ setup: () => () => h(Fragment, [inputTemplate?.Field?.({ Focused: onFocus, Blurred: onBlur, PointerEntered: onPointerEnter, PointerExited: onPointerLeave })]) });
+const ActionsOutlet = defineComponent({ setup: () => () => h(Fragment, [inputTemplate?.Actions?.()]) });
+const forwardedAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([name]) => !name.startsWith('ScrollViewer.') && !eventNames.has(name) && !name.startsWith('AutomationProperties.'))));
+const ScrollSettings = scrollViewerTemplateBindings(name => attrs[name], instance, {
+  HorizontalScrollMode: 'Auto', VerticalScrollMode: 'Auto',
+  HorizontalScrollBarVisibility: 'Hidden', VerticalScrollBarVisibility: 'Hidden',
+  IsDeferredScrollingEnabled: false
+});
+const inheritedScrollTemplateScope = inject(xamlScopeKey, {});
+provide(xamlScopeKey, Object.assign(Object.create(inheritedScrollTemplateScope), { ScrollSettings,
+  TextBoxScrollEnabled: computed(() => !isDisabled.value)
+}));
 
 type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
 type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
@@ -136,43 +206,58 @@ type CandidateWindowAlignment = 'Default' | 'BottomEdge';
 type TextBoxMenuCommand = 'cut' | 'copy' | 'paste' | 'undo' | 'redo' | 'selectAll';
 type TextBoxMenuItem = {
   Text?: string;
+  Background?: string | object;
   Icon?: string;
   Value?: TextBoxMenuCommand;
 };
 
-const props = withDefaults(defineProps<{
+const rawProps = withDefaults(defineProps<{
   Text?: string;
   PlaceholderText?: string;
-  Header?: string;
+  Header?: unknown;
+  HeaderTemplate?: unknown;
+  ContextFlyout?: unknown;
+  SelectionFlyout?: unknown;
   Description?: string;
-  AcceptsReturn?: boolean;
-  IsReadOnly?: boolean;
-  IsEnabled?: boolean;
-  MaxLength?: number;
+  AcceptsReturn?: boolean | string;
+  IsReadOnly?: boolean | string;
+  IsEnabled?: boolean | string;
+  MaxLength?: number | string;
   TextWrapping?: TextWrapping;
   TextAlignment?: TextAlignment;
-  IsSpellCheckEnabled?: boolean;
-  IsTextPredictionEnabled?: boolean;
+  IsSpellCheckEnabled?: boolean | string;
+  IsTextPredictionEnabled?: boolean | string;
   InputScope?: string;
   CharacterCasing?: CharacterCasing;
   SelectionHighlightColor?: string;
   DesiredCandidateWindowAlignment?: CandidateWindowAlignment;
-  IsColorFontEnabled?: boolean;
-  PreventKeyboardDisplayOnProgrammaticFocus?: boolean;
-  ShowDeleteButton?: boolean;
+  IsColorFontEnabled?: boolean | string;
+  PreventKeyboardDisplayOnProgrammaticFocus?: boolean | string;
 
   FontFamily?: string;
   FontSize?: number | string;
   FontStyle?: string;
   FontWeight?: number | string;
   Foreground?: string;
-  CharacterSpacing?: number;
+  Background?: string;
+  BorderBrush?: string;
+  BorderThickness?: number | string;
+  Padding?: number | string;
+  CornerRadius?: number | string;
+  PlaceholderForeground?: string;
+  CharacterSpacing?: number | string;
+  Width?: number | string;
+  Height?: number | string;
+  Margin?: number | string;
+  HorizontalAlignment?: string;
+  VerticalAlignment?: string;
   MinWidth?: number | string;
   MaxWidth?: number | string;
   MinHeight?: number | string;
   MaxHeight?: number | string;
 }>(), {
   PlaceholderText: '',
+  Background: '',
   Header: '',
   Description: '',
   AcceptsReturn: false,
@@ -189,18 +274,30 @@ const props = withDefaults(defineProps<{
   DesiredCandidateWindowAlignment: 'Default',
   IsColorFontEnabled: true,
   PreventKeyboardDisplayOnProgrammaticFocus: false,
-  ShowDeleteButton: true,
   FontFamily: '',
   FontSize: '',
   FontStyle: 'Normal',
   FontWeight: '',
   Foreground: '',
+  BorderBrush: '',
+  BorderThickness: 1,
+  Padding: '',
+  CornerRadius: 4,
+  PlaceholderForeground: '',
   CharacterSpacing: 0,
+  Width: '',
+  Height: '',
+  Margin: '',
+  HorizontalAlignment: '',
+  VerticalAlignment: '',
   MinWidth: '',
   MaxWidth: '',
   MinHeight: '',
   MaxHeight: ''
 });
+const propertyOverrides = ref<Record<string, unknown>>({});
+const props = new Proxy(rawProps, { get: (target, property) => typeof property === 'string' && property in propertyOverrides.value
+  ? propertyOverrides.value[property] : resolveXamlValue(Reflect.get(target, property), instance) });
 const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
 const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
 const resolvedText = computed(() => {
@@ -217,16 +314,36 @@ const emit = defineEmits<{
   SelectionChanging: [args: { SelectionStart: number; SelectionLength: number; Cancel: boolean }];
   GotFocus: [];
   LostFocus: [];
+  KeyDown: [args: { Key: string; OriginalSource: HTMLElement | null; Handled: boolean }];
   Paste: [args: { Handled: boolean }];
   CuttingToClipboard: [args: { Handled: boolean }];
   CopyingToClipboard: [args: { Handled: boolean }];
+  ContextMenuOpening: [args: { Handled: boolean; CursorLeft: number; CursorTop: number }];
   CandidateWindowBoundsChanged: [args: { Bounds: DOMRectReadOnly }];
   TextCompositionStarted: [];
   TextCompositionChanged: [];
   TextCompositionEnded: [];
 }>();
+const dispatch = (name: string, args?: unknown) => {
+  const sender = instance?.exposeProxy ?? instance?.exposed ?? instance?.proxy;
+  const eventArgs = args ?? { OriginalSource: fieldRef.value, Handled: false };
+  const listener = instance?.vnode.props?.[`on${name}`];
+  if (listener) {
+    for (const handler of Array.isArray(listener) ? listener : [listener]) if (typeof handler === 'function') handler(sender, eventArgs);
+  } else {
+    (emit as (name: string, ...args: unknown[]) => void)(name, sender, eventArgs);
+    resolveXamlHandler(attrs[name],instance)?.(sender,eventArgs);
+  }
+};
 
+const rootRef = ref<HTMLElement | null>(null);
+const naturalFieldWidth = ref(62);
+const surfaceWidth = ref(0);
+const naturalControlWidth = computed(() => naturalFieldWidth.value + 2 + (inputTemplate?.ActionsWidth?.() ?? 0) + (inputTemplate?.ReserveDeleteButtonWidth ?? 0));
+watch(naturalControlWidth, width => inputTemplate?.DesiredWidthChanged?.(width), { immediate: true });
 const fieldRef = ref<HTMLInputElement | HTMLTextAreaElement | null>(null);
+let editorResizeObserver: ResizeObserver | undefined;
+let caretFrame: number | undefined;
 const isFocused = ref(false);
 const isHovered = ref(false);
 const localText = ref(resolvedText.value);
@@ -234,6 +351,16 @@ const undoStack = ref<string[]>([]);
 const redoStack = ref<string[]>([]);
 const clipboardText = ref('');
 const contextMenuOpen = ref(false);
+const contextMenuRef = ref<any>(null);
+const flyoutKind = ref<'Context' | 'Selection'>('Context');
+const customContextFlyout = ref<any>(null);
+const customSelectionFlyout = ref<any>(null);
+const CustomFlyouts = defineComponent({ setup: () => () => h(Fragment, ['ContextFlyout', 'SelectionFlyout'].flatMap(name =>
+  propertyNodes(name).map(node => cloneVNode(node, { ref: (control: unknown) => {
+    if (name === 'ContextFlyout') customContextFlyout.value = control;
+    else customSelectionFlyout.value = control;
+  } }, true)))) });
+let contextRequest = 0;
 const isRestoringContextMenuFocus = ref(false);
 const contextMenuAnchor = ref<DOMRect | {
   x: number;
@@ -247,12 +374,17 @@ const contextMenuAnchor = ref<DOMRect | {
 } | null>(null);
 const contextSelection = ref({ start: 0, length: 0, text: '' });
 
-const isTextControlled = computed(() => props.Text !== undefined);
-const currentText = computed(() => isTextControlled.value ? resolvedText.value : localText.value);
+// Text is a mutable dependency property. A XAML OneWay binding supplies its
+// value but must still allow edits until the source changes again.
+const currentText = computed(() => localText.value);
 const isDisabled = computed(() => !props.IsEnabled);
+const backgroundBrush = useBrushProperty('Background', () => props.Background, () => slots.default?.() ?? [], instance);
+const backgroundStyle = useAcrylicBrushStyle(() => isDisabled.value || isFocused.value || isHovered.value
+  ? undefined : backgroundBrush.value.value, instance);
 const hasText = computed(() => currentText.value.length > 0);
 const showDeleteButton = computed(() =>
-  props.ShowDeleteButton && hasText.value && !props.AcceptsReturn && !props.IsReadOnly && props.IsEnabled && isFocused.value
+  !inputTemplate?.HideDeleteButton && hasText.value && !props.AcceptsReturn && !props.IsReadOnly && props.IsEnabled && isFocused.value
+    && surfaceWidth.value > (Number(props.FontSize) || 14) * 5
 );
 
 const inputMode = computed(() => {
@@ -287,15 +419,29 @@ const resolvedTextAlign = computed(() => {
 
 const cssSize = (value: number | string | undefined) => {
   if (value === undefined || value === '') return undefined;
-  return typeof value === 'number' ? `${value}px` : value;
+  return cssLength(value);
 };
 
 const rootStyle = computed<CSSProperties & Record<string, string | number | undefined>>(() => {
   const style: CSSProperties & Record<string, string | number | undefined> = {};
+  if (props.Padding !== '') style['--textbox-padding'] = xamlThickness(props.Padding);
+  style['--textbox-natural-width'] = `${naturalFieldWidth.value}px`;
+  style['--textbox-radius'] = cssSize(props.CornerRadius);
+  style['--textbox-border-thickness'] = xamlThickness(props.BorderThickness);
+  if (props.BorderBrush) { style['--textbox-border-top'] = props.BorderBrush; style['--textbox-border-bottom'] = props.BorderBrush; }
+  if (props.PlaceholderForeground) style['--textbox-placeholder-foreground'] = props.PlaceholderForeground;
   if (props.SelectionHighlightColor) {
     style['--textbox-selection-background'] = props.SelectionHighlightColor;
   }
-  if (props.MinWidth !== '') style.minWidth = cssSize(props.MinWidth);
+  if (props.Width !== '') style.width = cssSize(props.Width);
+  if (props.Height !== '') style.height = cssSize(props.Height);
+  if (props.Margin !== '') style.margin = xamlThickness(props.Margin);
+  if (props.HorizontalAlignment) style.justifySelf = alignment(props.HorizontalAlignment, 'horizontal');
+  if (props.VerticalAlignment) style.alignSelf = alignment(props.VerticalAlignment, 'vertical');
+  const minimum = cssSize(props.MinWidth === '' ? 64 : props.MinWidth);
+  // Helper buttons occupy the existing input surface and do not change its
+  // desired width when focus makes them visible.
+  style.minWidth = minimum ? `min(max(${minimum}, ${naturalControlWidth.value}px), 100%)` : undefined;
   if (props.MaxWidth !== '') style.maxWidth = cssSize(props.MaxWidth);
   if (props.MinHeight !== '') style.minHeight = cssSize(props.MinHeight);
   if (props.MaxHeight !== '') style.maxHeight = cssSize(props.MaxHeight);
@@ -310,7 +456,7 @@ const fieldStyle = computed<CSSProperties>(() => {
   if (props.FontFamily) style.fontFamily = props.FontFamily;
   if (props.FontSize !== '') style.fontSize = cssSize(props.FontSize);
   if (props.FontStyle && props.FontStyle !== 'Normal') style.fontStyle = props.FontStyle.toLowerCase();
-  if (props.FontWeight !== '') style.fontWeight = props.FontWeight;
+  if (props.FontWeight !== '') style.fontWeight = ({ Normal: 400, SemiBold: 600, Bold: 700, Light: 300 } as Record<string, number>)[String(props.FontWeight)] ?? props.FontWeight;
   if (props.Foreground) style.color = props.Foreground;
   if (props.CharacterSpacing) style.letterSpacing = `${props.CharacterSpacing / 1000}em`;
 
@@ -341,11 +487,11 @@ const contextMenuItems = computed<TextBoxMenuItem[]>(() => {
     items.push({ Text: t('text.paste'), Icon: '\uE77F', Value: 'paste' });
   }
 
-  if (canUndo.value) {
+  if (canEdit && canUndo.value) {
     items.push({ Text: t('text.undo'), Icon: '\uE7A7', Value: 'undo' });
   }
 
-  if (canRedo.value) {
+  if (canEdit && canRedo.value) {
     items.push({ Text: t('text.redo'), Icon: '\uE7A6', Value: 'redo' });
   }
 
@@ -364,26 +510,89 @@ const pushUndo = (previousText: string) => {
 
 const emitTextValue = (value: string, _reason: 'UserInput' | 'ProgrammaticChange', options: { undo?: boolean } = {}) => {
   const previous = currentText.value;
+  if (previous === value) return;
   if (options.undo) pushUndo(previous);
 
-  if (!isTextControlled.value) {
-    localText.value = value;
-  }
+  localText.value = value;
+  dispatch('TextChanging', { IsContentChanging: true });
   emit('update:Text', value);
-  emit('TextChanged');
+  updateXamlBinding(rawProps.Text, value, instance);
+  dispatch('TextChanged');
 };
 
 const resizeTextarea = () => {
   const element = fieldRef.value;
-  if (!element || !props.AcceptsReturn || !(element instanceof HTMLTextAreaElement)) return;
-  element.style.height = 'auto';
-  element.style.height = `${element.scrollHeight}px`;
+  if (!element) return;
+  const viewport = element.closest('.win-scroll-viewer-viewport') as HTMLElement | null;
+  if (!viewport || viewport.clientWidth === 0) return;
+  const style = getComputedStyle(element);
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  let contentWidth = 0;
+  if (context) {
+    context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    contentWidth = element.value.split('\n').reduce((maximum, line) => Math.max(maximum, context.measureText(line).width), 0);
+  }
+  const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+  if (context) {
+    const placeholderWidth = context.measureText(String(props.PlaceholderText ?? '')).width;
+    const spacing = (parseFloat(style.letterSpacing) || 0) * Math.max(0, (element.value || props.PlaceholderText || '').length - 1);
+    naturalFieldWidth.value = Math.max(62, Math.ceil(Math.max(contentWidth, placeholderWidth) + spacing + padding + 1));
+  }
+  const canScrollHorizontally = ScrollSettings.HorizontalScrollMode !== 'Disabled' && ScrollSettings.HorizontalScrollBarVisibility !== 'Disabled';
+  const wrap = props.AcceptsReturn && props.TextWrapping !== 'NoWrap';
+  element.style.width = `${wrap || !canScrollHorizontally ? viewport.clientWidth : Math.max(viewport.clientWidth, Math.ceil(contentWidth + padding + 1))}px`;
+  if (element instanceof HTMLTextAreaElement) {
+    element.style.height = 'auto';
+    element.style.height = `${element.scrollHeight}px`;
+  }
+  // The shared ScrollViewer owns scrolling. Native editing fields must not
+  // retain a second, hidden scroll offset after browser caret navigation.
+  element.scrollLeft = 0;
+  element.scrollTop = 0;
 };
 
-watch(() => props.Text, () => {
-  localText.value = resolvedText.value;
+const scrollCaretIntoView = () => {
+  const element = fieldRef.value;
+  if (!element || document.activeElement !== element) return;
+  const viewport = element.closest('.win-scroll-viewer-viewport') as HTMLElement | null;
+  if (!viewport) return;
+  const caretIndex = element.selectionDirection === 'backward' ? element.selectionStart : element.selectionEnd;
+  const caret = getRectFromCharacterIndex(caretIndex ?? 0);
+  const bounds = viewport.getBoundingClientRect();
+  const style = getComputedStyle(element);
+  const leftInset = parseFloat(style.paddingLeft) || 0;
+  const topInset = parseFloat(style.paddingTop) || 0;
+  if (ScrollSettings.HorizontalScrollMode !== 'Disabled' && ScrollSettings.HorizontalScrollBarVisibility !== 'Disabled') {
+    if (caret.x < bounds.left + leftInset) viewport.scrollLeft += caret.x - bounds.left - leftInset;
+    else if (caret.x + caret.width > bounds.right - 6) viewport.scrollLeft += caret.x + caret.width - bounds.right + 6;
+  }
+  if (ScrollSettings.VerticalScrollMode !== 'Disabled' && ScrollSettings.VerticalScrollBarVisibility !== 'Disabled') {
+    if (caret.y < bounds.top + topInset) viewport.scrollTop += caret.y - bounds.top - topInset;
+    else if (caret.y + caret.height > bounds.bottom - 6) viewport.scrollTop += caret.y + caret.height - bounds.bottom + 6;
+  }
+};
+const scheduleCaretIntoView = () => {
+  if (caretFrame !== undefined) cancelAnimationFrame(caretFrame);
+  caretFrame = requestAnimationFrame(() => {
+    caretFrame = undefined;
+    resizeTextarea();
+    scrollCaretIntoView();
+  });
+};
+
+watch(resolvedText, value => {
+  if (localText.value !== value) {
+    emitTextValue(value, 'ProgrammaticChange');
+  }
   void nextTick(resizeTextarea);
-}, { immediate: true });
+});
+watch(rawProps, () => { propertyOverrides.value = {}; });
+watch(isDisabled, disabled => {
+  if (disabled) { isHovered.value = false; isFocused.value = false; contextMenuRef.value?.Hide?.(); fieldRef.value?.blur(); }
+});
+
+watch(() => [props.AcceptsReturn, props.TextWrapping, props.FontFamily, props.FontSize, props.FontWeight, props.CharacterSpacing], () => void nextTick(resizeTextarea));
 
 const normalizeInput = (value: string) => {
   let nextValue = value;
@@ -400,13 +609,11 @@ const onInput = (event: Event) => {
   const nextValue = normalizeInput(element.value);
   const beforeChangingArgs = { NewText: nextValue, Cancel: false };
 
-  emit('BeforeTextChanging', beforeChangingArgs);
+  dispatch('BeforeTextChanging', beforeChangingArgs);
   if (beforeChangingArgs.Cancel) {
     element.value = currentText.value;
     return;
   }
-
-  emit('TextChanging', { IsContentChanging: nextValue !== currentText.value });
 
   if (element.value !== nextValue) {
     element.value = nextValue;
@@ -414,13 +621,15 @@ const onInput = (event: Event) => {
 
   emitTextValue(nextValue, 'UserInput', { undo: true });
   resizeTextarea();
+  scheduleCaretIntoView();
 };
 
 const onFocus = () => {
   isFocused.value = true;
   requestCandidateWindowAlignment();
-  emit('GotFocus');
+  dispatch('GotFocus');
   resizeTextarea();
+  scheduleCaretIntoView();
 };
 
 const onBlur = () => {
@@ -430,7 +639,7 @@ const onBlur = () => {
   if (contextMenuOpen.value || isRestoringContextMenuFocus.value) return;
   isFocused.value = false;
   requestCandidateWindowAlignment('Default');
-  emit('LostFocus');
+  dispatch('LostFocus');
 };
 
 const applyLegacyCandidateWindowAlignment = () => {
@@ -480,16 +689,16 @@ const requestCandidateWindowAlignment = (
 
 const onCompositionStart = () => {
   requestCandidateWindowAlignment();
-  emit('TextCompositionStarted');
+  dispatch('TextCompositionStarted');
 };
 
 const onCompositionChanged = () => {
   requestCandidateWindowAlignment();
-  emit('TextCompositionChanged');
+  dispatch('TextCompositionChanged');
 };
 
 const onCompositionEnd = () => {
-  emit('TextCompositionEnded');
+  dispatch('TextCompositionEnded');
 };
 
 watch(() => props.DesiredCandidateWindowAlignment, () => {
@@ -508,9 +717,18 @@ const onPointerLeave = () => {
 };
 
 const onKeydown = (event: KeyboardEvent) => {
+  inputTemplate?.KeyDown?.(event);
+  const args = { Key: event.key, OriginalSource: fieldRef.value, Handled: event.defaultPrevented };
+  dispatch('KeyDown', args);
+  if (args.Handled) { event.preventDefault(); return; }
+  if ((event.ctrlKey || event.metaKey) && !props.IsReadOnly) {
+    if (event.key.toLowerCase() === 'z') { event.preventDefault(); event.shiftKey ? redo() : undo(); }
+    if (event.key.toLowerCase() === 'y') { event.preventDefault(); redo(); }
+  }
   if (event.key === 'Enter' && !props.AcceptsReturn) {
     event.preventDefault();
   }
+  scheduleCaretIntoView();
 };
 
 const readSelection = () => {
@@ -527,29 +745,40 @@ const readSelection = () => {
   };
 };
 
+const lastSelection = ref({ start: 0, length: 0, text: '' });
+let restoringSelection = false;
 const onSelect = () => {
+  if (restoringSelection) return;
   const selection = readSelection();
+  if (selection.start === lastSelection.value.start && selection.length === lastSelection.value.length) return;
   const changingArgs = { SelectionStart: selection.start, SelectionLength: selection.length, Cancel: false };
-  emit('SelectionChanging', changingArgs);
-  if (changingArgs.Cancel) return;
-  emit('SelectionChanged');
+  dispatch('SelectionChanging', changingArgs);
+  if (changingArgs.Cancel) {
+    restoringSelection = true;
+    fieldRef.value?.setSelectionRange(lastSelection.value.start, lastSelection.value.start + lastSelection.value.length);
+    queueMicrotask(() => { restoringSelection = false; });
+    return;
+  }
+  lastSelection.value = selection;
+  dispatch('SelectionChanged');
+  scheduleCaretIntoView();
 };
 
 const onCuttingToClipboard = (event: ClipboardEvent) => {
   const args = { Handled: false };
-  emit('CuttingToClipboard', args);
+  dispatch('CuttingToClipboard', args);
   if (args.Handled) event.preventDefault();
 };
 
 const onCopyingToClipboard = (event: ClipboardEvent) => {
   const args = { Handled: false };
-  emit('CopyingToClipboard', args);
+  dispatch('CopyingToClipboard', args);
   if (args.Handled) event.preventDefault();
 };
 
 const onPaste = (event: ClipboardEvent) => {
   const args = { Handled: false };
-  emit('Paste', args);
+  dispatch('Paste', args);
   if (args.Handled) event.preventDefault();
 };
 
@@ -564,10 +793,26 @@ const readClipboardText = async () => {
 const onContextMenu = async (event: MouseEvent) => {
   event.preventDefault();
   if (isDisabled.value) return;
+  const args = { Handled: false, CursorLeft: event.offsetX, CursorTop: event.offsetY };
+  dispatch('ContextMenuOpening', args);
+  if (args.Handled || props.ContextFlyout === null) return;
 
+  // WinUI focuses a TextBox from the pointer before opening its selection
+  // menu. This also makes a second TextBox right-tapped while another menu is
+  // closing become the popup's previous-focus target.
+  fieldRef.value?.focus({ preventScroll: true });
+  flyoutKind.value = 'Context';
+  const custom = customContextFlyout.value ?? props.ContextFlyout;
+  if (custom?.ShowAt && fieldRef.value) {
+    const bounds = fieldRef.value.getBoundingClientRect();
+    void custom.ShowAt(fieldRef.value, { Position: { X: event.clientX - bounds.left, Y: event.clientY - bounds.top } });
+    return;
+  }
+  const request = ++contextRequest;
   contextMenuOpen.value = false;
   contextSelection.value = readSelection();
   clipboardText.value = await readClipboardText();
+  if (request !== contextRequest || !fieldRef.value?.isConnected || isDisabled.value) return;
 
   if (!contextMenuItems.value.length) return;
 
@@ -585,6 +830,21 @@ const onContextMenu = async (event: MouseEvent) => {
   };
   isRestoringContextMenuFocus.value = true;
   contextMenuOpen.value = true;
+  await nextTick();
+  const target = fieldRef.value;
+  if (target) void contextMenuRef.value?.ShowAt?.(target, { Position: { X: event.clientX - target.getBoundingClientRect().left, Y: event.clientY - target.getBoundingClientRect().top } });
+};
+
+const onSelectionPointerUp = async (event: PointerEvent) => {
+  if (event.button !== 0 || isDisabled.value || props.SelectionFlyout === null) return;
+  contextSelection.value = readSelection();
+  if (!contextSelection.value.length || !fieldRef.value) return;
+  flyoutKind.value = 'Selection';
+  const custom = customSelectionFlyout.value ?? props.SelectionFlyout;
+  if (custom?.ShowAt) { void custom.ShowAt(fieldRef.value, { ShowMode: 'Transient' }); return; }
+  clipboardText.value = await readClipboardText();
+  await nextTick();
+  void contextMenuRef.value?.ShowAt?.(fieldRef.value, { ShowMode: 'Transient', Placement: 'TopEdgeAlignedLeft' });
 };
 
 const clearText = () => {
@@ -596,13 +856,23 @@ const clearText = () => {
 };
 
 const closeContextMenu = () => {
+  contextRequest++;
   contextMenuOpen.value = false;
+  contextMenuRef.value?.Hide?.();
   nextTick(() => {
     focus();
     requestAnimationFrame(() => {
       isRestoringContextMenuFocus.value = false;
     });
   });
+};
+
+const onContextMenuClosed = () => {
+  // Closed follows the presenter's own focus decision. External dismissal or
+  // another menu opening must not schedule a second focus restoration here.
+  contextMenuOpen.value = false;
+  isRestoringContextMenuFocus.value = false;
+  if (document.activeElement !== fieldRef.value) onBlur();
 };
 
 const onContextMenuSelect = (item: TextBoxMenuItem) => {
@@ -617,6 +887,9 @@ const onContextMenuSelect = (item: TextBoxMenuItem) => {
   if (command === 'redo') redo();
   if (command === 'selectAll') selectAll();
 };
+
+const ContextMenu = textCommandFlyout(contextMenuRef, () => contextMenuItems.value, onContextMenuSelect, onContextMenuClosed,
+  () => ({ ShowMode: flyoutKind.value === 'Selection' ? 'Transient' : 'Standard' }));
 
 const focus = (options: FocusOptions = {}) => {
   fieldRef.value?.focus({
@@ -646,26 +919,27 @@ const getRectFromCharacterIndex = (index: number, trailingEdge = false) => {
 
   const rect = element.getBoundingClientRect();
   const computedStyle = getComputedStyle(element);
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
   const normalizedIndex = Math.max(0, Math.min(index, element.value.length));
-  let textWidth = 0;
-
-  if (context) {
-    context.font = `${computedStyle.fontStyle} ${computedStyle.fontWeight} ${computedStyle.fontSize} ${computedStyle.fontFamily}`;
-    textWidth = context.measureText(element.value.slice(0, normalizedIndex)).width;
-  }
-
-  const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
-  const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
   const lineHeight = parseFloat(computedStyle.lineHeight) || 20;
-
-  return {
-    x: rect.left + paddingLeft + textWidth + (trailingEdge ? 1 : 0),
-    y: rect.top + paddingTop,
+  // A measurement-only mirror uses the same text layout as the native editor,
+  // including wrapping, explicit newlines, alignment and character spacing.
+  const mirror = document.createElement('div');
+  for (const name of ['fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'lineHeight', 'letterSpacing', 'textAlign', 'overflowWrap', 'wordBreak', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'boxSizing'] as const) mirror.style[name] = computedStyle[name];
+  Object.assign(mirror.style, { position: 'fixed', visibility: 'hidden', pointerEvents: 'none', top: '0', left: '0', width: `${element.clientWidth}px`, whiteSpace: props.AcceptsReturn && props.TextWrapping !== 'NoWrap' ? 'pre-wrap' : 'pre' });
+  mirror.textContent = element.value.slice(0, normalizedIndex);
+  const marker = document.createElement('span');
+  marker.textContent = '\u200b';
+  mirror.append(marker);
+  document.body.append(mirror);
+  const caret = marker.getBoundingClientRect();
+  const result = {
+    x: rect.left + caret.left - element.scrollLeft + (trailingEdge ? 1 : 0),
+    y: rect.top + caret.top - element.scrollTop,
     width: 1,
     height: lineHeight
   };
+  mirror.remove();
+  return result;
 };
 
 const replaceSelectedText = (replacement: string) => {
@@ -677,19 +951,22 @@ const replaceSelectedText = (replacement: string) => {
 
 const replaceTextRange = (start: number, length: number, replacement: string) => {
   const element = fieldRef.value;
-  if (!element) return;
+  if (!element || props.IsReadOnly || isDisabled.value) return;
   const selectionStart = Math.max(0, Math.min(start, element.value.length));
   const selectionLength = Math.max(0, Math.min(length, element.value.length - selectionStart));
   const nextValue = normalizeInput(
     element.value.slice(0, selectionStart) + replacement + element.value.slice(selectionStart + selectionLength)
   );
+  const before = { NewText: nextValue, Cancel: false };
+  dispatch('BeforeTextChanging', before);
+  if (before.Cancel) return;
   element.value = nextValue;
   emitTextValue(nextValue, 'ProgrammaticChange', { undo: true });
   requestAnimationFrame(resizeTextarea);
 };
 
 const undo = () => {
-  if (!undoStack.value.length) return;
+  if (props.IsReadOnly || isDisabled.value || !undoStack.value.length) return;
   const previous = undoStack.value.pop() ?? '';
   redoStack.value.push(currentText.value);
   emitTextValue(previous, 'ProgrammaticChange');
@@ -697,7 +974,7 @@ const undo = () => {
 };
 
 const redo = () => {
-  if (!redoStack.value.length) return;
+  if (props.IsReadOnly || isDisabled.value || !redoStack.value.length) return;
   const next = redoStack.value.pop() ?? '';
   undoStack.value.push(currentText.value);
   emitTextValue(next, 'ProgrammaticChange');
@@ -717,23 +994,47 @@ const cutSelectionToClipboard = () => {
 };
 
 const pasteFromClipboard = async () => {
-  const text = await navigator.clipboard?.readText();
+  const args = { Handled: false };
+  dispatch('Paste', args);
+  if (args.Handled || props.IsReadOnly || isDisabled.value) return;
+  const text = await readClipboardText();
   if (text !== undefined) replaceSelectedText(text);
 };
 
 const copyContextSelectionToClipboard = () => {
+  const args = { Handled: false };
+  dispatch('CopyingToClipboard', args);
+  if (args.Handled) return;
   if (contextSelection.value.text) void navigator.clipboard?.writeText(contextSelection.value.text);
 };
 
 const cutContextSelectionToClipboard = () => {
+  const args = { Handled: false };
+  dispatch('CuttingToClipboard', args);
+  if (args.Handled || props.IsReadOnly || isDisabled.value) return;
   if (!contextSelection.value.text) return;
   void navigator.clipboard?.writeText(contextSelection.value.text);
   replaceTextRange(contextSelection.value.start, contextSelection.value.length, '');
 };
 
-onMounted(applyLegacyCandidateWindowAlignment);
+onMounted(() => {
+  applyLegacyCandidateWindowAlignment();
+  void nextTick(() => {
+    resizeTextarea();
+    const viewport = fieldRef.value?.closest('.win-scroll-viewer-viewport');
+    editorResizeObserver = new ResizeObserver(() => {
+      surfaceWidth.value = rootRef.value?.querySelector('.win-textbox-border')?.getBoundingClientRect().width ?? 0;
+      resizeTextarea();
+    });
+    if (rootRef.value) editorResizeObserver.observe(rootRef.value);
+    if (viewport) editorResizeObserver.observe(viewport);
+  });
+});
 
 onBeforeUnmount(() => {
+  contextRequest++;
+  editorResizeObserver?.disconnect();
+  if (caretFrame !== undefined) cancelAnimationFrame(caretFrame);
   if (isFocused.value) requestCandidateWindowAlignment('Default');
   undoStack.value = [];
   redoStack.value = [];
@@ -742,7 +1043,25 @@ onBeforeUnmount(() => {
 });
 
 defineExpose({
+  get Element() { return fieldRef.value; },
+  get IsEnabled() { return props.IsEnabled; }, set IsEnabled(value: boolean) { propertyOverrides.value.IsEnabled = value; },
+  get IsReadOnly() { return props.IsReadOnly; }, set IsReadOnly(value: boolean) { propertyOverrides.value.IsReadOnly = value; },
+  get AcceptsReturn() { return props.AcceptsReturn; }, set AcceptsReturn(value: boolean) { propertyOverrides.value.AcceptsReturn = value; },
+  get TextWrapping() { return props.TextWrapping; }, set TextWrapping(value: TextWrapping) { propertyOverrides.value.TextWrapping = value; },
+  get Text() {
+    return currentText.value;
+  },
+  set Text(value: string) {
+    const nextValue = value === undefined || value === null ? '' : String(value);
+    if (nextValue === currentText.value) return;
+    emitTextValue(nextValue, 'ProgrammaticChange');
+    void nextTick(resizeTextarea);
+  },
   Focus: focus,
+  get ContextFlyout() { return props.ContextFlyout !== undefined ? props.ContextFlyout : customContextFlyout.value ?? contextMenuRef.value; },
+  set ContextFlyout(value: unknown) { propertyOverrides.value.ContextFlyout = value; },
+  get SelectionFlyout() { return props.SelectionFlyout !== undefined ? props.SelectionFlyout : customSelectionFlyout.value ?? contextMenuRef.value; },
+  set SelectionFlyout(value: unknown) { propertyOverrides.value.SelectionFlyout = value; },
   SelectAll: selectAll,
   Select: select,
   GetRectFromCharacterIndex: getRectFromCharacterIndex,
@@ -766,14 +1085,17 @@ defineExpose({
   get SelectionStart() {
     return readSelection().start;
   },
+  set SelectionStart(value: number) { select(value, readSelection().length); },
   get SelectionLength() {
     return readSelection().length;
-  }
+  },
+  set SelectionLength(value: number) { select(readSelection().start, value); }
 });
 </script>
 
 <style scoped>
 .win-textbox {
+  --textbox-content-min-height: max(0px, calc(var(--TextControlThemeMinHeight, 32px) - 2px));
   --textbox-background: var(--TextControlBackground, var(--ControlFillColorDefaultBrush, var(--control-fill-color-default, var(--ctrl-fill-default, rgba(255, 255, 255, 0.70)))));
   --textbox-background-pointer-over: var(--TextControlBackgroundPointerOver, var(--ControlFillColorSecondaryBrush, var(--control-fill-color-secondary, var(--ctrl-fill-secondary))));
   --textbox-background-pressed: var(--ControlFillColorTertiaryBrush, var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary)));
@@ -798,7 +1120,9 @@ defineExpose({
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: auto;
+  min-width: 64px;
+  max-width: 100%;
 }
 
 :global(html.theme-dark .win-textbox),
@@ -814,7 +1138,7 @@ defineExpose({
 }
 
 .win-textbox-header {
-  margin-bottom: 8px;
+  margin: var(--TextBoxTopHeaderMargin, 0 0 8px 0);
   color: var(--text-primary, var(--text-fill-color-primary));
   font-size: 14px;
   font-weight: 400;
@@ -823,14 +1147,18 @@ defineExpose({
 
 .win-textbox-border {
   position: relative;
-  min-height: 32px;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--TextControlThemeMinHeight, 32px);
   overflow: visible;
   background: var(--textbox-background);
-  border: 1px solid var(--textbox-border-top);
+  border: solid var(--textbox-border-top);
+  border-width: var(--textbox-border-thickness, 1px);
   border-bottom-color: var(--textbox-border-bottom);
-  border-radius: 4px;
+  border-radius: var(--textbox-radius, 4px);
   box-shadow: inset 0 0 0 transparent;
   box-sizing: border-box;
+  flex: 1 1 auto;
 }
 
 .win-textbox-focus-border {
@@ -857,10 +1185,6 @@ defineExpose({
   background: var(--textbox-background-pointer-over);
 }
 
-.win-textbox:active:not(.is-disabled):not(.is-focused) .win-textbox-border {
-  background: var(--textbox-background-pressed);
-}
-
 .win-textbox.is-focused:not(.is-disabled) .win-textbox-border {
   background: var(--textbox-background-focused);
 }
@@ -871,9 +1195,19 @@ defineExpose({
 
 .win-textbox-content {
   display: flex;
+  flex: 1 1 auto;
   align-items: stretch;
   min-width: 0;
-  min-height: 30px;
+  min-height: var(--textbox-content-min-height);
+}
+
+.win-textbox-content-element {
+  flex: 1 1 0%;
+  width: 0;
+  min-width: 0;
+  min-height: var(--textbox-content-min-height);
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .win-textbox-field {
@@ -883,15 +1217,18 @@ defineExpose({
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
-  padding: 5px 6px 6px 10px;
+  padding: var(--textbox-padding, var(--TextControlThemePadding, 5px 6px 6px 10px));
   color: var(--textbox-foreground);
   background: transparent;
   border: 0;
   outline: 0;
   font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: var(--ControlContentThemeFontSize, 14px);
+  line-height: normal;
+  min-height: var(--textbox-content-min-height);
   user-select: text;
+  display: block;
+  overflow: hidden;
 }
 
 .win-textbox.candidate-window-bottom-edge .win-textbox-field {
@@ -899,7 +1236,7 @@ defineExpose({
 }
 
 .win-textbox-textarea {
-  min-height: 76px;
+  min-height: var(--textbox-content-min-height);
   height: auto;
   resize: none;
   overflow: hidden;
@@ -910,8 +1247,8 @@ defineExpose({
   -webkit-appearance: none;
   align-self: stretch;
   position: relative;
-  width: 40px;
-  min-width: 40px;
+  width: 30px;
+  min-width: 30px;
   height: auto;
   min-height: 0;
   margin: 0;
@@ -922,12 +1259,12 @@ defineExpose({
   border: 0;
   border-radius: 0;
   cursor: pointer;
-  flex: 0 0 40px;
+  flex: 0 0 30px;
   font: inherit;
   line-height: 1;
 }
 
-:slotted(.win-textbox-action-button) {
+:deep(.win-textbox-action-button) {
   appearance: none;
   -webkit-appearance: none;
   align-self: stretch;
@@ -949,35 +1286,35 @@ defineExpose({
   line-height: 1;
 }
 
-:slotted(.win-textbox-action-button.win-textbox-action-query) {
+:deep(.win-textbox-action-button.win-textbox-action-query) {
   width: 40px;
   min-width: 40px;
   flex-basis: 40px;
   margin-left: 0;
 }
 
-:slotted(.win-textbox-action-button.win-textbox-action-number) {
+:deep(.win-textbox-action-button.win-textbox-action-number) {
   width: 40px;
   min-width: 40px;
   flex-basis: 40px;
 }
 
-:slotted(.win-textbox-action-button:hover) {
+:deep(.win-textbox-action-button:hover) {
   color: var(--textbox-button-foreground-pointer-over);
 }
 
-:slotted(.win-textbox-action-button:active) {
+:deep(.win-textbox-action-button:active) {
   color: var(--textbox-button-foreground-pressed);
 }
 
-:slotted(.win-textbox-action-button:disabled) {
+:deep(.win-textbox-action-button:disabled) {
   color: var(--text-disabled, var(--text-fill-color-disabled, rgba(0, 0, 0, 0.36)));
   cursor: default;
 }
 
 .win-textbox-delete-button-layout {
   position: absolute;
-  inset: 4px;
+  inset: 4px 4px 4px 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -988,25 +1325,10 @@ defineExpose({
 }
 
 .win-textbox-delete-button,
-:slotted(.win-textbox-action-button) {
+:deep(.win-textbox-action-button) {
   display: block;
 }
 
-:deep(.win-textbox-action-button > span) {
-  position: absolute;
-  inset: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-:deep(.win-textbox-action-button.win-textbox-action-query > span) {
-  inset: 4px;
-}
-
-:deep(.win-textbox-action-button:hover > span),
 .win-textbox-delete-button:hover .win-textbox-delete-button-layout {
   background: var(--textbox-button-background-pointer-over);
 }
@@ -1015,7 +1337,6 @@ defineExpose({
   color: var(--textbox-button-foreground-pointer-over);
 }
 
-:deep(.win-textbox-action-button:active > span),
 .win-textbox-delete-button:active .win-textbox-delete-button-layout {
   background: var(--textbox-button-background-pressed);
   color: var(--textbox-button-foreground-pressed);
@@ -1062,10 +1383,6 @@ defineExpose({
   color: var(--text-secondary, var(--text-fill-color-secondary, rgba(0, 0, 0, 0.62)));
   font-size: 12px;
   line-height: 16px;
-}
-
-.win-textbox.is-readonly .win-textbox-border {
-  background: var(--control-fill-color-tertiary, var(--ctrl-fill-tertiary, rgba(249, 249, 249, 0.3)));
 }
 
 .win-textbox.is-disabled {

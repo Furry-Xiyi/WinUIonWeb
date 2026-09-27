@@ -7,11 +7,11 @@
                 <h1 class="page-title">Typography</h1>
               </div>
               <div class="header-actions">
-                <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': 'Toggle theme' }" @Click="toggleTheme">
-                  <span class="icon">&#xE793;</span>
+                <Button class="header-action" ToolTipService.ToolTip="{x:Bind ButtonBinding1, Mode=OneWay}" Click="toggleTheme">
+                  <FontIcon class="icon" Glyph="&#xe793;" />
                 </Button>
-                <ToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
-                  <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+                <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" ToolTipService.ToolTip="{x:Bind ButtonBinding2, Mode=OneWay}" Click="toggleFavorite">
+                  <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
                 </ToggleButton>
               </div>
             </div>
@@ -26,13 +26,12 @@
 
             <p class="control-example-description">Type ramp</p>
             <ControlExample class="basic-input-example-theme"
-              :theme="pageTheme"
-              :xaml="xamlCode"
-              :cSharp="cSharpCode">
-              <template #example>
+              Theme="{x:Bind pageTheme, Mode=OneWay}"
+              Xaml="{x:Bind xamlCode, Mode=OneWay}">
+              <ControlExample.Example>
                 <div class="typography-demo">
                   <!-- Visual demonstration image area -->
-                  <div class="hero-image-container">
+                  <ScrollViewer class="hero-image-container" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
                     <div class="hero-image" :class="{ 'dark-theme': isDarkTheme }">
                       <div class="typography-showcase">
                         <div class="showcase-item display-text">
@@ -67,10 +66,10 @@
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </ScrollViewer>
 
                   <!-- Type ramp table -->
-                  <div class="type-ramp-table">
+                  <ScrollViewer class="type-ramp-table" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
                     <div class="table-header">
                       <div class="column example-column">Example</div>
                       <div class="column font-column">Variable Font</div>
@@ -149,9 +148,11 @@
                       resourceName="DisplayTextBlockStyle"
                       styleClass="display"
                       :background="true" />
-                  </div>
+                  </ScrollViewer>
                 </div>
-              </template>
+              </ControlExample.Example>
+              <ControlExample.Output />
+              <ControlExample.Options />
             </ControlExample>
 
             <!-- Info tooltip -->
@@ -166,10 +167,13 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { computed, inject, ref } from 'vue';
 import ControlExample from '../../components/ControlExample.vue';
 import TypographyRow from '../../components/TypographyRow.vue';
 import { createPageState } from '../../utils/pageState';
+import { useI18n } from '../../components/i18n/index';
 import Button from '../../components/Button.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
 
@@ -198,17 +202,10 @@ const xamlCode = `<TextBlock Text="Caption" Style="{StaticResource CaptionTextBl
 <TextBlock Text="Title Large" Style="{StaticResource TitleLargeTextBlockStyle}"/>
 <TextBlock Text="Display" Style="{StaticResource DisplayTextBlockStyle}"/>`;
 
-const cSharpCode = `<div class="typography-samples">
-  <div class="text-caption">Caption</div>
-  <div class="text-body">Body</div>
-  <div class="text-body-strong">Body Strong</div>
-  <div class="text-body-large">Body Large</div>
-  <div class="text-body-large-strong">Body Large Strong</div>
-  <div class="text-subtitle">Subtitle</div>
-  <div class="text-title">Title</div>
-  <div class="text-title-large">Title Large</div>
-  <div class="text-display">Display</div>
-</div>`;
+const { t } = useI18n();
+const ButtonBinding1 = computed(() => t('gallery.page-header.toggle-theme'));
+const ButtonBinding2 = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavoriteState) ? '' : '');
 </script>
 
 <style scoped>
@@ -276,7 +273,6 @@ const cSharpCode = `<div class="typography-samples">
 
 .hero-image-container {
   width: 100%;
-  overflow: auto;
 }
 
 .hero-image {
@@ -378,8 +374,6 @@ const cSharpCode = `<div class="typography-samples">
   --typography-info-fill: rgba(255, 255, 255, 0.2);
   isolation: isolate;
   background: transparent;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -410,7 +404,6 @@ const cSharpCode = `<div class="typography-samples">
 
 .type-ramp-table {
   width: 100%;
-  overflow-x: auto;
 }
 
 .table-header {
@@ -446,8 +439,6 @@ const cSharpCode = `<div class="typography-samples">
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
 }
 
 .info-tooltip::before {

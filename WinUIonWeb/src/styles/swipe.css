@@ -1,0 +1,27 @@
+:root, html.theme-light, .example-theme-wrapper.theme-light, .win-theme-scope.theme-light {
+  --SwipeItemBackgroundPressed: rgba(0, 0, 0, 0.0941176471);
+}
+
+html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark {
+  --SwipeItemBackgroundPressed: rgba(255, 255, 255, 0.0705882353);
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.theme-light):not(.theme-dark) {
+    --SwipeItemBackgroundPressed: rgba(255, 255, 255, 0.0705882353);
+  }
+}
+
+@media (forced-colors: active) {
+  :root, html.theme-light, html.theme-dark,
+  .example-theme-wrapper.theme-light, .example-theme-wrapper.theme-dark,
+  .win-theme-scope.theme-light, .win-theme-scope.theme-dark {
+    --SwipeItemBackground: ButtonFace;
+    --SwipeItemForeground: ButtonText;
+    --SwipeItemBackgroundPressed: ButtonFace;
+    --SwipeItemPreThresholdExecuteForeground: GrayText;
+    --SwipeItemPreThresholdExecuteBackground: ButtonFace;
+    --SwipeItemPostThresholdExecuteForeground: HighlightText;
+    --SwipeItemPostThresholdExecuteBackground: Highlight;
+  }
+}

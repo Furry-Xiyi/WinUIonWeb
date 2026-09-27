@@ -1,0 +1,50 @@
+@font-face {
+  font-family: 'WinUIOnWebFontIcons';
+  src: local('Segoe Fluent Icons'), local('Segoe MDL2 Assets'), url('../assets/Fonts/SEGOEICONS.TTF') format('truetype');
+  font-display: block;
+}
+
+.win-icon-element {
+  display: inline-grid;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  vertical-align: middle;
+  background: transparent;
+  color: inherit;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.win-icon-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  background: transparent;
+}
+
+.win-icon-element .win-icon-text-block {
+  display: block;
+  align-self: center;
+  justify-self: stretch;
+  min-width: 0;
+  max-width: 100%;
+  color: inherit;
+  font-synthesis: none;
+  line-height: normal;
+  text-align: center;
+  white-space: pre;
+  overflow: hidden;
+  transform-origin: center;
+}
+
+.win-icon-text-block:empty::before {
+  display: inline-block;
+  height: 1lh;
+  content: '';
+}

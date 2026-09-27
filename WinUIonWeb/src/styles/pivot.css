@@ -1,0 +1,99 @@
+/* Pivot_themeresources.xaml aliases. Rebind them inside each Gallery theme
+   scope so brushes and selection states follow the page theme immediately. */
+:root, html.theme-light, html.theme-dark,
+.example-theme-wrapper.theme-light, .example-theme-wrapper.theme-dark,
+.win-theme-scope.theme-light, .win-theme-scope.theme-dark,
+.win-pivot[data-theme="light"], .win-pivot[data-theme="dark"] {
+  --PivotBackground: transparent;
+  --PivotHeaderBackground: transparent;
+  --PivotItemBackground: transparent;
+  --PivotTitleFontFamily: var(--ContentControlThemeFontFamily);
+  --PivotTitleFontSize: 14px;
+  --PivotTitleThemeFontWeight: 700;
+  --PivotHeaderItemFontFamily: var(--ContentControlThemeFontFamily);
+  --PivotHeaderItemFontSize: 24px;
+  --PivotHeaderItemThemeFontWeight: 350;
+  --PivotHeaderItemLockedTranslation: 40px;
+  --PivotHeaderItemSelectedPipeCornerRadius: 1.5px;
+  --PivotHeaderItemBackgroundUnselected: transparent;
+  --PivotHeaderItemBackgroundUnselectedPointerOver: transparent;
+  --PivotHeaderItemBackgroundUnselectedPressed: transparent;
+  --PivotHeaderItemBackgroundSelected: transparent;
+  --PivotHeaderItemBackgroundSelectedPointerOver: transparent;
+  --PivotHeaderItemBackgroundSelectedPressed: transparent;
+  --PivotHeaderItemBackgroundDisabled: transparent;
+  --PivotHeaderItemForegroundUnselected: var(--SystemControlForegroundBaseMediumBrush);
+  --PivotHeaderItemForegroundUnselectedPointerOver: var(--SystemControlHighlightAltBaseMediumHighBrush);
+  --PivotHeaderItemForegroundUnselectedPressed: var(--SystemControlHighlightAltBaseMediumHighBrush);
+  --PivotHeaderItemForegroundSelected: var(--SystemControlHighlightAltBaseHighBrush);
+  --PivotHeaderItemForegroundSelectedPointerOver: var(--SystemControlHighlightAltBaseMediumHighBrush);
+  --PivotHeaderItemForegroundSelectedPressed: var(--SystemControlHighlightAltBaseMediumHighBrush);
+  --PivotHeaderItemForegroundDisabled: var(--SystemControlDisabledBaseMediumLowBrush);
+  --PivotHeaderItemSelectedPipeFill: var(--AccentFillColorDefaultBrush);
+  --PivotHeaderItemFocusPipeFill: var(--AccentFillColorDefaultBrush);
+  --PivotNextButtonBackground: var(--PivotNavBackground);
+  --PivotPreviousButtonBackground: var(--PivotNavBackground);
+  --PivotNextButtonBackgroundPointerOver: var(--PivotNavBackgroundPointerOver);
+  --PivotPreviousButtonBackgroundPointerOver: var(--PivotNavBackgroundPointerOver);
+  --PivotNextButtonBackgroundPressed: var(--PivotNavBackgroundPressed);
+  --PivotPreviousButtonBackgroundPressed: var(--PivotNavBackgroundPressed);
+  --PivotNextButtonForeground: var(--PivotNavForeground);
+  --PivotPreviousButtonForeground: var(--PivotNavForeground);
+  --PivotNextButtonForegroundPointerOver: var(--PivotNavForeground);
+  --PivotPreviousButtonForegroundPointerOver: var(--PivotNavForeground);
+  --PivotNextButtonForegroundPressed: var(--PivotNavForeground);
+  --PivotPreviousButtonForegroundPressed: var(--PivotNavForeground);
+  --PivotNextButtonBorderBrush: transparent;
+  --PivotPreviousButtonBorderBrush: transparent;
+  --PivotNextButtonBorderBrushPointerOver: transparent;
+  --PivotPreviousButtonBorderBrushPointerOver: transparent;
+  --PivotNextButtonBorderBrushPressed: transparent;
+  --PivotPreviousButtonBorderBrushPressed: transparent;
+  --PivotNavButtonBorderThemeThickness: 0px;
+}
+/* generic.xaml: SystemBaseMediumLow/Medium/MediumHigh and AltMediumHigh. */
+:root, html.theme-light, .example-theme-wrapper.theme-light,
+.win-theme-scope.theme-light, .win-pivot[data-theme="light"] {
+  --PivotNavBackground: rgba(0, 0, 0, .4);
+  --PivotNavBackgroundPointerOver: rgba(0, 0, 0, .6);
+  --PivotNavBackgroundPressed: rgba(0, 0, 0, .8);
+  --PivotNavForeground: rgba(255, 255, 255, .8);
+}
+html.theme-dark, .example-theme-wrapper.theme-dark,
+.win-theme-scope.theme-dark, .win-pivot[data-theme="dark"] {
+  --PivotNavBackground: rgba(255, 255, 255, .4);
+  --PivotNavBackgroundPointerOver: rgba(255, 255, 255, .6);
+  --PivotNavBackgroundPressed: rgba(255, 255, 255, .8);
+  --PivotNavForeground: rgba(0, 0, 0, .8);
+}
+@media (forced-colors: active) {
+  :root, html.theme-light, html.theme-dark,
+  .example-theme-wrapper.theme-light, .example-theme-wrapper.theme-dark,
+  .win-theme-scope.theme-light, .win-theme-scope.theme-dark,
+  .win-pivot[data-theme="light"], .win-pivot[data-theme="dark"] {
+    --PivotHeaderItemForegroundUnselected: CanvasText;
+    --PivotHeaderItemForegroundSelected: CanvasText;
+    --PivotHeaderItemForegroundUnselectedPointerOver: Highlight;
+    --PivotHeaderItemForegroundSelectedPointerOver: Highlight;
+    --PivotHeaderItemForegroundUnselectedPressed: Highlight;
+    --PivotHeaderItemForegroundSelectedPressed: Highlight;
+    --PivotHeaderItemForegroundDisabled: GrayText;
+    --PivotHeaderItemSelectedPipeFill: Highlight;
+    --PivotHeaderItemFocusPipeFill: Highlight;
+    --PivotNextButtonBorderBrush: CanvasText;
+    --PivotPreviousButtonBorderBrush: CanvasText;
+    --PivotNextButtonBorderBrushPointerOver: CanvasText;
+    --PivotPreviousButtonBorderBrushPointerOver: CanvasText;
+    --PivotNextButtonBorderBrushPressed: CanvasText;
+    --PivotPreviousButtonBorderBrushPressed: CanvasText;
+    --PivotNavButtonBorderThemeThickness: 1px;
+    --PivotNavBackground: Canvas;
+    --PivotNavBackgroundPointerOver: Highlight;
+    --PivotNavBackgroundPressed: CanvasText;
+    --PivotNavForeground: CanvasText;
+    --PivotNextButtonForegroundPointerOver: HighlightText;
+    --PivotPreviousButtonForegroundPointerOver: HighlightText;
+    --PivotNextButtonForegroundPressed: Canvas;
+    --PivotPreviousButtonForegroundPressed: Canvas;
+  }
+}

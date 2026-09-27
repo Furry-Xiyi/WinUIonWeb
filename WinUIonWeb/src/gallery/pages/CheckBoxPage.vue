@@ -5,9 +5,9 @@
           <TextBlock class="page-header" Text="{x:Bind $t('text.checkbox'), Mode=OneWay}" />
           <TextBlock class="page-description" Text="{x:Bind $t('text.checkbox-controls-let-the-user-select-a-combinat'), Mode=OneWay}" TextWrapping="WrapWholeWords" />
           <div class="page-header-actions">
-            <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+            <Button class="header-action" Click="toggleTheme"><FontIcon class="icon" Glyph="&#xe793;" /></Button>
             <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+              <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
             </ToggleButton>
           </div>
         </div>
@@ -60,6 +60,8 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { computed, inject, ref } from 'vue';
 import Button from '../../components/Button.vue';
 import CheckBox from '../../components/CheckBox.vue';
@@ -91,18 +93,18 @@ const OptionsAllCheckBox = computed(() => {
   return null;
 });
 
-const TwoState_Checked = () => { TwoStateOutput.value = t('sample.checkbox.you-checked'); };
-const TwoState_Unchecked = () => { TwoStateOutput.value = t('sample.checkbox.you-unchecked'); };
-const ThreeState_Checked = () => { ThreeStateOutput.value = t('sample.checkbox.checked'); };
-const ThreeState_Unchecked = () => { ThreeStateOutput.value = t('sample.checkbox.unchecked'); };
-const ThreeState_Indeterminate = () => { ThreeStateOutput.value = t('sample.checkbox.indeterminate'); };
-const SelectAll_Checked = () => { Option1CheckBox.value = Option2CheckBox.value = Option3CheckBox.value = true; };
-const SelectAll_Unchecked = () => { Option1CheckBox.value = Option2CheckBox.value = Option3CheckBox.value = false; };
-const SelectAll_Indeterminate = () => {
+const TwoState_Checked = (sender, _args) => { twoStateChecked.value = sender.IsChecked; TwoStateOutput.value = t('sample.checkbox.you-checked'); };
+const TwoState_Unchecked = (sender, _args) => { twoStateChecked.value = sender.IsChecked; TwoStateOutput.value = t('sample.checkbox.you-unchecked'); };
+const ThreeState_Checked = (sender, _args) => { threeStateChecked.value = sender.IsChecked; ThreeStateOutput.value = t('sample.checkbox.checked'); };
+const ThreeState_Unchecked = (sender, _args) => { threeStateChecked.value = sender.IsChecked; ThreeStateOutput.value = t('sample.checkbox.unchecked'); };
+const ThreeState_Indeterminate = (sender, _args) => { threeStateChecked.value = sender.IsChecked; ThreeStateOutput.value = t('sample.checkbox.indeterminate'); };
+const SelectAll_Checked = (_sender, _args) => { Option1CheckBox.value = Option2CheckBox.value = Option3CheckBox.value = true; };
+const SelectAll_Unchecked = (_sender, _args) => { Option1CheckBox.value = Option2CheckBox.value = Option3CheckBox.value = false; };
+const SelectAll_Indeterminate = (_sender, _args) => {
   if (OptionsAllCheckBox.value === true) SelectAll_Unchecked();
 };
-const Option_Checked = () => {};
-const Option_Unchecked = () => {};
+const Option_Checked = (_sender, _args) => {};
+const Option_Unchecked = (_sender, _args) => {};
 
 const checkBoxTwoStateVue = `<CheckBox IsChecked="{x:Bind twoStateChecked, Mode=TwoWay}" AutomationProperties.Name="Two-state" Checked="TwoState_Checked" Unchecked="TwoState_Unchecked">
                   <TextBlock Text="{x:Bind $t('sample.checkbox.two-state-content'), Mode=OneWay}" />
@@ -118,6 +120,7 @@ const checkBoxSelectAllVue = `<StackPanel>
                   <CheckBox IsChecked="{x:Bind Option2CheckBox, Mode=TwoWay}" Margin="24,0,0,0"><TextBlock Text="{x:Bind $t('text.option-2'), Mode=OneWay}" /></CheckBox>
                   <CheckBox IsChecked="{x:Bind Option3CheckBox, Mode=TwoWay}" Margin="24,0,0,0"><TextBlock Text="{x:Bind $t('text.option-3'), Mode=OneWay}" /></CheckBox>
 </StackPanel>`;
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavoriteState) ? '' : '');
 </script>
 
 <style scoped>

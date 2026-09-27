@@ -1,255 +1,212 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-        <TextBlock class="page-header" :Text="$t('text.standarduicommand')" role="heading" aria-level="1" />
-        <TextBlock class="page-description" :Text="$t('text.standarduicommand-subtitle')" TextWrapping="WrapWholeWords" />
-        <div class="page-header-actions">
-          <Button class="header-action" @Click="toggleTheme"><TextBlock class="icon" Text="&#xE793;" /></Button>
-          <ToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite">
-            <TextBlock class="icon" :Text="isFavoriteState ? '\uE735' : '\uE734'" />
-          </ToggleButton>
-        </div>
-      </div>
-
-      <div class="gallery-page-content">
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('sample.standarduicommand.multiple-controls')"
-          HorizontalContentAlignment="Stretch"
-          :theme="pageTheme"
-          :vue="exampleCode"
-          :xaml="exampleXaml"
-          :cSharp="exampleCSharp">
-          <template #example>
-            <StackPanel Width="100%">
-              <TextBlock
-                :Text="$t('sample.standarduicommand.description')"
-                Margin="0,0,0,12"
-                TextWrapping="Wrap" />
-
-              <MenuBar :Items="menuItems" :Theme="pageTheme" />
-
-              <ListView
-                v-model:SelectedItems="selectedItems"
-                :ItemsSource="listItems"
-                :ItemContainerStyle="horizontalSwipeStyle"
-                :IsItemClickEnabled="true"
-                Height="500"
-                SelectionMode="Single"
-                :aria-label="$t('sample.standarduicommand.items')">
-                <template #item="{ item }">
-                  <SwipeControl
-                    Width="100%"
-                    Height="60"
-                    :RightItems="getDeleteSwipeItems(item.Text)"
-                    @ContextRequested="openContextMenu($event, item.Text)"
-                    @PointerEntered="hoveredItem = item.Text"
-                    @PointerExited="hoveredItem = ''">
-                    <Grid class="standard-command-row" ColumnDefinitions="*,Auto" RowDefinitions="60">
-                      <TextBlock class="standard-command-text" :Text="item.Text" Margin="10" FontSize="18" />
-                      <AppBarButton
-                        class="standard-command-delete"
-                        :Command="deleteCommand"
-                        :CommandParameter="item.Text"
-                        :Visibility="hoveredItem === item.Text ? 'Visible' : 'Collapsed'"
-                        HorizontalAlignment="Right"
-                        v-bind="{ 'AutomationProperties.Name': deleteCommand.Label }"
-                        @pointerdown.stop
-                        @Click="onDeleteButtonClick(item.Text)" />
-                    </Grid>
-                  </SwipeControl>
-                </template>
-              </ListView>
-
-              <MenuFlyout
-                :Open="contextMenuOpen"
-                :AnchorRect="contextMenuAnchor"
-                :Items="contextMenuItems"
-                :Theme="pageTheme"
-                Placement="RightEdgeAlignedTop"
-                @Close="contextMenuOpen = false" />
-            </StackPanel>
-          </template>
-        </ControlExample>
-      </div>
-    </div>
-  </ScrollViewer>
+  <Page>
+    <Page.Resources>
+      <Style x:Key="HorizontalSwipe" BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
+        <Setter Property="Height" Value="60" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="BorderThickness" Value="0" />
+      </Style>
+    </Page.Resources>
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind Labels.Title, Mode=OneWay}" FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal" Spacing="4">
+            <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind Labels.ToggleTheme, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind Labels.ToggleTheme, Mode=OneWay}">
+              <FontIcon Glyph="&#xE793;" FontSize="16" />
+            </Button>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}">
+              <FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" />
+            </ToggleButton>
+          </StackPanel>
+        </StackPanel>
+        <StackPanel class="gallery-page-content">
+          <ControlExample
+            SampleDefinition="StandardUICommand\StandardUICommandExposingCommandMultipleControls.txt"
+            HeaderText="{x:Bind Labels.SampleHeader, Mode=OneWay}"
+            HorizontalContentAlignment="Stretch"
+            Theme="{x:Bind pageTheme, Mode=OneWay}"
+            Loaded="ControlExample_Loaded"
+            Xaml="{x:Bind ExampleXaml}"
+            CSharp="{x:Bind ExampleCSharp}">
+            <ControlExample.Example>
+              <Grid x:Name="rootGrid">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Margin="0,0,0,12" TextWrapping="Wrap" Text="{x:Bind Labels.SampleDescription, Mode=OneWay}" />
+                <MenuBar Grid.Row="1">
+                  <MenuBarItem Title="{x:Bind Labels.File, Mode=OneWay}">
+                    <MenuFlyoutItem Text="{x:Bind Labels.New, Mode=OneWay}" />
+                    <MenuFlyoutItem Text="{x:Bind Labels.Open, Mode=OneWay}" />
+                    <MenuFlyoutItem Text="{x:Bind Labels.Save, Mode=OneWay}" />
+                    <MenuFlyoutItem Text="{x:Bind Labels.Exit, Mode=OneWay}" />
+                  </MenuBarItem>
+                  <MenuBarItem Title="{x:Bind Labels.Edit, Mode=OneWay}">
+                    <MenuFlyoutItem x:Name="DeleteFlyoutItem" />
+                  </MenuBarItem>
+                  <MenuBarItem Title="{x:Bind Labels.Help, Mode=OneWay}">
+                    <MenuFlyoutItem Text="{x:Bind Labels.About, Mode=OneWay}" />
+                  </MenuBarItem>
+                </MenuBar>
+                <ListView
+                  x:Name="ListViewRight"
+                  Grid.Row="2"
+                  Height="500"
+                  ContainerContentChanging="ListViewRight_ContainerContentChanging"
+                  IsItemClickEnabled="True"
+                  ItemContainerStyle="{StaticResource HorizontalSwipe}"
+                  Loaded="ListView_Loaded"
+                  SelectionMode="Single"
+                  AutomationProperties.Name="{x:Bind Labels.Items, Mode=OneWay}">
+                  <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="local:ListItemData">
+                      <UserControl PointerEntered="ListViewSwipeContainer_PointerEntered" PointerExited="ListViewSwipeContainer_PointerExited">
+                        <Grid AutomationProperties.Name="{x:Bind Text}">
+                          <SwipeControl x:Name="ListViewSwipeContainer">
+                            <SwipeControl.RightItems>
+                              <SwipeItems Mode="Execute">
+                                <SwipeItem x:Name="DeleteSwipeItem" Background="Red" Command="{x:Bind Command}" CommandParameter="{x:Bind Text}" />
+                              </SwipeItems>
+                            </SwipeControl.RightItems>
+                            <Grid VerticalAlignment="Center">
+                              <TextBlock Margin="10" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18" Text="{x:Bind Text}" />
+                              <AppBarButton x:Name="HoverButton" HorizontalAlignment="Right" Command="{x:Bind Command}" CommandParameter="{x:Bind Text}" IsTabStop="False" Visibility="Collapsed" />
+                            </Grid>
+                          </SwipeControl>
+                          <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="HoveringStates">
+                              <VisualState x:Name="HoverButtonsHidden" />
+                              <VisualState x:Name="HoverButtonsShown">
+                                <VisualState.Setters>
+                                  <Setter Target="HoverButton.Visibility" Value="Visible" />
+                                </VisualState.Setters>
+                              </VisualState>
+                            </VisualStateGroup>
+                          </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                      </UserControl>
+                    </DataTemplate>
+                  </ListView.ItemTemplate>
+                </ListView>
+              </Grid>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Page>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, h, inject, markRaw, onBeforeUnmount, provide, shallowReactive, watch } from 'vue';
 import AppBarButton from '../../components/AppBarButton.vue';
 import Button from '../../components/Button.vue';
+import { DataTemplate, XamlSetter as Setter, XamlStyle as Style } from '../../components/CollectionProperties';
 import ControlExample from '../../components/ControlExample.vue';
+import FontIcon from '../../components/FontIcon.vue';
 import Grid from '../../components/Grid.vue';
 import { useI18n } from '../../components/i18n/index';
 import ListView from '../../components/ListView.vue';
 import MenuBar from '../../components/MenuBar.vue';
+import MenuBarItem from '../../components/MenuBarItem.vue';
 import MenuFlyout from '../../components/MenuFlyout.vue';
+import { MenuFlyoutItem } from '../../components/MenuFlyoutItems';
+import Page from '../../components/Page.vue';
+import RowDefinition from '../../components/RowDefinition.vue';
 import ScrollViewer from '../../components/ScrollViewer.vue';
 import StackPanel from '../../components/StackPanel.vue';
-import SwipeControl from '../../components/SwipeControl.vue';
-import type { SwipeItems } from '../../components/SwipeControl.types';
 import { StandardUICommand } from '../../components/StandardUICommand';
+import SwipeControl from '../../components/SwipeControl.vue';
+import { SwipeItem, SwipeItems } from '../../components/SwipeControlProperties';
 import TextBlock from '../../components/TextBlock.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
+import UserControl from '../../components/UserControl';
+import { VisualState, VisualStateGroup, VisualStateManager, type VisualStateControl } from '../../components/VisualStateManager';
+import type { ExecuteRequestedEventArgs, XamlUICommand } from '../../components/XamlUICommand';
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime';
 import { createPageState } from '../../utils/pageState';
+import ExampleXaml from '../samples/StandardUICommand/StandardUICommandSample1_xaml.txt?raw';
+import ExampleCSharp from '../samples/StandardUICommand/StandardUICommandSample1_cs.txt?raw';
 
-const currentPage = inject<{ value: string }>('currentPage');
+interface ListItemData { Index: number; Text: string; Command: StandardUICommand }
+interface ListViewApi { ItemsSource: ListItemData[]; SelectedIndex: number }
+interface ItemContainer { IsSelected: boolean; ContextFlyout: ReturnType<typeof h> }
+
 const { t } = useI18n();
-const pageKey = computed(() => currentPage?.value || 'standarduicommand');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-
-const listItems = ref(Array.from({ length: 15 }, (_, index) => ({ Text: t('sample.standarduicommand.list-item', { index }) })));
-const selectedItems = ref<{ Text: string }[]>([]);
-const hoveredItem = ref('');
-const contextMenuOpen = ref(false);
-const contextMenuAnchor = ref<DOMRect>();
-const contextMenuParameter = ref('');
+const currentPage = inject<{ value: string }>('currentPage');
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'standarduicommand');
+const Names = shallowReactive<Record<string, any>>({});
+provide(xamlNameScopeKey, Names);
+const Labels = computed(() => ({
+  Title: t('text.standarduicommand'), Description: t('text.standarduicommand-subtitle'),
+  ToggleTheme: t('gallery.page-header.toggle-theme'),
+  SampleHeader: t('sample.standarduicommand.multiple-controls'), SampleDescription: t('sample.standarduicommand.description'),
+  File: t('MenuBarSample_File.Title'), Edit: t('MenuBarSample_Edit.Title'), Help: t('MenuBarSample_Help.Title'),
+  New: t('sample.standarduicommand.new'), Open: t('sample.standarduicommand.open'), Save: t('text.save'),
+  Exit: t('sample.standarduicommand.exit'), About: t('text.about'), Items: t('sample.standarduicommand.items')
+}));
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
+const collection = shallowReactive<ListItemData[]>([]);
+let deleteCommand: StandardUICommand | undefined;
 let detachAccelerator: (() => void) | undefined;
 
-const horizontalSwipeStyle = {
-  Height: 60,
-  Padding: 0,
-  HorizontalContentAlignment: 'Stretch' as const,
-  VerticalContentAlignment: 'Stretch' as const,
-  BorderThickness: 0
+const DeleteCommand_ExecuteRequested = (_sender: XamlUICommand, args: ExecuteRequestedEventArgs) => {
+  const parameterIndex = args.Parameter == null ? -1 : collection.findIndex(item => item.Text === args.Parameter);
+  const selectedIndex = Number(Names.ListViewRight?.SelectedIndex ?? -1);
+  const index = parameterIndex >= 0 ? parameterIndex : selectedIndex;
+  if (index >= 0 && index < collection.length) collection.splice(index, 1);
 };
-
-const deleteCommand = new StandardUICommand('Delete', {
-  ExecuteRequested: (_sender, args) => {
-    executeDelete(args.Parameter);
+const ListView_Loaded = (sender: ListViewApi) => { sender.ItemsSource = collection; };
+const ControlExample_Loaded = () => {
+  if (deleteCommand) return;
+  deleteCommand = markRaw(new StandardUICommand('Delete'));
+  deleteCommand.addEventListener('ExecuteRequested', DeleteCommand_ExecuteRequested);
+  Names.DeleteFlyoutItem.Command = deleteCommand;
+  for (let index = 0; index < 15; index += 1) {
+    collection.push(shallowReactive({ Index: index, Text: t('sample.standarduicommand.list-item', { index }), Command: deleteCommand }));
   }
+  detachAccelerator = deleteCommand.AttachKeyboardAccelerators();
+};
+const ListViewRight_ContainerContentChanging = (_sender: ListViewApi, args: { Item: ListItemData; ItemContainer: ItemContainer }) => {
+  args.ItemContainer.ContextFlyout = h(MenuFlyout, {
+    onOpened: () => { args.ItemContainer.IsSelected = true; }
+  }, { default: () => [h(MenuFlyoutItem, { Command: args.Item.Command })] });
+};
+const ListViewSwipeContainer_PointerEntered = (sender: VisualStateControl, args: { Pointer: { PointerDeviceType: string } }) => {
+  if (args.Pointer.PointerDeviceType === 'Mouse' || args.Pointer.PointerDeviceType === 'Pen') {
+    VisualStateManager.GoToState(sender, 'HoverButtonsShown', true);
+  }
+};
+const ListViewSwipeContainer_PointerExited = (sender: VisualStateControl) => {
+  VisualStateManager.GoToState(sender, 'HoverButtonsHidden', true);
+};
+watch(() => t('sample.standarduicommand.list-item', { index: 0 }), () => {
+  collection.forEach(item => { item.Text = t('sample.standarduicommand.list-item', { index: item.Index }); });
 });
-
-const executeDelete = (parameter?: unknown) => {
-  const text = typeof parameter === 'string' ? parameter : selectedItems.value[0]?.Text;
-  if (!text) return;
-  listItems.value = listItems.value.filter((item) => item.Text !== text);
-  selectedItems.value = selectedItems.value.filter((item) => item.Text !== text);
-  contextMenuOpen.value = false;
-};
-
-// AppBarButton invokes Command before raising Click. Keep the explicit handler
-// idempotent so a host that only forwards Click still executes the same command.
-const onDeleteButtonClick = (text: string) => {
-  if (listItems.value.some((item) => item.Text === text)) executeDelete(text);
-};
-
-const menuItems = computed(() => [
-  {
-    Title: t('text.file'),
-    Items: [
-      { Text: t('sample.standarduicommand.new') },
-      { Text: t('sample.standarduicommand.open') },
-      { Text: t('text.save') },
-      { Text: t('sample.standarduicommand.exit') }
-    ]
-  },
-  { Title: t('text.edit'), Items: [{ Command: deleteCommand }] },
-  { Title: t('text.help'), Items: [{ Text: t('text.about') }] }
-]);
-
-const contextMenuItems = computed(() => [{ Command: deleteCommand, CommandParameter: contextMenuParameter.value }]);
-
-const getDeleteSwipeItems = (parameter: string): SwipeItems => ({
-  Mode: 'Execute',
-  Items: [{ Background: 'Red', Command: deleteCommand, CommandParameter: parameter }]
+onBeforeUnmount(() => {
+  detachAccelerator?.();
+  deleteCommand?.removeEventListener('ExecuteRequested', DeleteCommand_ExecuteRequested);
 });
-
-const openContextMenu = (event: MouseEvent, parameter: string) => {
-  const item = listItems.value.find((candidate) => candidate.Text === parameter);
-  selectedItems.value = item ? [item] : [];
-  contextMenuParameter.value = parameter;
-  contextMenuAnchor.value = new DOMRect(event.clientX, event.clientY, 1, 1);
-  contextMenuOpen.value = true;
-};
-
-onMounted(() => { detachAccelerator = deleteCommand.AttachKeyboardAccelerators(); });
-onBeforeUnmount(() => detachAccelerator?.());
-
-const exampleCode = computed(() => `<StackPanel Width="100%">
-  <TextBlock
-    Text="sample.standarduicommand.description"
-    Margin="0,0,0,12"
-    TextWrapping="Wrap" />
-
-  <MenuBar Items="menuItems" />
-
-  <ListView
-    ItemsSource="listItems"
-    ItemContainerStyle="horizontalSwipeStyle"
-    IsItemClickEnabled="True"
-    Height="500"
-    SelectionMode="Single">
-    <ListView.ItemTemplate>
-      <DataTemplate>
-        <SwipeControl
-          Width="100%"
-          Height="60"
-          RightItems="getDeleteSwipeItems(item.Text)"
-          ContextRequested="OpenContextMenu"
-          PointerEntered="ListItem_PointerEntered"
-          PointerExited="ListItem_PointerExited">
-          <Grid ColumnDefinitions="*,Auto" RowDefinitions="60">
-            <TextBlock Text="item.Text" Margin="10" FontSize="18" />
-            <AppBarButton
-              Command="deleteCommand"
-              CommandParameter="item.Text"
-              Visibility="Collapsed"
-              HorizontalAlignment="Right"
-              AutomationProperties.Name="Delete"
-              Click="DeleteButton_Click" />
-          </Grid>
-        </SwipeControl>
-      </DataTemplate>
-    </ListView.ItemTemplate>
-  </ListView>
-
-  <MenuFlyout
-    Open="contextMenuOpen"
-    AnchorRect="contextMenuAnchor"
-    Items="contextMenuItems"
-    Placement="RightEdgeAlignedTop"
-    Close="ContextMenu_Closed" />
-</StackPanel>`);
-
-const exampleXaml = `<SwipeItem x:Name="DeleteSwipeItem" Background="Red" Command="{x:Bind Command}" CommandParameter="{x:Bind Text}" />
-
-<AppBarButton x:Name="HoverButton" IsTabStop="False" HorizontalAlignment="Right" Visibility="Collapsed"
- Command="{x:Bind Command}" CommandParameter="{x:Bind Text}" />`;
-
-const exampleCSharp = `private void ControlExample_Loaded(object sender, RoutedEventArgs e)
-{
-    var deleteCommand = new StandardUICommand(StandardUICommandKind.Delete);
-    deleteCommand.ExecuteRequested += DeleteCommand_ExecuteRequested;
-
-    DeleteFlyoutItem.Command = deleteCommand;
-
-    for (var i = 0; i < 15; i++)
-    {
-        collection.Add(new ListItemData { Text = "List item " + i.ToString(), Command = deleteCommand });
-    }
-}
-
-private void ListViewRight_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
-{
-    MenuFlyout flyout = new MenuFlyout();
-    ListItemData data = (ListItemData)args.Item;
-    MenuFlyoutItem item = new MenuFlyoutItem() { Command = data.Command };
-    flyout.Items.Add(item);
-    args.ItemContainer.ContextFlyout = flyout;
-}`;
+provide(xamlScopeKey, {
+  Labels, FavoriteLabel, FavoriteGlyph, isFavoriteState, pageTheme, toggleTheme, toggleFavorite,
+  ExampleXaml, ExampleCSharp, ControlExample_Loaded, ListView_Loaded, ListViewRight_ContainerContentChanging,
+  ListViewSwipeContainer_PointerEntered, ListViewSwipeContainer_PointerExited
+});
 </script>
 
 <style scoped>
-.page-heading { position: relative; }
-.page-header { margin: 0 0 8px; color: var(--text-primary); font-size: 28px; font-weight: 600; }
-.page-description { margin: 0 72px 16px 0; color: var(--text-secondary); font-size: 14px; line-height: 20px; }
-.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-size: 16px; }
-.standard-command-row { align-items: center; }
-.standard-command-text { grid-column: 1; grid-row: 1; min-width: 0; align-self: center; }
-.standard-command-delete { grid-column: 2; grid-row: 1; justify-self: end; align-self: center; }
+.page-heading { position: relative; min-width: 0; }
+.page-header { margin: 0 72px 8px 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.page-description { margin: 0 0 16px; color: var(--text-secondary); }
+.page-header-actions { position: absolute; top: 0; right: 0; }
+.gallery-item-page, .gallery-page-content { min-width: 0; max-width: 100%; }
 </style>

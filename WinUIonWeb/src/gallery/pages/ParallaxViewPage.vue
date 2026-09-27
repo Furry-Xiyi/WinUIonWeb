@@ -1,169 +1,125 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-          <TextBlock class="page-header" :Text="$t('text.parallaxview')" />
-          <TextBlock class="page-description" :Text="$t('text.parallaxview-description')" TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
-            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </ToggleButton>
-          </div>
-        </div>
-      <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme parallax-example" :exampleHeight="750" :headerText="$t('sample.parallaxview.listview')" :theme="pageTheme" :vue="listViewCode">
-              <template #example>
-                <div class="parallax-host">
-                  <ParallaxView :Source="() => listSourceRef" :VerticalShift="500">
-                    <template #child>
-                      <img class="parallax-image" :src="cliffImage" alt="" />
-                    </template>
-                  </ParallaxView>
-                  <div class="parallax-source">
-                    <ListView
-                      ref="listSourceRef"
-                      :ItemsSource="sampleItems"
-                      Background="rgba(0, 0, 0, 0.50)"
-                      Height="100%">
-                      <template #header>
-                        <TextBlock
-                          class="parallax-heading"
-                          :Text="$t('sample.parallaxview.list-heading')"
-                          Foreground="White"
-                          FontSize="28"
-                          TextWrapping="WrapWholeWords" />
-                      </template>
-                      <template #item="{ item }">
-                        <TextBlock :Text="item" Foreground="White" />
-                      </template>
-                    </ListView>
-                  </div>
-                </div>
-              </template>
-            </ControlExample>
+  <Page>
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind pageTitle, Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind pageDescription, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal">
+            <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind toggleThemeLabel, Mode=OneWay}"><FontIcon Glyph="&#xE793;" /></Button>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=TwoWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind favoriteLabel, Mode=OneWay}"><FontIcon Glyph="{x:Bind favoriteGlyph, Mode=OneWay}" /></ToggleButton>
+          </StackPanel>
+        </StackPanel>
+        <StackPanel class="gallery-page-content">
+          <ControlExample x:Name="Example1" Height="750" HorizontalContentAlignment="Stretch" SampleDefinition="ParallaxView\ParallaxViewParallaxListview.txt" HeaderText="{x:Bind listViewHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind listViewCode}">
+            <ControlExample.Example>
+              <Grid>
+                <ParallaxView x:Name="parallaxView" Source="{Binding ElementName=listView}" VerticalShift="500" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Image Source="{x:Bind cliffImage, Mode=OneWay}" />
+                </ParallaxView>
+                <ListView x:Name="listView" HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="#80000000" HighContrastAdjustment="Auto" AutomationProperties.Name="{x:Bind allSamplesLabel, Mode=OneWay}" ItemsSource="{x:Bind Items, Mode=OneWay}">
+                  <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:ControlInfoDataItem">
+                      <TextBlock Text="{x:Bind Title}" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}" />
+                    </DataTemplate>
+                  </ListView.ItemTemplate>
+                  <ListView.Header>
+                    <TextBlock MaxWidth="280" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="28" Foreground="White" Text="{x:Bind listHeading, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                  </ListView.Header>
+                </ListView>
+              </Grid>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+          </ControlExample>
 
-            <ControlExample class="basic-input-example-theme parallax-example" :exampleHeight="750" :headerText="$t('sample.parallaxview.scrollview')" :theme="pageTheme" :vue="scrollViewCode">
-              <template #example>
-                <div class="parallax-host">
-                  <ParallaxView :Source="() => scrollSourceRef" :VerticalShift="500">
-                    <template #child>
-                      <img class="parallax-image" :src="cliffImage" alt="" />
-                    </template>
-                  </ParallaxView>
-                  <div class="parallax-scroll-example">
-                    <TextBlock class="parallax-heading top-heading" :Text="$t('sample.parallaxview.rectangles-heading')" TextWrapping="WrapWholeWords" />
-                    <ScrollViewer
-                      ref="scrollSourceRef"
-                      class="parallax-rect-scroll"
-                      Width="150"
-                      HorizontalAlignment="Left"
-                      VerticalScrollBarVisibility="Auto"
-                      VerticalScrollMode="Auto">
-                      <StackPanel>
-                        <div v-for="color in rectangleColors" :key="color" class="color-rectangle" :style="{ background: color }" />
-                      </StackPanel>
-                    </ScrollViewer>
-                  </div>
-                </div>
-              </template>
-            </ControlExample>
-      </div>
-    </div>
-  </ScrollViewer>
+          <ControlExample x:Name="Example2" Height="750" HorizontalContentAlignment="Stretch" SampleDefinition="ParallaxView\ParallaxViewParallaxScrollview.txt" HeaderText="{x:Bind scrollViewHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind scrollViewCode}">
+            <ControlExample.Example>
+              <Grid>
+                <ParallaxView Source="{Binding ElementName=scrollView}" VerticalShift="500" HorizontalAlignment="Left" VerticalAlignment="Top">
+                  <Image Source="{x:Bind cliffImage, Mode=OneWay}" />
+                </ParallaxView>
+                <TextBlock MaxWidth="280" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="28" Foreground="White" Text="{x:Bind rectanglesHeading, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                <ScrollView x:Name="scrollView" Width="150" HorizontalAlignment="Left">
+                  <StackPanel>
+                    <Rectangle Height="150" Fill="AliceBlue" />
+                    <Rectangle Height="150" Fill="AntiqueWhite" />
+                    <Rectangle Height="150" Fill="Aqua" />
+                    <Rectangle Height="150" Fill="Aquamarine" />
+                    <Rectangle Height="150" Fill="Azure" />
+                    <Rectangle Height="150" Fill="Beige" />
+                    <Rectangle Height="150" Fill="Bisque" />
+                    <Rectangle Height="150" Fill="BlanchedAlmond" />
+                    <Rectangle Height="150" Fill="BlueViolet" />
+                    <Rectangle Height="150" Fill="Brown" />
+                    <Rectangle Height="150" Fill="BurlyWood" />
+                    <Rectangle Height="150" Fill="CadetBlue" />
+                    <Rectangle Height="150" Fill="Chartreuse" />
+                    <Rectangle Height="150" Fill="Chocolate" />
+                    <Rectangle Height="150" Fill="Coral" />
+                    <Rectangle Height="150" Fill="CornflowerBlue" />
+                    <Rectangle Height="150" Fill="Cornsilk" />
+                    <Rectangle Height="150" Fill="Crimson" />
+                    <Rectangle Height="150" Fill="Cyan" />
+                  </StackPanel>
+                </ScrollView>
+              </Grid>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Page>
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue';
+import { computed, inject } from 'vue';
 import Button from '../../components/Button.vue';
 import ControlExample from '../../components/ControlExample.vue';
+import FontIcon from '../../components/FontIcon.vue';
+import { DataTemplate } from '../../components/CollectionProperties';
+import Grid from '../../components/Grid.vue';
+import Image from '../../components/Image.vue';
 import ListView from '../../components/ListView.vue';
 import ParallaxView from '../../components/ParallaxView.vue';
+import Page from '../../components/Page.vue';
+import Rectangle from '../../components/Rectangle.vue';
+import ScrollView from '../../components/ScrollView.vue';
 import ScrollViewer from '../../components/ScrollViewer.vue';
 import StackPanel from '../../components/StackPanel.vue';
 import TextBlock from '../../components/TextBlock.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
+import controlInfoGroups from '../samples/SemanticZoom/ControlInfoGroups.json';
+import listViewDefinition from '../samples/ParallaxView/ParallaxViewParallaxListview.txt?raw';
+import scrollViewDefinition from '../samples/ParallaxView/ParallaxViewParallaxScrollview.txt?raw';
 
 const { t } = useI18n();
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'parallaxview');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-
-const listSourceRef = ref(null);
-const scrollSourceRef = ref(null);
+const pageTitle = computed(() => t('text.parallaxview'));
+const pageDescription = computed(() => t('text.parallaxview-description'));
+const listViewHeader = computed(() => t('sample.parallaxview.listview'));
+const scrollViewHeader = computed(() => t('sample.parallaxview.scrollview'));
+const listHeading = computed(() => t('sample.parallaxview.list-heading'));
+const rectanglesHeading = computed(() => t('sample.parallaxview.rectangles-heading'));
+const allSamplesLabel = computed(() => t('sample.parallaxview.all-samples'));
+const toggleThemeLabel = computed(() => t('gallery.page-header.toggle-theme'));
+const favoriteLabel = computed(() => t('gallery.page-header.favorite'));
+const favoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
 
 const cliffImage = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg';
 
 // Official sample binds the ListView to every control in the gallery, ordered by title.
-const sampleItems = [
-  'AcrylicBrush', 'AnimatedIcon', 'AnimatedVisualPlayer', 'Animation interop', 'AnnotatedScrollBar',
-  'App notifications', 'AppBarButton', 'AppBarSeparator', 'AppBarToggleButton', 'AppWindow',
-  'AppWindowTitleBar', 'AutoSuggestBox', 'Badge notifications', 'Binding', 'Border', 'BreadcrumbBar',
-  'Button', 'CalendarDatePicker', 'CalendarView', 'Canvas', 'Capture Element / Camera Preview',
-  'CheckBox', 'Clipboard', 'Color', 'Color Contrast', 'ColorPicker', 'ComboBox', 'CommandBar',
-  'CommandBarFlyout', 'Compact Sizing', 'Connected Animation', 'ContentDialog', 'ContentIsland',
-  'Custom & User Controls', 'DatePicker', 'DropDownButton', 'Easing Functions', 'Expander', 'FlipView',
-  'Flyout', 'Geometry', 'Grid', 'GridView', 'HyperlinkButton', 'IconElement', 'Iconography', 'Image',
-  'Implicit Transitions', 'InfoBadge', 'InfoBar', 'ItemsRepeater', 'ItemsView', 'JumpList',
-  'Keyboard Navigation', 'Line', 'ListView', 'MapControl', 'MediaPlayerElement', 'MenuBar', 'MenuFlyout',
-  'Multiple windows', 'NavigationView', 'NumberBox', 'Page Transitions', 'ParallaxView', 'PasswordBox',
-  'PersonPicture', 'PipsPager', 'Pivot', 'Popup', 'ProgressBar', 'ProgressRing', 'PullToRefresh',
-  'RadialGradientBrush', 'RadioButton', 'RatingControl', 'RelativePanel', 'RepeatButton', 'Resources',
-  'RichEditBox', 'RichTextBlock', 'Scratch Pad', 'Screen Reader', 'ScrollView', 'ScrollViewer',
-  'SelectorBar', 'SemanticZoom', 'Shape', 'Slider', 'Sound', 'Spacing', 'SplitButton', 'SplitView',
-  'StackPanel', 'StandardUICommand', 'Storage pickers', 'Style', 'SwipeControl',
-  'System Backdrops (Mica/Acrylic)', 'SystemBackdropElement', 'TabView', 'TeachingTip', 'Templates',
-  'TextBlock', 'TextBox', 'Theme Transitions', 'ThemeShadow', 'TimePicker', 'TitleBar', 'ToggleButton',
-  'ToggleSplitButton', 'ToggleSwitch', 'ToolTip', 'TreeView', 'Typography', 'VariableSizedWrapGrid',
-  'Viewbox', 'WebView2', 'XAML Conditions', 'XamlUICommand'
-];
+const Items = computed(() => controlInfoGroups.flatMap(group => group.Items)
+  .map(item => ({ ...item, Title: t(item.TitleKey) }))
+  .sort((a, b) => a.Title.localeCompare(b.Title)));
 
-const rectangleColors = ['AliceBlue', 'AntiqueWhite', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'BlanchedAlmond', 'BlueViolet', 'Brown', 'BurlyWood', 'CadetBlue', 'Chartreuse', 'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan'];
-
-const listViewCode = computed(() => `<ParallaxView Source="listView" VerticalShift="500">
-  <template #child>
-    <Image Source="${cliffImage}" />
-  </template>
-</ParallaxView>
-<ListView x:Name="listView" Background="#80000000" ItemsSource="Items">
-  <ListView.Header>
-    <TextBlock Text="${t('sample.parallaxview.list-heading')}" Foreground="White" FontSize="28" TextWrapping="WrapWholeWords" />
-  </ListView.Header>
-</ListView>`);
-
-const scrollViewCode = computed(() => `<ParallaxView Source="scrollView" VerticalShift="500">
-  <template #child>
-    <Image Source="${cliffImage}" />
-  </template>
-</ParallaxView>
-<TextBlock Text="${t('sample.parallaxview.rectangles-heading')}" Foreground="White" FontSize="28" TextWrapping="WrapWholeWords" />
-<ScrollViewer x:Name="scrollView" Width="150">
-  <StackPanel>
-    <Rectangle Height="150" Fill="AliceBlue" />
-    <Rectangle Height="150" Fill="AntiqueWhite" />
-    <Rectangle Height="150" Fill="Aqua" />
-  </StackPanel>
-</ScrollViewer>`);
+const sampleXaml = definition => definition.split(/--- xaml\s*\r?\n/)[1]?.trim() ?? '';
+const listViewCode = sampleXaml(listViewDefinition);
+const scrollViewCode = sampleXaml(scrollViewDefinition);
 </script>
-
-<style scoped>
-.page-heading { position: relative; }
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
-.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
-.icon { font-size: 16px; }
-.parallax-example :deep(.example-display) { padding: 0; align-items: stretch; }
-.parallax-host { width: 100%; height: 100%; overflow: hidden; position: relative; }
-.parallax-image { width: 100%; height: 100%; object-fit: cover; display: block; }
-.parallax-source { position: absolute; inset: 0; z-index: 1; }
-.parallax-heading { max-width: 280px; margin: 24px auto; color: White; font-size: 28px; line-height: 36px; text-align: center; }
-.parallax-example :deep(.win-list-view) { width: 100%; height: 100%; }
-.parallax-example :deep(.win-list-header) { margin: 24px auto; padding: 0; background: transparent; min-height: 0; }
-.parallax-example :deep(.win-list-header .win-text-block) { max-width: 280px; margin: 0 auto; text-align: center; }
-.parallax-scroll-example { width: 100%; height: 100%; position: relative; }
-.top-heading { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 2; margin-top: 24px; }
-.parallax-rect-scroll { height: 100%; }
-.color-rectangle { width: 150px; height: 150px; }
-</style>

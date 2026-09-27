@@ -1,19 +1,29 @@
 <template>
   <div
+    ref="checkboxElement"
     class="win-checkbox"
     :class="stateClasses"
     :style="checkboxStyle"
-    :tabindex="isDisabled ? -1 : 0"
+    :tabindex="isTabStop ? (isDisabled ? -1 : 0) : -1"
     role="checkbox"
     :aria-checked="ariaChecked"
     :aria-disabled="isDisabled"
     v-bind="forwardedAttrs"
     @click="toggle"
-    @keydown.space.prevent="toggle"
-    @keydown.enter.prevent="toggle">
+    @pointerenter="iconInput.PointerEntered"
+    @pointerleave="iconInput.PointerExited"
+    @pointerdown="iconInput.PointerPressed"
+    @pointerup="iconInput.PointerReleased"
+    @pointercancel="iconInput.PointerExited"
+    @lostpointercapture="iconInput.PointerExited"
+    @keydown="onKeyDown"
+    @keyup="onKeyUp"
+    @focusout="onLostFocus">
     <span class="checkbox-box" aria-hidden="true">
-      <span class="checkbox-glyph check-glyph" :class="{ checked: isChecked, hidden: isIndeterminate }">&#xE73E;</span>
-      <span v-if="isIndeterminate" class="checkbox-glyph indeterminate-glyph">{{ indeterminateGlyph }}</span>
+      <AnimatedIcon class="checkbox-glyph" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{x:Bind CheckGlyphMargin, Mode=OneWay}">
+        <AnimatedIcon.Source><animatedvisuals:AnimatedAcceptVisualSource /></AnimatedIcon.Source>
+        <AnimatedIcon.FallbackIconSource><FontIconSource Glyph="&#xE73E;" FontSize="12" /></AnimatedIcon.FallbackIconSource>
+      </AnimatedIcon>
     </span>
     <span class="checkbox-content">
       <slot>{{ resolvedContent }}</slot>
@@ -22,24 +32,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, ref, useAttrs, watch } from 'vue';
-import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
+import { computed, getCurrentInstance, inject, provide, ref, useAttrs, watch } from 'vue';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
+import AnimatedIcon from './AnimatedIcon.vue';
+import { useAnimatedIconInput } from './animatedIconInput';
 
 const props = defineProps({
   Content: { type: [String, Number], default: '' },
   IsChecked: { type: [Boolean, String, null], default: undefined },
   IsThreeState: { type: [Boolean, String], default: undefined },
   IsEnabled: { type: [Boolean, String], default: true },
-  Margin: { type: String, default: '' },
-  modelValue: { type: [Boolean, null], default: undefined },
-  isThreeState: { type: Boolean, default: false },
-  indeterminate: { type: Boolean, default: undefined },
-  disabled: Boolean
+  IsTabStop: { type: [Boolean, String], default: true },
+  Margin: { type: String, default: '' }
 });
 const instance = getCurrentInstance();
 const attrs = useAttrs();
 const forwardedAttrs = computed(() => {
-  const { class: _class, style: _style, onClick: _onClick, onPointerdown: _onPointerdown, ...rest } = attrs;
+  const { class: _class, style: _style, Click: _click, onClick: _onClick, onPointerdown: _onPointerdown, ...rest } = attrs;
   return rest;
 });
 const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
@@ -48,43 +57,37 @@ const resolvedIsThreeState = computed(() => resolveXamlValue(props.IsThreeState,
 const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
 
 const emit = defineEmits([
-  'update:modelValue',
+  'Click',
   'update:IsChecked',
   'Checked',
   'Unchecked',
-  'Indeterminate',
-  'checked',
-  'unchecked',
-  'indeterminate'
+  'Indeterminate'
 ]);
 
 const localChecked = ref(false);
 const boundChecked = ref<boolean | null | undefined>(undefined);
-const isControlled = computed(() => props.IsChecked !== undefined || props.modelValue !== undefined || props.indeterminate !== undefined);
-const isThreeState = computed(() => resolvedIsThreeState.value ?? props.isThreeState);
-const isDisabled = computed(() => props.disabled || !resolvedIsEnabled.value);
+const isThreeState = computed(() => resolvedIsThreeState.value === true);
+// XAML's IsTabStop="False" removes the control from the tab order without
+// disabling it, which is what ItemContainer's selection checkbox uses.
+const isTabStop = computed(() => resolveXamlValue(props.IsTabStop, instance) !== false);
+const isDisabled = computed(() => !resolvedIsEnabled.value);
 
 const currentValue = computed(() => {
-  if (props.indeterminate === true) return null;
   if (boundChecked.value !== undefined) return boundChecked.value;
   return localChecked.value;
 });
 
-watch([resolvedIsChecked, () => props.modelValue, () => props.indeterminate], ([isChecked, modelValue, indeterminate]) => {
-  if (indeterminate === true) boundChecked.value = null;
-  else if (isChecked !== undefined) {
+watch(resolvedIsChecked, isChecked => {
+  if (isChecked !== undefined) {
     // A three-state XAML binding uses null for Indeterminate. Do not coerce it
     // to false when the page's TwoWay source sends the value back down.
     boundChecked.value = isChecked === null ? null : isChecked === true;
   }
-  else if (modelValue !== undefined) boundChecked.value = modelValue as boolean | null;
   else boundChecked.value = undefined;
-  if (modelValue !== undefined) localChecked.value = modelValue as boolean;
 }, { immediate: true });
 
 const isChecked = computed(() => currentValue.value === true);
 const isIndeterminate = computed(() => isThreeState.value && currentValue.value === null);
-const indeterminateGlyph = '\uE73C';
 const ariaChecked = computed(() => isIndeterminate.value ? 'mixed' : String(isChecked.value));
 
 const stateClasses = computed(() => ({
@@ -93,6 +96,15 @@ const stateClasses = computed(() => ({
   'is-indeterminate': isIndeterminate.value,
   'is-disabled': isDisabled.value
 }));
+
+const checkboxElement = ref<HTMLElement | null>(null);
+const iconInput = useAnimatedIconInput(false, state => `${state === 'Disabled' ? 'Normal' : state}${isIndeterminate.value ? 'Indeterminate' : isChecked.value ? 'On' : 'Off'}`);
+watch(checkboxElement, element => iconInput.Attach(element), { flush: 'post' });
+watch([isChecked, isIndeterminate, isDisabled], () => iconInput.Refresh(), { flush: 'post' });
+provide(xamlScopeKey, {
+  ...inject(xamlScopeKey, {}),
+  CheckGlyphMargin: computed(() => isIndeterminate.value ? '0' : '0,1,0,-1')
+});
 
 const cssLength = (value) => {
   if (value === '' || value === undefined || value === null) return '';
@@ -111,39 +123,63 @@ const xamlThickness = (value) => {
 
 const checkboxStyle = computed(() => props.Margin ? { margin: xamlThickness(props.Margin) } : {});
 
-const emitState = (value) => {
+const emitState = (value, originalEvent?: MouseEvent | KeyboardEvent) => {
+  if (value === currentValue.value) return;
   // XAML OneWay bindings still allow the control to change its target value.
   // Keep a local value until the source sends a newer value back down.
   boundChecked.value = value;
   localChecked.value = value === true;
-  emit('update:modelValue', value);
   emit('update:IsChecked', value);
+  updateXamlBinding(props.IsChecked, value, instance);
+  const args = { OriginalSource: publicApi, OriginalEvent: originalEvent, Handled: false };
 
-  if (value === true) {
-    emit('Checked', value);
-    resolveXamlHandler(attrs.Checked, instance)?.(value);
-    emit('checked', value);
-  } else if (value === null) {
-    emit('Indeterminate', value);
-    resolveXamlHandler(attrs.Indeterminate, instance)?.(value);
-    emit('indeterminate', value);
+  const name = value === true ? 'Checked' : value === null ? 'Indeterminate' : 'Unchecked';
+  const listener = instance?.vnode.props?.[`on${name}`];
+  if (listener) {
+    for (const handler of Array.isArray(listener) ? listener : [listener]) if (typeof handler === 'function') handler(publicApi, args);
   } else {
-    emit('Unchecked', value);
-    resolveXamlHandler(attrs.Unchecked, instance)?.(value);
-    emit('unchecked', value);
+    emit(name, publicApi, args);
+    resolveXamlHandler(attrs[name], instance)?.(publicApi, args);
   }
 };
 
-const toggle = () => {
-  if (isDisabled.value) return;
-  if (isThreeState.value) {
-    if (currentValue.value === false) emitState(true);
-    else if (currentValue.value === true) emitState(null);
-    else emitState(false);
-    return;
-  }
-  emitState(!isChecked.value);
+const publicApi = {
+  get IsChecked() { return currentValue.value; },
+  set IsChecked(value: boolean | null) { emitState(value); },
+  get IsEnabled() { return !isDisabled.value; },
+  get Content() { return resolvedContent.value; },
+  get Element() { return checkboxElement.value; }
 };
+defineExpose(publicApi);
+
+const toggle = (originalEvent?: MouseEvent | KeyboardEvent) => {
+  if (isDisabled.value || (originalEvent instanceof KeyboardEvent && originalEvent.repeat)) return;
+  if (isThreeState.value) {
+    if (currentValue.value === false) emitState(true, originalEvent);
+    else if (currentValue.value === true) emitState(null, originalEvent);
+    else emitState(false, originalEvent);
+  } else emitState(!isChecked.value, originalEvent);
+  const args = { OriginalEvent: originalEvent, Handled: false };
+  emit('Click', publicApi, args);
+  if (!instance?.vnode.props?.onClick) resolveXamlHandler(attrs.Click, instance)?.(publicApi, args);
+};
+let spacePressed = false;
+const onKeyDown = (event: KeyboardEvent) => {
+  iconInput.KeyDown(event);
+  if (event.key !== ' ' && event.key !== 'Spacebar') return;
+  event.preventDefault();
+  if (!event.repeat && !isDisabled.value) spacePressed = true;
+};
+const onKeyUp = (event: KeyboardEvent) => {
+  iconInput.KeyUp(event);
+  if (event.key !== ' ' && event.key !== 'Spacebar') return;
+  event.preventDefault();
+  const invoke = spacePressed && !isDisabled.value;
+  spacePressed = false;
+  if (invoke) toggle(event);
+};
+const onLostFocus = (event: FocusEvent) => { spacePressed = false; iconInput.LostFocus(event); };
+watch(isDisabled, disabled => { if (disabled) spacePressed = false; });
 </script>
 
 <style>
@@ -189,47 +225,7 @@ const toggle = () => {
 .checkbox-glyph {
   font-size: 12px;
   line-height: 1;
-  color: var(--CheckBoxCheckGlyphForeground, var(--accent-text));
-}
-
-.indeterminate-glyph {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.check-glyph {
-  font-weight: bold;
-  animation: glyph-close 0.2s ease-in-out forwards;
-}
-
-.check-glyph.checked {
-  animation: glyph-open 0.2s ease-in-out forwards;
-}
-
-.check-glyph.hidden {
-  visibility: hidden;
-}
-
-@keyframes glyph-open {
-  0% {
-    clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);
-  }
-
-  100% {
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-  }
-}
-
-@keyframes glyph-close {
-  0% {
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-  }
-
-  100% {
-    clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%);
-  }
+  color: var(--CheckBoxCheckGlyphForeground, var(--TextOnAccentFillColorPrimaryBrush, var(--accent-text)));
 }
 
 .checkbox-content {

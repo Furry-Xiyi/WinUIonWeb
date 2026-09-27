@@ -1,258 +1,166 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">IconElement</h1>
-          <p class="page-description">
-            Represents the base class for an icon UI element. IconElement is the parent class for BitmapIcon, FontIcon, ImageIcon, PathIcon, and SymbolIcon.
-          </p>
-          <div class="page-header-actions">
-            <Button class="header-action" @click="toggleTheme"
-             >
-              <span class="icon">&#xE793;</span>
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
+    <StackPanel class="gallery-item-page icon-element-page">
+      <StackPanel class="gallery-page-content">
+      <ControlExample x:Name="Example1" SampleDefinition="IconElement\IconElementBitmapiconMulticolorBitmapImage.txt" HeaderText="{x:Bind Labels.BitmapHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind BitmapXaml}">
+        <ControlExample.Example>
+          <StackPanel>
+            <TextBlock Margin="0,0,0,12" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Text="{x:Bind Labels.BitmapDescription, Mode=OneWay}" />
+            <BitmapIcon x:Name="SlicesIcon" Width="50" HorizontalAlignment="Left" ShowAsMonochrome="False" UriSource="https://cdn.jsdelivr.net/gh/microsoft/WinUI-Gallery@main/WinUIGallery/Assets/SampleMedia/Slices.png" />
+          </StackPanel>
+        </ControlExample.Example>
+        <ControlExample.Output />
+        <ControlExample.Options>
+          <CheckBox x:Name="MonochromeButton" Checked="MonochromeButton_CheckedChanged" Unchecked="MonochromeButton_CheckedChanged" Content="{x:Bind Labels.Monochrome, Mode=OneWay}" />
+        </ControlExample.Options>
+        <ControlExample.Substitutions>
+          <ControlExampleSubstitution Key="ShowAsMonochrome" Value="{x:Bind MonochromeButton.IsChecked.Value, Mode=OneWay}" />
+        </ControlExample.Substitutions>
+      </ControlExample>
+
+      <ControlExample x:Name="Example2" SampleDefinition="IconElement\IconElementFonticonGlyphSpecificFont.txt" HeaderText="{x:Bind Labels.FontHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind FontXaml}">
+        <ControlExample.Example>
+          <StackPanel>
+            <TextBlock Margin="0,0,0,12" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Text="{x:Bind Labels.FontDescription, Mode=OneWay}" />
+            <Button x:Name="ExampleButton1" AutomationProperties.Name="ExampleButton1">
+              <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE790;" />
             </Button>
-            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-             >
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </ToggleButton>
-          </div>
-        </div>
-    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example 1: BitmapIcon with ShowAsMonochrome -->
-            <ControlExample
-              headerText="BitmapIcon"
-              :theme="pageTheme"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
-                    The ShowAsMonochrome property (true by default) will result in a solid block of the foreground color if the property is set to true and the icon is more than one color. This behavior can be ignored by setting the ShowAsMonochrome property to false.
-                  </p>
-                  <div
-                    class="bitmap-icon"
-                    :class="{ monochrome: showAsMonochrome }"
-                    :style="{
-                      width: '50px',
-                      height: '50px',
-                      backgroundImage: 'url(https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Slices.png)',
-                      backgroundSize: 'contain',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'center'
-                    }">
-                  </div>
-                </div>
-              </template>
-              <template #options>
-                <CheckBox v-model="showAsMonochrome">
-                  Monochrome
-                </CheckBox>
-              </template>
-            </ControlExample>
+          </StackPanel>
+        </ControlExample.Example>
+        <ControlExample.Output />
+        <ControlExample.Options />
+      </ControlExample>
 
-            <!-- Example 2: FontIcon -->
-            <ControlExample
-              headerText="FontIcon"
-              :theme="pageTheme"
-              :templateCode="example2Template"
-              :vueCode="example2Vue">
-              <template #example>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
-                    Use FontIcon as the icon for a control if you want to specify a Glyph value from a FontFamily. Windows 10 uses the Segoe MDL2 Assets FontFamily and that is what this example is showing.
-                  </p>
-                  <Button style="width: auto;">
-                    <span class="font-icon">&#xE790;</span>
-                  </Button>
-                </div>
-              </template>
-            </ControlExample>
+      <ControlExample x:Name="Example3" SampleDefinition="IconElement\IconElementImageiconBitmapImageButton.txt" HeaderText="{x:Bind Labels.BitmapImageHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind BitmapImageXaml}">
+        <ControlExample.Example>
+          <StackPanel>
+            <TextBlock Margin="0,0,0,12" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Text="{x:Bind Labels.ImageDescription, Mode=OneWay}" />
+            <Button x:Name="ImageExample1" Width="100" AutomationProperties.Name="ImageExample1">
+              <ImageIcon>
+                <ImageIcon.Source>
+                  <BitmapImage UriSource="https://cdn.jsdelivr.net/gh/microsoft/WinUI-Gallery@main/WinUIGallery/Assets/SampleMedia/Slices.png" />
+                </ImageIcon.Source>
+              </ImageIcon>
+            </Button>
+          </StackPanel>
+        </ControlExample.Example>
+        <ControlExample.Output />
+        <ControlExample.Options />
+      </ControlExample>
 
-            <!-- Example 3: ImageIcon (PNG) -->
-            <ControlExample
-              headerText="ImageIcon (PNG)"
-              :theme="pageTheme"
-              :templateCode="example3Template"
-              :vueCode="example3Vue">
-              <template #example>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
-                    To use an ImageIcon as the icon for a control, you can set image that has a file format supported by the Image class. The two examples here show a PNG and SVG image as the icon.
-                  </p>
-                  <Button style="width: 100px;">
-                    <img src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Slices.png" alt="Slices" style="width: 20px; height: 20px; object-fit: contain;" />
-                  </Button>
-                </div>
-              </template>
-            </ControlExample>
+      <ControlExample x:Name="Example4" SampleDefinition="IconElement\IconElementImageiconSvgImageButton.txt" HeaderText="{x:Bind Labels.SvgImageHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind SvgImageXaml}">
+        <ControlExample.Example>
+          <Button x:Name="ImageExample2" AutomationProperties.Name="ImageExample2">
+            <ImageIcon Width="50">
+              <ImageIcon.Source>
+                <SvgImageSource UriSource="https://cdn.jsdelivr.net/gh/DiemenDesign/LibreICONS@master/svg-color/libre-camera-panorama.svg" />
+              </ImageIcon.Source>
+            </ImageIcon>
+          </Button>
+        </ControlExample.Example>
+        <ControlExample.Output />
+        <ControlExample.Options />
+      </ControlExample>
 
-            <!-- Example 4: ImageIcon (SVG) -->
-            <ControlExample
-              headerText="ImageIcon (SVG)"
-              :theme="pageTheme"
-              :templateCode="example4Template"
-              :vueCode="example4Vue">
-              <template #example>
-                <Button style="width: auto;">
-                  <svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
-                </Button>
-              </template>
-            </ControlExample>
+      <ControlExample x:Name="Example5" SampleDefinition="IconElement\IconElementPathiconButton.txt" HeaderText="{x:Bind Labels.PathHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind PathXaml}">
+        <ControlExample.Example>
+          <StackPanel>
+            <TextBlock Margin="0,0,0,12" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Text="{x:Bind Labels.PathDescription, Mode=OneWay}" />
+            <Button x:Name="Example1Button" AutomationProperties.Name="Example1Button">
+              <PathIcon HorizontalAlignment="Center" Data="F1 M 16,12 20,2L 20,16 1,16" />
+            </Button>
+          </StackPanel>
+        </ControlExample.Example>
+        <ControlExample.Output />
+        <ControlExample.Options />
+      </ControlExample>
 
-            <!-- Example 5: PathIcon -->
-            <ControlExample
-              headerText="PathIcon"
-              :theme="pageTheme"
-              :templateCode="example5Template"
-              :vueCode="example5Vue">
-              <template #example>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
-                    To use a PathIcon as the icon for a control, you specify the path data of the image you are trying to display. The path data draws a series of connected lines and curves.
-                  </p>
-                  <Button style="width: auto;">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M 16,12 20,2 L 20,16 1,16" />
-                    </svg>
-                  </Button>
-                </div>
-              </template>
-            </ControlExample>
-
-            <!-- Example 6: SymbolIcon -->
-            <ControlExample
-              headerText="SymbolIcon"
-              :theme="pageTheme"
-              :templateCode="example6Template"
-              :vueCode="example6Vue">
-              <template #example>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
-                    To use a SymbolIcon as the icon for a control, you specify the enum value for the glyph you would like to display. SymbolIcon's enum is based off of icons from the Segoe MDL2 font used by Windows 10.
-                  </p>
-                  <Button style="width: auto;">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                      <span class="symbol-icon">&#xE8FB;</span>
-                      <span style="font-size: 12px;">Accept</span>
-                    </div>
-                  </Button>
-                </div>
-              </template>
-            </ControlExample>
-      </div>
-    </ScrollViewer>
-  </div>
+      <ControlExample x:Name="Example6" SampleDefinition="IconElement\IconElementSymboliconButton.txt" HeaderText="{x:Bind Labels.SymbolHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind SymbolXaml}">
+        <ControlExample.Example>
+          <StackPanel>
+            <TextBlock Margin="0,0,0,12" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Text="{x:Bind Labels.SymbolDescription, Mode=OneWay}" />
+            <Button x:Name="AcceptButton" AutomationProperties.Name="AcceptButton">
+              <StackPanel>
+                <SymbolIcon Symbol="Accept" />
+                <TextBlock Text="{x:Bind Labels.Accept, Mode=OneWay}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </ControlExample.Example>
+        <ControlExample.Output />
+        <ControlExample.Options />
+      </ControlExample>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
+import { computed, inject, provide, shallowReactive } from 'vue';
+import BitmapIcon from '../../components/BitmapIcon.vue';
+import BitmapImage from '../../components/BitmapImage.vue';
+import Button from '../../components/Button.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import ControlExample from '../../components/ControlExample.vue';
-import Button from '../../components/Button.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import { createPageState } from '../../utils/pageState';
-
+import { ControlExampleSubstitution } from '../../components/ControlExampleProperties';
+import FontIcon from '../../components/FontIcon.vue';
+import ImageIcon from '../../components/ImageIcon.vue';
+import PathIcon from '../../components/PathIcon.vue';
 import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import SvgImageSource from '../../components/SvgImageSource.vue';
+import SymbolIcon from '../../components/SymbolIcon.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import { useI18n } from '../../components/i18n/index';
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime';
+import { createPageState } from '../../utils/pageState';
+import bitmapDefinition from '../samples/IconElement/IconElementBitmapiconMulticolorBitmapImage.txt?raw';
+import fontDefinition from '../samples/IconElement/IconElementFonticonGlyphSpecificFont.txt?raw';
+import bitmapImageDefinition from '../samples/IconElement/IconElementImageiconBitmapImageButton.txt?raw';
+import svgImageDefinition from '../samples/IconElement/IconElementImageiconSvgImageButton.txt?raw';
+import pathDefinition from '../samples/IconElement/IconElementPathiconButton.txt?raw';
+import symbolDefinition from '../samples/IconElement/IconElementSymboliconButton.txt?raw';
+
+const { t } = useI18n();
 const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'iconelement');
+const { pageTheme } = createPageState(currentPage?.value || 'iconelement');
+const Names = shallowReactive({});
+provide(xamlNameScopeKey, Names);
+const Labels = computed(() => ({
+  BitmapHeader: t('sample.iconelement.bitmap-header'),
+  FontHeader: t('sample.iconelement.font-header'),
+  BitmapImageHeader: t('sample.iconelement.bitmap-image-header'),
+  SvgImageHeader: t('sample.iconelement.svg-image-header'),
+  PathHeader: t('sample.iconelement.path-header'),
+  SymbolHeader: t('sample.iconelement.symbol-header'),
+  BitmapDescription: t('sample.iconelement.bitmap-description'),
+  FontDescription: t('sample.iconelement.font-description'),
+  ImageDescription: t('sample.iconelement.image-description'),
+  PathDescription: t('sample.iconelement.path-description'),
+  SymbolDescription: t('sample.iconelement.symbol-description'),
+  Monochrome: t('sample.iconelement.monochrome'),
+  Accept: t('sample.iconelement.accept')
+}));
+const sampleXaml = source => source.split(/--- xaml\s*\r?\n/)[1]?.split(/\r?\n--- /)[0].trim() ?? '';
+const BitmapXaml = sampleXaml(bitmapDefinition);
+const FontXaml = sampleXaml(fontDefinition);
+const BitmapImageXaml = sampleXaml(bitmapImageDefinition);
+const SvgImageXaml = sampleXaml(svgImageDefinition);
+const PathXaml = sampleXaml(pathDefinition);
+const SymbolXaml = sampleXaml(symbolDefinition);
 
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const MonochromeButton_CheckedChanged = () => {
+  Names.SlicesIcon.ShowAsMonochrome = Names.MonochromeButton.IsChecked === true;
+  Names.SlicesIcon.UriSource = 'https://cdn.jsdelivr.net/gh/microsoft/WinUI-Gallery@main/WinUIGallery/Assets/SampleMedia/Slices.png';
+};
 
-// Example 1: BitmapIcon
-const showAsMonochrome = ref(false);
-
-const example1Template = `<div class="bitmap-icon" :class="{ monochrome: showAsMonochrome }">
-  <!-- Image: https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Slices.png -->
-</div>`;
-
-const example1Vue = `const showAsMonochrome = ref(false);`;
-
-// Example 2: FontIcon
-const example2Template = `<Button>
-  <span class="font-icon">&#xE790;</span>
-</Button>`;
-
-const example2Vue = `// FontFamily: Segoe MDL2 Assets
-// Glyph: &#xE790;`;
-
-// Example 3: ImageIcon (PNG)
-const example3Template = `<Button>
-  <img src="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Slices.png" alt="Icon" />
-</Button>`;
-
-const example3Vue = `// Source: https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Slices.png`;
-
-// Example 4: ImageIcon (SVG)
-const example4Template = `<Button>
-  <svg width="50" height="50" viewBox="0 0 24 24">
-    <path d="..." fill="currentColor" />
-  </svg>
-</Button>`;
-
-const example4Vue = `// Source: SVG path data`;
-
-// Example 5: PathIcon
-const example5Template = `<Button>
-  <svg width="20" height="20" viewBox="0 0 20 20">
-    <path d="M 16,12 20,2 L 20,16 1,16" />
-  </svg>
-</Button>`;
-
-const example5Vue = `// Data: "M 16,12 20,2 L 20,16 1,16"`;
-
-// Example 6: SymbolIcon
-const example6Template = `<Button>
-  <div style="display: flex; flex-direction: column; align-items: center;">
-    <span class="symbol-icon">&#xE8FB;</span>
-    <span>Accept</span>
-  </div>
-</Button>`;
-
-const example6Vue = `// Symbol: Accept (&#xE8FB;)`;
+provide(xamlScopeKey, {
+  Labels, pageTheme, BitmapXaml, FontXaml, BitmapImageXaml, SvgImageXaml,
+  PathXaml, SymbolXaml, MonochromeButton_CheckedChanged
+});
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-}
-
-.font-icon,
-.symbol-icon {
-  font-size: 20px;
-  display: inline-block;
-}
-
-.bitmap-icon {
-  display: inline-block;
-}
-
-.bitmap-icon.monochrome {
-  filter: grayscale(1) brightness(0) invert(var(--is-dark-theme, 0));
-}
+.icon-element-page { min-width: 0; width: 100%; }
+.icon-element-page :deep(.control-example-header) { white-space: normal !important; overflow-wrap: anywhere; }
 </style>

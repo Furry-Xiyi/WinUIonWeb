@@ -6,14 +6,14 @@
             Learn how to create reusable custom controls and UserControls in WinUI applications.
           </p>
           <div class="page-header-actions">
-            <Button class="header-action" @click="toggleTheme"
+            <Button class="header-action" Click="toggleTheme"
              >
-              <span class="icon">&#xE793;</span>
+              <FontIcon class="icon" Glyph="&#xe793;" />
             </Button>
-            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}"
+              Click="toggleFavorite"
              >
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+              <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
             </ToggleButton>
           </div>
         </div>
@@ -75,11 +75,10 @@
                     :minLength="8"
                     v-model="passwordValue"
                     @validationChanged="onPasswordValidationChanged" />
-                  <Button primary
-                    :disabled="!isPasswordValid"
-                    @click="onSubmitPassword">
-                    Submit
-                  </Button>
+                  <Button Style="{StaticResource AccentButtonStyle}"
+                    IsEnabled="{x:Bind isPasswordValid, Mode=OneWay}"
+                    Content="{x:Bind SubmitLabel, Mode=OneWay}"
+                    Click="onSubmitPassword" />
                 </div>
               </template>
               <template #options>
@@ -115,6 +114,8 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { ref, inject, computed } from 'vue';
 import Button from '../../components/Button.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
@@ -123,12 +124,15 @@ import CounterControl from '../../components/examples/CounterControl.vue';
 import ValidatedPasswordBox from '../../components/examples/ValidatedPasswordBox.vue';
 import TemperatureConverter from '../../components/examples/TemperatureConverter.vue';
 import { createPageState } from '../../utils/pageState';
+import { useI18n } from '../../components/i18n/index';
 
 import ScrollViewer from '../../components/ScrollViewer.vue';
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'customusercontrols');
 
 const { pageTheme, isFavoriteState, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const { t } = useI18n();
+const SubmitLabel = computed(() => t('ButtonMigration_Submit'));
 
 // Example 2: Password validation
 const passwordValue = ref('');
@@ -273,6 +277,7 @@ const example3Vue = `public sealed partial class TemperatureConverterControl : U
         }
     }
 }`;
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavoriteState) ? '' : '');
 </script>
 
 <style scoped>

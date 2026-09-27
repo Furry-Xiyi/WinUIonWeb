@@ -1,5 +1,6 @@
 <template>
   <ExpanderBase
+    ref="expanderBase"
     v-bind="$attrs"
     :Header="Header"
     :Content="Content"
@@ -8,6 +9,11 @@
     :IsExpanded="IsExpanded"
     :ExpandDirection="ExpandDirection"
     :Padding="Padding"
+    :Background="Background"
+    :BorderBrush="BorderBrush"
+    :BorderThickness="BorderThickness"
+    :CornerRadius="CornerRadius"
+    :IsEnabled="IsEnabled"
     :HorizontalContentAlignment="HorizontalContentAlignment"
     :VerticalContentAlignment="VerticalContentAlignment"
     :Width="Width"
@@ -17,8 +23,8 @@
     :HorizontalAlignment="HorizontalAlignment"
     :VerticalAlignment="VerticalAlignment"
     @update:IsExpanded="$emit('update:IsExpanded', $event)"
-    @Expanding="$emit('Expanding', $event)"
-    @Collapsed="$emit('Collapsed', $event)">
+    @Expanding="forwardExpanding"
+    @Collapsed="forwardCollapsed">
     <template v-if="headerNodes.length" #Header><HeaderOutlet /></template>
     <template v-if="descriptionNodes.length" #Description><DescriptionOutlet /></template>
     <template v-if="headerIconNodes.length" #HeaderIcon><HeaderIconOutlet /></template>
@@ -48,20 +54,41 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, h, useSlots } from 'vue'
+import { computed, defineComponent, Fragment, getCurrentInstance, h, ref, useSlots } from 'vue'
 import ExpanderBase from './ExpanderBase.vue'
 import { getExpanderProperty, type ExpanderPropertyName } from './ExpanderProperties'
+import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue } from './xamlRuntime'
 
 defineOptions({ inheritAttrs: false })
 defineEmits(['update:IsExpanded', 'Expanding', 'Collapsed'])
-defineProps({
+const instance = getCurrentInstance()
+const expanderBase = ref<{ IsExpanded: boolean } | null>(null)
+const forwardLifecycleEvent = (name: string, _sender: unknown, args: unknown) => {
+  const sender = instance?.exposeProxy ?? instance?.exposed ?? instance?.proxy
+  const handler = instance?.vnode.props?.[`on${name}`]
+  for (const callback of Array.isArray(handler) ? handler : [handler]) {
+    if (typeof callback === 'function') callback(sender, args)
+  }
+  resolveXamlHandler(instance?.attrs[name], instance)?.(sender, args)
+}
+const forwardExpanding = (sender: unknown, args: unknown) => forwardLifecycleEvent('Expanding', sender, args)
+const forwardCollapsed = (sender: unknown, args: unknown) => forwardLifecycleEvent('Collapsed', sender, args)
+const props = defineProps({
   Header: { type: [String, Number], default: '' }, Content: { type: [String, Number], default: '' }, Description: { type: [String, Number], default: '' },
   HeaderIcon: { type: String, default: '' }, IsExpanded: { type: [Boolean, String], default: false },
   ExpandDirection: { type: [String, Number], default: 'Down' }, Padding: { type: [String, Number], default: '16' },
+  Background: { type: [String, Object], default: '{ThemeResource ExpanderContentBackground}' },
+  BorderBrush: { type: [String, Object], default: '{ThemeResource ExpanderContentBorderBrush}' },
+  BorderThickness: { type: [String, Number], default: '' }, CornerRadius: { type: [String, Number], default: '{ThemeResource ControlCornerRadius}' },
+  IsEnabled: { type: [Boolean, String], default: true },
   HorizontalContentAlignment: { type: String, default: 'Stretch' }, VerticalContentAlignment: { type: String, default: 'Stretch' },
   Width: { type: [String, Number], default: '' }, MinWidth: { type: [String, Number], default: '' },
   Height: { type: [String, Number], default: '' }, MaxWidth: { type: [String, Number], default: '' },
   HorizontalAlignment: { type: String, default: '' }, VerticalAlignment: { type: String, default: '' }
+})
+defineExpose({
+  get IsExpanded() { return expanderBase.value?.IsExpanded ?? resolveXamlValue(props.IsExpanded, instance) === true },
+  set IsExpanded(value: boolean) { if (expanderBase.value) expanderBase.value.IsExpanded = value }
 })
 
 const slots = useSlots()
@@ -70,16 +97,18 @@ const propertyNodes = computed(() => {
     header: [], content: [], description: [], headerIcon: [], headerControls: []
   }
   const defaultContent: ReturnType<NonNullable<typeof slots.default>> = []
-  for (const node of slots.default?.() ?? []) {
+  const collect = (nodes: ReturnType<NonNullable<typeof slots.default>>) => { for (const node of nodes) {
+    if (node.type === Fragment && Array.isArray(node.children)) { collect(node.children as ReturnType<NonNullable<typeof slots.default>>); continue }
     const propertyName = getExpanderProperty(node)
     if (!propertyName || !node.children || typeof node.children !== 'object') {
       defaultContent.push(node)
       continue
     }
     const propertySlot = (node.children as { default?: () => ReturnType<NonNullable<typeof slots.default>> }).default
-    if (propertySlot) result[propertyName] = propertySlot()
-  }
-  if (!result.content.length) result.content = defaultContent
+    if (propertySlot) result[propertyName] = normalizeXamlNodes(propertySlot(), instance)
+  } }
+  collect(slots.default?.() ?? [])
+  if (!result.content.length) result.content = normalizeXamlNodes(defaultContent, instance)
   return result
 })
 

@@ -1,153 +1,82 @@
 <template>
-  <div class="win-capture-element">
-    <div class="win-capture-frame-source" :class="{ empty: !frameSourceName }">{{ frameSourceName }}</div>
-    <div class="win-capture-captured-label" :class="{ visible: snapshots.length > 0 }">Captured:</div>
-
-    <div class="win-capture-preview" :class="{ mirrored: mirrorPreview }">
-      <video ref="videoRef" autoplay muted playsinline></video>
-    </div>
-
-    <div class="win-capture-container">
-      <ScrollViewer
-        class="win-capture-snapshots-scroll"
-        VerticalScrollMode="Auto"
-        VerticalScrollBarVisibility="Auto"
-        HorizontalScrollMode="Disabled"
-        HorizontalScrollBarVisibility="Disabled">
-        <div class="win-capture-snapshots">
-          <img v-for="snapshot in snapshots" :key="snapshot.id" :src="snapshot.source" alt="Captured photo" />
-        </div>
-      </ScrollViewer>
-    </div>
+  <div class="win-capture-element" :style="elementStyle">
+    <video ref="video" class="win-capture-video" autoplay muted playsinline :style="videoStyle" />
   </div>
 </template>
 
-<script setup>
-import { nextTick, onBeforeUnmount, ref } from 'vue';
-import ScrollViewer from './ScrollViewer.vue';
+<script setup lang="ts">
+import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { alignment, cssLength, xamlThickness } from './layout'
+import { resolveXamlValue } from './xamlRuntime'
 
-const emit = defineEmits(['Ready', 'PhotoCaptured']);
-const videoRef = ref(null);
-const frameSourceName = ref('');
-const snapshots = ref([]);
-const mirrorPreview = ref(false);
-let mediaStream = null;
-
-const StartCaptureElement = async () => {
-  emit('Ready', false);
-  if (!navigator.mediaDevices?.getUserMedia) {
-    frameSourceName.value = 'No camera devices found.';
-    return false;
+const props = defineProps({
+  Source: { type: [String, Object], default: null },
+  Stretch: { type: String, default: 'Uniform' },
+  Width: { type: [String, Number], default: '' },
+  Height: { type: [String, Number], default: '' },
+  MinWidth: { type: [String, Number], default: '' },
+  MinHeight: { type: [String, Number], default: '' },
+  MaxWidth: { type: [String, Number], default: '' },
+  MaxHeight: { type: [String, Number], default: '' },
+  Margin: { type: [String, Number], default: '' },
+  HorizontalAlignment: { type: String, default: 'Stretch' },
+  VerticalAlignment: { type: String, default: 'Stretch' },
+  Visibility: { type: String, default: 'Visible' },
+  Opacity: { type: [String, Number], default: 1 }
+})
+const emit = defineEmits(['PreviewFailed'])
+const instance = getCurrentInstance()
+const video = ref<HTMLVideoElement | null>(null)
+const source = computed(() => resolveXamlValue(props.Source, instance) as MediaStream | null)
+const elementStyle = computed(() => {
+  const style: Record<string, string> = {}
+  for (const property of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) {
+    const value = resolveXamlValue(props[property], instance)
+    if (value !== '' && value !== undefined && value !== null) style[property[0].toLowerCase() + property.slice(1)] = cssLength(value)
   }
+  style.margin = xamlThickness(resolveXamlValue(props.Margin, instance))
+  style.justifySelf = alignment(String(resolveXamlValue(props.HorizontalAlignment, instance)), 'horizontal')
+  style.alignSelf = alignment(String(resolveXamlValue(props.VerticalAlignment, instance)), 'vertical')
+  style.opacity = String(resolveXamlValue(props.Opacity, instance))
+  const visibility = resolveXamlValue(props.Visibility, instance)
+  if (visibility === 'Collapsed') style.display = 'none'
+  else if (visibility === 'Hidden') style.visibility = 'hidden'
+  return style
+})
+const videoStyle = computed(() => ({
+  objectFit: ({ None: 'none', Fill: 'fill', Uniform: 'contain', UniformToFill: 'cover' } as Record<string, 'none' | 'fill' | 'contain' | 'cover'>)[String(resolveXamlValue(props.Stretch, instance))] || 'contain'
+}))
 
+let sourceVersion = 0
+const attachSource = async () => {
+  const element = video.value
+  if (!element) return
+  const version = ++sourceVersion
   try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    if (!videoRef.value) return false;
-    videoRef.value.srcObject = mediaStream;
-    await new Promise((resolve, reject) => {
-      videoRef.value.onloadedmetadata = resolve;
-      videoRef.value.onerror = reject;
-    });
-    await videoRef.value.play();
-    const track = mediaStream.getVideoTracks()[0];
-    frameSourceName.value = `Viewing: ${track?.label || 'Integrated camera'}`;
-    await nextTick();
-    emit('Ready', true);
-    return true;
+    element.pause()
+    if (source.value && typeof source.value.getVideoTracks !== 'function') throw new TypeError('InvalidCaptureSource')
+    element.srcObject = source.value || null
+    if (!source.value) return
+    await element.play()
   } catch (error) {
-    frameSourceName.value = 'No camera devices found.';
-    frameSourceName.value = error?.name === 'NotAllowedError'
-      ? 'Camera access denied.'
-      : 'Unable to start the camera.';
-    emit('Ready', false);
-    return false;
+    if (version !== sourceVersion) return
+    element.srcObject = null
+    emit('PreviewFailed', { Code: error instanceof DOMException ? error.name : 'PreviewFailed', Message: error instanceof Error ? error.message : '', Handled: false })
   }
-};
-
-const StopCaptureElement = () => {
-  mediaStream?.getTracks().forEach((track) => track.stop());
-  mediaStream = null;
-  if (videoRef.value) videoRef.value.srcObject = null;
-  emit('Ready', false);
-};
-
-const CapturePhoto = () => {
-  const video = videoRef.value;
-  if (!video || !mediaStream || !video.videoWidth) return null;
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const context = canvas.getContext('2d');
-  if (!context) return null;
-  // The WinUI sample mirrors only the live preview; captured photos keep the camera orientation.
-  context.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const source = canvas.toDataURL('image/jpeg', .92);
-  const photo = { id: `${Date.now()}-${snapshots.value.length}`, source };
-  snapshots.value.unshift(photo);
-  emit('PhotoCaptured', photo);
-  return photo;
-};
-
-const SetMirrorPreview = (value) => {
-  mirrorPreview.value = Boolean(value);
-};
-
-onBeforeUnmount(StopCaptureElement);
-
-defineExpose({
-  StartCaptureElement,
-  StopCaptureElement,
-  CapturePhoto,
-  SetMirrorPreview,
-  snapshots,
-  mirrorPreview
-});
+}
+watch(source, attachSource, { flush: 'post' })
+onMounted(attachSource)
+onBeforeUnmount(() => {
+  ++sourceVersion
+  if (video.value) {
+    video.value.pause()
+    video.value.srcObject = null
+  }
+})
+defineExpose({ Source: source })
 </script>
 
-<style>
-.win-capture-element {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 100px;
-  grid-template-rows: auto minmax(0, 1fr);
-  width: 100%;
-  height: 300px;
-  min-width: 400px;
-  min-height: 300px;
-  max-height: 300px;
-  gap: 10px 4px;
-  color: var(--text-primary);
-  box-sizing: border-box;
-}
-
-.win-capture-frame-source,
-.win-capture-captured-label {
-  min-height: 20px;
-  align-self: center;
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.win-capture-frame-source.empty { color: var(--text-secondary); }
-.win-capture-captured-label { visibility: hidden; }
-.win-capture-captured-label.visible { visibility: visible; }
-
-.win-capture-preview {
-  position: relative;
-  min-width: 0;
-  min-height: 240px;
-  overflow: hidden;
-  background: #000;
-}
-
-.win-capture-preview.mirrored video { transform: scaleX(-1); }
-.win-capture-preview video { display: block; width: 100%; height: 100%; min-height: 240px; object-fit: contain; background: #000; }
-.win-capture-container { min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
-.win-capture-snapshots-scroll { width: 100%; height: 100%; min-height: 0; }
-.win-capture-snapshots-scroll .win-scroll-viewer-viewport { height: 100%; }
-.win-capture-snapshots { min-height: 100%; display: flex; flex-direction: column; gap: 2px; }
-.win-capture-snapshots img { display: block; width: 100%; height: auto; object-fit: contain; }
-
-@media (max-width: 520px) {
-  .win-capture-element { min-width: 0; grid-template-columns: minmax(0, 1fr) 84px; }
-}
+<style scoped>
+.win-capture-element { position: relative; min-width: 0; min-height: 0; overflow: hidden; box-sizing: border-box; }
+.win-capture-video { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; background: transparent; }
 </style>

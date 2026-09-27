@@ -17,25 +17,25 @@
                 </p>
               </div>
               <div class="page-actions">
-                <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': themeButtonTitle }" @Click="toggleTheme">
-                  <span class="icon">&#xE793;</span>
+                <Button class="header-action" ToolTipService.ToolTip="{x:Bind themeButtonTitle, Mode=OneWay}" Click="toggleTheme">
+                  <FontIcon class="icon" Glyph="&#xe793;" />
                 </Button>
-                <ToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': favoriteButtonTitle }" @update:IsChecked="toggleFavorite">
-                  <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
+                <ToggleButton IsChecked="{x:Bind isFavorite, Mode=OneWay}" class="header-action" ToolTipService.ToolTip="{x:Bind favoriteButtonTitle, Mode=OneWay}" Click="toggleFavorite">
+                  <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
                 </ToggleButton>
               </div>
             </div>
 
             <!-- Main Example -->
             <ControlExample
-              :theme="currentTheme"
-              headerText="Corner radius examples"
-              :templateCode="templateCode"
-              :vueCode="vueCode">
-              <template #example>
+              Theme="{x:Bind currentTheme, Mode=OneWay}"
+              HeaderText="{x:Bind t('text.geometry'), Mode=OneWay}"
+              Xaml="{x:Bind templateCode, Mode=OneWay}"
+              HorizontalContentAlignment="Stretch">
+              <ControlExample.Example>
                 <div class="geometry-container">
                   <!-- Image Canvas with Interactive Hotspots -->
-                  <div class="canvas-container">
+                  <ScrollViewer class="canvas-container" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
                     <div class="canvas">
                       <img
                         :src="geometryImage"
@@ -46,9 +46,9 @@
                       <Button
                         class="geometry-button"
                         style="left: 16px; top: 16px;"
-                        @click="toggleTooltip1"
-                        v-bind="{ 'tooltipservice.tooltip': '8px' }">
-                        <span class="icon">&#xE946;</span>
+                        Click="toggleTooltip1"
+                        ToolTipService.ToolTip="{x:Bind ButtonBinding1, Mode=OneWay}">
+                        <FontIcon class="icon" Glyph="&#xe946;" />
                       </Button>
                       <div
                         v-if="tooltip1Open"
@@ -62,9 +62,9 @@
                       <Button
                         class="geometry-button"
                         style="left: 16px; top: 148px;"
-                        @click="toggleTooltip2"
-                        v-bind="{ 'tooltipservice.tooltip': 'Body' }">
-                        <span class="icon">&#xE946;</span>
+                        Click="toggleTooltip2"
+                        ToolTipService.ToolTip="{x:Bind ButtonBinding2, Mode=OneWay}">
+                        <FontIcon class="icon" Glyph="&#xe946;" />
                       </Button>
                       <div
                         v-if="tooltip2Open"
@@ -77,9 +77,9 @@
                       <Button
                         class="geometry-button"
                         style="left: 240px; top: 168px;"
-                        @click="toggleTooltip3"
-                        v-bind="{ 'tooltipservice.tooltip': '4px' }">
-                        <span class="icon">&#xE946;</span>
+                        Click="toggleTooltip3"
+                        ToolTipService.ToolTip="{x:Bind ButtonBinding3, Mode=OneWay}">
+                        <FontIcon class="icon" Glyph="&#xe946;" />
                       </Button>
                       <div
                         v-if="tooltip3Open"
@@ -89,9 +89,10 @@
                         <div class="teaching-tip-subtitle">ControlCornerRadius</div>
                       </div>
                     </div>
-                  </div>
+                  </ScrollViewer>
 
                   <!-- Corner Radius Reference Table -->
+                  <ScrollViewer class="radius-table-scroll" HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
                   <div class="radius-table">
                     <!-- Table Header -->
                     <div class="table-header">
@@ -117,9 +118,9 @@
                       <div class="cell copy-col">
                         <Button
                           class="copy-button"
-                          @click="copyToClipboard('OverlayCornerRadius')"
-                          ToolTipService.ToolTip="Copy to clipboard">
-                          <span class="icon">&#xE8C8;</span>
+                          Click="ButtonClick4"
+                          ToolTipService.ToolTip="{x:Bind CopyLabel, Mode=OneWay}">
+                          <FontIcon class="icon" Glyph="&#xe8c8;" />
                         </Button>
                       </div>
                     </div>
@@ -141,9 +142,9 @@
                       <div class="cell copy-col">
                         <Button
                           class="copy-button"
-                          @click="copyToClipboard('ControlCornerRadius')"
-                          ToolTipService.ToolTip="Copy to clipboard">
-                          <span class="icon">&#xE8C8;</span>
+                          Click="ButtonClick5"
+                          ToolTipService.ToolTip="{x:Bind CopyLabel, Mode=OneWay}">
+                          <FontIcon class="icon" Glyph="&#xe8c8;" />
                         </Button>
                       </div>
                     </div>
@@ -165,8 +166,11 @@
                       <div class="cell copy-col"></div>
                     </div>
                   </div>
+                  </ScrollViewer>
                 </div>
-              </template>
+              </ControlExample.Example>
+              <ControlExample.Output />
+              <ControlExample.Options />
             </ControlExample>
       </div>
     </ScrollViewer>
@@ -174,27 +178,32 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { ref, computed, inject } from 'vue';
 import ControlExample from '../../components/ControlExample.vue';
 import Button from '../../components/Button.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
 import { createPageState } from '../../utils/pageState';
+import { useI18n } from '../../components/i18n/index';
 
 import ScrollViewer from '../../components/ScrollViewer.vue';
+const { t } = useI18n();
 // Theme management
 const currentPage = inject('currentPage');
 const pageKey = computed(() => currentPage?.value || 'geometry');
 const { pageTheme: currentTheme, isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
-const themeButtonTitle = computed(() => `Switch to ${currentTheme.value === 'light' ? 'dark' : 'light'} theme`);
+const themeButtonTitle = computed(() => t('gallery.page-header.toggle-theme'));
 
-const favoriteButtonTitle = computed(() => isFavorite.value ? 'Remove from favorites' : 'Add to favorites');
+const favoriteButtonTitle = computed(() => t(isFavorite.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const CopyLabel = computed(() => t('text.copy'));
 
 // Geometry image based on theme
 const geometryImage = computed(() => {
   return currentTheme.value === 'light'
-    ? '/assets/design/geometry-light.png'
-    : '/assets/design/geometry-dark.png';
+    ? 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Design/Geometry.light.png'
+    : 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/Design/Geometry.dark.png';
 });
 
 // Teaching tip states
@@ -238,17 +247,12 @@ const copyToClipboard = (text) => {
 const templateCode = `<Grid CornerRadius="{StaticResource OverlayCornerRadius}"/>
 <Grid CornerRadius="{StaticResource ControlCornerRadius}"/>`;
 
-const vueCode = `<div style="border-radius: 8px;">
-  <!-- OverlayCornerRadius: 8px -->
-</div>
-
-<div style="border-radius: 4px;">
-  <!-- ControlCornerRadius: 4px -->
-</div>
-
-<div style="border-radius: 0;">
-  <!-- No rounding -->
-</div>`;
+const ButtonBinding1 = computed(() => ('8px'));
+const ButtonBinding2 = computed(() => t('ButtonMigration_GeometryBody'));
+const ButtonBinding3 = computed(() => ('4px'));
+const ButtonClick4 = (_sender, _args) => { copyToClipboard('OverlayCornerRadius') };
+const ButtonClick5 = (_sender, _args) => { copyToClipboard('ControlCornerRadius') };
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavorite) ? '' : '');
 </script>
 
 <style scoped>
@@ -311,7 +315,6 @@ const vueCode = `<div style="border-radius: 8px;">
 
 .canvas-container {
   width: 100%;
-  overflow-x: auto;
 }
 
 .canvas {
@@ -347,8 +350,6 @@ const vueCode = `<div style="border-radius: 8px;">
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
   z-index: 20;
   min-width: 200px;
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
 }
 
 .teaching-tip::before {

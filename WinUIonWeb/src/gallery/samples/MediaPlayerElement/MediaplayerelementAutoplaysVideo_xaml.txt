@@ -1,0 +1,3 @@
+<MediaPlayerElement Source="Assets/SampleMedia/fishes.wmv"
+                    MaxWidth="400"
+                    AutoPlay="True" />

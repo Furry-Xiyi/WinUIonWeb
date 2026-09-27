@@ -8,12 +8,12 @@
           Text="{x:Bind $t('text.the-expander-control-lets-you-show-or-hide-less'), Mode=OneWay}"
           TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <Button class="header-action" Click="toggleTheme"><span class="icon"></span></Button>
+          <Button class="header-action" Click="toggleTheme"><FontIcon class="icon" Glyph="&#xe793;" /></Button>
           <ToggleButton
             IsChecked="{x:Bind isFavoriteState, Mode=OneWay}"
             class="header-action"
             Click="toggleFavorite">
-            <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
           </ToggleButton>
         </div>
       </div>
@@ -39,7 +39,7 @@
             <StackPanel>
               <ComboBox
                 SelectedIndex="{x:Bind expandDirectionIndex, Mode=TwoWay}"
-                Header="ExpandDirection"
+                Header="{x:Bind expandDirectionLabel, Mode=OneWay}"
                 Width="196"
                 ItemsSource="{x:Bind expandDirectionItems, Mode=OneWay}"
                 DisplayMemberPath="Text" />
@@ -73,6 +73,8 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { computed, inject, ref } from 'vue';
 import Button from '../../components/Button.vue';
 import ComboBox from '../../components/ComboBox.vue';
@@ -91,6 +93,7 @@ const pageKey = computed(() => currentPage?.value || 'expander');
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
 
 const expander1Expanded = ref(false);
+const expandDirectionLabel = computed(() => t('sample.expander.expand-direction'));
 const expandDirectionIndex = ref(0);
 const expandDirectionItems = computed(() => [
   { Text: t('text.down'), Value: 'Down' },
@@ -114,6 +117,7 @@ const example2Code = computed(() => `<Expander Width="500" Padding="0" Horizonta
     <TextBlock Margin="4" Text="${t('sample.expander.left-aligned-content')}" />
   </Expander.Content>
 </Expander>`);
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavoriteState) ? '' : '');
 </script>
 
 <style scoped>

@@ -1,110 +1,130 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div style="position: relative;" class="page-heading">
-          <TextBlock class="page-header" :Text="$t('text.numberbox')" />
-          <TextBlock class="page-description" :Text="$t('text.the-numberbox-control-allows-users-to-enter-numb')" TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <Button class="header-action" @click="toggleTheme"><span class="icon"></span></Button>
-            <ToggleButton class="header-action" :IsChecked="isFavoriteState" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></ToggleButton>
-          </div>
-        </div>
-      <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example1Template" :headerText="$t('text.a-numberbox-that-evaluates-expressions')">
-              <template #example>
-                <NumberBox v-model:Value="expressionValue" :AcceptsExpression="true" :Header="$t('text.enter-an-expression')" PlaceholderText="1 + 2^2" :Width="300" />
-              </template>
-            </ControlExample>
+  <Page>
 
-            <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example2Template" :headerText="$t('sample.numberbox.spin-button')">
-              <template #example>
-                <NumberBox v-model:Value="spinValue" :Header="$t('sample.numberbox.enter-integer')" :SmallChange="10" :LargeChange="100" :SpinButtonPlacementMode="spinMode" :Width="300" />
-              </template>
-              <template #options>
-                <div class="options-group">
-                  <TextBlock class="options-label" :Text="$t('sample.numberbox.spinbutton-placement')" />
-                  <RadioButton v-model="spinMode" value="Inline"><TextBlock :Text="$t('text.inline')" /></RadioButton>
-                  <RadioButton v-model="spinMode" value="Compact"><TextBlock :Text="$t('sample.numberbox.compact')" /></RadioButton>
-                </div>
-              </template>
-            </ControlExample>
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind Labels.Title, Mode=OneWay}" FontSize="28" FontWeight="SemiBold" />
+          <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal" Spacing="4">
+            <Button Click="toggleTheme" ToolTipService.ToolTip="{x:Bind Labels.ToggleTheme, Mode=OneWay}" AutomationProperties.Name="{x:Bind Labels.ToggleTheme, Mode=OneWay}"><FontIcon Glyph="&#xE793;" FontSize="16" /></Button>
+            <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}"><FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" /></ToggleButton>
+          </StackPanel>
+        </StackPanel>
+        <StackPanel class="gallery-page-content">
+        <StackPanel>
+          <ControlExample SampleDefinition="NumberBox\NumberboxEvaluatesExpressions.txt" HeaderText="{x:Bind Labels.Header0, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind Sources[0].Xaml}" CSharp="{x:Bind Sources[0].CSharp}">
+            <ControlExample.Example>
+              <NumberBox AcceptsExpression="True" Header="{x:Bind Labels.Text4, Mode=OneWay}" PlaceholderText="{x:Bind Labels.Text5, Mode=OneWay}" Value="NaN" />
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
 
-            <ControlExample class="basic-input-example-theme" :theme="pageTheme" :vue="example3Template" :headerText="$t('sample.numberbox.formatted-rounding')">
-              <template #example>
-                <div class="stack-example">
-                  <NumberBox v-model:Value="currencyValue" :NumberFormatter="currencyFormatter" :Header="$t('sample.numberbox.enter-dollar-amount')" PlaceholderText="0.00" :SmallChange="0.25" :Width="300" @ValueChanged="roundCurrency" />
-                  <TextBlock class="output-text" :Text="currencyOutput" />
-                </div>
-              </template>
-            </ControlExample>
-      </div>
-    </div>
-  </ScrollViewer>
+          </ControlExample>
+          <ControlExample SampleDefinition="NumberBox\NumberboxSpinButton.txt" HeaderText="{x:Bind Labels.Header1, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind Sources[1].Xaml}" CSharp="{x:Bind Sources[1].CSharp}">
+            <ControlExample.Example>
+              <NumberBox x:Name="NumberBoxSpinButtonPlacementExample" VerticalAlignment="Top" AutomationProperties.Name="{x:Bind Labels.Text7, Mode=OneWay}" Header="{x:Bind Labels.Text8, Mode=OneWay}" LargeChange="100" SmallChange="10" SpinButtonPlacementMode="Compact" Value="10" />
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options>
+              <RadioButtons x:Name="SpinButtonPlacementGroup" Header="{x:Bind Labels.Text9, Mode=OneWay}" SelectedIndex="0" SelectionChanged="SpinButtonPlacementGroup_SelectionChanged">
+                <x:String x:Uid="text.inline">Inline</x:String>
+                <x:String x:Uid="sample.numberbox.compact">Compact</x:String>
+              </RadioButtons>
+            </ControlExample.Options>
+            <ControlExample.Substitutions>
+              <ControlExampleSubstitution Key="SpinButtonPlacementMode" Value="{x:Bind SpinButtonPlacementMode, Mode=OneWay}" />
+            </ControlExample.Substitutions>
+          </ControlExample>
+          <ControlExample SampleDefinition="NumberBox\FormattedNumberboxRoundsNearest.txt" HeaderText="{x:Bind Labels.Header2, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind Sources[2].Xaml}" CSharp="{x:Bind Sources[2].CSharp}">
+            <ControlExample.Example>
+              <NumberBox x:Name="FormattedNumberBox" Header="{x:Bind Labels.Text13, Mode=OneWay}" PlaceholderText="{x:Bind Labels.Text14, Mode=OneWay}" />
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options />
+
+          </ControlExample>
+        </StackPanel>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+
+  </Page>
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue';
+import { computed, inject, onMounted, provide, ref, shallowReactive } from 'vue';
 import Button from '../../components/Button.vue';
-import ControlExample from '../../components/ControlExample.vue';
-import NumberBox from '../../components/NumberBox.vue';
-import RadioButton from '../../components/RadioButton.vue';
-import TextBlock from '../../components/TextBlock.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
+import FontIcon from '../../components/FontIcon.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Page from '../../components/Page.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import Grid from '../../components/Grid.vue';
+import RowDefinition from '../../components/RowDefinition.vue';
+import ColumnDefinition from '../../components/ColumnDefinition.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import TextBox from '../../components/TextBox.vue';
+import AutoSuggestBox from '../../components/AutoSuggestBox.vue';
+import NumberBox from '../../components/NumberBox.vue';
+import PasswordBox from '../../components/PasswordBox.vue';
+import RichEditBox from '../../components/RichEditBox.vue';
+import RichTextBlock from '../../components/RichTextBlock.vue';
+import RelativePanel from '../../components/RelativePanel.vue';
+import Image from '../../components/Image.vue';
+import RadioButtons from '../../components/RadioButtons.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import ToggleSwitch from '../../components/ToggleSwitch.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import ComboBox from '../../components/ComboBox.vue';
+import DropDownButton from '../../components/DropDownButton.vue';
+import Flyout from '../../components/Flyout.vue';
+import VariableSizedWrapGrid from '../../components/VariableSizedWrapGrid.vue';
+import Rectangle from '../../components/Rectangle.vue';
+import SymbolIcon from '../../components/SymbolIcon.vue';
+import RichTextBlockOverflow from '../../components/RichTextBlockOverflow.vue';
+import SampleCodePresenter from '../../components/SampleCodePresenter.vue';
+import { Run, Span, Bold, Italic, Underline, LineBreak, Hyperlink, Paragraph } from '../../components/TextInline';
+import { ComboBoxItem, XamlString } from '../../components/ComboBox.vue';
+import { ControlExampleSubstitution } from '../../components/ControlExampleProperties';
+import { XamlStyle as Style, XamlSetter as Setter } from '../../components/CollectionProperties';
+import { ResourceDictionary } from '../../components/xamlPrimitives';
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime';
 import { useI18n } from '../../components/i18n/index';
 import { createPageState } from '../../utils/pageState';
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
-const { t, locale } = useI18n();
+import Sample0 from '../samples/NumberBox/NumberboxEvaluatesExpressions.txt?raw';
+import Sample1 from '../samples/NumberBox/NumberboxSpinButton.txt?raw';
+import Sample2 from '../samples/NumberBox/FormattedNumberboxRoundsNearest.txt?raw';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'numberbox');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-
-const expressionValue = ref(Number.NaN);
-const spinValue = ref(10);
-const spinMode = ref('Compact');
-const currencyValue = ref(Number.NaN);
-const currencyOutput = ref('');
-const currencyFormatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: false });
-
-const formatCurrency = (value) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(value);
-const roundCurrency = ({ NewValue }) => {
-  if (Number.isNaN(NewValue)) {
-    currencyOutput.value = '';
-    return;
-  }
-  const rounded = Math.round(NewValue * 4) / 4;
-  currencyValue.value = rounded;
-  currencyOutput.value = formatCurrency(rounded);
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'numberbox');
+const controls = shallowReactive({});
+provide(xamlNameScopeKey, controls);
+const Labels = computed(() => ({ Title: t('text.numberbox'), Description: t('text.the-numberbox-control-allows-users-to-enter-numb'), ToggleTheme: t('gallery.page-header.toggle-theme'), Header0: t('text.a-numberbox-that-evaluates-expressions'), Text4: t('text.enter-an-expression'), Text5: t('TextControls.NumberBox.Label1'), Header1: t('sample.numberbox.spin-button'), Text7: t('TextControls.NumberBox.Label2'), Text8: t('sample.numberbox.enter-integer'), Text9: t('sample.numberbox.spinbutton-placement'), Text10: t('text.inline'), Text11: t('sample.numberbox.compact'), Header2: t('sample.numberbox.formatted-rounding'), Text13: t('sample.numberbox.enter-dollar-amount'), Text14: t('TextControls.NumberBox.Label3') }));
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
+const Sources = [Sample0,Sample1,Sample2].map(sample => ({ Xaml: sample.split(/^--- xaml\r?\n/m)[1]?.split(/^--- c#/m)[0]?.trim() ?? '', CSharp: sample.split(/^--- c#\r?\n/m)[1]?.trim() ?? '' }));
+const formatter = { FormatDouble: value => (Math.floor(value * 4 + 0.5) / 4).toFixed(2), ParseDouble: value => Number(value) };
+const SpinButtonPlacementMode = ref('Inline');
+const SetNumberBoxNumberFormatter = () => { if (controls.FormattedNumberBox) controls.FormattedNumberBox.NumberFormatter = formatter; };
+const SpinButtonPlacementGroup_SelectionChanged = sender => {
+  SpinButtonPlacementMode.value = sender.SelectedIndex === 0 ? 'Inline' : 'Compact';
+  if (controls.NumberBoxSpinButtonPlacementExample) controls.NumberBoxSpinButtonPlacementExample.SpinButtonPlacementMode = SpinButtonPlacementMode.value;
 };
 
-const example1Template = computed(() => `<NumberBox
-  v-model:Value="expressionValue"
-  :AcceptsExpression="true"
-  Header="${t('text.enter-an-expression')}"
-  PlaceholderText="1 + 2^2" />`);
-
-const example2Template = computed(() => `<NumberBox
-  v-model:Value="spinValue"
-  Header="${t('sample.numberbox.enter-integer')}"
-  :SmallChange="10"
-  :LargeChange="100"
-  :SpinButtonPlacementMode="spinMode" />`);
-
-const example3Template = computed(() => `<NumberBox
-  v-model:Value="currencyValue"
-  :NumberFormatter="currencyFormatter"
-  Header="${t('sample.numberbox.enter-dollar-amount')}"
-  PlaceholderText="0.00"
-  :SmallChange="0.25"
-  @ValueChanged="roundCurrency" />`);
+provide(xamlScopeKey, { Labels, FavoriteLabel, FavoriteGlyph, isFavoriteState, pageTheme, Sources, toggleTheme, toggleFavorite, SpinButtonPlacementMode, SetNumberBoxNumberFormatter, SpinButtonPlacementGroup_SelectionChanged });
+onMounted(() => {
+  SetNumberBoxNumberFormatter();
+  if (controls.SpinButtonPlacementGroup) SpinButtonPlacementGroup_SelectionChanged(controls.SpinButtonPlacementGroup);
+});
 </script>
 
 <style scoped>
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-primary); }
-.page-description { font-size: 14px; color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.5; }
-.page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; align-items: center; }
-.icon { font-size: 16px; }
-.options-group, .stack-example { display: flex; flex-direction: column; gap: 8px; }
-.options-label { color: var(--text-primary); font-size: 14px; font-weight: 600; }
-.output-text { color: var(--text-primary); font-size: 14px; }
+.page-heading { position: relative; }
+.page-header { margin: 0 80px 8px 0; }
+.page-description { margin: 0 0 16px; color: var(--text-secondary); }
+.page-header-actions { position: absolute; top: 0; right: 0; }
+.gallery-page-content { min-width: 0; }
 </style>

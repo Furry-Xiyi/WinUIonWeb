@@ -1,63 +1,75 @@
 <template>
   <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-          <TextBlock class="page-header" :Text="$t('text.relativepanel')" />
-          <TextBlock class="page-description" :Text="$t('text.relativepanel-description')" TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
-            <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </ToggleButton>
-          </div>
-        </div>
-      <div class="gallery-page-content">
-        <ControlExample class="basic-input-example-theme" SampleDefinition="RelativePanel\RelativepanelControl.txt" :HeaderText="$t('sample.relativepanel.control')" :Theme="pageTheme" :Vue="relativePanelCode">
-              <ControlExample.Example>
-                <RelativePanel Width="300" Height="108">
-                  <div class="layout-rectangle red" style="left: 0; top: 0;" />
-                  <div class="layout-rectangle blue" style="left: 58px; top: 0;" />
-                  <div class="layout-rectangle green" style="right: 0; top: 0;" />
-                  <div class="layout-rectangle yellow" style="right: 0; top: 58px;" />
-                </RelativePanel>
-              </ControlExample.Example>
-            </ControlExample>
-      </div>
-    </div>
+    <StackPanel class="gallery-item-page">
+      <StackPanel class="page-heading">
+        <TextBlock class="page-header" Text="{x:Bind PageTitle}" />
+        <TextBlock class="page-description" Text="{x:Bind PageDescription}" TextWrapping="WrapWholeWords" />
+        <StackPanel class="page-header-actions" Orientation="Horizontal">
+          <Button class="header-action" AutomationProperties.Name="{x:Bind ThemeActionText, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind ThemeActionText, Mode=OneWay}" Click="toggleTheme">
+            <TextBlock class="icon" Text="&#xE793;" />
+          </Button>
+          <ToggleButton class="header-action" AutomationProperties.Name="{x:Bind FavoriteActionText, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind FavoriteActionText, Mode=OneWay}" IsChecked="{x:Bind isFavoriteState, Mode=TwoWay}" Click="toggleFavorite">
+            <TextBlock class="icon" FontFamily="Segoe Fluent Icons" Text="{x:Bind FavoriteGlyph, Mode=OneWay}" />
+          </ToggleButton>
+        </StackPanel>
+      </StackPanel>
+      <StackPanel class="gallery-page-content">
+        <ControlExample class="basic-input-example-theme" VerticalAlignment="Top" ExampleHeight="Auto" SampleDefinition="RelativePanel\RelativepanelControl.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind RelativePanelCode}">
+          <ControlExample.Example>
+            <RelativePanel Width="300">
+              <Rectangle x:Name="Rectangle1" Width="50" Height="50" Fill="Red" />
+              <Rectangle x:Name="Rectangle2" Width="50" Height="50" Margin="8,0,0,0" Fill="Blue" RelativePanel.RightOf="Rectangle1" />
+              <Rectangle x:Name="Rectangle3" Width="50" Height="50" Fill="Green" RelativePanel.AlignRightWithPanel="True" />
+              <Rectangle x:Name="Rectangle4" Width="50" Height="50" Margin="0,8,0,0" Fill="Yellow" RelativePanel.AlignHorizontalCenterWith="Rectangle3" RelativePanel.Below="Rectangle3" />
+            </RelativePanel>
+          </ControlExample.Example>
+          <ControlExample.Output />
+          <ControlExample.Options />
+        </ControlExample>
+      </StackPanel>
+    </StackPanel>
   </ScrollViewer>
 </template>
 
-<script setup>
-import { computed, inject } from 'vue';
-import Button from '../../components/Button.vue';
-import ControlExample from '../../components/ControlExample.vue';
-import RelativePanel from '../../components/RelativePanel.vue';
-import TextBlock from '../../components/TextBlock.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import { createPageState } from '../../utils/pageState';
+<script setup lang="ts">
+import { computed, inject } from 'vue'
+import Button from '../../components/Button.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import Rectangle from '../../components/Rectangle.vue'
+import RelativePanel from '../../components/RelativePanel.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import ToggleButton from '../../components/ToggleButton.vue'
+import { useI18n } from '../../components/i18n/index'
+import { createPageState } from '../../utils/pageState'
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
-const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'relativepanel');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const { t } = useI18n()
+const currentPage = inject<{ value: string }>('currentPage')
+const pageKey = computed(() => currentPage?.value || 'relativepanel')
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value)
+const PageTitle = computed(() => t('text.relativepanel'))
+const PageDescription = computed(() => t('text.relativepanel-description'))
+const ThemeActionText = computed(() => t('gallery.page-header.toggle-theme'))
+const FavoriteActionText = computed(() => t('gallery.page-header.favorite'))
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
 
-const relativePanelCode = `<RelativePanel Width="300">
-  <Rectangle x:Name="Rectangle1" Fill="Red" Height="50" Width="50" />
-  <Rectangle x:Name="Rectangle2" Fill="Blue" Height="50" Width="50" RelativePanel.RightOf="Rectangle1" Margin="8,0,0,0" />
-  <Rectangle x:Name="Rectangle3" Fill="Green" Height="50" Width="50" RelativePanel.AlignRightWithPanel="True" />
-  <Rectangle x:Name="Rectangle4" Fill="Yellow" Height="50" Width="50" RelativePanel.Below="Rectangle3" RelativePanel.AlignHorizontalCenterWith="Rectangle3" Margin="0,8,0,0" />
-</RelativePanel>`;
+const RelativePanelCode = `<RelativePanel Width="300">
+    <Rectangle x:Name="Rectangle1" Width="50" Height="50" Fill="Red" />
+    <Rectangle x:Name="Rectangle2" Width="50" Height="50" Margin="8,0,0,0"
+        Fill="Blue" RelativePanel.RightOf="Rectangle1" />
+    <Rectangle x:Name="Rectangle3" Width="50" Height="50" Fill="Green"
+        RelativePanel.AlignRightWithPanel="True" />
+    <Rectangle x:Name="Rectangle4" Width="50" Height="50" Margin="0,8,0,0"
+        Fill="Yellow" RelativePanel.AlignHorizontalCenterWith="Rectangle3"
+        RelativePanel.Below="Rectangle3" />
+</RelativePanel>`
 </script>
 
 <style scoped>
-.page-heading { position: relative; }
-.page-header { font-size: 28px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-heading { position: relative; min-width: 0; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 80px 8px 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.page-description { color: var(--text-secondary); margin: 0 80px 16px 0; line-height: 20px; overflow-wrap: anywhere; }
 .page-header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 4px; }
 .icon { font-size: 16px; }
-.layout-rectangle { position: absolute; width: 50px; height: 50px; }
-.red { background: Red; }
-.blue { background: Blue; }
-.green { background: Green; }
-.yellow { background: Yellow; }
 </style>

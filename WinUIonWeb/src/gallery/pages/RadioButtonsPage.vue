@@ -4,9 +4,9 @@
       <TextBlock class="page-header" :Text="$t('text.radiobuttons')" />
       <TextBlock class="page-description" :Text="$t('text.radiobuttons-are-used-to-select-a-single-option')" TextWrapping="WrapWholeWords" />
       <div class="page-header-actions">
-        <Button class="header-action" @Click="toggleTheme"><span class="icon"></span></Button>
-        <ToggleButton :IsChecked="isFavoriteState" class="header-action" @update:IsChecked="toggleFavorite">
-          <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+        <Button class="header-action" Click="toggleTheme"><FontIcon class="icon" Glyph="&#xe793;" /></Button>
+        <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" Click="toggleFavorite">
+          <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
         </ToggleButton>
       </div>
     </div>
@@ -50,6 +50,8 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { computed, inject, ref } from 'vue';
 import Button from '../../components/Button.vue';
 import ControlExample from '../../components/ControlExample.vue';
@@ -95,6 +97,7 @@ const radioButtonStringsVue = `<RadioButton Header="Background" MaxColumns="3" :
 <RadioButton Header="Border" MaxColumns="3" :SelectedIndex="1" :ItemsSource="['Green', 'Yellow', 'White']" />
 
 <div style="height: 50px; margin: 0 10px; border: 10px solid #FFD700; background: #FFFFFF;" />`;
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavoriteState) ? '' : '');
 </script>
 
 <style scoped>

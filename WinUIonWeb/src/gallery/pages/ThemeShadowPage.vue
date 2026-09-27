@@ -1,188 +1,129 @@
 <template>
-  <div class="gallery-item-page">
-    <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">ThemeShadow</h1>
-          <p class="page-description">
-            ThemeShadow is a pre-configured shadow effect that can be applied to any XAML element to draw appropriate shadows based on x, y, z coordinates.
-          </p>
-          <div class="page-header-actions">
-            <Button class="header-action" @click="toggleTheme"
-             >
-              <span class="icon">&#xE793;</span>
-            </Button>
-            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-             >
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </ToggleButton>
-          </div>
-        </div>
+  <Page>
     <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- Example 1: ThemeShadow applied to a Border -->
-            <ControlExample
-              headerText="ThemeShadow applied to a Border"
-              :theme="pageTheme"
-              exampleHeight="320px"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <div class="shadow-container">
-                  <div ref="shadowReceiver" class="shadow-receiver"></div>
-                  <div
-                    ref="shadowCaster"
-                    class="shadow-caster"
-                    :style="{
-                      transform: `translateZ(${zTranslation}px)`,
-                      boxShadow: computedShadow
-                    }">
-                  </div>
-                </div>
-              </template>
-              <template #options>
-                <Slider
-                  v-model="zTranslation"
-                  header="Z-translation"
-                  :min="0"
-                  :max="64"
-                  :stepFrequency="1"
-                  style="width: 200px;"
-                />
-              </template>
-            </ControlExample>
-      </div>
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind PageTitle, Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind PageDescription, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal">
+            <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind ThemeButtonLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind ThemeButtonLabel, Mode=OneWay}">
+              <FontIcon Glyph="&#xE793;" />
+            </Button>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind FavoriteButtonLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind FavoriteButtonLabel, Mode=OneWay}">
+              <FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" />
+            </ToggleButton>
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel class="gallery-page-content">
+          <ControlExample x:Name="Example3" SampleDefinition="ThemeShadow\ThemeshadowAppliedBorder.txt" HeaderText="{x:Bind SampleHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind SampleXaml, Mode=OneWay}" CSharp="{x:Bind SampleCSharp, Mode=OneWay}">
+            <ControlExample.Example>
+              <Grid x:Name="Example3Grid" Padding="36">
+                <Grid x:Name="ShadowCastGrid" />
+                <Border x:Name="ShadowRect" Width="200" Height="200" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="{ThemeResource OverlayCornerRadius}" Loaded="ShadowRect_Loaded">
+                  <Border.Shadow>
+                    <ThemeShadow x:Name="shadow" />
+                  </Border.Shadow>
+                </Border>
+              </Grid>
+            </ControlExample.Example>
+            <ControlExample.Output>
+              <StackPanel>
+                <TextBlock Text="{x:Bind TranslationOutput, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+                <TextBlock Text="{x:Bind ReceiversOutput, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+              </StackPanel>
+            </ControlExample.Output>
+            <ControlExample.Options>
+              <Slider x:Name="TranslationSliderInApp" Width="200" HorizontalAlignment="Left" AutomationProperties.Name="{x:Bind ShadowIntensityName, Mode=OneWay}" Header="{x:Bind TranslationHeader, Mode=OneWay}" IsFocusEngagementEnabled="False" Maximum="64" Minimum="0" SmallChange="1" StepFrequency="1" ValueChanged="TranslationSliderInApp_ValueChanged" Value="32" />
+            </ControlExample.Options>
+            <ControlExample.Substitutions>
+              <ControlExampleSubstitution Key="TranslationSlider" Value="{x:Bind TranslationSliderInApp.Value, Mode=OneWay}" />
+            </ControlExample.Substitutions>
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
     </ScrollViewer>
-  </div>
+  </Page>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, inject } from 'vue';
-import ControlExample from '../../components/ControlExample.vue';
-import Button from '../../components/Button.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import Slider from '../../components/Slider.vue';
+import { computed, inject, onBeforeUnmount, provide, shallowReactive } from 'vue'
+import Border from '../../components/Border.vue'
+import Button from '../../components/Button.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import { ControlExampleSubstitution } from '../../components/ControlExampleProperties'
+import FontIcon from '../../components/FontIcon.vue'
+import Grid from '../../components/Grid.vue'
+import Page from '../../components/Page.vue'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import Slider from '../../components/Slider.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import ThemeShadow from '../../components/ThemeShadow.vue'
+import ToggleButton from '../../components/ToggleButton.vue'
+import { useI18n } from '../../components/i18n/index'
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime'
+import { createPageState } from '../../utils/pageState'
+import sample from '../samples/ThemeShadow/ThemeshadowAppliedBorder.txt?raw'
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
-import { createPageState } from '../../utils/pageState';
-// Theme management
-const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'themeshadow');
-const { pageTheme, isFavoriteState, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-
-// Shadow state
-const zTranslation = ref(32);
-const shadowReceiver = ref(null);
-const shadowCaster = ref(null);
-
-// Computed shadow based on z-translation
-const computedShadow = computed(() => {
-  const depth = zTranslation.value;
-  const blur = Math.max(8, depth * 0.5);
-  const spread = 0;
-  const offsetY = Math.max(4, depth * 0.3);
-  const opacity = Math.min(0.26, 0.13 + (depth / 64) * 0.13);
-
-  return `0 ${offsetY}px ${blur}px ${spread}px rgba(0, 0, 0, ${opacity})`;
-});
-
-onMounted(() => {
-  // Initialize shadow receiver (equivalent to shadow.Receivers.Add(ShadowCastGrid))
-  if (shadowReceiver.value && shadowCaster.value) {
-    // In WinUI, ThemeShadow.Receivers determines what elements receive the shadow
-    // In web implementation, this is handled by CSS positioning and z-index
+const { t } = useI18n()
+const currentPage = inject('currentPage')
+const pageKey = computed(() => currentPage?.value || 'themeshadow')
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value)
+const namescope = shallowReactive({})
+provide(xamlNameScopeKey, namescope)
+const resource = key => computed(() => t(key))
+const PageTitle = resource('text.theme-shadow')
+const PageDescription = resource('text.theme-shadow-description')
+const SampleHeader = resource('sample.themeshadow.applied-border')
+const ShadowIntensityName = resource('sample.themeshadow.shadow-intensity')
+const TranslationHeader = resource('sample.themeshadow.z-translation')
+const ThemeButtonLabel = resource('gallery.toggle-theme')
+const FavoriteButtonLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'))
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
+const SampleXaml = sample.split(/--- xaml\s*\r?\n/)[1]?.split(/--- c#\s*\r?\n/)[0]?.trim()
+  ?? ''
+const SampleCSharp = sample.split(/--- c#\s*\r?\n/)[1]?.trim() ?? ''
+const TranslationOutput = computed(() => {
+  const vector = namescope.ShadowRect?.Translation ?? { X: 0, Y: 0, Z: 0 }
+  return t('sample.themeshadow.translation-output', { x: vector.X, y: vector.Y, z: vector.Z })
+})
+const ReceiversOutput = computed(() => t('sample.themeshadow.receivers-output', {
+  count: namescope.shadow?.Receivers.Count ?? 0
+}))
+const TranslationSliderInApp_ValueChanged = (sender, args) => {
+  if (namescope.ShadowRect) namescope.ShadowRect.Translation = { X: 0, Y: 0, Z: Number(args?.NewValue ?? sender?.Value ?? 32) }
+}
+const ShadowRect_Loaded = () => {
+  namescope.shadow?.Receivers.Add(namescope.ShadowCastGrid)
+  if (namescope.ShadowRect && namescope.TranslationSliderInApp) {
+    namescope.ShadowRect.Translation = { X: 0, Y: 0, Z: Number(namescope.TranslationSliderInApp.Value) }
   }
-});
+}
+onBeforeUnmount(() => {
+  if (namescope.shadow && namescope.ShadowCastGrid) namescope.shadow.Receivers.Remove(namescope.ShadowCastGrid)
+})
 
-// Code examples
-const example1Template = `<div class="shadow-container">
-  <div class="shadow-receiver"></div>
-  <div
-    class="shadow-caster"
-    :style="{
-      transform: \`translateZ(\${zTranslation}px)\`,
-      boxShadow: computedShadow
-    }">
-  </div>
-</div>
-
-<Slider
-  v-model="zTranslation"
-  header="Z-translation"
-  :min="0"
-  :max="64"
-  :stepFrequency="1"
-/>`;
-
-const example1Vue = `import { ref, computed } from 'vue';
-
-const zTranslation = ref(32);
-
-const computedShadow = computed(() => {
-  const depth = zTranslation.value;
-  const blur = Math.max(8, depth * 0.5);
-  const offsetY = Math.max(4, depth * 0.3);
-  const opacity = Math.min(0.26, 0.13 + (depth / 64) * 0.13);
-
-  return \`0 \${offsetY}px \${blur}px 0px rgba(0, 0, 0, \${opacity})\`;
-});`;
+provide(xamlScopeKey, {
+  PageTitle, PageDescription, SampleHeader, ShadowIntensityName, TranslationHeader,
+  ThemeButtonLabel, FavoriteButtonLabel, FavoriteGlyph, SampleXaml, SampleCSharp, TranslationOutput, ReceiversOutput,
+  isFavoriteState, pageTheme, toggleTheme, toggleFavorite,
+  TranslationSliderInApp_ValueChanged, ShadowRect_Loaded
+})
 </script>
 
 <style scoped>
-.page-header {
-  margin: 0 0 8px 0;
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.page-description {
-  margin: 0 0 24px 0;
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--text-secondary);
-  max-width: 800px;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 8px;
-}
-
-.icon {
-  font-size: 16px;
-  display: inline-block;
-  line-height: 1;
-}
-
-.shadow-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 36px;
-}
-
-.shadow-receiver {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-}
-
-.shadow-caster {
-  width: 200px;
-  height: 200px;
-  background: var(--card-bg-default);
-  border-radius: 8px;
-  position: relative;
-  z-index: 1;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 72px 8px 0; color: var(--text-primary); }
+.page-description { color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; gap: 4px; }
+.gallery-page-content :deep(.example-container) { grid-template-columns: minmax(272px, 1fr) 252px 252px; }
+.gallery-page-content :deep(.example-output) { width: 240px; max-width: 240px; }
+.gallery-page-content :deep(.example-options) { width: 252px; max-width: 252px; }
+@media (max-width: 1199px) {
+  .gallery-page-content :deep(.example-container) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; }
+  .gallery-page-content :deep(.example-display) { grid-column: 1; grid-row: 1; min-height: 272px; }
+  .gallery-page-content :deep(.example-output) { grid-column: 1; grid-row: 2; width: calc(100% - 24px); max-width: none; margin: 12px; }
+  .gallery-page-content :deep(.example-options) { grid-column: 1; grid-row: 3; width: 100%; max-width: none; margin: 0; border-left: 0; border-top: 1px solid var(--DividerStrokeColorDefaultBrush, var(--stroke-divider)); }
 }
 </style>

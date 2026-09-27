@@ -5,8 +5,8 @@
         <TextBlock class="page-header" :Text="$t('text.animatedvisualplayer')" />
         <TextBlock class="page-description" :Text="$t('text.animatedvisualplayer-description')" TextWrapping="WrapWholeWords" />
         <div class="page-header-actions">
-          <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': $t('sample.navigationview.change-theme') }" @Click="toggleTheme"><span class="icon">&#xE793;</span></Button>
-          <ToggleButton :IsChecked="isFavoriteState" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavoriteState ? $t('sample.navigationview.remove-favorite') : $t('sample.navigationview.add-favorite') }" @update:IsChecked="toggleFavorite"><span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span></ToggleButton>
+          <Button class="header-action" ToolTipService.ToolTip="{x:Bind ThemeToolTip, Mode=OneWay}" Click="toggleTheme"><FontIcon class="icon" Glyph="&#xe793;" /></Button>
+          <ToggleButton IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" class="header-action" ToolTipService.ToolTip="{x:Bind FavoriteToolTip, Mode=OneWay}" Click="toggleFavorite"><FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" /></ToggleButton>
         </div>
       </div>
 
@@ -19,10 +19,10 @@
                 <AnimatedVisualPlayer ref="playerRef" :AutoPlay="false" :PlaybackRate="playbackRate" />
               </div>
               <div class="animated-visual-player-buttons">
-                <Button AutomationProperties.Name="Play" v-bind="{ 'tooltipservice.tooltip': playTooltip }" @Click="play"><span class="icon">&#xE768;</span></Button>
-                <ToggleButton AutomationProperties.Name="Pause" :IsChecked="paused" v-bind="{ 'tooltipservice.tooltip': pauseTooltip }" @update:IsChecked="onPausedChanged"><span class="icon">&#xE769;</span></ToggleButton>
-                <Button AutomationProperties.Name="Stop" v-bind="{ 'tooltipservice.tooltip': stopTooltip }" @Click="stop"><span class="icon">&#xE71A;</span></Button>
-                <Button AutomationProperties.Name="Reverse" v-bind="{ 'tooltipservice.tooltip': reverseTooltip }" @Click="reverse"><span class="icon">&#xE892;</span></Button>
+                <Button AutomationProperties.Name="{x:Bind playTooltip, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind playTooltip, Mode=OneWay}" Click="play"><FontIcon class="icon" Glyph="&#xe768;" /></Button>
+                <ToggleButton AutomationProperties.Name="{x:Bind pauseTooltip, Mode=OneWay}" IsChecked="{x:Bind paused, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind pauseTooltip, Mode=OneWay}" Click="OnPauseButtonClick"><FontIcon class="icon" Glyph="&#xe769;" /></ToggleButton>
+                <Button AutomationProperties.Name="{x:Bind stopTooltip, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind stopTooltip, Mode=OneWay}" Click="stop"><FontIcon class="icon" Glyph="&#xe71a;" /></Button>
+                <Button AutomationProperties.Name="{x:Bind reverseTooltip, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind reverseTooltip, Mode=OneWay}" Click="reverse"><FontIcon class="icon" Glyph="&#xe892;" /></Button>
               </div>
             </div>
           </template>
@@ -33,6 +33,8 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { computed, inject, ref } from 'vue';
 import AnimatedVisualPlayer from '../../components/AnimatedVisualPlayer.vue';
 import Button from '../../components/Button.vue';
@@ -55,6 +57,9 @@ const playTooltip = computed(() => t('text.play'));
 const pauseTooltip = computed(() => t('text.pause'));
 const stopTooltip = computed(() => t('text.stop'));
 const reverseTooltip = computed(() => t('sample.animatedvisualplayer.reverse'));
+const ThemeToolTip = computed(() => t('gallery.page-header.toggle-theme'));
+const FavoriteToolTip = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const OnPauseButtonClick = (sender) => onPausedChanged(Boolean(sender.IsChecked));
 
 const play = () => {
   playbackRate.value = 1;
@@ -82,6 +87,7 @@ const reverse = () => {
 
 const playerCode = computed(() => '<AnimatedVisualPlayer AutoPlay="False" />');
 
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavoriteState) ? '' : '');
 </script>
 
 <style scoped>

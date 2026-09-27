@@ -1,744 +1,563 @@
 <template>
+  <span ref="hostRef" class="teaching-tip-host" aria-hidden="true" />
   <Teleport to="body">
-    <Transition name="teaching-tip">
-      <section
-        v-if="effectiveIsOpen"
-        ref="tipRef"
-        class="teaching-tip"
-        :class="[
-          isTargeted ? 'is-targeted' : 'is-untargeted',
-          IsLightDismissEnabled ? 'is-light-dismiss' : 'is-normal-dismiss',
-          themeClass,
-          `placement-${actualPlacement.toLowerCase()}`,
-          `hero-placement-${HeroContentPlacement.toLowerCase()}`
-        ]"
-        :style="tipStyle"
-        role="dialog"
-        @pointerdown.stop>
-        <div v-if="hasHeroContent" class="teaching-tip-hero">
-          <HeroContentOutlet v-if="propertyNodes.heroContent.length" />
-          <slot v-else name="HeroContent">
-            <slot name="hero">
-              <template v-if="typeof HeroContent === 'string' || typeof HeroContent === 'number'">{{ HeroContent }}</template>
-            </slot>
-          </slot>
-        </div>
-        <div class="teaching-tip-main" :class="{ 'has-alternate-close': ShowAlternateCloseButton }">
-          <div v-if="hasIconSource" class="teaching-tip-icon">
-            <IconSourceOutlet v-if="propertyNodes.iconSource.length" />
-            <slot v-else name="IconSource"><slot name="icon">{{ iconGlyph }}</slot></slot>
-          </div>
-          <div class="teaching-tip-text">
-            <TextBlock v-if="Title" class="teaching-tip-title" Text="{x:Bind TipTitle}" TextWrapping="WrapWholeWords" />
-            <TextBlock v-if="Subtitle" class="teaching-tip-subtitle" Text="{x:Bind TipSubtitle}" TextWrapping="WrapWholeWords" />
-            <div v-if="hasContent" class="teaching-tip-content">
-              <ContentOutlet v-if="propertyNodes.content.length" />
-              <slot v-else>{{ Content }}</slot>
-            </div>
-          </div>
-          <Button
-            v-if="ShowAlternateCloseButton"
-            class="teaching-tip-close"
-            Style="SubtleButtonStyle"
-            Width="40"
-            Height="40"
-            Padding="4"
-            Margin="0"
-            BorderThickness="1"
-            CornerRadius="var(--ControlCornerRadius, 4px)"
-            FocusVisualMargin="-3"
-            Content="&#xE711;"
-            FontFamily="var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets')"
-            FontSize="16"
-            AutomationProperties.Name="{x:Bind CloseButtonLabel}"
-            ToolTipService.ToolTip="{x:Bind CloseButtonLabel}"
-            Click="OnTeachingTipCloseButtonClick" />
-        </div>
-        <div
-          v-if="ActionButtonContent || CloseButtonContent || $slots.actions"
-          class="teaching-tip-actions"
-          :class="{ 'both-buttons-visible': ActionButtonContent && CloseButtonContent }">
-          <slot name="actions">
+    <div
+      v-if="isVisible && IsLightDismissEnabled"
+      class="teaching-tip-light-dismiss-indicator"
+      :style="lightDismissStyle"
+      v-bind="lightDismissEvents"
+      aria-hidden="true"
+      @pointerdown.prevent.stop="OnLightDismissPointerDown" />
+    <section
+      ref="tipRef"
+      class="teaching-tip-root"
+      :class="[themeClass, `tail-${tailSide}`, `hero-${effectiveHeroPlacement.toLowerCase()}`, { 'teaching-tip-container': isVisible, 'is-light-dismiss': IsLightDismissEnabled }]"
+      :style="containerStyle"
+      role="dialog"
+      :aria-label="automationName || Title || undefined"
+      :aria-modal="IsLightDismissEnabled || undefined"
+      :aria-hidden="!isVisible || undefined"
+      :inert="!isVisible"
+      tabindex="-1">
+      <Grid class="teaching-tip-layout-root">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="{StaticResource TeachingTipTailShortSideLength}" />
+          <ColumnDefinition Width="{StaticResource TeachingTipTailMargin}" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="{StaticResource TeachingTipTailMargin}" />
+          <ColumnDefinition Width="{StaticResource TeachingTipTailShortSideLength}" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="{StaticResource TeachingTipTailShortSideLength}" />
+          <RowDefinition Height="{StaticResource TeachingTipTailMargin}" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="{StaticResource TeachingTipTailMargin}" />
+          <RowDefinition Height="{StaticResource TeachingTipTailShortSideLength}" />
+        </Grid.RowDefinitions>
+        <Grid class="teaching-tip-tail-occlusion-grid" Grid.RowSpan="5" Grid.ColumnSpan="5">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{StaticResource TeachingTipTailShortSideLength}" />
+            <ColumnDefinition Width="{StaticResource TeachingTipTailMargin}" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="{StaticResource TeachingTipTailMargin}" />
+            <ColumnDefinition Width="{StaticResource TeachingTipTailShortSideLength}" />
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="{StaticResource TeachingTipTailShortSideLength}" />
+            <RowDefinition Height="{StaticResource TeachingTipTailMargin}" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="{StaticResource TeachingTipTailMargin}" />
+            <RowDefinition Height="{StaticResource TeachingTipTailShortSideLength}" />
+          </Grid.RowDefinitions>
+        <Grid class="teaching-tip-content-root-grid" Grid.Row="1" Grid.Column="1" Grid.RowSpan="3" Grid.ColumnSpan="3" Background="{x:Bind TipBackground}" BorderBrush="{x:Bind TipBorderBrush}" BorderThickness="{x:Bind TipBorderThickness}" CornerRadius="{x:Bind TipCornerRadius}" Shadow="{x:Bind ContentShadow, Mode=OneWay}" Translation="0,0,32">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <Border class="teaching-tip-hero-content-border" Visibility="{x:Bind HeroVisibility}" Grid.Row="{x:Bind HeroRow}" CornerRadius="{x:Bind HeroCornerRadius}">
+            <HeroContentOutlet />
+          </Border>
+          <Grid class="teaching-tip-non-hero-content-root-grid" Grid.Row="1">
+            <ScrollViewer class="teaching-tip-scroll-viewer" VerticalScrollBarVisibility="Auto">
+              <StackPanel Margin="{StaticResource TeachingTipContentMargin}">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Border class="teaching-tip-icon-presenter" Visibility="{x:Bind IconVisibility}" Grid.Column="0" Margin="{StaticResource TeachingTipIconPresenterMarginWithIcon}">
+                    <IconSourceOutlet />
+                  </Border>
+                  <StackPanel Grid.Column="1" Margin="{x:Bind TitlesMargin}">
+                    <TextBlock class="teaching-tip-title" Visibility="{x:Bind TitleVisibility}" Text="{x:Bind TeachingTipTitleValue}" TextWrapping="WrapWholeWords" FontWeight="SemiBold" />
+                    <TextBlock class="teaching-tip-subtitle" Visibility="{x:Bind SubtitleVisibility}" Text="{x:Bind TeachingTipSubtitleValue}" TextWrapping="WrapWholeWords" />
+                  </StackPanel>
+                </Grid>
+                <Border class="teaching-tip-main-content-presenter" Visibility="{x:Bind ContentVisibility}" Margin="{StaticResource TeachingTipMainContentPresentMargin}">
+                  <ContentOutlet />
+                </Border>
+                <Grid class="teaching-tip-buttons-grid">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Button class="teaching-tip-action-button" Visibility="{x:Bind ActionVisibility}" HorizontalAlignment="Stretch" Style="{x:Bind ActionStyle}" Grid.ColumnSpan="{x:Bind ActionSpan}" Margin="{x:Bind ActionMargin}" Click="OnActionButtonClick">
+                    <ActionContentOutlet />
+                  </Button>
+                  <Button class="teaching-tip-close-button" Visibility="{x:Bind CloseVisibility}" HorizontalAlignment="Stretch" Style="{x:Bind CloseStyle}" Grid.Column="{x:Bind CloseColumn}" Grid.ColumnSpan="{x:Bind CloseSpan}" Margin="{x:Bind CloseMargin}" Click="OnCloseButtonClick">
+                    <CloseContentOutlet />
+                  </Button>
+                </Grid>
+              </StackPanel>
+            </ScrollViewer>
             <Button
-              v-if="ActionButtonContent"
-              class="teaching-tip-action-button"
-              Style="{x:Bind ActionButtonStyleName}"
-              Click="OnTeachingTipActionButtonClick">
-              <TextBlock Text="{x:Bind ActionButtonContent}" />
-            </Button>
-            <Button
-              v-if="CloseButtonContent"
-              class="teaching-tip-close-button"
-              Style="{x:Bind CloseButtonStyleName}"
-              Click="OnTeachingTipCloseButtonClick">
-              <TextBlock Text="{x:Bind CloseButtonContent}" />
-            </Button>
-          </slot>
-        </div>
-        <svg
-          v-if="hasVisibleTail"
-          class="teaching-tip-tail"
-          viewBox="0 0 20 10"
-          preserveAspectRatio="none"
-          aria-hidden="true">
+              class="teaching-tip-alternate-close-button"
+              Visibility="{x:Bind AlternateCloseVisibility}"
+              Style="SubtleButtonStyle"
+              Width="{ThemeResource TeachingTipAlternateCloseButtonSize}"
+              Height="{ThemeResource TeachingTipAlternateCloseButtonSize}"
+              Padding="4"
+              Margin="0"
+              BorderThickness="{ThemeResource TeachingTipAlternateCloseButtonBorderThickness}"
+              CornerRadius="{ThemeResource ControlCornerRadius}"
+              FocusVisualMargin="-3"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Top"
+              Content="&#xE711;"
+              FontFamily="{ThemeResource SymbolThemeFontFamily}"
+              FontSize="{ThemeResource TeachingTipAlternateCloseButtonGlyphSize}"
+              AutomationProperties.Name="{x:Bind AlternateCloseButtonLabel}"
+              ToolTipService.ToolTip="{x:Bind AlternateCloseButtonLabel}"
+              Click="OnCloseButtonClick" />
+          </Grid>
+        </Grid>
+        <svg v-if="hasVisibleTail" class="teaching-tip-tail-polygon" Grid.RowSpan="5" Grid.ColumnSpan="5" :viewBox="tailViewBox" aria-hidden="true">
           <polygon :points="tailPoints" />
           <polyline :points="tailPoints" />
         </svg>
-      </section>
-    </Transition>
+        </Grid>
+      </Grid>
+    </section>
   </Teleport>
 </template>
 
 <script lang="ts">
-import { TeachingTipContent, TeachingTipHeroContent, TeachingTipIconSource } from './TeachingTipProperties'
+import { TeachingTipContent, TeachingTipHeroContent, TeachingTipIconSource, TeachingTipActionButtonContent, TeachingTipCloseButtonContent } from './TeachingTipProperties'
 
 export default {
   HeroContent: TeachingTipHeroContent,
   Content: TeachingTipContent,
-  IconSource: TeachingTipIconSource
+  IconSource: TeachingTipIconSource,
+  ActionButtonContent: TeachingTipActionButtonContent,
+  CloseButtonContent: TeachingTipCloseButtonContent
 }
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, unref, useAttrs, useSlots, watch } from 'vue';
-import Button from './Button.vue';
-import TextBlock from './TextBlock.vue';
-import { useI18n } from './i18n/index';
-import { getTeachingTipProperty, type TeachingTipPropertyName } from './TeachingTipProperties';
-import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime';
+import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, proxyRefs, ref, shallowReactive, unref, useAttrs, useSlots, watch, type VNode } from 'vue'
+import Border from './Border.vue'
+import Button from './Button.vue'
+import ColumnDefinition from './ColumnDefinition.vue'
+import Grid from './Grid.vue'
+import RowDefinition from './RowDefinition.vue'
+import ScrollViewer from './ScrollViewer.vue'
+import StackPanel from './StackPanel.vue'
+import SymbolIcon from './SymbolIcon.vue'
+import TextBlock from './TextBlock.vue'
+import { useI18n } from './i18n/index'
+import { getTeachingTipProperty, type TeachingTipPropertyName } from './TeachingTipProperties'
+import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime'
+import { popupBoundsFor, resolvePopupElement, fitPopupPosition } from './popupRuntime'
+import { teachingTipPlacement, teachingTipTailSide, teachingTipThickness, type TeachingTipPlacement } from './teachingTipPlacement'
+import { createThemeShadow } from './themeShadowRuntime'
 
-const { t } = useI18n();
-
-defineOptions({ name: 'TeachingTip' });
-
+defineOptions({ name: 'TeachingTip', inheritAttrs: false })
 const props = defineProps({
-  IsOpen: { type: [Boolean, String], default: undefined },
-  Target: { type: [Object, String], default: null },
-  Title: { type: String, default: '' },
-  Subtitle: { type: String, default: '' },
-  Content: { type: [String, Number, Object], default: '' },
-  HeroContent: { type: [String, Number, Object], default: null },
-  TailVisibility: { type: String, default: 'Auto' },
-  PreferredPlacement: { type: String, default: 'Auto' },
-  PlacementMargin: { type: [String, Number, Object], default: 0 },
-  ShouldConstrainToRootBounds: { type: Boolean, default: true },
-  IsLightDismissEnabled: { type: Boolean, default: false },
-  HeroContentPlacement: { type: String, default: 'Auto' },
-  Theme: { type: String, default: '' },
-  ActionButtonContent: { type: [String, Number, Object], default: '' },
-  ActionButtonStyle: { type: [String, Object], default: '' },
-  ActionButtonCommand: { type: [Function, Object], default: null },
-  ActionButtonCommandParameter: { type: [String, Number, Boolean, Object], default: null },
-  CloseButtonContent: { type: [String, Number, Object], default: '' },
-  CloseButtonStyle: { type: [String, Object], default: '' },
-  CloseButtonCommand: { type: [Function, Object], default: null },
-  CloseButtonCommandParameter: { type: [String, Number, Boolean, Object], default: null },
-  IconSource: { type: [String, Object], default: '' },
-  isTargeted: { type: Boolean, default: undefined }
-});
-
-const emit = defineEmits(['update:IsOpen', 'ActionButtonClick', 'CloseButtonClick', 'Opened', 'Closed']);
-
-const tipRef = ref(null);
-const instance = getCurrentInstance();
-const attrs = useAttrs();
-const slots = useSlots();
-const localIsOpen = ref(false);
-const position = ref({ top: 0, left: 0, tailLeft: 160 });
-const actualPlacement = ref('Bottom');
-const inheritedTheme = inject('winuiTheme', null);
-const anchorTheme = ref('');
-const documentTheme = ref('');
-let themeObserver = null;
-
-const resolve = (value: unknown) => resolveXamlValue(value, instance);
-const effectiveIsOpen = computed(() => resolve(props.IsOpen) ?? localIsOpen.value);
-const targetValue = computed(() => resolve(props.Target));
-const isTargeted = computed(() => props.isTargeted ?? Boolean(targetElement()));
-const Title = computed(() => resolve(props.Title));
-const Subtitle = computed(() => resolve(props.Subtitle));
-const PreferredPlacement = computed(() => resolve(props.PreferredPlacement) || 'Auto');
-const ActionButtonContent = computed(() => resolve(props.ActionButtonContent));
-const ActionButtonStyle = computed(() => typeof resolve(props.ActionButtonStyle) === 'string' ? resolve(props.ActionButtonStyle) : '');
-const CloseButtonContent = computed(() => resolve(props.CloseButtonContent));
-const CloseButtonStyle = computed(() => typeof resolve(props.CloseButtonStyle) === 'string' ? resolve(props.CloseButtonStyle) : '');
-const ActionButtonStyleName = computed(() => ActionButtonStyle.value || 'DefaultButtonStyle');
-const CloseButtonStyleName = computed(() => CloseButtonStyle.value || 'DefaultButtonStyle');
-const TipTitle = computed(() => Title.value);
-const TipSubtitle = computed(() => Subtitle.value);
-const CloseButtonLabel = computed(() => t('text.close'));
-const IsLightDismissEnabled = computed(() => resolve(props.IsLightDismissEnabled) === true);
-const TailVisibility = computed(() => normalizeTailVisibility(resolve(props.TailVisibility)));
-const ShouldConstrainToRootBounds = computed(() => resolve(props.ShouldConstrainToRootBounds) !== false);
-const HeroContentPlacement = computed(() => normalizeHeroContentPlacement(resolve(props.HeroContentPlacement)));
-const effectiveTheme = computed(() => {
-  const explicitTheme = normalizeTheme(resolve(props.Theme));
-  if (explicitTheme) return explicitTheme;
-  if (anchorTheme.value) return anchorTheme.value;
-  const providedTheme = normalizeTheme(unref(inheritedTheme));
-  return providedTheme || documentTheme.value;
-});
-const themeClass = computed(() => effectiveTheme.value
-  ? `win-theme-scope theme-${effectiveTheme.value}`
-  : '');
-const ShowAlternateCloseButton = computed(() => !CloseButtonContent.value && !IsLightDismissEnabled.value);
-const hasVisibleTail = computed(() => isTargeted.value && TailVisibility.value !== 'Collapsed');
-const tailPoints = computed(() => actualPlacement.value === 'Top'
-  ? '0,0 10,10 20,0'
-  : '0,10 10,0 20,10');
-const propertyNodes = computed(() => {
-  const result: Record<TeachingTipPropertyName, ReturnType<NonNullable<typeof slots.default>>> = {
-    heroContent: [], content: [], iconSource: []
-  };
-  const defaultContent: ReturnType<NonNullable<typeof slots.default>> = [];
-  for (const node of slots.default?.() ?? []) {
-    const property = getTeachingTipProperty(node);
-    if (!property || !node.children || typeof node.children !== 'object') {
-      defaultContent.push(node);
-      continue;
-    }
-    const propertySlot = (node.children as { default?: () => ReturnType<NonNullable<typeof slots.default>> }).default;
-    if (propertySlot) result[property] = normalizeXamlNodes(propertySlot(), instance);
-  }
-  if (!result.content.length) result.content = normalizeXamlNodes(defaultContent, instance);
-  return result;
-});
-const outlet = (name: TeachingTipPropertyName) => defineComponent({
-  name: `TeachingTip${name[0].toUpperCase()}${name.slice(1)}Outlet`,
-  setup() { return () => h(Fragment, propertyNodes.value[name]); }
-});
-const HeroContentOutlet = outlet('heroContent');
-const ContentOutlet = outlet('content');
-const IconSourceOutlet = outlet('iconSource');
-const HeroContent = computed(() => resolve(props.HeroContent));
-const IconSource = computed(() => resolve(props.IconSource));
-const Content = computed(() => resolve(props.Content));
-const hasHeroContent = computed(() => propertyNodes.value.heroContent.length > 0 || Boolean(HeroContent.value) || Boolean(slots.HeroContent || slots.hero));
-const hasContent = computed(() => propertyNodes.value.content.length > 0 || Boolean(Content.value) || Boolean(slots.content));
-const hasIconSource = computed(() => propertyNodes.value.iconSource.length > 0 || Boolean(IconSource.value) || Boolean(slots.IconSource || slots.icon));
-const iconGlyph = computed(() => IconSource.value === 'Refresh' ? '\uE72C' : IconSource.value);
-const tipStyle = computed(() => {
-  const background = IsLightDismissEnabled.value
-    ? 'var(--TeachingTipTransientBackground, var(--AcrylicInAppFillColorDefaultBrush, var(--flyout-bg)))'
-    : 'var(--TeachingTipBackgroundBrush, var(--SolidBackgroundFillColorTertiaryBrush, var(--ctrl-fill-tertiary, var(--flyout-bg))))';
-
-  return {
-    top: `${position.value.top}px`,
-    left: `${position.value.left}px`,
-    '--teaching-tip-tail-left': `${position.value.tailLeft}px`,
-    '--teaching-tip-background': background,
-    '--win-acrylic-fill': background
-  };
-});
-
-function targetElementFallback() {
-  const expression = typeof props.Target === 'string'
-    ? props.Target.match(/^\{(?:x:Bind|Binding)\s+([A-Za-z_$][\w$]*)[\s\S]*\}$/)?.[1]
-    : '';
-  if (!expression) return null;
-  const escaped = typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
-    ? CSS.escape(expression)
-    : expression.replace(/[^A-Za-z0-9_-]/g, '\\$&');
-  return document.querySelector<HTMLElement>(`[data-xaml-ref="${escaped}"]`)
-    || document.querySelector<HTMLElement>(`[data-xaml-ref~="${escaped}"]`);
+  IsOpen: { type: [Boolean, String], default: undefined }, Target: { type: [Object, String], default: null },
+  Title: { type: String, default: '' }, Subtitle: { type: String, default: '' },
+  Content: { type: [String, Number, Object], default: null }, HeroContent: { type: [String, Number, Object], default: null },
+  ActionButtonContent: { type: [String, Number, Object], default: null }, CloseButtonContent: { type: [String, Number, Object], default: null },
+  ActionButtonStyle: { type: [String, Object], default: '{ThemeResource DefaultButtonStyle}' },
+  CloseButtonStyle: { type: [String, Object], default: '{ThemeResource DefaultButtonStyle}' },
+  ActionButtonCommand: { type: [Function, Object, String], default: null }, ActionButtonCommandParameter: { default: null },
+  CloseButtonCommand: { type: [Function, Object, String], default: null }, CloseButtonCommandParameter: { default: null },
+  IconSource: { type: [String, Object], default: null }, TailVisibility: { type: String, default: 'Auto' },
+  PreferredPlacement: { type: String, default: 'Auto' }, PlacementMargin: { type: [String, Number, Object], default: 0 },
+  ShouldConstrainToRootBounds: { type: [Boolean, String], default: true }, IsLightDismissEnabled: { type: [Boolean, String], default: false },
+  HeroContentPlacement: { type: String, default: 'Auto' }, RequestedTheme: { type: String, default: 'Default' },
+  Background: { type: String, default: '{ThemeResource TeachingTipBackgroundBrush}' },
+  Foreground: { type: String, default: '{ThemeResource TeachingTipForegroundBrush}' },
+  BorderBrush: { type: String, default: '{ThemeResource TeachingTipBorderBrush}' },
+  BorderThickness: { type: [String, Number], default: 1 }, CornerRadius: { type: [String, Number], default: '{ThemeResource OverlayCornerRadius}' }
+})
+type CloseReason = 'CloseButton' | 'LightDismiss' | 'Programmatic'
+const emit = defineEmits(['update:IsOpen', 'ActionButtonClick', 'CloseButtonClick', 'Closing', 'Closed', 'Opened'])
+const instance = getCurrentInstance()
+const attrs = useAttrs()
+const slots = useSlots()
+const { t } = useI18n()
+const inheritedTheme = inject('winuiTheme', null)
+const hostRef = ref<HTMLElement | null>(null)
+const tipRef = ref<HTMLElement | null>(null)
+const localIsOpen = ref(false)
+const isVisible = ref(false)
+// TeachingTip::EstablishShadows attaches to ContentRootGrid; its tail shadow is debug-only.
+const contentShadow = createThemeShadow()
+const ContentShadow = computed(() => isVisible.value ? contentShadow : null)
+const positioned = ref(false)
+const theme = ref('light')
+const position = ref({ left: 0, top: 0, tailX: 160, tailY: 40 })
+const sizeLimit = ref({ width: 336, height: 520 })
+const rootBounds = ref({ left: 0, top: 0, width: 0, height: 0 })
+const actualPlacement = ref<TeachingTipPlacement>('Bottom')
+const resolve = (value: unknown) => resolveXamlValue(value, instance)
+const propertyOverrides = shallowReactive<Record<string, unknown>>({})
+const propertyValue = (name: keyof typeof props) => propertyOverrides[name] !== undefined ? propertyOverrides[name] : resolve(props[name])
+const dependencyProperty = (name: keyof typeof props) => {
+  watch(() => resolve(props[name]), () => { delete propertyOverrides[name] })
+  return computed({ get: () => propertyValue(name), set: value => { propertyOverrides[name] = value; updateXamlBinding(props[name], value, instance) } })
 }
+const boolean = (value: unknown) => resolve(value) === true || resolve(value) === 'True'
+const IsLightDismissEnabled = computed(() => boolean(propertyValue('IsLightDismissEnabled')))
+const requestedOpen = localIsOpen
+watch(() => resolve(props.IsOpen), value => { if (value !== undefined) localIsOpen.value = value === true || value === 'True' }, { immediate: true })
+const Target = dependencyProperty('Target')
+const Title = dependencyProperty('Title')
+const Subtitle = dependencyProperty('Subtitle')
+const TeachingTipTitleValue = Title
+const TeachingTipSubtitleValue = Subtitle
+const AlternateCloseButtonLabel = computed(() => t('control.teachingtip.close'))
+const automationName = computed(() => resolve(attrs['AutomationProperties.Name']))
+const themeClass = computed(() => `win-theme-scope theme-${theme.value}`)
+const propertyNodes = computed(() => {
+  const result: Record<TeachingTipPropertyName, VNode[]> = { heroContent: [], content: [], iconSource: [], actionButtonContent: [], closeButtonContent: [] }
+  const content: VNode[] = []
+  const collect = (nodes: VNode[]) => {
+    for (const node of nodes) {
+      if (node.type === Fragment && Array.isArray(node.children)) { collect(node.children as VNode[]); continue }
+      const property = getTeachingTipProperty(node)
+      if (!property) { content.push(node); continue }
+      const slot = (node.children as { default?: () => VNode[] } | null)?.default
+      if (slot) result[property].push(...normalizeXamlNodes(slot(), instance))
+    }
+  }
+  collect(slots.default?.() ?? [])
+  if (!result.content.length) result.content = normalizeXamlNodes(content, instance)
+  return result
+})
+const hasValue = (name: TeachingTipPropertyName, value: unknown) => propertyNodes.value[name].length > 0 || value !== null && value !== undefined && value !== ''
+const hasHeroContent = computed(() => hasValue('heroContent', propertyValue('HeroContent')))
+const hasContent = computed(() => hasValue('content', propertyValue('Content')))
+const hasIconSource = computed(() => hasValue('iconSource', propertyValue('IconSource')))
+const hasActionButton = computed(() => hasValue('actionButtonContent', propertyValue('ActionButtonContent')))
+const hasCloseButton = computed(() => hasValue('closeButtonContent', propertyValue('CloseButtonContent')))
+const ShowAlternateCloseButton = computed(() => !hasCloseButton.value && !IsLightDismissEnabled.value)
+const HeroVisibility = computed(() => hasHeroContent.value ? 'Visible' : 'Collapsed')
+const IconVisibility = computed(() => hasIconSource.value ? 'Visible' : 'Collapsed')
+const TitleVisibility = computed(() => Title.value ? 'Visible' : 'Collapsed')
+const SubtitleVisibility = computed(() => Subtitle.value ? 'Visible' : 'Collapsed')
+const ContentVisibility = computed(() => hasContent.value ? 'Visible' : 'Collapsed')
+const ActionVisibility = computed(() => hasActionButton.value ? 'Visible' : 'Collapsed')
+const CloseVisibility = computed(() => hasCloseButton.value ? 'Visible' : 'Collapsed')
+const AlternateCloseVisibility = computed(() => ShowAlternateCloseButton.value ? 'Visible' : 'Collapsed')
+const effectiveHeroPlacement = computed(() => {
+  const preferred = propertyValue('HeroContentPlacement')
+  if (preferred === 'Top' || preferred === 'Bottom') return preferred
+  if (!hasVisibleTail.value) return 'Top'
+  return ['Bottom', 'BottomLeft', 'BottomRight', 'LeftBottom', 'RightBottom'].includes(actualPlacement.value) ? 'Bottom' : 'Top'
+})
+const HeroRow = computed(() => effectiveHeroPlacement.value === 'Top' ? 0 : 2)
+const HeroCornerRadius = computed(() => effectiveHeroPlacement.value === 'Top' ? 'var(--OverlayCornerRadius) var(--OverlayCornerRadius) 0 0' : '0 0 var(--OverlayCornerRadius) var(--OverlayCornerRadius)')
+const TitlesMargin = computed(() => resolve(ShowAlternateCloseButton.value ? '{StaticResource TeachingTipTitleStackPanelMarginWithHeaderCloseButton}' : '{StaticResource TeachingTipTitleStackPanelMarginWithFooterCloseButton}'))
+const ActionMargin = computed(() => resolve(hasCloseButton.value ? '{ThemeResource TeachingTipLeftButtonMargin}' : '{ThemeResource TeachingTipButtonPanelMargin}'))
+const CloseMargin = computed(() => resolve(hasActionButton.value ? '{ThemeResource TeachingTipRightButtonMargin}' : '{ThemeResource TeachingTipButtonPanelMargin}'))
+const ActionSpan = computed(() => hasCloseButton.value ? 1 : 2)
+const CloseSpan = computed(() => hasActionButton.value ? 1 : 2)
+const CloseColumn = computed(() => hasActionButton.value ? 1 : 0)
+const ActionStyle = computed(() => propertyValue('ActionButtonStyle'))
+const CloseStyle = computed(() => propertyValue('CloseButtonStyle'))
+const TipBackground = computed(() => IsLightDismissEnabled.value ? '{ThemeResource TeachingTipTransientBackground}' : propertyValue('Background'))
+const TipBorderBrush = computed(() => propertyValue('BorderBrush'))
+const TipBorderThickness = computed(() => propertyValue('BorderThickness'))
+const TipCornerRadius = computed(() => propertyValue('CornerRadius'))
+const hasVisibleTail = computed(() => propertyValue('TailVisibility') !== 'Collapsed' && (Boolean(targetElement()) || propertyValue('TailVisibility') === 'Visible'))
+const tailSide = computed(() => hasVisibleTail.value ? teachingTipTailSide(actualPlacement.value) : 'none')
+const tailViewBox = computed(() => tailSide.value === 'left' || tailSide.value === 'right' ? '0 0 10 20' : '0 0 20 10')
+const tailPoints = computed(() => ({ top: '0,10 10,0 20,10', bottom: '0,0 10,10 20,0', left: '10,0 0,10 10,20', right: '0,0 10,10 0,20' }[tailSide.value] || ''))
+const containerStyle = computed(() => ({
+  display: isVisible.value ? undefined : 'none',
+  left: `${position.value.left}px`, top: `${position.value.top}px`, visibility: positioned.value ? 'visible' : 'hidden',
+  '--teaching-tip-width': `${sizeLimit.value.width}px`, '--teaching-tip-height': `${sizeLimit.value.height}px`,
+  '--teaching-tip-tail-x': `${position.value.tailX}px`, '--teaching-tip-tail-y': `${position.value.tailY}px`,
+  '--teaching-tip-background': IsLightDismissEnabled.value ? 'var(--TeachingTipTransientBackground, var(--AcrylicInAppFillColorDefaultBrush))' : propertyValue('Background'),
+  '--teaching-tip-foreground': propertyValue('Foreground'), '--teaching-tip-border': propertyValue('BorderBrush'),
+  '--teaching-tip-radius': typeof propertyValue('CornerRadius') === 'number' ? `${propertyValue('CornerRadius')}px` : propertyValue('CornerRadius'),
+  '--teaching-tip-border-width': `${Number(propertyValue('BorderThickness')) || 0}px`
+}))
+const lightDismissStyle = computed(() => ({
+  left: `${rootBounds.value.left}px`, top: `${rootBounds.value.top}px`,
+  width: `${rootBounds.value.width}px`, height: `${rootBounds.value.height}px`,
+  visibility: positioned.value ? 'visible' : 'hidden'
+}))
+const lightDismissEvents = { onClick: (event: MouseEvent) => { event.preventDefault(); event.stopPropagation() } }
+const outlet = (name: TeachingTipPropertyName, value: () => unknown) => defineComponent({
+  name: `TeachingTip${name}Presenter`,
+  setup() { return () => {
+    if (propertyNodes.value[name].length) return h(Fragment, propertyNodes.value[name])
+    const content = resolve(value())
+    if (isVNode(content)) return content
+    if (name === 'iconSource' && content) {
+      const source = content as { Symbol?: unknown, Foreground?: string }
+      return h(SymbolIcon, { Symbol: String(source.Symbol ?? content), Foreground: source.Foreground })
+    }
+    return typeof content === 'string' || typeof content === 'number' ? h('span', { class: 'teaching-tip-presenter-text' }, String(content)) : null
+  } }
+})
+const HeroContentOutlet = outlet('heroContent', () => propertyValue('HeroContent'))
+const ContentOutlet = outlet('content', () => propertyValue('Content'))
+const IconSourceOutlet = outlet('iconSource', () => propertyValue('IconSource'))
+const ActionContentOutlet = outlet('actionButtonContent', () => propertyValue('ActionButtonContent'))
+const CloseContentOutlet = outlet('closeButtonContent', () => propertyValue('CloseButtonContent'))
+let animation: Animation | null = null
+let animationTask: Promise<void> = Promise.resolve()
+let closingTask: Promise<void> | null = null
+let themeObserver: MutationObserver | null = null
+let resizeObserver: ResizeObserver | null = null
+let previouslyFocused: HTMLElement | null = null
+let unmounted = false
+let openGeneration = 0
+let boundsHost: HTMLElement | null = null
 
 function targetElement() {
-  const value = targetValue.value;
-  const fallback = targetElementFallback();
-  if (!value) return fallback;
-  if (value instanceof HTMLElement) return value;
-  if (value && typeof value === 'object' && value.$el instanceof HTMLElement) return value.$el;
-  if (value && typeof value === 'object' && value.value instanceof HTMLElement) return value.value;
-  if (value && typeof value === 'object' && value.value?.$el instanceof HTMLElement) return value.value.$el;
-  return fallback;
+  const resolved = resolvePopupElement(Target.value)
+  if (resolved) return resolved
+  const name = String(props.Target ?? '').match(/^\{x:Bind\s+([\w]+)(?:,.*)?\}$/)?.[1]
+  return name ? hostRef.value?.closest('.example-display')?.querySelector<HTMLElement>(`[data-xaml-ref="${name}"]`) ?? null : null
 }
-
-function normalizeTheme(value) {
-  const theme = String(value || '').toLowerCase();
-  return theme === 'light' || theme === 'dark' ? theme : '';
+function dispatch(name: 'ActionButtonClick' | 'CloseButtonClick' | 'Closing' | 'Closed' | 'Opened', args: unknown) {
+  emit(name, publicApi, args)
+  resolveXamlHandler(attrs[name], instance)?.(publicApi, args)
 }
-
-function resolveAnchorTheme() {
-  const scope = targetElement()?.closest?.('.theme-light, .theme-dark');
-  if (scope?.classList.contains('theme-dark')) return 'dark';
-  if (scope?.classList.contains('theme-light')) return 'light';
-  return '';
+function setOpen(value: boolean) {
+  localIsOpen.value = value
+  updateXamlBinding(props.IsOpen, value, instance)
+  emit('update:IsOpen', value)
 }
-
-function resolveDocumentTheme() {
-  const root = document.documentElement;
-  if (root.classList.contains('theme-dark') || root.dataset.theme === 'dark') return 'dark';
-  if (root.classList.contains('theme-light') || root.dataset.theme === 'light') return 'light';
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+const IsOpen = computed({ get: () => requestedOpen.value, set: setOpen })
+function syncTheme() {
+  const owner = targetElement() ?? hostRef.value
+  const scope = owner?.closest('.theme-light, .theme-dark')
+  const explicit = String(propertyValue('RequestedTheme') ?? '').toLowerCase()
+  theme.value = explicit === 'light' || explicit === 'dark' ? explicit
+    : scope?.classList.contains('theme-dark') ? 'dark' : scope?.classList.contains('theme-light') ? 'light'
+      : String(unref(inheritedTheme) || document.documentElement.dataset.theme || 'light').toLowerCase() === 'dark' ? 'dark' : 'light'
 }
-
-function observeTheme() {
-  themeObserver?.disconnect();
-  anchorTheme.value = resolveAnchorTheme();
-  documentTheme.value = resolveDocumentTheme();
-  themeObserver = new MutationObserver(() => {
-    anchorTheme.value = resolveAnchorTheme();
-    documentTheme.value = resolveDocumentTheme();
-  });
-  const scope = targetElement()?.closest?.('.theme-light, .theme-dark');
-  if (scope) themeObserver.observe(scope, { attributes: true, attributeFilter: ['class', 'data-theme'] });
-  if (document.documentElement !== scope) {
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+function firstFocusable() {
+  return [...(tipRef.value?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), [tabindex="0"]') ?? [])].find(element => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden') ?? tipRef.value
+}
+async function updatePosition() {
+  await nextTick()
+  const tip = tipRef.value
+  if (!tip || unmounted || !isVisible.value) return
+  const target = targetElement()
+  const bounds = popupBoundsFor(target ?? hostRef.value, boolean(propertyValue('ShouldConstrainToRootBounds')))
+  rootBounds.value = bounds
+  const resource = (name: string, fallback: number) => Number.parseFloat(getComputedStyle(tip).getPropertyValue(`--${name}`)) || fallback
+  sizeLimit.value = { width: Math.min(resource('TeachingTipMaxWidth', 336), bounds.width), height: Math.min(resource('TeachingTipMaxHeight', 520), bounds.height) }
+  await nextTick()
+  const size = { width: tip.offsetWidth, height: tip.offsetHeight }
+  const result = teachingTipPlacement(target?.getBoundingClientRect() ?? null, size, bounds, String(propertyValue('PreferredPlacement')), teachingTipThickness(propertyValue('PlacementMargin')), String(propertyValue('HeroContentPlacement')), hasHeroContent.value, getComputedStyle(target ?? hostRef.value ?? document.documentElement).direction === 'rtl')
+  actualPlacement.value = result.placement
+  const constrained = boolean(propertyValue('ShouldConstrainToRootBounds')) ? fitPopupPosition(result, size, bounds) : result
+  const rect = target?.getBoundingClientRect()
+  position.value = {
+    ...constrained,
+    tailX: rect ? Math.max(28, Math.min(size.width - 28, rect.left + rect.width / 2 - constrained.left)) : size.width / 2,
+    tailY: rect ? Math.max(28, Math.min(size.height - 28, rect.top + rect.height / 2 - constrained.top)) : size.height / 2
+  }
+  positioned.value = true
+  syncTheme()
+}
+async function animate(open: boolean) {
+  const element = tipRef.value
+  if (!element) return
+  animation?.cancel()
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !element.animate) return
+  const side = tailSide.value
+  element.style.transformOrigin = side === 'bottom' ? `${position.value.tailX}px 100%` : side === 'top' ? `${position.value.tailX}px 0` : side === 'left' ? `0 ${position.value.tailY}px` : side === 'right' ? `100% ${position.value.tailY}px` : '50% 50%'
+  const shrink = `scale(${20 / element.offsetWidth}, ${20 / element.offsetHeight})`
+  const current = element.animate(open ? [{ transform: 'scale(0.01)' }, { transform: 'scale(1)' }] : [{ transform: 'scale(1)' }, { transform: shrink }], {
+    duration: open ? 300 : 200, easing: open ? 'cubic-bezier(0.1, 0.9, 0.2, 1)' : 'cubic-bezier(0.7, 0, 1, 0.5)', fill: 'both'
+  })
+  animation = current
+  try { await current.finished } catch { return }
+  if (animation === current) { current.cancel(); animation = null }
+}
+async function openTip() {
+  const generation = ++openGeneration
+  const scrollX = window.scrollX
+  const scrollY = window.scrollY
+  if (closingTask) await closingTask
+  if (unmounted || !requestedOpen.value || isVisible.value) return
+  isVisible.value = true
+  positioned.value = false
+  animationTask = (async () => {
+    await updatePosition()
+    if (unmounted || generation !== openGeneration) return
+    if (tipRef.value) resizeObserver?.observe(tipRef.value)
+    if (IsLightDismissEnabled.value) {
+      previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+      firstFocusable()?.focus({ preventScroll: true })
+      window.scrollTo({ left: scrollX, top: scrollY, behavior: 'instant' })
+    }
+    await animate(true)
+  })()
+  await animationTask
+  if (isVisible.value && requestedOpen.value && !unmounted) dispatch('Opened', {})
+}
+async function requestClose(reason: CloseReason = 'Programmatic') {
+  if (!isVisible.value || closingTask) return closingTask
+  setOpen(false)
+  closingTask = (async () => {
+    let pending = 0
+    let eventDispatched = false
+    let completeDeferrals!: () => void
+    const deferrals = new Promise<void>(resolve => { completeDeferrals = resolve })
+    const args = {
+      Reason: reason, Cancel: false,
+      GetDeferral() {
+        pending += 1
+        let completed = false
+        return { Complete() { if (completed) return; completed = true; pending -= 1; if (eventDispatched && pending === 0) completeDeferrals() } }
+      }
+    }
+    dispatch('Closing', args)
+    eventDispatched = true
+    if (pending === 0) completeDeferrals()
+    await deferrals
+    if (unmounted) return
+    if (args.Cancel) { setOpen(true); return }
+    // WinUI completes its expand batch before beginning a requested contract.
+    await animationTask
+    if (unmounted) return
+    await animate(false)
+    if (unmounted) return
+    isVisible.value = false
+    positioned.value = false
+    dispatch('Closed', { Reason: reason })
+    if (reason === 'CloseButton' || IsLightDismissEnabled.value) previouslyFocused?.focus({ preventScroll: true })
+    previouslyFocused = null
+  })()
+  try { await closingTask } finally { closingTask = null }
+  if (requestedOpen.value && !unmounted) void openTip()
+}
+function executeCommand(input: unknown, parameter: unknown) {
+  const command = resolve(input) as { CanExecute?: (value: unknown) => boolean, Execute?: (value: unknown) => void } | ((value: unknown) => void) | null
+  const value = resolve(parameter)
+  if (typeof command === 'function') command(value)
+  else if (command && (!command.CanExecute || command.CanExecute(value))) command.Execute?.(value)
+}
+function OnActionButtonClick() { executeCommand(propertyValue('ActionButtonCommand'), propertyValue('ActionButtonCommandParameter')); dispatch('ActionButtonClick', null) }
+function OnCloseButtonClick() { executeCommand(propertyValue('CloseButtonCommand'), propertyValue('CloseButtonCommandParameter')); dispatch('CloseButtonClick', null); void requestClose('CloseButton') }
+const exposedProperties = Object.fromEntries((Object.keys(props) as (keyof typeof props)[]).filter(name => !['IsOpen', 'Target', 'Title', 'Subtitle'].includes(name)).map(name => [name, dependencyProperty(name)]))
+const api = { ...exposedProperties, IsOpen, Target, Title, Subtitle, Element: tipRef, TemplateSettings: computed(() => ({ IconElement: propertyValue('IconSource') })) }
+const publicApi = proxyRefs(api)
+provide(xamlScopeKey, { TeachingTipTitleValue, TeachingTipSubtitleValue, HeroVisibility, IconVisibility, TitleVisibility, SubtitleVisibility, ContentVisibility, ActionVisibility, CloseVisibility, AlternateCloseVisibility, TipBackground, TipBorderBrush, TipBorderThickness, TipCornerRadius, ContentShadow, HeroCornerRadius, HeroRow, TitlesMargin, ActionMargin, CloseMargin, ActionSpan, CloseSpan, CloseColumn, ActionStyle, CloseStyle, AlternateCloseButtonLabel, OnActionButtonClick, OnCloseButtonClick })
+defineExpose(api)
+watch(requestedOpen, open => { if (open) void openTip(); else void requestClose() }, { flush: 'post' })
+watch(() => [Target.value, propertyValue('PreferredPlacement'), propertyValue('PlacementMargin'), propertyValue('HeroContentPlacement'), propertyValue('TailVisibility'), Title.value, Subtitle.value, propertyNodes.value, hasActionButton.value, hasCloseButton.value], () => { if (isVisible.value) void updatePosition() })
+watch(() => propertyValue('RequestedTheme'), syncTheme)
+function viewportChanged() { if (isVisible.value) void updatePosition() }
+function pointerDown(event: PointerEvent) {
+  if (!isVisible.value || !IsLightDismissEnabled.value || !(event.target instanceof Node) || tipRef.value?.contains(event.target)) return
+  void requestClose('LightDismiss')
+}
+function OnLightDismissPointerDown() { void requestClose('LightDismiss') }
+function keyDown(event: KeyboardEvent) {
+  if (!isVisible.value) return
+  if (event.key === 'Escape' && IsLightDismissEnabled.value) { event.preventDefault(); void requestClose('LightDismiss') }
+  if (event.key === 'F6') {
+    event.preventDefault()
+    if (tipRef.value?.contains(document.activeElement)) previouslyFocused?.focus({ preventScroll: true })
+    else {
+      previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+      firstFocusable()?.focus({ preventScroll: true })
+    }
   }
 }
-
-const setOpen = (value) => {
-  localIsOpen.value = value;
-  emit('update:IsOpen', value);
-  const binding = typeof props.IsOpen === 'string'
-    ? props.IsOpen.match(/^\{(?:x:Bind|Binding)\s+([\s\S]*?)\}$/)
-    : null;
-  if (binding) {
-    const expression = binding[1]
-      .replace(/,\s*Mode\s*=\s*(?:OneWay|TwoWay|OneTime)\s*$/, '')
-      .trim();
-    resolveXamlHandler(`${expression} = $event`, instance)?.(value);
-  }
-  emit(value ? 'Opened' : 'Closed');
-};
-
-const close = () => {
-  if (!effectiveIsOpen.value) return;
-  emit('CloseButtonClick');
-  resolveXamlHandler(attrs.CloseButtonClick, instance)?.();
-  setOpen(false);
-};
-
-const onAction = () => {
-  executeCommand(props.ActionButtonCommand, props.ActionButtonCommandParameter);
-  emit('ActionButtonClick');
-  resolveXamlHandler(attrs.ActionButtonClick, instance)?.();
-};
-
-const onCloseButton = () => {
-  executeCommand(props.CloseButtonCommand, props.CloseButtonCommandParameter);
-  close();
-};
-
-const OnTeachingTipCloseButtonClick = () => onCloseButton();
-const OnTeachingTipActionButtonClick = () => onAction();
-provide(xamlScopeKey, {
-  OnTeachingTipCloseButtonClick,
-  OnTeachingTipActionButtonClick,
-  TipTitle,
-  TipSubtitle,
-  ActionButtonContent,
-  CloseButtonContent,
-  ActionButtonStyleName,
-  CloseButtonStyleName,
-  CloseButtonLabel
-});
-
-function executeCommand(command, parameter) {
-  if (typeof command === 'function') {
-    command(parameter);
-  } else if (command && typeof command.Execute === 'function') {
-    command.Execute(parameter);
-  }
-}
-
-const updatePosition = async () => {
-  await nextTick();
-  const tip = tipRef.value;
-  if (!tip) return;
-  // The enter animation scales the element, so getBoundingClientRect() would
-  // measure the transient scaled size and place the tip at the wrong offset.
-  const tipRect = {
-    width: tip.offsetWidth,
-    height: tip.offsetHeight
-  };
-  const margin = parseThickness(props.PlacementMargin);
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const target = targetElement();
-
-  if (!target) {
-    const edgeMargin = 24;
-    const bottomTop = viewportHeight - tipRect.height - edgeMargin - margin.bottom;
-    const topTop = edgeMargin + margin.top;
-    const fitsBottom = bottomTop >= edgeMargin;
-    const fitsTop = topTop + tipRect.height <= viewportHeight - edgeMargin;
-    actualPlacement.value = fitsBottom || !fitsTop ? 'Bottom' : 'Top';
-    position.value = {
-      top: clamp(actualPlacement.value === 'Bottom' ? bottomTop : topTop, edgeMargin, viewportHeight - tipRect.height - edgeMargin),
-      left: clamp((viewportWidth - tipRect.width) / 2, margin.left, viewportWidth - tipRect.width - margin.right),
-      tailLeft: tipRect.width / 2
-    };
-    return;
-  }
-
-  const rect = target.getBoundingClientRect();
-  const preferred = normalizePlacement(PreferredPlacement.value);
-  const tailInset = hasVisibleTail.value ? 9 : 0;
-  const verticalExtent = tipRect.height + tailInset;
-  const spaceBelow = viewportHeight - rect.bottom - margin.bottom;
-  const spaceAbove = rect.top - margin.top;
-  const placement = choosePlacement(preferred, verticalExtent, spaceAbove, spaceBelow);
-  actualPlacement.value = placement;
-
-  let top = placement === 'Top'
-    ? rect.top - tipRect.height - tailInset - margin.top
-    : rect.bottom + tailInset + margin.bottom;
-  let left = rect.left + rect.width / 2 - tipRect.width / 2;
-  if (ShouldConstrainToRootBounds.value) {
-    const minTop = placement === 'Bottom' ? margin.top + tailInset : margin.top;
-    const maxTop = viewportHeight - tipRect.height - margin.bottom - (placement === 'Top' ? tailInset : 0);
-    top = clamp(top, minTop, maxTop);
-    left = clamp(left, margin.left, viewportWidth - tipRect.width - margin.right);
-  }
-  const targetCenter = rect.left + rect.width / 2;
-  const tailLeft = clamp(targetCenter - left, 18, tipRect.width - 18);
-  position.value = { top, left, tailLeft };
-};
-
-function parseThickness(value) {
-  if (value && typeof value === 'object') {
-    return {
-      top: finiteNumber(value.top ?? value.Top),
-      right: finiteNumber(value.right ?? value.Right),
-      bottom: finiteNumber(value.bottom ?? value.Bottom),
-      left: finiteNumber(value.left ?? value.Left)
-    };
-  }
-
-  const parts = String(value ?? '0')
-    .split(',')
-    .map((part) => Number(part.trim()))
-    .filter(Number.isFinite);
-
-  if (parts.length === 1) return { top: parts[0], right: parts[0], bottom: parts[0], left: parts[0] };
-  if (parts.length === 2) return { top: parts[1], right: parts[0], bottom: parts[1], left: parts[0] };
-  if (parts.length === 4) return { top: parts[1], right: parts[2], bottom: parts[3], left: parts[0] };
-  return { top: 0, right: 0, bottom: 0, left: 0 };
-}
-
-function finiteNumber(value) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : 0;
-}
-
-function normalizePlacement(value) {
-  const placement = String(value || 'Auto').toLowerCase();
-  const knownPlacements = ['Top', 'Bottom', 'Left', 'Right', 'TopRight', 'TopLeft', 'BottomRight', 'BottomLeft', 'LeftTop', 'LeftBottom', 'RightTop', 'RightBottom', 'Center'];
-  const normalized = knownPlacements.find((item) => item.toLowerCase() === placement);
-  if (normalized) return normalized;
-  return 'Auto';
-}
-
-function normalizeTailVisibility(value) {
-  const visibility = String(value || 'Auto').toLowerCase();
-  if (visibility === 'visible') return 'Visible';
-  if (visibility === 'collapsed') return 'Collapsed';
-  return 'Auto';
-}
-
-function normalizeHeroContentPlacement(value) {
-  const placement = String(value || 'Auto').toLowerCase();
-  if (placement === 'bottom') return 'Bottom';
-  if (placement === 'top') return 'Top';
-  return 'Auto';
-}
-
-function choosePlacement(preferred, tipExtent, spaceAbove, spaceBelow) {
-  const fitsTop = spaceAbove >= tipExtent;
-  const fitsBottom = spaceBelow >= tipExtent;
-  if (preferred === 'Top') return fitsTop || !fitsBottom ? 'Top' : 'Bottom';
-  if (preferred === 'Bottom') return fitsBottom || !fitsTop ? 'Bottom' : 'Top';
-  if (fitsTop) return 'Top';
-  if (fitsBottom) return 'Bottom';
-  return spaceAbove >= spaceBelow ? 'Top' : 'Bottom';
-}
-
-function clamp(value, min, max) {
-  if (max < min) return min;
-  return Math.max(min, Math.min(max, value));
-}
-
-watch(effectiveIsOpen, (value) => {
-  if (value) {
-    observeTheme();
-    void updatePosition();
-  }
-});
-
-watch(targetValue, () => {
-  void nextTick(observeTheme);
-  if (effectiveIsOpen.value) {
-    void nextTick(() => updatePosition());
-    requestAnimationFrame(() => { if (effectiveIsOpen.value) void updatePosition(); });
-  }
-});
-
-watch(effectiveIsOpen, (open) => {
-  if (open) {
-    // Component refs are registered after the first render. Reposition once
-    // more after Vue commits the button element so the tail anchors to it.
-    void nextTick(() => updatePosition());
-    requestAnimationFrame(() => { if (effectiveIsOpen.value) void updatePosition(); });
-  }
-});
-
-watch(
-  () => [
-    props.PlacementMargin,
-    props.PreferredPlacement,
-    props.ShouldConstrainToRootBounds,
-    props.TailVisibility,
-    props.Title,
-    props.Subtitle,
-    props.Content,
-    props.ActionButtonContent,
-    props.CloseButtonContent
-  ],
-  () => {
-    if (effectiveIsOpen.value) void updatePosition();
-  }
-);
-
-const onViewportChanged = () => {
-  if (effectiveIsOpen.value) void updatePosition();
-};
-
-const onDocumentPointerDown = (event: PointerEvent) => {
-  if (!effectiveIsOpen.value || !IsLightDismissEnabled.value) return;
-  const target = event.target;
-  if (!(target instanceof Node)) return;
-  if (tipRef.value?.contains(target) || targetElement()?.contains(target)) return;
-  // Light-dismiss closes the tip without reporting a close-button click.
-  setOpen(false);
-};
-
 onMounted(() => {
-  observeTheme();
-  window.addEventListener('resize', onViewportChanged);
-  window.addEventListener('scroll', onViewportChanged, true);
-  document.addEventListener('pointerdown', onDocumentPointerDown, true);
-});
-
+  boundsHost = hostRef.value?.closest<HTMLElement>('[data-xaml-root]') ?? null
+  syncTheme()
+  themeObserver = new MutationObserver(syncTheme)
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] })
+  const themeHost = hostRef.value?.closest<HTMLElement>('.theme-light, .theme-dark') ?? boundsHost
+  if (themeHost) themeObserver.observe(themeHost, { attributes: true, attributeFilter: ['class', 'data-theme'] })
+  resizeObserver = new ResizeObserver(viewportChanged)
+  if (boundsHost) resizeObserver.observe(boundsHost)
+  if (targetElement()) resizeObserver.observe(targetElement()!)
+  window.addEventListener('resize', viewportChanged)
+  window.addEventListener('scroll', viewportChanged, true)
+  document.addEventListener('pointerdown', pointerDown, true)
+  document.addEventListener('keydown', keyDown, true)
+  if (requestedOpen.value) void openTip()
+})
 onBeforeUnmount(() => {
-  themeObserver?.disconnect();
-  window.removeEventListener('resize', onViewportChanged);
-  window.removeEventListener('scroll', onViewportChanged, true);
-  document.removeEventListener('pointerdown', onDocumentPointerDown, true);
-});
-
-defineExpose({ close, updatePosition });
+  unmounted = true
+  contentShadow.Dispose()
+  animation?.cancel()
+  themeObserver?.disconnect()
+  resizeObserver?.disconnect()
+  window.removeEventListener('resize', viewportChanged)
+  window.removeEventListener('scroll', viewportChanged, true)
+  document.removeEventListener('pointerdown', pointerDown, true)
+  document.removeEventListener('keydown', keyDown, true)
+})
 </script>
 
 <style>
-.teaching-tip {
+.teaching-tip-host { display: none; }
+.teaching-tip-light-dismiss-indicator {
   position: fixed;
-  z-index: var(--teaching-tip-z-index, var(--win-tip-z-index, 2147483646));
+  z-index: calc(var(--win-tip-z-index, 2147483646) - 1);
+  background: transparent;
+  touch-action: none;
+}
+.teaching-tip-root {
+  position: fixed;
+  z-index: var(--win-tip-z-index, 2147483646);
   width: max-content;
-  min-width: min(var(--TeachingTipMinWidth, 320px), calc(100vw - 16px));
-  max-width: min(var(--TeachingTipMaxWidth, 336px), calc(100vw - 16px));
+  min-width: min(var(--TeachingTipMinWidth, 320px), var(--teaching-tip-width));
+  max-width: var(--teaching-tip-width);
   min-height: var(--TeachingTipMinHeight, 40px);
-  max-height: min(var(--TeachingTipMaxHeight, 520px), calc(100vh - 16px));
-  overflow: visible;
-  display: flex;
-  flex-direction: column;
-  color: var(--TeachingTipForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
-  --teaching-tip-background: var(--TeachingTipBackgroundBrush, var(--SolidBackgroundFillColorTertiaryBrush, #F9F9F9));
-  --win-acrylic-fill: var(--teaching-tip-background);
-  --teaching-tip-backdrop: none;
-  --teaching-tip-border: var(--TeachingTipBorderBrush, var(--SurfaceStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))));
-  isolation: isolate;
-  background: var(--teaching-tip-background);
-  border: 1px solid var(--teaching-tip-border);
-  border-radius: var(--OverlayCornerRadius, 8px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  -webkit-backdrop-filter: var(--teaching-tip-backdrop);
-  backdrop-filter: var(--teaching-tip-backdrop);
-}
-
-.teaching-tip.is-light-dismiss {
-  --teaching-tip-backdrop: var(--flyout-backdrop);
-}
-
-.teaching-tip-hero {
-  /* HeroContentBorder is an Auto row in the WinUI template. */
-  min-height: 0;
-  overflow: hidden;
-  flex: 0 0 auto;
-  background: var(--teaching-tip-background);
-  border-radius: var(--OverlayCornerRadius, 8px) var(--OverlayCornerRadius, 8px) 0 0;
-}
-
-.teaching-tip-hero .win-image-host {
-  display: flex;
-  width: 100%;
-  max-width: 100%;
-  height: 160px;
-}
-
-.teaching-tip-hero .win-image {
-  width: 100%;
-  max-width: 100%;
-  height: 160px;
-  object-fit: cover;
-}
-
-.teaching-tip.hero-placement-bottom .teaching-tip-hero {
-  order: 3;
-  border-radius: 0 0 var(--OverlayCornerRadius, 8px) var(--OverlayCornerRadius, 8px);
-}
-
-.teaching-tip.hero-placement-bottom .teaching-tip-main {
-  order: 1;
-}
-
-.teaching-tip.hero-placement-bottom .teaching-tip-actions {
-  order: 2;
-}
-
-.teaching-tip-main {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px;
-}
-
-.teaching-tip-icon {
-  flex: 0 0 auto;
-  width: 20px;
-  color: var(--TeachingTipForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
-  font-size: 16px;
+  max-height: var(--teaching-tip-height);
+  box-sizing: border-box;
+  padding: 0;
+  color: var(--teaching-tip-foreground, var(--TextFillColorPrimaryBrush));
+  font-size: 14px;
   line-height: 20px;
-  text-align: center;
+  outline: none;
 }
-
-.teaching-tip-text {
+.teaching-tip-layout-root.win-grid, .teaching-tip-tail-occlusion-grid.win-grid { position: relative; min-width: 0; }
+.teaching-tip-content-root-grid.win-grid {
   min-width: 0;
-  flex: 1;
-}
-
-.teaching-tip-main.has-alternate-close .teaching-tip-text {
-  padding-right: 28px;
-}
-
-.teaching-tip-title {
-  color: var(--TeachingTipTitleForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
-}
-
-.teaching-tip-subtitle,
-.teaching-tip-content {
-  margin-top: 0;
-  color: var(--TeachingTipSubtitleForegroundBrush, var(--TextFillColorPrimaryBrush, var(--text-primary)));
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.teaching-tip-close {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
-.teaching-tip-actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  justify-content: stretch;
-  gap: 0;
-  padding: 0 12px 12px;
-}
-
-.teaching-tip-actions.both-buttons-visible {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: 0;
-}
-
-.teaching-tip-action-button,
-.teaching-tip-close-button {
-  width: 100%;
-  margin-top: 12px;
-}
-
-.teaching-tip-actions.both-buttons-visible .teaching-tip-action-button {
-  margin-right: 4px;
-}
-
-.teaching-tip-actions.both-buttons-visible .teaching-tip-close-button {
-  margin-left: 4px;
-}
-
-.teaching-tip-tail {
-  position: absolute;
-  left: var(--teaching-tip-tail-left, 50%);
-  z-index: 2;
-  width: 20px;
-  height: 10px;
-  display: block;
+  max-height: calc(var(--teaching-tip-height) - 16px);
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  background: var(--teaching-tip-background, var(--TeachingTipBackgroundBrush));
+  border: var(--teaching-tip-border-width, 1px) solid var(--teaching-tip-border, var(--TeachingTipBorderBrush));
+  border-radius: var(--teaching-tip-radius, var(--OverlayCornerRadius, 8px));
   overflow: visible;
-  pointer-events: none;
-  transform: translateX(-50%);
-  fill: var(--teaching-tip-background);
-  stroke: var(--teaching-tip-border);
-  stroke-width: 1;
-  stroke-linecap: butt;
-  stroke-linejoin: miter;
+  position: relative;
 }
-
-.teaching-tip-tail polyline {
-  fill: none;
+.teaching-tip-content-root-grid::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: var(--TeachingTipTopHighlightHeight, 1px); background: var(--TeachingTipTopHighlightBrush); border-radius: inherit; pointer-events: none; }
+.teaching-tip-hero-content-border { min-width: 0; min-height: 0; overflow: hidden; max-height: calc(var(--teaching-tip-height) - 88px); }
+.teaching-tip-container.hero-top .teaching-tip-hero-content-border { border-radius: var(--teaching-tip-radius, 8px) var(--teaching-tip-radius, 8px) 0 0; }
+.teaching-tip-container.hero-bottom .teaching-tip-hero-content-border { border-radius: 0 0 var(--teaching-tip-radius, 8px) var(--teaching-tip-radius, 8px); }
+.teaching-tip-hero-content-border .win-image-host { max-width: 100%; }
+.teaching-tip-hero-content-border .win-image { max-width: 100%; }
+.teaching-tip-non-hero-content-root-grid { position: relative; min-width: 0; min-height: 0; }
+.teaching-tip-scroll-viewer { min-width: 0; min-height: 0; max-height: calc(var(--teaching-tip-height) - 18px); }
+.teaching-tip-scroll-viewer .win-scroll-viewer-viewport { min-width: 0; }
+.teaching-tip-title { color: var(--TeachingTipTitleForegroundBrush, var(--TextFillColorPrimaryBrush)); }
+.teaching-tip-subtitle { color: var(--TeachingTipSubtitleForegroundBrush, var(--TextFillColorPrimaryBrush)); }
+.teaching-tip-main-content-presenter { min-width: 0; max-width: 100%; overflow: hidden; }
+.teaching-tip-presenter-text { overflow-wrap: anywhere; white-space: normal; }
+.teaching-tip-action-button, .teaching-tip-close-button { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.teaching-tip-alternate-close-button { position: absolute; right: 0; top: 0; }
+.teaching-tip-alternate-close-button.win-btn { background: transparent; border-color: transparent; box-shadow: none; }
+.teaching-tip-alternate-close-button.win-btn:hover { background: transparent; border-color: transparent; }
+.teaching-tip-alternate-close-button.win-btn::after {
+  content: ''; position: absolute; inset: 4px; pointer-events: none; border: 1px solid transparent; border-radius: var(--ControlCornerRadius, 4px);
 }
-
-.teaching-tip-tail polygon {
-  stroke: none;
-}
-
-.teaching-tip.placement-bottom .teaching-tip-tail {
-  top: -9px;
-}
-
-.teaching-tip.placement-bottom {
-  transform-origin: var(--teaching-tip-tail-left, 50%) 0;
-}
-
-.teaching-tip.placement-top .teaching-tip-tail {
-  bottom: -9px;
-}
-
-.teaching-tip.placement-top {
-  transform-origin: var(--teaching-tip-tail-left, 50%) 100%;
-}
-
-.teaching-tip-enter-active {
-  animation: teaching-tip-enter 167ms cubic-bezier(0, 0, 0, 1) both;
-}
-
-.teaching-tip-leave-active {
-  animation: teaching-tip-exit 167ms cubic-bezier(0.7, 0, 1, 0.5) both;
-}
-
-@keyframes teaching-tip-enter {
-  from {
-    opacity: 0;
-    transform: scale(0.08);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes teaching-tip-exit {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.08);
-  }
-}
+.teaching-tip-alternate-close-button.win-btn:hover::after { background: var(--TeachingTipAlternateCloseButtonBackgroundPointerOver, var(--SubtleFillColorSecondaryBrush)); border-color: var(--TeachingTipAlternateCloseButtonBorderBrushPointerOver, transparent); }
+.teaching-tip-alternate-close-button.win-btn:active::after { background: var(--TeachingTipAlternateCloseButtonBackgroundPressed, var(--SubtleFillColorTertiaryBrush)); border-color: var(--TeachingTipAlternateCloseButtonBorderBrushPressed, transparent); }
+.teaching-tip-alternate-close-button.win-btn:active { color: var(--TeachingTipAlternateCloseButtonForegroundPressed, var(--TextFillColorSecondaryBrush)); }
+.teaching-tip-alternate-close-button.win-btn > * { position: relative; z-index: 1; }
+.teaching-tip-tail-polygon { position: absolute; z-index: 1; overflow: visible; pointer-events: none; fill: var(--teaching-tip-background); stroke: var(--teaching-tip-border); stroke-width: 1; }
+.teaching-tip-tail-polygon polygon { stroke: none; }
+.teaching-tip-tail-polygon polyline { fill: none; }
+.tail-top .teaching-tip-tail-polygon { top: -1px; left: var(--teaching-tip-tail-x); width: 20px; height: 10px; transform: translateX(-50%); }
+.tail-bottom .teaching-tip-tail-polygon { bottom: -1px; left: var(--teaching-tip-tail-x); width: 20px; height: 10px; transform: translateX(-50%); }
+.tail-left .teaching-tip-tail-polygon { left: -1px; top: var(--teaching-tip-tail-y); width: 10px; height: 20px; transform: translateY(-50%); }
+.tail-right .teaching-tip-tail-polygon { right: -1px; top: var(--teaching-tip-tail-y); width: 10px; height: 20px; transform: translateY(-50%); }
 </style>

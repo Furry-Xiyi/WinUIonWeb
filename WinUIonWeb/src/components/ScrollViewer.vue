@@ -5,82 +5,71 @@
     :class="[
       `zoom-mode-${effectiveZoomMode.toLowerCase()}`,
       {
+        'is-disabled': !effectiveIsEnabled,
         'scrolling': isScrolling,
         'zooming': isZooming,
         'has-vertical-scrollbar': hasVerticalScrollBar,
-        'has-horizontal-scrollbar': hasHorizontalScrollBar,
-        'scrollbar-corner-visible': hasVerticalScrollBar && hasHorizontalScrollBar && (isVerticalExpanded || isHorizontalExpanded),
-        'vertical-contracting': isVerticalContracting,
-        'horizontal-contracting': isHorizontalContracting
+        'has-horizontal-scrollbar': hasHorizontalScrollBar
       }
     ]"
     :style="scrollViewerStyle"
+    v-acrylic-brush="backgroundStyle"
+    @pointerenter="handleViewerPointerEnter"
+    @pointermove="handleViewerPointerMove"
+    @pointerleave="handleViewerPointerLeave"
   >
     <div
       ref="scrollViewerRef"
       class="win-scroll-viewer-viewport"
       :style="viewportStyle"
       :tabindex="effectiveIsTabStop ? 0 : -1"
+      :aria-disabled="!effectiveIsEnabled || undefined"
       @scroll="handleScroll"
       @wheel="handleWheel"
-      @touchstart.passive="handleTouchStart"
-      @touchmove.passive="handleTouchMove"
-      @touchend.passive="handleTouchEnd"
+      @keydown="handleKeyDown"
+      @touchstart="handleTouchStart"
+      @touchmove="handleTouchMove"
+      @touchend="handleTouchEnd"
+      @touchcancel="handleTouchEnd"
     >
       <div
         ref="contentRef"
         class="scroll-content"
         :style="contentStyle"
       >
-        <slot></slot>
+        <ContentOutlet />
       </div>
     </div>
 
-    <div
-      v-if="hasVerticalScrollBar"
-      ref="verticalScrollBarRef"
-      class="scrollbar scrollbar-vertical"
-      :class="{ 'visible': showVerticalScrollBar, 'expanded': isVerticalExpanded, 'contracting': isVerticalContracting, 'dragging': isDraggingVertical, 'line-scrolling': activeLineScroll?.orientation === 'vertical' || isWheelScrolling, 'has-cross-scrollbar': hasHorizontalScrollBar }"
-      @pointerenter="handleScrollBarPointerEnter('vertical', $event)"
-      @pointerleave="handleScrollBarPointerLeave('vertical')"
-      @pointerdown="handleScrollBarPointerDown('vertical', $event)"
-      @wheel="handleScrollBarWheel"
-    >
-      <button class="scrollbar-button decrease icon" type="button" aria-hidden="true" tabindex="-1" @pointerdown.prevent="startLineScroll('vertical', -1, $event)"></button>
-      <div class="scrollbar-track"></div>
-      <div
-        class="scrollbar-thumb"
-        :style="verticalThumbStyle"
-        @pointerdown.prevent.stop="startVerticalDrag"
-      ></div>
-      <button class="scrollbar-button increase icon" type="button" aria-hidden="true" tabindex="-1" @pointerdown.prevent="startLineScroll('vertical', 1, $event)"></button>
+    <div v-if="hasVerticalScrollBar" class="viewer-scrollbar-host viewer-scrollbar-host-vertical" :class="{ 'has-cross-scrollbar': hasHorizontalScrollBar }">
+      <ScrollBar Orientation="Vertical" SmallChange="16" LargeChange="{x:Bind ScrollBars.Vertical.ViewportSize, Mode=OneWay}" Minimum="0" Maximum="{x:Bind ScrollBars.Vertical.Maximum, Mode=OneWay}" ViewportSize="{x:Bind ScrollBars.Vertical.ViewportSize, Mode=OneWay}" Value="{x:Bind ScrollBars.Vertical.Value, Mode=OneWay}" IndicatorMode="{x:Bind ScrollBars.IndicatorMode, Mode=OneWay}" IsEnabled="{x:Bind ScrollBars.IsEnabled, Mode=OneWay}" Scroll="VerticalScrollBar_Scroll" />
     </div>
-
-    <div
-      v-if="hasHorizontalScrollBar"
-      ref="horizontalScrollBarRef"
-      class="scrollbar scrollbar-horizontal"
-      :class="{ 'visible': showHorizontalScrollBar, 'expanded': isHorizontalExpanded, 'contracting': isHorizontalContracting, 'dragging': isDraggingHorizontal, 'line-scrolling': activeLineScroll?.orientation === 'horizontal' || isWheelScrolling, 'has-cross-scrollbar': hasVerticalScrollBar }"
-      @pointerenter="handleScrollBarPointerEnter('horizontal', $event)"
-      @pointerleave="handleScrollBarPointerLeave('horizontal')"
-      @pointerdown="handleScrollBarPointerDown('horizontal', $event)"
-      @wheel="handleScrollBarWheel"
-    >
-      <button class="scrollbar-button decrease icon" type="button" aria-hidden="true" tabindex="-1" @pointerdown.prevent="startLineScroll('horizontal', -1, $event)"></button>
-      <div class="scrollbar-track"></div>
-      <div
-        class="scrollbar-thumb"
-        :style="horizontalThumbStyle"
-        @pointerdown.prevent.stop="startHorizontalDrag"
-      ></div>
-      <button class="scrollbar-button increase icon" type="button" aria-hidden="true" tabindex="-1" @pointerdown.prevent="startLineScroll('horizontal', 1, $event)"></button>
+    <div v-if="hasHorizontalScrollBar" class="viewer-scrollbar-host viewer-scrollbar-host-horizontal" :class="{ 'has-cross-scrollbar': hasVerticalScrollBar }">
+      <ScrollBar Orientation="Horizontal" SmallChange="16" LargeChange="{x:Bind ScrollBars.Horizontal.ViewportSize, Mode=OneWay}" Minimum="0" Maximum="{x:Bind ScrollBars.Horizontal.Maximum, Mode=OneWay}" ViewportSize="{x:Bind ScrollBars.Horizontal.ViewportSize, Mode=OneWay}" Value="{x:Bind ScrollBars.Horizontal.Value, Mode=OneWay}" IndicatorMode="{x:Bind ScrollBars.IndicatorMode, Mode=OneWay}" IsEnabled="{x:Bind ScrollBars.IsEnabled, Mode=OneWay}" Scroll="HorizontalScrollBar_Scroll" />
     </div>
     <div v-if="hasVerticalScrollBar && hasHorizontalScrollBar" class="scrollbar-corner"></div>
   </div>
 </template>
 
+<script lang="ts">
+import { defineComponent } from 'vue'
+export const ScrollViewerTemplate = defineComponent({
+  name: 'ScrollViewer.Template',
+  __scrollViewerTemplate: true,
+  setup() { return () => null }
+})
+export default { Template: ScrollViewerTemplate }
+</script>
+
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, defineComponent, Fragment, getCurrentInstance, h, inject, provide, useAttrs, useSlots, type CSSProperties, type VNode } from 'vue'
+import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime'
+import { boolValue, cssLength, xamlThickness } from './layout'
+import ScrollBar from './ScrollBar.vue'
+import { scrollBarOwnerKey, type ScrollBarScrollEventArgs } from './scrollBarOwner'
+import { uiSettings } from './uiSettings'
+import { useAcrylicBrushStyle } from './AcrylicBrush'
+import { vAcrylicBrush } from './acrylicBrushVisual'
 
 // Enums
 type ScrollViewerZoomMode = 'Disabled' | 'Enabled'
@@ -89,44 +78,76 @@ type ScrollViewerScrollBarVisibility = 'Disabled' | 'Auto' | 'Hidden' | 'Visible
 type ScrollViewerHorizontalAlignment = 'Left' | 'Center' | 'Right' | 'Stretch'
 type ScrollViewerVerticalAlignment = 'Top' | 'Center' | 'Bottom' | 'Stretch'
 
-// Props - 100% aligned with official WinUI API
+// Dependency properties from the WinUI ScrollViewer default template.
 interface Props {
-  ZoomMode?: ScrollViewerZoomMode
-  MinZoomFactor?: number
-  MaxZoomFactor?: number
-  ZoomFactor?: number
-  HorizontalScrollMode?: ScrollViewerScrollMode
-  VerticalScrollMode?: ScrollViewerScrollMode
-  HorizontalScrollBarVisibility?: ScrollViewerScrollBarVisibility
-  VerticalScrollBarVisibility?: ScrollViewerScrollBarVisibility
-  IsVerticalScrollChainingEnabled?: boolean
-  IsHorizontalScrollChainingEnabled?: boolean
-  IsTabStop?: boolean
+  Template?: string
+  ZoomMode?: ScrollViewerZoomMode | string
+  MinZoomFactor?: number | string
+  MaxZoomFactor?: number | string
+  HorizontalScrollMode?: ScrollViewerScrollMode | string
+  VerticalScrollMode?: ScrollViewerScrollMode | string
+  HorizontalScrollBarVisibility?: ScrollViewerScrollBarVisibility | string
+  VerticalScrollBarVisibility?: ScrollViewerScrollBarVisibility | string
+  IsVerticalScrollChainingEnabled?: boolean | string
+  IsHorizontalScrollChainingEnabled?: boolean | string
+  IsTabStop?: boolean | string
+  IsEnabled?: boolean | string
+  IsHorizontalRailEnabled?: boolean | string
+  IsVerticalRailEnabled?: boolean | string
+  IsDeferredScrollingEnabled?: boolean | string
   Width?: number | string
   Height?: number | string
-  HorizontalAlignment?: ScrollViewerHorizontalAlignment
-  VerticalAlignment?: ScrollViewerVerticalAlignment
+  MinWidth?: number | string
+  MaxWidth?: number | string
+  MinHeight?: number | string
+  MaxHeight?: number | string
+  Margin?: string
+  Padding?: string
+  Background?: string | object
+  BorderBrush?: string
+  BorderThickness?: number | string
+  CornerRadius?: number | string
+  HorizontalContentAlignment?: ScrollViewerHorizontalAlignment | string
+  VerticalContentAlignment?: ScrollViewerVerticalAlignment | string
+  HorizontalAlignment?: ScrollViewerHorizontalAlignment | string
+  VerticalAlignment?: ScrollViewerVerticalAlignment | string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   ZoomMode: 'Disabled',
   MinZoomFactor: 0.1,
   MaxZoomFactor: 10.0,
-  ZoomFactor: 1.0,
+  // WinUI's ScrollViewer defaults differ per axis: HorizontalScrollBarVisibility
+  // keeps its Disabled dependency-property default while the default style sets
+  // VerticalScrollBarVisibility to Visible (generic.xaml, `Style
+  // TargetType="ScrollViewer"`).  Matching that pair is what makes a sample which
+  // asks only for vertical scrolling leave the horizontal axis disabled, giving
+  // its content a finite width to be measured against.
   HorizontalScrollMode: 'Auto',
   VerticalScrollMode: 'Auto',
-  HorizontalScrollBarVisibility: 'Auto',
-  VerticalScrollBarVisibility: 'Auto',
+  HorizontalScrollBarVisibility: 'Disabled',
+  VerticalScrollBarVisibility: 'Visible',
   IsVerticalScrollChainingEnabled: true,
   IsHorizontalScrollChainingEnabled: true,
   IsTabStop: false,
+  IsEnabled: true,
+  IsHorizontalRailEnabled: true,
+  IsVerticalRailEnabled: true,
+  IsDeferredScrollingEnabled: false,
+  HorizontalContentAlignment: 'Left',
+  VerticalContentAlignment: 'Top',
+  Padding: '0',
+  BorderThickness: 0,
+  BorderBrush: 'Transparent',
+  Background: 'Transparent',
+  CornerRadius: 0,
   Width: NaN,
   Height: NaN,
   HorizontalAlignment: 'Stretch',
   VerticalAlignment: 'Stretch'
 })
 
-// Events - 100% aligned with official WinUI API
+// Official ScrollViewer events carry their sender and event arguments.
 interface ScrollViewerView {
   HorizontalOffset: number
   VerticalOffset: number
@@ -143,93 +164,155 @@ interface ViewChangingEventArgs {
   IsInertial: boolean
 }
 
+type ScrollViewerEventArgs = {
+  ViewChanged: ViewChangedEventArgs
+  ViewChanging: ViewChangingEventArgs
+  DirectManipulationStarted: Record<string, never>
+  DirectManipulationCompleted: Record<string, never>
+  Loaded: Record<string, unknown>
+}
 const emit = defineEmits<{
-  ViewChanged: [args: ViewChangedEventArgs]
-  ViewChanging: [args: ViewChangingEventArgs]
-  DirectManipulationStarted: [args: Record<string, never>]
-  DirectManipulationCompleted: [args: Record<string, never>]
+  ViewChanged: [sender: Record<string, unknown>, args: ViewChangedEventArgs]
+  ViewChanging: [sender: Record<string, unknown>, args: ViewChangingEventArgs]
+  DirectManipulationStarted: [sender: Record<string, unknown>, args: Record<string, never>]
+  DirectManipulationCompleted: [sender: Record<string, unknown>, args: Record<string, never>]
+  Loaded: [sender: Record<string, unknown>, args: Record<string, unknown>]
 }>()
+
+const instance = getCurrentInstance()
+const attrs = useAttrs()
+const slots = useSlots()
+function dispatch<K extends keyof ScrollViewerEventArgs>(name: K, args: ScrollViewerEventArgs[K]) {
+  const dispatchEmit = emit as (name: K, sender: Record<string, unknown>, args: ScrollViewerEventArgs[K]) => void
+  dispatchEmit(name, controlSender, args)
+  // XAML event attributes also work when the ScrollViewer is composed directly
+  // in another control. Normalized on<Event> listeners already receive emit.
+  if (!instance?.vnode.props?.[`on${name}`]) resolveXamlHandler(attrs[name], instance)?.(controlSender, args)
+}
+const resolve = (value: unknown) => resolveXamlValue(value, instance)
+const propertyNodes = computed(() => {
+  const content: VNode[] = []
+  let hasTemplate = false
+  const collect = (nodes: VNode[]) => {
+    for (const node of nodes) {
+      if (node.type === Fragment && Array.isArray(node.children)) collect(node.children as VNode[])
+      else if ((node.type as { __scrollViewerTemplate?: boolean; name?: string })?.__scrollViewerTemplate || (node.type as { name?: string })?.name === 'ScrollViewer.Template') hasTemplate = true
+      else content.push(node)
+    }
+  }
+  collect(slots.default?.() ?? [])
+  return { content: normalizeXamlNodes(content, instance), hasTemplate }
+})
+const ContentOutlet = defineComponent({ setup: () => () => h(Fragment, propertyNodes.value.content) })
+const inheritedScrollScope = inject<Record<string, unknown>>(xamlScopeKey, {})
+const ScrollBars = computed(() => {
+  scrollRevision.value; overflowRevision.value
+  const port = scrollViewerRef.value
+  return {
+    Vertical: { Maximum: Math.max(0, (port?.scrollHeight ?? 0) - (port?.clientHeight ?? 0)), ViewportSize: port?.clientHeight ?? 0, Value: port?.scrollTop ?? 0 },
+    Horizontal: { Maximum: Math.max(0, (port?.scrollWidth ?? 0) - (port?.clientWidth ?? 0)), ViewportSize: port?.clientWidth ?? 0, Value: port?.scrollLeft ?? 0 },
+    IndicatorMode: indicatorMode.value === 'touch' ? 'TouchIndicator' : uiSettings.AutoHideScrollBars ? indicatorMode.value === 'mouse' ? 'MouseIndicator' : 'None' : 'MouseIndicator',
+    IsEnabled: effectiveIsEnabled.value
+  }
+})
+const scrollBarChanged = (axis: 'Vertical' | 'Horizontal', args: ScrollBarScrollEventArgs) => {
+  const port = scrollViewerRef.value
+  if (!port) return
+  if (effectiveIsDeferredScrollingEnabled.value && args.ScrollEventType === 'ThumbTrack') {
+    if (axis === 'Vertical') deferredVerticalOffset.value = args.NewValue
+    else deferredHorizontalOffset.value = args.NewValue
+    return
+  }
+  if (axis === 'Vertical') port.scrollTop = args.NewValue
+  else port.scrollLeft = args.NewValue
+  if (args.ScrollEventType === 'EndScroll') {
+    deferredVerticalOffset.value = deferredHorizontalOffset.value = null
+    finishViewChange()
+  }
+  scrollRevision.value += 1
+}
+const VerticalScrollBar_Scroll = (_sender: unknown, args: ScrollBarScrollEventArgs) => scrollBarChanged('Vertical', args)
+const HorizontalScrollBar_Scroll = (_sender: unknown, args: ScrollBarScrollEventArgs) => scrollBarChanged('Horizontal', args)
+provide(xamlScopeKey, { ...inheritedScrollScope, ScrollBars, VerticalScrollBar_Scroll, HorizontalScrollBar_Scroll })
+provide(scrollBarOwnerKey, {
+  autoHide: () => uiSettings.AutoHideScrollBars,
+  onHover: (axis, over) => {
+    if (axis === 'Vertical') isVerticalPointerOver.value = over; else isHorizontalPointerOver.value = over
+    if (!over) scheduleIndicatorHide()
+  },
+  onPointerActivity: type => { lastIndicatorType = type === 'touch' ? 'touch' : 'mouse'; showIndicators(lastIndicatorType) },
+  onInteraction: (axis, active) => {
+    if (axis === 'Vertical') isDraggingVertical.value = active; else isDraggingHorizontal.value = active
+    if (active) { cancelPendingAnimatedScrollForDirectInput(); beginDirectManipulation() }
+    else { finishViewChange(); scheduleIndicatorHide() }
+  }
+})
 
 // Refs
 const rootRef = ref<HTMLDivElement>()
 const scrollViewerRef = ref<HTMLDivElement>()
 const contentRef = ref<HTMLDivElement>()
-const verticalScrollBarRef = ref<HTMLDivElement>()
-const horizontalScrollBarRef = ref<HTMLDivElement>()
-const currentZoomFactor = ref(props.ZoomFactor)
+const currentZoomFactor = ref(1)
 const isScrolling = ref(false)
 const isZooming = ref(false)
-const showVerticalScrollBar = ref(false)
-const showHorizontalScrollBar = ref(false)
-const isVerticalExpanded = ref(false)
-const isHorizontalExpanded = ref(false)
-const isVerticalContracting = ref(false)
-const isHorizontalContracting = ref(false)
-const velocityAnimationFrame = ref<number>()
-const velocityExpectedLeft = ref<number | null>(null)
-const velocityExpectedTop = ref<number | null>(null)
 const isWheelScrolling = ref(false)
 const isDirectManipulationActive = ref(false)
+const isRootPointerOver = ref(false)
+const indicatorTimer = ref<number>()
+const indicatorMode = ref<'none' | 'mouse' | 'touch'>('none')
+let lastIndicatorType: 'mouse' | 'touch' = 'mouse'
+const programmaticFrame = ref<number>()
+let pendingViewChange = false
+let lastIntermediateViewKey = ''
+let lastFinalViewKey = ''
+let programmaticAnimationActive = false
+let programmaticGeneration = 0
+let touchPoint: { x: number; y: number } | undefined
+let touchZoomCenter: { x: number; y: number } | undefined
 
 // Touch/Gesture state
 const touchStartDistance = ref(0)
 const touchStartZoom = ref(1)
 const scrollTimer = ref<number>()
-const verticalHoverExpandTimer = ref<number>()
-const horizontalHoverExpandTimer = ref<number>()
-const verticalContractTimer = ref<number>()
-const horizontalContractTimer = ref<number>()
-const verticalContractAnimationTimer = ref<number>()
-const horizontalContractAnimationTimer = ref<number>()
 const isVerticalPointerOver = ref(false)
 const isHorizontalPointerOver = ref(false)
 
 // Drag state for custom scrollbars
 const isDraggingVertical = ref(false)
 const isDraggingHorizontal = ref(false)
-const verticalInteractionToken = ref(0)
-const horizontalInteractionToken = ref(0)
-const lastNonMouseScrollBarPointerTime = ref(0)
-const activeVerticalDragPointerId = ref<number | null>(null)
-const activeHorizontalDragPointerId = ref<number | null>(null)
-const activeLineScroll = ref<{ orientation: 'vertical' | 'horizontal', direction: number, lastTime: number } | null>(null)
-const lineScrollAnimationFrame = ref<number>()
+const deferredVerticalOffset = ref<number | null>(null)
+const deferredHorizontalOffset = ref<number | null>(null)
 const wheelScrollAnimationFrame = ref<number>()
 const wheelScrollTargetLeft = ref(0)
 const wheelScrollTargetTop = ref(0)
 const wheelScrollExpectedLeft = ref<number | null>(null)
 const wheelScrollExpectedTop = ref<number | null>(null)
-const dragStartY = ref(0)
-const dragStartX = ref(0)
-const dragStartScrollTop = ref(0)
-const dragStartScrollLeft = ref(0)
 const overflowRevision = ref(0)
 const scrollRevision = ref(0)
 let resizeObserver: ResizeObserver | undefined
+let resizeFrame: number | undefined
 
-const scrollBarContractDelay = 0
-const scrollBarContractBeginTime = 500
-const scrollBarContractDuration = 167
-const scrollControllerSmallChange = 16
-const scrollControllerInertiaDecayRate = 0.9995
 const scrollControllerVelocityNeededPerPixel = 7.600855902349023
+const scrollControllerSmallChange = 16
 const scrollControllerMinMaxEpsilon = 0.001
 
-const effectiveZoomMode = computed<ScrollViewerZoomMode>(() => props.ZoomMode)
-const effectiveMinZoomFactor = computed(() => props.MinZoomFactor)
-const effectiveMaxZoomFactor = computed(() => props.MaxZoomFactor)
-const effectiveZoomFactor = computed(() => props.ZoomFactor)
-const effectiveHorizontalScrollMode = computed<ScrollViewerScrollMode>(() => props.HorizontalScrollMode)
-const effectiveVerticalScrollMode = computed<ScrollViewerScrollMode>(() => props.VerticalScrollMode)
-const effectiveHorizontalScrollBarVisibility = computed<ScrollViewerScrollBarVisibility>(() => props.HorizontalScrollBarVisibility)
-const effectiveVerticalScrollBarVisibility = computed<ScrollViewerScrollBarVisibility>(() => props.VerticalScrollBarVisibility)
-const effectiveIsVerticalScrollChainingEnabled = computed(() => props.IsVerticalScrollChainingEnabled)
-const effectiveIsHorizontalScrollChainingEnabled = computed(() => props.IsHorizontalScrollChainingEnabled)
-const effectiveIsTabStop = computed(() => props.IsTabStop)
-const effectiveWidth = computed(() => props.Width)
-const effectiveHeight = computed(() => props.Height)
-const effectiveHorizontalAlignment = computed<ScrollViewerHorizontalAlignment>(() => props.HorizontalAlignment)
-const effectiveVerticalAlignment = computed<ScrollViewerVerticalAlignment>(() => props.VerticalAlignment)
+const effectiveZoomMode = computed<ScrollViewerZoomMode>(() => resolve(props.ZoomMode) as ScrollViewerZoomMode)
+const effectiveMinZoomFactor = computed(() => Math.max(0.01, Number(resolve(props.MinZoomFactor)) || 0.1))
+const effectiveMaxZoomFactor = computed(() => Math.max(effectiveMinZoomFactor.value, Number(resolve(props.MaxZoomFactor)) || 10))
+const effectiveHorizontalScrollMode = computed<ScrollViewerScrollMode>(() => resolve(props.HorizontalScrollMode) as ScrollViewerScrollMode)
+const effectiveVerticalScrollMode = computed<ScrollViewerScrollMode>(() => resolve(props.VerticalScrollMode) as ScrollViewerScrollMode)
+const effectiveHorizontalScrollBarVisibility = computed<ScrollViewerScrollBarVisibility>(() => resolve(props.HorizontalScrollBarVisibility) as ScrollViewerScrollBarVisibility)
+const effectiveVerticalScrollBarVisibility = computed<ScrollViewerScrollBarVisibility>(() => resolve(props.VerticalScrollBarVisibility) as ScrollViewerScrollBarVisibility)
+const effectiveIsVerticalScrollChainingEnabled = computed(() => boolValue(resolve(props.IsVerticalScrollChainingEnabled)))
+const effectiveIsHorizontalScrollChainingEnabled = computed(() => boolValue(resolve(props.IsHorizontalScrollChainingEnabled)))
+const effectiveIsTabStop = computed(() => boolValue(resolve(props.IsTabStop)) && effectiveIsEnabled.value)
+const effectiveIsEnabled = computed(() => boolValue(resolve(props.IsEnabled)))
+const effectiveIsDeferredScrollingEnabled = computed(() => boolValue(resolve(props.IsDeferredScrollingEnabled)))
+const effectiveWidth = computed(() => resolve(props.Width) as number | string)
+const effectiveHeight = computed(() => resolve(props.Height) as number | string)
+const effectiveHorizontalAlignment = computed<ScrollViewerHorizontalAlignment>(() => resolve(props.HorizontalAlignment) as ScrollViewerHorizontalAlignment)
+const effectiveVerticalAlignment = computed<ScrollViewerVerticalAlignment>(() => resolve(props.VerticalAlignment) as ScrollViewerVerticalAlignment)
+const isScrollBarlessTemplate = computed(() => propertyNodes.value.hasTemplate || props.Template?.trim() === '{StaticResource ScrollViewerScrollBarlessTemplate}')
 
 const hasCssSize = (value: number | string | undefined) => (
   value !== undefined &&
@@ -245,11 +328,30 @@ const cssSize = (value: number | string | undefined) => (
 )
 
 // Computed styles
+const backgroundStyle = useAcrylicBrushStyle(() => props.Background ?? 'Transparent', instance)
 const scrollViewerStyle = computed(() => {
-  const styles: Record<string, string> = {}
+  const styles: CSSProperties & Record<string, unknown> = {
+    ...backgroundStyle.value,
+    borderColor: String(resolve(props.BorderBrush) ?? 'transparent'),
+    borderWidth: xamlThickness(resolve(props.BorderThickness)),
+    borderRadius: xamlThickness(resolve(props.CornerRadius)),
+    margin: xamlThickness(resolve(props.Margin))
+  }
+
+  for (const name of ['MinWidth', 'MaxWidth', 'MinHeight', 'MaxHeight'] as const) {
+    const value = resolve(props[name])
+    if (value !== undefined && value !== '' && value !== null) {
+      const cssName = name[0].toLowerCase() + name.slice(1)
+      styles[cssName] = cssLength(value)
+    }
+  }
 
   if (hasCssSize(effectiveWidth.value)) {
     styles.width = cssSize(effectiveWidth.value) ?? ''
+    styles.flexGrow = '0'
+    styles.flexShrink = '1'
+    styles.flexBasis = 'auto'
+    styles.maxWidth = styles.maxWidth || '100%'
   }
   if (hasCssSize(effectiveHeight.value)) {
     styles.height = cssSize(effectiveHeight.value) ?? ''
@@ -262,7 +364,20 @@ const scrollViewerStyle = computed(() => {
     Stretch: 'stretch'
   }[effectiveHorizontalAlignment.value]
   styles.justifySelf = horizontalAlignment
-  styles.alignSelf = horizontalAlignment
+  styles.alignSelf = effectiveVerticalAlignment.value === 'Stretch'
+    ? 'stretch'
+    : ({ Top: 'start', Center: 'center', Bottom: 'end' }[effectiveVerticalAlignment.value] ?? 'stretch')
+  // WinUI's default HorizontalAlignment is Stretch, which fills the width the
+  // parent offers.  A CSS `align-self: stretch` only fills the *cross* axis of a
+  // flex container, so when the repeater's ScrollViewer sits in the gallery's
+  // row-direction display area it would otherwise be sized from its own content
+  // and collapse to zero — taking every descendant measured against it with it.
+  if (effectiveHorizontalAlignment.value === 'Stretch' && styles.width === undefined) {
+    styles.flexGrow = '1'
+    styles.flexShrink = '1'
+    styles.flexBasis = hasCssSize(effectiveHeight.value) ? 'auto' : '0%'
+    styles.minWidth = '0'
+  }
 
   if (effectiveVerticalAlignment.value !== 'Stretch') {
     styles.verticalAlign = {
@@ -282,6 +397,15 @@ const viewportStyle = computed(() => {
 
   styles.overflowX = overflowX
   styles.overflowY = overflowY
+  styles.padding = xamlThickness(resolve(props.Padding))
+  // A finite MaxHeight/MaxWidth constrains the ScrollPresenter itself.  Without
+  // these caps a percentage-sized viewport can resolve against its content's
+  // auto size and let a templated flyout grow past the official boundary.
+  styles.maxWidth = styles.maxWidth || '100%'
+  styles.maxHeight = styles.maxHeight || '100%'
+  styles.overscrollBehaviorX = effectiveIsHorizontalScrollChainingEnabled.value ? 'auto' : 'contain'
+  styles.overscrollBehaviorY = effectiveIsVerticalScrollChainingEnabled.value ? 'auto' : 'contain'
+  styles.touchAction = !effectiveIsEnabled.value || effectiveZoomMode.value === 'Enabled' ? 'none' : 'pan-x pan-y'
   return styles
 })
 
@@ -297,12 +421,24 @@ const contentStyle = computed(() => {
   styles.display = 'block'
   styles.width = '100%'
   styles.minWidth = '0'
+  const horizontal = resolve(props.HorizontalContentAlignment)
+  const vertical = resolve(props.VerticalContentAlignment)
+  if (horizontal === 'Center' || horizontal === 'Right') {
+    styles.display = 'flex'
+    styles.justifyContent = horizontal === 'Center' ? 'center' : 'flex-end'
+  }
+  if (vertical === 'Center' || vertical === 'Bottom') {
+    styles.display = 'flex'
+    styles.alignItems = vertical === 'Center' ? 'center' : 'flex-end'
+    styles.minHeight = `${(scrollViewerRef.value?.clientHeight ?? 0) / zoom}px`
+  }
 
   return styles
 })
 
 const computedVerticalScrollBarVisibility = computed(() => {
   overflowRevision.value
+  if (isScrollBarlessTemplate.value) return 'hidden'
   if (effectiveVerticalScrollBarVisibility.value === 'Disabled') return 'hidden'
   if (effectiveVerticalScrollBarVisibility.value === 'Hidden') return 'hidden'
   if (effectiveVerticalScrollBarVisibility.value === 'Visible') return 'visible'
@@ -314,6 +450,7 @@ const computedVerticalScrollBarVisibility = computed(() => {
 
 const computedHorizontalScrollBarVisibility = computed(() => {
   overflowRevision.value
+  if (isScrollBarlessTemplate.value) return 'hidden'
   if (effectiveHorizontalScrollBarVisibility.value === 'Disabled') return 'hidden'
   if (effectiveHorizontalScrollBarVisibility.value === 'Hidden') return 'hidden'
   if (effectiveHorizontalScrollBarVisibility.value === 'Visible') return 'visible'
@@ -325,42 +462,6 @@ const computedHorizontalScrollBarVisibility = computed(() => {
 
 const hasVerticalScrollBar = computed(() => computedVerticalScrollBarVisibility.value !== 'hidden')
 const hasHorizontalScrollBar = computed(() => computedHorizontalScrollBarVisibility.value !== 'hidden')
-
-const verticalThumbStyle = computed(() => {
-  scrollRevision.value
-  if (!scrollViewerRef.value) return {}
-
-  const container = scrollViewerRef.value
-  const metrics = getScrollBarMetrics('vertical')
-  const minimumThumbHeight = 30
-  const thumbHeight = Math.max(minimumThumbHeight, (container.clientHeight / container.scrollHeight) * metrics.trackLength)
-  const travel = Math.max(0, metrics.trackLength - thumbHeight)
-  const maxScroll = Math.max(1, container.scrollHeight - container.clientHeight)
-  const thumbTop = metrics.trackStart + (container.scrollTop / maxScroll) * travel
-
-  return {
-    height: `${thumbHeight}px`,
-    transform: `translateY(${thumbTop}px)`
-  }
-})
-
-const horizontalThumbStyle = computed(() => {
-  scrollRevision.value
-  if (!scrollViewerRef.value) return {}
-
-  const container = scrollViewerRef.value
-  const metrics = getScrollBarMetrics('horizontal')
-  const minimumThumbWidth = 30
-  const thumbWidth = Math.max(minimumThumbWidth, (container.clientWidth / container.scrollWidth) * metrics.trackLength)
-  const travel = Math.max(0, metrics.trackLength - thumbWidth)
-  const maxScroll = Math.max(1, container.scrollWidth - container.clientWidth)
-  const thumbLeft = metrics.trackStart + (container.scrollLeft / maxScroll) * travel
-
-  return {
-    width: `${thumbWidth}px`,
-    transform: `translateX(${thumbLeft}px)`
-  }
-})
 
 // Helper functions
 function getOverflowValue(scrollMode: ScrollViewerScrollMode, visibility: ScrollViewerScrollBarVisibility): string {
@@ -378,56 +479,48 @@ function emitViewChanged(isIntermediate: boolean) {
     VerticalOffset: scrollViewerRef.value.scrollTop,
     ZoomFactor: currentZoomFactor.value
   }
+  const viewKey = `${view.HorizontalOffset}:${view.VerticalOffset}:${view.ZoomFactor}`
+  if (isIntermediate) {
+    if (lastIntermediateViewKey === viewKey) return
+    lastIntermediateViewKey = viewKey
+    pendingViewChange = true
+  } else {
+    if (!pendingViewChange && lastFinalViewKey === viewKey) return
+    pendingViewChange = false
+    lastFinalViewKey = viewKey
+    lastIntermediateViewKey = viewKey
+  }
 
   if (isIntermediate) {
-    emit('ViewChanging', {
+    dispatch('ViewChanging', {
       NextView: view,
       FinalView: view,
       IsInertial: false
     })
   }
-  emit('ViewChanged', { IsIntermediate: isIntermediate })
+  dispatch('ViewChanged', { IsIntermediate: isIntermediate })
 }
 
 function beginDirectManipulation() {
+  if (scrollTimer.value !== undefined) clearTimeout(scrollTimer.value)
+  scrollTimer.value = window.setTimeout(finishViewChange, 150)
   if (isDirectManipulationActive.value) return
   isDirectManipulationActive.value = true
-  emit('DirectManipulationStarted', {})
+  dispatch('DirectManipulationStarted', {})
 }
 
 function completeDirectManipulation() {
   if (!isDirectManipulationActive.value) return
   isDirectManipulationActive.value = false
-  emit('DirectManipulationCompleted', {})
-}
-
-function getScrollBarMetrics(orientation: 'vertical' | 'horizontal') {
-  const container = scrollViewerRef.value
-  if (!container) return { trackStart: 0, trackLength: 0 }
-
-  const isVertical = orientation === 'vertical'
-  const scrollBar = isVertical ? verticalScrollBarRef.value : horizontalScrollBarRef.value
-  const rect = scrollBar?.getBoundingClientRect()
-  const measuredExtent = rect ? (isVertical ? rect.height : rect.width) : 0
-  const crossBarVisible = isVertical ? hasHorizontalScrollBar.value : hasVerticalScrollBar.value
-  const extent = measuredExtent || (isVertical ? container.clientHeight : container.clientWidth)
-  const overlapAvoidance = crossBarVisible ? 12 : 0
-  const buttonReserve = 12
-  const trackStart = buttonReserve
-  const trackEndReserve = buttonReserve + overlapAvoidance
-  const trackLength = Math.max(30, extent - trackStart - trackEndReserve)
-
-  return { trackStart, trackLength }
+  dispatch('DirectManipulationCompleted', {})
 }
 
 // Scroll handling
 function handleScroll() {
   stopSmoothWheelScrollIfExternalScroll()
-  stopScrollVelocityIfExternalScroll()
 
   scrollRevision.value += 1
 
-  beginDirectManipulation()
   isScrolling.value = true
 
   // Clear previous timer
@@ -439,310 +532,83 @@ function handleScroll() {
   emitViewChanged(true)
 
   // Set timer for final event
-  scrollTimer.value = window.setTimeout(() => {
-    isScrolling.value = false
-    emitViewChanged(false)
-    completeDirectManipulation()
-  }, 150)
+  scrollTimer.value = window.setTimeout(finishViewChange, 150)
 
   // Update scrollbar visibility
-  updateScrollBarVisibility()
+  showIndicators(lastIndicatorType)
 }
 
 function updateScrollBarVisibility() {
-  if (!scrollViewerRef.value) return
-
-  showVerticalScrollBar.value = hasVerticalScrollBar.value
-  showHorizontalScrollBar.value = hasHorizontalScrollBar.value
+  // The shared ScrollBar resolves visibility and geometry from this revision.
+  overflowRevision.value += 1
 }
 
-function clearScrollBarTimers(orientation: 'vertical' | 'horizontal') {
-  if (orientation === 'vertical') {
-    if (verticalHoverExpandTimer.value) clearTimeout(verticalHoverExpandTimer.value)
-    if (verticalContractTimer.value) clearTimeout(verticalContractTimer.value)
-    if (verticalContractAnimationTimer.value) clearTimeout(verticalContractAnimationTimer.value)
-    verticalHoverExpandTimer.value = undefined
-    verticalContractTimer.value = undefined
-    verticalContractAnimationTimer.value = undefined
-  } else {
-    if (horizontalHoverExpandTimer.value) clearTimeout(horizontalHoverExpandTimer.value)
-    if (horizontalContractTimer.value) clearTimeout(horizontalContractTimer.value)
-    if (horizontalContractAnimationTimer.value) clearTimeout(horizontalContractAnimationTimer.value)
-    horizontalHoverExpandTimer.value = undefined
-    horizontalContractTimer.value = undefined
-    horizontalContractAnimationTimer.value = undefined
-  }
-}
-
-function getScrollBarInteractionToken(orientation: 'vertical' | 'horizontal') {
-  return orientation === 'vertical' ? verticalInteractionToken.value : horizontalInteractionToken.value
-}
-
-function bumpScrollBarInteractionToken(orientation: 'vertical' | 'horizontal') {
-  if (orientation === 'vertical') {
-    verticalInteractionToken.value += 1
-    return verticalInteractionToken.value
-  }
-  horizontalInteractionToken.value += 1
-  return horizontalInteractionToken.value
-}
-
-function beginScrollBarInteraction(orientation: 'vertical' | 'horizontal') {
-  const token = bumpScrollBarInteractionToken(orientation)
-  clearScrollBarTimers(orientation)
-  if (orientation === 'vertical') {
-    isVerticalContracting.value = false
-    showVerticalScrollBar.value = hasVerticalScrollBar.value
-  } else {
-    isHorizontalContracting.value = false
-    showHorizontalScrollBar.value = hasHorizontalScrollBar.value
-  }
-  scrollRevision.value += 1
-  updateScrollBarVisibility()
-  return token
-}
-
-function expandScrollBarAfterLayout(orientation: 'vertical' | 'horizontal', token = getScrollBarInteractionToken(orientation)) {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      if (token !== getScrollBarInteractionToken(orientation)) return
-      if (orientation === 'vertical') {
-        if (!isVerticalPointerOver.value && activeLineScroll.value?.orientation !== 'vertical' && !isDraggingVertical.value) return
-        isVerticalContracting.value = false
-        isVerticalExpanded.value = hasVerticalScrollBar.value
-      } else {
-        if (!isHorizontalPointerOver.value && activeLineScroll.value?.orientation !== 'horizontal' && !isDraggingHorizontal.value) return
-        isHorizontalContracting.value = false
-        isHorizontalExpanded.value = hasHorizontalScrollBar.value
-      }
-      scrollRevision.value += 1
-      updateScrollBarVisibility()
-    })
-  })
-}
-
-function expandScrollBarNow(orientation: 'vertical' | 'horizontal') {
-  const token = beginScrollBarInteraction(orientation)
-  if (orientation === 'vertical') {
-    isVerticalExpanded.value = hasVerticalScrollBar.value
-  } else {
-    isHorizontalExpanded.value = hasHorizontalScrollBar.value
-  }
-  scrollRevision.value += 1
-  updateScrollBarVisibility()
-  return token
-}
-
-function markNonMouseScrollBarPointer(event: PointerEvent) {
-  if (event.pointerType !== 'mouse') {
-    lastNonMouseScrollBarPointerTime.value = performance.now()
-  }
-}
-
-function isSyntheticHoverAfterTouch() {
-  return performance.now() - lastNonMouseScrollBarPointerTime.value < 800
-}
-
-function triggerScrollBarHapticFeedback(event: PointerEvent) {
-  if (event.pointerType === 'mouse') return
-  try {
-    navigator.vibrate?.(12)
-  } catch {
-    // Some browsers expose vibrate but reject it silently outside supported hardware.
-  }
-}
-
-function getScrollBarPointerLineDirection(orientation: 'vertical' | 'horizontal', event: PointerEvent) {
-  const target = event.currentTarget as HTMLElement | null
-  const rect = target?.getBoundingClientRect()
-  if (!rect) return 0
-
-  const buttonExtent = 12
-  if (orientation === 'vertical') {
-    const y = event.clientY - rect.top
-    if (y <= buttonExtent) return -1
-    if (y >= rect.height - buttonExtent) return 1
-    return 0
-  }
-
-  const x = event.clientX - rect.left
-  if (x <= buttonExtent) return -1
-  if (x >= rect.width - buttonExtent) return 1
-  return 0
-}
-
-function handleScrollBarPointerEnter(orientation: 'vertical' | 'horizontal', event: PointerEvent) {
-  if (event.pointerType !== 'mouse') return
-  if (isSyntheticHoverAfterTouch()) return
-  if (orientation === 'vertical') {
-    isVerticalPointerOver.value = true
-  } else {
-    isHorizontalPointerOver.value = true
-  }
-
-  const token = beginScrollBarInteraction(orientation)
-  expandScrollBarAfterLayout(orientation, token)
-}
-
-function handleScrollBarPointerDown(orientation: 'vertical' | 'horizontal', event: PointerEvent) {
-  if (event.pointerType === 'mouse') return
-  markNonMouseScrollBarPointer(event)
-  if ((event.target as HTMLElement | null)?.closest('.scrollbar-thumb, .scrollbar-button')) return
-  triggerScrollBarHapticFeedback(event)
-  const direction = getScrollBarPointerLineDirection(orientation, event)
-  if (direction !== 0) {
-    event.preventDefault()
-    startLineScroll(orientation, direction, event)
-    return
-  }
-  expandScrollBarNow(orientation)
-  event.preventDefault()
-}
-
-function handleScrollBarPointerLeave(orientation: 'vertical' | 'horizontal') {
-  if (orientation === 'vertical') {
-    isVerticalPointerOver.value = false
-    if (!isDraggingVertical.value && activeLineScroll.value?.orientation !== 'vertical') {
-      scheduleScrollBarContract('vertical')
+function scheduleIndicatorHide() {
+  if (indicatorTimer.value !== undefined) clearTimeout(indicatorTimer.value)
+  indicatorTimer.value = undefined
+  if (!effectiveIsEnabled.value) { indicatorMode.value = 'none'; return }
+  if (!uiSettings.AutoHideScrollBars) { indicatorMode.value = 'mouse'; return }
+  if (isVerticalPointerOver.value || isHorizontalPointerOver.value || isDraggingVertical.value || isDraggingHorizontal.value) return
+  indicatorTimer.value = window.setTimeout(() => {
+    indicatorTimer.value = undefined
+    if (isVerticalPointerOver.value || isHorizontalPointerOver.value || isDraggingVertical.value || isDraggingHorizontal.value || isZooming.value || touchPoint || isScrolling.value) {
+      scheduleIndicatorHide()
+      return
     }
-    return
-  }
-
-  isHorizontalPointerOver.value = false
-  if (!isDraggingHorizontal.value && activeLineScroll.value?.orientation !== 'horizontal') {
-    scheduleScrollBarContract('horizontal')
-  }
-}
-
-function scheduleScrollBarContract(orientation: 'vertical' | 'horizontal') {
-  const token = bumpScrollBarInteractionToken(orientation)
-  const timer = orientation === 'vertical' ? verticalContractTimer : horizontalContractTimer
-  if (timer.value) clearTimeout(timer.value)
-
-  timer.value = window.setTimeout(() => {
-    if (token !== getScrollBarInteractionToken(orientation)) return
-    if (orientation === 'vertical') {
-      if (isVerticalPointerOver.value || isDraggingVertical.value || activeLineScroll.value?.orientation === 'vertical') return
-      if (!isVerticalExpanded.value) return
-      if (verticalContractAnimationTimer.value) clearTimeout(verticalContractAnimationTimer.value)
-      isVerticalContracting.value = true
-      isVerticalExpanded.value = false
-      scrollRevision.value += 1
-      verticalContractAnimationTimer.value = window.setTimeout(() => {
-        if (token !== getScrollBarInteractionToken(orientation)) return
-        if (isVerticalPointerOver.value || isDraggingVertical.value || activeLineScroll.value?.orientation === 'vertical') {
-          isVerticalContracting.value = false
-          isVerticalExpanded.value = hasVerticalScrollBar.value
-          return
-        }
-        isVerticalContracting.value = false
-        scrollRevision.value += 1
-      }, scrollBarContractBeginTime + scrollBarContractDuration)
-    } else {
-      if (isHorizontalPointerOver.value || isDraggingHorizontal.value || activeLineScroll.value?.orientation === 'horizontal') return
-      if (!isHorizontalExpanded.value) return
-      if (horizontalContractAnimationTimer.value) clearTimeout(horizontalContractAnimationTimer.value)
-      isHorizontalContracting.value = true
-      isHorizontalExpanded.value = false
-      scrollRevision.value += 1
-      horizontalContractAnimationTimer.value = window.setTimeout(() => {
-        if (token !== getScrollBarInteractionToken(orientation)) return
-        if (isHorizontalPointerOver.value || isDraggingHorizontal.value || activeLineScroll.value?.orientation === 'horizontal') {
-          isHorizontalContracting.value = false
-          isHorizontalExpanded.value = hasHorizontalScrollBar.value
-          return
-        }
-        isHorizontalContracting.value = false
-        scrollRevision.value += 1
-      }, scrollBarContractBeginTime + scrollBarContractDuration)
-    }
-    scrollRevision.value += 1
+    indicatorMode.value = 'none'
     updateScrollBarVisibility()
-  }, scrollBarContractDelay)
+  }, indicatorMode.value === 'touch' ? 500 : 2000)
 }
 
-function scrollLine(orientation: 'vertical' | 'horizontal', direction: number, distance = scrollControllerSmallChange) {
-  if (!scrollViewerRef.value) return false
-  const delta = distance * direction
-  let changed = false
-  if (orientation === 'vertical') {
-    changed = requestScrollByOffset(0, delta, true)
-  } else {
-    changed = requestScrollByOffset(delta, 0, true)
-  }
-  return changed
+function showIndicators(type: 'mouse' | 'touch') {
+  if (!effectiveIsEnabled.value) return
+  // MouseIndicator wins while it is already visible, as in ShowIndicators.
+  indicatorMode.value = type === 'mouse' || indicatorMode.value === 'mouse' ? 'mouse' : 'touch'
+  updateScrollBarVisibility()
+  scheduleIndicatorHide()
 }
 
-function startLineScroll(orientation: 'vertical' | 'horizontal', direction: number, event: PointerEvent) {
-  if (!scrollViewerRef.value) return
-  markNonMouseScrollBarPointer(event)
-  triggerScrollBarHapticFeedback(event)
-  expandScrollBarNow(orientation)
-
-  ;(event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId)
-  stopLineScroll()
-  activeLineScroll.value = { orientation, direction, lastTime: performance.now() }
-  const moved = scrollLine(orientation, direction)
-  if (!moved) {
-    activeLineScroll.value = null
-    return
-  }
-  document.addEventListener('pointerup', stopLineScroll)
-  document.addEventListener('pointercancel', stopLineScroll)
-  lineScrollAnimationFrame.value = requestAnimationFrame(runLineScroll)
+function handleViewerPointerEnter(event: PointerEvent) {
+  if (event.pointerType !== 'mouse') return
+  isRootPointerOver.value = true
+  lastIndicatorType = 'mouse'
+  showIndicators('mouse')
 }
 
-function runLineScroll(now: number) {
-  const active = activeLineScroll.value
-  if (!active) return
-
-  const elapsed = Math.min(50, now - active.lastTime)
-  active.lastTime = now
-  const moved = scrollLine(active.orientation, active.direction, 320 * elapsed / 1000)
-  if (!moved) {
-    cancelLineScroll(false)
-    return
-  }
-  lineScrollAnimationFrame.value = requestAnimationFrame(runLineScroll)
+function handleViewerPointerMove(event: PointerEvent) {
+  if (event.pointerType !== 'mouse' || !effectiveIsEnabled.value) return
+  lastIndicatorType = 'mouse'
+  showIndicators('mouse')
 }
 
-function stopLineScroll() {
-  cancelLineScroll(true)
-}
-
-function cancelLineScroll(shouldScheduleContract: boolean) {
-  const previousOrientation = activeLineScroll.value?.orientation
-  activeLineScroll.value = null
-  if (lineScrollAnimationFrame.value !== undefined) {
-    cancelAnimationFrame(lineScrollAnimationFrame.value)
-    lineScrollAnimationFrame.value = undefined
-  }
-  document.removeEventListener('pointerup', stopLineScroll)
-  document.removeEventListener('pointercancel', stopLineScroll)
-
-  if (!shouldScheduleContract) return
-
-  if (previousOrientation === 'vertical' && !isVerticalPointerOver.value && !isDraggingVertical.value) {
-    scheduleScrollBarContract('vertical')
-  }
-  if (previousOrientation === 'horizontal' && !isHorizontalPointerOver.value && !isDraggingHorizontal.value) {
-    scheduleScrollBarContract('horizontal')
-  }
+function handleViewerPointerLeave() {
+  isRootPointerOver.value = false
+  isVerticalPointerOver.value = false
+  isHorizontalPointerOver.value = false
+  scheduleIndicatorHide()
 }
 
 // Zoom handling (wheel/pinch)
 function handleWheel(event: WheelEvent) {
+  lastIndicatorType = 'mouse'
+  if (!effectiveIsEnabled.value) {
+    event.preventDefault()
+    return
+  }
   cancelPendingAnimatedScrollForDirectInput()
 
   // Ctrl+Wheel for zoom (standard browser behavior)
   if (event.ctrlKey && effectiveZoomMode.value !== 'Disabled') {
     const delta = -event.deltaY
     const zoomDelta = delta > 0 ? 1.1 : 0.9
-    zoomToFactor(currentZoomFactor.value * zoomDelta)
+    beginDirectManipulation()
+    const bounds = scrollViewerRef.value?.getBoundingClientRect()
+    setZoomFactor(currentZoomFactor.value * zoomDelta, bounds ? { x: event.clientX - bounds.left, y: event.clientY - bounds.top } : undefined)
     event.preventDefault()
     event.stopPropagation()
     return
   }
+  beginDirectManipulation()
 
   // Handle scroll chaining
   if (!effectiveIsVerticalScrollChainingEnabled.value && scrollViewerRef.value) {
@@ -779,26 +645,11 @@ function normalizeWheelDelta(event: WheelEvent) {
   return { deltaX, deltaY }
 }
 
-function handleScrollBarWheel(event: WheelEvent) {
-  const { deltaX, deltaY } = normalizeWheelDelta(event)
-
-  if (requestScrollByOffset(deltaX, deltaY, true)) {
-    event.preventDefault()
-    event.stopPropagation()
-    return
-  }
-
-  const verticalBlocked = !effectiveIsVerticalScrollChainingEnabled.value && deltaY !== 0
-  const horizontalBlocked = !effectiveIsHorizontalScrollChainingEnabled.value && deltaX !== 0
-  if (verticalBlocked || horizontalBlocked) {
-    event.preventDefault()
-    event.stopPropagation()
-  }
-}
-
 function requestScrollByOffset(horizontalOffsetDelta = 0, verticalOffsetDelta = 0, animated = true) {
   const container = scrollViewerRef.value
   if (!container) return false
+  if (effectiveHorizontalScrollMode.value === 'Disabled' || effectiveHorizontalScrollBarVisibility.value === 'Disabled') horizontalOffsetDelta = 0
+  if (effectiveVerticalScrollMode.value === 'Disabled' || effectiveVerticalScrollBarVisibility.value === 'Disabled') verticalOffsetDelta = 0
 
   const maxLeft = Math.max(0, container.scrollWidth - container.clientWidth)
   const maxTop = Math.max(0, container.scrollHeight - container.clientHeight)
@@ -824,7 +675,6 @@ function requestScrollByOffset(horizontalOffsetDelta = 0, verticalOffsetDelta = 
 
   if (!changed) return false
 
-  cancelScrollVelocity()
   wheelScrollTargetLeft.value = targetLeft
   wheelScrollTargetTop.value = targetTop
 
@@ -897,9 +747,15 @@ function stopSmoothWheelScroll() {
 }
 
 function cancelPendingAnimatedScrollForDirectInput() {
-  cancelLineScroll(false)
-  cancelScrollVelocity()
+  programmaticGeneration += 1
+  if (programmaticFrame.value !== undefined) cancelAnimationFrame(programmaticFrame.value)
+  programmaticFrame.value = undefined
+  programmaticAnimationActive = false
   stopSmoothWheelScroll()
+  // A focused item may have requested a native smooth bring-into-view scroll.
+  // Direct input takes over at its current offset, including thumb dragging.
+  const container = scrollViewerRef.value
+  container?.scrollTo({ left: container.scrollLeft, top: container.scrollTop, behavior: 'instant' })
 }
 
 function stopSmoothWheelScrollIfExternalScroll() {
@@ -924,10 +780,19 @@ function stopSmoothWheelScrollIfExternalScroll() {
 
 // Touch/Pinch handling
 function handleTouchStart(event: TouchEvent) {
+  lastIndicatorType = 'touch'
+  if (!effectiveIsEnabled.value) return
+  showIndicators('touch')
   cancelPendingAnimatedScrollForDirectInput()
-
-  if (effectiveZoomMode.value === 'Disabled' || event.touches.length !== 2) return
   beginDirectManipulation()
+  if (effectiveZoomMode.value === 'Disabled') return
+  if (event.touches.length === 1) {
+    const touch = event.touches[0]
+    touchPoint = { x: touch.clientX, y: touch.clientY }
+    return
+  }
+  if (event.touches.length !== 2) return
+  touchPoint = undefined
 
   const touch1 = event.touches[0]
   const touch2 = event.touches[1]
@@ -937,10 +802,24 @@ function handleTouchStart(event: TouchEvent) {
     touch2.clientY - touch1.clientY
   )
   touchStartZoom.value = currentZoomFactor.value
+  const bounds = scrollViewerRef.value?.getBoundingClientRect()
+  touchZoomCenter = bounds ? { x: (touch1.clientX + touch2.clientX) / 2 - bounds.left, y: (touch1.clientY + touch2.clientY) / 2 - bounds.top } : undefined
+  event.preventDefault()
 }
 
 function handleTouchMove(event: TouchEvent) {
-  if (effectiveZoomMode.value === 'Disabled' || event.touches.length !== 2) return
+  if (!effectiveIsEnabled.value || effectiveZoomMode.value === 'Disabled') return
+  if (event.touches.length === 1 && touchPoint && scrollViewerRef.value) {
+    const touch = event.touches[0]
+    const deltaX = touchPoint.x - touch.clientX
+    const deltaY = touchPoint.y - touch.clientY
+    if (effectiveHorizontalScrollMode.value !== 'Disabled' && effectiveHorizontalScrollBarVisibility.value !== 'Disabled') scrollViewerRef.value.scrollLeft += deltaX
+    if (effectiveVerticalScrollMode.value !== 'Disabled' && effectiveVerticalScrollBarVisibility.value !== 'Disabled') scrollViewerRef.value.scrollTop += deltaY
+    touchPoint = { x: touch.clientX, y: touch.clientY }
+    event.preventDefault()
+    return
+  }
+  if (event.touches.length !== 2 || touchStartDistance.value <= 0) return
 
   const touch1 = event.touches[0]
   const touch2 = event.touches[1]
@@ -951,46 +830,133 @@ function handleTouchMove(event: TouchEvent) {
   )
 
   const scale = currentDistance / touchStartDistance.value
-  zoomToFactor(touchStartZoom.value * scale)
+  setZoomFactor(touchStartZoom.value * scale, touchZoomCenter)
 
   isZooming.value = true
+  event.preventDefault()
 }
 
-function handleTouchEnd() {
-  if (isZooming.value) {
-    isZooming.value = false
-    emitViewChanged(false)
-    completeDirectManipulation()
+function handleTouchEnd(event: TouchEvent) {
+  if (event.touches.length === 1) {
+    touchPoint = { x: event.touches[0].clientX, y: event.touches[0].clientY }
+    return
+  }
+  touchPoint = undefined
+  touchZoomCenter = undefined
+  touchStartDistance.value = 0
+  isZooming.value = false
+  finishViewChange()
+}
+
+function handleKeyDown(event: KeyboardEvent) {
+  if (!effectiveIsEnabled.value || event.target !== scrollViewerRef.value || event.altKey || event.ctrlKey || event.metaKey) return
+  const container = scrollViewerRef.value
+  if (!container) return
+  let horizontal = 0
+  let vertical = 0
+  if (event.key === 'ArrowLeft') horizontal = -scrollControllerSmallChange
+  else if (event.key === 'ArrowRight') horizontal = scrollControllerSmallChange
+  else if (event.key === 'ArrowUp') vertical = -scrollControllerSmallChange
+  else if (event.key === 'ArrowDown') vertical = scrollControllerSmallChange
+  else if (event.key === 'PageUp') vertical = -container.clientHeight
+  else if (event.key === 'PageDown') vertical = container.clientHeight
+  else if (event.key === 'Home') vertical = -container.scrollTop
+  else if (event.key === 'End') vertical = container.scrollHeight - container.clientHeight - container.scrollTop
+  else return
+  if (effectiveHorizontalScrollMode.value === 'Disabled' || effectiveHorizontalScrollBarVisibility.value === 'Disabled') horizontal = 0
+  if (effectiveVerticalScrollMode.value === 'Disabled' || effectiveVerticalScrollBarVisibility.value === 'Disabled') vertical = 0
+  if (requestScrollByOffset(horizontal, vertical)) {
+    beginDirectManipulation()
+    event.preventDefault()
   }
 }
 
 // Public methods (exposed for programmatic control)
-function zoomToFactor(factor: number) {
+function setZoomFactor(factor: number, center?: { x: number; y: number }) {
+  if (!Number.isFinite(factor)) return
   const clampedFactor = Math.max(effectiveMinZoomFactor.value, Math.min(effectiveMaxZoomFactor.value, factor))
+  if (Math.abs(clampedFactor - currentZoomFactor.value) < 0.0001) return
+  const previousZoom = currentZoomFactor.value
+  const container = scrollViewerRef.value
+  const centerPoint = center ?? { x: 0, y: 0 }
+  const left = container ? (container.scrollLeft + centerPoint.x) * clampedFactor / previousZoom - centerPoint.x : 0
+  const top = container ? (container.scrollTop + centerPoint.y) * clampedFactor / previousZoom - centerPoint.y : 0
   currentZoomFactor.value = clampedFactor
   overflowRevision.value += 1
   scrollRevision.value += 1
+  void nextTick(() => {
+    if (container) {
+      container.scrollLeft = Math.max(0, left)
+      container.scrollTop = Math.max(0, top)
+    }
+    scrollRevision.value += 1
+    updateScrollBarVisibility()
+    emitViewChanged(true)
+    if (scrollTimer.value !== undefined) clearTimeout(scrollTimer.value)
+    scrollTimer.value = window.setTimeout(finishViewChange, 150)
+  })
+}
 
-  emitViewChanged(true)
+function finishViewChange() {
+  if (programmaticAnimationActive || isDraggingHorizontal.value || isDraggingVertical.value || isZooming.value || touchPoint) return
+  if (scrollTimer.value !== undefined) clearTimeout(scrollTimer.value)
+  scrollTimer.value = undefined
+  isScrolling.value = false
+  emitViewChanged(false)
+  completeDirectManipulation()
+  scheduleIndicatorHide()
 }
 
 function ChangeView(
   horizontalOffset?: number | null,
   verticalOffset?: number | null,
-  zoomFactor?: number | null
+  zoomFactor?: number | null,
+  disableAnimation = false
 ) {
   if (!scrollViewerRef.value) return false
+  if ([horizontalOffset, verticalOffset, zoomFactor].some(value => value !== undefined && value !== null && !Number.isFinite(value))) return false
   cancelPendingAnimatedScrollForDirectInput()
-
-  setOffsets(horizontalOffset, verticalOffset)
-
-  if (zoomFactor !== null && zoomFactor !== undefined) {
-    zoomToFactor(zoomFactor)
+  const container = scrollViewerRef.value
+  const targetZoom = Math.max(effectiveMinZoomFactor.value, Math.min(effectiveMaxZoomFactor.value, zoomFactor ?? currentZoomFactor.value))
+  const from = { x: container.scrollLeft, y: container.scrollTop, zoom: currentZoomFactor.value }
+  const target = { x: Math.max(0, horizontalOffset ?? from.x), y: Math.max(0, verticalOffset ?? from.y), zoom: targetZoom }
+  const generation = programmaticGeneration
+  if (disableAnimation || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    currentZoomFactor.value = target.zoom
+    void nextTick(() => {
+      if (generation !== programmaticGeneration) return
+      setOffsets(target.x, target.y)
+      overflowRevision.value += 1
+      updateScrollBarVisibility()
+      finishViewChange()
+    })
+    return true
   }
-
-  emitViewChanged(false)
+  programmaticAnimationActive = true
+  const startTime = performance.now()
+  const animate = (time: number) => {
+    if (generation !== programmaticGeneration) return
+    const progress = Math.min(1, (time - startTime) / 300)
+    const eased = 1 - (1 - progress) ** 3
+    currentZoomFactor.value = from.zoom + (target.zoom - from.zoom) * eased
+    void nextTick(() => {
+      if (!programmaticAnimationActive || generation !== programmaticGeneration) return
+      setOffsets(from.x + (target.x - from.x) * eased, from.y + (target.y - from.y) * eased)
+      overflowRevision.value += 1
+      emitViewChanged(true)
+      if (progress < 1) programmaticFrame.value = requestAnimationFrame(animate)
+      else {
+        programmaticAnimationActive = false
+        programmaticFrame.value = undefined
+        finishViewChange()
+      }
+    })
+  }
+  programmaticFrame.value = requestAnimationFrame(animate)
   return true
 }
+
+function ZoomToFactor(factor: number) { return ChangeView(null, null, factor, true) }
 
 function setOffsets(
   horizontalOffset?: number | null,
@@ -1008,240 +974,84 @@ function setOffsets(
   scrollRevision.value += 1
 }
 
-function cancelScrollVelocity() {
-  if (velocityAnimationFrame.value !== undefined) {
-    cancelAnimationFrame(velocityAnimationFrame.value)
-    velocityAnimationFrame.value = undefined
+const measure = (name: 'scrollLeft' | 'scrollTop' | 'clientWidth' | 'clientHeight' | 'scrollWidth' | 'scrollHeight') => {
+  scrollRevision.value
+  overflowRevision.value
+  return scrollViewerRef.value?.[name] ?? 0
+}
+const publicProperties = {
+  ZoomFactor: computed(() => currentZoomFactor.value),
+  MinZoomFactor: effectiveMinZoomFactor,
+  MaxZoomFactor: effectiveMaxZoomFactor,
+  IsDeferredScrollingEnabled: effectiveIsDeferredScrollingEnabled,
+  HorizontalOffset: computed(() => measure('scrollLeft')),
+  VerticalOffset: computed(() => measure('scrollTop')),
+  ViewportWidth: computed(() => measure('clientWidth')),
+  ViewportHeight: computed(() => measure('clientHeight')),
+  ExtentWidth: computed(() => measure('scrollWidth')),
+  ExtentHeight: computed(() => measure('scrollHeight')),
+  ScrollableWidth: computed(() => Math.max(0, measure('scrollWidth') - measure('clientWidth'))),
+  ScrollableHeight: computed(() => Math.max(0, measure('scrollHeight') - measure('clientHeight'))),
+  ComputedHorizontalScrollBarVisibility: computed(() => hasHorizontalScrollBar.value ? 'Visible' : 'Collapsed'),
+  ComputedVerticalScrollBarVisibility: computed(() => hasVerticalScrollBar.value ? 'Visible' : 'Collapsed')
+}
+const controlSender: Record<string, unknown> = { ChangeView, ZoomToFactor }
+for (const [name, value] of Object.entries(publicProperties)) {
+  Object.defineProperty(controlSender, name, { enumerable: true, get: () => value.value })
+}
+// The viewport handle is private implementation access for existing controls'
+// focus/bring-into-view logic; public samples use the WinUI property names.
+defineExpose({ ...publicProperties, ChangeView, ZoomToFactor, scrollViewerRef })
+
+watch(effectiveIsDeferredScrollingEnabled, () => {
+  // The native property change synchronizes cached offsets even mid-drag.
+  if (scrollViewerRef.value) {
+    if (deferredVerticalOffset.value !== null) scrollViewerRef.value.scrollTop = deferredVerticalOffset.value
+    if (deferredHorizontalOffset.value !== null) scrollViewerRef.value.scrollLeft = deferredHorizontalOffset.value
   }
-  velocityExpectedLeft.value = null
-  velocityExpectedTop.value = null
-}
-
-function stopScrollVelocityIfExternalScroll() {
-  const container = scrollViewerRef.value
-  if (!container || velocityAnimationFrame.value === undefined) return
-
-  const expectedLeft = velocityExpectedLeft.value
-  const expectedTop = velocityExpectedTop.value
-  if (expectedLeft === null || expectedTop === null) {
-    cancelScrollVelocity()
-    return
-  }
-
-  const isExpectedVelocityScroll =
-    Math.abs(container.scrollLeft - expectedLeft) < 0.75 &&
-    Math.abs(container.scrollTop - expectedTop) < 0.75
-
-  if (!isExpectedVelocityScroll) {
-    cancelScrollVelocity()
-  }
-}
-
-function ZoomTo(zoomFactor: number) {
-  zoomToFactor(zoomFactor)
-  return 0
-}
-
-function ZoomBy(zoomFactorDelta: number) {
-  zoomToFactor(currentZoomFactor.value + zoomFactorDelta)
-  return 0
-}
-
-function ScrollTo(horizontalOffset: number, verticalOffset: number) {
-  cancelPendingAnimatedScrollForDirectInput()
-  setOffsets(horizontalOffset, verticalOffset)
-  emitViewChanged(false)
-  return 0
-}
-
-function ScrollBy(horizontalOffsetDelta: number, verticalOffsetDelta: number) {
-  requestScrollByOffset(horizontalOffsetDelta, verticalOffsetDelta, true)
-  return 0
-}
-
-function AddScrollVelocity(
-  offsetsVelocity: { x?: number; y?: number } | [number, number],
-  inertiaDecayRate = scrollControllerInertiaDecayRate
-) {
-  cancelPendingAnimatedScrollForDirectInput()
-  let horizontalVelocity = Array.isArray(offsetsVelocity) ? offsetsVelocity[0] : offsetsVelocity.x ?? 0
-  let verticalVelocity = Array.isArray(offsetsVelocity) ? offsetsVelocity[1] : offsetsVelocity.y ?? 0
-  let lastTimestamp = performance.now()
-
-  const scroll = (timestamp: number) => {
-    if (!scrollViewerRef.value) return
-    const elapsedSeconds = Math.min(0.05, Math.max(0, (timestamp - lastTimestamp) / 1000))
-    lastTimestamp = timestamp
-    const container = scrollViewerRef.value
-    const maxLeft = Math.max(0, container.scrollWidth - container.clientWidth)
-    const maxTop = Math.max(0, container.scrollHeight - container.clientHeight)
-    const nextLeft = Math.max(0, Math.min(maxLeft, container.scrollLeft + horizontalVelocity * elapsedSeconds))
-    const nextTop = Math.max(0, Math.min(maxTop, container.scrollTop + verticalVelocity * elapsedSeconds))
-    const moved = Math.abs(nextLeft - container.scrollLeft) > 0.01 || Math.abs(nextTop - container.scrollTop) > 0.01
-
-    container.scrollLeft = nextLeft
-    container.scrollTop = nextTop
-    velocityExpectedLeft.value = container.scrollLeft
-    velocityExpectedTop.value = container.scrollTop
-    scrollRevision.value += 1
-    updateScrollBarVisibility()
-    emitViewChanged(true)
-
-    const decay = Math.pow(inertiaDecayRate, elapsedSeconds * 1000)
-    horizontalVelocity *= decay
-    verticalVelocity *= decay
-
-    if (!moved || (Math.abs(horizontalVelocity) < 0.5 && Math.abs(verticalVelocity) < 0.5)) {
-      velocityAnimationFrame.value = undefined
-      velocityExpectedLeft.value = null
-      velocityExpectedTop.value = null
-      emitViewChanged(false)
-      return
-    }
-
-    velocityAnimationFrame.value = requestAnimationFrame(scroll)
-  }
-
-  velocityAnimationFrame.value = requestAnimationFrame(scroll)
-  return 0
-}
-
-// Custom scrollbar dragging
-function startVerticalDrag(event: PointerEvent) {
-  cancelPendingAnimatedScrollForDirectInput()
-  markNonMouseScrollBarPointer(event)
-  triggerScrollBarHapticFeedback(event)
-  expandScrollBarNow('vertical')
-  isDraggingVertical.value = true
-  activeVerticalDragPointerId.value = event.pointerId
-  ;(event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId)
-  dragStartY.value = event.clientY
-  dragStartScrollTop.value = scrollViewerRef.value?.scrollTop || 0
-
-  document.addEventListener('pointermove', handleVerticalDrag)
-  document.addEventListener('pointerup', stopVerticalDrag)
-  document.addEventListener('pointercancel', stopVerticalDrag)
-  event.preventDefault()
-}
-
-function handleVerticalDrag(event: PointerEvent) {
-  if (!isDraggingVertical.value || !scrollViewerRef.value) return
-  if (activeVerticalDragPointerId.value !== null && event.pointerId !== activeVerticalDragPointerId.value) return
-
-  const deltaY = event.clientY - dragStartY.value
-  const metrics = getScrollBarMetrics('vertical')
-  const minimumThumbHeight = 30
-  const thumbHeight = Math.max(minimumThumbHeight, (scrollViewerRef.value.clientHeight / scrollViewerRef.value.scrollHeight) * metrics.trackLength)
-  const travel = Math.max(1, metrics.trackLength - thumbHeight)
-  const maxScroll = Math.max(1, scrollViewerRef.value.scrollHeight - scrollViewerRef.value.clientHeight)
-  scrollViewerRef.value.scrollTop = dragStartScrollTop.value + (deltaY / travel) * maxScroll
+  deferredVerticalOffset.value = deferredHorizontalOffset.value = null
   scrollRevision.value += 1
-  event.preventDefault()
-}
-
-function stopVerticalDrag(event?: PointerEvent) {
-  if (event && activeVerticalDragPointerId.value !== null && event.pointerId !== activeVerticalDragPointerId.value) return
-  isDraggingVertical.value = false
-  activeVerticalDragPointerId.value = null
-  document.removeEventListener('pointermove', handleVerticalDrag)
-  document.removeEventListener('pointerup', stopVerticalDrag)
-  document.removeEventListener('pointercancel', stopVerticalDrag)
-  if (!isVerticalPointerOver.value) {
-    scheduleScrollBarContract('vertical')
-  }
-}
-
-function startHorizontalDrag(event: PointerEvent) {
-  cancelPendingAnimatedScrollForDirectInput()
-  markNonMouseScrollBarPointer(event)
-  triggerScrollBarHapticFeedback(event)
-  expandScrollBarNow('horizontal')
-  isDraggingHorizontal.value = true
-  activeHorizontalDragPointerId.value = event.pointerId
-  ;(event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId)
-  dragStartX.value = event.clientX
-  dragStartScrollLeft.value = scrollViewerRef.value?.scrollLeft || 0
-
-  document.addEventListener('pointermove', handleHorizontalDrag)
-  document.addEventListener('pointerup', stopHorizontalDrag)
-  document.addEventListener('pointercancel', stopHorizontalDrag)
-  event.preventDefault()
-}
-
-function handleHorizontalDrag(event: PointerEvent) {
-  if (!isDraggingHorizontal.value || !scrollViewerRef.value) return
-  if (activeHorizontalDragPointerId.value !== null && event.pointerId !== activeHorizontalDragPointerId.value) return
-
-  const deltaX = event.clientX - dragStartX.value
-  const metrics = getScrollBarMetrics('horizontal')
-  const minimumThumbWidth = 30
-  const thumbWidth = Math.max(minimumThumbWidth, (scrollViewerRef.value.clientWidth / scrollViewerRef.value.scrollWidth) * metrics.trackLength)
-  const travel = Math.max(1, metrics.trackLength - thumbWidth)
-  const maxScroll = Math.max(1, scrollViewerRef.value.scrollWidth - scrollViewerRef.value.clientWidth)
-  scrollViewerRef.value.scrollLeft = dragStartScrollLeft.value + (deltaX / travel) * maxScroll
-  scrollRevision.value += 1
-  event.preventDefault()
-}
-
-function stopHorizontalDrag(event?: PointerEvent) {
-  if (event && activeHorizontalDragPointerId.value !== null && event.pointerId !== activeHorizontalDragPointerId.value) return
-  isDraggingHorizontal.value = false
-  activeHorizontalDragPointerId.value = null
-  document.removeEventListener('pointermove', handleHorizontalDrag)
-  document.removeEventListener('pointerup', stopHorizontalDrag)
-  document.removeEventListener('pointercancel', stopHorizontalDrag)
-  if (!isHorizontalPointerOver.value) {
-    scheduleScrollBarContract('horizontal')
-  }
-}
-
-// Watch for external zoomFactor changes
-watch(effectiveZoomFactor, (newValue) => {
-  currentZoomFactor.value = newValue
+})
+watch(() => uiSettings.AutoHideScrollBars, () => {
+  if (indicatorTimer.value !== undefined) clearTimeout(indicatorTimer.value)
+  indicatorTimer.value = undefined
+  if (!uiSettings.AutoHideScrollBars || isVerticalPointerOver.value || isHorizontalPointerOver.value || isDraggingVertical.value || isDraggingHorizontal.value) showIndicators(lastIndicatorType)
+  else { indicatorMode.value = 'none'; updateScrollBarVisibility() }
 })
 
-// Expose methods for parent components
-defineExpose({
-  zoomToFactor,
-  ChangeView,
-  ZoomTo,
-  ZoomBy,
-  ZoomToFactor: ZoomTo,
-  ZoomFactor: computed(() => currentZoomFactor.value),
-  HorizontalOffset: computed(() => scrollViewerRef.value?.scrollLeft || 0),
-  VerticalOffset: computed(() => scrollViewerRef.value?.scrollTop || 0),
-  ViewportWidth: computed(() => scrollViewerRef.value?.clientWidth || 0),
-  ViewportHeight: computed(() => scrollViewerRef.value?.clientHeight || 0),
-  ExtentWidth: computed(() => scrollViewerRef.value?.scrollWidth || 0),
-  ExtentHeight: computed(() => scrollViewerRef.value?.scrollHeight || 0),
-  ScrollableWidth: computed(() => Math.max(0, (scrollViewerRef.value?.scrollWidth || 0) - (scrollViewerRef.value?.clientWidth || 0))),
-  ScrollableHeight: computed(() => Math.max(0, (scrollViewerRef.value?.scrollHeight || 0) - (scrollViewerRef.value?.clientHeight || 0))),
-  ComputedHorizontalScrollBarVisibility: computed(() => hasHorizontalScrollBar.value ? 'Visible' : 'Collapsed'),
-  ComputedVerticalScrollBarVisibility: computed(() => hasVerticalScrollBar.value ? 'Visible' : 'Collapsed'),
-  ScrollTo,
-  ScrollBy,
-  AddScrollVelocity,
-  CancelScrollVelocity: cancelScrollVelocity,
-  scrollViewerRef,
-  scrollTop: computed(() => scrollViewerRef.value?.scrollTop || 0),
-  scrollLeft: computed(() => scrollViewerRef.value?.scrollLeft || 0),
-  scrollHeight: computed(() => scrollViewerRef.value?.scrollHeight || 0),
-  scrollWidth: computed(() => scrollViewerRef.value?.scrollWidth || 0),
-  clientHeight: computed(() => scrollViewerRef.value?.clientHeight || 0),
-  clientWidth: computed(() => scrollViewerRef.value?.clientWidth || 0)
+watch([effectiveMinZoomFactor, effectiveMaxZoomFactor], () => {
+  if (currentZoomFactor.value < effectiveMinZoomFactor.value || currentZoomFactor.value > effectiveMaxZoomFactor.value) ZoomToFactor(currentZoomFactor.value)
+})
+watch(effectiveIsEnabled, enabled => {
+  if (enabled) return
+  cancelPendingAnimatedScrollForDirectInput()
+  handleViewerPointerLeave()
+  finishViewChange()
+})
+watch([effectiveHorizontalScrollBarVisibility, effectiveVerticalScrollBarVisibility, effectiveHorizontalScrollMode, effectiveVerticalScrollMode], () => {
+  void nextTick(() => {
+    overflowRevision.value += 1
+    scrollRevision.value += 1
+    updateScrollBarVisibility()
+  })
 })
 
 // Lifecycle
 onMounted(() => {
   void nextTick(() => {
     updateScrollBarVisibility()
+    dispatch('Loaded', { OriginalSource: controlSender })
     if (scrollViewerRef.value) {
       emitViewChanged(false)
     }
     resizeObserver = new ResizeObserver(() => {
-      overflowRevision.value += 1
-      scrollRevision.value += 1
-      updateScrollBarVisibility()
+      if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = undefined
+        overflowRevision.value += 1
+        scrollRevision.value += 1
+        updateScrollBarVisibility()
+      })
     })
     if (rootRef.value) resizeObserver.observe(rootRef.value)
     if (scrollViewerRef.value) resizeObserver.observe(scrollViewerRef.value)
@@ -1250,35 +1060,29 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  programmaticGeneration += 1
+  if (programmaticFrame.value !== undefined) cancelAnimationFrame(programmaticFrame.value)
+  programmaticAnimationActive = false
+  if (indicatorTimer.value !== undefined) clearTimeout(indicatorTimer.value)
   if (scrollTimer.value) {
     clearTimeout(scrollTimer.value)
   }
-  if (verticalHoverExpandTimer.value) clearTimeout(verticalHoverExpandTimer.value)
-  if (horizontalHoverExpandTimer.value) clearTimeout(horizontalHoverExpandTimer.value)
-  if (verticalContractTimer.value) clearTimeout(verticalContractTimer.value)
-  if (horizontalContractTimer.value) clearTimeout(horizontalContractTimer.value)
-  if (verticalContractAnimationTimer.value) clearTimeout(verticalContractAnimationTimer.value)
-  if (horizontalContractAnimationTimer.value) clearTimeout(horizontalContractAnimationTimer.value)
-  cancelLineScroll(false)
   stopSmoothWheelScroll()
   resizeObserver?.disconnect()
-  cancelScrollVelocity()
+  if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame)
 
-  document.removeEventListener('pointermove', handleVerticalDrag)
-  document.removeEventListener('pointerup', stopVerticalDrag)
-  document.removeEventListener('pointercancel', stopVerticalDrag)
-  document.removeEventListener('pointermove', handleHorizontalDrag)
-  document.removeEventListener('pointerup', stopHorizontalDrag)
-  document.removeEventListener('pointercancel', stopHorizontalDrag)
 })
 </script>
 
 <style scoped>
 .win-scroll-viewer {
   position: relative;
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   box-sizing: border-box;
   background: transparent;
+  border-style: solid;
   border-radius: 0;
   min-width: 0;
   min-height: 0;
@@ -1298,293 +1102,25 @@ onBeforeUnmount(() => {
 }
 
 .win-scroll-viewer-viewport:focus-visible {
-  outline: 2px solid var(--accent-base);
+  outline: 2px solid var(--FocusVisualPrimaryBrush, var(--SystemControlFocusVisualPrimaryBrush, var(--FocusStrokeColorOuterBrush, var(--text-primary))));
   outline-offset: -2px;
+  box-shadow: inset 0 0 0 3px var(--FocusVisualSecondaryBrush, var(--SystemControlFocusVisualSecondaryBrush, var(--FocusStrokeColorInnerBrush, var(--app-bg))));
 }
 
 .scroll-content {
   width: 100%;
   min-width: 0;
   min-height: max-content;
-  transition: transform 0.1s ease-out;
-  will-change: transform;
 }
 
-.scrollbar {
-  position: absolute;
-  opacity: 1;
-  background: transparent;
-  transition: opacity 83ms linear;
-  pointer-events: auto;
-  z-index: 1;
-  min-width: 0;
-  min-height: 0;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.scrollbar.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.scrollbar-vertical {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 12px;
-  height: auto;
-}
-
-.scrollbar-horizontal {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: auto;
-  height: 12px;
-}
-
-.scrollbar-corner {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 12px;
-  height: 12px;
-  opacity: 0;
-  background: var(--ScrollViewerScrollBarSeparatorBackground, var(--ControlFillColorTransparentBrush, transparent));
-  transition: opacity 83ms linear;
-}
-
-.win-scroll-viewer.scrollbar-corner-visible .scrollbar-corner {
-  opacity: 1;
-}
-
-.scrollbar-track {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0;
-  isolation: isolate;
-  background: transparent;
-  background-image: none;
-  border: 0 solid var(--ScrollBarTrackStroke, transparent);
-  border-radius: 6px;
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
-  transition: opacity 83ms linear;
-}
-
-.scrollbar-track::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: inherit;
-  background: var(--ScrollBarTrackFill, color-mix(in srgb, var(--flyout-bg, Canvas) 78%, transparent));
-}
-
-.scrollbar-vertical.has-cross-scrollbar .scrollbar-track {
-  bottom: 12px;
-}
-
-.scrollbar-horizontal.has-cross-scrollbar .scrollbar-track {
-  right: 12px;
-}
-
-.scrollbar.expanded .scrollbar-track {
-  opacity: 1;
-  transition-delay: 400ms;
-}
-
-.scrollbar.contracting .scrollbar-track {
-  opacity: 0;
-  transition-delay: 500ms;
-}
-
-.scrollbar-thumb {
-  position: absolute;
-  z-index: 1;
-  box-sizing: border-box;
-  background: transparent;
-  border: 0;
-  border-radius: 3px;
-  cursor: pointer;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  transition:
-    width 167ms cubic-bezier(0, 0, 0, 1),
-    height 167ms cubic-bezier(0, 0, 0, 1),
-    right 167ms cubic-bezier(0, 0, 0, 1),
-    bottom 167ms cubic-bezier(0, 0, 0, 1),
-    transform 167ms cubic-bezier(0, 0, 0, 1),
-    background 83ms linear;
-  transition-delay: 0ms, 0ms, 0ms, 0ms, 0ms, 0ms;
-}
-
-.scrollbar.dragging .scrollbar-thumb,
-.scrollbar.line-scrolling .scrollbar-thumb {
-  transition: none;
-}
-
-.scrollbar-thumb::before {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  border-radius: 999px;
-  background: var(--ScrollBarThumbBackground, var(--ControlStrongFillColorDefaultBrush, var(--ctrl-strong-fill, rgba(0, 0, 0, 0.45))));
-  transition: background-color 83ms linear;
-}
-
-.scrollbar-vertical .scrollbar-thumb {
-  right: 0;
-  width: 8px;
-  min-height: 30px;
-  border-radius: 3px;
-}
-
-.scrollbar-horizontal .scrollbar-thumb {
-  left: 0;
-  bottom: 0;
-  height: 8px;
-  min-width: 30px;
-  border-radius: 3px;
-}
-
-.scrollbar-vertical.expanded .scrollbar-thumb {
-  right: 0;
-  width: 12px;
-  min-height: 30px;
-  border-radius: 3px;
-  transition-delay: 400ms, 400ms, 400ms, 400ms, 400ms, 0ms;
-}
-
-.scrollbar-horizontal.expanded .scrollbar-thumb {
-  bottom: 0;
-  height: 12px;
-  min-width: 30px;
-  border-radius: 3px;
-  transition-delay: 400ms, 400ms, 400ms, 400ms, 400ms, 0ms;
-}
-
-.scrollbar-vertical.contracting .scrollbar-thumb {
-  right: 0;
-  width: 8px;
-  min-height: 30px;
-  border-radius: 3px;
-  transition-delay: 500ms, 500ms, 500ms, 500ms, 500ms, 0ms;
-}
-
-.scrollbar-horizontal.contracting .scrollbar-thumb {
-  bottom: 0;
-  height: 8px;
-  min-width: 30px;
-  border-radius: 3px;
-  transition-delay: 500ms, 500ms, 500ms, 500ms, 500ms, 0ms;
-}
-
-.scrollbar-thumb:hover::before {
-  background-color: var(--ScrollBarThumbFillPointerOver, var(--ControlStrongFillColorDefaultBrush, var(--ctrl-strong-fill)));
-}
-
-.scrollbar-thumb:active::before {
-  background-color: var(--ScrollBarThumbFillPressed, var(--ControlStrongFillColorDefaultBrush, var(--ctrl-strong-fill)));
-}
-
-.scrollbar-button {
-  position: absolute;
-  z-index: 2;
-  border: 0;
-  padding: 0;
-  width: 12px;
-  height: 12px;
-  min-width: 12px;
-  min-height: 12px;
-  display: grid;
-  place-items: center;
-  opacity: 0;
-  color: var(--ScrollBarButtonArrowForeground, var(--ControlStrongFillColorDefaultBrush, var(--ctrl-strong-fill)));
-  background: var(--ScrollBarButtonBackground, transparent);
-  font-size: 8px;
-  line-height: 1;
-  pointer-events: none;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  transition: opacity 83ms linear 500ms, color 83ms linear;
-}
-
-.scrollbar.expanded .scrollbar-button {
-  opacity: 1;
-  pointer-events: auto;
-  transition-delay: 400ms, 0ms;
-}
-
-.scrollbar.contracting .scrollbar-button {
-  opacity: 0;
-  pointer-events: none;
-  transition-delay: 500ms, 0ms;
-}
-
-.scrollbar-button.decrease {
-  top: 0;
-  left: 0;
-}
-
-.scrollbar-button.increase {
-  right: 0;
-  bottom: 0;
-}
-
-.scrollbar-vertical.has-cross-scrollbar .scrollbar-button.increase {
-  bottom: 12px;
-}
-
-.scrollbar-horizontal.has-cross-scrollbar .scrollbar-button.increase {
-  right: 12px;
-}
-
-.scrollbar-vertical .scrollbar-button.decrease {
-  padding-top: 4px;
-}
-
-.scrollbar-vertical .scrollbar-button.increase {
-  padding-bottom: 4px;
-}
-
-.scrollbar-horizontal .scrollbar-button.decrease {
-  padding-left: 4px;
-}
-
-.scrollbar-horizontal .scrollbar-button.increase {
-  padding-right: 4px;
-}
-
-.scrollbar-button:hover {
-  color: var(--ScrollBarButtonArrowForegroundPointerOver, var(--text-secondary));
-}
-
-.scrollbar-button:active {
-  color: var(--ScrollBarButtonArrowForegroundPressed, var(--text-secondary));
-  transform: scale(0.875);
-}
-
-@media (hover: none) and (pointer: coarse), (any-pointer: coarse) {
-  .scrollbar-button {
-    pointer-events: auto;
-  }
-}
-
-/* Visual States */
-.win-scroll-viewer.scrolling .scroll-content {
-  /* Smooth scrolling indicator */
-}
-
-.win-scroll-viewer.zooming .scroll-content {
-  transition: transform 0.05s ease-out;
-}
+.viewer-scrollbar-host { position: absolute; display: grid; grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr); box-sizing: border-box; z-index: 2; min-width: 0; min-height: 0; }
+/* An absolute ScrollViewer host applies the official Margin around the 12px
+   bar. ScrollView's Grid host applies that same margin as its 14px cell inset. */
+.viewer-scrollbar-host-vertical { top: var(--ScrollViewerScrollBarMargin,1px); right: var(--ScrollViewerScrollBarMargin,1px); bottom: var(--ScrollViewerScrollBarMargin,1px); width: 12px; }
+.viewer-scrollbar-host-horizontal { left: var(--ScrollViewerScrollBarMargin,1px); right: var(--ScrollViewerScrollBarMargin,1px); bottom: var(--ScrollViewerScrollBarMargin,1px); height: 12px; }
+.viewer-scrollbar-host-vertical.has-cross-scrollbar { bottom: 15px; }
+.viewer-scrollbar-host-horizontal.has-cross-scrollbar { right: 15px; }
+.scrollbar-corner { position: absolute; right: 0; bottom: 0; width: 14px; height: 14px; background: var(--ScrollViewerScrollBarSeparatorBackground, var(--ControlFillColorTransparentBrush)); }
 
 /* Zoom mode disabled - prevent any zoom gestures */
 .zoom-mode-disabled {
@@ -1605,11 +1141,7 @@ onBeforeUnmount(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scroll-content,
-  .scrollbar,
-  .scrollbar-track,
-  .scrollbar-button,
-  .scrollbar-thumb {
+  .scroll-content {
     transition: none;
   }
 }

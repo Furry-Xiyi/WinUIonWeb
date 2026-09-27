@@ -1,165 +1,50 @@
 <template>
-  <div
-    v-if="Visibility !== 'Collapsed'"
-    :class="separatorClasses"
-    :style="separatorStyle"
-    role="separator"
-    :tabindex="xamlTrue(IsTabStop) ? 0 : -1"
-    :aria-orientation="isOverflowStyle || isHorizontal ? 'horizontal' : 'vertical'"
-    :aria-hidden="Visibility === 'Hidden' ? 'true' : undefined">
-    <div class="separator-line" aria-hidden="true"></div>
+  <div v-if="visible" ref="rootRef" v-bind="attrs" class="win-appbar-separator" :class="{ 'is-compact': compact, 'is-overflow': inOverflow }"
+    :style="separatorStyle" role="separator" :aria-orientation="inOverflow ? 'horizontal' : 'vertical'" :tabindex="isTabStop ? 0 : undefined"
+    :data-application-view-state="inOverflow ? 'Overflow' : compact ? 'Compact' : 'FullSize'">
+    <span class="appbar-separator-rectangle" aria-hidden="true"></span>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs } from 'vue';
+import { computed, getCurrentInstance, inject, ref, shallowReactive, useAttrs, watch, type CSSProperties } from 'vue'
+import { appBarBoolean, commandBarContextKey } from './appBarRuntime'
+import { frameworkLayoutStyle } from './frameworkLayout'
+import { cssLength, xamlThickness } from './layout'
+import { resolveXamlValue, updateXamlBinding } from './xamlRuntime'
+import './appBarStyles.css'
 
-defineOptions({ inheritAttrs: true });
-
-type XamlBoolean = boolean | 'True' | 'False';
-
-const props = withDefaults(defineProps<{
-  /** Switches the separator to the compact AppBar visual state. */
-  IsCompact?: XamlBoolean;
-  /** Uses the horizontal separator template used by CommandBar overflow. */
-  UseOverflowStyle?: XamlBoolean;
-  /** Read-only in WinUI; accepted here so a command container can describe its state. */
-  IsInOverflow?: XamlBoolean;
-  /** Dynamic overflow ordering metadata inherited from ICommandBarElement. */
-  DynamicOverflowOrder?: number;
-  /** AppBarSeparator is not a tab stop in the WinUI template. */
-  IsTabStop?: XamlBoolean;
-  Visibility?: 'Visible' | 'Collapsed' | 'Hidden';
-  IsEnabled?: XamlBoolean;
-  Foreground?: string;
-  Padding?: string | number;
-  Margin?: string | number;
-  Width?: string | number;
-  Height?: string | number;
-  HorizontalAlignment?: 'Left' | 'Center' | 'Right' | 'Stretch';
-  VerticalAlignment?: 'Top' | 'Center' | 'Bottom' | 'Stretch';
-}>(), {
-  IsCompact: false,
-  UseOverflowStyle: false,
-  IsInOverflow: false,
-  DynamicOverflowOrder: -1,
-  IsTabStop: false,
-  Visibility: 'Visible',
-  IsEnabled: true,
-  Foreground: undefined,
-  Padding: undefined,
-  Margin: undefined,
-  Width: undefined,
-  Height: undefined,
-  HorizontalAlignment: undefined,
-  VerticalAlignment: undefined
-});
-
-const attrs = useAttrs();
-const isHorizontal = computed(() => Boolean((attrs.class as string | undefined)?.split(' ').includes('is-horizontal')));
-const xamlTrue = (value: XamlBoolean | undefined) => value === true || value === 'True';
-const isOverflowStyle = computed(() => xamlTrue(props.UseOverflowStyle) || xamlTrue(props.IsInOverflow));
-
-const cssLength = (value: string | number | undefined) => {
-  if (value === undefined || value === '') return undefined;
-  return typeof value === 'number' || !Number.isNaN(Number(value)) ? `${Number(value)}px` : String(value);
-};
-
-const xamlThickness = (value: string | number | undefined) => {
-  if (value === undefined || value === '') return undefined;
-  const parts = String(value).split(',').map((part) => cssLength(part.trim()) || '0');
-  if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
-  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
-  return String(value);
-};
-
-const separatorClasses = computed(() => ({
-  'win-appbar-separator': true,
-  'is-compact': xamlTrue(props.IsCompact),
-  'is-overflow': isOverflowStyle.value,
-  'is-disabled': !xamlTrue(props.IsEnabled),
-  'is-hidden': props.Visibility === 'Hidden'
-}));
-
-const separatorStyle = computed(() => ({
-  '--AppBarSeparatorForeground': props.Foreground || undefined,
-  padding: xamlThickness(props.Padding),
-  margin: xamlThickness(props.Margin),
-  width: cssLength(props.Width),
-  height: cssLength(props.Height),
-  justifySelf: props.HorizontalAlignment ? {
-    Left: 'start', Center: 'center', Right: 'end', Stretch: 'stretch'
-  }[props.HorizontalAlignment] : undefined,
-  alignSelf: props.VerticalAlignment ? {
-    Top: 'start', Center: 'center', Bottom: 'end', Stretch: 'stretch'
-  }[props.VerticalAlignment] : undefined,
-}));
+defineOptions({ name: 'AppBarSeparator', inheritAttrs: false })
+const props = defineProps({
+  IsCompact: { type: [Boolean, String], default: undefined }, DynamicOverflowOrder: { type: [Number, String], default: 0 },
+  IsTabStop: { type: [Boolean, String], default: false }, Visibility: { type: String, default: 'Visible' }, IsEnabled: { type: [Boolean, String], default: true },
+  Foreground: { default: undefined }, Padding: { type: [String, Number], default: undefined }, Margin: { type: [String, Number], default: undefined },
+  Width: { type: [String, Number], default: undefined }, Height: { type: [String, Number], default: undefined },
+  MinWidth: { type: [String, Number], default: 0 }, MinHeight: { type: [String, Number], default: 0 },
+  MaxWidth: { type: [String, Number], default: undefined }, MaxHeight: { type: [String, Number], default: undefined },
+  HorizontalAlignment: { type: String, default: 'Stretch' }, VerticalAlignment: { type: String, default: 'Stretch' }
+})
+const emit = defineEmits(['update:IsCompact', 'update:DynamicOverflowOrder', 'update:IsTabStop', 'update:Visibility', 'update:IsEnabled', 'update:Foreground', 'update:Padding', 'update:Margin', 'update:Width', 'update:Height', 'update:MinWidth', 'update:MinHeight', 'update:MaxWidth', 'update:MaxHeight', 'update:HorizontalAlignment', 'update:VerticalAlignment'])
+const attrs = useAttrs()
+const instance = getCurrentInstance()
+const barContext = inject(commandBarContextKey, null)
+const rootRef = ref<HTMLElement | null>(null)
+const overrides = shallowReactive<Record<string, unknown>>({})
+const resolve = (input: unknown) => resolveXamlValue(input, instance)
+const value = (name: keyof typeof props) => name in overrides ? overrides[name] : resolve(props[name])
+const inOverflow = computed(() => barContext?.isInOverflow.value ?? false)
+const compact = computed(() => value('IsCompact') === undefined ? barContext?.compact.value ?? false : appBarBoolean(value('IsCompact')))
+const visible = computed(() => value('Visibility') !== 'Collapsed')
+const isTabStop = computed(() => appBarBoolean(value('IsTabStop')))
+for (const name of Object.keys(props) as (keyof typeof props)[]) watch(() => resolve(props[name]), () => { delete overrides[name] })
+const separatorStyle = computed<CSSProperties>(() => ({
+  ...frameworkLayoutStyle(props, instance), margin: xamlThickness(value('Margin')) || undefined,
+  width: cssLength(value('Width')) || undefined, height: cssLength(value('Height')) || undefined,
+  minWidth: cssLength(value('MinWidth')) || undefined, minHeight: cssLength(value('MinHeight')) || undefined,
+  maxWidth: cssLength(value('MaxWidth')) || undefined, maxHeight: cssLength(value('MaxHeight')) || undefined,
+  '--AppBarSeparatorForeground': value('Foreground') || undefined,
+  '--AppBarSeparatorPadding': xamlThickness(value('Padding')) || undefined
+} as CSSProperties))
+const dependencies = Object.fromEntries((Object.keys(props) as (keyof typeof props)[]).map(name => [name, computed({ get: () => value(name), set: next => { overrides[name] = next; updateXamlBinding(props[name], next, instance); emit(`update:${name}` as 'update:IsCompact', next) } })]))
+defineExpose({ ...dependencies, Name: computed(() => String(resolve(attrs['data-xaml-ref'] ?? attrs['x:Name'] ?? attrs.Name ?? ''))), IsInOverflow: inOverflow, $el: rootRef })
 </script>
-
-<style scoped>
-.win-appbar-separator {
-  display: grid;
-  flex: 0 0 auto;
-  box-sizing: border-box;
-  width: 5px;
-  /* FullSize is stretched by CommandBar's primary-items presenter. */
-  height: auto;
-  min-height: 0;
-  padding: 8px 2px;
-  align-self: stretch;
-  place-items: stretch;
-  color: var(--AppBarSeparatorForeground, var(--stroke-divider));
-  transition: opacity var(--fast-duration, 167ms) var(--fast-out-slow-in, cubic-bezier(0.1, 0.9, 0.2, 1));
-}
-
-.separator-line {
-  width: 1px;
-  height: auto;
-  min-height: 0;
-  border-radius: 0.5px;
-  background: currentColor;
-}
-
-.win-appbar-separator.is-compact {
-  height: 48px;
-  min-height: 0;
-  align-self: start;
-}
-
-.win-appbar-separator.is-overflow {
-  width: 100%;
-  min-width: 0;
-  height: 9px;
-  padding: 4px 0;
-  align-self: stretch;
-}
-
-.win-appbar-separator.is-overflow .separator-line {
-  width: auto;
-  height: 1px;
-  align-self: stretch;
-}
-
-.win-appbar-separator.is-horizontal {
-  width: 100%;
-  min-width: 0;
-  height: 9px;
-  padding: 4px 0;
-  align-self: stretch;
-}
-
-.win-appbar-separator.is-horizontal .separator-line {
-  width: auto;
-  height: 1px;
-}
-
-.win-appbar-separator.is-disabled {
-  color: var(--ControlStrongStrokeColorDisabledBrush, var(--text-disabled));
-  opacity: 0.55;
-}
-
-.win-appbar-separator.is-hidden {
-  visibility: hidden;
-}
-</style>

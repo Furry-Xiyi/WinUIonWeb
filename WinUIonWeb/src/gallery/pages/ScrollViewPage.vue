@@ -1,247 +1,163 @@
 <template>
-  <ScrollViewer
-    class="gallery-page-scroll"
-    Width="100%"
-    Height="100%"
-    VerticalScrollBarVisibility="Auto"
-    VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div class="page-heading">
-        <TextBlock
-          class="page-description"
-          :Text="$t('text.scrollview-description')"
-          TextWrapping="WrapWholeWords" />
-      </div>
-      <div class="gallery-page-content">
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('sample.scrollview.content')"
-          :theme="pageTheme"
-          :vue="contentInsideScrollViewCode">
-          <template #example>
+  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+    <StackPanel class="gallery-item-page" Spacing="0">
+      <StackPanel class="page-heading">
+        <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords"/>
+      </StackPanel>
+      <StackPanel class="gallery-page-content">
+        <ControlExample x:Name="Example1" class="scrollview-example" HeaderText="{x:Bind Labels.ContentHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind ContentXaml, Mode=OneWay}" CSharp="{x:Bind ScrollViewCSharp, Mode=OneWay}">
+          <ControlExample.Example>
             <StackPanel Spacing="16">
-              <TextBlock
-                :Text="$t('sample.scrollview.content-note')"
-                TextWrapping="Wrap" />
-              <ScrollView
-                ref="scrollView1Ref"
-                Width="400"
-                Height="266"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                ContentOrientation="None"
-                :IsTabStop="true"
-                :ZoomMode="ZoomMode"
-                :ZoomFactor="ZoomFactor"
-                :HorizontalScrollMode="HorizontalScrollMode"
-                :VerticalScrollMode="VerticalScrollMode"
-                :HorizontalScrollBarVisibility="HorizontalScrollBarVisibility"
-                :VerticalScrollBarVisibility="VerticalScrollBarVisibility">
-                <Image
-                  HorizontalAlignment="Center"
-                  VerticalAlignment="Center"
-                  v-bind="{ 'AutomationProperties.Name': $t('text.cliff') }"
-                  :Source="cliffImage"
-                  Stretch="Uniform" />
+              <TextBlock Text="{x:Bind Labels.ContentNote, Mode=OneWay}" TextWrapping="Wrap"/>
+              <ScrollView x:Name="scrollView1" Width="400" Height="266" HorizontalAlignment="Left" VerticalAlignment="Top" ContentOrientation="None" IsTabStop="True" ZoomMode="Enabled" Loaded="ScrollViewPage_Loaded">
+                <Image HorizontalAlignment="Center" VerticalAlignment="Center" AutomationProperties.Name="{x:Bind Labels.Cliff, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg" Stretch="Uniform"/>
               </ScrollView>
             </StackPanel>
-          </template>
-          <template #options>
-            <Grid
-              Width="100%"
-              MinWidth="200"
-              ColumnDefinitions="Auto,*"
-              ColumnSpacing="12"
-              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
-              RowSpacing="16">
-              <TextBlock VerticalAlignment="Center" :Text="$t('text.zoom-mode')" style="grid-column: 1; grid-row: 1;" />
-                <ComboBox
-                  v-model:SelectedIndex="ZoomModeSelectedIndex"
-                  Width="100%"
-                HorizontalAlignment="Stretch"
-                v-bind="{ 'AutomationProperties.Name': $t('text.zoom-mode-automation-name') }"
-                :ItemsSource="ZoomModeItems"
-                style="grid-column: 2; grid-row: 1;" />
-
-              <TextBlock VerticalAlignment="Center" :Text="$t('text.zoom-factor')" style="grid-column: 1; grid-row: 2;" />
-              <NumberBox
-                v-model:Value="ZoomFactor"
-                Width="100%"
-                v-bind="{ 'AutomationProperties.Name': $t('text.zoom-factor-automation-name') }"
-                :LargeChange="10"
-                :Maximum="10"
-                :Minimum="0.1"
-                :SmallChange="1"
-                SpinButtonPlacementMode="Inline"
-                style="grid-column: 2; grid-row: 2;" />
-
-              <TextBlock HorizontalAlignment="Center" :Text="$t('text.scroll-mode')" style="grid-column: 1 / span 2; grid-row: 3;" />
-              <TextBlock VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 4;" />
-              <ComboBox
-                v-model:SelectedIndex="HorizontalScrollModeSelectedIndex"
-                Width="100%"
-                HorizontalAlignment="Stretch"
-                v-bind="{ 'AutomationProperties.Name': $t('text.horizontal-scroll-mode-automation-name') }"
-                :ItemsSource="ScrollModeItems"
-                style="grid-column: 2; grid-row: 4;" />
-              <TextBlock VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 5;" />
-              <ComboBox
-                v-model:SelectedIndex="VerticalScrollModeSelectedIndex"
-                Width="100%"
-                HorizontalAlignment="Stretch"
-                v-bind="{ 'AutomationProperties.Name': $t('text.vertical-scroll-mode-automation-name') }"
-                :ItemsSource="ScrollModeItems"
-                style="grid-column: 2; grid-row: 5;" />
-
-              <TextBlock HorizontalAlignment="Center" :Text="$t('text.scrollbar-visibility')" style="grid-column: 1 / span 2; grid-row: 6;" />
-              <TextBlock VerticalAlignment="Center" :Text="$t('text.horizontal')" style="grid-column: 1; grid-row: 7;" />
-              <ComboBox
-                v-model:SelectedIndex="HorizontalScrollBarVisibilitySelectedIndex"
-                Width="100%"
-                HorizontalAlignment="Stretch"
-                v-bind="{ 'AutomationProperties.Name': $t('text.horizontal-scrollbar-visibility-automation-name') }"
-                :ItemsSource="ScrollBarVisibilityItems"
-                style="grid-column: 2; grid-row: 7;" />
-              <TextBlock VerticalAlignment="Center" :Text="$t('text.vertical')" style="grid-column: 1; grid-row: 8;" />
-              <ComboBox
-                v-model:SelectedIndex="VerticalScrollBarVisibilitySelectedIndex"
-                Width="100%"
-                HorizontalAlignment="Stretch"
-                v-bind="{ 'AutomationProperties.Name': $t('text.vertical-scrollbar-visibility-automation-name') }"
-                :ItemsSource="ScrollBarVisibilityItems"
-                style="grid-column: 2; grid-row: 8;" />
+          </ControlExample.Example>
+          <ControlExample.Output>
+            <TextBlock Text="{x:Bind Output1, Mode=OneWay}" TextWrapping="Wrap"/>
+          </ControlExample.Output>
+          <ControlExample.Options>
+            <Grid MinWidth="200" ColumnSpacing="12" RowSpacing="16">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+              <TextBlock VerticalAlignment="Center" Text="{x:Bind Labels.ZoomMode, Mode=OneWay}"/>
+              <ComboBox x:Name="cmbZoomMode" Grid.Column="1" HorizontalAlignment="Stretch" AutomationProperties.Name="{x:Bind Labels.ZoomModeName, Mode=OneWay}" SelectedIndex="0" SelectionChanged="CmbZoomMode_SelectionChanged">
+                <ComboBoxItem Content="{x:Bind Labels.Enabled, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Disabled, Mode=OneWay}"/>
+              </ComboBox>
+              <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="{x:Bind Labels.ZoomFactor, Mode=OneWay}"/>
+              <NumberBox x:Name="nbZoomFactor" Grid.Row="1" Grid.Column="1" AutomationProperties.Name="{x:Bind Labels.ZoomFactorName, Mode=OneWay}" LargeChange="10" Maximum="10" Minimum="0.1" SmallChange="1" SpinButtonPlacementMode="Inline" ValueChanged="NbZoomFactor_ValueChanged" Value="{x:Bind ZoomFactorValue, Mode=TwoWay}" NumberFormatter="{x:Bind ZoomFactorFormatter}"/>
+              <TextBlock Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Text="{x:Bind Labels.ScrollMode, Mode=OneWay}"/>
+              <TextBlock Grid.Row="3" VerticalAlignment="Center" Text="{x:Bind Labels.Horizontal, Mode=OneWay}"/>
+              <ComboBox x:Name="cmbHorizontalScrollMode" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" AutomationProperties.Name="{x:Bind Labels.HorizontalScrollModeName, Mode=OneWay}" SelectedIndex="2" SelectionChanged="CmbHorizontalScrollMode_SelectionChanged">
+                <ComboBoxItem Content="{x:Bind Labels.Enabled, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Disabled, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Auto, Mode=OneWay}"/>
+              </ComboBox>
+              <TextBlock Grid.Row="4" VerticalAlignment="Center" Text="{x:Bind Labels.Vertical, Mode=OneWay}"/>
+              <ComboBox x:Name="cmbVerticalScrollMode" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Stretch" AutomationProperties.Name="{x:Bind Labels.VerticalScrollModeName, Mode=OneWay}" SelectedIndex="2" SelectionChanged="CmbVerticalScrollMode_SelectionChanged">
+                <ComboBoxItem Content="{x:Bind Labels.Enabled, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Disabled, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Auto, Mode=OneWay}"/>
+              </ComboBox>
+              <TextBlock Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Center" Text="{x:Bind Labels.ScrollbarVisibility, Mode=OneWay}"/>
+              <TextBlock Grid.Row="6" VerticalAlignment="Center" Text="{x:Bind Labels.Horizontal, Mode=OneWay}"/>
+              <ComboBox x:Name="cmbHorizontalScrollBarVisibility" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Stretch" AutomationProperties.Name="{x:Bind Labels.HorizontalScrollBarName, Mode=OneWay}" SelectedIndex="0" SelectionChanged="CmbHorizontalScrollBarVisibility_SelectionChanged">
+                <ComboBoxItem Content="{x:Bind Labels.Auto, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Visible, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Hidden, Mode=OneWay}"/>
+              </ComboBox>
+              <TextBlock Grid.Row="7" VerticalAlignment="Center" Text="{x:Bind Labels.Vertical, Mode=OneWay}"/>
+              <ComboBox x:Name="cmbVerticalScrollBarVisibility" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Stretch" AutomationProperties.Name="{x:Bind Labels.VerticalScrollBarName, Mode=OneWay}" SelectedIndex="0" SelectionChanged="CmbVerticalScrollBarVisibility_SelectionChanged">
+                <ComboBoxItem Content="{x:Bind Labels.Auto, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Visible, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Hidden, Mode=OneWay}"/>
+              </ComboBox>
             </Grid>
-          </template>
+          </ControlExample.Options>
         </ControlExample>
-
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('sample.scrollview.constant-velocity')"
-          :theme="pageTheme"
-          :vue="constantVelocityCode">
-          <template #example>
+        <ControlExample x:Name="Example2" class="scrollview-example" HeaderText="{x:Bind Labels.VelocityHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind VelocityXaml, Mode=OneWay}" CSharp="{x:Bind ScrollViewCSharp, Mode=OneWay}">
+          <ControlExample.Example>
             <StackPanel Spacing="16">
-              <TextBlock
-                :Text="$t('sample.scrollview.velocity-note')"
-                TextWrapping="Wrap" />
-              <ScrollView
-                ref="scrollView2Ref"
-                Width="400"
-                Height="300"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                :IsTabStop="true">
+              <TextBlock Text="{x:Bind Labels.VelocityNote, Mode=OneWay}" TextWrapping="Wrap"/>
+              <ScrollView x:Name="scrollView2" Width="400" Height="300" HorizontalAlignment="Left" VerticalAlignment="Top" IsTabStop="True">
                 <StackPanel>
-                  <Image
-                    v-for="image in velocityImages"
-                    :key="image.name"
-                    v-bind="{ 'AutomationProperties.Name': image.name }"
-                    :Source="image.source"
-                    Stretch="Uniform" />
+                  <Image AutomationProperties.Name="{x:Bind Labels.Grapes, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/grapes.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Rainier, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/rainier.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Sunset, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/sunset.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Treetops, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/treetops.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Valley, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/valley.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Cliff, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/cliff.jpg" Stretch="Uniform"/>
                 </StackPanel>
               </ScrollView>
             </StackPanel>
-          </template>
-          <template #options>
-            <Grid
-              Width="100%"
-              MinWidth="200"
-              ColumnDefinitions="Auto,*"
-              ColumnSpacing="12"
-              RowDefinitions="Auto"
-              RowSpacing="16">
-              <TextBlock VerticalAlignment="Center" :Text="$t('text.vertical-velocity')" style="grid-column: 1; grid-row: 1;" />
-              <NumberBox
-                v-model:Value="VerticalVelocity"
-                Width="100%"
-                v-bind="{ 'AutomationProperties.Name': $t('text.vertical-velocity-automation-name') }"
-                :LargeChange="30"
-                :Maximum="200"
-                :Minimum="-200"
-                :SmallChange="10"
-                SpinButtonPlacementMode="Inline"
-                style="grid-column: 2; grid-row: 1;"
-                @ValueChanged="onVerticalVelocityChanged" />
+          </ControlExample.Example>
+          <ControlExample.Output>
+            <TextBlock Text="{x:Bind Output2, Mode=OneWay}" TextWrapping="Wrap"/>
+          </ControlExample.Output>
+          <ControlExample.Options>
+            <Grid MinWidth="200" ColumnSpacing="12" RowSpacing="16">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+              <TextBlock VerticalAlignment="Center" Text="{x:Bind Labels.VerticalVelocity, Mode=OneWay}"/>
+              <NumberBox x:Name="nbVerticalVelocity" Grid.Column="1" AutomationProperties.Name="{x:Bind Labels.VerticalVelocityName, Mode=OneWay}" LargeChange="30" Maximum="200" Minimum="-200" SmallChange="10" SpinButtonPlacementMode="Inline" ValueChanged="NbVerticalVelocity_ValueChanged" Value="{x:Bind VerticalVelocityValue, Mode=TwoWay}"/>
             </Grid>
-          </template>
+          </ControlExample.Options>
         </ControlExample>
-
-        <ControlExample
-          class="basic-input-example-theme"
-          :headerText="$t('sample.scrollview.programmatic-animation')"
-          :theme="pageTheme"
-          :vue="programmaticScrollCode">
-          <template #example>
+        <ControlExample x:Name="Example3" class="scrollview-example" HeaderText="{x:Bind Labels.AnimationHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind AnimationXaml, Mode=OneWay}" CSharp="{x:Bind AnimationCSharp, Mode=OneWay}">
+          <ControlExample.Example>
             <StackPanel Spacing="16">
-              <TextBlock
-                :Text="$t('sample.scrollview.animation-note')"
-                TextWrapping="Wrap" />
-              <ScrollView
-                ref="scrollView3Ref"
-                Width="400"
-                Height="300"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                :IsTabStop="true">
+              <TextBlock Text="{x:Bind Labels.AnimationNote, Mode=OneWay}" TextWrapping="Wrap"/>
+              <ScrollView x:Name="scrollView3" Width="400" Height="300" HorizontalAlignment="Left" VerticalAlignment="Top" IsTabStop="True" ScrollAnimationStarting="ScrollView_ScrollAnimationStarting">
                 <StackPanel>
-                  <Image
-                    v-for="image in animationImages"
-                    :key="image.name"
-                    v-bind="{ 'AutomationProperties.Name': image.name }"
-                    :Source="image.source"
-                    Stretch="Uniform" />
+                  <Image AutomationProperties.Name="{x:Bind Labels.Leaves, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/LandscapeImage1.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Carousel, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/LandscapeImage2.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Bicycles, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/LandscapeImage3.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Pond, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/LandscapeImage4.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Marina, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/LandscapeImage5.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Beach, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/LandscapeImage6.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Rampart, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/LandscapeImage7.jpg" Stretch="Uniform"/>
+                  <Image AutomationProperties.Name="{x:Bind Labels.Mountain, Mode=OneWay}" Source="https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/LandscapeImage8.jpg" Stretch="Uniform"/>
                 </StackPanel>
               </ScrollView>
             </StackPanel>
-          </template>
-          <template #options>
-            <Grid
-              Width="100%"
-              MinWidth="320"
-              ColumnDefinitions="Auto,*"
-              ColumnSpacing="12"
-              RowDefinitions="Auto,Auto,Auto"
-              RowSpacing="16">
-              <TextBlock VerticalAlignment="Center" :Text="$t('text.scroll-with-animation')" style="grid-column: 1; grid-row: 1;" />
-              <ComboBox
-                v-model:SelectedIndex="VerticalAnimationSelectedIndex"
-                Width="100%"
-                HorizontalAlignment="Stretch"
-                v-bind="{ 'AutomationProperties.Name': $t('text.vertical-animation-options-automation-name') }"
-                :ItemsSource="AnimationItems"
-                style="grid-column: 2; grid-row: 1;" />
-              <TextBlock VerticalAlignment="Center" :Text="$t('text.animation-duration-msec')" style="grid-column: 1; grid-row: 2;" />
-              <NumberBox
-                v-model:Value="AnimationDuration"
-                Width="100%"
-                v-bind="{ 'AutomationProperties.Name': $t('text.animation-duration-automation-name') }"
-                :LargeChange="1000"
-                :Maximum="5000"
-                :Minimum="1000"
-                :SmallChange="500"
-                SpinButtonPlacementMode="Inline"
-                style="grid-column: 2; grid-row: 2;" />
-              <Button
-                HorizontalAlignment="Stretch"
-                v-bind="{ 'AutomationProperties.Name': $t('text.scroll-with-animation-automation-name') }"
-                style="grid-column: 1 / span 2; grid-row: 3;"
-                @Click="scrollWithAnimation">
-                {{ $t('text.scroll-with-animation') }}
-              </Button>
+          </ControlExample.Example>
+          <ControlExample.Output>
+            <TextBlock Text="{x:Bind Output3, Mode=OneWay}" TextWrapping="Wrap"/>
+          </ControlExample.Output>
+          <ControlExample.Options>
+            <Grid MinWidth="320" ColumnSpacing="12" RowSpacing="16">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+              <TextBlock VerticalAlignment="Center" Text="{x:Bind Labels.ScrollWithAnimation, Mode=OneWay}"/>
+              <ComboBox x:Name="cmbVerticalAnimation" Grid.Column="1" HorizontalAlignment="Stretch" AutomationProperties.Name="{x:Bind Labels.VerticalAnimationName, Mode=OneWay}" SelectedIndex="{x:Bind AnimationSelectedIndex, Mode=TwoWay}" SelectionChanged="cmbVerticalAnimation_SelectionChanged">
+                <ComboBoxItem Content="{x:Bind Labels.Default, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Accordion, Mode=OneWay}"/>
+                <ComboBoxItem Content="{x:Bind Labels.Teleportation, Mode=OneWay}"/>
+              </ComboBox>
+              <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="{x:Bind Labels.Duration, Mode=OneWay}"/>
+              <NumberBox x:Name="nbAnimationDuration" Grid.Row="1" Grid.Column="1" AutomationProperties.Name="{x:Bind Labels.DurationName, Mode=OneWay}" LargeChange="1000" Maximum="5000" Minimum="1000" SmallChange="500" SpinButtonPlacementMode="Inline" ValueChanged="nbAnimationDuration_ValueChanged" Value="{x:Bind AnimationDurationValue, Mode=TwoWay}"/>
+              <Button x:Name="btnScrollWithAnimation" Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" AutomationProperties.Name="{x:Bind Labels.ScrollWithAnimationName, Mode=OneWay}" Click="BtnScrollWithAnimation_Click" Content="{x:Bind Labels.ScrollWithAnimation, Mode=OneWay}"/>
             </Grid>
-          </template>
+          </ControlExample.Options>
         </ControlExample>
-      </div>
-    </div>
+      </StackPanel>
+    </StackPanel>
   </ScrollViewer>
 </template>
-
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue'
+import { computed, inject, provide, ref, shallowReactive } from 'vue'
 import Button from '../../components/Button.vue'
-import ComboBox from '../../components/ComboBox.vue'
+import ComboBox, { ComboBoxItem } from '../../components/ComboBox.vue'
 import ControlExample from '../../components/ControlExample.vue'
 import Grid from '../../components/Grid.vue'
+import ColumnDefinition from '../../components/ColumnDefinition.vue'
+import RowDefinition from '../../components/RowDefinition.vue'
 import Image from '../../components/Image.vue'
 import NumberBox from '../../components/NumberBox.vue'
 import ScrollView from '../../components/ScrollView.vue'
@@ -249,186 +165,97 @@ import ScrollViewer from '../../components/ScrollViewer.vue'
 import StackPanel from '../../components/StackPanel.vue'
 import TextBlock from '../../components/TextBlock.vue'
 import { useI18n } from '../../components/i18n/index'
+import { xamlNameScopeKey } from '../../components/xamlRuntime'
 import { createPageState } from '../../utils/pageState'
-
-const currentPage = inject<{ value: string }>('currentPage')
-const pageKey = computed(() => currentPage?.value || 'scrollview')
-const { pageTheme } = createPageState(pageKey.value)
+import contentDefinition from '../samples/ScrollView/ContentInsideScrollview.txt?raw'
+import velocityDefinition from '../samples/ScrollView/ScrollViewConstantVelocityScrolling.txt?raw'
+import animationDefinition from '../samples/ScrollView/ScrollViewProgrammaticScrollCustomAnimation.txt?raw'
+import ScrollViewCSharp from '../samples/ScrollView/ScrollViewPage.xaml.cs?raw'
+import defaultAnimation from '../samples/ScrollView/ScrollViewSample3_DefaultAnimation_cs.txt?raw'
+import accordionAnimation from '../samples/ScrollView/ScrollViewSample3_AccordionAnimation_cs.txt?raw'
+import teleportationAnimation from '../samples/ScrollView/ScrollViewSample3_TeleportationAnimation_cs.txt?raw'
 const { t } = useI18n()
-
-const sampleMedia = 'https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia'
-const cliffImage = `${sampleMedia}/cliff.jpg`
-const velocityNames = ['grapes', 'rainier', 'sunset', 'treetops', 'valley', 'cliff']
-const velocityImages = velocityNames.map(name => ({ name, source: `${sampleMedia}/${name}.jpg` }))
-const animationNames = ['leaves', 'carousel', 'bicycles', 'pond', 'marina', 'beach', 'rampart', 'mountain']
-const animationImages = animationNames.map((name, index) => ({ name, source: `${sampleMedia}/LandscapeImage${index + 1}.jpg` }))
-
-const scrollView1Ref = ref<InstanceType<typeof ScrollView>>()
-const scrollView2Ref = ref<InstanceType<typeof ScrollView>>()
-const scrollView3Ref = ref<InstanceType<typeof ScrollView>>()
-const ZoomModeValues = ['Enabled', 'Disabled'] as const
-const ScrollModeValues = ['Enabled', 'Disabled', 'Auto'] as const
-const ScrollBarVisibilityValues = ['Auto', 'Visible', 'Hidden'] as const
-const AnimationValues = ['Default', 'Accordion', 'Teleportation'] as const
-const ZoomModeItems = computed(() => [t('text.enabled'), t('text.disabled')])
-const ScrollModeItems = computed(() => [t('text.enabled'), t('text.disabled'), t('text.auto')])
-const ScrollBarVisibilityItems = computed(() => [t('text.auto'), t('text.visible'), t('text.hidden')])
-const AnimationItems = computed(() => [t('text.default'), t('text.accordion'), t('text.teleportation')])
-const ZoomModeSelectedIndex = ref(0)
-const ZoomFactor = ref(4)
-const HorizontalScrollModeSelectedIndex = ref(2)
-const VerticalScrollModeSelectedIndex = ref(2)
-const HorizontalScrollBarVisibilitySelectedIndex = ref(0)
-const VerticalScrollBarVisibilitySelectedIndex = ref(0)
-const VerticalVelocity = ref(30)
-const VerticalAnimationSelectedIndex = ref(0)
-const AnimationDuration = ref(1500)
-const ZoomMode = computed(() => ZoomModeValues[ZoomModeSelectedIndex.value] ?? 'Enabled')
-const HorizontalScrollMode = computed(() => ScrollModeValues[HorizontalScrollModeSelectedIndex.value] ?? 'Auto')
-const VerticalScrollMode = computed(() => ScrollModeValues[VerticalScrollModeSelectedIndex.value] ?? 'Auto')
-const HorizontalScrollBarVisibility = computed(() => ScrollBarVisibilityValues[HorizontalScrollBarVisibilitySelectedIndex.value] ?? 'Auto')
-const VerticalScrollBarVisibility = computed(() => ScrollBarVisibilityValues[VerticalScrollBarVisibilitySelectedIndex.value] ?? 'Auto')
-const VerticalAnimation = computed(() => AnimationValues[VerticalAnimationSelectedIndex.value] ?? 'Default')
-
-const onVerticalVelocityChanged = ({ OldValue, NewValue }: { OldValue: number; NewValue: number }) => {
-  if (Number.isNaN(OldValue) || !scrollView2Ref.value) return
-  scrollView2Ref.value.CancelScrollVelocity()
-
-  const verticalOffset = Number(scrollView2Ref.value.VerticalOffset ?? 0)
-  const scrollableHeight = Number(scrollView2Ref.value.ScrollableHeight ?? 0)
-  let verticalConstantVelocity = NewValue
-
-  if (NewValue <= 30 && NewValue >= -30) {
-    if (NewValue < OldValue) verticalConstantVelocity = verticalOffset === 0 ? 30 : -30
-    else verticalConstantVelocity = verticalOffset === scrollableHeight ? -30 : 30
-  } else if (NewValue < 30 && verticalOffset === 0) {
-    verticalConstantVelocity = 30
-  } else if (NewValue > 30 && verticalOffset === scrollableHeight) {
-    verticalConstantVelocity = -30
-  }
-
-  VerticalVelocity.value = verticalConstantVelocity
-  scrollView2Ref.value.AddScrollVelocity({ x: 0, y: verticalConstantVelocity }, 1)
+const currentPage = inject<{ value: string }>('currentPage')
+const { pageTheme } = createPageState(currentPage?.value || 'scrollview')
+const Names = shallowReactive<Record<string, any>>({})
+provide(xamlNameScopeKey, Names)
+const Labels = computed(() => ({
+  Description: t('text.scrollview-description'),
+  ContentHeader: t('sample.scrollview.content'), VelocityHeader: t('sample.scrollview.constant-velocity'), AnimationHeader: t('sample.scrollview.programmatic-animation'),
+  ContentNote: t('sample.scrollview.content-note'), VelocityNote: t('sample.scrollview.velocity-note'), AnimationNote: t('sample.scrollview.animation-note'),
+  ZoomMode: t('text.zoom-mode'), ZoomFactor: t('text.zoom-factor'), ScrollMode: t('text.scroll-mode'), ScrollbarVisibility: t('text.scrollbar-visibility'), Horizontal: t('text.horizontal'), Vertical: t('text.vertical'), VerticalVelocity: t('text.vertical-velocity'), Duration: t('text.animation-duration-msec'), ScrollWithAnimation: t('text.scroll-with-animation'),
+  ZoomModeName: t('text.zoom-mode-automation-name'), ZoomFactorName: t('text.zoom-factor-automation-name'), HorizontalScrollModeName: t('text.horizontal-scroll-mode-automation-name'), VerticalScrollModeName: t('text.vertical-scroll-mode-automation-name'), HorizontalScrollBarName: t('text.horizontal-scrollbar-visibility-automation-name'), VerticalScrollBarName: t('text.vertical-scrollbar-visibility-automation-name'), VerticalVelocityName: t('text.vertical-velocity-automation-name'), VerticalAnimationName: t('text.vertical-animation-options-automation-name'), DurationName: t('text.animation-duration-automation-name'), ScrollWithAnimationName: t('text.scroll-with-animation-automation-name'),
+  Enabled: t('text.enabled'), Disabled: t('text.disabled'), Auto: t('text.auto'), Visible: t('text.visible'), Hidden: t('text.hidden'), Default: t('text.default'), Accordion: t('text.accordion'), Teleportation: t('text.teleportation'),
+  Cliff: t('text.cliff'), Grapes: t('sample.scrollview.image.grapes'), Rainier: t('sample.scrollview.image.rainier'), Sunset: t('sample.scrollview.image.sunset'), Treetops: t('sample.scrollview.image.treetops'), Valley: t('sample.scrollview.image.valley'), Leaves: t('sample.scrollview.image.leaves'), Carousel: t('sample.scrollview.image.carousel'), Bicycles: t('sample.scrollview.image.bicycles'), Pond: t('sample.scrollview.image.pond'), Marina: t('sample.scrollview.image.marina'), Beach: t('sample.scrollview.image.beach'), Rampart: t('sample.scrollview.image.rampart'), Mountain: t('sample.scrollview.image.mountain')
+}))
+const ZoomFactorValue = ref(4)
+const VerticalVelocityValue = ref(30)
+const AnimationDurationValue = ref(1500)
+const AnimationSelectedIndex = ref(0)
+const ZoomFactorFormatter = { format: (value: number) => (Math.round(value * 10) / 10).toFixed(1).padStart(4, '0') }
+const ScrollViewPage_Loaded = () => Names.scrollView1?.ZoomTo(4, null, { AnimationMode: 'Enabled', SnapPointsMode: 'Ignore' })
+const selectionIndex = (sender: any) => Number(sender?.SelectedIndex ?? 0)
+const CmbZoomMode_SelectionChanged = (sender: any) => { if (Names.scrollView1) Names.scrollView1.ZoomMode = ['Enabled', 'Disabled'][selectionIndex(sender)] }
+const CmbHorizontalScrollMode_SelectionChanged = (sender: any) => { if (Names.scrollView1) Names.scrollView1.HorizontalScrollMode = ['Enabled', 'Disabled', 'Auto'][selectionIndex(sender)] }
+const CmbVerticalScrollMode_SelectionChanged = (sender: any) => { if (Names.scrollView1) Names.scrollView1.VerticalScrollMode = ['Enabled', 'Disabled', 'Auto'][selectionIndex(sender)] }
+const CmbHorizontalScrollBarVisibility_SelectionChanged = (sender: any) => { if (Names.scrollView1) Names.scrollView1.HorizontalScrollBarVisibility = ['Auto', 'Visible', 'Hidden'][selectionIndex(sender)] }
+const CmbVerticalScrollBarVisibility_SelectionChanged = (sender: any) => { if (Names.scrollView1) Names.scrollView1.VerticalScrollBarVisibility = ['Auto', 'Visible', 'Hidden'][selectionIndex(sender)] }
+const NbZoomFactor_ValueChanged = (_sender: unknown, args: { NewValue: number }) => { if (Number.isFinite(args.NewValue)) Names.scrollView1?.ZoomTo(args.NewValue, null) }
+const NbVerticalVelocity_ValueChanged = (_sender: unknown, args: { OldValue: number; NewValue: number }) => {
+  const view = Names.scrollView2
+  if (!view || !Number.isFinite(args.OldValue) || !Number.isFinite(args.NewValue)) return
+  view.ScrollBy(0, 0, { AnimationMode: 'Disabled', SnapPointsMode: 'Ignore' })
+  let velocity = args.NewValue
+  if (velocity <= 30 && velocity >= -30) velocity = args.NewValue < args.OldValue ? view.VerticalOffset === 0 ? 30 : -30 : view.VerticalOffset === view.ScrollableHeight ? -30 : 30
+  else if (velocity < 30 && view.VerticalOffset === 0) velocity = 30
+  else if (velocity > 30 && view.VerticalOffset === view.ScrollableHeight) velocity = -30
+  VerticalVelocityValue.value = velocity
+  view.AddScrollVelocity({ x: 0, y: velocity }, { x: 0, y: 0 })
 }
-
-const cubicBezier = (x1: number, y1: number, x2: number, y2: number) => (progress: number) => {
-  const sample = (a: number, b: number, t: number) => 3 * a * (1 - t) ** 2 * t + 3 * b * (1 - t) * t ** 2 + t ** 3
-  let parameter = progress
-  for (let iteration = 0; iteration < 6; iteration += 1) {
-    const x = sample(x1, x2, parameter) - progress
-    const derivative = 3 * x1 * (1 - parameter) ** 2 + 6 * (x2 - x1) * (1 - parameter) * parameter + 3 * (1 - x2) * parameter ** 2
-    if (Math.abs(derivative) < 0.0001) break
-    parameter = Math.min(1, Math.max(0, parameter - x / derivative))
+const GetTargetVerticalOffset = () => { const view = Names.scrollView3; return !view ? 0 : view.VerticalOffset > view.ScrollableHeight / 2 ? view.ScrollableHeight / 5 : 4 * view.ScrollableHeight / 5 }
+const BtnScrollWithAnimation_Click = () => { const view = Names.scrollView3; view?.ScrollTo(view.HorizontalOffset, GetTargetVerticalOffset(), { AnimationMode: 'Enabled', SnapPointsMode: 'Ignore' }) }
+const ScrollView_ScrollAnimationStarting = (_sender: unknown, args: any) => {
+  const stock = args.Animation
+  if (!stock || !Names.scrollView3) return
+  if (AnimationSelectedIndex.value === 0) { stock.Duration = AnimationDurationValue.value; return }
+  const view = Names.scrollView3, target = args.EndPosition.y, delta = target - args.StartPosition.y
+  const custom = stock.Compositor.CreateVector3KeyFrameAnimation()
+  if (AnimationSelectedIndex.value === 1) {
+    let overshoot = 0.1 * delta
+    for (let step = 0; step < 3; step++) { custom.InsertKeyFrame(1 - 0.4 / 2 ** step, { x: view.HorizontalOffset, y: target + overshoot, z: 0 }); overshoot /= -2 }
+    custom.InsertKeyFrame(1, { x: view.HorizontalOffset, y: target, z: 0 })
+  } else {
+    const start = stock.Compositor.CreateCubicBezierEasingFunction({ x: 1, y: 0 }, { x: 1, y: 0 }), end = stock.Compositor.CreateCubicBezierEasingFunction({ x: 0, y: 1 }, { x: 0, y: 1 }), step = stock.Compositor.CreateStepEasingFunction(1)
+    custom.InsertKeyFrame(0.499999, { x: view.HorizontalOffset, y: target - 0.9 * delta, z: 0 }, start)
+    custom.InsertKeyFrame(0.5, { x: view.HorizontalOffset, y: target - 0.1 * delta, z: 0 }, step)
+    custom.InsertKeyFrame(1, { x: view.HorizontalOffset, y: target, z: 0 }, end)
   }
-  return sample(y1, y2, parameter)
+  custom.Duration = AnimationDurationValue.value
+  args.Animation = custom
 }
-
-const defaultEase = cubicBezier(0.1, 0.9, 0.2, 1)
-const teleportStartEase = cubicBezier(1, 0, 1, 0)
-const teleportEndEase = cubicBezier(0, 1, 0, 1)
-const interpolate = (from: number, to: number, progress: number) => from + (to - from) * progress
-
-const getAnimatedOffset = (animation: string, start: number, target: number, progress: number) => {
-  const delta = target - start
-  if (animation === 'Accordion') {
-    const frames = [
-      { progress: 0, value: start },
-      { progress: 0.6, value: target + 0.1 * delta },
-      { progress: 0.8, value: target - 0.05 * delta },
-      { progress: 0.9, value: target + 0.025 * delta },
-      { progress: 1, value: target }
-    ]
-    const nextFrameIndex = frames.findIndex(frame => frame.progress >= progress)
-    const nextFrame = frames[Math.max(1, nextFrameIndex)]
-    const previousFrame = frames[Math.max(0, nextFrameIndex - 1)]
-    return interpolate(previousFrame.value, nextFrame.value, (progress - previousFrame.progress) / (nextFrame.progress - previousFrame.progress))
-  }
-  if (animation === 'Teleportation') {
-    if (progress < 0.5) return interpolate(start, target - 0.9 * delta, teleportStartEase(progress * 2))
-    return interpolate(target - 0.1 * delta, target, teleportEndEase((progress - 0.5) * 2))
-  }
-  return interpolate(start, target, defaultEase(progress))
-}
-
-const scrollWithAnimation = () => {
-  const scrollView = scrollView3Ref.value
-  if (!scrollView) return
-  const start = Number(scrollView.VerticalOffset ?? 0)
-  const scrollableHeight = Number(scrollView.ScrollableHeight ?? 0)
-  const target = start > scrollableHeight / 2 ? scrollableHeight / 5 : 4 * scrollableHeight / 5
-  const started = performance.now()
-
-  const animate = (timestamp: number) => {
-    const progress = Math.min(1, (timestamp - started) / AnimationDuration.value)
-    scrollView.ScrollTo(Number(scrollView.HorizontalOffset ?? 0), getAnimatedOffset(VerticalAnimation.value, start, target, progress))
-    if (progress < 1) requestAnimationFrame(animate)
-  }
-  requestAnimationFrame(animate)
-}
-
-const contentInsideScrollViewCode = computed(() => `<ScrollView
-  Height="266"
-  Width="400"
-  ContentOrientation="None"
-  ZoomMode="${ZoomMode.value}"
-  :ZoomFactor="${ZoomFactor.value}"
-  :IsTabStop="true"
-  VerticalAlignment="Top"
-  HorizontalAlignment="Left"
-  HorizontalScrollMode="${HorizontalScrollMode.value}"
-  HorizontalScrollBarVisibility="${HorizontalScrollBarVisibility.value}"
-  VerticalScrollMode="${VerticalScrollMode.value}"
-  VerticalScrollBarVisibility="${VerticalScrollBarVisibility.value}">
-  <Image
-    Source="${cliffImage}"
-    AutomationProperties.Name="cliff"
-    Stretch="Uniform"
-    HorizontalAlignment="Center"
-    VerticalAlignment="Center" />
-</ScrollView>`)
-
-const constantVelocityCode = `<ScrollView
-  ref="scrollView"
-  Height="300"
-  Width="400"
-  :IsTabStop="true"
-  VerticalAlignment="Top"
-  HorizontalAlignment="Left">
-  <StackPanel>
-    <Image
-      v-for="image in velocityImages"
-      :key="image.name"
-      :Source="image.source"
-      :AutomationProperties.Name="image.name"
-      Stretch="Uniform" />
-  </StackPanel>
-</ScrollView>`
-
-const programmaticScrollCode = computed(() => `<ScrollView
-  ref="scrollView"
-  Height="300"
-  Width="400"
-  :IsTabStop="true"
-  VerticalAlignment="Top"
-  HorizontalAlignment="Left">
-  <StackPanel>
-    <Image
-      v-for="image in animationImages"
-      :key="image.name"
-      :Source="image.source"
-      :AutomationProperties.Name="image.name"
-      Stretch="Uniform" />
-  </StackPanel>
-</ScrollView>
-
-<Button @Click="scrollWithAnimation">
-  Scroll with animation
-</Button>
-
-// Animation: ${VerticalAnimation.value}
-// Duration: ${AnimationDuration.value} ms`)
+const cmbVerticalAnimation_SelectionChanged = (sender: any) => { AnimationSelectedIndex.value = selectionIndex(sender) }
+const nbAnimationDuration_ValueChanged = (_sender: unknown, args: { NewValue: number }) => { if (Number.isFinite(args.NewValue)) AnimationDurationValue.value = args.NewValue }
+const codePart = (definition: string) => definition.split('--- xaml')[1]?.trim() ?? ''
+const ContentXaml = computed(() => codePart(contentDefinition).replace(/\$\((\w+)\)/g, (_whole, key) => String(Names.scrollView1?.[key] ?? ({ ZoomMode: 'Enabled', HorizontalScrollMode: 'Auto', VerticalScrollMode: 'Auto', HorizontalScrollBarVisibility: 'Auto', VerticalScrollBarVisibility: 'Auto' } as Record<string, string>)[key])))
+const VelocityXaml = codePart(velocityDefinition)
+const AnimationXaml = codePart(animationDefinition)
+const AnimationCSharp = computed(() => [defaultAnimation, accordionAnimation, teleportationAnimation][AnimationSelectedIndex.value]?.replaceAll('nbAnimationDuration.Value', String(AnimationDurationValue.value)) ?? defaultAnimation)
+const output = (name: string) => { const view = Names[name]; return t('sample.scrollview.output', { horizontal: Number(view?.HorizontalOffset ?? 0).toFixed(1), vertical: Number(view?.VerticalOffset ?? 0).toFixed(1), zoom: Number(view?.ZoomFactor ?? 1).toFixed(1), state: t(`sample.scrollview.state.${String(view?.State ?? 'Idle').toLowerCase()}`) }) }
+const Output1 = computed(() => output('scrollView1')), Output2 = computed(() => output('scrollView2')), Output3 = computed(() => output('scrollView3'))
 </script>
 
 <style scoped>
-.page-description { margin: 0 72px 16px 0; color: var(--text-secondary); }
+.page-description { margin: 0 0 16px; color: var(--text-secondary); flex: 1; min-width: 0; }
+.gallery-item-page { width: 100%; min-width: 0; }
+.gallery-item-page :deep(.scrollview-example .example-container.has-output.has-options) { grid-template-columns: minmax(0,1fr) 320px; grid-template-rows: auto auto; }
+.gallery-item-page :deep(.scrollview-example .example-options) { grid-column: 2; grid-row: 1 / span 2; }
+.gallery-item-page :deep(.scrollview-example .example-output) { grid-column: 1; grid-row: 2; justify-self: stretch; max-width: none; width: auto; margin: 0; padding: 12px; border-radius: 0; }
+.gallery-item-page :deep(.scrollview-example .example-display) { min-width: 0; overflow: hidden; }
+.gallery-item-page :deep(.scrollview-example .example-output) { min-width: 0; overflow-wrap: anywhere; }
+.gallery-item-page :deep(.scrollview-example .example-options) { min-width: 0; }
+.gallery-item-page :deep(.scrollview-example .example-options > .win-grid) { max-width: 100%; }
+.gallery-item-page :deep(.scrollview-example .example-options .win-text-block) { white-space: normal; overflow-wrap: anywhere; }
+.gallery-item-page :deep(.scrollview-example .example-options .win-combo-box), .gallery-item-page :deep(.scrollview-example .example-options .win-number-box) { min-width: 0; max-width: 100%; }
+@media (max-width: 1100px) { .gallery-item-page :deep(.scrollview-example .example-container.has-output.has-options) { grid-template-columns: minmax(0,1fr); } .gallery-item-page :deep(.scrollview-example .example-options) { grid-column: 1; grid-row: 3; width: auto; max-width: none; border-left: 0; border-top: 1px solid var(--DividerStrokeColorDefaultBrush); }
+ .gallery-item-page :deep(.scrollview-example .example-options > .win-grid) { min-width: 0 !important; width: 100%; } }
 </style>

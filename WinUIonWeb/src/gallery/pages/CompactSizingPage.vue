@@ -1,351 +1,160 @@
 <template>
-  <div class="gallery-item-page">
+  <Page x:Name="compactPage">
     <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-      <div class="gallery-page-content">
-            <!-- 页面头部 -->
-            <div class="page-header">
-              <div class="header-content">
-                <h1 class="page-title">Compact Sizing</h1>
-                <p class="page-description">
-                  Controls can be displayed in a more compact density to enable more content to be shown in limited space.
-                </p>
-              </div>
-              <div class="header-actions">
-                <Button class="header-action" v-bind="{ 'tooltipservice.tooltip': `Switch to ${theme === 'light' ? 'dark' : 'light'} theme` }" @Click="toggleTheme">
-                  <span class="icon">&#xE793;</span>
-                </Button>
-                <ToggleButton :IsChecked="isFavorite" class="header-action" v-bind="{ 'tooltipservice.tooltip': isFavorite ? 'Remove from favorites' : 'Add to favorites' }" @update:IsChecked="toggleFavorite">
-                  <span class="icon">{{ isFavorite ? '&#xE735;' : '&#xE734;' }}</span>
-                </ToggleButton>
-              </div>
-            </div>
-
-            <!-- 支持的控件列表 -->
-            <div class="supported-controls">
-              <p class="controls-title"><strong>Controls that support compact styling:</strong></p>
-              <ul class="controls-list">
-                <li>ListView</li>
-                <li>TextBox</li>
-                <li>PasswordBox</li>
-                <li>AutoSuggestBox</li>
-                <li>ComboBox</li>
-                <li>DatePicker</li>
-                <li>TimePicker</li>
-                <li>TreeView</li>
-                <li>NavigationView</li>
-                <li>MenuBar</li>
-              </ul>
-            </div>
-
-            <!-- 示例 -->
-            <ControlExample
-              :theme="theme"
-              headerText="Compact Sizing for controls"
-              :templateCode="templateCode"
-              :vueCode="vueCode">
-              <template #example>
-                <div class="sizing-demo" :class="{ 'compact-mode': isCompact }">
-                  <div class="demo-form">
-                    <p class="demo-header">{{ isCompact ? 'Compact Size' : 'Standard Size' }}</p>
-                    <TextBox
-                      v-model:Text="firstName"
-                      Header="First Name:"
-                      PlaceholderText="Enter first name" />
-                    <TextBox
-                      v-model:Text="lastName"
-                      Header="Last Name:"
-                      PlaceholderText="Enter last name" />
-                    <PasswordBox
-                      v-model="password"
-                      Header="Password:"
-                      placeholder="Enter password" />
-                    <PasswordBox
-                      v-model="confirmPassword"
-                      Header="Confirm Password:"
-                      placeholder="Confirm password" />
-                    <DatePicker
-                      v-model:Date="chosenDate"
-                      Header="Pick a date" />
-                  </div>
-                </div>
-              </template>
-              <template #options>
-                <div class="options-group">
-                  <p class="options-header">Fluent Standard and Compact Sizing</p>
-                  <div class="radio-group">
-                    <label class="radio-option">
-                      <input
-                        type="radio"
-                        name="sizing"
-                        value="standard"
-                        v-model="sizingMode"
-                        @change="onSizingChanged" />
-                      <span>Standard</span>
-                    </label>
-                    <label class="radio-option">
-                      <input
-                        type="radio"
-                        name="sizing"
-                        value="compact"
-                        v-model="sizingMode"
-                        @change="onSizingChanged" />
-                      <span>Compact</span>
-                    </label>
-                  </div>
-                </div>
-              </template>
-            </ControlExample>
-      </div>
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind Labels.Title, Mode=OneWay}" FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <TextBlock class="page-description" Text="{x:Bind Labels.Description, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal" Spacing="4">
+            <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind Labels.ToggleTheme, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind Labels.ToggleTheme, Mode=OneWay}">
+              <FontIcon Glyph="&#xE793;" FontSize="16" />
+            </Button>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind FavoriteLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind FavoriteLabel, Mode=OneWay}">
+              <FontIcon Glyph="{x:Bind FavoriteGlyph, Mode=OneWay}" FontSize="16" />
+            </ToggleButton>
+          </StackPanel>
+        </StackPanel>
+        <Grid class="gallery-page-content">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <RichTextBlock Margin="0,24,0,0">
+            <Paragraph>
+              <Run FontWeight="SemiBold" Text="{x:Bind Labels.SupportedControls, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.ListView, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.TextBox, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.PasswordBox, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.AutoSuggestBox, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.ComboBox, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.DatePicker, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.TimePicker, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.TreeView, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.NavigationView, Mode=OneWay}" />
+              <LineBreak />
+              <Run Text="{x:Bind Labels.MenuBar, Mode=OneWay}" />
+            </Paragraph>
+          </RichTextBlock>
+          <ControlExample
+            x:Name="Example1"
+            Grid.Row="1"
+            SampleDefinition="CompactSizing\CompactSizingControls.txt"
+            HeaderText="{x:Bind Labels.SampleHeader, Mode=OneWay}"
+            HorizontalContentAlignment="Stretch"
+            Theme="{x:Bind pageTheme, Mode=OneWay}"
+            Loaded="Example1_Loaded"
+            Xaml="{x:Bind ExampleXaml}">
+            <ControlExample.Example>
+              <Frame x:Name="ContentFrame" />
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options>
+              <RadioButtons Header="{x:Bind Labels.SizingHeader, Mode=OneWay}">
+                <RadioButton Checked="Standard_Checked" Content="{x:Bind Labels.Standard, Mode=OneWay}" GroupName="ControlSize" IsChecked="True" Tag="StandardSize" />
+                <RadioButton Checked="Compact_Checked" Content="{x:Bind Labels.Compact, Mode=OneWay}" GroupName="ControlSize" Tag="CompactSize" />
+              </RadioButtons>
+            </ControlExample.Options>
+          </ControlExample>
+        </Grid>
+      </StackPanel>
     </ScrollViewer>
-  </div>
+  </Page>
 </template>
 
-<script setup>
-import { ref, computed, inject } from 'vue';
-import ControlExample from '../../components/ControlExample.vue';
+<script setup lang="ts">
+import { computed, inject, nextTick, provide, shallowReactive, type Component } from 'vue';
 import Button from '../../components/Button.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import TextBox from '../../components/TextBox.vue';
-import PasswordBox from '../../components/PasswordBox.vue';
-import DatePicker from '../../components/DatePicker.vue';
-import { createPageState } from '../../utils/pageState';
-
-const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'compactsizing');
-const { pageTheme: theme, isFavoriteState: isFavorite, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
-const sizingMode = ref('standard');
-const isCompact = computed(() => sizingMode.value === 'compact');
-
-// 表单数据
-const firstName = ref('');
-const lastName = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const chosenDate = ref(new Date());
-
-const onSizingChanged = () => {
-  // 切换时保留表单状态（数据已通过v-model保持）
-};
-
-const templateCode = `<div class="sizing-demo" :class="{ 'compact-mode': isCompact }">
-  <div class="demo-form">
-    <p class="demo-header">{{ isCompact ? 'Compact Size' : 'Standard Size' }}</p>
-    <TextBox
-      v-model:Text="firstName"
-      Header="First Name:"
-      PlaceholderText="Enter first name" />
-    <TextBox
-      v-model:Text="lastName"
-      Header="Last Name:"
-      PlaceholderText="Enter last name" />
-    <PasswordBox
-      v-model="password"
-      Header="Password:"
-      placeholder="Enter password" />
-    <PasswordBox
-      v-model="confirmPassword"
-      Header="Confirm Password:"
-      placeholder="Confirm password" />
-    <DatePicker
-      v-model:Date="chosenDate"
-      Header="Pick a date" />
-  </div>
-</div>`;
-
-const vueCode = `import { ref, computed } from 'vue';
-import TextBox from '../../components/TextBox.vue';
-import PasswordBox from '../../components/PasswordBox.vue';
-import DatePicker from '../../components/DatePicker.vue';
-
+import ControlExample from '../../components/ControlExample.vue';
+import FontIcon from '../../components/FontIcon.vue';
+import Frame from '../../components/Frame.vue';
+import Grid from '../../components/Grid.vue';
+import { useI18n } from '../../components/i18n/index';
+import Page from '../../components/Page.vue';
+import RadioButton from '../../components/RadioButton.vue';
+import RadioButtons from '../../components/RadioButtons.vue';
+import RichTextBlock from '../../components/RichTextBlock.vue';
+import RowDefinition from '../../components/RowDefinition.vue';
 import ScrollViewer from '../../components/ScrollViewer.vue';
-const sizingMode = ref('standard');
-const isCompact = computed(() => sizingMode.value === 'compact');
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import { LineBreak, Paragraph, Run } from '../../components/TextInline';
+import ToggleButton from '../../components/ToggleButton.vue';
+import { xamlNameScopeKey, xamlScopeKey } from '../../components/xamlRuntime';
+import { createPageState } from '../../utils/pageState';
+import SampleCompactSizingPage from './SampleCompactSizingPage.vue';
+import SampleStandardSizingPage from './SampleStandardSizingPage.vue';
 
-const firstName = ref('');
-const lastName = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const chosenDate = ref(new Date());`;
+interface SamplePage {
+  FirstName: { Text: string };
+  LastName: { Text: string };
+  Password: { Password: string };
+  ConfirmPassword: { Password: string };
+  ChosenDate: { Date: Date };
+  CopyState: (page: SamplePage) => void;
+}
+interface FrameApi { Content: SamplePage | null; Navigate: (page: Component, parameter?: unknown, transitionInfo?: unknown) => boolean }
+
+const { t } = useI18n();
+const currentPage = inject<{ value: string }>('currentPage');
+const { pageTheme, isFavoriteState, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'compactsizing');
+const Names = shallowReactive<Record<string, unknown>>({});
+provide(xamlNameScopeKey, Names);
+const Labels = computed(() => ({
+  Title: t('text.compact-sizing'), Description: t('sample.compactsizing.description'),
+  ToggleTheme: t('gallery.page-header.toggle-theme'), SupportedControls: t('sample.compactsizing.supported-controls'),
+  ListView: t('sample.compactsizing.supported-listview'), TextBox: t('sample.compactsizing.supported-textbox'),
+  PasswordBox: t('sample.compactsizing.supported-passwordbox'), AutoSuggestBox: t('sample.compactsizing.supported-autosuggestbox'),
+  ComboBox: t('sample.compactsizing.supported-combobox'), DatePicker: t('sample.compactsizing.supported-datepicker'),
+  TimePicker: t('sample.compactsizing.supported-timepicker'), TreeView: t('sample.compactsizing.supported-treeview'),
+  NavigationView: t('sample.compactsizing.supported-navigationview'), MenuBar: t('sample.compactsizing.supported-menubar'),
+  SampleHeader: t('sample.compactsizing.header'), SizingHeader: t('sample.compactsizing.options-header'),
+  Standard: t('sample.compactsizing.standard'), Compact: t('sample.compactsizing.compact')
+}));
+const FavoriteLabel = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const FavoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
+const ExampleXaml = `<Page.Resources>
+    <ResourceDictionary Source="ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml" />
+</Page.Resources>`;
+
+let navigationVersion = 0;
+const navigate = async (pageType: Component, copyState: boolean) => {
+  const frame = Names.ContentFrame as FrameApi | undefined;
+  if (!frame) return;
+  const oldPage = frame.Content;
+  // Vue commits navigation on the next tick. Capture the dependency-property
+  // values before the old Page's namescope is disposed.
+  const previous = oldPage && copyState ? {
+    FirstName: { Text: oldPage.FirstName.Text }, LastName: { Text: oldPage.LastName.Text },
+    Password: { Password: oldPage.Password.Password }, ConfirmPassword: { Password: oldPage.ConfirmPassword.Password },
+    ChosenDate: { Date: oldPage.ChosenDate.Date }, CopyState: oldPage.CopyState
+  } : null;
+  const version = ++navigationVersion;
+  if (!frame.Navigate(pageType, null, { Type: 'SuppressNavigationTransitionInfo' })) return;
+  await nextTick();
+  if (version === navigationVersion && previous && frame.Content) frame.Content.CopyState(previous);
+};
+const Example1_Loaded = () => { void navigate(SampleStandardSizingPage, false); };
+const Standard_Checked = () => { void navigate(SampleStandardSizingPage, true); };
+const Compact_Checked = () => { void navigate(SampleCompactSizingPage, true); };
+provide(xamlScopeKey, {
+  Labels, FavoriteLabel, FavoriteGlyph, pageTheme, isFavoriteState, toggleTheme, toggleFavorite,
+  ExampleXaml, Example1_Loaded, Standard_Checked, Compact_Checked
+});
 </script>
 
 <style scoped>
-.page-container {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--divider-stroke-default);
-}
-
-.header-content {
-  flex: 1;
-}
-
-.page-title {
-  margin: 0 0 8px 0;
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.page-description {
-  margin: 0;
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.header-actions {
-  display: flex;
-  gap: 4px;
-}
-
-.icon {
-  font-size: 16px;
-}
-
-.supported-controls {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: var(--card-bg-default);
-  border: 1px solid var(--ctrl-border-rest);
-  border-radius: 8px;
-}
-
-.controls-title {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-.controls-list {
-  margin: 0;
-  padding-left: 20px;
-  columns: 2;
-  column-gap: 32px;
-}
-
-.controls-list li {
-  margin-bottom: 6px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.sizing-demo {
-  width: 100%;
-  padding: 16px;
-  transition: all 0.2s ease;
-}
-
-.demo-form {
-  display: flex;
-  flex-direction: column;
-  max-width: 400px;
-}
-
-/* Standard模式 - 16px间距 */
-.sizing-demo:not(.compact-mode) .demo-form {
-  gap: 16px;
-}
-
-/* Compact模式 - 8px间距 */
-.sizing-demo.compact-mode .demo-form {
-  gap: 8px;
-}
-
-.demo-header {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-/* Compact模式 - 减小控件间距 */
-.sizing-demo.compact-mode :deep(.win-textbox),
-.sizing-demo.compact-mode :deep(.win-passwordbox),
-.sizing-demo.compact-mode :deep(.win-datepicker) {
-  margin-bottom: 0;
-}
-
-/* Compact模式 - 减小header间距 */
-.sizing-demo.compact-mode :deep(.textbox-header),
-.sizing-demo.compact-mode :deep(.passwordbox-header),
-.sizing-demo.compact-mode :deep(.datepicker-header) {
-  margin-bottom: 2px;
-}
-
-.options-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.options-header {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.radio-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.radio-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 4px;
-  transition: background 0.15s ease;
-}
-
-.radio-option:hover {
-  background: var(--subtle-fill-secondary);
-}
-
-.radio-option input[type="radio"] {
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  cursor: pointer;
-  accent-color: var(--accent-default);
-}
-
-.radio-option span {
-  font-size: 14px;
-  color: var(--text-primary);
-  user-select: none;
-}
-
-@media (max-width: 768px) {
-  .page-container {
-    padding: 16px;
-  }
-
-  .page-header {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .header-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .controls-list {
-    columns: 1;
-  }
-}
+.page-heading { position: relative; min-width: 0; }
+.page-header { margin: 0 72px 8px 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.page-description { margin: 0 0 16px; color: var(--text-secondary); }
+.page-header-actions { position: absolute; top: 0; right: 0; }
+.gallery-item-page, .gallery-page-content { min-width: 0; max-width: 100%; }
 </style>

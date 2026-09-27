@@ -1,304 +1,229 @@
 <template>
-  <div class="win-dropdown-btn-wrap" ref="wrap">
-    <button
-      v-bind="buttonAttrs"
-      class="win-btn DefaultButtonStyle win-dropdown-btn"
-      :class="attrs.class"
-      :style="buttonStyle"
-      :disabled="isDisabled"
-      @click="toggle"
-      @mousedown="onChevronDown"
-      @mouseup="onChevronUp"
-      @mouseleave="onChevronLeave">
-      <span class="win-dropdown-content">
-        <ContentOutlet v-if="contentNodes.length" />
-        <span v-else>{{ resolvedContent }}</span>
-      </span>
-      <span class="icon win-dd-chevron chevron-animate"
-            :class="[chevronClass, { open: isOpen }]"
-            aria-hidden="true"
-            @animationend="onChevronAnimEnd"></span>
-    </button>
-    <MenuFlyout
-      :Open="isOpen"
-      :AnchorRect="anchorRect"
-      :Items="flyoutItems"
-      :Placement="flyoutPlacement"
-      @Close="isOpen = false"
-      @Select="onSelect" />
-  </div>
+  <button ref="element" v-bind="hostAttrs" type="button" class="win-dropdown-button"
+    :class="[attrs.class, { 'is-pressed': IsPressed, 'system-focus': UseSystemFocusVisuals, 'win-theme-scope': RequestedTheme === 'Light' || RequestedTheme === 'Dark', 'theme-light': RequestedTheme === 'Light', 'theme-dark': RequestedTheme === 'Dark' }]"
+    :style="hostStyle" :disabled="!IsEnabled" :tabindex="IsTabStop ? undefined : -1"
+    :aria-haspopup="Flyout ? 'menu' : undefined" :aria-expanded="Flyout ? isFlyoutOpen : undefined"
+    @click="input.onNativeClick" @pointerdown="input.onPointerPressed" @pointermove="input.onPointerMoved"
+    @pointerup="input.onPointerReleased" @pointercancel="input.onPointerCanceled" @lostpointercapture="input.onPointerCaptureLost"
+    @pointerenter="input.onPointerEntered" @pointerleave="input.onPointerExited"
+    @keydown="input.onKeyDown" @keyup="input.onKeyUp" @focus="onGotFocus" @blur="onLostFocus" @contextmenu="onContextRequested">
+    <Grid class="win-dropdown-root-grid" Background="{x:Bind RootBackground}" Padding="{x:Bind Padding}"
+      BorderBrush="{x:Bind RootBorderBrush}" BorderThickness="{x:Bind BorderThickness}"
+      CornerRadius="{x:Bind CornerRadius}" BackgroundSizing="{x:Bind BackgroundSizing}">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+      <ContentPresenter class="win-dropdown-content-presenter" Content="{x:Bind Content}" ContentTemplate="{x:Bind ContentTemplate}"
+        ContentTransitions="{x:Bind ContentTransitions}" HorizontalContentAlignment="{x:Bind HorizontalContentAlignment}"
+        VerticalContentAlignment="{x:Bind VerticalContentAlignment}" AutomationProperties.AccessibilityView="Raw">
+        <ContentOutlet />
+      </ContentPresenter>
+      <AnimatedIcon class="win-dropdown-chevron" Grid.Column="1" Margin="8,0,0,0" Width="12" Height="12"
+        Foreground="{x:Bind ChevronForeground}" AutomationProperties.AccessibilityView="Raw">
+        <AnimatedChevronDownSmallVisualSource />
+        <AnimatedIcon.FallbackIconSource><FontIconSource FontSize="8" FontFamily="{ThemeResource SymbolThemeFontFamily}" Glyph="&#xE96E;" IsTextScaleFactorEnabled="False" /></AnimatedIcon.FallbackIconSource>
+      </AnimatedIcon>
+    </Grid>
+    <AttachedOutlet v-if="propertyNodes.attached.length" />
+  </button>
+  <FlyoutOutlet v-if="flyoutNodes.length" />
 </template>
-<script lang="ts">
-import { DropDownButtonContent, DropDownButtonFlyout } from './DropDownButtonProperties'
 
-// Vue compiles XAML property elements as static members on the owner
-// component (for example, DropDownButton.Flyout).
+<script lang="ts">
+import { brushProperty } from './brushProperties'
+import { buttonContentProperty } from './buttonContentRuntime'
+import { DropDownButtonContent, DropDownButtonFlyout, DropDownButtonKeyboardAccelerators } from './DropDownButtonProperties'
 export default {
-  Flyout: DropDownButtonFlyout,
-  Content: DropDownButtonContent
+  Content: DropDownButtonContent, Flyout: DropDownButtonFlyout, KeyboardAccelerators: DropDownButtonKeyboardAccelerators,
+  ContentTemplate: buttonContentProperty('DropDownButton', 'ContentTemplate'), ContentTransitions: buttonContentProperty('DropDownButton', 'ContentTransitions'),
+  Resources: buttonContentProperty('DropDownButton', 'Resources'), Background: brushProperty('DropDownButton', 'Background')
 }
 </script>
+
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, ref, useAttrs, useSlots } from 'vue';
-import MenuFlyout from './MenuFlyout.vue';
-import { getDropDownButtonProperty } from './DropDownButtonProperties';
-import { resolveXamlHandler, resolveXamlValue } from './xamlRuntime';
+import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, onScopeDispose, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch, type VNode } from 'vue'
+import Grid from './Grid.vue'
+import ContentPresenter from './ContentPresenter.vue'
+import AnimatedIcon from './AnimatedIcon.vue'
+import { FontIconSource } from './IconSource'
+import { animatedIconVisualSourceComponents } from './animatedIconVisuals'
+import { useAnimatedIconInput } from './animatedIconInput'
+import { getDropDownButtonProperty } from './DropDownButtonProperties'
+import { getButtonContentProperty, useButtonContent } from './buttonContentRuntime'
+import { isBrushProperty, useBrushProperty } from './brushProperties'
+import { getToolTipServiceProperty } from './ToolTipServiceProperties'
+import { alignment, boolValue, cssLength, xamlThickness } from './layout'
+import { normalizeXamlNodes, resolveXamlHandler, resolveXamlResourceObject, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime'
+import { xamlResourceDictionaryKey } from './Page.vue'
+import { useUICommand } from './uiCommandRuntime'
+import { useDropDownButtonInput } from './dropDownButtonRuntime'
 
-defineOptions({
-  inheritAttrs: false
-});
-
+defineOptions({ name: 'DropDownButton', inheritAttrs: false })
 const props = defineProps({
-  Content: { type: [String, Number], default: '' },
-  Flyout: { type: [Object, Array], default: () => ({ Items: [] }) },
-  IsEnabled: { type: [Boolean, String], default: true },
-  Width: { type: [String, Number], default: '' },
-  Height: { type: [String, Number], default: '' },
-  MinWidth: { type: [String, Number], default: '' },
-  MinHeight: { type: [String, Number], default: '' },
-  MaxWidth: { type: [String, Number], default: '' },
-  MaxHeight: { type: [String, Number], default: '' },
-  Margin: { type: String, default: '' },
-  Padding: { type: String, default: '' },
-  HorizontalAlignment: { type: String, default: '' },
-  VerticalAlignment: { type: String, default: '' }
-});
-
-const emit = defineEmits(['Click', 'Select']);
-const attrs = useAttrs();
-const slots = useSlots();
-const instance = getCurrentInstance();
-const wrap = ref(null);
-const isOpen = ref(false);
-const anchorRect = ref(null);
-const chevronClass = ref('');
-let chevronPressed = false;
-let chevronPressDone = false;
-
-const buttonAttrs = computed(() => {
-  const { class: _class, style: _style, disabled: _disabled, ...rest } = attrs;
-  return rest;
-});
-
-const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
-const isDisabled = computed(() => !resolvedIsEnabled.value);
-const resolvedContent = computed(() => resolveXamlValue(props.Content, instance));
-
+  Content: { type: null, default: undefined }, ContentTemplate: { type: null, default: undefined }, ContentTransitions: { type: null, default: undefined }, Flyout: { type: null, default: null },
+  Command: { type: [Object, String], default: undefined }, CommandParameter: { default: undefined },
+  IsEnabled: { type: [Boolean, String], default: true }, IsTabStop: { type: [Boolean, String], default: true }, ClickMode: { type: String, default: 'Release' },
+  RequestedTheme: { type: String, default: 'Default' }, Visibility: { type: String, default: 'Visible' },
+  Background: { type: [String, Object], default: '' }, Foreground: { type: String, default: '' }, BorderBrush: { type: String, default: '' },
+  BackgroundSizing: { type: String, default: 'InnerBorderEdge' }, BorderThickness: { type: [String, Number], default: 1 }, CornerRadius: { type: [String, Number], default: 4 }, Padding: { type: [String, Number], default: '11,5,11,6' }, Margin: { type: [String, Number], default: 0 },
+  Width: { type: [String, Number], default: '' }, Height: { type: [String, Number], default: '' }, MinWidth: { type: [String, Number], default: 0 }, MinHeight: { type: [String, Number], default: 0 }, MaxWidth: { type: [String, Number], default: '' }, MaxHeight: { type: [String, Number], default: '' },
+  HorizontalAlignment: { type: String, default: 'Left' }, VerticalAlignment: { type: String, default: 'Center' },
+  HorizontalContentAlignment: { type: String, default: 'Center' }, VerticalContentAlignment: { type: String, default: 'Center' },
+  FontFamily: { type: String, default: '{ThemeResource ContentControlThemeFontFamily}' }, FontSize: { type: [String, Number], default: 14 }, FontWeight: { type: String, default: 'Normal' },
+  UseSystemFocusVisuals: { type: [Boolean, String], default: true }, FocusVisualMargin: { type: [String, Number], default: -3 }
+})
+const emit = defineEmits(['Click', 'GotFocus', 'LostFocus', 'KeyDown', 'KeyUp', 'ContextRequested', 'PointerEntered', 'PointerExited', 'PointerMoved', 'PointerPressed', 'PointerReleased', 'PointerCanceled', 'PointerCaptureLost'])
+const instance = getCurrentInstance(), attrs = useAttrs(), slots = useSlots()
+const element = ref<HTMLButtonElement | null>(null)
+const resolve = (value: unknown) => resolveXamlValue(value, instance)
+const inheritedResources = inject<Record<string, VNode>>(xamlResourceDictionaryKey, {})
+const { ContentTemplate, ContentTransitions, renderTemplate } = useButtonContent(props, () => slots.default?.() ?? [], instance)
+const backgroundBrush = useBrushProperty('Background', () => props.Background, () => slots.default?.() ?? [], instance)
+const Command = useUICommand(() => resolve(props.Command))
+const CommandParameter = computed(() => resolve(props.CommandParameter))
+const localContent = shallowRef<unknown>(undefined)
+const sourceContent = computed(() => props.Content === undefined ? Command.value?.Label ?? '' : resolve(props.Content))
+const Content = computed({ get: () => localContent.value === undefined ? sourceContent.value : localContent.value, set: value => { localContent.value = value; updateXamlBinding(props.Content, value, instance) } })
+watch(sourceContent, () => { localContent.value = undefined })
+const property = (name: 'IsEnabled' | 'RequestedTheme') => {
+  const source = computed(() => resolve(props[name])), local = shallowRef<unknown>(undefined)
+  watch(source, () => { local.value = undefined })
+  return computed({ get: () => local.value === undefined ? source.value : local.value, set: value => { local.value = value; updateXamlBinding(props[name], value, instance) } })
+}
+const EnabledProperty = property('IsEnabled'), RequestedTheme = property('RequestedTheme')
+const IsEnabled = computed({ get: () => boolValue(EnabledProperty.value) && (Command.value?.CanExecute?.(CommandParameter.value) ?? true), set: value => { EnabledProperty.value = boolValue(value) } })
+const IsTabStop = computed(() => boolValue(resolve(props.IsTabStop))), UseSystemFocusVisuals = computed(() => boolValue(resolve(props.UseSystemFocusVisuals)))
+const ClickMode = computed(() => String(resolve(props.ClickMode)))
+const childrenOf = (node: VNode): VNode[] => Array.isArray(node.children) ? node.children as VNode[] : (node.children as { default?: () => VNode[] })?.default?.() ?? []
 const propertyNodes = computed(() => {
-  const content = [];
-  const flyout = [];
-  const collect = (nodes) => {
-    for (const node of nodes) {
-      // Vue may wrap multiple XAML property elements in a Fragment. It is
-      // compiler structure, so inspect its children before classifying them.
-      if (node?.type === Fragment && Array.isArray(node.children)) {
-        collect(node.children);
-        continue;
-      }
-    const property = getDropDownButtonProperty(node)
-      ?? (typeof node?.type === 'string' && node.type.endsWith('.Flyout') ? 'flyout' : undefined)
-      ?? (typeof node?.type === 'string' && node.type.endsWith('.Content') ? 'content' : undefined);
-    if (!property) {
-      content.push(node);
-      continue;
-    }
-    const propertySlot = node.children && typeof node.children === 'object' ? node.children.default : undefined;
-    if (propertySlot) (property === 'content' ? content : flyout).push(...propertySlot());
-    }
+  const result: { content: VNode[]; flyout: VNode[]; attached: VNode[]; keyboardAccelerators: VNode[]; resources: VNode[] } = { content: [], flyout: [], attached: [], keyboardAccelerators: [], resources: [] }
+  const collect = (nodes: VNode[]) => { for (const node of nodes) {
+    if (node.type === Comment || node.type === Text && !String(node.children ?? '').trim()) continue
+    if (node.type === Fragment) { collect(childrenOf(node)); continue }
+    if (isBrushProperty(node)) continue
+    const contentProperty = getButtonContentProperty(node)
+    if (contentProperty) { if (contentProperty === 'Resources') result.resources.push(...childrenOf(node)); continue }
+    const propertyName = getDropDownButtonProperty(node)
+    if (propertyName) result[propertyName].push(...childrenOf(node))
+    else if (getToolTipServiceProperty(node)) result.attached.push(node)
+    else result.content.push(node)
+  } }
+  collect(slots.default?.() ?? [])
+  return result
+})
+const localResources = computed(() => {
+  const collect = (nodes: VNode[]): VNode[] => nodes.flatMap(node => {
+    const type = node.type as { name?: string; __name?: string } | string
+    return node.type === Fragment || (typeof type === 'string' ? type : type?.name ?? type?.__name) === 'ResourceDictionary' ? collect(childrenOf(node)) : [node]
+  })
+  return Object.fromEntries(collect(propertyNodes.value.resources).filter(node => node.props?.['x:Key']).map(node => [node.props!['x:Key'], node]))
+})
+const sourceFlyout = computed(() => {
+  const key = typeof props.Flyout === 'string' ? props.Flyout.match(/^\{(?:StaticResource|ThemeResource)\s+([^}]+)\}$/)?.[1] : undefined
+  return key ? localResources.value[key] ?? inheritedResources[key] ?? resolveXamlResourceObject(key, instance) : resolve(props.Flyout)
+})
+const localFlyout = shallowRef<unknown>(undefined), flyoutController = shallowRef<any>(null), flyoutOpened = ref(false)
+const flyoutNodes = computed(() => {
+  if (localFlyout.value === undefined && propertyNodes.value.flyout.length) return propertyNodes.value.flyout
+  const source = localFlyout.value === undefined ? sourceFlyout.value : localFlyout.value
+  return isVNode(source) ? [source] : []
+})
+const Flyout = computed({ get: () => flyoutController.value ?? (localFlyout.value === undefined ? isVNode(sourceFlyout.value) ? null : sourceFlyout.value : isVNode(localFlyout.value) ? null : localFlyout.value),
+  set: value => { Flyout.value?.Hide?.(); flyoutController.value = null; localFlyout.value = value; flyoutOpened.value = false; updateXamlBinding(props.Flyout, value, instance) } })
+watch(sourceFlyout, (_next, previous) => { (flyoutController.value ?? previous)?.Hide?.(); flyoutController.value = null; localFlyout.value = undefined; flyoutOpened.value = false })
+const isFlyoutOpen = computed(() => { const opened = flyoutOpened.value; return typeof Flyout.value?.IsOpen === 'boolean' ? Flyout.value.IsOpen : opened })
+let detachFlyoutEvents = () => {}
+watch(Flyout, flyout => {
+  detachFlyoutEvents()
+  const opened = () => { flyoutOpened.value = true }, closed = () => { flyoutOpened.value = false }
+  flyout?.addEventListener?.('Opened', opened)
+  flyout?.addEventListener?.('Closed', closed)
+  detachFlyoutEvents = () => { flyout?.removeEventListener?.('Opened', opened); flyout?.removeEventListener?.('Closed', closed) }
+  flyoutOpened.value = Boolean(flyout?.IsOpen)
+}, { immediate: true, flush: 'sync' })
+onScopeDispose(() => detachFlyoutEvents())
+provide('buttonFlyoutAnchor', null)
+provide('buttonFlyoutController', null)
+const FlyoutOutlet = defineComponent({ setup: () => () => h(Fragment, normalizeXamlNodes(flyoutNodes.value, instance).map(node => cloneVNode(node, {
+  ref: (api: unknown) => { flyoutController.value = api }, onOpened: () => { flyoutOpened.value = true }, onClosed: () => { flyoutOpened.value = false }
+}, true))) })
+const ContentOutlet = defineComponent({ setup: () => () => {
+  const templated = renderTemplate(Content.value)
+  if (templated) return templated
+  const nodes = localContent.value === undefined ? normalizeXamlNodes(propertyNodes.value.content, instance) : []
+  if (nodes.length) return nodes.every(node => node.type === Text) ? h('span', { class: 'win-button-default-text' }, nodes.map(node => String(node.children ?? '')).join('')) : h(Fragment, nodes)
+  return isVNode(Content.value) ? h(Fragment, normalizeXamlNodes([Content.value], instance)) : typeof Content.value === 'string' || typeof Content.value === 'number' ? h('span', { class: 'win-button-default-text' }, String(Content.value)) : null
+} })
+const AttachedOutlet = defineComponent({ setup: () => () => h(Fragment, propertyNodes.value.attached) })
+const glyphInput = useAnimatedIconInput(false, state => state === 'Disabled' ? 'Normal' : state)
+watch(element, value => glyphInput.Attach(value), { flush: 'post' })
+const raiseEvent = (name: string, event: Event, extra: Record<string, unknown> = {}) => {
+  const args = { OriginalSource: api, OriginalEvent: event, Handled: false, ...extra }
+  const listener = instance?.vnode.props?.[`on${name}`]
+  if (name === 'Click') {
+    for (const callback of Array.isArray(listener) ? listener : [listener]) if (typeof callback === 'function') callback(api, args)
+  } else emit(name as 'Click', api, args)
+  if (!listener) resolveXamlHandler(attrs[name], instance)?.(api, args)
+  if (args.Handled) { event.preventDefault(); event.stopPropagation() }
+  return args
+}
+const invoke = (event: Event) => {
+  if (!IsEnabled.value || resolve(props.Visibility) === 'Collapsed') return
+  raiseEvent('Click', event)
+  if (Command.value?.CanExecute?.(CommandParameter.value) ?? true) Command.value?.Execute(CommandParameter.value)
+  void Flyout.value?.ShowAt?.(element.value)
+}
+const input = useDropDownButtonInput(element, IsEnabled, ClickMode, invoke, (name, event, extra) => raiseEvent(name, event, extra).Handled, glyphInput)
+const { IsPressed, IsPointerOver } = input
+const exposedContent = computed({ get: () => localContent.value === undefined ? propertyNodes.value.content[0] ?? Content.value : Content.value, set: value => { Content.value = value } })
+const api = proxyRefs({ Element: element, Name: computed(() => attrs['data-xaml-ref'] ?? attrs['x:Name'] ?? attrs.Name ?? ''), Content: exposedContent, ContentTemplate, ContentTransitions, IsEnabled, RequestedTheme, Command, CommandParameter, Flyout, IsPressed, IsPointerOver, Focus: () => { if (!IsEnabled.value) return false; element.value?.focus(); return Boolean(element.value) } })
+defineExpose(api)
+const RootBackground = computed(() => backgroundBrush.value.value && !IsPressed.value && !IsPointerOver.value && IsEnabled.value ? backgroundBrush.value.value : !IsEnabled.value ? 'var(--ButtonBackgroundDisabled)' : IsPressed.value ? 'var(--ButtonBackgroundPressed)' : IsPointerOver.value ? 'var(--ButtonBackgroundPointerOver)' : 'var(--ButtonBackground)')
+const RootBorderBrush = computed(() => !IsEnabled.value ? 'var(--ButtonBorderBrushDisabled)' : IsPressed.value ? 'var(--ButtonBorderBrushPressed)' : IsPointerOver.value ? 'var(--ButtonBorderBrushPointerOver)' : resolve(props.BorderBrush) || 'var(--ButtonBorderBrush)')
+const Foreground = computed(() => !IsEnabled.value ? 'var(--ButtonForegroundDisabled)' : IsPressed.value ? 'var(--ButtonForegroundPressed)' : IsPointerOver.value ? 'var(--ButtonForegroundPointerOver)' : resolve(props.Foreground) || 'var(--ButtonForeground)')
+const ChevronForeground = computed(() => !IsEnabled.value ? 'var(--ButtonForegroundDisabled)' : IsPressed.value ? 'var(--DropDownButtonForegroundSecondaryPressed)' : IsPointerOver.value ? 'var(--DropDownButtonForegroundSecondaryPointerOver)' : 'var(--DropDownButtonForegroundSecondary)')
+const Padding = computed(() => resolve(props.Padding)), BorderThickness = computed(() => resolve(props.BorderThickness)), CornerRadius = computed(() => resolve(props.CornerRadius)), BackgroundSizing = computed(() => resolve(props.BackgroundSizing))
+const HorizontalContentAlignment = computed(() => resolve(props.HorizontalContentAlignment)), VerticalContentAlignment = computed(() => resolve(props.VerticalContentAlignment))
+const AnimatedChevronDownSmallVisualSource = animatedIconVisualSourceComponents.AnimatedChevronDownSmallVisualSource
+const hostAttrs = computed(() => {
+  const rest = { ...attrs }
+  for (const name of ['class', 'style', 'Click', 'GotFocus', 'LostFocus', 'KeyDown', 'KeyUp', 'ContextRequested', 'PointerEntered', 'PointerExited', 'PointerMoved', 'PointerPressed', 'PointerReleased', 'PointerCanceled', 'PointerCaptureLost']) delete rest[name]
+  const automationName = resolve(rest['AutomationProperties.Name']); delete rest['AutomationProperties.Name']
+  if (automationName) rest['aria-label'] = String(automationName)
+  const tooltip = resolve(rest['ToolTipService.ToolTip']) || Command.value?.Description; delete rest['ToolTipService.ToolTip']
+  if (tooltip) rest['tooltipservice.tooltip'] = String(tooltip)
+  return rest
+})
+const hostStyle = computed(() => {
+  const style: Record<string, unknown> = { margin: xamlThickness(resolve(props.Margin)), justifySelf: alignment(resolve(props.HorizontalAlignment), 'horizontal'), alignSelf: alignment(resolve(props.VerticalAlignment), 'vertical'), color: Foreground.value, fontFamily: resolve(props.FontFamily), fontSize: cssLength(resolve(props.FontSize)), fontWeight: resolve(props.FontWeight) === 'SemiBold' ? 600 : resolve(props.FontWeight), outlineOffset: cssLength(resolve(props.FocusVisualMargin)), borderRadius: xamlThickness(CornerRadius.value), '--DropDownButtonBorderBrushCurrent': RootBorderBrush.value, '--DropDownButtonBorderThickness': xamlThickness(BorderThickness.value) }
+  for (const name of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) if (resolve(props[name]) !== '') style[name[0].toLowerCase() + name.slice(1)] = cssLength(resolve(props[name]))
+  if (resolve(props.Visibility) === 'Collapsed') style.display = 'none'
+  return [attrs.style, style]
+})
+const onGotFocus = (event: FocusEvent) => raiseEvent('GotFocus', event)
+const onLostFocus = (event: FocusEvent) => { input.clearPressed(); glyphInput.LostFocus(event); raiseEvent('LostFocus', event) }
+const onContextRequested = (event: MouseEvent) => {
+  if (!IsEnabled.value || !attrs.ContextRequested && !instance?.vnode.props?.onContextRequested) return
+  raiseEvent('ContextRequested', event, { TryGetPosition: (relativeTo?: HTMLElement | { Element?: HTMLElement }) => { const target = relativeTo instanceof HTMLElement ? relativeTo : relativeTo?.Element; const bounds = target?.getBoundingClientRect(); return { X: event.clientX - (bounds?.left ?? 0), Y: event.clientY - (bounds?.top ?? 0) } } }); event.preventDefault()
+}
+const onAccelerator = (event: KeyboardEvent) => {
+  if (event.defaultPrevented || event.repeat || !IsEnabled.value) return
+  for (const node of propertyNodes.value.keyboardAccelerators) {
+    const definition = node.props ?? {}, key = String(resolve(definition.Key) ?? ''), modifiers = String(resolve(definition.Modifiers) ?? 'None').split(/[ ,]+/)
+    if (key.toLowerCase() === event.key.toLowerCase() && event.ctrlKey === modifiers.includes('Control') && event.altKey === modifiers.includes('Menu') && event.shiftKey === modifiers.includes('Shift') && event.metaKey === modifiers.includes('Windows') && boolValue(resolve(definition.IsEnabled ?? true))) { event.preventDefault(); invoke(event); return }
   }
-  collect(slots.default?.() ?? []);
-  return { content, flyout };
-});
-const contentNodes = computed(() => propertyNodes.value.content);
-const flyoutNodes = computed(() => propertyNodes.value.flyout);
-const ContentOutlet = defineComponent({ setup() { return () => h(Fragment, contentNodes.value); } });
-
-// Property elements are compiled as component VNodes in normal templates,
-// but sample content can also be normalized through a Fragment or a global
-// component name. Keep the XAML property-element lookup independent of that
-// compiler detail.
-const hasVNodeMarker = (node, marker, componentName) => {
-  const type = node?.type;
-  if (type && (typeof type === 'object' || typeof type === 'function') && type[marker]) return true;
-  return typeof type === 'string' && (type === componentName || type.endsWith(`.${componentName.split('.').pop()}`));
-};
-const flattenVNodes = (nodes) => {
-  const result = [];
-  for (const node of nodes || []) {
-    if (node?.type === Fragment && Array.isArray(node.children)) result.push(...flattenVNodes(node.children));
-    else if (node) result.push(node);
-  }
-  return result;
-};
-const slotVNodes = (node) => {
-  if (Array.isArray(node?.children)) return flattenVNodes(node.children);
-  const slot = node?.children && typeof node.children === 'object' ? node.children.default : undefined;
-  return typeof slot === 'function' ? flattenVNodes(slot()) : [];
-};
-const childVNodes = (node) => {
-  if (!node) return [];
-  if (Array.isArray(node)) return flattenVNodes(node);
-  const children = node.children;
-  if (Array.isArray(children)) return flattenVNodes(children);
-  if (children && typeof children === 'object') {
-    const slots = Object.values(children).filter((value) => typeof value === 'function');
-    return flattenVNodes(slots.flatMap((slot) => {
-      try { return slot(); } catch { return []; }
-    }));
-  }
-  return [];
-};
-const readIconValue = (node) => {
-  if (!node) return undefined;
-  const props = node.props ?? {};
-  for (const key of ['Glyph', 'Symbol', 'Text', 'Icon']) {
-    if (props[key] !== undefined) return resolveXamlValue(props[key], instance);
-  }
-  const nested = childVNodes(node);
-  return nested.length ? readIconValue(nested[0]) : undefined;
-};
-const findIconValue = (nodes) => {
-  for (const node of flattenVNodes(nodes)) {
-    const value = readIconValue(node);
-    if (value !== undefined) return value;
-    const nested = childVNodes(node);
-    const nestedValue = findIconValue(nested);
-    if (nestedValue !== undefined) return nestedValue;
-  }
-  return undefined;
-};
-
-const cssLength = (value) => {
-  if (value === '' || value === undefined || value === null) return '';
-  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) {
-    return `${Number(value.trim())}px`;
-  }
-  return typeof value === 'number' ? `${value}px` : value;
-};
-
-const xamlThickness = (value) => {
-  if (!value) return '';
-  const parts = String(value).split(',').map((part) => cssLength(Number.isNaN(Number(part.trim())) ? part.trim() : Number(part.trim())));
-  if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
-  if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
-  return value;
-};
-
-const propertyFlyout = computed(() => {
-  const menuNode = flyoutNodes.value.find((node) => {
-    return hasVNodeMarker(node, '__menuFlyoutDefinition', 'MenuFlyout');
-  });
-  if (!menuNode) return null;
-  const menuProps = (menuNode.props ?? {}) as Record<string, unknown>;
-  const itemNodes = slotVNodes(menuNode);
-  const items = itemNodes.flatMap((node) => {
-    if (!hasVNodeMarker(node, '__menuFlyoutItem', 'MenuFlyoutItem')) return [];
-    const itemProps = { ...((node.props ?? {}) as Record<string, unknown>) };
-    const itemChildren = slotVNodes(node);
-    const iconNode = itemChildren.find((child) => hasVNodeMarker(child, '__menuFlyoutItemProperty', 'MenuFlyoutItem.Icon'));
-    // Depending on whether the property element was compiled locally or
-    // resolved globally, Vue may retain or flatten the MenuFlyoutItem.Icon
-    // wrapper. Search the complete property subtree so the FontIcon glyph is
-    // preserved in either compiler shape.
-    const iconValue = readIconValue(iconNode) ?? findIconValue(itemChildren);
-    if (iconValue !== undefined) itemProps.Icon = iconValue;
-    return [{
-      ...itemProps,
-      Text: resolveXamlValue(itemProps.Text ?? '', instance),
-      Value: resolveXamlValue(itemProps.Value ?? itemProps.Text, instance),
-      IsEnabled: resolveXamlValue(itemProps.IsEnabled ?? true, instance) !== false
-    }];
-  });
-  return { ...menuProps, Items: items };
-});
-const flyoutDefinition = computed(() => {
-  if (propertyFlyout.value) return propertyFlyout.value;
-  return Array.isArray(props.Flyout) ? { Items: props.Flyout } : props.Flyout || { Items: [] };
-});
-const flyoutPlacement = computed(() => flyoutDefinition.value.Placement || 'Bottom');
-const flyoutItems = computed(() => (flyoutDefinition.value.Items || []).map((item) => {
-  if (typeof item === 'string') {
-    const text = resolveXamlValue(item, instance);
-    return { Text: text, Value: text };
-  }
-  const text = resolveXamlValue(item.Text ?? item.Content ?? item.label ?? String(item), instance);
-  const icon = item.Icon === undefined ? undefined : resolveXamlValue(item.Icon, instance);
-  return { ...item, Text: text, ...(icon === undefined ? {} : { Icon: icon }) };
-}));
-
-const buttonStyle = computed(() => {
-  const style = {};
-  if (props.Width !== '') style.width = cssLength(props.Width);
-  if (props.Height !== '') style.height = cssLength(props.Height);
-  if (props.MinWidth !== '') style.minWidth = cssLength(props.MinWidth);
-  if (props.MinHeight !== '') style.minHeight = cssLength(props.MinHeight);
-  if (props.MaxWidth !== '') style.maxWidth = cssLength(props.MaxWidth);
-  if (props.MaxHeight !== '') style.maxHeight = cssLength(props.MaxHeight);
-  if (props.Margin) style.margin = xamlThickness(props.Margin);
-  if (props.Padding) style.padding = xamlThickness(props.Padding);
-  if (props.HorizontalAlignment) style.justifySelf = props.HorizontalAlignment.toLowerCase();
-  if (props.VerticalAlignment) style.alignSelf = props.VerticalAlignment.toLowerCase();
-  return [attrs.style, style];
-});
-
-const onChevronDown = () => {
-  chevronPressed = true;
-  chevronPressDone = false;
-  chevronClass.value = 'pressing';
-};
-const onChevronUp = () => {
-  if (!chevronPressed) return;
-  releaseChevron();
-};
-const releaseChevron = () => {
-  if (chevronClass.value === '') return;
-  chevronPressed = false;
-  if (chevronPressDone) chevronClass.value = 'releasing';
-};
-const onChevronLeave = releaseChevron;
-const onChevronAnimEnd = (event) => {
-  if (chevronClass.value === 'pressing' && event.animationName === 'chevron-press') {
-    chevronPressDone = true;
-    if (!chevronPressed) chevronClass.value = 'releasing';
-  } else if (chevronClass.value === 'releasing' && event.animationName === 'chevron-release') {
-    chevronClass.value = '';
-    chevronPressDone = false;
-  }
-};
-
-const toggle = (event) => {
-  if (isDisabled.value) return;
-  emit('Click', event);
-  resolveXamlHandler(attrs.Click, instance)?.(event);
-  if (isOpen.value) { isOpen.value = false; return; }
-  const r = wrap.value.getBoundingClientRect();
-  anchorRect.value = { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
-  isOpen.value = true;
-};
-const onSelect = (item) => {
-  emit('Select', item);
-  resolveXamlHandler(attrs.Select, instance)?.(item);
-  isOpen.value = false;
-};
+  if (Command.value?.MatchesKeyboardEvent?.(event)) { event.preventDefault(); invoke(event) }
+}
+watch(IsEnabled, enabled => { glyphInput.Refresh(); if (!enabled) { input.clearPressed(); Flyout.value?.Hide?.() } })
+onMounted(() => document.addEventListener('keydown', onAccelerator))
+onBeforeUnmount(() => { document.removeEventListener('keydown', onAccelerator); Flyout.value?.Hide?.() })
+provide(xamlScopeKey, { ...inject(xamlScopeKey, {}), Content, ContentTemplate, ContentTransitions, RootBackground, RootBorderBrush, Padding, BorderThickness, CornerRadius, BackgroundSizing, HorizontalContentAlignment, VerticalContentAlignment, ChevronForeground })
 </script>
+
 <style>
-  .win-dd-chevron {
-    font-size: 0;
-  }
-
-  .win-dropdown-btn-wrap {
-    position: relative;
-    display: inline-flex;
-  }
-
-  .win-dropdown-btn {
-    gap: 8px;
-  }
-
-  .win-dropdown-content {
-    display: inline-flex;
-    align-items: center;
-    min-width: 0;
-  }
+.win-dropdown-button { position: relative; display: inline-grid; box-sizing: border-box; min-width: 0; max-width: 100%; min-height: 0; margin: 0; border: 0; padding: 0; background: transparent; font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif); font-size: 14px; font-weight: normal; line-height: 19px; user-select: none; outline: none; cursor: default; }
+.win-dropdown-root-grid { width: 100%; height: 100%; min-width: 0; min-height: 0; border-color: transparent !important; overflow: hidden; transition: background-color 83ms linear; }
+.win-dropdown-content-presenter { min-width: 0; max-width: 100%; min-height: 0; color: inherit; }
+.win-dropdown-chevron { pointer-events: none; align-self: center !important; }
+.win-dropdown-button::after { content: ""; position: absolute; inset: 0; padding: var(--DropDownButtonBorderThickness, 1px); border-radius: inherit; background: var(--DropDownButtonBorderBrushCurrent); pointer-events: none; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; }
+.win-dropdown-button.system-focus:focus-visible { outline: 2px solid var(--FocusStrokeColorOuterBrush, var(--text-primary)); box-shadow: inset 0 0 0 1px var(--FocusStrokeColorInnerBrush, var(--app-bg)); }
+.win-dropdown-button:disabled { pointer-events: none; }
 </style>

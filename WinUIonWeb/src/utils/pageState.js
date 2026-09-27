@@ -74,3 +74,9 @@ export const createPageState = (pageKey) => {
 
 export const getStoredFavorites = readFavorites;
 export const favoritesStorageKey = FAVORITES_KEY;
+export const pruneStoredFavorites = (validIds) => {
+  const current = readFavorites();
+  const valid = [...new Set(current.filter(id => typeof id === 'string' && validIds.has(id)))];
+  if (JSON.stringify(valid) !== JSON.stringify(current)) writeFavorites(valid);
+  return valid;
+};

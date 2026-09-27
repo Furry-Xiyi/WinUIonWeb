@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="rootRef"
     class="win-rating-control"
     :class="stateClasses"
     :style="rootStyle"
@@ -9,6 +10,7 @@
     :aria-valuenow="ariaValue"
     :aria-readonly="resolvedIsReadOnly"
     :aria-disabled="!isEnabled"
+    :aria-label="automationName"
     :tabindex="isEnabled ? 0 : -1"
     @keydown="onKeyDown">
     <div class="win-rating-caption-stack">
@@ -76,11 +78,19 @@ const props = defineProps({
 });
 const instance = getCurrentInstance();
 const attrs = useAttrs();
-const resolvedCaption = computed(() => resolveXamlValue(props.Caption, instance));
+const rootRef = ref(null);
+const captionOverride = ref(undefined);
+const placeholderOverride = ref(undefined);
+const captionSource = computed(() => resolveXamlValue(props.Caption, instance));
+watch(captionSource, () => { captionOverride.value = undefined; });
+const resolvedCaption = computed(() => captionOverride.value ?? captionSource.value);
+const automationName = computed(() => resolveXamlValue(attrs['AutomationProperties.Name'], instance));
 const RatingCaption = computed(() => resolvedCaption.value);
 const resolvedValue = computed(() => resolveXamlValue(props.Value, instance));
 const resolvedMaxRating = computed(() => resolveXamlValue(props.MaxRating, instance));
-const resolvedPlaceholderValue = computed(() => resolveXamlValue(props.PlaceholderValue, instance));
+const placeholderSourceValue = computed(() => resolveXamlValue(props.PlaceholderValue, instance));
+watch(placeholderSourceValue, () => { placeholderOverride.value = undefined; });
+const resolvedPlaceholderValue = computed(() => placeholderOverride.value ?? placeholderSourceValue.value);
 const resolvedInitialSetValue = computed(() => resolveXamlValue(props.InitialSetValue, instance));
 const resolvedIsClearEnabled = computed(() => resolveXamlValue(props.IsClearEnabled, instance) !== false);
 const resolvedIsReadOnly = computed(() => resolveXamlValue(props.IsReadOnly, instance) === true);
@@ -205,13 +215,44 @@ const commitRating = (newRating, originatedFromMouse = false) => {
 
   if (nextValue !== oldValue) {
     internalValue.value = nextValue;
+    updateXamlBinding(props.Value, nextValue, instance);
     emit('update:Value', nextValue);
     emit('update:modelValue', nextValue);
     const args = { OldValue: oldValue, NewValue: nextValue };
-    emit('ValueChanged', args);
-    resolveXamlHandler(attrs.ValueChanged, instance)?.(args);
+    emit('ValueChanged', publicApi, args);
+    if (!instance?.vnode.props?.onValueChanged) resolveXamlHandler(attrs.ValueChanged, instance)?.(publicApi, args);
   }
 };
+
+const publicApi = {
+  get Value() { return internalValue.value; },
+  set Value(value) {
+    const oldValue = internalValue.value;
+    const nextValue = coerceRatingValue(value);
+    if (oldValue === nextValue) return;
+    internalValue.value = nextValue;
+    updateXamlBinding(props.Value, internalValue.value, instance);
+    emit('update:Value', internalValue.value);
+    const args = { OldValue: oldValue, NewValue: nextValue };
+    emit('ValueChanged', publicApi, args);
+    if (!instance?.vnode.props?.onValueChanged) resolveXamlHandler(attrs.ValueChanged, instance)?.(publicApi, args);
+  },
+  get Caption() { return resolvedCaption.value; },
+  set Caption(value) {
+    captionOverride.value = String(value ?? '');
+    updateXamlBinding(props.Caption, captionOverride.value, instance);
+  },
+  get PlaceholderValue() { return placeholderValue.value; },
+  set PlaceholderValue(value) {
+    placeholderOverride.value = coerceRatingValue(value);
+    updateXamlBinding(props.PlaceholderValue, placeholderOverride.value, instance);
+  },
+  get IsReadOnly() { return resolvedIsReadOnly.value; },
+  get IsClearEnabled() { return resolvedIsClearEnabled.value; },
+  get IsEnabled() { return isEnabled.value; },
+  get Element() { return rootRef.value; }
+};
+defineExpose(publicApi);
 
 provide(xamlScopeKey, { RatingCaption });
 

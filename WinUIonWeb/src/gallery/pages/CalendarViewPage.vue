@@ -1,244 +1,145 @@
 <template>
   <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div style="position: relative;" class="page-heading">
-          <TextBlock class="page-header" :Text="$t('text.calendarview')" />
-          <TextBlock
-            class="page-description"
-            :Text="$t('text.the-calendarview-gives-a-standardized-way-to-let')"
-            TextWrapping="WrapWholeWords" />
-          <div class="page-header-actions">
-            <Button class="header-action" @click="toggleTheme">
-              <span class="icon"></span>
-            </Button>
-            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-             >
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
-            </ToggleButton>
-          </div>
-        </div>
-      <div class="gallery-page-content">
-        <ControlExample
-              class="basic-input-example-theme"
-              :headerText="$t('text.a-basic-calendar-view')"
-              :theme="pageTheme"
-              :vue="example1Vue">
-              <template #example>
-                <CalendarView
-                  :CalendarIdentifier="CalendarIdentifier"
-                  :IsGroupLabelVisible="IsGroupLabelVisible"
-                  :IsOutOfScopeEnabled="IsOutOfScopeEnabled"
-                  :SelectionMode="SelectionMode"
-                  :Language="Language" />
-              </template>
+    <StackPanel class="gallery-item-page">
+      <StackPanel class="page-heading">
+        <TextBlock class="page-header" Text="{x:Bind pageTitle, Mode=OneWay}" />
+        <TextBlock class="page-description" Text="{x:Bind pageDescription, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+        <StackPanel class="page-header-actions" Orientation="Horizontal">
+          <Button class="header-action" Click="toggleTheme" AutomationProperties.Name="{x:Bind themeLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind themeLabel, Mode=OneWay}">
+            <TextBlock class="icon" Text="&#xE793;" />
+          </Button>
+          <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=TwoWay}" Click="toggleFavorite" AutomationProperties.Name="{x:Bind favoriteLabel, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind favoriteLabel, Mode=OneWay}">
+            <TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" />
+          </ToggleButton>
+        </StackPanel>
+      </StackPanel>
 
-              <template #options>
-                <div class="options-panel">
-                  <CheckBox v-model="IsGroupLabelVisible"><TextBlock Text="IsGroupLabelVisible" /></CheckBox>
-                  <CheckBox v-model="IsOutOfScopeEnabled"><TextBlock Text="IsOutOfScopeEnabled" /></CheckBox>
-
-                  <div class="option-group">
-                    <ComboBox v-model:SelectedIndex="selectionModeIndex" Header="SelectionMode" :ItemsSource="selectionModes" style="width: 220px;" />
-                  </div>
-
-                  <div class="option-group">
-                    <ComboBox v-model:SelectedIndex="calendarIdentifierIndex" Header="CalendarIdentifier" :ItemsSource="calendarIdentifiers" DisplayMemberPath="label" style="width: 220px;" />
-                  </div>
-
-                  <div class="option-group">
-                    <ComboBox v-model:SelectedIndex="languageIndex" Header="Language" :ItemsSource="languages" DisplayMemberPath="label" style="width: 220px;" />
-                  </div>
-                </div>
-              </template>
-            </ControlExample>
-      </div>
-    </div>
+      <StackPanel class="gallery-page-content">
+        <ControlExample x:Name="ExampleAccessories" HeaderText="{x:Bind exampleHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind exampleXaml, Mode=OneWay}">
+          <ControlExample.Example>
+            <CalendarView
+              x:Name="Control1"
+              VerticalAlignment="Top"
+              CalendarIdentifier="{x:Bind CalendarIdentifier, Mode=OneWay}"
+              IsGroupLabelVisible="{x:Bind IsGroupLabelVisible, Mode=OneWay}"
+              IsOutOfScopeEnabled="{x:Bind IsOutOfScopeEnabled, Mode=OneWay}"
+              SelectionMode="{x:Bind SelectionMode, Mode=OneWay}"
+              Language="{x:Bind Language, Mode=OneWay}" />
+          </ControlExample.Example>
+          <ControlExample.Output />
+          <ControlExample.Options>
+            <StackPanel class="calendar-options" Margin="0,-5,0,0">
+              <CheckBox x:Name="isGroupLabelVisible" Content="{x:Bind groupLabelVisibleLabel, Mode=OneWay}" IsChecked="{x:Bind IsGroupLabelVisible, Mode=TwoWay}" />
+              <CheckBox x:Name="isOutOfScopeEnabled" Content="{x:Bind outOfScopeEnabledLabel, Mode=OneWay}" IsChecked="{x:Bind IsOutOfScopeEnabled, Mode=TwoWay}" />
+              <ComboBox
+                x:Name="selectionMode"
+                Margin="0,10,0,0"
+                Header="{x:Bind selectionModeLabel, Mode=OneWay}"
+                ItemsSource="{x:Bind selectionModes, Mode=OneWay}"
+                DisplayMemberPath="Name"
+                SelectedValuePath="Value"
+                SelectedValue="{x:Bind SelectionMode, Mode=TwoWay}"
+                SelectionChanged="SelectionMode_SelectionChanged" />
+              <ComboBox
+                x:Name="calendarIdentifier"
+                Width="220"
+                Margin="0,10,0,0"
+                Header="{x:Bind calendarIdentifierLabel, Mode=OneWay}"
+                ItemsSource="{x:Bind calendarIdentifiers, Mode=OneWay}"
+                DisplayMemberPath="Name"
+                SelectedValuePath="Value"
+                SelectedValue="{x:Bind CalendarIdentifier, Mode=TwoWay}" />
+              <ComboBox
+                x:Name="calendarLanguages"
+                Width="220"
+                Margin="0,10,0,0"
+                Header="{x:Bind languageLabel, Mode=OneWay}"
+                ItemsSource="{x:Bind Languages, Mode=OneWay}"
+                SelectedIndex="0"
+                SelectionChanged="calendarLanguages_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="helper:Language">
+                    <TextBlock Text="{x:Bind Name}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+          </ControlExample.Options>
+        </ControlExample>
+      </StackPanel>
+    </StackPanel>
   </ScrollViewer>
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue';
-import Button from '../../components/Button.vue';
-import CalendarView from '../../components/CalendarView.vue';
-import CheckBox from '../../components/CheckBox.vue';
-import ComboBox from '../../components/ComboBox.vue';
-import ControlExample from '../../components/ControlExample.vue';
-import TextBlock from '../../components/TextBlock.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import { createPageState } from '../../utils/pageState';
+import { computed, inject, ref } from 'vue'
+import Button from '../../components/Button.vue'
+import CalendarView from '../../components/CalendarView.vue'
+import CheckBox from '../../components/CheckBox.vue'
+import ComboBox from '../../components/ComboBox.vue'
+import ControlExample from '../../components/ControlExample.vue'
+import { DataTemplate } from '../../components/CollectionProperties'
+import ScrollViewer from '../../components/ScrollViewer.vue'
+import StackPanel from '../../components/StackPanel.vue'
+import TextBlock from '../../components/TextBlock.vue'
+import ToggleButton from '../../components/ToggleButton.vue'
+import { useI18n } from '../../components/i18n/index'
+import { createPageState } from '../../utils/pageState'
+import { calendarIdentifierValues, calendarLanguageCodes } from '../samples/CalendarSamples'
 
-import { useI18n } from '../../components/i18n/index';
+const { t } = useI18n()
+const pageTitle = t('text.calendarview')
+const pageDescription = t('text.the-calendarview-gives-a-standardized-way-to-let')
+const exampleHeader = t('text.a-basic-calendar-view')
+const themeLabel = t('gallery.page-header.toggle-theme')
+const favoriteLabel = t('gallery.page-header.favorite')
+const groupLabelVisibleLabel = t('sample.calendarview.is-group-label-visible')
+const outOfScopeEnabledLabel = t('sample.calendarview.is-out-of-scope-enabled')
+const selectionModeLabel = t('sample.calendarview.selection-mode')
+const calendarIdentifierLabel = t('sample.calendarview.calendar-identifier')
+const languageLabel = t('sample.calendarview.language')
+const currentPage = inject('currentPage')
+const pageKey = computed(() => currentPage?.value || 'calendarview')
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value)
+const favoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
-const { t } = useI18n();
-const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'calendarview');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const IsGroupLabelVisible = ref(true)
+const IsOutOfScopeEnabled = ref(true)
+const SelectionMode = ref('Single')
+const CalendarIdentifier = ref('GregorianCalendar')
+const Language = ref('en')
+const selectionModes = ['None', 'Single', 'Multiple'].map((Value) => ({
+  Name: t(`sample.calendarview.selection.${Value}`), Value
+}))
+const calendarIdentifiers = calendarIdentifierValues.map((Value) => ({
+  Name: t(`sample.calendarview.calendar.${Value}`), Value
+}))
+const Languages = calendarLanguageCodes.map((Code) => ({
+  Name: t(`sample.calendarview.language.${Code}`), Code
+}))
 
-const IsGroupLabelVisible = ref(true);
-const IsOutOfScopeEnabled = ref(true);
+const SelectionMode_SelectionChanged = (sender) => {
+  const value = sender.SelectedValue
+  if (selectionModes.some((item) => item.Value === value)) SelectionMode.value = value
+}
+const calendarLanguages_SelectionChanged = (sender) => {
+  const language = sender.SelectedItem
+  if (language && Languages.some((item) => item.Code === language.Code)) Language.value = language.Code
+}
 
-const selectionModes = [
-  'None',
-  'Single',
-  'Multiple'
-];
-const selectionModeIndex = ref(1);
-const SelectionMode = computed(() => selectionModes[selectionModeIndex.value]);
-
-const calendarIdentifiers = [
-  { label: t('text.gregoriancalendar'), value: 'GregorianCalendar' },
-  { label: t('text.hebrewcalendar'), value: 'HebrewCalendar' },
-  { label: t('text.hijricalendar'), value: 'HijriCalendar' },
-  { label: t('text.japanesecalendar'), value: 'JapaneseCalendar' },
-  { label: t('text.juliancalendar'), value: 'JulianCalendar' },
-  { label: t('text.koreancalendar'), value: 'KoreanCalendar' },
-  { label: t('text.persiancalendar'), value: 'PersianCalendar' },
-  { label: t('text.taiwancalendar'), value: 'TaiwanCalendar' },
-  { label: t('text.thaicalendar'), value: 'ThaiCalendar' },
-  { label: t('text.umalquracalendar'), value: 'UmAlQuraCalendar' }
-];
-const calendarIdentifierIndex = ref(0);
-const CalendarIdentifier = computed(() => calendarIdentifiers[calendarIdentifierIndex.value].value);
-
-const languages = [
-  { label: 'English', value: 'en' },
-  { label: 'Arabic', value: 'ar' },
-  { label: 'Afrikaans', value: 'af' },
-  { label: 'Albanian', value: 'sq' },
-  { label: 'Amharic', value: 'am' },
-  { label: 'Armenian', value: 'hy' },
-  { label: 'Assamese', value: 'as' },
-  { label: 'Azerbaijani', value: 'az' },
-  { label: 'Basque', value: 'eu' },
-  { label: 'Belarusian', value: 'be' },
-  { label: 'Bangla', value: 'bn' },
-  { label: 'Bosnian', value: 'bs' },
-  { label: 'Bulgarian', value: 'bg' },
-  { label: 'Catalan', value: 'ca' },
-  { label: 'Chinese (Simplified)', value: 'zh' },
-  { label: 'Croatian', value: 'hr' },
-  { label: 'Czech', value: 'cs' },
-  { label: 'Danish', value: 'da' },
-  { label: 'Dari', value: 'prs' },
-  { label: 'Dutch', value: 'nl' },
-  { label: 'Estonian', value: 'et' },
-  { label: 'Filipino', value: 'fil' },
-  { label: 'Finnish', value: 'fi' },
-  { label: 'French', value: 'fr' },
-  { label: 'Galician', value: 'gl' },
-  { label: 'Georgian', value: 'ka' },
-  { label: 'German', value: 'de' },
-  { label: 'Greek', value: 'el' },
-  { label: 'Gujarati', value: 'gu' },
-  { label: 'Hausa', value: 'ha' },
-  { label: 'Hebrew', value: 'he' },
-  { label: 'Hindi', value: 'hi' },
-  { label: 'Hungarian', value: 'hu' },
-  { label: 'Icelandic', value: 'is' },
-  { label: 'Indonesian', value: 'id' },
-  { label: 'Irish', value: 'ga' },
-  { label: 'isiXhosa', value: 'xh' },
-  { label: 'isiZulu', value: 'zu' },
-  { label: 'Italian', value: 'it' },
-  { label: 'Japanese', value: 'ja' },
-  { label: 'Kannada', value: 'kn' },
-  { label: 'Kazakh', value: 'kk' },
-  { label: 'Khmer', value: 'km' },
-  { label: 'Kinyarwanda', value: 'rw' },
-  { label: 'KiSwahili', value: 'sw' },
-  { label: 'Konkani', value: 'kok' },
-  { label: 'Korean', value: 'ko' },
-  { label: 'Lao', value: 'lo' },
-  { label: 'Latvian', value: 'lv' },
-  { label: 'Lithuanian', value: 'lt' },
-  { label: 'Luxembourgish', value: 'lb' },
-  { label: 'Macedonian', value: 'mk' },
-  { label: 'Malay', value: 'ms' },
-  { label: 'Malayalam', value: 'ml' },
-  { label: 'Maltese', value: 'mt' },
-  { label: 'Maori', value: 'mi' },
-  { label: 'Marathi', value: 'mr' },
-  { label: 'Nepali', value: 'ne' },
-  { label: 'Norwegian', value: 'nb' },
-  { label: 'Odia', value: 'or' },
-  { label: 'Persian', value: 'fa' },
-  { label: 'Polish', value: 'pl' },
-  { label: 'Portuguese', value: 'pt' },
-  { label: 'Punjabi', value: 'pa' },
-  { label: 'Quechua', value: 'quz' },
-  { label: 'Romanian', value: 'ro' },
-  { label: 'Russian', value: 'ru' },
-  { label: 'Serbian (Latin)', value: 'sr' },
-  { label: 'Sesotho sa Leboa', value: 'nso' },
-  { label: 'Setswana', value: 'tn' },
-  { label: 'Sinhala', value: 'si' },
-  { label: 'Slovak', value: 'sk' },
-  { label: 'Slovenian', value: 'sl' },
-  { label: 'Spanish', value: 'es' },
-  { label: 'Swedish', value: 'sv' },
-  { label: 'Tamil', value: 'ta' },
-  { label: 'Telugu', value: 'te' },
-  { label: 'Thai', value: 'th' },
-  { label: 'Tigrinya', value: 'ti' },
-  { label: 'Turkish', value: 'tr' },
-  { label: 'Ukrainian', value: 'uk' },
-  { label: 'Urdu', value: 'ur' },
-  { label: 'Uzbek (Latin)', value: 'uz' },
-  { label: 'Vietnamese', value: 'vi' },
-  { label: 'Welsh', value: 'cy' },
-  { label: 'Wolof', value: 'wo' }
-];
-const languageIndex = ref(0);
-const Language = computed(() => languages[languageIndex.value].value);
-
-const example1Vue = `<CalendarView
-  :CalendarIdentifier="CalendarIdentifier"
-  :IsGroupLabelVisible="IsGroupLabelVisible"
-  :IsOutOfScopeEnabled="IsOutOfScopeEnabled"
-  :SelectionMode="SelectionMode"
-  :Language="Language" />`;
-
+const exampleXaml = computed(() => `<CalendarView
+    SelectionMode="${SelectionMode.value}"
+    IsGroupLabelVisible="${IsGroupLabelVisible.value ? 'True' : 'False'}"
+    IsOutOfScopeEnabled="${IsOutOfScopeEnabled.value ? 'True' : 'False'}"
+    Language="${Language.value}"
+    CalendarIdentifier="${CalendarIdentifier.value}" />`)
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.options-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.option-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.icon {
-  font-size: 16px;
-}
+.page-heading { position: relative; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 72px 8px 0; }
+.page-description { font-size: 14px; color: var(--text-secondary); margin: 0 72px 16px 0; line-height: 1.5; }
+.page-header-actions { position: absolute; top: 0; right: 0; gap: 4px; }
+.icon { font-size: 16px; }
+.calendar-options { width: 220px; max-width: 100%; }
 </style>

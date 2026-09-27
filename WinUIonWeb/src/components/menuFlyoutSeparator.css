@@ -1,0 +1,12 @@
+.win-menu-flyout-separator {
+  display: grid;
+  align-items: center;
+  flex: 0 0 auto;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.win-menu-flyout-separator-line {
+  height: var(--MenuFlyoutSeparatorHeight, 1px);
+  background: var(--MenuFlyoutSeparatorBackground, var(--DividerStrokeColorDefaultBrush, var(--stroke-divider)));
+}

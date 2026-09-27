@@ -1,56 +1,14 @@
-import { defineComponent, h, type VNode } from 'vue'
+import { defineComponent, type VNode } from 'vue'
 
-export const DropDownButtonFlyout = defineComponent({
-  name: 'DropDownButton.Flyout',
-  __dropDownButtonProperty: 'flyout',
-  setup(_, { slots }) {
-    return () => h('span', { class: 'dropdown-button-property' }, slots.default?.())
-  }
+const property = (name: string, key: 'flyout' | 'content' | 'keyboardAccelerators') => defineComponent({
+  name: `DropDownButton.${name}`, __dropDownButtonProperty: key, setup() { return () => null }
 })
-
-export const DropDownButtonContent = defineComponent({
-  name: 'DropDownButton.Content',
-  __dropDownButtonProperty: 'content',
-  setup(_, { slots }) {
-    return () => h('span', { class: 'dropdown-button-property' }, slots.default?.())
-  }
-})
-
-export const MenuFlyout = defineComponent({
-  name: 'MenuFlyout',
-  __menuFlyoutDefinition: true,
-  props: {
-    Placement: { type: String, default: 'Bottom' },
-    Theme: { type: String, default: '' }
-  },
-  setup(props, { slots }) {
-    return () => h('span', { class: 'menu-flyout-definition', 'data-placement': props.Placement }, slots.default?.())
-  }
-})
-
-export const MenuFlyoutItem = defineComponent({
-  name: 'MenuFlyoutItem',
-  __menuFlyoutItem: true,
-  props: {
-    Text: { type: String, default: '' },
-    Icon: { type: [String, Object], default: '' },
-    Value: { type: [String, Number, Boolean], default: undefined },
-    IsEnabled: { type: Boolean, default: true }
-  },
-  setup() {
-    return () => null
-  }
-})
-
-export const MenuFlyoutItemIcon = defineComponent({
-  name: 'MenuFlyoutItem.Icon',
-  __menuFlyoutItemProperty: 'icon',
-  setup(_, { slots }) {
-    return () => h('span', { class: 'menu-flyout-item-property' }, slots.default?.())
-  }
-})
-
-export const getDropDownButtonProperty = (node: VNode): 'flyout' | 'content' | undefined => {
-  const type = node.type as { __dropDownButtonProperty?: 'flyout' | 'content' } | undefined
-  return type?.__dropDownButtonProperty
+export const DropDownButtonFlyout = property('Flyout', 'flyout')
+export const DropDownButtonContent = property('Content', 'content')
+export const DropDownButtonKeyboardAccelerators = property('KeyboardAccelerators', 'keyboardAccelerators')
+export const getDropDownButtonProperty = (node: VNode): 'flyout' | 'content' | 'keyboardAccelerators' | undefined => {
+  const type = node.type as { name?: string; __name?: string; __dropDownButtonProperty?: 'flyout' | 'content' | 'keyboardAccelerators' } | string
+  if (typeof type !== 'string' && type?.__dropDownButtonProperty) return type.__dropDownButtonProperty
+  const name = typeof type === 'string' ? type : type?.name ?? type?.__name
+  return ({ 'DropDownButton.Flyout': 'flyout', 'DropDownButton.Content': 'content', 'DropDownButton.KeyboardAccelerators': 'keyboardAccelerators' } as const)[name ?? '']
 }

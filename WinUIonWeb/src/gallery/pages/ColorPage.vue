@@ -3,12 +3,12 @@
     <div class="page-header-section page-heading">
           <h1 class="page-header">Color</h1>
           <div class="page-header-actions">
-            <Button class="header-action" @click="toggleTheme">
-              <span class="icon">&#xE793;</span>
+            <Button class="header-action" Click="toggleTheme">
+              <FontIcon class="icon" Glyph="&#xe793;" />
             </Button>
-            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite">
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            <ToggleButton class="header-action" IsChecked="{x:Bind isFavoriteState, Mode=OneWay}"
+              Click="toggleFavorite">
+              <FontIcon class="icon" Glyph="{x:Bind ButtonContent1, Mode=OneWay}" />
             </ToggleButton>
           </div>
         </div>
@@ -38,6 +38,8 @@
 </template>
 
 <script setup>
+import FontIcon from '../../components/FontIcon.vue';
+import { computed as ButtonContentComputed, unref as ButtonContentUnref } from 'vue';
 import { computed, inject, ref, shallowRef } from 'vue';
 import Button from '../../components/Button.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
@@ -83,6 +85,7 @@ const onSectionChanged = (sender) => {
   selectedSection.value = index;
   currentSectionComponent.value = sections[index];
 };
+const ButtonContent1 = ButtonContentComputed(() => ButtonContentUnref(isFavoriteState) ? '' : '');
 </script>
 
 <style scoped>

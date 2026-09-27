@@ -1,850 +1,392 @@
 <template>
+  <span ref="anchor" class="commandbar-flyout-anchor" aria-hidden="true"></span>
+  <DeclarationOutlet />
   <Teleport to="body">
-    <Transition name="cbf-flyout">
-      <div
-        v-if="isOpen"
-        ref="flyoutRef"
-        class="win-commandbar-flyout"
-        :class="[themeClass, `placement-${actualPlacement.toLowerCase()}`, panelStateClasses]"
-        :style="flyoutStyle"
-        role="menu"
-        @keydown="onKeydown"
-        @pointerdown.stop>
-        <div class="win-cbf-layout-root">
-          <div class="win-cbf-outer-content-root">
-            <div class="win-cbf-content-root">
-              <div class="win-cbf-primary-items-root">
-                <div v-if="primaryCommands.length" class="win-cbf-primary-items-control" role="toolbar">
-                  <CommandBar
-                    class="win-cbf-commandbar"
-                    :IsOpen="true"
-                    :IsSticky="true"
-                    :IsDynamicOverflowEnabled="false"
-                    OverflowButtonVisibility="Collapsed"
-                    DefaultLabelPosition="Collapsed"
-                    HorizontalAlignment="Left"
-                    :PrimaryCommands="commandBarPrimaryCommands"
-                    :SecondaryCommands="[]"
-                    :Theme="Theme" />
-                </div>
-
-                <button
-                  v-if="secondaryCommands.length && !AlwaysExpanded"
-                  class="win-cbf-more-button"
-                  type="button"
-                  :aria-label="secondaryOpen ? t('text.see-less') : t('text.see-more')"
-                  v-bind="{ 'tooltipservice.tooltip': secondaryOpen ? t('text.see-less') : t('text.see-more') }"
-                  :aria-expanded="secondaryOpen"
-                  @click="toggleSecondary">
-                  <span class="win-cbf-ellipsis-icon" aria-hidden="true">&#xE712;</span>
-                </button>
-              </div>
-
-              <div v-if="secondaryPanelVisible" class="win-cbf-outer-overflow-content-root">
-                <div class="win-cbf-overflow-content-root">
-                  <div class="win-cbf-secondary-items-control" role="menu">
-                    <button
-                      v-for="command in secondaryCommands"
-                      :key="commandKey(command)"
-                      class="win-cbf-overflow-button"
-                      :class="secondaryCommandClasses(command)"
-                      type="button"
-                      role="menuitem"
-                      :aria-label="command.Label"
-                      :aria-haspopup="command.Flyout ? 'menu' : undefined"
-                      :aria-pressed="command.IsToggle ? Boolean(command.IsChecked) : undefined"
-                      v-bind="commandToolTipAttrs(command)"
-                      :disabled="command.IsEnabled === false"
-                      @click="invoke(command, $event)">
-                      <span v-if="command.IsToggle" class="win-cbf-overflow-check" aria-hidden="true">&#xE73E;</span>
-                      <span
-                        v-if="secondaryHasIcon"
-                        class="win-cbf-overflow-icon"
-                        :class="{ 'is-placeholder': !command.Icon }"
-                        aria-hidden="true">{{ command.Icon ? iconGlyph(command.Icon) : '' }}</span>
-                      <span class="win-cbf-overflow-label">{{ command.Label }}</span>
-                      <span v-if="command.KeyboardAcceleratorTextOverride" class="win-cbf-overflow-accelerator">
-                        {{ command.KeyboardAcceleratorTextOverride }}
-                      </span>
-                      <span v-if="command.Flyout" class="win-cbf-overflow-chevron" aria-hidden="true">&#xE76C;</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div v-show="isPresent" ref="flyout" class="win-commandbar-flyout" :class="[themeClass, { 'is-positioning': !positioned, 'is-closing': !isOpen, 'is-expanded': expandedPresent, 'is-expanding': suppressShadow, 'has-primary': primaryCommands.length > 0, 'has-primary-labels': hasPrimaryLabels, 'expands-up': expandsUp }]" :style="flyoutStyle" :data-theme="theme" role="menu" tabindex="-1" @keydown="onKeyDown" @pointerdown.stop>
+      <div class="win-cbf-layout-root"><div class="win-cbf-outer-content-root"><div class="win-cbf-content-root">
+        <div v-show="primaryCommands.length || showMore" ref="primaryRoot" class="win-cbf-primary-items-root" v-acrylic-backdrop="[flyoutBackdropStyle, flyoutBackgroundStyle]" v-theme-shadow="{ Translation: 32, Theme: theme, Enabled: isOpen && primaryCommands.length > 0 && !suppressShadow }">
+          <div class="win-cbf-material-layer" data-menu-material="PrimaryItemsSystemBackdropRoot" :style="flyoutBackdropStyle" v-acrylic-brush.no-backdrop="flyoutBackdropStyle" aria-hidden="true"></div>
+          <div class="win-cbf-material-layer" data-menu-material="Background" :style="flyoutBackgroundStyle" v-acrylic-brush.no-backdrop="flyoutBackgroundStyle" aria-hidden="true"></div>
+          <div ref="primaryMount" class="win-cbf-primary-items-control" role="toolbar"></div>
+          <button v-if="showMore" v-bind="moreButtonAttributes" class="commandbar-more-button win-cbf-more-button" type="button" tabindex="-1" :aria-label="moreButtonLabel" :aria-expanded="expanded" @pointerdown.prevent @click="setExpanded(!expanded)">
+            <span class="commandbar-ellipsis-content"><span class="commandbar-ellipsis-icon" aria-hidden="true">&#xE712;</span></span>
+          </button>
+        </div>
+        <div v-show="expandedPresent" ref="overflowRoot" class="win-cbf-outer-overflow-content-root" v-acrylic-backdrop="[flyoutBackdropStyle, flyoutBackgroundStyle]" v-theme-shadow="{ Translation: 32, Theme: theme, Enabled: isPresent && expandedPresent && (!primaryCommands.length || !expandsUp) }">
+          <div class="win-cbf-overflow-content-root">
+            <div class="win-cbf-material-layer" data-menu-material="OverflowPopupSystemBackdropRoot" :style="flyoutBackdropStyle" v-acrylic-brush.no-backdrop="flyoutBackdropStyle" aria-hidden="true"></div>
+            <div class="win-cbf-material-layer" data-menu-material="Background" :style="flyoutBackgroundStyle" v-acrylic-brush.no-backdrop="flyoutBackgroundStyle" aria-hidden="true"></div>
+            <div ref="secondaryMount" class="win-cbf-secondary-items-control" role="menu"></div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </div></div></div>
+      <CommandPortal v-for="entry in entries" :key="entry.id" :node="entry.node" :host="entry.host" :overflow="entry.secondary || overflowIds.has(entry.id)" :context="commonContext" />
+    </div>
   </Teleport>
 </template>
 
-<script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import type { CSSProperties } from 'vue';
-import AppBarButton from './AppBarButton.vue';
-import AppBarToggleButton from './AppBarToggleButton.vue';
-import CommandBar from './CommandBar.vue';
-import { useI18n } from './i18n/index';
-
-const { t } = useI18n();
-
-type Placement =
-  | 'Auto'
-  | 'Top'
-  | 'Bottom'
-  | 'Left'
-  | 'Right'
-  | 'TopEdgeAlignedLeft'
-  | 'TopEdgeAlignedRight'
-  | 'BottomEdgeAlignedLeft'
-  | 'BottomEdgeAlignedRight'
-  | 'LeftEdgeAlignedTop'
-  | 'LeftEdgeAlignedBottom'
-  | 'RightEdgeAlignedTop'
-  | 'RightEdgeAlignedBottom';
-
-type ShowMode = 'Standard' | 'Transient';
-type AnchorRect = DOMRect | { top: number; bottom: number; left: number; right: number; width: number; height: number; x?: number; y?: number };
-type CommandBarFlyoutCommand = {
-  Name?: string;
-  Label: string;
-  Icon?: string;
-  Click?: (command: CommandBarFlyoutCommand, event: MouseEvent) => void;
-  'ToolTipService.ToolTip'?: string;
-  KeyboardAcceleratorTextOverride?: string;
-  Flyout?: unknown;
-  IsEnabled?: boolean;
-  IsToggle?: boolean;
-  IsChecked?: boolean;
+<script lang="ts">
+import { commandBarProperty } from './commandBarRuntime';
+export default {
+  PrimaryCommands: commandBarProperty('CommandBarFlyout', 'PrimaryCommands'),
+  SecondaryCommands: commandBarProperty('CommandBarFlyout', 'SecondaryCommands')
 };
-
-const props = withDefaults(defineProps<{
-  Open?: boolean;
-  AnchorRect?: AnchorRect | null;
-  PrimaryCommands?: CommandBarFlyoutCommand[];
-  SecondaryCommands?: CommandBarFlyoutCommand[];
-  AlwaysExpanded?: boolean;
-  Placement?: Placement;
-  ShowMode?: ShowMode;
-  MinWidth?: number;
-  Theme?: string;
-}>(), {
-  Open: false,
-  AnchorRect: null,
-  PrimaryCommands: () => [],
-  SecondaryCommands: () => [],
-  AlwaysExpanded: false,
-  Placement: 'Auto',
-  ShowMode: 'Standard',
-  MinWidth: 0,
-  Theme: ''
-});
-
-const emit = defineEmits<{
-  Close: [];
-  Click: [command: CommandBarFlyoutCommand, event: MouseEvent];
-  Opening: [];
-  Opened: [];
-  Closing: [];
-  Closed: [];
-}>();
-
-const flyoutRef = ref<HTMLElement | null>(null);
-const isOpen = ref(props.Open);
-const secondaryOpen = ref(props.AlwaysExpanded);
-const secondaryRendered = ref(props.AlwaysExpanded);
-const panelAnimation = ref<'expanding-setup' | 'expanding' | 'collapsing' | ''>('');
-const collapsedClip = ref({ right: '0px', bottom: '0px' });
-const anchorRect = ref<AnchorRect | null>(props.AnchorRect);
-const actualPlacement = ref<Placement>(props.Placement);
-const position = ref({ top: 0, left: 0 });
-const primaryCommands = computed(() => props.PrimaryCommands ?? []);
-const secondaryCommands = computed(() => props.SecondaryCommands ?? []);
-const secondaryHasIcon = computed(() => secondaryCommands.value.some((command) => Boolean(command.Icon)));
-const AlwaysExpanded = computed(() => props.AlwaysExpanded);
-const themeClass = computed(() => props.Theme === 'light' || props.Theme === 'dark' ? `win-theme-scope theme-${props.Theme}` : '');
-let secondaryAnimationTimer = 0;
-
-const secondaryPanelVisible = computed(() => secondaryCommands.value.length > 0 && secondaryRendered.value);
-const panelStateClasses = computed(() => ({
-  'is-expanded': secondaryRendered.value,
-  'is-panel-expanding-setup': panelAnimation.value === 'expanding-setup',
-  'is-panel-expanding': panelAnimation.value === 'expanding',
-  'is-panel-collapsing': panelAnimation.value === 'collapsing'
-}));
-
-const flyoutStyle = computed<CSSProperties>(() => ({
-  top: `${position.value.top}px`,
-  left: `${position.value.left}px`,
-  minWidth: props.MinWidth ? `${props.MinWidth}px` : undefined,
-  '--cbf-collapsed-right': collapsedClip.value.right,
-  '--cbf-collapsed-bottom': collapsedClip.value.bottom
-} as CSSProperties & Record<string, string | undefined>));
-
-const commandKey = (command: CommandBarFlyoutCommand) => command.Name || command.Label;
-const commandToolTipAttrs = (command: CommandBarFlyoutCommand) => (
-  command['ToolTipService.ToolTip'] ? { 'tooltipservice.tooltip': command['ToolTipService.ToolTip'] } : {}
-);
-
-const commandBarPrimaryCommands = computed(() => primaryCommands.value.map((command) => ({
-  Component: command.IsToggle ? AppBarToggleButton : AppBarButton,
-  Props: {
-    Icon: command.Icon,
-    Label: command.Label,
-    IsEnabled: command.IsEnabled,
-    IsChecked: command.IsChecked,
-    'ToolTipService.ToolTip': command['ToolTipService.ToolTip'],
-    KeyboardAcceleratorTextOverride: command.KeyboardAcceleratorTextOverride,
-    AllowFocusOnInteraction: false
-  },
-  Key: commandKey(command),
-  Click: (event?: MouseEvent) => {
-    if (event) invoke(command, event);
-  }
-})));
-
-const secondaryCommandClasses = (command: CommandBarFlyoutCommand) => ({
-  'is-toggle': command.IsToggle,
-  'is-checked': command.IsChecked,
-  'has-check': command.IsToggle,
-  // Keep the icon column for every item when any overflow item has an icon.
-  'has-menu-icon': secondaryHasIcon.value,
-  'has-keyboard-accelerator': Boolean(command.KeyboardAcceleratorTextOverride),
-  'has-flyout': Boolean(command.Flyout)
-});
-
-const iconMap: Record<string, string> = {
-  Share: '\uE72D',
-  Save: '\uE74E',
-  Delete: '\uE74D',
-  Cut: '\uE8C6',
-  Copy: '\uE8C8',
-  Paste: '\uE77F',
-  Undo: '\uE7A7',
-  Redo: '\uE7A6',
-  SelectAll: '\uE8B3',
-  Bold: '\uE8DD',
-  Italic: '\uE8DB',
-  Underline: '\uE8DC'
-};
-
-const iconGlyph = (icon: string) => iconMap[icon] ?? icon;
-
-const collapsedSize = () => {
-  const flyout = flyoutRef.value;
-  if (!flyout) return { width: 0, height: 0 };
-  const primaryRoot = flyout.querySelector<HTMLElement>('.win-cbf-primary-items-root');
-  return {
-    width: Math.max(1, primaryRoot?.offsetWidth ?? 0),
-    height: Math.max(1, primaryRoot?.offsetHeight ?? 0)
-  };
-};
-
-const setCollapsedClipFromSize = (expandedRect: DOMRect, size = collapsedSize()) => {
-  collapsedClip.value = {
-    right: `${Math.max(0, expandedRect.width - size.width)}px`,
-    bottom: `${Math.max(0, expandedRect.height - size.height)}px`
-  };
-};
-
-const clearSecondaryAnimationTimer = () => {
-  if (!secondaryAnimationTimer) return;
-  window.clearTimeout(secondaryAnimationTimer);
-  secondaryAnimationTimer = 0;
-};
-
-const finishSecondaryAnimation = () => {
-  if (panelAnimation.value === 'collapsing') {
-    secondaryRendered.value = false;
-  }
-  panelAnimation.value = '';
-  secondaryAnimationTimer = 0;
-  void nextTick(updatePosition);
-};
-
-const scheduleSecondaryAnimationEnd = (duration = 200) => {
-  clearSecondaryAnimationTimer();
-  secondaryAnimationTimer = window.setTimeout(finishSecondaryAnimation, duration);
-};
-
-const nextAnimationFrame = () => new Promise<void>(resolve => window.requestAnimationFrame(() => resolve()));
-
-const choosePlacement = (rect: AnchorRect, requested: Placement) => {
-  if (requested !== 'Auto') return requested;
-  const below = window.innerHeight - rect.bottom;
-  const above = rect.top;
-  const right = window.innerWidth - rect.right;
-  const left = rect.left;
-  if (below >= 120) return 'Bottom';
-  if (above >= 120) return 'Top';
-  if (right >= 180) return 'Right';
-  if (left >= 180) return 'Left';
-  return 'Bottom';
-};
-
-const updatePosition = async () => {
-  const rect = anchorRect.value;
-  if (!rect) return;
-  actualPlacement.value = choosePlacement(rect, props.Placement);
-
-  let top = rect.bottom;
-  let left = rect.left;
-
-  if (actualPlacement.value.includes('Top')) top = rect.top;
-  if (actualPlacement.value.includes('Bottom')) top = rect.bottom;
-  if (actualPlacement.value.includes('Left')) {
-    top = rect.top;
-    left = rect.left;
-  }
-  if (actualPlacement.value.includes('Right')) {
-    top = rect.top;
-    left = rect.right;
-  }
-  if (actualPlacement.value.includes('AlignedBottom')) top = rect.bottom;
-  if (actualPlacement.value.includes('AlignedRight')) left = rect.right;
-
-  position.value = { top, left };
-  await nextTick();
-
-  const flyout = flyoutRef.value;
-  if (!flyout) return;
-  const flyoutRect = flyout.getBoundingClientRect();
-  let nextTop = position.value.top;
-  let nextLeft = position.value.left;
-
-  if (actualPlacement.value.includes('Top')) nextTop -= flyoutRect.height;
-  if (actualPlacement.value.includes('Left')) nextLeft -= flyoutRect.width;
-  if (actualPlacement.value.includes('AlignedRight')) nextLeft -= flyoutRect.width;
-
-  nextLeft = Math.max(8, Math.min(window.innerWidth - flyoutRect.width - 8, nextLeft));
-  nextTop = Math.max(8, Math.min(window.innerHeight - flyoutRect.height - 8, nextTop));
-  position.value = { top: nextTop, left: nextLeft };
-};
-
-const openAt = async (rect: AnchorRect, options: { Placement?: Placement; ShowMode?: ShowMode } = {}) => {
-  anchorRect.value = rect;
-  actualPlacement.value = options.Placement ?? props.Placement;
-  secondaryOpen.value = props.AlwaysExpanded;
-  secondaryRendered.value = props.AlwaysExpanded;
-  panelAnimation.value = '';
-  emit('Opening');
-  isOpen.value = true;
-  await nextTick();
-  await updatePosition();
-  emit('Opened');
-};
-
-const showAt = async (target: HTMLElement, options: { Placement?: Placement; ShowMode?: ShowMode } = {}) => {
-  await openAt(target.getBoundingClientRect(), {
-    Placement: options.Placement,
-    ShowMode: options.ShowMode
-  });
-};
-
-const hide = () => {
-  if (!isOpen.value) return;
-  emit('Closing');
-  clearSecondaryAnimationTimer();
-  isOpen.value = false;
-  secondaryOpen.value = props.AlwaysExpanded;
-  secondaryRendered.value = props.AlwaysExpanded;
-  panelAnimation.value = '';
-  emit('Close');
-  emit('Closed');
-};
-
-const toggleSecondary = async () => {
-  if (!secondaryCommands.value.length || props.AlwaysExpanded) return;
-
-  if (secondaryOpen.value) {
-    const flyout = flyoutRef.value;
-    if (flyout) setCollapsedClipFromSize(flyout.getBoundingClientRect());
-    secondaryOpen.value = false;
-    panelAnimation.value = 'collapsing';
-    scheduleSecondaryAnimationEnd(167);
-    return;
-  }
-
-  const startSize = collapsedSize();
-  secondaryRendered.value = true;
-  secondaryOpen.value = true;
-  await nextTick();
-  await updatePosition();
-  if (flyoutRef.value) setCollapsedClipFromSize(flyoutRef.value.getBoundingClientRect(), startSize);
-  panelAnimation.value = 'expanding-setup';
-  await nextAnimationFrame();
-  panelAnimation.value = 'expanding';
-  scheduleSecondaryAnimationEnd(200);
-};
-
-const invoke = (command: CommandBarFlyoutCommand, event: MouseEvent) => {
-  if (command.IsEnabled === false) return;
-  command.Click?.(command, event);
-  emit('Click', command, event);
-  hide();
-};
-
-const onKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    event.preventDefault();
-    hide();
-  }
-};
-
-const onPointerDown = (event: PointerEvent) => {
-  if (!isOpen.value) return;
-  if (flyoutRef.value?.contains(event.target as Node)) return;
-  hide();
-};
-
-watch(() => props.Open, (value) => {
-  if (value && props.AnchorRect) void openAt(props.AnchorRect);
-  else if (!value) hide();
-});
-
-watch(() => props.AnchorRect, (value) => {
-  anchorRect.value = value;
-  if (isOpen.value) void updatePosition();
-});
-
-onMounted(() => {
-  document.addEventListener('pointerdown', onPointerDown);
-  window.addEventListener('resize', updatePosition);
-  window.addEventListener('scroll', updatePosition, true);
-});
-
-onBeforeUnmount(() => {
-  clearSecondaryAnimationTimer();
-  document.removeEventListener('pointerdown', onPointerDown);
-  window.removeEventListener('resize', updatePosition);
-  window.removeEventListener('scroll', updatePosition, true);
-});
-
-defineExpose({ showAt, hide, openAt, isOpen });
 </script>
 
-<style scoped>
-.win-commandbar-flyout {
-  position: fixed;
-  z-index: 9100;
-  max-width: 440px;
-  color: var(--CommandBarFlyoutForeground, var(--text-primary));
-  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
-  font-size: var(--ControlContentThemeFontSize, 14px);
-  font-weight: 400;
-  --win-acrylic-fill: var(--CommandBarFlyoutBackground, var(--flyout-background, var(--layer-fill-color-default)));
-  isolation: isolate;
-  background: transparent;
-  border-radius: var(--OverlayCornerRadius, var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px)));
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
-  --win-cbf-shadow-bleed: 24px;
-  -webkit-backdrop-filter: var(--flyout-backdrop, blur(30px));
-  backdrop-filter: var(--flyout-backdrop, blur(30px));
-  overflow: hidden;
-  clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)));
-  will-change: clip-path, opacity;
-}
+<script setup lang="ts">
+import { computed, defineComponent, getCurrentInstance, inject, isVNode, nextTick, onBeforeUnmount, onMounted, onUpdated, provide, ref, shallowReactive, shallowRef, unref, useAttrs, useSlots, watch, type Ref, type VNode } from 'vue';
+import { CommandPortal, commandChildren, commandCollection, commandHasIcon, flattenCommandNodes, isAppBarCommand, isCommandSeparator, isCommandToggle } from './commandBarRuntime';
+import type { CommandBarContext } from './appBarRuntime';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlControlIdentityKey } from './xamlRuntime';
+import { fitPopupPosition, popupBoundsFor, popupPlacementPosition, resolvePopupElement } from './popupRuntime';
+import { flyoutContainsNode, hasOpenDescendantFlyout, hideDescendantFlyouts, isDescendantFlyoutOpening, nestedFlyoutLayers, registerFlyoutInputRegion, type FlyoutInputRegion } from './flyoutInput';
+import { useI18n } from './i18n';
+import './commandBarResources.css';
+import { useAcrylicBrushStyle } from './AcrylicBrush';
+import { vAcrylicBackdrop, vAcrylicBrush } from './acrylicBrushVisual';
+import { vThemeShadow } from './themeShadowVisual';
+import { getThemeShadowRecipe } from './themeShadowRuntime';
+import { xamlThemeKey } from './brushCore';
 
-.win-cbf-layout-root,
-.win-cbf-outer-content-root,
-.win-cbf-content-root {
-  border-radius: inherit;
-}
-
-.win-cbf-content-root {
-  display: flex;
-  flex-direction: column;
-  background: transparent;
-}
-
-.win-cbf-primary-items-root {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 46px;
-  overflow: hidden;
-  background: transparent;
-  border: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1px var(--CommandBarFlyoutBorderBrush, var(--control-stroke-color-default, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))));
-}
-
-.win-commandbar-flyout.is-expanded .win-cbf-primary-items-root {
-  border-radius: var(--OverlayCornerRadius, var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px)))
-    var(--OverlayCornerRadius, var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px))) 0 0;
-}
-
-.win-cbf-primary-items-control {
-  display: flex;
-  grid-column: 1;
-  align-items: stretch;
-  height: 40px;
-  min-height: 40px;
-  min-width: 0;
-  margin: 3px 0 3px 3px;
-}
-
-.win-cbf-commandbar {
-  height: 40px;
-  min-height: 40px;
-  background: transparent;
-  --CommandBarBackground: transparent;
-  --CommandBarBackgroundOpen: transparent;
-  --CommandBarBorderBrushOpen: transparent;
-  --CommandBarHeightTransitionDuration: 0ms;
-  --AppBarButtonBackground: var(--CommandBarFlyoutAppBarButtonBackground, transparent);
-  --AppBarButtonBackgroundPointerOver: var(--CommandBarFlyoutAppBarButtonBackgroundPointerOver, var(--subtle-fill-color-secondary, var(--subtle-secondary)));
-  --AppBarButtonBackgroundPressed: var(--CommandBarFlyoutAppBarButtonBackgroundPressed, var(--subtle-fill-color-tertiary, var(--subtle-tertiary)));
-  --AppBarButtonBackgroundDisabled: var(--CommandBarFlyoutAppBarButtonBackgroundDisabled, transparent);
-  --AppBarButtonForeground: var(--CommandBarFlyoutAppBarButtonForeground, var(--text-primary));
-  --AppBarButtonForegroundPointerOver: var(--CommandBarFlyoutAppBarButtonForegroundPointerOver, var(--text-primary));
-  --AppBarButtonForegroundPressed: var(--CommandBarFlyoutAppBarButtonForegroundPressed, var(--text-secondary));
-  --AppBarButtonForegroundDisabled: var(--CommandBarFlyoutAppBarButtonForegroundDisabled, var(--text-disabled));
-  --AppBarToggleButtonBackgroundChecked: var(--CommandBarFlyoutAppBarButtonBackgroundChecked, var(--accent-base));
-  --AppBarToggleButtonBackgroundCheckedPointerOver: var(--CommandBarFlyoutAppBarButtonBackgroundCheckedPointerOver, var(--accent-hover, var(--accent-base)));
-  --AppBarToggleButtonBackgroundCheckedPressed: var(--CommandBarFlyoutAppBarButtonBackgroundCheckedPressed, var(--accent-pressed, var(--accent-base)));
-  --AppBarToggleButtonForegroundChecked: var(--CommandBarFlyoutAppBarButtonForegroundChecked, var(--accent-text));
-  --AppBarToggleButtonForegroundCheckedPointerOver: var(--CommandBarFlyoutAppBarButtonForegroundCheckedPointerOver, var(--accent-text));
-  --AppBarToggleButtonForegroundCheckedPressed: var(--CommandBarFlyoutAppBarButtonForegroundCheckedPressed, var(--accent-text));
-}
-
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed),
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-surface),
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-primary-content) {
-  height: 40px;
-  min-height: 40px;
-  background: transparent;
-}
-
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-surface) {
-  padding-left: 0;
-  border: 0;
-  box-shadow: none;
-  border-radius: 0;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-primary-content) {
-  justify-content: flex-start;
-  overflow: visible;
-}
-
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar.label-collapsed .commandbar-primary-content .win-appbar-button) {
-  flex-basis: auto;
-  width: auto;
-  min-width: 40px;
-  max-width: none;
-  height: 40px;
-  min-height: 40px;
-  align-self: stretch;
-  justify-self: stretch;
-}
-
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-inner-border) {
-  inset: 2px;
-}
-
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-content-root) {
-  width: auto;
-  min-width: 40px;
-  height: 40px;
-  min-height: 40px;
-  align-content: start;
-}
-
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-icon) {
-  margin: 12px 0 0;
-}
-
-.win-cbf-primary-items-control :deep(.win-commandbar.win-cbf-commandbar .appbar-button-label) {
-  width: 60px;
-  max-width: 60px;
-  margin: 6px 0 2px;
-}
-
-.win-cbf-more-button,
-.win-cbf-overflow-button {
-  appearance: none;
-  position: relative;
-  isolation: isolate;
-  border: 0;
-  border-radius: var(--ControlCornerRadius, var(--control-corner-radius, 4px));
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.win-cbf-overflow-button::before {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  z-index: 0;
-  border-radius: inherit;
-  background: transparent;
-  transition: background-color 83ms linear;
-}
-
-.win-cbf-more-button::before {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  z-index: 0;
-  border-radius: inherit;
-  background: transparent;
-  transition: background-color 83ms linear;
-}
-
-.win-cbf-more-button > *,
-.win-cbf-overflow-button > * {
-  position: relative;
-  z-index: 1;
-}
-
-.win-cbf-overflow-icon,
-.win-cbf-ellipsis-icon,
-.win-cbf-overflow-check,
-.win-cbf-overflow-chevron {
-  font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets');
-}
-
-.win-cbf-overflow-icon,
-.win-cbf-ellipsis-icon {
-  font-size: 16px;
-  line-height: 16px;
-}
-
-.win-cbf-more-button {
-  display: grid;
-  grid-column: 2;
-  align-self: start;
-  justify-self: stretch;
-  width: 44px;
-  min-width: 44px;
-  max-width: 44px;
-  height: 40px;
-  min-height: 40px;
-  margin: 3px 3px 3px 0;
-  padding: 0;
-  place-items: center;
-  font-size: var(--ControlContentThemeFontSize, 14px);
-  font-weight: 600;
-}
-
-.win-cbf-ellipsis-icon {
-  display: grid;
-  width: 16px;
-  height: 16px;
-  place-items: center;
-  text-align: center;
-  transform: none;
-}
-
-.win-cbf-more-button:hover,
-.win-cbf-overflow-button:hover {
-  color: var(--CommandBarFlyoutAppBarButtonForegroundPointerOver, var(--text-primary));
-}
-
-.win-cbf-more-button:hover::before,
-.win-cbf-overflow-button:hover::before {
-  background: var(--CommandBarFlyoutAppBarButtonBackgroundPointerOver, var(--subtle-fill-color-secondary, var(--subtle-secondary)));
-}
-
-.win-cbf-more-button:active,
-.win-cbf-overflow-button:active {
-  color: var(--CommandBarFlyoutAppBarButtonForegroundPressed, var(--text-secondary));
-}
-
-.win-cbf-more-button:active::before,
-.win-cbf-overflow-button:active::before {
-  background: var(--CommandBarFlyoutAppBarButtonBackgroundPressed, var(--subtle-fill-color-tertiary, var(--subtle-tertiary)));
-}
-
-.win-cbf-more-button:disabled,
-.win-cbf-overflow-button:disabled {
-  color: var(--CommandBarFlyoutAppBarButtonForegroundDisabled, var(--text-disabled));
-  cursor: default;
-}
-
-.win-cbf-more-button:focus-visible,
-.win-cbf-overflow-button:focus-visible {
-  outline: 2px solid var(--focus-stroke-color-outer, var(--accent-default, #005FB8));
-  outline-offset: -2px;
-}
-
-.win-cbf-outer-overflow-content-root {
-  width: 100%;
-  background: transparent;
-}
-
-.win-cbf-overflow-content-root {
-  background: var(--CommandBarFlyoutButtonBackground, var(--flyout-background, var(--layer-fill-color-default)));
-  border: solid var(--CommandBarFlyoutBorderBrush, var(--control-stroke-color-default, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))));
-  border-width: 0 1px 1px;
-  border-radius: 0 0 var(--OverlayCornerRadius, var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px)))
-    var(--OverlayCornerRadius, var(--overlay-corner-radius, var(--muxc-overlay-corner-radius, 8px)));
-}
-
-.win-cbf-secondary-items-control {
-  display: flex;
-  flex-direction: column;
-  min-width: 136px;
-  max-width: 440px;
-  max-height: 480px;
-  margin: 0;
-  padding: 3px;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.win-cbf-overflow-button {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  width: 100%;
-  min-height: 33px;
-  padding: 0;
-  text-align: left;
-}
-
-.win-cbf-overflow-button.has-check,
-.win-cbf-overflow-button.has-menu-icon {
-  grid-template-columns: 39px minmax(0, 1fr) auto auto;
-}
-
-.win-cbf-overflow-button.has-check.has-menu-icon {
-  grid-template-columns: 39px 28px minmax(0, 1fr) auto auto;
-}
-
-.win-cbf-overflow-check {
-  display: grid;
-  width: 39px;
-  margin: 4px 0;
-  place-items: center;
-  color: inherit;
-  font-size: 12px;
-  line-height: 16px;
-  opacity: 0;
-}
-
-.win-cbf-overflow-button.is-checked .win-cbf-overflow-check {
-  opacity: 1;
-}
-
-.win-cbf-overflow-icon {
-  display: grid;
-  width: 16px;
-  height: 16px;
-  place-items: center;
-}
-
-.win-cbf-overflow-icon.is-placeholder {
-  visibility: hidden;
-}
-
-.win-cbf-overflow-button.has-menu-icon:not(.has-check) .win-cbf-overflow-icon {
-  margin: 0 11px 0 12px;
-}
-
-.win-cbf-overflow-button.has-check.has-menu-icon .win-cbf-overflow-icon {
-  margin: 0 12px 0 0;
-}
-
-.win-cbf-overflow-label {
-  min-width: 0;
-  margin: 0 12px;
-  padding: 6px 0 7px;
-  color: inherit;
-  font-size: 14px;
-  line-height: 20px;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: clip;
-}
-
-.win-cbf-overflow-button.has-check .win-cbf-overflow-label,
-.win-cbf-overflow-button.has-menu-icon .win-cbf-overflow-label {
-  margin-left: 0;
-}
-
-.win-cbf-overflow-accelerator {
-  min-width: 0;
-  margin: 0 12px 0 24px;
-  color: var(--CommandBarFlyoutAppBarButtonKeyboardTextLabelForeground, var(--text-secondary));
-  font-size: 12px;
-  line-height: 16px;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.win-cbf-overflow-chevron {
-  margin: 0 12px;
-  color: var(--CommandBarFlyoutAppBarButtonSubItemChevronForeground, var(--text-secondary));
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.win-cbf-overflow-button:hover .win-cbf-overflow-accelerator {
-  color: var(--CommandBarFlyoutAppBarButtonKeyboardTextLabelForegroundPointerOver, var(--text-secondary));
-}
-
-.win-cbf-overflow-button:active .win-cbf-overflow-accelerator {
-  color: var(--CommandBarFlyoutAppBarButtonKeyboardTextLabelForegroundPressed, var(--text-tertiary, var(--text-secondary)));
-}
-
-.win-cbf-overflow-button:hover .win-cbf-overflow-chevron {
-  color: var(--CommandBarFlyoutAppBarButtonSubItemChevronPointerOverForeground, var(--text-secondary));
-}
-
-.win-cbf-overflow-button:active .win-cbf-overflow-chevron {
-  color: var(--CommandBarFlyoutAppBarButtonSubItemChevronPressedForeground, var(--text-tertiary, var(--text-secondary)));
-}
-
-.cbf-flyout-enter-active { animation: cbf-flyout-fade-in 83ms linear both; }
-.cbf-flyout-leave-active { animation: cbf-flyout-fade-out 83ms linear both; }
-
-.win-commandbar-flyout.is-panel-expanding-setup {
-  clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)) var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) calc(-1 * var(--win-cbf-shadow-bleed)));
-}
-
-.win-commandbar-flyout.is-panel-expanding {
-  animation: cbf-panel-expand 200ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
-}
-
-.win-commandbar-flyout.is-panel-collapsing {
-  animation: cbf-panel-collapse 167ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
-  pointer-events: none;
-}
-
-@keyframes cbf-flyout-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes cbf-flyout-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes cbf-panel-expand {
-  from {
-    clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)) var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) calc(-1 * var(--win-cbf-shadow-bleed)));
+defineOptions({ name: 'CommandBarFlyout', inheritAttrs: false });
+const props = defineProps({
+  PrimaryCommands: { default: undefined }, SecondaryCommands: { default: undefined }, AlwaysExpanded: { type: [Boolean, String], default: false },
+  Placement: { type: String, default: 'Top' }, ShowMode: { type: String, default: 'Standard' },
+  AreOpenCloseAnimationsEnabled: { type: [Boolean, String], default: true }, ShouldConstrainToRootBounds: { type: [Boolean, String], default: true },
+  LightDismissOverlayMode: { type: String, default: 'Auto' }
+});
+const emit = defineEmits(['Opening', 'Opened', 'Closing', 'Closed', 'update:PrimaryCommands', 'update:SecondaryCommands', 'update:AlwaysExpanded', 'update:Placement', 'update:ShowMode', 'update:AreOpenCloseAnimationsEnabled', 'update:ShouldConstrainToRootBounds', 'update:LightDismissOverlayMode']);
+const instance = getCurrentInstance(); const attrs = useAttrs(); const slots = useSlots(); const { t } = useI18n();
+const resolve = (input: unknown) => resolveXamlValue(input, instance);
+const enabled = (input: unknown) => input !== false && input !== 'False' && input !== 'false';
+const overrides = shallowReactive<Record<string, unknown>>({});
+const value = (name: keyof typeof props) => name in overrides ? overrides[name] : resolve(props[name]);
+const primaryCommands = commandCollection(shallowReactive<VNode[]>([])); const secondaryCommands = commandCollection(shallowReactive<VNode[]>([])); const initialized = new Set<string>();
+const lastDeclarations = new Map<string, VNode[]>();
+const anchor = ref<HTMLElement | null>(null); const flyout = ref<HTMLElement | null>(null); const primaryRoot = ref<HTMLElement | null>(null); const overflowRoot = ref<HTMLElement | null>(null);
+const primaryMount = ref<HTMLElement | null>(null); const secondaryMount = ref<HTMLElement | null>(null);
+type Entry = { id: number; node: VNode; host: HTMLElement; secondary: boolean; width: number };
+const retainedEntries = new Map<number, Entry>(); const nodeIds = new WeakMap<object, number>(); let nextId = 0;
+const overflowIds = shallowRef(new Set<number>());
+const overflowDivider = document.createElement('div'); overflowDivider.className = 'commandbar-overflow-divider'; overflowDivider.setAttribute('role', 'separator');
+const entries = computed(() => [...primaryCommands.map(node => entryFor(node, false)), ...secondaryCommands.map(node => entryFor(node, true))]);
+function entryFor(node: VNode, secondary: boolean): Entry {
+  let id = nodeIds.get(node); if (id === undefined) { id = ++nextId; nodeIds.set(node, id); }
+  let entry = retainedEntries.get(id);
+  if (!entry) {
+    const host = document.createElement('div'); host.className = 'commandbar-command-host';
+    entry = { id, node, host, secondary, width: isCommandSeparator(node) ? 5 : Number(resolve(node.props?.Width)) || 40 }; retainedEntries.set(id, entry);
   }
-  to {
-    clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)));
-  }
+  entry.secondary = secondary; return entry;
 }
+const overflowNodes = computed(() => entries.value.filter(entry => entry.secondary || overflowIds.value.has(entry.id)).map(entry => entry.node));
+const target = ref<HTMLElement | null>(null); const isOpen = ref(false); const isPresent = ref(false); const positioned = ref(false);
+const expanded = ref(false); const expandedPresent = ref(false); const expandsUp = ref(false); const position = ref({ left: 0, top: 0 });
+const hasPrimaryLabels = ref(false);
+const suppressShadow = ref(false);
+const moreButtonLabel = computed(() => t(expanded.value ? 'text.see-less' : 'text.see-more'));
+const moreButtonAttributes = computed(() => ({ 'ToolTipService.ToolTip': moreButtonLabel.value }));
+const available = ref({ width: 0, height: 0 });
+type ShowOptions = { Placement?: string; ShowMode?: string; Position?: { X?: number; Y?: number; x?: number; y?: number } };
+const options = ref<ShowOptions | null>(null); const actualPlacement = ref('Top');
+const inheritedTheme = inject<string | Ref<string> | null>(xamlThemeKey, null) ?? inject<string | Ref<string> | null>('winuiTheme', null); const themeRevision = ref(0);
+const buttonAnchor = inject<Ref<HTMLElement | null> | null>('buttonFlyoutAnchor', null);
+const buttonController = inject<Ref<Record<string, unknown> | null> | null>('buttonFlyoutController', null);
+const showMode = computed(() => enabled(value('AlwaysExpanded')) ? 'Standard' : String(options.value?.ShowMode || value('ShowMode')));
+const showMore = computed(() => primaryCommands.length > 0 && overflowNodes.value.length > 0 && !enabled(value('AlwaysExpanded')));
+const theme = computed(() => {
+  themeRevision.value;
+  const scope = target.value?.closest('[data-theme], .win-theme-scope, .example-theme-wrapper, .theme-light, .theme-dark');
+  const explicit = scope?.getAttribute('data-theme')?.toLowerCase();
+  return explicit === 'light' || explicit === 'dark' ? explicit : scope?.classList.contains('theme-dark') ? 'dark' : scope?.classList.contains('theme-light') ? 'light' : String(unref(inheritedTheme) || '').toLowerCase();
+});
+const themeClass = computed(() => theme.value === 'light' || theme.value === 'dark' ? `win-theme-scope theme-${theme.value}` : '');
+provide(xamlThemeKey, theme);
+provide('winuiTheme', theme);
+const flyoutLayer = ref<number | undefined>(undefined);
+const flyoutBackgroundStyle = useAcrylicBrushStyle('{ThemeResource CommandBarFlyoutBackground}', instance);
+const flyoutBackdropStyle = useAcrylicBrushStyle('{StaticResource CommandBarFlyoutSystemBackdrop}', instance);
+const flyoutStyle = computed(() => {
+  const shadowInsets = getThemeShadowRecipe(32, theme.value).Insets;
+  return { zIndex: flyoutLayer.value, left: `${position.value.left}px`, top: `${position.value.top}px`, '--cbf-available-width': `${available.value.width}px`, '--cbf-available-height': `${available.value.height}px`, '--cbf-shadow-top-inset': `${shadowInsets.Top}px`, '--cbf-shadow-bottom-inset': `${shadowInsets.Bottom}px` };
+});
+const commonContext: CommandBarContext = {
+  isOpen, defaultLabelPosition: computed(() => hasPrimaryLabels.value ? 'Bottom' : 'Collapsed'), compact: computed(() => true), isInOverflow: computed(() => false), isInFlyout: computed(() => true),
+  hasIcons: computed(() => overflowNodes.value.some(commandHasIcon)), hasToggleButtons: computed(() => overflowNodes.value.some(isCommandToggle)),
+  closeOverflow: () => Hide(), invokeCommand: () => Hide()
+};
+const DeclarationOutlet = defineComponent({
+  name: 'CommandBarFlyoutDeclarationOutlet',
+  setup() { return () => {
+    const nodes = flattenCommandNodes(slots.default?.() ?? []);
+    for (const name of ['PrimaryCommands', 'SecondaryCommands'] as const) {
+      const explicit = resolve(props[name]); const property = nodes.find(node => (node.type as { __commandBarProperty?: string }).__commandBarProperty === name);
+      const commands = Array.isArray(explicit) ? explicit.filter(isVNode) : flattenCommandNodes(property ? commandChildren(property) : name === 'PrimaryCommands' ? nodes.filter(isAppBarCommand) : []);
+      const previous = lastDeclarations.get(name);
+      const signature = (node: VNode) => JSON.stringify(Object.entries(node.props || {}).filter(([, input]) => input === null || ['string', 'number', 'boolean'].includes(typeof input)));
+      if (!initialized.has(name) || !previous || previous.length !== commands.length || commands.some((node, index) => node.type !== previous[index].type || node.key !== previous[index].key || signature(node) !== signature(previous[index]))) {
+        const collection = name === 'PrimaryCommands' ? primaryCommands : secondaryCommands;
+        collection.splice(0, collection.length, ...commands); initialized.add(name); lastDeclarations.set(name, commands);
+      }
+    }
+    return null;
+  }; }
+});
 
-@keyframes cbf-panel-collapse {
-  from {
-    clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)));
+const api: Record<string, unknown> = { ShowAt, Hide };
+const inputRegion: FlyoutInputRegion = {
+  Owner: api,
+  get IsOpen() { return isOpen.value; },
+  get Target() { return target.value; },
+  get Presenter() { return flyout.value; },
+  DismissLayer: null,
+  Hide
+};
+const unregisterInputRegion = registerFlyoutInputRegion(inputRegion);
+const raise = (name: 'Opening' | 'Opened' | 'Closing' | 'Closed', args: Record<string, unknown> = {}) => {
+  const listener = instance?.vnode.props?.[`on${name}`];
+  if (listener) {
+    for (const handler of Array.isArray(listener) ? listener : [listener]) handler(api, args);
+  } else {
+    emit(name, api, args);
+    resolveXamlHandler(attrs[name], instance)?.(api, args);
   }
-  to {
-    clip-path: inset(calc(-1 * var(--win-cbf-shadow-bleed)) var(--cbf-collapsed-right) var(--cbf-collapsed-bottom) calc(-1 * var(--win-cbf-shadow-bleed)));
+};
+let generation = 0; let expandGeneration = 0; let positionGeneration = 0; let animations: Animation[] = []; let expansionAnimations: Animation[] = [];
+let resizeObserver: ResizeObserver | null = null; let themeObserver: MutationObserver | null = null; let commandObserver: MutationObserver | null = null; let viewportFrame: number | null = null;
+let previousFocus: HTMLElement | null = null; let boundButton: HTMLElement | null = null; let unmounted = false; let lastInsidePointer = 0;
+const stopAnimations = () => { animations.forEach(animation => animation.cancel()); animations = []; };
+const expansionElements = () => ({ primary: primaryRoot.value, secondary: overflowRoot.value, more: primaryRoot.value?.querySelector<HTMLElement>('.win-cbf-more-button') ?? null });
+const stopExpansion = (clearVisuals = true) => {
+  expansionAnimations.forEach(animation => animation.cancel()); expansionAnimations = [];
+  if (!clearVisuals) return;
+  const elements = expansionElements();
+  elements.primary?.style.removeProperty('clip-path'); elements.secondary?.style.removeProperty('clip-path'); elements.more?.style.removeProperty('transform');
+};
+const freezeExpansion = () => {
+  const elements = expansionElements();
+  const sample = expansionAnimations.length ? {
+    primaryClip: elements.primary ? getComputedStyle(elements.primary).clipPath : 'none',
+    secondaryClip: elements.secondary ? getComputedStyle(elements.secondary).clipPath : 'none',
+    moreTransform: elements.more ? getComputedStyle(elements.more).transform : 'none'
+  } : null;
+  stopExpansion(!sample);
+  if (sample) {
+    elements.primary?.style.setProperty('clip-path', sample.primaryClip);
+    elements.secondary?.style.setProperty('clip-path', sample.secondaryClip);
+    elements.more?.style.setProperty('transform', sample.moreTransform);
   }
+  return sample;
+};
+const collapsedPrimaryWidth = () => {
+  if (!primaryRoot.value || !primaryMount.value) return 0;
+  const mountStyle = getComputedStyle(primaryMount.value), rootStyle = getComputedStyle(primaryRoot.value);
+  const primaryWidth = entries.value.filter(entry => !entry.secondary && !overflowIds.value.has(entry.id)).reduce((width, entry) => {
+    const element = entry.host.firstElementChild;
+    if (!(element instanceof HTMLElement)) return width + entry.width;
+    const style = getComputedStyle(element);
+    return width + element.offsetWidth + (parseFloat(style.marginLeft) || 0) + (parseFloat(style.marginRight) || 0);
+  }, 0);
+  const moreWidth = expansionElements().more?.offsetWidth ?? 3;
+  const chrome = [mountStyle.marginLeft, mountStyle.marginRight, rootStyle.borderLeftWidth, rootStyle.borderRightWidth].reduce((width, part) => width + (parseFloat(part) || 0), 0);
+  return Math.min(primaryWidth + moreWidth + chrome, available.value.width, 440);
+};
+const animationsEnabled = () => enabled(value('AreOpenCloseAnimationsEnabled')) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const animateOpacity = (opening: boolean, initialOpacity?: string) => {
+  if (!animationsEnabled()) return Promise.resolve();
+  // Keep the fade on each backdrop host. A fading ancestor would isolate both
+  // system backdrops from the page while opening and closing.
+  animations = [primaryRoot.value, overflowRoot.value].filter((element): element is HTMLElement => Boolean(element?.animate)).map(element =>
+    element.animate(opening ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: initialOpacity || getComputedStyle(element).opacity }, { opacity: 0 }], { duration: 83, easing: 'linear', fill: 'both' }));
+  return Promise.all(animations.map(animation => animation.finished.catch(() => undefined))).then(() => undefined);
+};
+const syncPrimaryLabels = () => {
+  const next = entries.value.some(entry => {
+    if (entry.secondary) return false;
+    const element = entry.host.querySelector<HTMLElement>('.win-appbar-button');
+    return element?.dataset.labelPosition === 'Default' && Boolean(element.querySelector('.appbar-button-label')?.textContent?.trim());
+  });
+  if (next === hasPrimaryLabels.value) return;
+  hasPrimaryLabels.value = next;
+  onViewport();
+};
+const observeCommandFlyout = () => {
+  commandObserver?.disconnect();
+  if (flyout.value) commandObserver?.observe(flyout.value, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['data-label-position'] });
+};
+const mountCommands = () => {
+  if (!primaryMount.value || !secondaryMount.value || unmounted) return;
+  const focused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const ownedFocus = focused && entries.value.some(entry => entry.host.contains(focused));
+  const primaryHosts: HTMLElement[] = []; const secondaryHosts: HTMLElement[] = []; let insertedDivider = false;
+  const hasOverflowPrimary = entries.value.some(entry => !entry.secondary && overflowIds.value.has(entry.id));
+  for (const entry of entries.value) {
+    if (entry.secondary && hasOverflowPrimary && !insertedDivider) { secondaryHosts.push(overflowDivider); insertedDivider = true; }
+    (entry.secondary || overflowIds.value.has(entry.id) ? secondaryHosts : primaryHosts).push(entry.host);
+  }
+  if (!insertedDivider) overflowDivider.remove();
+  for (const [parent, hosts] of [[primaryMount.value, primaryHosts], [secondaryMount.value, secondaryHosts]] as const) {
+    let cursor = parent.firstElementChild;
+    for (const host of hosts) { if (host !== cursor) parent.insertBefore(host, cursor); cursor = host.nextElementSibling; }
+  }
+  const live = new Set(entries.value.map(entry => entry.id));
+  for (const [id, entry] of retainedEntries) if (!live.has(id)) { entry.host.remove(); retainedEntries.delete(id); }
+  syncPrimaryLabels();
+  if (ownedFocus && focused?.isConnected && document.activeElement !== focused) {
+    if (focused.getClientRects().length) focused.focus({ preventScroll: true }); else primaryRoot.value?.querySelector<HTMLElement>('.win-cbf-more-button')?.focus({ preventScroll: true });
+  }
+};
+const calculateOverflow = () => {
+  const primary = entries.value.filter(entry => !entry.secondary);
+  for (const entry of primary) if (!overflowIds.value.has(entry.id)) entry.width = entry.host.firstElementChild?.getBoundingClientRect().width || entry.width;
+  const next = new Set<number>(); const limit = Math.min(440, available.value.width);
+  const total = primary.reduce((sum, entry) => sum + entry.width, 0);
+  const requiresMore = secondaryCommands.length > 0 || total + 6 > limit;
+  const width = Math.max(0, limit - (requiresMore && !enabled(value('AlwaysExpanded')) ? 44 : 0) - 6);
+  let occupied = total;
+  const candidates = [...primary].sort((a, b) => (Number(resolve(a.node.props?.DynamicOverflowOrder)) || Infinity) - (Number(resolve(b.node.props?.DynamicOverflowOrder)) || Infinity) || primary.indexOf(b) - primary.indexOf(a));
+  for (const entry of candidates) {
+    if (occupied <= width) break;
+    const order = Number(resolve(entry.node.props?.DynamicOverflowOrder) || 0);
+    const group = order ? primary.filter(item => Number(resolve(item.node.props?.DynamicOverflowOrder)) === order) : [entry];
+    for (const item of group) if (!next.has(item.id)) { next.add(item.id); occupied -= item.width; }
+  }
+  if (next.size !== overflowIds.value.size || [...next].some(id => !overflowIds.value.has(id))) { overflowIds.value = next; return true; }
+  return false;
+};
+const updatePosition = async () => {
+  if (!isPresent.value || !flyout.value || !target.value) return;
+  const version = ++positionGeneration; const placementTarget = target.value; const presenter = flyout.value;
+  const bounds = popupBoundsFor(placementTarget, enabled(value('ShouldConstrainToRootBounds')));
+  available.value = { width: Math.max(0, bounds.width - 8), height: Math.max(0, bounds.height - 8) }; await nextTick();
+  if (unmounted || version !== positionGeneration || !isPresent.value || flyout.value !== presenter || target.value !== placementTarget) return;
+  mountCommands();
+  if (calculateOverflow()) { await nextTick(); if (unmounted || version !== positionGeneration || !isPresent.value || flyout.value !== presenter || target.value !== placementTarget) return; mountCommands(); }
+  const requested = options.value?.Placement || String(value('Placement')); const rect = placementTarget.getBoundingClientRect();
+  const size = { width: presenter.offsetWidth, height: presenter.offsetHeight };
+  const result = popupPlacementPosition(rect, size, requested, bounds, 4, getComputedStyle(placementTarget).direction === 'rtl');
+  actualPlacement.value = result.placement;
+  const point = options.value?.Position;
+  position.value = point ? fitPopupPosition({ left: rect.left + Number(point.X ?? point.x ?? 0), top: rect.top + Number(point.Y ?? point.y ?? 0) }, size, bounds) : { left: result.left, top: result.top };
+  const primaryHeight = primaryRoot.value?.offsetHeight || 0; const secondaryHeight = overflowRoot.value?.offsetHeight || 0;
+  expandsUp.value = actualPlacement.value.startsWith('Top') || (bounds.bottom - position.value.top - primaryHeight < secondaryHeight && position.value.top >= secondaryHeight);
+  positioned.value = true;
+};
+const focusable = (root: HTMLElement | null) => Array.from(root?.querySelectorAll<HTMLElement>('button:not(:disabled), [tabindex]:not([tabindex="-1"])') ?? []).filter(element => element.getClientRects().length > 0);
+async function ShowAt(placementTarget?: unknown, showOptions?: ShowOptions) {
+  const element = resolvePopupElement(placementTarget) || buttonAnchor?.value || anchor.value?.parentElement || null;
+  if (!element || unmounted) return;
+  const version = ++generation; expandGeneration += 1; stopAnimations(); stopExpansion();
+  suppressShadow.value = false;
+  if (!isOpen.value) previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  target.value = element; options.value = showOptions ?? null;
+  flyoutLayer.value = nestedFlyoutLayers(inputRegion)?.presenter;
+  const shouldExpand = enabled(value('AlwaysExpanded')) || !primaryCommands.length || showMode.value === 'Standard';
+  expanded.value = shouldExpand; expandedPresent.value = shouldExpand && overflowNodes.value.length > 0;
+  themeObserver?.disconnect(); const scope = element.closest('[data-theme], .win-theme-scope, .example-theme-wrapper, .theme-light, .theme-dark');
+  if (scope) themeObserver?.observe(scope, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+  themeObserver?.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] }); themeRevision.value += 1;
+  if (isOpen.value) { await updatePosition(); return; }
+  window.dispatchEvent(new CustomEvent('winui-flyout-opening', { detail: api }));
+  raise('Opening'); isOpen.value = true; isPresent.value = true; positioned.value = false; await nextTick(); observeCommandFlyout(); await updatePosition();
+  if (version !== generation || unmounted || !isOpen.value) return;
+  resizeObserver?.disconnect(); if (flyout.value) resizeObserver?.observe(flyout.value); resizeObserver?.observe(element);
+  if (showMode.value === 'Standard') (focusable(primaryRoot.value)[0] || focusable(overflowRoot.value)[0] || flyout.value)?.focus({ preventScroll: true });
+  const finished = animateOpacity(true); raise('Opened'); await finished; if (version === generation) stopAnimations();
 }
-</style>
+function Hide(restoreFocus = true) {
+  if (!isOpen.value) return;
+  const args = { Cancel: false }; raise('Closing', args); if (args.Cancel) return;
+  const ownedFocus = flyoutContainsNode(inputRegion, document.activeElement);
+  hideDescendantFlyouts(inputRegion);
+  const version = ++generation; expandGeneration += 1; const opacityHost = primaryRoot.value ?? overflowRoot.value; const opacity = opacityHost ? getComputedStyle(opacityHost).opacity : undefined; stopAnimations(); freezeExpansion(); suppressShadow.value = true; isOpen.value = false; resizeObserver?.disconnect();
+  if (restoreFocus && ownedFocus) (previousFocus?.isConnected ? previousFocus : target.value)?.focus({ preventScroll: true });
+  void animateOpacity(false, opacity).then(() => { if (version !== generation || unmounted || isOpen.value) return; stopAnimations(); stopExpansion(); isPresent.value = false; positioned.value = false; expanded.value = false; expandedPresent.value = false; raise('Closed'); });
+}
+async function setExpanded(next: boolean) {
+  if (!isOpen.value || next === expanded.value || enabled(value('AlwaysExpanded')) || !overflowNodes.value.length) return;
+  const version = ++expandGeneration; const sample = freezeExpansion();
+  suppressShadow.value = true;
+  if (next) { options.value = { ...options.value, ShowMode: 'Standard' }; expandedPresent.value = true; }
+  expanded.value = next; await nextTick(); await updatePosition();
+  const element = flyout.value; if (!element || version !== expandGeneration) return;
+  const roots = expansionElements(); const halfWidthDelta = Math.max(0, element.offsetWidth - collapsedPrimaryWidth()) / 2;
+  const halfOverflowHeight = (roots.secondary?.offsetHeight || 0) / 2;
+  const primaryStart = `inset(0px ${halfWidthDelta}px 0px 0px)`;
+  const secondaryStart = expandsUp.value ? `inset(${halfOverflowHeight}px ${halfWidthDelta}px 0px 0px)` : `inset(0px ${halfWidthDelta}px ${halfOverflowHeight}px 0px)`;
+  const expandedClip = 'inset(0px 0px 0px 0px)'; const moreStart = `translateX(${-halfWidthDelta}px)`;
+  if (element.animate && animationsEnabled()) {
+    const timing = { duration: next ? 250 : 167, easing: 'cubic-bezier(0, 0, 0, 1)', fill: 'both' as FillMode };
+    const animateClip = (root: HTMLElement | null, initial: string, previous?: string) => root ? root.animate([{ clipPath: previous || (next ? initial : expandedClip) }, { clipPath: next ? expandedClip : initial }], timing) : null;
+    const clips = [animateClip(roots.primary, primaryStart, sample?.primaryClip), animateClip(roots.secondary, secondaryStart, sample?.secondaryClip)];
+    const moreAnimation = roots.more?.animate([{ transform: sample?.moreTransform || (next ? moreStart : 'translateX(0px)') }, { transform: next ? 'translateX(0px)' : moreStart }], timing);
+    expansionAnimations = [...clips, moreAnimation].filter((animation): animation is Animation => Boolean(animation));
+    await Promise.all(expansionAnimations.map(animation => animation.finished.catch(() => undefined)));
+  }
+  if (version !== expandGeneration || !isOpen.value) return;
+  stopExpansion(); if (!next) expandedPresent.value = false; await nextTick(); await updatePosition();
+  if (version === expandGeneration && isOpen.value) suppressShadow.value = false;
+}
+const onKeyDown = (event: KeyboardEvent) => {
+  if (event.defaultPrevented || hasOpenDescendantFlyout(inputRegion)) return;
+  if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); Hide(); return; }
+  const inOverflow = overflowRoot.value?.contains(event.target as Node); const root = inOverflow ? overflowRoot.value : primaryRoot.value;
+  const items = focusable(root); const index = items.indexOf(document.activeElement as HTMLElement);
+  if (!inOverflow && event.key === 'ArrowDown' && overflowNodes.value.length) { event.preventDefault(); void setExpanded(true).then(() => focusable(overflowRoot.value)[0]?.focus({ preventScroll: true })); return; }
+  const keys = inOverflow ? ['ArrowUp', 'ArrowDown'] : ['ArrowLeft', 'ArrowRight'];
+  if ([...keys, 'Home', 'End'].includes(event.key) && items.length) { event.preventDefault(); const destination = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 : (index + (event.key === keys[0] ? -1 : 1) + items.length) % items.length; items[destination].focus({ preventScroll: true }); return; }
+  if (event.key === 'Tab' && showMode.value === 'Standard') {
+    const all = focusable(flyout.value); const active = all.indexOf(document.activeElement as HTMLElement); if (all.length && (event.shiftKey && active <= 0 || !event.shiftKey && active === all.length - 1)) { event.preventDefault(); all[event.shiftKey ? all.length - 1 : 0].focus({ preventScroll: true }); }
+  }
+};
+const onPointerDown = (event: PointerEvent) => {
+  if (!isOpen.value) return;
+  if (flyoutContainsNode(inputRegion, event.target as Node | null)) { lastInsidePointer = performance.now(); return; }
+  if (target.value?.contains(event.target as Node)) return;
+  Hide();
+};
+const onGlobalKeyDown = (event: KeyboardEvent) => {
+  if (!isOpen.value || event.key !== 'Escape' || event.defaultPrevented || hasOpenDescendantFlyout(inputRegion) || flyoutContainsNode(inputRegion, event.target as Node | null)) return;
+  event.preventDefault(); Hide();
+};
+const onViewport = () => { if (!isOpen.value || viewportFrame !== null) return; viewportFrame = requestAnimationFrame(() => { viewportFrame = null; void updatePosition(); }); };
+const onWindowBlur = () => Hide();
+const onOtherOpening = (event: Event) => {
+  const owner = (event as CustomEvent).detail;
+  if (owner !== api && !isDescendantFlyoutOpening(owner, inputRegion) && !flyoutContainsNode(inputRegion, document.activeElement) && performance.now() - lastInsidePointer > 1000) Hide();
+};
+const onButtonClick = () => { void ShowAt(buttonAnchor?.value); };
+for (const name of Object.keys(props) as (keyof typeof props)[]) {
+  if (name === 'PrimaryCommands' || name === 'SecondaryCommands') continue;
+  Object.defineProperty(api, name, { enumerable: true, get: () => value(name), set: next => { overrides[name] = next; updateXamlBinding(props[name], next, instance); emit(`update:${name}`, next); onViewport(); } });
+  watch(() => resolve(props[name]), () => { delete overrides[name]; onViewport(); });
+}
+for (const name of ['PrimaryCommands', 'SecondaryCommands'] as const) {
+  const collection = name === 'PrimaryCommands' ? primaryCommands : secondaryCommands;
+  Object.defineProperty(api, name, { enumerable: true, get: () => collection, set: next => { if (!Array.isArray(next) || next.some(node => !isVNode(node))) throw new TypeError(`${name} requires AppBar command elements`); collection.splice(0, collection.length, ...next); emit(`update:${name}`, collection); onViewport(); } });
+  watch(() => { const source = resolve(props[name]); return Array.isArray(source) ? [...source] : undefined; }, next => { if (next) collection.splice(0, collection.length, ...next.filter(isVNode)); });
+}
+Object.defineProperty(api, 'IsOpen', { enumerable: true, get: () => isOpen.value }); Object.defineProperty(api, 'Target', { enumerable: true, get: () => target.value });
+onMounted(() => {
+  mountCommands();
+  resizeObserver = new ResizeObserver(onViewport); themeObserver = new MutationObserver(() => { themeRevision.value += 1; });
+  commandObserver = new MutationObserver(syncPrimaryLabels);
+  if (buttonController) buttonController.value = api; boundButton = buttonAnchor?.value?.tagName === 'BUTTON' ? buttonAnchor.value : null; boundButton?.addEventListener('click', onButtonClick);
+  document.addEventListener('pointerdown', onPointerDown, true); document.addEventListener('keydown', onGlobalKeyDown, true); window.addEventListener('resize', onViewport); window.addEventListener('scroll', onViewport, true); window.addEventListener('blur', onWindowBlur); window.addEventListener('winui-flyout-opening', onOtherOpening);
+});
+watch(() => entries.value.map(entry => entry.id), async () => { await nextTick(); if (unmounted) return; mountCommands(); onViewport(); });
+watch(() => overflowNodes.value.length, async count => {
+  if (!isOpen.value || unmounted) return;
+  expandedPresent.value = expanded.value && count > 0;
+  await nextTick(); if (!unmounted && isOpen.value) await updatePosition();
+});
+onUpdated(mountCommands);
+onBeforeUnmount(() => {
+  hideDescendantFlyouts(inputRegion); unregisterInputRegion();
+  unmounted = true; generation += 1; expandGeneration += 1; positionGeneration += 1; stopAnimations(); stopExpansion(); resizeObserver?.disconnect(); themeObserver?.disconnect(); commandObserver?.disconnect(); if (viewportFrame !== null) cancelAnimationFrame(viewportFrame); retainedEntries.forEach(entry => entry.host.remove()); overflowDivider.remove();
+  if (buttonController?.value === api) buttonController.value = null; boundButton?.removeEventListener('click', onButtonClick);
+  document.removeEventListener('pointerdown', onPointerDown, true); document.removeEventListener('keydown', onGlobalKeyDown, true); window.removeEventListener('resize', onViewport); window.removeEventListener('scroll', onViewport, true); window.removeEventListener('blur', onWindowBlur); window.removeEventListener('winui-flyout-opening', onOtherOpening);
+});
+Object.defineProperty(api, xamlControlIdentityKey, { value: true });
+defineExpose(api);
+</script>

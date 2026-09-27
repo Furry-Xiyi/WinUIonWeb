@@ -27,23 +27,33 @@
     :class="{ 'is-checked': resolvedChecked, 'is-disabled': !resolvedIsEnabled }"
     :style="rootStyle">
     <input
+      ref="radioInput"
       class="win-radio-input"
       type="radio"
       :name="radioGroupName || undefined"
       :checked="resolvedChecked"
       :disabled="!resolvedIsEnabled"
-      @change="check" />
+      :tabindex="group?.tabIndex ? group.tabIndex(groupIndex) : undefined"
+      @change="check"
+      @keydown="group?.navigate?.(groupIndex, $event)" />
     <span class="win-radio-glyph" aria-hidden="true"><span class="win-radio-check" /></span>
-    <TextBlock class="win-radio-content" Text="{x:Bind RadioContent}">
-      <slot>{{ contentText }}</slot>
+    <TextBlock v-if="$slots.default" class="win-radio-content">
+      <slot />
     </TextBlock>
+    <TextBlock v-else class="win-radio-content" Text="{x:Bind RadioContent}" />
   </label>
 </template>
 
+<script>
+// A named XAML group spans sibling RadioButton instances in the same app.
+// Browser radios alone cannot update the dependency properties or glyphs.
+const namedRadioGroups = new WeakMap();
+</script>
+
 <script setup>
-import { computed, getCurrentInstance, inject, onMounted, provide, ref, useAttrs } from 'vue';
+import { computed, getCurrentInstance, inject, onBeforeUnmount, onMounted, provide, ref, useAttrs, watch } from 'vue';
 import TextBlock from './TextBlock.vue';
-import { resolveXamlHandler, resolveXamlValue, xamlScopeKey } from './xamlRuntime';
+import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 
 const radioButtonsGroupKey = Symbol.for('WinUIonWeb.RadioButtons');
 
@@ -69,20 +79,27 @@ const emit = defineEmits(['update:IsChecked', 'Checked', 'Unchecked', 'update:mo
 const groupName = `win-radio-buttons-${Math.random().toString(36).slice(2)}`;
 const instance = getCurrentInstance();
 const attrs = useAttrs();
+const radioInput = ref(null);
+const group = inject(radioButtonsGroupKey, null);
 const resolvedItemsSource = computed(() => {
   const value = resolveXamlValue(props.ItemsSource, instance);
   return Array.isArray(value) ? value : [];
 });
 const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
-const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false);
+const resolvedIsEnabled = computed(() => resolveXamlValue(props.IsEnabled, instance) !== false && group?.isEnabled?.value !== false);
 const resolvedIsChecked = computed(() => resolveXamlValue(props.IsChecked, instance));
+const localChecked = ref(resolvedIsChecked.value === true || (props.value !== undefined && props.modelValue === props.value));
 const resolvedSelectedIndex = computed(() => {
   const value = resolveXamlValue(props.SelectedIndex, instance);
   return value === undefined || value === '' ? undefined : Number(value);
 });
 const internalSelectedIndex = ref(resolvedSelectedIndex.value ?? -1);
-const group = inject(radioButtonsGroupKey, null);
-const groupIndex = group?.register?.();
+const groupIndex = group?.register?.({
+  getItem: () => eventSender,
+  isEnabled: () => resolvedIsEnabled.value,
+  getBounds: () => radioInput.value?.parentElement?.getBoundingClientRect(),
+  focus: () => radioInput.value?.focus()
+});
 let nextSlotIndex = 0;
 
 const cssLength = (value) => {
@@ -106,17 +123,15 @@ const normalizedItems = computed(() => resolvedItemsSource.value.map((item) => {
   return { ...item, Text: item.Text ?? item.Content ?? item.label ?? String(item), Value: item.Value ?? item };
 }));
 const selectedIndexValue = computed(() => resolvedSelectedIndex.value ?? internalSelectedIndex.value);
-const radioGroupName = computed(() => props.GroupName || props.name);
+const defaultGroupName = `win-radio-parent-${instance?.parent?.uid ?? instance?.uid}`;
+const radioGroupName = computed(() => group?.name || props.GroupName || props.name || (group ? '' : defaultGroupName));
 const resolvedChecked = computed(() => {
   // RadioButtons owns the selection state for its direct RadioButton
   // children.  A declarative IsChecked="True" establishes the initial
   // selection only; it must not pin that item after the user picks another
   // item, which is how WinUI's RadioButton group behaves.
   if (group && groupIndex !== undefined) return group.selectedIndex.value === groupIndex;
-  if (resolvedIsChecked.value !== undefined) return resolvedIsChecked.value === true;
-  return props.modelValue !== undefined || props.value !== undefined
-    ? props.modelValue === props.value
-    : false;
+  return localChecked.value;
 });
 const contentText = computed(() => {
   const value = resolveXamlValue(props.Content, instance);
@@ -124,12 +139,48 @@ const contentText = computed(() => {
 });
 const RadioButtonsHeader = computed(() => resolvedHeader.value);
 const RadioContent = computed(() => contentText.value);
-const eventSender = computed(() => ({
-  Tag: resolveXamlValue(props.Tag, instance),
-  Content: contentText.value,
-  IsChecked: resolvedChecked.value,
-  GroupName: radioGroupName.value
-}));
+const setChecked = (value) => {
+  const checked = resolveXamlValue(value, instance) === true;
+  if (group && groupIndex !== undefined) {
+    if (checked) group.select(groupIndex, false);
+    else if (resolvedChecked.value) group.select(-1, false);
+  } else {
+    if (checked && registeredNamedGroup) {
+      for (const member of appRadioGroups.get(registeredNamedGroup) ?? []) {
+        if (member !== namedMember) member.setChecked(false);
+      }
+    }
+    localChecked.value = checked;
+  }
+};
+let registeredNamedGroup = '';
+let appRadioGroups = namedRadioGroups.get(instance.appContext);
+if (!appRadioGroups) { appRadioGroups = new Map(); namedRadioGroups.set(instance.appContext, appRadioGroups); }
+const namedMember = { setChecked };
+const unregisterNamedGroup = () => {
+  const members = appRadioGroups.get(registeredNamedGroup);
+  members?.delete(namedMember);
+  if (members?.size === 0) appRadioGroups.delete(registeredNamedGroup);
+  registeredNamedGroup = '';
+};
+watch(radioGroupName, name => {
+  unregisterNamedGroup();
+  if (group || !name) return;
+  registeredNamedGroup = name;
+  let members = appRadioGroups.get(name);
+  if (!members) { members = new Set(); appRadioGroups.set(name, members); }
+  members.add(namedMember);
+  if (localChecked.value) setChecked(true);
+}, { immediate: true });
+const eventSender = {
+  get Name() { return String(attrs['data-xaml-ref'] ?? attrs['x:Name'] ?? ''); },
+  get Tag() { return resolveXamlValue(props.Tag, instance); },
+  get Content() { return contentText.value; },
+  get IsChecked() { return resolvedChecked.value; },
+  set IsChecked(value) { setChecked(value); },
+  get IsEnabled() { return resolvedIsEnabled.value; },
+  get GroupName() { return radioGroupName.value; }
+};
 const rootStyle = computed(() => props.Margin ? { margin: xamlThickness(resolveXamlValue(props.Margin, instance)) } : {});
 const itemsStyle = computed(() => {
   const maxColumns = Math.max(1, Number(props.MaxColumns) || 1);
@@ -139,21 +190,35 @@ const itemsStyle = computed(() => {
 });
 
 const check = () => {
-  if (!resolvedIsEnabled.value) return;
+  if (!resolvedIsEnabled.value || resolvedChecked.value) return;
   if (group && groupIndex !== undefined) group.select(groupIndex);
-  emit('update:IsChecked', true);
-  const sender = eventSender.value;
-  const args = { OriginalSource: sender, RoutedEvent: 'Checked' };
-  emit('Checked', sender, args);
-  resolveXamlHandler(attrs.Checked, instance)?.(sender, args);
-  if (props.value !== undefined) emit('update:modelValue', props.value);
+  else setChecked(true);
 };
+
+watch(resolvedIsChecked, (value) => {
+  if (value !== undefined) setChecked(value);
+});
+watch(() => props.modelValue, (value) => {
+  if (props.value !== undefined) setChecked(value === props.value);
+});
+watch(resolvedChecked, (value, previous) => {
+  if (value === previous) return;
+  emit('update:IsChecked', value);
+  updateXamlBinding(props.IsChecked, value, instance);
+  const eventName = value ? 'Checked' : 'Unchecked';
+  const args = { OriginalSource: eventSender, RoutedEvent: eventName };
+  emit(eventName, eventSender, args);
+  resolveXamlHandler(attrs[eventName], instance)?.(eventSender, args);
+  if (value && props.value !== undefined) emit('update:modelValue', props.value);
+}, { flush: 'sync' });
 
 onMounted(() => {
   if (group && groupIndex !== undefined && resolvedIsChecked.value === true && group.selectedIndex.value < 0) {
-    group.select(groupIndex);
+    if (group.initialize) group.initialize(groupIndex);
+    else group.select(groupIndex);
   }
 });
+onBeforeUnmount(() => { group?.unregister?.(groupIndex); unregisterNamedGroup(); });
 
 const select = (index) => {
   if (!resolvedIsEnabled.value) return;
@@ -179,6 +244,15 @@ provide(radioButtonsGroupKey, {
   register: () => nextSlotIndex++,
   select
 });
+
+defineExpose({
+  Name: computed(() => eventSender.Name),
+  IsChecked: computed({ get: () => resolvedChecked.value, set: setChecked }),
+  Content: contentText,
+  Tag: computed(() => resolveXamlValue(props.Tag, instance)),
+  IsEnabled: resolvedIsEnabled,
+  GroupName: radioGroupName
+});
 </script>
 
 <style>
@@ -200,6 +274,7 @@ provide(radioButtonsGroupKey, {
 }
 
 .win-radio-button {
+  position: relative;
   display: inline-flex;
   align-items: flex-start;
   gap: 8px;
@@ -214,8 +289,17 @@ provide(radioButtonsGroupKey, {
 
 .win-radio-input {
   position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
   opacity: 0;
   pointer-events: none;
+}
+
+.win-radio-button:has(.win-radio-input:focus-visible) {
+  outline: 2px solid var(--focus-stroke-outer, var(--text-primary));
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .win-radio-glyph {

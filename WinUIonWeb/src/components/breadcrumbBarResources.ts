@@ -1,0 +1,33 @@
+// BreadcrumbBar_themeresources.xaml aliases. Keep scalar/glyph resources as
+// XAML values; brush resources remain CSS variables in the owning theme scope.
+export const breadcrumbBarResources: Record<string, string | number> = {
+  BreadcrumbBarChevronLeftToRight: '\uE974',
+  BreadcrumbBarChevronRightToLeft: '\uE973',
+  BreadcrumbBarChevronPadding: '2,0',
+  BreadcrumbBarChevronFontSize: 12,
+  BreadcrumbBarItemFontWeight: 'Normal',
+  BreadcrumbBarItemThemeFontSize: 'var(--ControlContentThemeFontSize, 14px)',
+  BreadcrumbBarEllipsisFlyoutPresenterBorderThemeThickness: 1,
+  BreadcrumbBarNormalForegroundBrush: 'var(--BreadcrumbBarNormalForegroundBrush, var(--text-primary))',
+  BreadcrumbBarHoverForegroundBrush: 'var(--BreadcrumbBarHoverForegroundBrush, var(--text-secondary))',
+  BreadcrumbBarPressedForegroundBrush: 'var(--BreadcrumbBarPressedForegroundBrush, var(--text-tertiary))',
+  BreadcrumbBarDisabledForegroundBrush: 'var(--BreadcrumbBarDisabledForegroundBrush, var(--text-disabled))',
+  BreadcrumbBarFocusForegroundBrush: 'var(--BreadcrumbBarFocusForegroundBrush, var(--text-primary))',
+  BreadcrumbBarCurrentNormalForegroundBrush: 'var(--BreadcrumbBarCurrentNormalForegroundBrush, var(--text-primary))',
+  BreadcrumbBarCurrentHoverForegroundBrush: 'var(--BreadcrumbBarCurrentHoverForegroundBrush, var(--text-secondary))',
+  BreadcrumbBarCurrentPressedForegroundBrush: 'var(--BreadcrumbBarCurrentPressedForegroundBrush, var(--text-tertiary))',
+  BreadcrumbBarCurrentDisabledForegroundBrush: 'var(--BreadcrumbBarCurrentDisabledForegroundBrush, var(--text-disabled))',
+  BreadcrumbBarCurrentFocusForegroundBrush: 'var(--BreadcrumbBarCurrentFocusForegroundBrush, var(--text-primary))',
+  BreadcrumbBarEllipsisDropDownItemBackground: 'var(--BreadcrumbBarEllipsisDropDownItemBackground, transparent)',
+  BreadcrumbBarEllipsisDropDownItemBackgroundPointerOver: 'var(--BreadcrumbBarEllipsisDropDownItemBackgroundPointerOver, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)))',
+  BreadcrumbBarEllipsisDropDownItemBackgroundPressed: 'var(--BreadcrumbBarEllipsisDropDownItemBackgroundPressed, var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary)))',
+  BreadcrumbBarEllipsisDropDownItemBackgroundDisabled: 'var(--BreadcrumbBarEllipsisDropDownItemBackgroundDisabled, transparent)',
+  BreadcrumbBarEllipsisDropDownItemForegroundPointerOver: 'var(--BreadcrumbBarEllipsisDropDownItemForegroundPointerOver, var(--text-primary))',
+  BreadcrumbBarEllipsisDropDownItemForegroundPressed: 'var(--BreadcrumbBarEllipsisDropDownItemForegroundPressed, var(--text-primary))',
+  BreadcrumbBarEllipsisDropDownItemForegroundDisabled: 'var(--BreadcrumbBarEllipsisDropDownItemForegroundDisabled, var(--text-disabled))',
+  BreadcrumbBarForegroundBrush: 'var(--BreadcrumbBarForegroundBrush, var(--text-primary))',
+  BreadcrumbBarBackgroundBrush: 'var(--BreadcrumbBarBackgroundBrush, transparent)',
+  BreadcrumbBarBorderBrush: 'var(--BreadcrumbBarBorderBrush, transparent)',
+  BreadcrumbBarEllipsisFlyoutPresenterBackground: '{ThemeResource AcrylicBackgroundFillColorDefaultBrush}',
+  BreadcrumbBarEllipsisFlyoutPresenterBorderBrush: 'var(--BreadcrumbBarEllipsisFlyoutPresenterBorderBrush, var(--SurfaceStrokeColorFlyoutBrush, var(--stroke-flyout)))'
+}

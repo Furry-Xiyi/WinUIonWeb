@@ -13,6 +13,7 @@ export interface SearchItem {
 const LABEL_KEYS: Record<string, string> = {
   radiobutton: 'text.radiobuttons',
   rating: 'text.ratingcontrol',
+  pagetransition: 'text.page-transition',
   captureelement: 'text.capture-element-camera',
   xamlresources: 'text.resources',
   xamlstyles: 'text.style',
@@ -21,6 +22,7 @@ const LABEL_KEYS: Record<string, string> = {
   iconelement: 'text.icon-element',
   radialgradientbrush: 'text.radial-gradient-brush',
   systembackdrops: 'text.system-backdrops',
+  systembackdropelement: 'text.system-backdrop-element',
   themeshadow: 'text.theme-shadow'
 };
 
@@ -29,7 +31,7 @@ const TAGS = [
   'dropdownbutton', 'hyperlinkbutton', 'repeatbutton', 'togglebutton',
   'splitbutton', 'togglesplitbutton', 'checkbox', 'colorpicker', 'combobox',
   'radiobutton', 'rating', 'slider', 'timepicker', 'toggleswitch', 'border',
-  'canvas', 'expander', 'grid', 'parallaxview', 'relativepanel', 'scrollview',
+  'canvas', 'expander', 'grid', 'pagetransition', 'parallaxview', 'relativepanel', 'scrollview',
   'scrollviewer', 'splitview', 'stackpanel', 'variablesizedwrapgrid', 'viewbox',
   'flipview', 'gridview', 'itemsrepeater', 'itemsview', 'listbox', 'listview',
   'pulltorefresh', 'treeview', 'pipspager', 'semanticzoom',
@@ -38,11 +40,11 @@ const TAGS = [
   'menubar', 'menuflyout', 'swipecontrol', 'standarduicommand',
   'xamluicommand', 'popup', 'teachingtip', 'tooltip', 'infobadge', 'infobar',
   'progressbar', 'progressring', 'breadcrumbbar', 'navigationview', 'pivot',
-  'selectorbar', 'autosuggestbox', 'numberbox', 'passwordbox', 'richeditbox',
+  'selectorbar', 'tabview', 'autosuggestbox', 'numberbox', 'passwordbox', 'richeditbox',
   'richtextblock', 'textbox', 'textblock', 'settings', 'xamlresources',
   'xamlstyles', 'geometry', 'iconography', 'typography', 'acrylic',
   'animatedicon', 'compactsizing', 'iconelement', 'line',
-  'radialgradientbrush', 'systembackdrops', 'themeshadow', 'colors'
+  'radialgradientbrush', 'systembackdrops', 'systembackdropelement', 'themeshadow', 'colors', 'titlebar'
 ];
 
 const resolveLabel = (resources: Record<string, string>, tag: string) => (

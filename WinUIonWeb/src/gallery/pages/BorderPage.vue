@@ -1,218 +1,130 @@
 <template>
-  <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-    <div class="gallery-item-page">
-      <div style="position: relative;" class="page-heading">
-          <h1 class="page-header">Border</h1>
-          <p class="page-description">
-            A Border is a container control that draws a border, background, or both, around another object.
-          </p>
-          <div class="page-header-actions">
-            <Button class="header-action" @Click="toggleTheme"
-             >
-              <span class="icon">&#xE793;</span>
+  <Page>
+    <ScrollViewer class="gallery-page-scroll" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+      <StackPanel class="gallery-item-page">
+        <StackPanel class="page-heading">
+          <TextBlock class="page-header" Text="{x:Bind pageTitle, Mode=OneWay}" />
+          <TextBlock class="page-description" Text="{x:Bind pageDescription, Mode=OneWay}" TextWrapping="WrapWholeWords" />
+          <StackPanel class="page-header-actions" Orientation="Horizontal">
+            <Button class="header-action" AutomationProperties.Name="{x:Bind themeButtonName, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind themeButtonName, Mode=OneWay}" Click="toggleTheme">
+              <TextBlock class="icon" Text="&#xE793;" />
             </Button>
-            <ToggleButton class="header-action" :IsChecked="isFavoriteState"
-              @update:IsChecked="toggleFavorite"
-             >
-              <span class="icon">{{ isFavoriteState ? '&#xE735;' : '&#xE734;' }}</span>
+            <ToggleButton class="header-action" AutomationProperties.Name="{x:Bind favoriteButtonName, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind favoriteButtonName, Mode=OneWay}" IsChecked="{x:Bind isFavoriteState, Mode=TwoWay}" Click="toggleFavorite">
+              <TextBlock class="icon" Text="{x:Bind favoriteGlyph, Mode=OneWay}" />
             </ToggleButton>
-          </div>
-        </div>
-      <div class="gallery-page-content">
-        <!-- Example 1: A Border around a TextBlock -->
-            <ControlExample
-              headerText="A Border around a TextBlock."
-              :theme="pageTheme"
-              :templateCode="example1Template"
-              :vueCode="example1Vue">
-              <template #example>
-                <div
-                  :style="{
-                    display: 'inline-block',
-                    verticalAlign: 'top',
-                    border: `${borderThickness}px solid ${borderBrushColor}`,
-                    background: backgroundColor,
-                    padding: '8px 5px'
-                  }">
-                  <span style="font-size: 18px; color: black;">Text inside a border</span>
-                </div>
-              </template>
-              <template #options>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                  <Slider
-                    v-model="borderThickness"
-                    header="BorderThickness"
-                    :minimum="0"
-                    :maximum="10"
-                    :stepFrequency="1" />
+          </StackPanel>
+        </StackPanel>
 
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <div>
-                      <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Background</p>
-                      <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <RadioButton
-                          v-model="selectedBackground"
-                          value="Green"
-                          name="bgColor">
-                          Green
-                        </RadioButton>
-                        <RadioButton
-                          v-model="selectedBackground"
-                          value="Yellow"
-                          name="bgColor">
-                          Yellow
-                        </RadioButton>
-                        <RadioButton
-                          v-model="selectedBackground"
-                          value="Blue"
-                          name="bgColor">
-                          Blue
-                        </RadioButton>
-                        <RadioButton
-                          v-model="selectedBackground"
-                          value="White"
-                          name="bgColor">
-                          White
-                        </RadioButton>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">BorderBrush</p>
-                      <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <RadioButton
-                          v-model="selectedBorderBrush"
-                          value="Green"
-                          name="borderBrush">
-                          Green
-                        </RadioButton>
-                        <RadioButton
-                          v-model="selectedBorderBrush"
-                          value="Yellow"
-                          name="borderBrush">
-                          Yellow
-                        </RadioButton>
-                        <RadioButton
-                          v-model="selectedBorderBrush"
-                          value="Blue"
-                          name="borderBrush">
-                          Blue
-                        </RadioButton>
-                        <RadioButton
-                          v-model="selectedBorderBrush"
-                          value="White"
-                          name="borderBrush">
-                          White
-                        </RadioButton>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </ControlExample>
-      </div>
-    </div>
-  </ScrollViewer>
+        <StackPanel class="gallery-page-content">
+          <ControlExample x:Name="Example1" SampleDefinition="Border\BorderAroundTextblock.txt" HeaderText="{x:Bind sampleHeader, Mode=OneWay}" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind borderSource, Mode=OneWay}">
+            <ControlExample.Example>
+              <Border x:Name="Control1" VerticalAlignment="Top" Background="{x:Bind backgroundColor, Mode=OneWay}" BorderBrush="{x:Bind borderBrushColor, Mode=OneWay}" BorderThickness="{x:Bind borderThickness, Mode=OneWay}">
+                <TextBlock Margin="8,5" FontSize="18" Foreground="Black" Text="{x:Bind borderText, Mode=OneWay}" />
+              </Border>
+            </ControlExample.Example>
+            <ControlExample.Output />
+            <ControlExample.Options>
+              <StackPanel>
+                <Slider x:Name="ThicknessSlider" Header="{x:Bind optionText.Thickness, Mode=OneWay}" IsFocusEngagementEnabled="False" Maximum="10" Minimum="0" StepFrequency="1" ValueChanged="ThicknessSlider_ValueChanged" Value="2" />
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                  </Grid.ColumnDefinitions>
+                  <RadioButtons Header="{x:Bind optionText.Background, Mode=OneWay}">
+                    <RadioButton Checked="BGRadioButton_Checked" Content="{x:Bind optionText.Green, Mode=OneWay}" Tag="Green" GroupName="BGColor" />
+                    <RadioButton Checked="BGRadioButton_Checked" Content="{x:Bind optionText.Yellow, Mode=OneWay}" Tag="Yellow" GroupName="BGColor" />
+                    <RadioButton Checked="BGRadioButton_Checked" Content="{x:Bind optionText.Blue, Mode=OneWay}" Tag="Blue" GroupName="BGColor" />
+                    <RadioButton Checked="BGRadioButton_Checked" Content="{x:Bind optionText.White, Mode=OneWay}" Tag="White" GroupName="BGColor" IsChecked="True" />
+                  </RadioButtons>
+                  <RadioButtons Grid.Column="1" Header="{x:Bind optionText.BorderBrush, Mode=OneWay}">
+                    <RadioButton Checked="RadioButton_Checked" Content="{x:Bind optionText.Green, Mode=OneWay}" Tag="Green" GroupName="BorderBrush" />
+                    <RadioButton Checked="RadioButton_Checked" Content="{x:Bind optionText.Yellow, Mode=OneWay}" Tag="Yellow" GroupName="BorderBrush" IsChecked="True" />
+                    <RadioButton Checked="RadioButton_Checked" Content="{x:Bind optionText.Blue, Mode=OneWay}" Tag="Blue" GroupName="BorderBrush" />
+                    <RadioButton Checked="RadioButton_Checked" Content="{x:Bind optionText.White, Mode=OneWay}" Tag="White" GroupName="BorderBrush" />
+                  </RadioButtons>
+                </Grid>
+              </StackPanel>
+            </ControlExample.Options>
+          </ControlExample>
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </Page>
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
-import ControlExample from '../../components/ControlExample.vue';
+import { computed, inject, provide, ref } from 'vue';
+import Border from '../../components/Border.vue';
 import Button from '../../components/Button.vue';
-import ToggleButton from '../../components/ToggleButton.vue';
-import Slider from '../../components/Slider.vue';
+import ColumnDefinition from '../../components/ColumnDefinition.vue';
+import ControlExample from '../../components/ControlExample.vue';
+import Grid from '../../components/Grid.vue';
+import Page from '../../components/Page.vue';
 import RadioButton from '../../components/RadioButton.vue';
+import RadioButtons from '../../components/RadioButtons.vue';
+import ScrollViewer from '../../components/ScrollViewer.vue';
+import Slider from '../../components/Slider.vue';
+import StackPanel from '../../components/StackPanel.vue';
+import TextBlock from '../../components/TextBlock.vue';
+import ToggleButton from '../../components/ToggleButton.vue';
+import { useI18n } from '../../components/i18n/index';
+import { xamlScopeKey } from '../../components/xamlRuntime';
 import { createPageState } from '../../utils/pageState';
 
-import ScrollViewer from '../../components/ScrollViewer.vue';
+const { t } = useI18n();
 const currentPage = inject('currentPage');
-const pageKey = computed(() => currentPage?.value || 'border');
-const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(pageKey.value);
+const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'border');
+const pageTitle = computed(() => t('text.border'));
+const pageDescription = computed(() => t('text.border-description'));
+const sampleHeader = computed(() => t('sample.border.around-textblock'));
+const borderText = computed(() => t('sample.border.inside-text'));
+const themeButtonName = computed(() => t('gallery.toggle-theme'));
+const favoriteButtonName = computed(() => t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'));
+const favoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734');
+const optionText = computed(() => ({
+  Thickness: t('sample.border.thickness'),
+  Background: t('sample.border.background'),
+  BorderBrush: t('sample.border.brush'),
+  Green: t('sample.layout.color-green'),
+  Yellow: t('sample.layout.color-yellow'),
+  Blue: t('sample.layout.color-blue'),
+  White: t('sample.layout.color-white')
+}));
 
-// Border properties
 const borderThickness = ref(2);
-const selectedBackground = ref('White');
-const selectedBorderBrush = ref('Yellow');
+const backgroundColor = ref('#FFFFFFFF');
+const borderBrushColor = ref('#FFFFD700');
+const backgroundColors = { Green: '#FF008000', Yellow: '#FFFFFF00', Blue: '#FF0000FF', White: '#FFFFFFFF' };
+const borderColors = { Green: '#FF006400', Yellow: '#FFFFD700', Blue: '#FF00008B', White: '#FFFFFFFF' };
+const ThicknessSlider_ValueChanged = (_sender, args) => {
+  borderThickness.value = args.NewValue;
+};
+const BGRadioButton_Checked = (sender) => {
+  const color = backgroundColors[sender.Tag];
+  if (color) backgroundColor.value = color;
+};
+const RadioButton_Checked = (sender) => {
+  const color = borderColors[sender.Tag];
+  if (color) borderBrushColor.value = color;
+};
+const borderSource = computed(() => `<Border BorderThickness="${borderThickness.value}" BorderBrush="${borderBrushColor.value}" Background="${backgroundColor.value}">
+    <TextBlock Text="${borderText.value}" FontSize="18" Foreground="Black" />
+</Border>`);
 
-// Computed colors based on official WinUI color mapping
-const backgroundColor = computed(() => {
-  const colors = {
-    'Green': '#00FF00',
-    'Yellow': '#FFFF00',
-    'Blue': '#0000FF',
-    'White': '#FFFFFF'
-  };
-  return colors[selectedBackground.value] || '#FFFFFF';
+provide(xamlScopeKey, {
+  pageTitle, pageDescription, sampleHeader, borderText, optionText,
+  themeButtonName, favoriteButtonName, favoriteGlyph,
+  isFavoriteState, pageTheme, toggleTheme, toggleFavorite,
+  borderThickness, backgroundColor, borderBrushColor, borderSource,
+  ThicknessSlider_ValueChanged, BGRadioButton_Checked, RadioButton_Checked
 });
-
-const borderBrushColor = computed(() => {
-  const colors = {
-    'Green': '#006400',    // DarkGreen
-    'Yellow': '#FFD700',   // Gold
-    'Blue': '#00008B',     // DarkBlue
-    'White': '#FFFFFF'
-  };
-  return colors[selectedBorderBrush.value] || '#FFD700';
-});
-
-// Code examples
-const example1Template = `<Border
-  BorderThickness="${computed(() => borderThickness.value)}"
-  BorderBrush="${computed(() => borderBrushColor.value)}"
-  Background="${computed(() => backgroundColor.value)}">
-  <TextBlock Text="Text inside a border" FontSize="18" Foreground="Black" />
-</Border>`;
-
-const example1Vue = `const borderThickness = ref(2);
-const selectedBackground = ref('White');
-const selectedBorderBrush = ref('Yellow');
-
-const backgroundColor = computed(() => {
-  const colors = {
-    'Green': '#00FF00',
-    'Yellow': '#FFFF00',
-    'Blue': '#0000FF',
-    'White': '#FFFFFF'
-  };
-  return colors[selectedBackground.value];
-});
-
-const borderBrushColor = computed(() => {
-  const colors = {
-    'Green': '#006400',
-    'Yellow': '#FFD700',
-    'Blue': '#00008B',
-    'White': '#FFFFFF'
-  };
-  return colors[selectedBorderBrush.value];
-});`;
 </script>
 
 <style scoped>
-.page-header {
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  color: var(--text-primary);
-}
-
-.page-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.page-header-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.icon {
-  font-size: 16px;
-}
+.page-heading { position: relative; min-width: 0; }
+.page-header { font-size: 28px; font-weight: 600; margin: 0 80px 8px 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.page-description { margin: 0 0 16px; color: var(--text-secondary); line-height: 20px; }
+.page-header-actions { position: absolute; top: 0; right: 0; gap: 4px; }
+.icon { font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif; font-size: 16px; }
 </style>

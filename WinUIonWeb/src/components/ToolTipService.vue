@@ -1,375 +1,210 @@
 <template>
-  <ToolTip
-    :IsOpen="isOpen"
-    :Content="content"
-    :Placement="placement"
-    :PlacementTarget="placementTarget || undefined"
-    :PlacementPoint="placementPoint || undefined"
-    :Theme="theme"
-    :UseNativeToolTip="false"
-    IsServiceHost
-    @tooltip-pointer-enter="onToolTipPointerEnter"
-    @tooltip-pointer-leave="onToolTipPointerLeave" />
+  <span class="tooltip-service-host" aria-hidden="true" style="display:none" />
+  <ToolTip ref="fallbackRef" Content="{x:Bind ServiceContent}" />
 </template>
-
+<script lang="ts">
+import { ToolTipServiceToolTip } from './ToolTipServiceProperties'
+export default { ToolTip: ToolTipServiceToolTip }
+</script>
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
-import ToolTip from './ToolTip.vue';
+import { nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue'
+import ToolTip from './ToolTip.vue'
+import { xamlScopeKey } from './xamlRuntime'
+import { isInToolTipSafeZone, registeredToolTip, toolTipOwnerContextKey, type ToolTipController, type ToolTipInputMode, type ToolTipPoint } from './toolTipRuntime'
 
-const TOOL_TIP_ATTRIBUTE = 'tooltipservice.tooltip';
-const PLACEMENT_ATTRIBUTE = 'tooltipservice.placement';
-const PLACEMENT_TARGET_ATTRIBUTE = 'tooltipservice.placementtarget';
-const TOOL_TIP_SELECTOR = '[tooltipservice\\.tooltip]';
-const MOUSE_HOVER_TIME = 400;
-const INITIAL_SHOW_DELAY = MOUSE_HOVER_TIME * 2;
-const RESHOW_DELAY = MOUSE_HOVER_TIME * 1.5;
-const TOUCH_SHOW_DELAY = MOUSE_HOVER_TIME;
-const BETWEEN_SHOW_DELAY = 200;
-const CLOSE_ANIMATION_DURATION = 167;
-
-type InputMode = 'keyboard' | 'mouse' | 'touch';
-
-const isOpen = ref(false);
-const content = ref('');
-const placement = ref('Mouse');
-const placementTarget = shallowRef<HTMLElement | null>(null);
-const placementPoint = ref<{ x: number; y: number } | null>(null);
-const theme = ref('');
-const attachedElements = new Set<HTMLElement>();
-const originalTitles = new WeakMap<HTMLElement, string | null>();
-let activeElement: HTMLElement | null = null;
-let pendingElement: HTMLElement | null = null;
-let observer: MutationObserver | null = null;
-let openTimer: number | undefined;
-let closeTimer: number | undefined;
-let touchDismissTimer: number | undefined;
-let lastClosedAt = Number.NEGATIVE_INFINITY;
-let isPointerOverToolTip = false;
-let suppressedElement: HTMLElement | null = null;
-let lastInputMode: InputMode | null = null;
-let isClosing = false;
-let canCancelClose = false;
-
-function toolTipText(element: HTMLElement): string | null {
-  return element.getAttribute(TOOL_TIP_ATTRIBUTE);
+const TOOLTIP = 'tooltipservice.tooltip', PLACEMENT = 'tooltipservice.placement', TARGET = 'tooltipservice.placementtarget'
+const SELECTOR = '[tooltipservice\\.tooltip]'
+// ToolTipService_Partial.h/.cpp defaults: hover 400; normal 2x; mouse
+// reshow 1.5x; touch 1x; between-show 200; message duration 5 seconds.
+const HOVER = 400, BETWEEN = 200, CLOSE = 167, DURATION = 5000
+const ServiceContent = ref('')
+provide(xamlScopeKey, { ServiceContent })
+const fallbackRef = ref<{ Controller: ToolTipController } | null>(null)
+const owner = shallowRef<HTMLElement | null>(null)
+const mode = ref<ToolTipInputMode>('none'), point = ref<ToolTipPoint | null>(null), theme = ref('')
+provide(toolTipOwnerContextKey, { owner, inputMode: mode, point, theme, attached: false })
+const originalTitles = new WeakMap<HTMLElement, string | null>(), attached = new Set<HTMLElement>()
+const describedBy = new WeakMap<HTMLElement, string | null>()
+let active: HTMLElement | null = null, pending: HTMLElement | null = null, suppressed: HTMLElement | null = null
+let observer: MutationObserver | null = null
+let openTimer: number | undefined, closeTimer: number | undefined, touchTimer: number | undefined
+let lastClosed = -Infinity, inputMode: ToolTipInputMode = 'none', lastPoint: ToolTipPoint | undefined
+let openSequence = 0
+const controller = (element: HTMLElement) => registeredToolTip(element) ?? (owner.value === element ? fallbackRef.value?.Controller : null)
+const canOpen = (element: HTMLElement) => {
+  if (element.matches(':disabled') || Boolean(element.closest('[aria-disabled="true"]'))) return false
+  // WinUI suppresses service tips for disabled owners (including controls
+  // whose root is a custom element with a disabled native descendant).
+  if (element.matches(':disabled') || Boolean(element.querySelector(':disabled'))) return false
+  const explicit = registeredToolTip(element)
+  if (explicit) return explicit.IsEnabled()
+  const content = element.getAttribute(TOOLTIP)
+  return Boolean(content) && !/\{(?:x:Bind|Binding)\s|\[object Object\]/.test(content!)
 }
-
-function syncNativeTitle(element: HTMLElement) {
-  const text = toolTipText(element);
-  if (text === null) {
-    if (activeElement === element) closeActive();
-    else if (attachedElements.has(element)) restoreOriginalTitle(element);
-    return;
+const findOwner = (target: EventTarget | null) => {
+  let current = target instanceof HTMLElement ? target : target instanceof Node ? target.parentElement : null
+  while (current) { if (current.hasAttribute(TOOLTIP)) return current; current = current.parentElement }
+  return null
+}
+function syncTitle(element: HTMLElement) {
+  if (!element.hasAttribute(TOOLTIP)) { if (active === element) closeActive(); restoreTitle(element); return }
+  if (!attached.has(element)) { originalTitles.set(element, element.getAttribute('title')); attached.add(element) }
+  element.removeAttribute('title')
+  if (active === element && owner.value === element) ServiceContent.value = element.getAttribute(TOOLTIP) ?? ''
+}
+function restoreTitle(element: HTMLElement) {
+  if (!attached.has(element)) return
+  const original = originalTitles.get(element)
+  if (original === null || original === undefined) element.removeAttribute('title'); else element.setAttribute('title', original)
+  attached.delete(element); originalTitles.delete(element)
+}
+const clearOpen = () => { if (openTimer !== undefined) window.clearTimeout(openTimer); openTimer = undefined; pending = null; openSequence += 1 }
+const clearClose = () => { if (closeTimer !== undefined) window.clearTimeout(closeTimer); closeTimer = undefined }
+const clearTouch = () => { if (touchTimer !== undefined) window.clearTimeout(touchTimer); touchTimer = undefined }
+function restoreDescription(element: HTMLElement) {
+  if (!describedBy.has(element)) return
+  const original = describedBy.get(element)
+  if (original === null || original === undefined) element.removeAttribute('aria-describedby'); else element.setAttribute('aria-describedby', original)
+  describedBy.delete(element)
+}
+function closeActive() {
+  clearOpen(); clearClose(); clearTouch()
+  if (active) {
+    controller(active)?.Close(); restoreDescription(active); lastClosed = performance.now()
   }
-
-  if (!attachedElements.has(element)) {
-    originalTitles.set(element, element.getAttribute('title'));
-    attachedElements.add(element);
+  active = null
+}
+function syncTheme(element: HTMLElement) {
+  const scope = element.closest('.theme-light, .theme-dark')
+  theme.value = scope?.classList.contains('theme-dark') ? 'dark' : scope?.classList.contains('theme-light') ? 'light' : ''
+}
+async function openActive(element: HTMLElement, input: ToolTipInputMode, at?: ToolTipPoint) {
+  if (!element.isConnected || !canOpen(element)) return
+  clearClose(); clearOpen()
+  if (active && active !== element) closeActive()
+  active = element; inputMode = input; lastPoint = at
+  let current = registeredToolTip(element)
+  if (!current) {
+    const sequence = openSequence
+    owner.value = element; mode.value = input; point.value = at ?? null
+    ServiceContent.value = element.getAttribute(TOOLTIP) ?? ''; syncTheme(element)
+    await nextTick()
+    if (sequence !== openSequence || active !== element || !element.isConnected) return
+    current = fallbackRef.value?.Controller
   }
-
-  if (activeElement === element && isOpen.value) {
-    content.value = text;
-    placement.value = element.getAttribute(PLACEMENT_ATTRIBUTE) || 'Mouse';
-    placementTarget.value = resolvePlacementTarget(element);
-  } else {
-    element.removeAttribute('title');
-  }
-}
-
-function restoreOriginalTitle(element: HTMLElement) {
-  const original = originalTitles.get(element);
-  if (original === null || original === undefined) element.removeAttribute('title');
-  else element.setAttribute('title', original);
-  originalTitles.delete(element);
-  attachedElements.delete(element);
-}
-
-function restoreAttachedTitle(element: HTMLElement) {
-  const text = toolTipText(element);
-  if (text === null) restoreOriginalTitle(element);
-  else element.removeAttribute('title');
-}
-
-function scanNode(node: Node) {
-  if (!(node instanceof Element)) return;
-  if (node instanceof HTMLElement && node.hasAttribute(TOOL_TIP_ATTRIBUTE)) syncNativeTitle(node);
-  node.querySelectorAll<HTMLElement>(TOOL_TIP_SELECTOR).forEach(syncNativeTitle);
-}
-
-function releaseNode(node: Node) {
-  if (!(node instanceof Element)) return;
-  const elements = node instanceof HTMLElement && node.hasAttribute(TOOL_TIP_ATTRIBUTE)
-    ? [node, ...node.querySelectorAll<HTMLElement>(TOOL_TIP_SELECTOR)]
-    : [...node.querySelectorAll<HTMLElement>(TOOL_TIP_SELECTOR)];
-  elements.forEach(element => {
-    if (activeElement === element) closeActive();
-    if (pendingElement === element) clearOpenTimer();
-    if (suppressedElement === element) suppressedElement = null;
-    if (attachedElements.has(element)) restoreOriginalTitle(element);
-  });
-}
-
-function findToolTipElement(start: EventTarget | null): HTMLElement | null {
-  let element = start instanceof HTMLElement
-    ? start
-    : start instanceof Node
-      ? start.parentElement
-      : null;
-
-  while (element) {
-    if (element.hasAttribute(TOOL_TIP_ATTRIBUTE)) return element;
-    element = element.parentElement;
-  }
-  return null;
-}
-
-function resolvePlacementTarget(element: HTMLElement): HTMLElement {
-  const selector = element.getAttribute(PLACEMENT_TARGET_ATTRIBUTE);
-  if (!selector) return element;
-  try {
-    return document.querySelector<HTMLElement>(selector) || element;
-  } catch {
-    return element;
+  if (!current || active !== element || !element.isConnected) return
+  current?.Open(input, at)
+  const sequence = openSequence
+  await nextTick(); await current?.UpdatePosition()
+  if (sequence !== openSequence || active !== element) return
+  const id = current?.Element()?.id
+  if (id) {
+    if (!describedBy.has(element)) describedBy.set(element, element.getAttribute('aria-describedby'))
+    const original = describedBy.get(element)
+    element.setAttribute('aria-describedby', [original, id].filter(Boolean).join(' '))
   }
 }
-
-function resolveTheme(element: HTMLElement): string {
-  const scope = element.closest('.theme-light, .theme-dark');
-  if (scope?.classList.contains('theme-dark')) return 'dark';
-  if (scope?.classList.contains('theme-light')) return 'light';
-  return '';
+function queueOpen(element: HTMLElement, input: ToolTipInputMode, at?: ToolTipPoint) {
+  if (suppressed === element || !canOpen(element)) return
+  if (active === element && controller(element)?.IsOpen()) { clearClose(); return }
+  if (pending === element) { lastPoint = at; return }
+  const changing = Boolean(active && active !== element)
+  if (changing) closeActive(); else { clearOpen(); clearClose() }
+  const recentlyClosed = performance.now() - lastClosed <= BETWEEN
+  const delay = input === 'touch' ? (recentlyClosed || changing ? 0 : HOVER) : input === 'keyboard' ? HOVER * 2 : (recentlyClosed || changing ? HOVER * 1.5 : HOVER * 2)
+  pending = element; lastPoint = at
+  openTimer = window.setTimeout(() => { void openActive(element, input, lastPoint) }, delay)
 }
-
-function clearOpenTimer() {
-  if (openTimer !== undefined) window.clearTimeout(openTimer);
-  openTimer = undefined;
-  pendingElement = null;
+function inSafeZone(at: ToolTipPoint) {
+  const tip = active ? controller(active)?.Element() : null
+  return Boolean(active && tip && isInToolTipSafeZone(at, active.getBoundingClientRect(), tip.getBoundingClientRect()))
 }
-
-function clearCloseTimer() {
-  if (closeTimer !== undefined) window.clearTimeout(closeTimer);
-  closeTimer = undefined;
+function queueClose(element: HTMLElement, force = false) {
+  if (pending !== element && active !== element) return
+  if (pending === element) clearOpen()
+  if (!force && lastPoint && inSafeZone(lastPoint)) return
+  if (closeTimer === undefined) closeTimer = window.setTimeout(() => { closeTimer = undefined; closeActive() }, CLOSE)
 }
-
-function clearTouchDismissTimer() {
-  if (touchDismissTimer !== undefined) window.clearTimeout(touchDismissTimer);
-  touchDismissTimer = undefined;
+function scan(node: Node) {
+  if (!(node instanceof Element)) return
+  if (node instanceof HTMLElement && node.hasAttribute(TOOLTIP)) syncTitle(node)
+  node.querySelectorAll<HTMLElement>(SELECTOR).forEach(syncTitle)
 }
-
-function elementCenter(element: HTMLElement) {
-  const rect = element.getBoundingClientRect();
-  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+function release(node: Node) {
+  if (!(node instanceof Element)) return
+  const nodes = node instanceof HTMLElement && node.hasAttribute(TOOLTIP) ? [node, ...node.querySelectorAll<HTMLElement>(SELECTOR)] : [...node.querySelectorAll<HTMLElement>(SELECTOR)]
+  nodes.forEach(element => { if (active === element) closeActive(); if (pending === element) clearOpen(); if (suppressed === element) suppressed = null; restoreTitle(element) })
 }
-
-function openFor(element: HTMLElement) {
-  const text = toolTipText(element);
-  if (text === null) return;
-  clearCloseTimer();
-  isClosing = false;
-  canCancelClose = false;
-  if (activeElement && activeElement !== element) restoreAttachedTitle(activeElement);
-  activeElement = element;
-  pendingElement = null;
-  content.value = text;
-  placement.value = element.getAttribute(PLACEMENT_ATTRIBUTE) || 'Mouse';
-  placementTarget.value = resolvePlacementTarget(element);
-  theme.value = resolveTheme(element);
-  element.removeAttribute('title');
-  isOpen.value = true;
-}
-
-function queueOpen(element: HTMLElement, inputMode: InputMode, point?: { x: number; y: number }) {
-  if (suppressedElement === element) return;
-  if (activeElement === element && isClosing && canCancelClose) {
-    clearCloseTimer();
-    isClosing = false;
-    canCancelClose = false;
-    element.removeAttribute('title');
-    isOpen.value = true;
-    return;
-  }
-  if (activeElement === element && isOpen.value) {
-    clearCloseTimer();
-    return;
-  }
-  if (pendingElement === element) return;
-
-  const isSwitchingVisibleTarget = Boolean(activeElement && activeElement !== element && isOpen.value);
-  if (isSwitchingVisibleTarget) {
-    closeActive();
-  } else {
-    clearOpenTimer();
-    clearCloseTimer();
-  }
-
-  pendingElement = element;
-  placementPoint.value = point || elementCenter(element);
-  const recentlyClosed = performance.now() - lastClosedAt <= BETWEEN_SHOW_DELAY;
-  const isReshow = isSwitchingVisibleTarget || recentlyClosed;
-  const delay = inputMode === 'touch'
-    ? isReshow ? 0 : TOUCH_SHOW_DELAY
-    : inputMode === 'mouse' && isReshow
-      ? RESHOW_DELAY
-      : INITIAL_SHOW_DELAY;
-  openTimer = window.setTimeout(() => openFor(element), delay);
-}
-
-function closeActive(allowCancellation = false) {
-  const wasOpen = Boolean(activeElement && isOpen.value);
-  const closingElement = activeElement;
-  clearOpenTimer();
-  clearCloseTimer();
-  clearTouchDismissTimer();
-  isPointerOverToolTip = false;
-  if (closingElement) restoreAttachedTitle(closingElement);
-  isOpen.value = false;
-  if (wasOpen) lastClosedAt = performance.now();
-  if (!closingElement) {
-    isClosing = false;
-    canCancelClose = false;
-    placementTarget.value = null;
-    placementPoint.value = null;
-    content.value = '';
-    return;
-  }
-
-  isClosing = true;
-  canCancelClose = allowCancellation;
-  closeTimer = window.setTimeout(() => {
-    closeTimer = undefined;
-    if (!isClosing || isOpen.value || activeElement !== closingElement) return;
-    activeElement = null;
-    isClosing = false;
-    canCancelClose = false;
-    placementTarget.value = null;
-    placementPoint.value = null;
-    content.value = '';
-  }, CLOSE_ANIMATION_DURATION);
-}
-
-function queueClose(element: HTMLElement) {
-  if (pendingElement !== element && activeElement !== element) return;
-  clearOpenTimer();
-  if (isPointerOverToolTip) return;
-  closeActive(true);
-}
-
 function onPointerOver(event: PointerEvent) {
-  const element = findToolTipElement(event.target);
-  if (element && event.pointerType !== 'touch') {
-    lastInputMode = 'mouse';
-    queueOpen(element, 'mouse', { x: event.clientX, y: event.clientY });
-  }
+  const element = findOwner(event.target)
+  if (element && event.pointerType !== 'touch') { inputMode = 'mouse'; queueOpen(element, 'mouse', { x: event.clientX, y: event.clientY }) }
+  else if (active && (event.target as HTMLElement)?.closest?.('.win-tooltip')) clearClose()
 }
-
 function onPointerMove(event: PointerEvent) {
-  if (event.pointerType === 'touch' || !pendingElement) return;
-  const element = findToolTipElement(event.target);
-  if (element !== pendingElement) return;
-  placementPoint.value = { x: event.clientX, y: event.clientY };
+  if (event.pointerType === 'touch') return
+  lastPoint = { x: event.clientX, y: event.clientY }
+  if (active) { if (inSafeZone(lastPoint)) clearClose(); else queueClose(active) }
 }
-
 function onPointerOut(event: PointerEvent) {
-  const element = findToolTipElement(event.target);
-  if (!element) return;
-  const related = event.relatedTarget;
-  if (related instanceof Node && element.contains(related)) return;
-  if (suppressedElement === element) suppressedElement = null;
-  queueClose(element);
+  const popup = (event.target as HTMLElement | null)?.closest?.('.win-tooltip')
+  if (popup && active) {
+    const related = event.relatedTarget
+    if (!(related instanceof Node && popup.contains(related))) {
+      lastPoint = { x: event.clientX, y: event.clientY }
+      queueClose(active, related === null)
+    }
+    return
+  }
+  const element = findOwner(event.target)
+  if (!element) return
+  const related = event.relatedTarget
+  if (related instanceof Node && element.contains(related)) return
+  if (suppressed === element) suppressed = null
+  lastPoint = { x: event.clientX, y: event.clientY }
+  queueClose(element, related === null)
 }
-
 function onPointerDown(event: PointerEvent) {
-  lastInputMode = event.pointerType === 'touch' ? 'touch' : 'mouse';
-  const element = findToolTipElement(event.target);
+  const element = findOwner(event.target)
+  inputMode = event.pointerType === 'touch' ? 'touch' : 'mouse'
   if (event.pointerType === 'touch' && element) {
-    queueOpen(element, 'touch', { x: event.clientX, y: event.clientY });
-    clearTouchDismissTimer();
-    touchDismissTimer = window.setTimeout(closeActive, 5000);
-  } else if (element) {
-    suppressedElement = element;
-    if (activeElement === element || pendingElement === element) closeActive();
-  } else if (!element && activeElement) {
-    closeActive();
-  }
+    queueOpen(element, 'touch', { x: event.clientX, y: event.clientY })
+    clearTouch(); touchTimer = window.setTimeout(closeActive, DURATION)
+  } else if (element) { suppressed = element; if (active === element || pending === element) closeActive() }
+  else if (active) closeActive()
 }
-
-function onFocusIn(event: FocusEvent) {
-  const element = findToolTipElement(event.target);
-  if (element && lastInputMode === 'keyboard') {
-    queueOpen(element, 'keyboard', elementCenter(element));
-  }
+function onPointerCanceled() { closeActive() }
+function onPointerReleased(event: PointerEvent) { if (event.pointerType === 'touch' && pending) clearOpen() }
+function onFocusIn(event: FocusEvent) { const element = findOwner(event.target); if (element && inputMode === 'keyboard') queueOpen(element, 'keyboard') }
+function onFocusOut(event: FocusEvent) { const element = findOwner(event.target); if (element && !(event.relatedTarget instanceof Node && element.contains(event.relatedTarget))) { if (suppressed === element) suppressed = null; queueClose(element, true) } }
+function onKeyDown(event: KeyboardEvent) {
+  inputMode = 'keyboard'
+  if (event.key === 'Escape') { if (active) suppressed = active; closeActive(); return }
+  // ToolTipService::IsSpecialKey preserves arrows and navigation/action
+  // keys; ordinary typing dismisses a currently visible automatic tip.
+  if (!['Alt', 'Backspace', 'Delete', 'ArrowDown', 'End', 'Home', 'Insert', 'ArrowLeft', 'PageDown', 'PageUp', 'ArrowRight', ' ', 'ArrowUp'].includes(event.key) && active) closeActive()
 }
-
-function onFocusOut(event: FocusEvent) {
-  const element = findToolTipElement(event.target);
-  if (element) queueClose(element);
-}
-
-function onKeyDown() {
-  lastInputMode = 'keyboard';
-}
-
-function onToolTipPointerEnter() {
-  isPointerOverToolTip = true;
-  clearCloseTimer();
-  if (activeElement && isClosing && canCancelClose && suppressedElement !== activeElement) {
-    isClosing = false;
-    canCancelClose = false;
-    activeElement.removeAttribute('title');
-    isOpen.value = true;
-  }
-}
-
-function onToolTipPointerLeave() {
-  isPointerOverToolTip = false;
-  if (activeElement) queueClose(activeElement);
-}
-
+function onBlur() { closeActive(); suppressed = null }
+function onVisibilityChanged() { if (document.hidden) onBlur() }
+const listeners = { pointerover: onPointerOver, pointermove: onPointerMove, pointerout: onPointerOut, pointerdown: onPointerDown, pointercancel: onPointerCanceled, lostpointercapture: onPointerCanceled, pointerup: onPointerReleased, keydown: onKeyDown, focusin: onFocusIn, focusout: onFocusOut } as const
 onMounted(() => {
-  document.querySelectorAll<HTMLElement>(TOOL_TIP_SELECTOR).forEach(syncNativeTitle);
-  observer = new MutationObserver(records => {
-    records.forEach(record => {
-      if (record.type === 'attributes' && record.target instanceof HTMLElement) {
-        if (record.attributeName === TOOL_TIP_ATTRIBUTE) syncNativeTitle(record.target);
-        if (
-          record.attributeName === 'class'
-          && activeElement
-          && (record.target === activeElement || record.target.contains(activeElement))
-        ) {
-          theme.value = resolveTheme(activeElement);
-        }
+  document.querySelectorAll<HTMLElement>(SELECTOR).forEach(syncTitle)
+  observer = new MutationObserver(records => records.forEach(record => {
+    if (record.type === 'attributes' && record.target instanceof HTMLElement) {
+      if (record.attributeName === TOOLTIP) syncTitle(record.target)
+      if (active && (record.target === active || record.target.contains(active))) {
+        if (!canOpen(active)) closeActive()
+        else { syncTheme(active); void controller(active)?.UpdatePosition() }
       }
-      record.addedNodes.forEach(scanNode);
-      record.removedNodes.forEach(releaseNode);
-    });
-  });
-  observer.observe(document.body, {
-    attributes: true,
-    attributeFilter: [TOOL_TIP_ATTRIBUTE, 'class'],
-    childList: true,
-    subtree: true
-  });
-  document.addEventListener('pointerover', onPointerOver, true);
-  document.addEventListener('pointermove', onPointerMove, true);
-  document.addEventListener('pointerout', onPointerOut, true);
-  document.addEventListener('pointerdown', onPointerDown, true);
-  document.addEventListener('keydown', onKeyDown, true);
-  document.addEventListener('focusin', onFocusIn, true);
-  document.addEventListener('focusout', onFocusOut, true);
-});
-
+    }
+    record.addedNodes.forEach(scan); record.removedNodes.forEach(release)
+  }))
+  observer.observe(document.body, { attributes: true, attributeFilter: [TOOLTIP, PLACEMENT, TARGET, 'class', 'disabled', 'aria-disabled'], childList: true, subtree: true })
+  for (const [event, handler] of Object.entries(listeners)) document.addEventListener(event, handler as EventListener, true)
+  window.addEventListener('blur', onBlur); document.addEventListener('visibilitychange', onVisibilityChanged)
+})
 onBeforeUnmount(() => {
-  observer?.disconnect();
-  clearOpenTimer();
-  clearCloseTimer();
-  clearTouchDismissTimer();
-  attachedElements.forEach(restoreOriginalTitle);
-  document.removeEventListener('pointerover', onPointerOver, true);
-  document.removeEventListener('pointermove', onPointerMove, true);
-  document.removeEventListener('pointerout', onPointerOut, true);
-  document.removeEventListener('pointerdown', onPointerDown, true);
-  document.removeEventListener('keydown', onKeyDown, true);
-  document.removeEventListener('focusin', onFocusIn, true);
-  document.removeEventListener('focusout', onFocusOut, true);
-});
+  observer?.disconnect(); closeActive(); attached.forEach(restoreTitle)
+  for (const [event, handler] of Object.entries(listeners)) document.removeEventListener(event, handler as EventListener, true)
+  window.removeEventListener('blur', onBlur); document.removeEventListener('visibilitychange', onVisibilityChanged)
+})
 </script>

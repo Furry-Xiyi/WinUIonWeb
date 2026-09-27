@@ -1,0 +1,157 @@
+.win-commandbar, .commandbar-overlay-root {
+  position: relative;
+  min-width: 0;
+  height: var(--AppBarThemeCompactHeight, 48px);
+  min-height: var(--AppBarThemeCompactHeight, 48px);
+  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', sans-serif);
+  color: var(--CommandBarForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  z-index: 20;
+}
+.win-commandbar.closed-minimal { height: 24px; min-height: 24px; }
+/* Retain XAML DesiredSize while command instances are hosted in overflow. */
+.win-commandbar::before { content: ''; display: block; width: var(--CommandBarDesiredWidth, 0px); max-width: 100%; height: 0; pointer-events: none; }
+.win-commandbar.closed-hidden { height: 0; min-height: 0; }
+.commandbar-layout-root { position: relative; height: max-content; min-width: 0; }
+.commandbar-overlay-root { position: fixed; z-index: 2147483000; min-height: 0; max-width: none; }
+.commandbar-light-dismiss-layer { position: fixed; inset: 0; z-index: 2147482999; background: transparent; touch-action: none; }
+.commandbar-overlay-root.opens-up .commandbar-content-root { transform: translateY(var(--CommandBarVerticalDelta)); }
+.commandbar-content-root {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 48px;
+  background: var(--CommandBarBackground, var(--ControlFillColorTransparentBrush, transparent));
+  border-radius: var(--CommandBarCornerRadius, var(--ControlCornerRadius, 4px));
+}
+.is-open > .commandbar-layout-root .commandbar-content-root {
+}
+.commandbar-content-and-primary { display: grid; grid-template-columns: minmax(0, 1fr) auto; min-width: 0; overflow: hidden; }
+.dynamic-overflow-enabled .commandbar-content-and-primary { grid-template-columns: auto minmax(0, 1fr); }
+.commandbar-content-control { min-width: 0; margin: var(--CommandBarContentPadding, 0 0 0 4px); align-self: start; }
+.commandbar-primary-items-control { display: flex; justify-content: flex-end; align-items: flex-start; min-width: 0; min-height: 48px; }
+.commandbar-command-host { display: contents; }
+.commandbar-more-column { width: var(--AppBarMoreButtonColumnMinWidth, 6px); }
+.commandbar-open-border { position: absolute; inset: 0; border: 1px solid transparent; border-radius: inherit; pointer-events: none; }
+.is-open > .commandbar-layout-root .commandbar-open-border { border-color: var(--CommandBarBorderBrushOpen, var(--CardStrokeColorDefaultSolidBrush, var(--card-stroke))); }
+.commandbar-more-button {
+  appearance: none; position: relative; width: 48px; min-width: 48px; height: 48px; min-height: 48px;
+  padding: 0; margin: 0; border: 0; background: transparent; color: inherit; cursor: default; border-radius: var(--ControlCornerRadius, 4px);
+}
+.is-open .commandbar-more-button { height: 100%; }
+.commandbar-ellipsis-content { position: absolute; inset: 6px 6px 6px 2px; display: grid; place-items: center; border-radius: inherit; background: var(--AppBarButtonBackground, transparent); transition: background-color 83ms linear; }
+.commandbar-more-button:hover .commandbar-ellipsis-content { background: var(--AppBarButtonBackgroundPointerOver, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary))); color: var(--AppBarButtonForegroundPointerOver, var(--text-primary)); }
+.commandbar-more-button:active .commandbar-ellipsis-content { background: var(--AppBarButtonBackgroundPressed, var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary))); color: var(--AppBarButtonForegroundPressed, var(--text-secondary)); }
+.commandbar-more-button:disabled .commandbar-ellipsis-content { color: var(--CommandBarEllipsisIconForegroundDisabled, var(--TextFillColorDisabledBrush, var(--text-disabled))); background: transparent; }
+.commandbar-more-button:focus-visible { outline: 2px solid var(--FocusStrokeColorOuterBrush, var(--text-primary)); outline-offset: -3px; }
+.commandbar-ellipsis-icon { font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets'); font-size: 20px; line-height: 20px; width: 20px; height: 20px; }
+.closed-minimal:not(.is-open) .commandbar-content-root { height: 24px; overflow: hidden; }
+.closed-minimal:not(.is-open) .commandbar-content-and-primary { visibility: hidden; }
+.closed-minimal:not(.is-open) .commandbar-more-button { height: 24px; min-height: 24px; }
+.closed-minimal:not(.is-open) .commandbar-ellipsis-content { inset-block: 0; }
+.closed-hidden:not(.is-open) .commandbar-content-root { visibility: hidden; }
+.commandbar-overflow-content-root {
+  position: fixed; z-index: 2147483001; width: max-content;
+  min-width: min(var(--CommandBarOverflowMinWidth, 160px), var(--CommandBarOverflowAvailableWidth));
+  max-width: min(var(--CommandBarOverflowMaxWidth, 480px), var(--CommandBarOverflowAvailableWidth));
+  max-height: var(--CommandBarOverflowAvailableHeight);
+  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', sans-serif);
+  color: var(--CommandBarForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  border-radius: var(--OverlayCornerRadius, 8px); isolation: isolate;
+}
+.commandbar-overflow-content-root.is-positioning { visibility: hidden; }
+.commandbar-secondary-shadow-wrapper { position: relative; border-radius: inherit; max-height: inherit; overflow: visible; }
+.commandbar-overflow-presenter {
+  border: 1px solid var(--CommandBarOverflowPresenterBorderBrush, var(--SystemControlTransientBorderBrush, var(--flyout-border)));
+  border-radius: inherit; max-height: inherit; box-sizing: border-box; overflow: hidden;
+}
+.commandbar-overflow-scroll-viewer { max-height: calc(var(--CommandBarOverflowAvailableHeight) - 2px); overflow-y: auto; overflow-x: hidden; }
+.commandbar-secondary-items-presenter { display: flex; flex-direction: column; min-width: 0; margin: 4px 0; }
+.commandbar-overflow-divider { height: 1px; flex: 0 0 1px; margin: 4px 0; background: var(--AppBarSeparatorForeground, var(--DividerStrokeColorDefaultBrush, var(--stroke-divider))); border-radius: 0.5px; }
+.win-commandbar-flyout {
+  position: fixed; z-index: 2147483000; width: max-content; min-width: 0;
+  max-width: min(440px, var(--cbf-available-width)); max-height: var(--cbf-available-height);
+  color: var(--CommandBarFlyoutForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', sans-serif);
+  font-size: var(--ControlContentThemeFontSize, 14px); border-radius: var(--OverlayCornerRadius, 8px);
+  overflow: visible; isolation: isolate;
+  --AppBarButtonBackground: var(--CommandBarFlyoutAppBarButtonBackground, var(--SubtleFillColorTransparentBrush, transparent));
+  --AppBarButtonBackgroundPointerOver: var(--CommandBarFlyoutAppBarButtonBackgroundPointerOver, var(--SubtleFillColorSecondaryBrush, var(--subtle-secondary)));
+  --AppBarButtonBackgroundPressed: var(--CommandBarFlyoutAppBarButtonBackgroundPressed, var(--SubtleFillColorTertiaryBrush, var(--subtle-tertiary)));
+  --AppBarButtonForeground: var(--CommandBarFlyoutAppBarButtonForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  --AppBarButtonForegroundPointerOver: var(--CommandBarFlyoutAppBarButtonForegroundPointerOver, var(--TextFillColorPrimaryBrush, var(--text-primary)));
+  --AppBarButtonForegroundPressed: var(--CommandBarFlyoutAppBarButtonForegroundPressed, var(--TextFillColorSecondaryBrush, var(--text-secondary)));
+  --AppBarButtonForegroundDisabled: var(--CommandBarFlyoutAppBarButtonForegroundDisabled, var(--TextFillColorDisabledBrush, var(--text-disabled)));
+  --AppBarButtonBorderBrush: var(--CommandBarFlyoutAppBarButtonBorderBrush, transparent);
+  --AppBarButtonBorderBrushPointerOver: var(--CommandBarFlyoutAppBarButtonBorderBrush, transparent);
+  --AppBarButtonBorderBrushPressed: var(--CommandBarFlyoutAppBarButtonBorderBrush, transparent);
+  --AppBarButtonBorderBrushDisabled: var(--CommandBarFlyoutAppBarButtonBorderBrush, transparent);
+  --AppBarButtonBorderThickness: 0px;
+  --AppBarToggleButtonBorderBrushChecked: var(--CommandBarFlyoutAppBarButtonBorderBrush, transparent);
+  --AppBarToggleButtonBorderBrushCheckedPointerOver: var(--CommandBarFlyoutAppBarButtonBorderBrush, transparent);
+  --AppBarToggleButtonBorderBrushCheckedPressed: var(--CommandBarFlyoutAppBarButtonBorderBrush, transparent);
+  --AppBarToggleButtonBorderBrushCheckedDisabled: var(--CommandBarFlyoutAppBarButtonBorderBrush, transparent);
+}
+.win-commandbar-flyout.is-positioning { visibility: hidden; }
+.win-commandbar-flyout.is-closing { pointer-events: none; }
+.win-cbf-layout-root, .win-cbf-outer-content-root, .win-cbf-content-root { border-radius: inherit; }
+.win-cbf-primary-items-root {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(3px, auto); min-width: 0; min-height: 48px; border-radius: inherit;
+  border: 1px solid var(--CommandBarFlyoutBorderBrush, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))); box-sizing: border-box;
+}
+.win-cbf-primary-items-control { display: flex; align-items: stretch; height: 40px; min-width: 0; margin: 3px 0 3px 3px; }
+.win-commandbar-flyout.has-primary-labels .win-cbf-primary-items-control { height: auto; min-height: 52px; }
+.win-cbf-more-button { width: 44px; min-width: 44px; height: auto; min-height: 40px; align-self: stretch; margin: 0; }
+.win-cbf-more-button .commandbar-ellipsis-content { inset: 2px 6px 2px 2px; }
+.win-cbf-more-button .commandbar-ellipsis-icon { width: 16px; height: 16px; font-size: 16px; line-height: 16px; }
+.win-cbf-primary-items-control .win-appbar-button { width: 40px; height: auto; align-self: stretch !important; }
+.win-cbf-primary-items-control .win-appbar-button .appbar-button-inner-border { inset: 2px; border-width: 0; }
+.win-cbf-primary-items-control .win-appbar-button .appbar-button-content-root {
+  width: 40px; min-width: 40px; min-height: 40px; height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; align-content: center;
+}
+.win-cbf-primary-items-control .win-appbar-button .appbar-button-content-viewbox {
+  width: 16px !important; height: 16px; align-self: center !important; justify-self: center !important; margin: 0 !important;
+}
+.win-cbf-primary-items-control .win-appbar-button .appbar-button-label, .win-cbf-primary-items-control .win-appbar-button .appbar-button-chevron { display: none; }
+.win-commandbar-flyout.has-primary-labels .win-cbf-primary-items-control .win-appbar-button { width: 60px; }
+.win-commandbar-flyout.has-primary-labels .win-cbf-primary-items-control .win-appbar-button .appbar-button-content-root {
+  width: 60px; min-height: 52px; grid-template-rows: 16px auto; align-content: start; padding-top: 9px; box-sizing: border-box;
+}
+.win-commandbar-flyout.has-primary-labels .win-cbf-primary-items-control .win-appbar-button .appbar-button-label {
+  display: block; grid-area: 2 / 1; margin: 6px 0 2px; line-height: 16px; overflow-wrap: normal;
+}
+.win-cbf-outer-overflow-content-root { position: relative; min-width: min(136px, var(--cbf-available-width)); max-width: min(440px, var(--cbf-available-width)); width: max-content; border-radius: inherit; overflow: visible; }
+.win-commandbar-flyout.is-expanded .win-cbf-outer-overflow-content-root { width: 100%; }
+.win-cbf-material-layer { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1; }
+/* WinUI prepends the caster shadow below its background. The separate overflow
+   Popup also occludes the primary shadow at the shared edge. Keep that shadow
+   out of the adjacent acrylic backdrop sample in the browser composition. */
+.win-cbf-primary-items-root > .win-theme-shadow-visual,
+.win-cbf-outer-overflow-content-root > .win-theme-shadow-visual { z-index: -2; }
+.win-cbf-primary-items-root, .win-cbf-overflow-content-root { isolation: isolate; }
+.win-cbf-overflow-content-root { position: relative; border: 1px solid var(--CommandBarFlyoutBorderBrush, var(--ControlStrokeColorDefaultBrush, var(--flyout-border))); border-radius: inherit; overflow: hidden; }
+.win-cbf-secondary-items-control { display: flex; flex-direction: column; min-width: 0; margin: 0; padding: 3px; max-height: min(478px, calc(var(--cbf-available-height) - 2px)); box-sizing: border-box; overflow-x: hidden; overflow-y: auto; }
+.win-cbf-secondary-items-control .win-appbar-button .appbar-button-inner-border { inset: 2px; border-width: 0; }
+.win-cbf-secondary-items-control .win-appbar-button .appbar-button-content-root { min-width: 0; }
+.win-cbf-secondary-items-control .win-appbar-button .appbar-button-overflow-label { padding: 6px 0 7px; }
+.win-cbf-secondary-items-control .win-appbar-button.overflow-with-icons .appbar-button-overflow-label,
+.win-cbf-secondary-items-control .win-appbar-button.overflow-with-toggles .appbar-button-overflow-label { margin-inline-start: 39px; }
+.win-cbf-secondary-items-control .win-appbar-button.overflow-with-icons.overflow-with-toggles .appbar-button-content-viewbox { margin-inline-start: 39px; }
+.win-cbf-secondary-items-control .win-appbar-button.overflow-with-icons.overflow-with-toggles .appbar-button-overflow-label { margin-inline-start: 67px; }
+.win-cbf-secondary-items-control .win-appbar-button .appbar-button-overflow-chevron { margin: 0 12px; }
+.win-cbf-secondary-items-control .win-appbar-toggle-button .appbar-toggle-check-glyph { inset-inline-start: 15px; font-size: 12px; }
+.win-commandbar-flyout.is-expanded.has-primary .win-cbf-layout-root,
+.win-commandbar-flyout.is-expanded.has-primary .win-cbf-primary-items-root { border-radius: var(--OverlayCornerRadius, 8px) var(--OverlayCornerRadius, 8px) 0 0; }
+.win-commandbar-flyout.is-expanded.has-primary .win-cbf-outer-overflow-content-root { border-radius: 0 0 var(--OverlayCornerRadius, 8px) var(--OverlayCornerRadius, 8px); }
+.win-commandbar-flyout.is-expanded.has-primary .win-cbf-overflow-content-root { border-top: 0; }
+/* Absolute shadow children start inside PrimaryItemsRoot's 1px border. */
+.win-commandbar-flyout.is-expanded.has-primary .win-cbf-primary-items-root > .win-theme-shadow-visual { clip-path: inset(0 0 calc(var(--cbf-shadow-bottom-inset) - 1px) 0); }
+.win-commandbar-flyout.is-expanded.has-primary .win-cbf-outer-overflow-content-root > .win-theme-shadow-visual { clip-path: inset(var(--cbf-shadow-top-inset) 0 0 0); }
+.win-commandbar-flyout.is-expanded .win-cbf-primary-items-root { width: 100%; grid-template-columns: minmax(0, 1fr) auto; }
+.win-commandbar-flyout.expands-up .win-cbf-content-root { display: flex; flex-direction: column-reverse; }
+.win-commandbar-flyout.expands-up.is-expanded.has-primary .win-cbf-layout-root,
+.win-commandbar-flyout.expands-up.is-expanded.has-primary .win-cbf-primary-items-root { border-radius: 0 0 var(--OverlayCornerRadius, 8px) var(--OverlayCornerRadius, 8px); }
+.win-commandbar-flyout.expands-up.is-expanded.has-primary .win-cbf-outer-overflow-content-root { border-radius: var(--OverlayCornerRadius, 8px) var(--OverlayCornerRadius, 8px) 0 0; }
+.win-commandbar-flyout.expands-up.is-expanded.has-primary .win-cbf-overflow-content-root { border-top: 1px solid var(--CommandBarFlyoutBorderBrush, var(--flyout-border)); border-bottom: 0; }
+.win-commandbar-flyout.expands-up.is-expanded.has-primary .win-cbf-primary-items-root > .win-theme-shadow-visual { clip-path: inset(calc(var(--cbf-shadow-top-inset) - 1px) 0 0 0); }
+.commandbar-flyout-anchor { display: none; }
