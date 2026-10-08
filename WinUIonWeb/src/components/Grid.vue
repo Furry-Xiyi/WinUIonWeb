@@ -44,7 +44,7 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { cloneVNode, computed, defineComponent, Fragment, getCurrentInstance, h, inject, onBeforeUnmount, provide, ref, shallowRef, useSlots, watch, type VNode } from 'vue'
+import { cloneVNode, computed, getCurrentInstance, inject, onBeforeUnmount, provide, ref, shallowRef, useSlots, watch, type VNode } from 'vue'
 import { alignment, applyGridChildren, attachedValue, cssLength, useLayoutObserver, xamlThickness } from './layout'
 import { gridDefinitionContextKey } from './layout'
 
@@ -57,7 +57,8 @@ import { isBrushProperty, useBrushProperty } from './brushProperties'
 import { vAcrylicBrush } from './acrylicBrushVisual'
 import { collectXamlResources, useXamlBrushResources } from './xamlBrushResources'
 import { vRadialGradientBrush } from './RadialGradientVisual'
-import { vThemeShadow } from './themeShadowVisual'
+import { vThemeShadow, type ThemeShadowVisualOptions } from './themeShadowVisual'
+import type { ThemeShadowValue } from './themeShadowRuntime'
 
 const props = defineProps({
   Width: { type: [String, Number], default: '' }, Height: { type: [String, Number], default: '' },
@@ -99,16 +100,16 @@ const backgroundBrush = useBrushProperty('Background', () => props.Background, (
 const shadowProperty = useBrushProperty('Shadow', () => props.Shadow, () => slots.default?.() ?? [], instance)
 const localShadow = shallowRef<unknown>()
 const Shadow = computed({
-  get: () => localShadow.value === undefined ? shadowProperty.value.value : localShadow.value,
+  get: (): ThemeShadowValue | null | undefined => (localShadow.value === undefined ? shadowProperty.value.value : localShadow.value) as ThemeShadowValue | null | undefined,
   set: value => { localShadow.value = value; updateXamlBinding(props.Shadow, value, instance); emit('update:Shadow', value) }
 })
 watch(() => resolveXamlValue(props.Shadow, instance), () => { localShadow.value = undefined })
-const localTranslation = shallowRef(resolveXamlValue(props.Translation, instance))
+const localTranslation = shallowRef(resolveXamlValue(props.Translation, instance) as ThemeShadowVisualOptions['Translation'])
 const Translation = computed({
   get: () => localTranslation.value,
   set: value => { localTranslation.value = value; updateXamlBinding(props.Translation, value, instance); emit('update:Translation', value) }
 })
-watch(() => resolveXamlValue(props.Translation, instance), value => { localTranslation.value = value }, { deep: true })
+watch(() => resolveXamlValue(props.Translation, instance), value => { localTranslation.value = value as ThemeShadowVisualOptions['Translation'] }, { deep: true })
 defineExpose({ Element: root, Shadow, Translation })
 const primitiveResources = primitiveResourceScope(() => slots.default?.() ?? [], inject(xamlPrimitiveResourceKey, null))
 provide(xamlPrimitiveResourceKey, primitiveResources)
@@ -204,7 +205,8 @@ const rootStyle = computed(() => {
   style.justifySelf = alignment(resolveProp(props.HorizontalAlignment), 'horizontal')
   style.alignSelf = alignment(resolveProp(props.VerticalAlignment), 'vertical')
   const translation = Translation.value
-  const [x, y] = typeof translation === 'string' ? translation.split(',').map(Number) : [Number(translation?.X), Number(translation?.Y)]
+  const vector = typeof translation === 'object' ? translation : undefined
+  const [x, y] = typeof translation === 'string' ? translation.split(',').map(Number) : [Number(vector?.X), Number(vector?.Y)]
   if (x || y) style.transform = `translate(${x || 0}px, ${y || 0}px)`
   if (resolveProp(props.Visibility) === 'Collapsed') style.display = 'none'
   else if (resolveProp(props.Visibility) === 'Hidden') style.visibility = 'hidden'

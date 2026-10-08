@@ -28,7 +28,7 @@ export default { Source: ImageSourceProperty }
 </script>
 
 <script setup lang="ts">
-import { cloneVNode, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, reactive, ref, shallowRef, useAttrs, useSlots, watch, type VNode } from 'vue'
+import { cloneVNode, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, reactive, ref, shallowRef, useAttrs, useSlots, watch, type CSSProperties, type PropType, type StyleValue, type VNode } from 'vue'
 import { alignment, cssLength, xamlThickness } from './layout'
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlResourceObject, resolveXamlValue } from './xamlRuntime'
 import { xamlResourceDictionaryKey } from './Page.vue'
@@ -38,7 +38,7 @@ import { parallaxChildLayoutKey } from './parallaxRuntime'
 
 defineOptions({ inheritAttrs: false })
 const props = defineProps({
-  Source: { type: [String, Object], default: '' },
+  Source: { type: [String, Object] as PropType<unknown>, default: '' as unknown },
   Stretch: { type: String, default: 'Uniform' },
   NineGrid: { type: [String, Number, Object], default: '0' },
   Width: { type: [String, Number], default: '' }, Height: { type: [String, Number], default: '' },
@@ -168,7 +168,7 @@ const desiredSize = computed(() => {
     height: Number.isFinite(height) ? height : Math.min(finiteSize(props.MaxHeight), Math.max(imageNumber(value(props.MinHeight)), desired.height))
   }
 })
-const hostStyle = computed(() => [attrs.style, {
+const hostStyle = computed<StyleValue>(() => [attrs.style as StyleValue, {
   flex: '0 0 auto',
   width: `${parallaxLayout?.arrangedSize.value?.width ?? desiredSize.value.width}px`, height: `${parallaxLayout?.arrangedSize.value?.height ?? desiredSize.value.height}px`,
   minWidth: cssLength(value(props.MinWidth)), minHeight: cssLength(value(props.MinHeight)),
@@ -180,7 +180,7 @@ const hostStyle = computed(() => [attrs.style, {
   pointerEvents: imageBoolean(value(props.IsHitTestVisible)) ? undefined : 'none'
 }])
 if (parallaxLayout) watch(desiredSize, size => parallaxLayout.reportDesiredSize(size), { immediate: true })
-const surfaceStyle = computed(() => ({ objectFit: ({ None: 'none', Fill: 'fill', Uniform: 'contain', UniformToFill: 'cover' } as Record<string, string>)[stretch.value] }))
+const surfaceStyle = computed<CSSProperties>(() => ({ objectFit: ({ None: 'none', Fill: 'fill', Uniform: 'contain', UniformToFill: 'cover' } as Record<string, CSSProperties['objectFit']>)[stretch.value] }))
 
 function cancelPlayback() {
   if (animationFrame !== null) cancelAnimationFrame(animationFrame)

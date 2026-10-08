@@ -1,33 +1,35 @@
 <template>
-  <Grid class="win-home-header-tile" Width="232" Height="172" CornerRadius="8"
-        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-        BorderBrush="{ThemeResource SurfaceStrokeColorFlyoutBrush}">
-    <HyperlinkButton class="win-home-header-tile-link" Padding="-1" CornerRadius="8"
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                     HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                     AutomationProperties.Name="{x:Bind TileTitle, Mode=OneWay}"
-                     NavigateUri="{x:Bind TileLink, Mode=OneWay}" TargetName="_blank">
-      <Grid Padding="24" RowSpacing="16" VerticalAlignment="Stretch" class="win-home-header-tile-content">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="36" />
-          <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <FontIcon Grid.RowSpan="3" Margin="-12" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                  class="win-home-header-tile-open-icon" Glyph="&#xE8A7;" FontSize="14"
-                  Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-        <ContentPresenter class="win-home-header-tile-source" HorizontalAlignment="Left" VerticalAlignment="Top"
-                          Content="{x:Bind TileSource, Mode=OneWay}" />
-        <StackPanel Grid.Row="1" Spacing="4">
-          <TextBlock class="win-home-header-tile-title" Text="{x:Bind TileTitle, Mode=OneWay}"
-                     Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                     Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
-          <TextBlock class="win-home-header-tile-description" Text="{x:Bind TileDescription, Mode=OneWay}"
-                     Style="{StaticResource CaptionTextBlockStyle}"
-                     Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-        </StackPanel>
-      </Grid>
-    </HyperlinkButton>
-  </Grid>
+  <UserControl class="win-home-header-tile" Width="232" Height="172">
+    <Grid class="win-home-header-tile-surface" CornerRadius="8"
+          Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+          BorderBrush="{ThemeResource SurfaceStrokeColorFlyoutBrush}">
+      <HyperlinkButton class="win-home-header-tile-link" Padding="-1" CornerRadius="{StaticResource OverlayCornerRadius}"
+                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                       HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                       AutomationProperties.Name="{x:Bind TileTitle, Mode=OneWay}"
+                       NavigateUri="{x:Bind TileLink, Mode=OneWay}" TargetName="_blank">
+        <Grid Padding="24" RowSpacing="16" VerticalAlignment="Stretch" class="win-home-header-tile-content">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="36" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <FontIcon Grid.RowSpan="3" Margin="-12" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    class="win-home-header-tile-open-icon" Glyph="&#xE8A7;" FontSize="14"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+          <ContentPresenter class="win-home-header-tile-source" HorizontalAlignment="Left" VerticalAlignment="Top"
+                            Content="{x:Bind TileSource, Mode=OneWay}" />
+          <StackPanel Grid.Row="1" Spacing="4">
+            <TextBlock class="win-home-header-tile-title" Text="{x:Bind TileTitle, Mode=OneWay}"
+                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                       Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+            <TextBlock class="win-home-header-tile-description" Text="{x:Bind TileDescription, Mode=OneWay}"
+                       Style="{StaticResource CaptionTextBlockStyle}"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+          </StackPanel>
+        </Grid>
+      </HyperlinkButton>
+    </Grid>
+  </UserControl>
 </template>
 
 <script lang="ts">
@@ -43,6 +45,7 @@ import Grid from '../../components/Grid.vue';
 import FontIcon from '../../components/FontIcon.vue';
 import HyperlinkButton from '../../components/HyperlinkButton.vue';
 import TextBlock from '../../components/TextBlock.vue';
+import UserControl from '../../components/UserControl';
 import { getVNodeChildren } from '../../components/CollectionProperties';
 import { normalizeXamlNodes, resolveXamlValue, updateXamlBinding, xamlScopeKey } from '../../components/xamlRuntime';
 
@@ -81,6 +84,7 @@ defineExpose({ Title: TileTitle, Description: TileDescription, Link: TileLink, S
   --HyperlinkButtonBorderBrushDisabled: var(--ControlStrokeColorDefaultBrush, var(--ctrl-border));
 }
 .win-home-header-tile-link { width: 100%; height: 100%; white-space: normal; }
+.win-home-header-tile-surface { min-width: 0; min-height: 0; overflow: hidden; }
 .win-home-header-tile :deep(.win-hyperlink-content-presenter) { height: 100%; padding: 0; }
 .win-home-header-tile-content { position: relative; width: 100%; height: 100%; min-width: 0; min-height: 0; text-align: left; }
 .win-home-header-tile-source { width: 36px; height: 36px; overflow: hidden; }

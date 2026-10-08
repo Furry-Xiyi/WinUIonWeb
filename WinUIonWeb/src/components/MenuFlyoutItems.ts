@@ -28,8 +28,8 @@ export const KeyboardAccelerator = defineComponent({
 })
 
 const commonProperties = {
-  Text: { type: [String, Number], default: undefined }, Icon: { default: undefined }, Tag: { default: undefined }, DataContext: { default: undefined },
-  Command: { default: undefined }, CommandParameter: { default: undefined },
+  Text: { type: [String, Number], default: undefined }, Icon: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, Tag: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, DataContext: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+  Command: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, CommandParameter: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
   IsEnabled: { type: [Boolean, String], default: true }, IsChecked: { type: [Boolean, String], default: false }, GroupName: { type: String, default: '' },
   KeyboardAccelerators: { type: [Array, String] as PropType<unknown[] | string>, default: undefined }, KeyboardAcceleratorTextOverride: { type: String, default: '' },
   KeyboardAcceleratorPlacementMode: { type: String, default: 'Hidden' }, PreventDismissOnPointer: { type: [Boolean, String], default: false },
@@ -257,7 +257,7 @@ const createItem = (kind: string) => Object.assign(defineComponent({
       return source ? [h(SymbolIcon, { Symbol: String(source), FontSize: 20 })] : []
     }
     const leading = () => [
-      context?.ContainsCheckItems.value ? h('span', { class: ['win-menu-flyout-check-slot', { 'is-checked': checked.value && (isToggle || isRadio) }], 'aria-hidden': true }, (isToggle || isRadio) ? h(FontIcon, { Glyph: isRadio ? '\uE915' : '\uE73E', FontSize: 12, Foreground: 'inherit' }) : null) : null,
+      context?.ContainsCheckItems.value ? h('span', { class: ['win-menu-flyout-check-slot', { 'is-checked': checked.value && (isToggle || isRadio) }], 'aria-hidden': true }, (isToggle || isRadio) ? [h(FontIcon, { Glyph: isRadio ? '\uE915' : '\uE73E', FontSize: 12, Foreground: 'inherit' })] : undefined) : null,
       context?.ContainsIconItems.value ? h('span', { class: 'win-menu-flyout-icon-viewbox', 'aria-hidden': true }, h('span', { class: 'win-menu-flyout-icon-content' }, iconContent())) : null
     ]
     const contents = () => [

@@ -112,7 +112,7 @@ export default { components: { 'animatedvisuals:AnimatedBackVisualSource': anima
 </script>
 
 <script setup lang="ts">
-import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch } from 'vue';
+import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch, type ComponentPublicInstance, type CSSProperties, type PropType, type VNode } from 'vue';
 import Grid from './Grid.vue';
 import Button from './Button.vue';
 import ColumnDefinition from './ColumnDefinition.vue';
@@ -137,7 +137,7 @@ const hostAdapter = inject<TitleBarHostAdapter | null>(titleBarHostAdapterKey, n
 const forcedHighContrast = ref(false);
 const highContrast = computed(() => forcedHighContrast.value || uiSettings.IsHighContrast);
 const brushAliases = computed(() => highContrast.value ? titleBarHighContrastBrushAliases : titleBarBrushAliases);
-const highContrastColors = { SystemControlForegroundBaseHighBrush: 'CanvasText', SystemControlHighlightAltBaseHighBrush: 'HighlightText', SystemControlDisabledBaseMediumLowBrush: 'GrayText', SystemControlBackgroundBaseLowBrush: 'Canvas', SystemControlHighlightListLowBrush: 'Highlight', SystemControlHighlightListMediumBrush: 'Highlight' };
+const highContrastColors: Record<string, string> = { SystemControlForegroundBaseHighBrush: 'CanvasText', SystemControlHighlightAltBaseHighBrush: 'HighlightText', SystemControlDisabledBaseMediumLowBrush: 'GrayText', SystemControlBackgroundBaseLowBrush: 'Canvas', SystemControlHighlightListLowBrush: 'Highlight', SystemControlHighlightListMediumBrush: 'Highlight' };
 
 const xamlProps = defineProps({
   Title: { type: String, default: '' },
@@ -146,7 +146,7 @@ const xamlProps = defineProps({
   IsBackButtonVisible: { type: [Boolean, String], default: false },
   IsBackButtonEnabled: { type: [Boolean, String], default: true },
   IsPaneToggleButtonVisible: { type: [Boolean, String], default: false },
-  LeftHeader: { type: null, default: null }, Content: { type: null, default: null }, RightHeader: { type: null, default: null },
+  LeftHeader: { type: null as unknown as PropType<unknown>, default: null }, Content: { type: null as unknown as PropType<unknown>, default: null }, RightHeader: { type: null as unknown as PropType<unknown>, default: null },
   IsEnabled: { type: [Boolean, String], default: true }, FlowDirection: { type: String, default: 'LeftToRight' }, Visibility: { type: String, default: 'Visible' },
   AutoRefreshDragRegions: { type: [Boolean, String], default: false },
   Background: { type: String, default: '' },
@@ -164,20 +164,20 @@ const xamlProps = defineProps({
 
 const emit = defineEmits(['BackRequested', 'PaneToggleRequested', 'LayoutUpdated']);
 const instance = getCurrentInstance(), attrs = useAttrs();
-const overrides = shallowRef({});
+const overrides = shallowRef<Record<PropertyKey, unknown>>({});
 const props = new Proxy(xamlProps, { get: (target, key) => resolveXamlValue(key in overrides.value ? overrides.value[key] : Reflect.get(target, key), instance) });
 const rootAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([name]) => !['BackRequested', 'PaneToggleRequested', 'LayoutUpdated'].includes(name))));
 const slotNodes = computed(() => flatten(slots.default?.() ?? []));
-const children = node => Array.isArray(node.children) ? node.children : node.children?.default?.() ?? [];
-const flatten = nodes => nodes.flatMap(node => node.type === Fragment ? flatten(children(node)) : node.type === Comment || node.type === Text && !String(node.children ?? '').trim() ? [] : [node]);
-const property = node => node.type?.__titleBarProperty;
-const propertyNodes = name => slotNodes.value.filter(node => property(node) === name).flatMap(children);
+const children = (node: VNode): VNode[] => Array.isArray(node.children) ? node.children as VNode[] : (node.children as { default?: () => VNode[] } | null)?.default?.() ?? [];
+const flatten = (nodes: VNode[]): VNode[] => nodes.flatMap(node => node.type === Fragment ? flatten(children(node)) : node.type === Comment || node.type === Text && !String(node.children ?? '').trim() ? [] : [node]);
+const property = (node: VNode) => (node.type as { __titleBarProperty?: string })?.__titleBarProperty;
+const propertyNodes = (name: string) => slotNodes.value.filter(node => property(node) === name).flatMap(children);
 const defaultContent = () => slotNodes.value.filter(node => !property(node));
 const inheritedResources = inject(xamlPrimitiveResourceKey, null);
 const localResources = primitiveResourceScope(() => slotNodes.value.filter(node => property(node) === 'Resources'), inheritedResources);
 const resources = computed(() => ({ ...titleBarResources, ...localResources.value }));
 provide(xamlPrimitiveResourceKey, resources);
-const resource = name => {
+const resource = (name: string) => {
   if (resources.value[name] !== undefined) return resources.value[name];
   const alias = brushAliases.value[name] ?? name;
   const value = resolveXamlValue(`{ThemeResource ${alias}}`, instance);
@@ -186,7 +186,7 @@ const resource = name => {
 const IconSource = computed(() => props.IconSource);
 const FlowDirection = computed(() => props.FlowDirection);
 const IsEnabled = computed(() => props.IsEnabled !== false);
-const hasProperty = name => name in overrides.value ? props[name] !== null : propertyNodes(name).length > 0 || props[name] !== null;
+const hasProperty = (name: keyof typeof xamlProps) => name in overrides.value ? props[name] !== null : propertyNodes(name).length > 0 || props[name] !== null;
 const hasIcon = computed(() => hasProperty('IconSource'));
 const hasLeftHeader = computed(() => hasProperty('LeftHeader'));
 const hasRightHeader = computed(() => hasProperty('RightHeader'));
@@ -212,11 +212,12 @@ const ElementOutlet = defineComponent({ props: { element: { type: Object, requir
   onMounted(adopt); watch(() => value.element, adopt, { flush: 'post' }); onBeforeUnmount(release);
   return () => h('span', { ref: host, style: { display: 'contents' } });
 } });
-const outlet = name => defineComponent({ setup: () => () => {
+const outlet = (name: 'LeftHeader' | 'RightHeader' | 'Content') => defineComponent({ setup: () => () => {
   const nodes = name in overrides.value ? [] : name === 'Content' ? propertyNodes('Content').length ? propertyNodes('Content') : defaultContent() : propertyNodes(name);
   if (nodes.length) return h(Fragment, normalizeXamlNodes(nodes.map(node => cloneVNode(node)), instance));
   const value = props[name];
-  const element = value?.nodeType === 1 ? value : value?.Element ?? value?.$el;
+  const candidate = value as { nodeType?: number; Element?: HTMLElement; $el?: HTMLElement } | null;
+  const element = candidate?.nodeType === 1 ? candidate : candidate?.Element ?? candidate?.$el;
   if (element?.nodeType === 1) return h(ElementOutlet, { element });
   return isVNode(value) ? h(Fragment, normalizeXamlNodes([value], instance)) : typeof value === 'string' || typeof value === 'number' ? String(value) : null;
 } });
@@ -243,11 +244,13 @@ const requestPaneToggle = () => {
 };
 provide(xamlScopeKey, { ...inject(xamlScopeKey, {}), Title, Subtitle, IconSource, HeaderInset, IsEnabled, BackButtonEnabled, BackLabel, PaneLabel, ContentAlignment, ContentMargin, requestBack, requestPaneToggle });
 
-const rootRef = ref(null);
-const registerRoot = value => { rootRef.value = value?.Element ?? value?.$el ?? null; };
-const iconElementRef = ref(null);
-const contentAreaRef = ref(null);
-const registerContentArea = value => { contentAreaRef.value = value?.Element ?? value?.$el ?? null; };
+type HostedElement = Element | ComponentPublicInstance | null;
+const elementFromRef = (value: HostedElement) => value instanceof HTMLElement ? value : (value as { Element?: HTMLElement; $el?: HTMLElement } | null)?.Element ?? (value as { $el?: HTMLElement } | null)?.$el ?? null;
+const rootRef = ref<HTMLElement | null>(null);
+const registerRoot = (value: HostedElement) => { rootRef.value = elementFromRef(value); };
+const iconElementRef = ref<InstanceType<typeof IconSourceElement> | null>(null);
+const contentAreaRef = ref<HTMLElement | null>(null);
+const registerContentArea = (value: HostedElement) => { contentAreaRef.value = elementFromRef(value); };
 const isDeactivated = ref(false);
 const isCompact = ref(false);
 const isNarrow = ref(false);
@@ -257,17 +260,17 @@ const dragRegionRevision = ref(0);
 const NARROW_TITLEBAR_WIDTH = 480;
 let defaultDocumentTitle = '';
 let lastAppliedTitle = '';
-let focusHandler = null;
-let blurHandler = null;
-let resizeObserver = null;
-let contentObserver = null;
+let focusHandler: (() => void) | null = null;
+let blurHandler: (() => void) | null = null;
+let resizeObserver: ResizeObserver | null = null;
+let contentObserver: MutationObserver | null = null;
 let attachedPropertyObserver: MutationObserver | undefined;
 let interactableElements: HTMLElement[] = [];
 let observedIcon: Element | null = null;
 let compactMeasureFrame = 0;
 let compactModeThresholdWidth = 0;
 let lastMeasuredWidth = -1;
-let ownerWindow = null;
+let ownerWindow: (Window & typeof globalThis) | null = null;
 let windowHost: TitleBarWindowHost | null = null;
 let unsubscribeActivation: (() => void) | undefined;
 let unsubscribeInsets: (() => void) | undefined;
@@ -293,40 +296,40 @@ const rootClasses = computed(() => {
   'is-negative-inset-spacing': isNegativeInsetSpacing.value
 }); });
 
-const cssLength = (value) => {
+const cssLength = (value: unknown): string => {
   if (value === '' || value === undefined || value === null) return '';
   if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) {
     return `${Number(value.trim())}px`;
   }
-  return typeof value === 'number' ? `${value}px` : value;
+  return typeof value === 'number' ? `${value}px` : String(value);
 };
 
-const xamlThickness = (value) => {
+const xamlThickness = (value: unknown): string => {
   if (value === '' || value === undefined || value === null) return '';
   const parts = String(value).split(',').map((part) => cssLength(part.trim()));
-  if (parts.length === 1) return parts[0];
+  if (parts.length === 1) return parts[0] ?? '';
   if (parts.length === 2) return `${parts[1]} ${parts[0]}`;
   if (parts.length === 4) return `${parts[1]} ${parts[2]} ${parts[3]} ${parts[0]}`;
   return String(value);
 };
 
-const alignment = (value) => ({
+const alignment = (value: string) => ({
   Left: 'start',
   Center: 'center',
   Right: 'end',
   Stretch: 'stretch'
-}[value] ?? 'center');
+} as Record<string, string>)[value] ?? 'center';
 
-const verticalAlignment = (value) => ({
+const verticalAlignment = (value: string) => ({
   Top: 'start',
   Center: 'center',
   Bottom: 'end',
   Stretch: 'stretch'
-}[value] ?? 'center');
+} as Record<string, string>)[value] ?? 'center';
 
 const rootStyle = computed(() => {
-  const style = {};
-  for (const name of Object.keys(brushAliases.value)) style[`--${name}`] = resource(name);
+  const style: CSSProperties & Record<`--${string}`, string | number | undefined> = {};
+  for (const name of Object.keys(brushAliases.value)) style[`--${name}`] = resource(name) as string | number | undefined;
   for (const name of ['TitleBarLeftPaddingWidth', 'TitleBarRightPaddingWidth', 'TitleBarMinDragRegionWidth', 'TitleBarBackButtonWidth', 'TitleBarPaneToggleButtonWidth']) {
     if (localResources.value[name] !== undefined) style[`--${name}`] = cssLength(localResources.value[name]);
   }
@@ -378,10 +381,10 @@ const resetWindowTitle = () => {
   lastAppliedTitle = '';
 };
 
-const measureContentDesiredWidth = (root, content) => {
+const measureContentDesiredWidth = (root: HTMLElement, content: HTMLElement) => {
   // DesiredSize is measured before the content is stretched or compacted.
-  const measurement = root.cloneNode(false);
-  const measuredContent = content.cloneNode(true);
+  const measurement = root.cloneNode(false) as HTMLElement;
+  const measuredContent = content.cloneNode(true) as HTMLElement;
   measurement.classList.remove('is-compact', 'is-narrow');
   measurement.setAttribute('aria-hidden', 'true');
   measurement.inert = true;
@@ -395,7 +398,7 @@ const measureContentDesiredWidth = (root, content) => {
     width: 'max-content', minWidth: '0', maxWidth: 'none', padding: '0',
     justifyContent: 'flex-start', overflow: 'visible'
   });
-  for (const child of measuredContent.children) child.style.flex = '0 0 auto';
+  for (const child of measuredContent.children) (child as HTMLElement).style.flex = '0 0 auto';
   measurement.appendChild(measuredContent);
   root.ownerDocument.body.appendChild(measurement);
   try {
@@ -410,7 +413,7 @@ const updateCompactMode = () => {
   const content = contentAreaRef.value;
   if (!root || !content) return;
 
-  const presenter = content.querySelector('.win-titlebar-content-presenter');
+  const presenter = content.querySelector<HTMLElement>('.win-titlebar-content-presenter');
   const desired = measureContentDesiredWidth(root, presenter ?? content);
   const available = content.clientWidth;
   const rootWidth = root.getBoundingClientRect().width;
@@ -479,7 +482,7 @@ const recomputeDragRegions = () => {
   const elements = findTitleBarInteractableElements(root);
   interactableElements = elements;
   const interactive = new Set(elements);
-  for (const element of root.querySelectorAll('[data-titlebar-passthrough]')) {
+  for (const element of root.querySelectorAll<HTMLElement>('[data-titlebar-passthrough]')) {
     if (!interactive.has(element)) element.removeAttribute('data-titlebar-passthrough');
   }
   for (const element of elements) {
@@ -493,7 +496,7 @@ const updateDragRegions = () => {
   const root = rootRef.value;
   if (!root) return;
   const bounds = root.getBoundingClientRect();
-  const region = (element): TitleBarRegion => {
+  const region = (element: Element): TitleBarRegion => {
     const rect = element.getBoundingClientRect();
     const left = Math.max(bounds.left + (captionPadding.value?.LeftInset ?? 0), rect.left), top = Math.max(bounds.top, rect.top);
     return { X: left, Y: top, Width: Math.max(0, Math.min(bounds.right - (captionPadding.value?.RightInset ?? 0), rect.right) - left), Height: Math.max(0, Math.min(bounds.bottom, rect.bottom) - top) };
@@ -523,7 +526,8 @@ const onBlur = () => {
 };
 
 onMounted(async () => {
-  ownerWindow = rootRef.value?.ownerDocument.defaultView ?? window;
+  if (!rootRef.value) return;
+  ownerWindow = rootRef.value.ownerDocument.defaultView ?? window;
   contrastQuery = ownerWindow.matchMedia?.('(forced-colors: active)');
   contrastChanged();
   contrastQuery?.addEventListener('change', contrastChanged);
@@ -609,11 +613,11 @@ watch(hasContent, (has) => {
 watch([IsBackButtonVisible, IsBackButtonEnabled, IsPaneToggleButtonVisible, hasLeftHeader, hasRightHeader, hasIcon], () => { void nextTick(recomputeDragRegions); }, { flush: 'post' });
 watch(() => props.FlowDirection, () => { lastMeasuredWidth = -1; void nextTick(scheduleCompactModeUpdate); });
 
-const dependencyProperty = name => computed({ get: () => name in overrides.value || props[name] !== null ? props[name] : name === 'IconSource' ? iconElementRef.value?.IconSource ?? null : propertyNodes(name)[0] ?? props[name], set: value => { overrides.value = { ...overrides.value, [name]: value }; updateXamlBinding(xamlProps[name], value, instance); } });
-for (const name of Object.keys(xamlProps)) watch(() => resolveXamlValue(xamlProps[name], instance), () => { if (name in overrides.value) { const next = { ...overrides.value }; delete next[name]; overrides.value = next; } });
+const dependencyProperty = (name: keyof typeof xamlProps) => computed({ get: () => name in overrides.value || props[name] !== null ? props[name] : name === 'IconSource' ? iconElementRef.value?.IconSource ?? null : propertyNodes(name)[0] ?? props[name], set: value => { overrides.value = { ...overrides.value, [name]: value }; updateXamlBinding(xamlProps[name], value, instance); } });
+for (const name of Object.keys(xamlProps) as (keyof typeof xamlProps)[]) watch(() => resolveXamlValue(xamlProps[name], instance), () => { if (name in overrides.value) { const next = { ...overrides.value }; delete next[name]; overrides.value = next; } });
 const publicApi = proxyRefs({
   Element: rootRef,
-  ...Object.fromEntries(['Title', 'Subtitle', 'IconSource', 'LeftHeader', 'Content', 'RightHeader', 'IsBackButtonVisible', 'IsBackButtonEnabled', 'IsPaneToggleButtonVisible', 'AutoRefreshDragRegions', 'FlowDirection'].map(name => [name, dependencyProperty(name)])),
+  ...Object.fromEntries((['Title', 'Subtitle', 'IconSource', 'LeftHeader', 'Content', 'RightHeader', 'IsBackButtonVisible', 'IsBackButtonEnabled', 'IsPaneToggleButtonVisible', 'AutoRefreshDragRegions', 'FlowDirection'] as const).map(name => [name, dependencyProperty(name)])),
   TemplateSettings: computed(() => ({ IconElement: hasIcon.value ? iconElementRef.value : null })),
   RecomputeDragRegions: recomputeDragRegions
 });

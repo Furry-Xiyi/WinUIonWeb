@@ -44,9 +44,9 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, h, inject, nextTick, onMounted, onBeforeUnmount, provide, shallowReactive, useSlots, getCurrentInstance } from 'vue'
+import { computed, defineComponent, Fragment, h, inject, nextTick, onMounted, onBeforeUnmount, provide, shallowReactive, useSlots, getCurrentInstance, type PropType } from 'vue'
 import ControlExampleBase from './ControlExampleBase.vue'
-import { getControlExampleProperty, type ControlExamplePropertyName } from './ControlExampleProperties'
+import { getControlExampleProperty, type ControlExamplePropertyName, type ControlExampleSubstitutionValue } from './ControlExampleProperties'
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, xamlNameScopeKey } from './xamlRuntime'
 
 defineOptions({ inheritAttrs: false })
@@ -67,9 +67,10 @@ onMounted(async () => {
   resolveXamlHandler(instance?.attrs.Loaded, instance)?.(sender, args)
 })
 onBeforeUnmount(() => { loaded = true })
-const xamlNameScope = inject(xamlNameScopeKey, null) ?? shallowReactive<Record<string, unknown>>({})
+const xamlNameScope = inject<Record<string, unknown> | null>(xamlNameScopeKey, null) ?? shallowReactive<Record<string, unknown>>({})
 provide(xamlNameScopeKey, xamlNameScope)
-const resolveProp = (value: unknown) => resolveXamlValue(value, instance)
+// Bindings retain the receiving dependency property's declared value type.
+const resolveProp = <T,>(value: T): T => resolveXamlValue(value, instance) as T
 const propertyNodes = computed(() => {
   const result: Record<ControlExamplePropertyName, ReturnType<NonNullable<typeof slots.default>>> = {
     example: [],
@@ -142,6 +143,6 @@ const props = defineProps({
   XamlSource: { type: String, default: '' },
   CSharpSource: { type: String, default: '' },
   SampleDefinition: { type: String, default: '' },
-  Substitutions: { type: Array, default: () => [] }
+  Substitutions: { type: Array as PropType<ControlExampleSubstitutionValue[]>, default: () => [] }
 })
 </script>

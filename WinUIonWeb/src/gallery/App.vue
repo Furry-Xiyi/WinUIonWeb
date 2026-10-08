@@ -93,7 +93,7 @@
     </div>
   </div>
 
-  <Teleport to="body">
+  <Teleport to="#app">
     <div
       v-if="compactSearchOpen"
       ref="compactSearchRef"
@@ -137,6 +137,7 @@ import { searchAll } from './searchIndex';
 import { useI18n } from '../components/i18n/index';
 import { syncPwaWindowChrome } from '../utils/pwaWindowChrome';
 import { galleryWindowBackdropKey } from '../utils/galleryWindowBackdrop';
+import { multipleWindowManagerKey } from '../components/multipleWindowHostAdapter';
 import {
   DefaultNavigationTransitionInfo,
   NavigationTrigger_BackNavigatingTo,
@@ -207,6 +208,7 @@ const isPaneToggleVisible = computed(() => !isTopNavMode.value);
 const isPaneOpen = ref(true);
 const themeSetting = ref(readStoredSetting('winui-theme-setting', 'system', ['system', 'light', 'dark']));
 const galleryWindowBackdrop = inject(galleryWindowBackdropKey, shallowRef(null));
+const multipleWindowManager = inject(multipleWindowManagerKey, null);
 const materialSetting = ref(readStoredSetting('winui-material-setting', 'mica', ['mica', 'acrylic']));
 const navigationTransitionInfo = ref(readStoredNavigationTransitionInfo());
 const pageTransitionInfo = shallowRef(normalizeNavigationTransitionInfo(navigationTransitionInfo.value));
@@ -484,6 +486,7 @@ const selectedNavigationItem = computed({
 
 const pageSourceNames = {
   titlebar: 'TitleBarPage',
+  createmultiplewindows: 'CreateMultipleWindowsPage',
   tabview: 'TabViewPage',
   button: 'ButtonPage',
   hyperlinkbutton: 'HyperlinkButtonPage',
@@ -597,6 +600,19 @@ const currentPageItem = computed(() => {
         Uri: 'https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.controls.titlebar' },
       { Title: t('gallery.page-header.guidelines'), Uri: 'https://learn.microsoft.com/windows/apps/design/basics/titlebar-design' }],
       SourceLink: 'https://github.com/microsoft/microsoft-ui-xaml/tree/main/controls/dev/TitleBar',
+      PageMarkupUri: sampleUri, PageCodeUri: `${sampleUri}.cs`
+    };
+  }
+  if (currentPage.value === 'createmultiplewindows') {
+    const sampleUri = 'https://github.com/microsoft/WinUI-Gallery/blob/main/WinUIGallery/Samples/CreateMultipleWindows/CreateMultipleWindowsPage.xaml';
+    return {
+      Title: t('text.createmultiplewindows'), UniqueId: 'createmultiplewindows', ApiNamespace: 'Microsoft.UI.Xaml',
+      BaseClasses: [],
+      Docs: [{ Title: t('gallery.page-header.api-link', { 0: 'MultipleWindow' }),
+        Uri: 'https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.window' },
+      { Title: t('gallery.page-header.guidelines'), Uri: 'https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.window' }],
+      Description: t('sample.multiplewindows.description'),
+      SourceLink: 'https://github.com/microsoft/WinUI-Gallery/tree/main/WinUIGallery/Samples/CreateMultipleWindows',
       PageMarkupUri: sampleUri, PageCodeUri: `${sampleUri}.cs`
     };
   }
@@ -845,6 +861,7 @@ function applyTheme(mode) {
     : mode;
   html.classList.remove('theme-light', 'theme-dark');
   html.classList.add(`theme-${resolvedTheme}`);
+  void multipleWindowManager?.SetTheme(resolvedTheme === 'dark' ? 'Dark' : 'Light').catch(error => console.error(error));
 }
 
 watch(themeSetting, (val) => applyTheme(val), { immediate: true });
@@ -950,10 +967,9 @@ watch(titlebarCompact, (compact) => {
     /* Grid's layout primitive uses an inline relative position. The window
        shell owns this fixed row, so it must override that local layout. */
     position: fixed !important;
-    top: env(titlebar-area-y, 0px);
-    left: env(titlebar-area-x, 0px);
-    width: env(titlebar-area-width, 100%);
-    height: max(env(titlebar-area-height, 0px), 48px) !important;
+    top: var(--WindowTitleBarY, env(titlebar-area-y, 0px));
+    left: 0;
+    width: 100%;
     z-index: 1000;
   }
 
@@ -963,7 +979,9 @@ watch(titlebarCompact, (compact) => {
     box-sizing: border-box;
     width: 100%;
     height: 100%;
-    padding-top: calc(env(titlebar-area-y, 0px) + max(env(titlebar-area-height, 0px), 48px));
+    --gallery-titlebar-bottom: calc(var(--WindowTitleBarY, env(titlebar-area-y, 0px)) + 48px);
+    --gallery-caption-band-bottom: var(--WindowCaptionBandBottom, calc(env(titlebar-area-y, 0px) + env(titlebar-area-height, 0px)));
+    padding-top: max(var(--gallery-titlebar-bottom), var(--gallery-caption-band-bottom));
     min-width: 0;
     min-height: 0;
     display: flex;
@@ -1066,7 +1084,7 @@ watch(titlebarCompact, (compact) => {
   /* 弹出的单个搜索框：位于标题栏下方，距视口左侧 16px */
   .gallery-compact-search-popup {
     position: fixed;
-    top: max(env(titlebar-area-height, 0px), 48px);
+    top: max(calc(var(--WindowTitleBarY, env(titlebar-area-y, 0px)) + 48px), var(--WindowCaptionBandBottom, calc(env(titlebar-area-y, 0px) + env(titlebar-area-height, 0px))));
     left: 16px;
     width: min(350px, calc(100vw - 32px));
     z-index: 10000;

@@ -1,4 +1,4 @@
-import { defineComponent, effectScope, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, reactive, useSlots, watch, watchEffect, type ComponentInternalInstance, type InjectionKey, type VNode } from 'vue'
+import { defineComponent, effectScope, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, reactive, useSlots, watch, watchEffect, type ComponentInternalInstance, type InjectionKey, type PropType, type VNode } from 'vue'
 import FontIcon from './FontIcon.vue'
 import SymbolIcon from './SymbolIcon.vue'
 import BitmapIcon from './BitmapIcon.vue'
@@ -105,7 +105,7 @@ const createIconSource = (kind: IconSourceKind) => {
     name,
     __iconSourceKind: kind,
     inheritAttrs: false,
-    props: Object.fromEntries(Object.keys(defaults).map(property => [property, { default: undefined }])),
+    props: Object.fromEntries(Object.keys(defaults).map(property => [property, { type: null as unknown as PropType<unknown>, default: undefined as unknown }])),
     setup(props, { expose }) {
       const instance = getCurrentInstance()
       const slots = useSlots()

@@ -250,7 +250,7 @@ const templateNodes = computed<VNode[]>(() => {
 
 const ItemOutlet = defineComponent({
   name: 'BreadcrumbBarElementFactory',
-  props: { item: { default: undefined }, index: { type: [Number, String], required: true }, dropDown: Boolean, flyoutIndex: { type: Number, default: -1 } },
+  props: { item: { type: null, default: undefined }, index: { type: [Number, String], required: true }, dropDown: Boolean, flyoutIndex: { type: Number, default: -1 } },
   setup(outletProps) {
     const outletInstance = getCurrentInstance()
     const index = () => Number(outletProps.index)

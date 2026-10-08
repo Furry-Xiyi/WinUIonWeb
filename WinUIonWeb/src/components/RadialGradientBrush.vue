@@ -99,7 +99,7 @@ export const createRadialGradientBrush = (): RadialGradientBrushValue => {
       else if (property === 'SpreadMethod') value = input === 'Repeat' || input === 'Reflect' ? input : 'Pad'
       return Reflect.set(target, property, value, receiver)
     }
-  }))
+  })) as RadialGradientBrushValue
 }
 
 export const GradientStop = defineComponent({ name: 'GradientStop', __xamlReactive: true,
@@ -174,7 +174,7 @@ const createResource = (read: (name: string) => unknown, context: ResourceContex
       const name = declarationName(node)
       const key = node.key ?? name
       const oldIndex = key === undefined ? available.indexOf(stopDeclarations[index]!)
-        : available.findIndex(entry => (entry.node.value.key ?? declarationName(entry.node.value)) === key)
+        : available.findIndex(entry => entry.node.value && (entry.node.value.key ?? declarationName(entry.node.value)) === key)
       const declaration = oldIndex >= 0 ? available.splice(oldIndex, 1)[0]! : makeDeclaration(node)
       declaration.node.value = node
       if (declaration.name !== name) unpublish(declaration)

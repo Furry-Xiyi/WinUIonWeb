@@ -39,7 +39,7 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, onScopeDispose, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch, type VNode } from 'vue'
+import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, onScopeDispose, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch, type CSSProperties, type VNode } from 'vue'
 import Grid from './Grid.vue'
 import ContentPresenter from './ContentPresenter.vue'
 import AnimatedIcon from './AnimatedIcon.vue'
@@ -193,8 +193,8 @@ const hostAttrs = computed(() => {
   return rest
 })
 const hostStyle = computed(() => {
-  const style: Record<string, unknown> = { margin: xamlThickness(resolve(props.Margin)), justifySelf: alignment(resolve(props.HorizontalAlignment), 'horizontal'), alignSelf: alignment(resolve(props.VerticalAlignment), 'vertical'), color: Foreground.value, fontFamily: resolve(props.FontFamily), fontSize: cssLength(resolve(props.FontSize)), fontWeight: resolve(props.FontWeight) === 'SemiBold' ? 600 : resolve(props.FontWeight), outlineOffset: cssLength(resolve(props.FocusVisualMargin)), borderRadius: xamlThickness(CornerRadius.value), '--DropDownButtonBorderBrushCurrent': RootBorderBrush.value, '--DropDownButtonBorderThickness': xamlThickness(BorderThickness.value) }
-  for (const name of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) if (resolve(props[name]) !== '') style[name[0].toLowerCase() + name.slice(1)] = cssLength(resolve(props[name]))
+  const style: CSSProperties = { margin: xamlThickness(resolve(props.Margin)), justifySelf: alignment(resolve(props.HorizontalAlignment), 'horizontal'), alignSelf: alignment(resolve(props.VerticalAlignment), 'vertical'), color: Foreground.value as CSSProperties['color'], fontFamily: resolve(props.FontFamily) as CSSProperties['fontFamily'], fontSize: cssLength(resolve(props.FontSize)), fontWeight: resolve(props.FontWeight) === 'SemiBold' ? 600 : resolve(props.FontWeight) as CSSProperties['fontWeight'], outlineOffset: cssLength(resolve(props.FocusVisualMargin)), borderRadius: xamlThickness(CornerRadius.value), '--DropDownButtonBorderBrushCurrent': RootBorderBrush.value as CSSProperties['--DropDownButtonBorderBrushCurrent'], '--DropDownButtonBorderThickness': xamlThickness(BorderThickness.value) }
+  for (const name of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) if (resolve(props[name]) !== '') style[(name[0].toLowerCase() + name.slice(1)) as 'width' | 'height' | 'minWidth' | 'minHeight' | 'maxWidth' | 'maxHeight'] = cssLength(resolve(props[name]))
   if (resolve(props.Visibility) === 'Collapsed') style.display = 'none'
   return [attrs.style, style]
 })

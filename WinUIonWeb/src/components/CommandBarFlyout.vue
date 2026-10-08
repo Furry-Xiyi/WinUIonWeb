@@ -315,7 +315,7 @@ async function setExpanded(next: boolean) {
   const primaryStart = `inset(0px ${halfWidthDelta}px 0px 0px)`;
   const secondaryStart = expandsUp.value ? `inset(${halfOverflowHeight}px ${halfWidthDelta}px 0px 0px)` : `inset(0px ${halfWidthDelta}px ${halfOverflowHeight}px 0px)`;
   const expandedClip = 'inset(0px 0px 0px 0px)'; const moreStart = `translateX(${-halfWidthDelta}px)`;
-  if (element.animate && animationsEnabled()) {
+  if (typeof element.animate === 'function' && animationsEnabled()) {
     const timing = { duration: next ? 250 : 167, easing: 'cubic-bezier(0, 0, 0, 1)', fill: 'both' as FillMode };
     const animateClip = (root: HTMLElement | null, initial: string, previous?: string) => root ? root.animate([{ clipPath: previous || (next ? initial : expandedClip) }, { clipPath: next ? expandedClip : initial }], timing) : null;
     const clips = [animateClip(roots.primary, primaryStart, sample?.primaryClip), animateClip(roots.secondary, secondaryStart, sample?.secondaryClip)];

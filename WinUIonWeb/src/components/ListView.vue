@@ -153,7 +153,7 @@ export default {
 
 <script setup lang="ts">
 import { createSemanticZoomView } from './semanticZoomView';
-import { cloneVNode, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowReactive, shallowRef, toRaw, useAttrs, useSlots, watch, type VNode } from 'vue';
+import { cloneVNode, computed, getCurrentInstance, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowReactive, shallowRef, toRaw, useAttrs, useSlots, watch, type VNode } from 'vue';
 import type { CSSProperties } from 'vue';
 import { scrollViewerTemplateBindings } from './scrollViewerTemplateBindings'
 import ScrollViewer from './ScrollViewer.vue';
@@ -172,7 +172,7 @@ const ScrollSettings = scrollViewerTemplateBindings(name => attrs[name], instanc
 provide(xamlScopeKey, { ...inheritedScrollTemplateScope, ScrollSettings, get ScrollTemplateIsEnabled() { return resolvedIsEnabled.value } });
 const SelectionCheck = defineComponent({
   name: 'ListViewSelectionCheck',
-  props: { Item: { default: undefined } },
+  props: { Item: { type: null, default: undefined } },
   setup(selectionProps) {
     provide(xamlScopeKey, {
       ...inheritedScrollTemplateScope,
@@ -313,7 +313,7 @@ const xamlItemContainerStyle = computed<CSSProperties>(() => {
   return result;
 });
 const groupHeaderCache = new Map<any, any>();
-const groupHeaderComponent = (group) => {
+const groupHeaderComponent = (group: unknown) => {
   const key = group ?? '__root__';
   const cached = groupHeaderCache.get(key);
   if (cached) return cached;
@@ -512,13 +512,13 @@ const selectedItems = computed(() => (
   selectionMode.value === 'None' ? [] : configuredSelectedItems.value
 ));
 
-const cssLength = (value: string | number | undefined) => {
+const cssLength = (value: unknown) => {
   if (value === '' || value === undefined || value === null) return '';
   if (typeof value === 'number' || !Number.isNaN(Number(String(value).trim()))) return `${Number(value)}px`;
   return String(value);
 };
 
-const xamlThickness = (value: string | number | undefined) => {
+const xamlThickness = (value: unknown) => {
   if (value === '' || value === undefined || value === null) return '';
   const parts = String(value).split(',').map((part) => cssLength(part.trim()));
   if (parts.length === 1) return parts[0];
@@ -527,10 +527,11 @@ const xamlThickness = (value: string | number | undefined) => {
   return String(value);
 };
 
-const alignment = (value: string | undefined) => ({
+const contentAlignments: Record<string, string> = {
   Left: 'flex-start', Center: 'center', Right: 'flex-end', Stretch: 'stretch',
   Top: 'flex-start', Bottom: 'flex-end'
-}[value || ''] || undefined) as CSSProperties['justifyContent'] & CSSProperties['alignItems'];
+};
+const alignment = (value: string | undefined) => (contentAlignments[value || ''] || undefined) as CSSProperties['justifyContent'] & CSSProperties['alignItems'];
 
 const backgroundStyle = useAcrylicBrushStyle(() => props.Background || undefined, instance);
 const rootStyle = computed<CSSProperties>(() => ({
@@ -544,7 +545,7 @@ const rootStyle = computed<CSSProperties>(() => ({
   maxHeight: cssLength(resolveXamlValue(props.MaxHeight, instance) as string | number) || undefined,
   margin: xamlThickness(resolveXamlValue(props.Margin, instance) as string | number) || undefined,
   ...backgroundStyle.value,
-  borderColor: resolveXamlValue(props.BorderBrush, instance) || undefined,
+  borderColor: resolveXamlValue(props.BorderBrush, instance) ? String(resolveXamlValue(props.BorderBrush, instance)) : undefined,
   borderWidth: xamlThickness(props.BorderThickness) || undefined,
   borderStyle: resolveXamlValue(props.BorderThickness, instance) !== '' && resolveXamlValue(props.BorderThickness, instance) !== 0 ? 'solid' : undefined,
   borderRadius: cssLength(resolveXamlValue(props.CornerRadius, instance) as string | number) || undefined
@@ -579,7 +580,7 @@ const itemContainerStyle = computed<CSSProperties>(() => ({
   borderStyle: propItemContainerStyle.value.borderStyle ?? xamlItemContainerStyle.value.borderStyle,
   borderRadius: propItemContainerStyle.value.borderRadius ?? xamlItemContainerStyle.value.borderRadius
 }));
-const styleAlignment = (value: unknown, fallback: 'Left' | 'Center' | 'Right' | 'Stretch') => {
+const styleAlignment = (value: unknown, fallback: 'Left' | 'Center' | 'Right' | 'Stretch'): string => {
   const normalized = String(value ?? '').trim();
   return (normalized === 'Left' || normalized === 'Center' || normalized === 'Right' || normalized === 'Stretch')
     ? normalized
@@ -2438,13 +2439,13 @@ onBeforeUnmount(() => {
     padding: 0 12px 0 16px;
   }
 
-  .win-list-item-content > :deep(*) {
+  .win-list-item-content > * {
     flex: 0 1 auto;
     min-width: 0;
     max-width: 100%;
   }
 
-  .win-list-item.content-stretch .win-list-item-content > :deep(*) {
+  .win-list-item.content-stretch .win-list-item-content > * {
     flex: 1 1 auto;
   }
 

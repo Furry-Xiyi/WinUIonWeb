@@ -9,7 +9,7 @@ export default { Items: MenuFlyoutItemsProperty, MenuFlyoutPresenterStyle: MenuF
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, proxyRefs, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch, type Ref, type VNode } from 'vue'
+import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, proxyRefs, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch, type PropType, type Ref, type VNode, type WritableComputedRef } from 'vue'
 import MenuFlyoutPresenter from './MenuFlyoutPresenter'
 import { getVNodeChildren } from './CollectionProperties'
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlResourceObject, resolveXamlValue, updateXamlBinding } from './xamlRuntime'
@@ -17,11 +17,11 @@ import { resolvePopupElement } from './popupRuntime'
 
 defineOptions({ name: 'MenuFlyout', inheritAttrs: false })
 const props = defineProps({
-  Items: { default: undefined }, MenuFlyoutPresenterStyle: { default: undefined },
+  Items: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, MenuFlyoutPresenterStyle: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
   Placement: { type: String, default: 'Bottom' }, ShowMode: { type: String, default: 'Standard' },
   LightDismissOverlayMode: { type: String, default: 'Auto' }, AreOpenCloseAnimationsEnabled: { type: [Boolean, String], default: true },
   ShouldConstrainToRootBounds: { type: [Boolean, String], default: true }, AllowFocusOnInteraction: { type: [Boolean, String], default: true },
-  AllowFocusWhenDisabled: { type: [Boolean, String], default: false }, OverlayInputPassThroughElement: { default: undefined }
+  AllowFocusWhenDisabled: { type: [Boolean, String], default: false }, OverlayInputPassThroughElement: { type: null as unknown as PropType<unknown>, default: undefined as unknown }
 })
 const emit = defineEmits(['Opening', 'Opened', 'Closing', 'Closed', 'update:Items', 'update:MenuFlyoutPresenterStyle', 'update:Placement', 'update:ShowMode', 'update:LightDismissOverlayMode', 'update:AreOpenCloseAnimationsEnabled', 'update:ShouldConstrainToRootBounds', 'update:AllowFocusOnInteraction', 'update:AllowFocusWhenDisabled', 'update:OverlayInputPassThroughElement'])
 const instance = getCurrentInstance()
@@ -34,7 +34,9 @@ const buttonController = inject<Ref<any> | null>('buttonFlyoutController', null)
 const overrides = shallowReactive<Record<string, unknown>>({})
 const value = (name: keyof typeof props) => name in overrides ? overrides[name] : resolveXamlValue(props[name], instance)
 const dependency = (name: keyof typeof props) => computed({ get: () => value(name), set: next => { overrides[name] = next; updateXamlBinding(props[name], next, instance); emit(`update:${name}`, next) } })
-const dependencies = Object.fromEntries(Object.keys(props).filter(name => name !== 'Items').map(name => [name, dependency(name as keyof typeof props)]))
+const dependencies = Object.fromEntries(Object.keys(props).filter(name => name !== 'Items').map(name => [name, dependency(name as keyof typeof props)])) as {
+  [Name in Exclude<keyof typeof props, 'Items'>]: WritableComputedRef<unknown>
+}
 for (const name of Object.keys(props) as (keyof typeof props)[]) watch(() => resolveXamlValue(props[name], instance), () => { delete overrides[name] })
 // Evaluate the declaration slot only from its render outlet. Presenter options
 // are also observed outside rendering and must read the saved object tree.

@@ -55,6 +55,8 @@ its sample title cannot rename the application window.
 
 ```ts
 import {
+  configureTitleBarWindowHost,
+  nativeTitleBarMetricsToCssPixels,
   registerTitleBarWindowHost,
   type TitleBarWindowHost,
 } from '../src/components/titleBarHostAdapter'
@@ -64,14 +66,20 @@ const windowHost: TitleBarWindowHost = {
   SetTitle: title => desktopWindow.setTitle(title),
   IsInputActive: () => desktopWindow.isInputActive(),
   SubscribeActivation: listener => desktopWindow.subscribeActivation(listener),
-  GetTitleBarInsets: () => desktopWindow.getTitleBarInsetsInCssPixels(),
+  GetTitleBarInsets: () => nativeTitleBarMetricsToCssPixels(desktopWindow.getPhysicalTitleBarMetrics()),
   SubscribeTitleBarInsets: listener => desktopWindow.subscribeTitleBarGeometry(listener),
+  SetExtendsContentIntoTitleBar: value => desktopWindow.setExtendsContentIntoTitleBar(value),
+  SetPreferredHeightOption: value => desktopWindow.setPreferredTitleBarHeightOption(value),
   IsTitleBarOwner: element => element === appTitleBar.Element,
   SetDragRegions: regions => desktopWindow.setNonClientRegions(regions),
   ClearDragRegions: () => desktopWindow.clearNonClientRegions(),
 }
 
 // Register the actual framework content root before mounting its TitleBar.
+await configureTitleBarWindowHost(windowHost, {
+  ExtendsContentIntoTitleBar: true,
+  PreferredHeightOption: 'Tall',
+})
 const releaseWindowHost = registerTitleBarWindowHost(contentElement, windowHost)
 ```
 
@@ -84,6 +92,15 @@ function. Removing the TitleBar releases that subscription and clears its
 native regions; removing the framework content root also calls
 `releaseWindowHost()`.
 
+The official TitleBar template uses 32 logical pixels without header/content
+and 48 logical pixels when header/content is present. Gallery's main window
+and its two complete TitleBar sample windows also request the actual native
+`AppWindow.TitleBar.PreferredHeightOption = Tall`. The control height and the
+native window configuration are separate. `configureTitleBarWindowHost` awaits
+content extension before requesting Tall, then the framework mounts its
+TitleBar. Its optional `AbortSignal` prevents late configuration after a
+cancelled mount. Browser hosts omit those native setters.
+
 `GetTitleBarInsets()` returns physical `LeftInset` and `RightInset` in viewport
 CSS pixels, with an optional `TitleBarArea: { X, Y, Width, Height }` describing
 the actual vertical caption band. The host converts native pixel units through
@@ -92,6 +109,12 @@ notify after inset, DPI or caption geometry changes and return a cleanup
 function. The control converts the physical insets to its own arranged bounds,
 swaps template padding columns for `FlowDirection="RightToLeft"`, and clips
 visuals and native regions against the physical safe edges.
+
+`nativeTitleBarMetricsToCssPixels` takes physical native insets and an optional
+physical `TitleBarArea`, together with `PhysicalPixelsPerCssPixel`. The host
+must supply its actual monitor DPI and WebView zoom conversion. The helper
+divides once and rejects invalid metrics. Do not pass already converted CSS
+pixels to it or infer native units from the browser's `devicePixelRatio`.
 
 The browser host reads a visible `navigator.windowControlsOverlay` through
 `getTitlebarAreaRect()` and observes `geometrychange` and window resize. An
@@ -117,6 +140,30 @@ changes recalculate the frame; the returned cleanup removes subscriptions and
 restores its owned padding. The main Gallery already reserves its caption band
 in its own layout and passes `reserveBand = false` when connecting a native
 caption host.
+
+With `reserveBand = false`, the frame publishes owned `--WindowTitleBarY` and
+`--WindowCaptionBandBottom` values for the Gallery shell. The control's arranged
+height and the caption band's bottom are measured
+separately. Geometry loss and cleanup restore original values while preserving
+external style changes.
+
+The Gallery keeps its official 48-pixel expanded title bar in PWA windows even
+when the browser caption buttons use a shorter band. Browser hosts do not
+expose a native Tall setter. The Gallery reserves the larger of its own bar and
+the real caption band, and keeps the bar inside the overlay's safe horizontal
+area. Standalone windows without an owning TitleBar reserve the full caption
+band above their content. Native Gallery hosts and the TitleBar demonstrations
+retain the official control heights; a larger native band reserves additional
+space without stretching their controls.
+
+When a standalone window has no owning TitleBar, the frame also supplies an
+empty caption drag region inside the actual content bounds, clipped to the
+host's safe left/right insets and viewport. PWA drag behavior uses
+`app-region: drag`; a native host receives the same rectangle through
+`SetDragRegions`, with empty Passthrough and Icon regions. Geometry changes
+replace it, invalid geometry releases it, and mounting a TitleBar transfers
+region ownership to that control. Removing the frame cleans up its element
+and any native caption region still owned by the frame.
 
 Alternatively, install `setTitleBarHostAdapter({ Connect(element) { ... } })`
 to resolve the host for each actual application TitleBar. `Connect` returns

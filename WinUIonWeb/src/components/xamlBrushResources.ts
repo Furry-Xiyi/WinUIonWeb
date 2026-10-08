@@ -20,7 +20,7 @@ export const xamlResourceKey = (node: VNode) => {
 // Resource declarations are recreated by Vue's slot render on each pass.
 // Compare the dependency-property inputs instead of VNode identity so a
 // stable brush does not retrigger its watchers during the owning host render.
-export const xamlResourceNodesEqual = (left: VNode | undefined, right: VNode | undefined) => {
+export const xamlResourceNodesEqual = (left: VNode | undefined, right: VNode | undefined): boolean => {
   if (left === right) return true
   if (!left || !right || left.type !== right.type) return false
   const leftProps = left.props ?? {}

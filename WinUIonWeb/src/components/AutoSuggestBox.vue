@@ -87,7 +87,7 @@ export default { QueryIcon: AutoSuggestBoxQueryIcon, Header: AutoSuggestBoxHeade
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, proxyRefs, ref, useAttrs, useSlots, watch, watchPostEffect } from 'vue';
+import { computed, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, proxyRefs, ref, useAttrs, useSlots, watch, watchPostEffect } from 'vue';
 import { useI18n } from './i18n/index';
 import type { ComputedRef, CSSProperties, VNode } from 'vue';
 import ScrollViewer from './ScrollViewer.vue';
@@ -127,7 +127,7 @@ const props = withDefaults(defineProps<{
   IsSuggestionListOpen?: boolean | string;
   MaxSuggestionListHeight?: number | string;
   AutoMaximizeSuggestionArea?: boolean | string;
-  DesiredCandidateWindowAlignment?: 'Default' | 'BottomEdge';
+  DesiredCandidateWindowAlignment?: string;
   LightDismissOverlayMode?: string;
   TextBoxStyle?: unknown | null;
   KeepInteriorCornersSquare?: boolean | string;
@@ -136,7 +136,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   Text: '',
   PlaceholderText: '',
-  Header: '',
+  Header: () => '',
   HeaderTemplate: undefined,
   Description: '',
   QueryIcon: '',
@@ -163,13 +163,13 @@ const resolvedPlaceholder = computed(() => resolveXamlValue(props.PlaceholderTex
 const dispatchXamlEvent = (name: string, args: unknown) => {
   resolveXamlHandler(attrs[name], instance)?.(api, args);
 };
-const inheritedResources = inject(xamlResourceDictionaryKey, {});
+const inheritedResources = inject<Record<string, unknown>>(xamlResourceDictionaryKey, {});
 const TextBoxBackground = computed(() => {
   const style = resolveXamlValue(props.TextBoxStyle, instance);
   const key = typeof props.TextBoxStyle === 'string' ? props.TextBoxStyle.match(/^\{StaticResource\s+([^}]+)\}$/)?.[1] : undefined;
   const declaration = key ? resources[key] : style;
   if (declaration && typeof declaration === 'object' && 'type' in declaration) {
-    const setter = getVNodeChildren(declaration).find(node => node.props?.Property === 'Background');
+    const setter = getVNodeChildren(declaration as VNode).find(node => node.props?.Property === 'Background');
     return setter ? resolveXamlValue(setter.props?.Value, instance) : undefined;
   }
   if (style && typeof style === 'object' && 'Background' in style) return style.Background;
@@ -320,7 +320,7 @@ provide(textInputTemplateKey, {
     onPointerup: AnimatedQueryInput.PointerReleased, onPointercancel: AnimatedQueryInput.PointerExited,
     onLostpointercapture: AnimatedQueryInput.PointerReleased, onKeydown: AnimatedQueryInput.KeyDown,
     onKeyup: AnimatedQueryInput.KeyUp, onBlur: AnimatedQueryInput.LostFocus, onClick: () => submitQuery()
-  }, h('span', { class: 'win-asb-query-content' }, queryIconNodes.value.length ? h(QueryIconOutlet) : h(FontIcon, { class: 'win-asb-icon', Glyph: resolvedQueryIcon.value, FontSize: 12 }))) : null
+  }, h('span', { class: 'win-asb-query-content' }, queryIconNodes.value.length ? h(QueryIconOutlet) : h(FontIcon, { class: 'win-asb-icon', Glyph: String(resolvedQueryIcon.value ?? ''), FontSize: 12 }))) : null
 });
 const localizedNoResultsText = computed(() => t('text.no-results-found'));
 const popupThemeClass = computed(() => {

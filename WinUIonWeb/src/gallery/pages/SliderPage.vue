@@ -112,7 +112,7 @@
 import { computed, inject, provide, shallowReactive } from 'vue'
 import Button from '../../components/Button.vue'
 import ColumnDefinition from '../../components/ColumnDefinition.vue'
-import { XamlString } from '../../components/ComboBox.vue'
+import { XamlString } from '../../components/inlineControlProperties'
 import ControlExample from '../../components/ControlExample.vue'
 import { ControlExampleSubstitution } from '../../components/ControlExampleProperties'
 import FontIcon from '../../components/FontIcon.vue'

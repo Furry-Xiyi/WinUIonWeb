@@ -1,4 +1,4 @@
-import { createApp, shallowRef } from 'vue'
+import { createApp, shallowRef, type Component } from 'vue'
 import App from './gallery/App.vue'
 import HomeHeaderTile from './gallery/components/HomeHeaderTile.vue'
 import HorizontalScrollContainer from './components/HorizontalScrollContainer.vue'
@@ -9,6 +9,7 @@ import { readSystemBackdropSampleSession } from './gallery/samples/SystemBackdro
 import WindowSampleRecoveryPage from './gallery/samples/SystemBackdrops/WindowSampleRecoveryPage.vue'
 import TitleBarDragRegionsWindow from './gallery/samples/TitleBar/TitleBarDragRegionsWindow.vue'
 import TitleBarWindow from './gallery/samples/TitleBar/TitleBarWindow.vue'
+import MultipleWindowsSampleWindow from './gallery/samples/MultipleWindows/MultipleWindowsSampleWindow.vue'
 import './styles/theme.css'
 import './styles/buttonResources.css'
 import './styles/dropDownButtonResources.css'
@@ -23,7 +24,7 @@ import { createI18n, i18nKey } from './components/i18n/index'
 import galleryEnUS from './gallery/Strings/en-US/Resources'
 import galleryZhCN from './gallery/Strings/zh-CN/Resources'
 import Canvas, { CanvasResources } from './components/Canvas.vue'
-import { SliderHeaderProperty } from './components/Slider.vue'
+import { SliderHeaderProperty, ComboBoxItem, XamlString } from './components/inlineControlProperties'
 import Button, { ButtonFlyout, ButtonContent, ButtonKeyboardAccelerators } from './components/Button.vue'
 import HyperlinkButton, { HyperlinkButtonContent } from './components/HyperlinkButton.vue'
 import RepeatButton, { RepeatButtonContent } from './components/RepeatButton.vue'
@@ -57,8 +58,10 @@ import { tabViewHostAdapterKey } from './components/tabViewHostAdapter'
 import { createTabViewPwaHost, readTabViewPwaSession, tabViewPwaHostKey, tabViewPwaSessionKey } from './components/tabViewPwaHost'
 import { observePwaWindowChrome, syncPwaWindowChrome } from './utils/pwaWindowChrome'
 import { connectWindowTitleBarFrame } from './utils/titleBarWindowFrame'
+import { configureTitleBarWindowHost } from './components/titleBarHostAdapter'
+import { createMultipleWindowManager, multipleWindowManagerKey } from './components/multipleWindowHostAdapter'
 import { connectGalleryWindowBackdrop, galleryWindowBackdropKey, type GalleryWindowBackdropConnection } from './utils/galleryWindowBackdrop'
-import ComboBox, { ComboBoxItem, XamlString } from './components/ComboBox.vue'
+import ComboBox from './components/ComboBox.vue'
 import SplitView, { SplitViewPane, SplitViewContent } from './components/SplitView.vue'
 import ColumnDefinition from './components/ColumnDefinition.vue'
 import Grid, { GridContextFlyout } from './components/Grid.vue'
@@ -216,7 +219,8 @@ import { ResourceDictionary, SolidColorBrush, StaticResource } from './component
 
 const sampleRoot = systemBackdropSampleSession?.Kind === 'TitleBarDragRegions' ? TitleBarDragRegionsWindow
   : systemBackdropSampleSession?.Kind === 'TitleBarEndToEnd' ? TitleBarWindow
-    : systemBackdropSampleSession?.allowedBackdrops.length === 4 ? SampleBuiltInSystemBackdropsWindow : SampleSystemBackdropsWindow
+    : systemBackdropSampleSession?.Kind === 'CreateMultipleWindows' ? MultipleWindowsSampleWindow
+      : systemBackdropSampleSession?.allowedBackdrops.length === 4 ? SampleBuiltInSystemBackdropsWindow : SampleSystemBackdropsWindow
 const app = windowSampleRecoveryFailure ? createApp(WindowSampleRecoveryPage, { context: windowSampleRecoveryFailure })
   : systemBackdropSampleSession ? createApp(sampleRoot, { handle: systemBackdropSampleSession.handle, allowedBackdrops: systemBackdropSampleSession.allowedBackdrops })
   : tabViewPwaSession ? createApp(TabViewWindowingSamplePage) : createApp(App)
@@ -231,6 +235,14 @@ app.provide(tabViewHostAdapterKey, tabViewPwaHost.Adapter)
 app.provide(tabViewPwaHostKey, tabViewPwaHost)
 const galleryWindowBackdrop = shallowRef<GalleryWindowBackdropConnection | null>(null)
 app.provide(galleryWindowBackdropKey, galleryWindowBackdrop)
+const multipleWindowManager = createMultipleWindowManager()
+app.provide(multipleWindowManagerKey, multipleWindowManager)
+const disposeMultipleWindows = (event: PageTransitionEvent) => {
+  if (event.persisted) return
+  window.removeEventListener('pagehide', disposeMultipleWindows)
+  void multipleWindowManager.Dispose().catch(error => console.error(error))
+}
+window.addEventListener('pagehide', disposeMultipleWindows)
 if (tabViewPwaSession) app.provide(tabViewPwaSessionKey, tabViewPwaSession)
 const disposeTabViewPwaHost = (event: PageTransitionEvent) => {
   if (event.persisted) return
@@ -404,7 +416,7 @@ app.component('SlideNavigationTransitionInfo', SlideNavigationTransitionInfo)
 app.component('CommonNavigationTransitionInfo', CommonNavigationTransitionInfo)
 app.component('ContinuumNavigationTransitionInfo', ContinuumNavigationTransitionInfo)
 app.component('NavigationView', NavigationView)
-for (const property of Object.values(NavigationViewProperties)) {
+for (const property of Object.values(NavigationViewProperties) as Component[]) {
   if (property && typeof property === 'object' && 'name' in property
     && typeof property.name === 'string' && /^(NavigationView|MenuItemTemplateSelector)/.test(property.name)) {
     app.component(property.name, property)
@@ -610,22 +622,45 @@ app.provide(i18nKey, i18n)
 app.config.globalProperties.$t = i18n.t
 if (systemBackdropSampleSession) {
   const host = document.getElementById('app')!
-  document.title = i18n.t(systemBackdropSampleSession.Kind === 'TitleBarDragRegions' ? 'sample.titlebar.drag-window-title' : systemBackdropSampleSession.Kind === 'TitleBarEndToEnd' ? 'sample.titlebar.end-window-title' : 'sample.systembackdrops.window-title')
+  document.title = i18n.t(systemBackdropSampleSession.Kind === 'TitleBarDragRegions' ? 'sample.titlebar.drag-window-title' : systemBackdropSampleSession.Kind === 'TitleBarEndToEnd' ? 'sample.titlebar.end-window-title' : systemBackdropSampleSession.Kind === 'CreateMultipleWindows' ? 'sample.multiplewindows.child-window-title' : 'sample.systembackdrops.window-title')
   document.documentElement.style.height = '100%'
   document.documentElement.style.overflow = 'hidden'
   Object.assign(document.body.style, { margin: '0', width: '100%', height: '100%', overflow: 'hidden', background: 'transparent' })
   Object.assign(host.style, { width: '100%', height: '100%', minWidth: '0', minHeight: '0', overflow: 'auto', boxSizing: 'border-box' })
   host.className = 'win-system-backdrop-window-content win-theme-scope'
-  void systemBackdropSampleSession.handle.SetContentElement(host).then(() => {
-    const releaseTitleBarFrame = connectWindowTitleBarFrame(host, systemBackdropSampleSession.handle.TitleBarHost)
+  const sampleMountAbort = new AbortController()
+  let sampleMounted = false
+  let releaseTitleBarFrame: (() => void) | undefined
+  let releasePwaChrome: (() => void) | undefined
+  const detachSampleWindow = (event: PageTransitionEvent) => {
+    if (event.persisted) return
+    window.removeEventListener('pagehide', detachSampleWindow)
+    sampleMountAbort.abort()
+    releasePwaChrome?.()
+    if (sampleMounted) app.unmount()
+    releaseTitleBarFrame?.()
+    systemBackdropSampleSession.Detach?.()
+  }
+  window.addEventListener('pagehide', detachSampleWindow)
+  void systemBackdropSampleSession.handle.SetContentElement(host).then(async () => {
+    await configureTitleBarWindowHost(systemBackdropSampleSession.handle.TitleBarHost, {
+      ExtendsContentIntoTitleBar: true,
+      ...(systemBackdropSampleSession.Kind === 'TitleBarDragRegions' || systemBackdropSampleSession.Kind === 'TitleBarEndToEnd' ? { PreferredHeightOption: 'Tall' as const } : {}),
+    }, sampleMountAbort.signal)
+    if (sampleMountAbort.signal.aborted || systemBackdropSampleSession.handle.State.Status === 'Closed') return
+    releaseTitleBarFrame = connectWindowTitleBarFrame(host, systemBackdropSampleSession.handle.TitleBarHost)
     app.mount(host)
-    const releasePwaChrome = observePwaWindowChrome(window, host)
+    sampleMounted = true
+    releasePwaChrome = observePwaWindowChrome(window, host)
     systemBackdropSampleSession.Ready()
-    window.addEventListener('pagehide', () => { releasePwaChrome(); app.unmount(); releaseTitleBarFrame(); systemBackdropSampleSession.Detach?.() }, { once: true })
-  }).catch(() => { void systemBackdropSampleSession.handle.Close() })
+  }).catch(error => {
+    if (sampleMountAbort.signal.aborted) return
+    console.error(error)
+    void systemBackdropSampleSession.handle.Close().catch(failure => console.error(failure))
+  })
 } else if (windowSampleRecoveryFailure) {
   const host = document.getElementById('app')!
-  document.title = i18n.t(windowSampleRecoveryFailure.Kind === 'TitleBarDragRegions' ? 'sample.titlebar.drag-window-title' : windowSampleRecoveryFailure.Kind === 'TitleBarEndToEnd' ? 'sample.titlebar.end-window-title' : 'sample.systembackdrops.window-title')
+  document.title = i18n.t(windowSampleRecoveryFailure.Kind === 'TitleBarDragRegions' ? 'sample.titlebar.drag-window-title' : windowSampleRecoveryFailure.Kind === 'TitleBarEndToEnd' ? 'sample.titlebar.end-window-title' : windowSampleRecoveryFailure.Kind === 'CreateMultipleWindows' ? 'sample.multiplewindows.child-window-title' : 'sample.systembackdrops.window-title')
   Object.assign(document.documentElement.style, { height: '100%', overflow: 'hidden' })
   Object.assign(document.body.style, { margin: '0', width: '100%', height: '100%', overflow: 'hidden' })
   Object.assign(host.style, { width: '100%', height: '100%', minWidth: '0', minHeight: '0', overflow: 'auto' })
@@ -664,10 +699,13 @@ if (systemBackdropSampleSession) {
   void connectGalleryWindowBackdrop(galleryHost, { theme, signal: connectionAbort.signal }).catch(error => {
     if (!connectionAbort.signal.aborted) console.error(error)
     return null
-  }).then(connection => {
+  }).then(async connection => {
+    if (connectionAbort.signal.aborted) { void connection?.Dispose(); return }
+    try { await configureTitleBarWindowHost(connection?.Handle.TitleBarHost, { ExtendsContentIntoTitleBar: true, PreferredHeightOption: 'Tall' }, connectionAbort.signal) }
+    catch (error) { if (!connectionAbort.signal.aborted) console.error(error) }
     if (connectionAbort.signal.aborted) { void connection?.Dispose(); return }
     galleryWindowBackdrop.value = connection
-    if (connection?.Handle.TitleBarHost) releaseTitleBarHost = connectWindowTitleBarFrame(galleryHost, connection.Handle.TitleBarHost, false)
+    releaseTitleBarHost = connectWindowTitleBarFrame(galleryHost, connection?.Handle.TitleBarHost, false)
     app.mount(galleryHost)
     galleryMounted = true
   })

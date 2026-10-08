@@ -1,6 +1,6 @@
 import {
   computed, defineComponent, Fragment, getCurrentInstance, h, inject, isRef,
-  onBeforeUnmount, provide, ref, shallowReactive, type VNode
+  onBeforeUnmount, provide, ref, shallowReactive, type PropType, type VNode
 } from 'vue'
 import { frameworkLayoutStyle } from './frameworkLayout'
 import {
@@ -22,13 +22,13 @@ export default Object.assign(defineComponent({
   name: 'UserControl',
   inheritAttrs: false,
   props: {
-    Content: { default: undefined }, DataContext: { default: undefined },
-    Width: { default: undefined }, Height: { default: undefined },
-    MinWidth: { default: undefined }, MinHeight: { default: undefined },
-    MaxWidth: { default: undefined }, MaxHeight: { default: undefined },
-    Margin: { default: undefined }, Padding: { default: undefined },
-    HorizontalAlignment: { default: 'Stretch' }, VerticalAlignment: { default: 'Stretch' },
-    Visibility: { default: 'Visible' }, Background: { default: undefined }
+    Content: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, DataContext: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+    Width: { type: null as unknown as PropType<string | number | undefined>, default: undefined }, Height: { type: null as unknown as PropType<string | number | undefined>, default: undefined },
+    MinWidth: { type: null as unknown as PropType<string | number | undefined>, default: undefined }, MinHeight: { type: null as unknown as PropType<string | number | undefined>, default: undefined },
+    MaxWidth: { type: null as unknown as PropType<string | number | undefined>, default: undefined }, MaxHeight: { type: null as unknown as PropType<string | number | undefined>, default: undefined },
+    Margin: { type: null as unknown as PropType<string | number | undefined>, default: undefined }, Padding: { type: null as unknown as PropType<string | number | undefined>, default: undefined },
+    HorizontalAlignment: { type: null as unknown as PropType<string>, default: 'Stretch' }, VerticalAlignment: { type: null as unknown as PropType<string>, default: 'Stretch' },
+    Visibility: { type: null as unknown as PropType<string>, default: 'Visible' }, Background: { type: null as unknown as PropType<unknown>, default: undefined as unknown }
   },
   emits: ['PointerEntered', 'PointerExited'],
   setup(props, { attrs, slots, emit, expose }) {
@@ -36,7 +36,7 @@ export default Object.assign(defineComponent({
     const element = ref<HTMLElement>()
     const names = shallowReactive<Record<string, unknown>>({})
     provide(xamlNameScopeKey, names)
-    const inheritedItem = inject(xamlItemContextKey, undefined)
+    const inheritedItem = inject<unknown>(xamlItemContextKey, undefined)
     const dataContext = computed(() => resolveXamlValue(props.DataContext, instance) ?? (isRef(inheritedItem) ? inheritedItem.value : inheritedItem))
     provide(xamlItemContextKey, dataContext)
     const originalValues = new Map<string, unknown>()
@@ -48,7 +48,7 @@ export default Object.assign(defineComponent({
         for (const node of nodes) {
           if (!node || typeof node !== 'object') continue
           if (typeName(node) === 'VisualState') {
-            const name = String(node.props?.['x:Name'] ?? '')
+            const name = String(node.props?.['x:Name'] ?? node.props?.['data-xaml-ref'] ?? '')
             const setters: VNode[] = []
             const collect = (children: VNode[]) => children.forEach(child => {
               if (typeName(child) === 'Setter') setters.push(child)
@@ -127,13 +127,18 @@ export default Object.assign(defineComponent({
       if (property) content = childrenOf(property)
       else if (props.Content !== undefined) {
         const value = resolveXamlValue(props.Content, instance)
-        content = Array.isArray(value) ? value as VNode[] : [h(Fragment, String(value ?? ''))]
+        content = Array.isArray(value) ? value as VNode[] : [h(Fragment, [String(value ?? '')])]
       }
+      const layoutAttrs = Object.fromEntries(Object.entries(attrs).filter(([name]) =>
+        /^(data-|aria-)/.test(name) || /^(Grid\.(Row|Column|RowSpan|ColumnSpan)|Canvas\.ZIndex)$/.test(name)))
       return h('div', {
+        ...layoutAttrs,
         class: ['win-user-control', attrs.class],
         'data-xaml-ref': attrs['data-xaml-ref'] ?? attrs['x:Name'],
         ref: element,
-        style: { display: 'grid', width: '100%', height: '100%', minWidth: 0, minHeight: 0, overflow: 'hidden', ...frameworkLayoutStyle(props, instance) },
+        HorizontalAlignment: resolveXamlValue(props.HorizontalAlignment, instance),
+        VerticalAlignment: resolveXamlValue(props.VerticalAlignment, instance),
+        style: [attrs.style, { display: 'grid', minWidth: 0, minHeight: 0, overflow: 'hidden', ...frameworkLayoutStyle(props, instance) }],
         onPointerenter: (event: PointerEvent) => pointerEvent('PointerEntered', event),
         onPointerleave: (event: PointerEvent) => pointerEvent('PointerExited', event)
       }, normalizeXamlNodes(content, instance))

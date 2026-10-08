@@ -20,7 +20,7 @@ export default { IconSource: InfoBadgeIconSourceProperty }
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch, type VNode } from 'vue'
+import { computed, Fragment, getCurrentInstance, h, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch, type VNode } from 'vue'
 import ContentPresenter from './ContentPresenter.vue'
 import FontIcon from './FontIcon.vue'
 import Grid from './Grid.vue'
@@ -163,9 +163,13 @@ const IconElementPresenter = defineComponent({
   name: 'InfoBadgeIconElementPresenter',
   setup() {
     return () => {
-      const source = IconElement.value
+      const source = IconElement.value as (Record<string, unknown> & {
+        FontFamily?: string; FontSize?: string | number; Symbol?: string | number
+        Foreground?: InstanceType<typeof FontIcon>['$props']['Foreground']
+        Width?: string | number; Height?: string | number
+      }) | null
       if (!source) return null
-      const foreground = source.Foreground || BadgeForeground.value
+      const foreground = (source.Foreground || BadgeForeground.value) as InstanceType<typeof FontIcon>['$props']['Foreground']
       if (iconKind.value === 'FontIcon') return h(FontIcon, { Glyph: decodeGlyph(source.Glyph), FontFamily: source.FontFamily || 'var(--SymbolThemeFontFamily)', FontSize: source.FontSize ?? 20, Foreground: foreground })
       if (iconKind.value === 'SymbolIcon') return h(SymbolIcon, { Symbol: source.Symbol, Foreground: foreground, FontSize: source.FontSize ?? 20 })
       if (iconKind.value === 'PathIcon') return h('svg', { viewBox: '0 0 20 20', width: 20, height: 20, 'aria-hidden': 'true', style: { fill: foreground } }, [h('path', { d: source.Data })])
@@ -183,7 +187,7 @@ const badgeStyle = computed(() => {
   style.background = ''; style.padding = ''; style.borderRadius = ''
   return [attrs.style, style]
 })
-const automationName = computed(() => value(attrs['AutomationProperties.Name']) || (displayKind.value === 'Value' ? t('control.infobadge.value', { value: BadgeValue.value }) : t(`control.infobadge.${displayKind.value === 'Dot' ? 'dot' : 'icon'}`)))
+const automationName = computed(() => String(value(attrs['AutomationProperties.Name']) || (displayKind.value === 'Value' ? t('control.infobadge.value', { value: BadgeValue.value }) : t(`control.infobadge.${displayKind.value === 'Dot' ? 'dot' : 'icon'}`))))
 const Value = computed({ get: () => BadgeValue.value, set: (input: unknown) => { const next = validateValue(input); localValue.value = next; updateXamlBinding(props.Value, next, instance); emit('update:Value', next) } })
 const Style = computed({ get: () => localStyle.value !== undefined ? localStyle.value : sourceStyle.value, set: (next: unknown) => { localStyle.value = next; updateXamlBinding(props.Style, next, instance); emit('update:Style', next) } })
 const IconSource = computed({ get: () => IconElement.value, set: (next: unknown) => { localIconSource.value = next; updateXamlBinding(props.IconSource, next, instance); emit('update:IconSource', next) } })

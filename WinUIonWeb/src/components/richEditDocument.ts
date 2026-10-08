@@ -44,7 +44,7 @@ export const loadRtf = async (source: string | ArrayBuffer): Promise<HTMLElement
   const bytes = typeof source === 'string'
     ? Uint8Array.from(source, character => character.charCodeAt(0)).buffer
     : source;
-  return new RTFJS.Document(bytes).render();
+  return new RTFJS.Document(bytes, {}).render();
 };
 
 const escapeRtfText = (value: string): string => Array.from(value).map(character => {

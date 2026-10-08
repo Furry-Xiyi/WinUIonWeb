@@ -1,7 +1,7 @@
 <template>
   <div ref="root" class="win-rectangle" v-acrylic-brush="rectangleStyle" :style="rectangleStyle" v-bind="forwardedAttrs">
     <OutlineVisual v-if="usesOutline" />
-    <RadialGradientVisual v-else-if="isRadial" :Brush="Fill" />
+    <RadialGradientVisual v-else-if="radialFill" :Brush="radialFill" />
   </div>
 </template>
 
@@ -71,7 +71,7 @@ const Stroke = computed({
 })
 defineExpose({ Fill, Stroke, Element: root, ActualSize: actualSize,
   ActualWidth: computed(() => actualSize.value.X), ActualHeight: computed(() => actualSize.value.Y) })
-const isRadial = computed(() => Boolean(Fill.value && typeof Fill.value === 'object' && Fill.value.__radialGradient))
+const radialFill = computed(() => isRadialGradientBrush(Fill.value) ? Fill.value : null)
 const usesOutline = computed(() => Boolean(Stroke.value) || resolveXamlValue(props.Stretch, instance) !== 'Fill')
 const number = (value: unknown, fallback = 0) => {
   const resolved = resolveXamlValue(value, instance)
@@ -92,7 +92,7 @@ const outline = computed(() => {
     rx: Math.min(w / 2, Math.abs(number(props.RadiusX))), ry: Math.min(h / 2, Math.abs(number(props.RadiusY))), thickness }
 })
 const OutlineVisual = defineComponent({ setup: () => () => {
-  const defs = []
+  const defs: import('vue').VNode[] = []
   const paint = (brush: unknown, property: string) => {
     if (isRadialGradientBrush(brush)) {
       const geometry = outline.value
@@ -130,14 +130,14 @@ const rectangleStyle = computed(() => {
     height: cssLength(props.Height) || undefined,
     margin: xamlThickness(resolveXamlValue(props.Margin, instance)) || undefined,
     ...(usesOutline.value && !isAcrylicBrush(Fill.value) ? { background: 'transparent' }
-      : isRadial.value ? { background: 'transparent' } : resolveBrushStyle(Fill.value, instance)),
+      : radialFill.value ? { background: 'transparent' } : resolveBrushStyle(Fill.value, instance)),
     position: 'relative' as const, overflow: 'hidden' as const,
     minWidth: cssLength(props.MinWidth) || undefined, minHeight: cssLength(props.MinHeight) || undefined,
     maxWidth: cssLength(props.MaxWidth) || undefined, maxHeight: cssLength(props.MaxHeight) || undefined,
     justifySelf: alignment(props.HorizontalAlignment, 'horizontal'), alignSelf: alignment(props.VerticalAlignment, 'vertical'),
     borderRadius: rx && ry ? `${rx}px / ${ry}px` : undefined
   }
-  return [attrs.style, style]
+  return [attrs.style, style as import('vue').CSSProperties]
 })
 </script>
 

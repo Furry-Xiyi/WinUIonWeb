@@ -54,8 +54,8 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue';
-export const SliderHeaderProperty = defineComponent({ name: 'Slider.Header', __sliderHeaderProperty: true, setup: () => () => null });
+import { SliderHeaderProperty } from './inlineControlProperties';
+export { SliderHeaderProperty } from './inlineControlProperties';
 export default { Header: SliderHeaderProperty };
 </script>
 

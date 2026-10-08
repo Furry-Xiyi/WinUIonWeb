@@ -41,7 +41,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import { buttonContentProperty } from './buttonContentRuntime'
 export const SplitButtonFlyout = defineComponent({ name: 'SplitButton.Flyout', __splitButtonProperty: 'flyout', setup() { return () => null } })
 export const SplitButtonContent = defineComponent({ name: 'SplitButton.Content', __splitButtonProperty: 'content', setup() { return () => null } })
@@ -178,7 +177,7 @@ const hostStyle = computed(() => {
   for (const name of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) if (resolve(props[name]) !== '') style[name[0].toLowerCase() + name.slice(1)] = cssLength(resolve(props[name]))
   if (resolve(props.Visibility) === 'Collapsed') style.display = 'none'
   if (resolve(props.Visibility) === 'Hidden') style.visibility = 'hidden'
-  return [attrs.style, style]
+  return [attrs.style, style as import('vue').CSSProperties]
 })
 const api = proxyRefs({ IsEnabled, RequestedTheme, ContentTemplate, ContentTransitions, Name: computed(() => attrs['data-xaml-ref'] ?? attrs['x:Name'] ?? attrs.Name ?? ''), Content: computed({ get: () => localContent.value !== undefined ? localContent.value : propertyNodes.value.main[0] ?? Content.value, set: value => { Content.value = value } }), Flyout, Command, CommandParameter, Element: root, IsFlyoutOpen: isOpen, Focus: () => { root.value?.focus(); return IsEnabled.value } })
 defineExpose(api)

@@ -12,7 +12,7 @@ export default { Resources: CanvasResources, Background: brushProperty('Canvas',
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, ref, useAttrs, useSlots, type VNode } from 'vue'
+import { computed, Fragment, getCurrentInstance, h, ref, useAttrs, useSlots, type VNode } from 'vue'
 import { attachedValue, cssLength, useLayoutObserver } from './layout'
 import { frameworkLayoutStyle } from './frameworkLayout'
 import { layoutResourceChildren } from './layoutResources'

@@ -55,7 +55,7 @@
             :autocapitalize="textPredictionAttr"
             :autocorrect="textPredictionAttr"
             :style="fieldStyle"
-            :aria-label="resolveXamlValue(attrs['AutomationProperties.Name'], instance) || resolvedHeader"
+            :aria-label="automationName"
             @input="onInput"
             @focus="onFocus"
             @blur="onBlur"
@@ -88,7 +88,7 @@
             :autocapitalize="textPredictionAttr"
             :autocorrect="textPredictionAttr"
             :style="fieldStyle"
-            :aria-label="resolveXamlValue(attrs['AutomationProperties.Name'], instance) || resolvedHeader"
+            :aria-label="automationName"
             @input="onInput"
             @focus="onFocus"
             @blur="onBlur"
@@ -136,7 +136,6 @@
 
 <script lang="ts">
 import { brushProperty } from './brushProperties';
-import { defineComponent } from 'vue';
 const textBoxProperty = (name: string) => defineComponent({ name: `TextBox.${name}`, __textInputProperty: name, setup: () => () => null });
 export const TextBoxHeader = textBoxProperty('Header');
 export const TextBoxHeaderTemplate = textBoxProperty('HeaderTemplate');
@@ -174,7 +173,7 @@ const propertyNodes = (name: string) => {
   return normalizeXamlNodes(collect(slots.default?.() ?? []),instance);
 };
 const headerNodes = computed(() => propertyNodes('Header'));
-const resources = inject(xamlResourceDictionaryKey, {});
+const resources = inject<Record<string, unknown>>(xamlResourceDictionaryKey, {});
 const headerTemplate = computed(() => {
   const declaration = propertyNodes('HeaderTemplate')[0];
   if (declaration) return declaration;
@@ -203,6 +202,7 @@ type TextAlignment = 'Left' | 'Center' | 'Right' | 'Justify';
 type TextWrapping = 'NoWrap' | 'Wrap' | 'WrapWholeWords';
 type CharacterCasing = 'Normal' | 'Lower' | 'Upper';
 type CandidateWindowAlignment = 'Default' | 'BottomEdge';
+type XamlExpression = `{${string}}`;
 type TextBoxMenuCommand = 'cut' | 'copy' | 'paste' | 'undo' | 'redo' | 'selectAll';
 type TextBoxMenuItem = {
   Text?: string;
@@ -223,14 +223,14 @@ const rawProps = withDefaults(defineProps<{
   IsReadOnly?: boolean | string;
   IsEnabled?: boolean | string;
   MaxLength?: number | string;
-  TextWrapping?: TextWrapping;
-  TextAlignment?: TextAlignment;
+  TextWrapping?: TextWrapping | XamlExpression;
+  TextAlignment?: TextAlignment | XamlExpression;
   IsSpellCheckEnabled?: boolean | string;
   IsTextPredictionEnabled?: boolean | string;
   InputScope?: string;
-  CharacterCasing?: CharacterCasing;
+  CharacterCasing?: CharacterCasing | XamlExpression;
   SelectionHighlightColor?: string;
-  DesiredCandidateWindowAlignment?: CandidateWindowAlignment;
+  DesiredCandidateWindowAlignment?: CandidateWindowAlignment | XamlExpression;
   IsColorFontEnabled?: boolean | string;
   PreventKeyboardDisplayOnProgrammaticFocus?: boolean | string;
 
@@ -258,7 +258,7 @@ const rawProps = withDefaults(defineProps<{
 }>(), {
   PlaceholderText: '',
   Background: '',
-  Header: '',
+  Header: () => '',
   Description: '',
   AcceptsReturn: false,
   IsReadOnly: false,
@@ -296,10 +296,16 @@ const rawProps = withDefaults(defineProps<{
   MaxHeight: ''
 });
 const propertyOverrides = ref<Record<string, unknown>>({});
+type BooleanProperty = 'AcceptsReturn' | 'IsReadOnly' | 'IsEnabled' | 'IsSpellCheckEnabled' | 'IsTextPredictionEnabled' | 'IsColorFontEnabled' | 'PreventKeyboardDisplayOnProgrammaticFocus';
+type ResolvedTextBoxProps = Omit<typeof rawProps, BooleanProperty | 'MaxLength' | 'CharacterSpacing' | 'TextWrapping' | 'TextAlignment' | 'CharacterCasing' | 'DesiredCandidateWindowAlignment'> & Record<BooleanProperty, boolean> & { MaxLength: number; CharacterSpacing: number; TextWrapping: TextWrapping; TextAlignment: TextAlignment; CharacterCasing: CharacterCasing; DesiredCandidateWindowAlignment: CandidateWindowAlignment };
 const props = new Proxy(rawProps, { get: (target, property) => typeof property === 'string' && property in propertyOverrides.value
-  ? propertyOverrides.value[property] : resolveXamlValue(Reflect.get(target, property), instance) });
+  ? propertyOverrides.value[property] : resolveXamlValue(Reflect.get(target, property), instance) }) as ResolvedTextBoxProps;
 const resolvedHeader = computed(() => resolveXamlValue(props.Header, instance));
 const resolvedDescription = computed(() => resolveXamlValue(props.Description, instance));
+const automationName = computed(() => {
+  const value = resolveXamlValue(attrs['AutomationProperties.Name'], instance) || resolvedHeader.value;
+  return value === null || value === undefined ? undefined : String(value);
+});
 const resolvedText = computed(() => {
   const value = resolveXamlValue(props.Text, instance);
   return value === undefined || value === null ? '' : String(value);

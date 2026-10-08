@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Fragment, h } from 'vue'
+import { h } from 'vue'
 export const ParallaxViewChild = defineComponent({
   name: 'ParallaxView.Child', __parallaxChild: true,
   setup(_, { slots }) { return () => h(Fragment, slots.default?.()) }
@@ -21,7 +21,7 @@ import { arrangeParallaxChild, computeParallaxTranslation, measureParallaxAxis, 
 import { normalizeXamlNodes, resolveXamlValue, updateXamlBinding, xamlNameScopeKey } from './xamlRuntime'
 
 interface Props {
-  Child?: unknown; Source?: unknown; HorizontalShift?: number | string; VerticalShift?: number | string
+  Child?: unknown; Source?: object | string | null; HorizontalShift?: number | string; VerticalShift?: number | string
   HorizontalSourceStartOffset?: number | string; HorizontalSourceEndOffset?: number | string; VerticalSourceStartOffset?: number | string; VerticalSourceEndOffset?: number | string
   HorizontalSourceOffsetKind?: string | number; VerticalSourceOffsetKind?: string | number; IsHorizontalShiftClamped?: boolean | string; IsVerticalShiftClamped?: boolean | string
   MaxHorizontalShiftRatio?: number | string; MaxVerticalShiftRatio?: number | string; Width?: number | string; Height?: number | string; MinWidth?: number | string; MinHeight?: number | string; MaxWidth?: number | string; MaxHeight?: number | string; Margin?: number | string; HorizontalAlignment?: string; VerticalAlignment?: string; Visibility?: string; IsHitTestVisible?: boolean | string; Opacity?: number | string

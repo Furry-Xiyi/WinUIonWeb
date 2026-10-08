@@ -58,7 +58,7 @@ export function createTabViewPwaDragBroker(Options: {
     const drag = request?.DragId ? drags.get(request.DragId) : undefined
     const durable = request?.DragId ? read(request.DragId) : undefined
     const sent = request?.Journal
-    const journal = sent?.Id === request.DragId && sent.SourceId === id && sent.SourceWindowId === broker.WindowId && sent.Transaction === request.Transaction
+    const journal = sent && sent.Id === request.DragId && sent.SourceId === id && sent.SourceWindowId === broker.WindowId && sent.Transaction === request.Transaction
       ? sent : drag?.Journal ?? durable
     const source = sources.get(id)
     if (!drag && journal?.State === 'Completed' && journal.SourceId === id && journal.Transaction === request.Transaction && ['Finalize', 'Rollback'].includes(method)) return true

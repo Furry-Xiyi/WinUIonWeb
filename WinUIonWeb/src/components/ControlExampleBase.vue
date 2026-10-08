@@ -100,7 +100,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, getCurrentInstance, h, markRaw, provide, useSlots, watch } from 'vue';
+import { ref, computed, getCurrentInstance, h, markRaw, provide, useSlots, watch, type PropType } from 'vue';
+import type { ControlExampleSubstitutionValue } from './ControlExampleProperties';
 import Expander from './Expander.vue';
 import FontIcon from './FontIcon.vue';
 import Button from './Button.vue';
@@ -142,7 +143,7 @@ const props = defineProps({
   xamlSource: { type: String, default: '' },
   cSharpSource: { type: String, default: '' },
   sampleDefinition: { type: String, default: '' },
-  substitutions: { type: Array, default: () => [] }
+  substitutions: { type: Array as PropType<ControlExampleSubstitutionValue[]>, default: () => [] }
 });
 
 const themeValue = computed(() => props.theme as 'light' | 'dark' | 'system');

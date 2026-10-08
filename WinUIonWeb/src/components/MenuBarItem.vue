@@ -35,9 +35,9 @@ const MenuBarItem = defineComponent({
     const enabledOverride = ref<boolean | undefined>();
     const tabStopOverride = ref<boolean | undefined>();
     const visibilityOverride = ref<string | undefined>();
-    const title = computed(() => titleOverride.value ?? (props.Title === undefined ? t('MenuBarItemDefaultTitle') : resolveXamlValue(props.Title, instance)));
-    const enabled = computed(() => context?.isEnabled() !== false && (enabledOverride.value ?? ![false, 'False', 'false'].includes(resolveXamlValue(props.IsEnabled, instance))));
-    const tabStop = computed(() => tabStopOverride.value ?? ![false, 'False', 'false'].includes(resolveXamlValue(props.IsTabStop, instance)));
+    const title = computed(() => titleOverride.value ?? (props.Title === undefined ? t('MenuBarItemDefaultTitle') : resolveXamlValue(props.Title, instance) as string));
+    const enabled = computed(() => context?.isEnabled() !== false && (enabledOverride.value ?? !([false, 'False', 'false'] as unknown[]).includes(resolveXamlValue(props.IsEnabled, instance))));
+    const tabStop = computed(() => tabStopOverride.value ?? !([false, 'False', 'false'] as unknown[]).includes(resolveXamlValue(props.IsTabStop, instance)));
     const visibility = computed(() => visibilityOverride.value ?? String(resolveXamlValue(props.Visibility, instance)));
     const visible = computed(() => context?.isVisible() !== false && visibility.value !== 'Collapsed');
     const isOpen = ref(false);

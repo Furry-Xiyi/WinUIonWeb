@@ -60,7 +60,7 @@ export default { Content: FlyoutContent, FlyoutPresenterStyle };
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, onUpdated, provide, ref, shallowReactive, shallowRef, unref, useAttrs, useSlots, watch, type CSSProperties, type Ref, type VNode } from 'vue';
+import { computed, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, onUpdated, provide, ref, shallowReactive, shallowRef, unref, useAttrs, useSlots, watch, type CSSProperties, type PropType, type Ref, type VNode } from 'vue';
 import ScrollViewer from './ScrollViewer.vue';
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlResourceObject, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 import { fitPopupPosition, popupBoundsFor, popupPlacementPosition, resolvePopupElement, type PopupBounds } from './popupRuntime';
@@ -74,7 +74,7 @@ import { flyoutInputContextKey, flyoutContainsNode, hasOpenDescendantFlyout, hid
 defineOptions({ name: 'Flyout', inheritAttrs: false });
 
 const props = defineProps({
-  Content: { default: undefined },
+  Content: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
   Placement: { type: String, default: 'Top' },
   ShowMode: { type: String, default: 'Standard' },
   LightDismissOverlayMode: { type: String, default: 'Auto' },
@@ -82,7 +82,7 @@ const props = defineProps({
   ShouldConstrainToRootBounds: { type: [Boolean, String], default: true },
   AllowFocusOnInteraction: { type: [Boolean, String], default: true },
   AllowFocusWhenDisabled: { type: [Boolean, String], default: false },
-  FlyoutPresenterStyle: { default: undefined }
+  FlyoutPresenterStyle: { type: null as unknown as PropType<unknown>, default: undefined as unknown }
 });
 
 const emit = defineEmits(['Opening', 'Opened', 'Closing', 'Closed', 'update:Content', 'update:Placement', 'update:ShowMode', 'update:LightDismissOverlayMode', 'update:AreOpenCloseAnimationsEnabled', 'update:ShouldConstrainToRootBounds', 'update:AllowFocusOnInteraction', 'update:AllowFocusWhenDisabled', 'update:FlyoutPresenterStyle']);
@@ -130,7 +130,7 @@ const position = ref({ left: 0, top: 0 });
 const nestedLayers = ref<{ overlay: number; presenter: number } | null>(null);
 const showMode = computed(() => String(showOptions.value?.ShowMode || propertyValue('ShowMode') || 'Standard') === 'Auto' ? 'Standard' : String(showOptions.value?.ShowMode || propertyValue('ShowMode') || 'Standard'));
 const overlayVisible = computed(() => String(propertyValue('LightDismissOverlayMode')) === 'On');
-const automationName = computed(() => resolve(attrs['AutomationProperties.Name']));
+const automationName = computed(() => String(resolve(attrs['AutomationProperties.Name']) ?? ''));
 const themeRevision = ref(0);
 const effectiveTheme = computed(() => {
   themeRevision.value;

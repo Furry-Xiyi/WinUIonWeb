@@ -101,7 +101,7 @@ const rootStyle = computed(() => {
   else style.height ??= `${DEFAULT_PULL_DIMENSION_SIZE}px`
   if (value(props.Visibility) === 'Collapsed') style.display = 'none'
   if (value(props.Visibility) === 'Hidden') style.visibility = 'hidden'
-  return style
+  return style as import('vue').CSSProperties
 })
 
 const stopRotation = () => {

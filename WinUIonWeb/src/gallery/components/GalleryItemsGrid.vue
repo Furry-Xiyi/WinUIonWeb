@@ -64,7 +64,7 @@ import { pendingRouteNavigationCompletion } from '../../components/frameNavigati
 defineOptions({ inheritAttrs: true });
 const props = defineProps({
   ItemsSource: { type: [Array, String], default: () => [] },
-  Padding: { type: [String, Number], default: 0 },
+  Padding: { type: [String, Number], default: '0,0,0,10' },
   SingleRow: { type: [Boolean, String], default: false },
   IsScrollEnabled: { type: [Boolean, String], default: false },
   AccessibleName: { type: String, default: '' },
@@ -126,7 +126,7 @@ onMounted(async () => {
   });
 });
 onBeforeUnmount(() => { isMounted = false; descriptionObserver?.disconnect(); query.removeEventListener('change', updateWidth); cancelAnimationFrame(restoreFrame); });
-const CardWidth = computed(() => narrow.value && !singleRow.value ? 'Auto' : 300);
+const CardWidth = computed(() => narrow.value ? 'Auto' : 300);
 const CardHeight = computed(() => narrow.value ? 120 : 96);
 const DescriptionMaxHeight = computed(() => descriptionHeight.value || CardHeight.value - 50);
 watch([Items, CardHeight], () => { descriptionHeight.value = 0; if (isMounted) void observeDescription(); });

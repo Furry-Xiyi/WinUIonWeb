@@ -362,7 +362,7 @@ const template = reactive({
 })
 provide(xamlScopeKey, { Template: template })
 const rootAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([name]) => !['class', 'style', 'AutomationProperties.Name', 'AutomationProperties.AccessibilityView'].includes(name))))
-const rootStyle = computed(() => {
+const rootStyle = computed<import('vue').CSSProperties>(() => {
   const layout = frameworkLayoutStyle(Object.fromEntries(publicProperties.map(name => [name, raw(name)])), instance)
   delete layout.background; delete layout.borderColor; delete layout.borderWidth
   return {

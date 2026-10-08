@@ -70,7 +70,7 @@ export const ButtonKeyboardAccelerators = defineComponent({ name: 'Button.Keyboa
 export default { Flyout: ButtonFlyout, Content: ButtonContent, ContentTemplate: buttonContentProperty('Button', 'ContentTemplate'), ContentTransitions: buttonContentProperty('Button', 'ContentTransitions'), Resources: buttonContentProperty('Button', 'Resources'), KeyboardAccelerators: ButtonKeyboardAccelerators, Background: brushProperty('Button', 'Background') }
 </script>
 <script setup lang="ts">
-import { Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch } from 'vue';
+import { Comment, computed, Fragment, getCurrentInstance, inject, isVNode, onBeforeUnmount, onMounted, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch, type CSSProperties, type PropType, type StyleValue, type VNode } from 'vue';
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 import ContentPresenter from './ContentPresenter.vue';
 import Grid from './Grid.vue';
@@ -88,14 +88,14 @@ defineOptions({
 const props = defineProps({
   Style: { type: String, default: '' },
   RequestedTheme: { type: String, default: 'Default' },
-  Content: { type: null, default: undefined },
-  ContentTemplate: { type: null, default: undefined },
-  ContentTransitions: { type: null, default: undefined },
+  Content: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+  ContentTemplate: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+  ContentTransitions: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
   ClickMode: { type: String, default: 'Release' },
   IsTabStop: { type: [Boolean, String], default: true },
   Command: { type: [Object, String], default: undefined },
-  CommandParameter: { default: undefined },
-  Flyout: { type: null, default: undefined },
+  CommandParameter: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+  Flyout: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
   IsEnabled: { type: [Boolean, String], default: true },
   Visibility: { type: String, default: 'Visible' },
   Background: { type: [String, Object], default: '' },
@@ -130,7 +130,7 @@ const instance = getCurrentInstance();
 const slots = useSlots();
 const { ContentTemplate, ContentTransitions, renderTemplate } = useButtonContent(props, () => slots.default?.() ?? [], instance);
 const backgroundBrush = useBrushProperty('Background', () => props.Background, () => slots.default?.() ?? [], instance);
-const buttonRef = ref(null);
+const buttonRef = ref<HTMLElement | null>(null);
 const iconInput = useAnimatedIconInput();
 const IsPressed = ref(false);
 const IsPointerOver = ref(false);
@@ -138,13 +138,15 @@ let activePointer: number | null = null;
 let keyPressed = '';
 let suppressClick = false;
 watch(buttonRef, element => iconInput.Attach(element), { flush: 'post' });
-const pointerEvent = (name, event, feedback) => {
+type PointerEventName = 'PointerEntered' | 'PointerExited' | 'PointerMoved' | 'PointerPressed' | 'PointerReleased' | 'PointerCanceled' | 'PointerCaptureLost';
+const pointerDeviceTypes: Record<string, string> = { mouse: 'Mouse', touch: 'Touch', pen: 'Pen' };
+const pointerEvent = (name: PointerEventName, event: PointerEvent, feedback: (event: PointerEvent) => void) => {
   feedback(event);
   const sender = publicApi;
   const args = {
     OriginalSource: sender, OriginalEvent: event, Handled: false,
-    Pointer: { PointerId: event.pointerId, PointerDeviceType: ({ mouse: 'Mouse', touch: 'Touch', pen: 'Pen' })[event.pointerType] || 'Mouse' },
-    GetCurrentPoint: relativeTo => {
+    Pointer: { PointerId: event.pointerId, PointerDeviceType: pointerDeviceTypes[event.pointerType] || 'Mouse' },
+    GetCurrentPoint: (relativeTo?: HTMLElement | { Element?: HTMLElement }) => {
       const element = relativeTo instanceof HTMLElement ? relativeTo : relativeTo?.Element;
       const bounds = element?.getBoundingClientRect();
       return { Position: { X: event.clientX - (bounds?.left ?? 0), Y: event.clientY - (bounds?.top ?? 0) }, IsInContact: event.buttons > 0 };
@@ -154,13 +156,13 @@ const pointerEvent = (name, event, feedback) => {
   if (attrs[name] && !instance?.vnode.props?.[`on${name}`]) resolveXamlHandler(attrs[name], instance)?.(sender, args);
   if (args.Handled) { event.preventDefault(); event.stopPropagation(); }
 };
-const onPointerEntered = event => {
+const onPointerEntered = (event: PointerEvent) => {
   IsPointerOver.value = true;
   if (activePointer !== null && event.buttons > 0) IsPressed.value = true;
   pointerEvent('PointerEntered', event, iconInput.PointerEntered);
   if (!isDisabled.value && resolveXamlValue(props.ClickMode, instance) === 'Hover') onClick(event);
 };
-const onPointerExited = event => { IsPointerOver.value = false; IsPressed.value = false; pointerEvent('PointerExited', event, iconInput.PointerExited); };
+const onPointerExited = (event: PointerEvent) => { IsPointerOver.value = false; IsPressed.value = false; pointerEvent('PointerExited', event, iconInput.PointerExited); };
 const clearPressed = () => {
   const pointer = activePointer;
   activePointer = null; IsPressed.value = false; keyPressed = '';
@@ -168,7 +170,7 @@ const clearPressed = () => {
     try { buttonRef.value.releasePointerCapture(pointer); } catch { }
   }
 };
-const onPointerPressed = event => {
+const onPointerPressed = (event: PointerEvent) => {
   if (!isDisabled.value && event.button === 0 && resolveXamlValue(props.ClickMode, instance) !== 'Hover') {
     suppressClick = false;
     activePointer = event.pointerId;
@@ -178,11 +180,11 @@ const onPointerPressed = event => {
   }
   pointerEvent('PointerPressed', event, iconInput.PointerPressed);
 };
-const pointerInside = event => { const bounds = buttonRef.value?.getBoundingClientRect(); return bounds && event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom; };
-const onPointerMoved = event => { if (event.pointerId === activePointer) { IsPressed.value = Boolean(pointerInside(event)); IsPointerOver.value = IsPressed.value; } pointerEvent('PointerMoved', event, () => {}); };
-const onPointerReleased = event => { if (activePointer !== null && !pointerInside(event)) suppressClick = true; clearPressed(); pointerEvent('PointerReleased', event, iconInput.PointerReleased); };
-const onPointerCanceled = event => { clearPressed(); suppressClick = true; pointerEvent('PointerCanceled', event, iconInput.PointerExited); };
-const onPointerCaptureLost = event => { clearPressed(); pointerEvent('PointerCaptureLost', event, iconInput.PointerExited); };
+const pointerInside = (event: PointerEvent) => { const bounds = buttonRef.value?.getBoundingClientRect(); return bounds && event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom; };
+const onPointerMoved = (event: PointerEvent) => { if (event.pointerId === activePointer) { IsPressed.value = Boolean(pointerInside(event)); IsPointerOver.value = IsPressed.value; } pointerEvent('PointerMoved', event, () => {}); };
+const onPointerReleased = (event: PointerEvent) => { if (activePointer !== null && !pointerInside(event)) suppressClick = true; clearPressed(); pointerEvent('PointerReleased', event, iconInput.PointerReleased); };
+const onPointerCanceled = (event: PointerEvent) => { clearPressed(); suppressClick = true; pointerEvent('PointerCanceled', event, iconInput.PointerExited); };
+const onPointerCaptureLost = (event: PointerEvent) => { clearPressed(); pointerEvent('PointerCaptureLost', event, iconInput.PointerExited); };
 const command = useUICommand(() => resolveXamlValue(props.Command, instance));
 const commandParameter = computed(() => resolveXamlValue(props.CommandParameter, instance));
 const onContextRequested = (event: MouseEvent) => {
@@ -206,29 +208,29 @@ const onContextRequested = (event: MouseEvent) => {
 };
 const flyoutController = shallowRef<unknown>(null);
 const sourceFlyout = computed(() => resolveXamlValue(props.Flyout, instance));
-const localFlyout = shallowRef(undefined);
+const localFlyout = shallowRef<unknown>(undefined);
 watch(sourceFlyout, () => { localFlyout.value = undefined; });
 provide('buttonFlyoutAnchor', buttonRef);
 provide('buttonFlyoutController', flyoutController);
 
 const propertyNodes = computed(() => {
-  const content = [];
-  const flyout = [];
-  const attached = [];
-  const keyboardAccelerators = [];
-  const collect = nodes => { for (const node of nodes) {
+  const content: VNode[] = [];
+  const flyout: VNode[] = [];
+  const attached: VNode[] = [];
+  const keyboardAccelerators: VNode[] = [];
+  const collect = (nodes: VNode[]) => { for (const node of nodes) {
     if (node.type === Comment || node.type === Text && !String(node.children ?? '').trim()) continue;
     if (isBrushProperty(node) || getButtonContentProperty(node)) continue;
-    if (node.type === Fragment && Array.isArray(node.children)) { collect(node.children); continue; }
+    if (node.type === Fragment && Array.isArray(node.children)) { collect(node.children as VNode[]); continue; }
     const type = node?.type;
     const property = type && typeof type === 'object'
-      ? type.__buttonProperty
+      ? (type as { __buttonProperty?: string }).__buttonProperty
       : undefined;
     if (getToolTipServiceProperty(node)) {
       attached.push(node);
     } else if (property === 'flyout' || property === 'content' || property === 'keyboardAccelerators') {
       const slot = node.children && typeof node.children === 'object'
-        ? node.children.default
+        ? (node.children as { default?: () => VNode[] }).default
         : undefined;
       if (slot) (property === 'flyout' ? flyout : property === 'content' ? content : keyboardAccelerators).push(...slot());
     } else {
@@ -271,7 +273,7 @@ const ContentValueOutlet = defineComponent({ setup: () => () => {
 } });
 const AttachedOutlet = defineComponent({ setup: () => () => h(Fragment, propertyNodes.value.attached) });
 
-const buttonAttrs = computed(() => {
+const buttonAttrs = computed<Record<string, unknown>>(() => {
   const rest = { ...attrs };
   delete rest.class;
   delete rest.style;
@@ -280,7 +282,7 @@ const buttonAttrs = computed(() => {
   delete rest.GotFocus;
   delete rest.ContextRequested;
   for (const name of ['LostFocus', 'KeyDown', 'KeyUp', 'PointerEntered', 'PointerExited', 'PointerMoved', 'PointerPressed', 'PointerReleased', 'PointerCanceled', 'PointerCaptureLost']) delete rest[name];
-  const findAttr = (name) => Object.keys(rest).find((key) => key.toLowerCase() === name.toLowerCase());
+  const findAttr = (name: string) => Object.keys(rest).find((key) => key.toLowerCase() === name.toLowerCase());
   const toolTipKey = findAttr('ToolTipService.ToolTip');
   const automationKey = findAttr('AutomationProperties.Name');
   const toolTipValue = toolTipKey ? rest[toolTipKey] : undefined;
@@ -312,7 +314,7 @@ const sourceRequestedTheme = computed(() => String(resolveXamlValue(props.Reques
 const localRequestedTheme = ref<string | undefined>();
 watch(sourceRequestedTheme, () => { localRequestedTheme.value = undefined; });
 const RequestedTheme = computed({ get: () => localRequestedTheme.value ?? sourceRequestedTheme.value, set: value => { localRequestedTheme.value = value; updateXamlBinding(props.RequestedTheme, value, instance); } });
-const localContent = shallowRef(undefined);
+const localContent = shallowRef<unknown>(undefined);
 watch(sourceContent, () => { localContent.value = undefined; });
 const resolvedContent = computed({ get: () => localContent.value === undefined ? sourceContent.value : localContent.value, set: value => { localContent.value = value; updateXamlBinding(props.Content, value, instance); } });
 const resolvedStyle = computed(() => String(resolveXamlValue(props.Style, instance) || ''));
@@ -339,14 +341,15 @@ const PresenterCornerRadius = computed(() => resolveXamlValue(props.CornerRadius
 const inheritedScope = inject(xamlScopeKey, {});
 provide(xamlScopeKey, { ...inheritedScope, ContentTemplate, ContentTransitions, PresenterHorizontalAlignment, PresenterVerticalAlignment, PresenterBackground, PresenterBackgroundSizing, PresenterBorderBrush, PresenterBorderThickness, PresenterPadding, PresenterCornerRadius });
 
-const contentAlignment = (value) => ({
+const contentAlignments: Record<string, NonNullable<CSSProperties['justifyContent'] & CSSProperties['alignItems']>> = {
   Left: 'flex-start',
   Center: 'center',
   Right: 'flex-end',
   Stretch: 'stretch',
   Top: 'flex-start',
   Bottom: 'flex-end'
-}[value] ?? '');
+};
+const contentAlignment = (value: unknown) => contentAlignments[String(value)] ?? '';
 
 const styleClass = computed(() => {
   return {
@@ -358,8 +361,8 @@ const styleClass = computed(() => {
 });
 
 const buttonStyle = computed(() => {
-  const style = {};
-  const value = key => resolveXamlValue(props[key], instance);
+  const style: CSSProperties & Record<string, string | number | undefined> = {};
+  const value = (key: keyof typeof props) => resolveXamlValue(props[key], instance);
   if (titleBarStylePrefix.value) {
     for (const state of ['', 'PointerOver', 'Pressed', 'Disabled']) {
       style[`--ButtonBackground${state}`] = `var(--${titleBarStylePrefix.value}Background${state})`;
@@ -371,15 +374,15 @@ const buttonStyle = computed(() => {
     style.width = cssLength(resolveXamlValue(`{ThemeResource ${titleBarStylePrefix.value}Width}`, instance));
     style.margin = '2px';
   }
-  if (backgroundBrush.value.value) style['--ButtonBackground'] = typeof backgroundBrush.value.value === 'object' ? 'transparent' : backgroundBrush.value.value;
-  if (props.Foreground) style['--ButtonForeground'] = value('Foreground');
+  if (backgroundBrush.value.value) style['--ButtonBackground'] = typeof backgroundBrush.value.value === 'object' ? 'transparent' : String(backgroundBrush.value.value);
+  if (props.Foreground) style['--ButtonForeground'] = String(value('Foreground') ?? '');
   if (props.BorderThickness !== '') {
     style['--ButtonPresenterBorderThickness'] = xamlThickness(value('BorderThickness'));
   }
   if (props.BorderBrush) {
-    style['--ButtonBorderBrush'] = value('BorderBrush');
-    style['--ButtonBorderBrushTop'] = value('BorderBrush');
-    style['--ButtonBorderBrushBottom'] = value('BorderBrush');
+    style['--ButtonBorderBrush'] = String(value('BorderBrush') ?? '');
+    style['--ButtonBorderBrushTop'] = String(value('BorderBrush') ?? '');
+    style['--ButtonBorderBrushBottom'] = String(value('BorderBrush') ?? '');
   }
   const margin = resolveXamlValue(props.Margin, instance);
   if (margin !== undefined && margin !== null && margin !== '') style.margin = xamlThickness(margin);
@@ -397,14 +400,14 @@ const buttonStyle = computed(() => {
       : contentAlignment(value('HorizontalContentAlignment'));
   }
   if (props.VerticalContentAlignment) style.alignItems = contentAlignment(value('VerticalContentAlignment'));
-  if (props.FontFamily) style.fontFamily = value('FontFamily');
-  if (props.FontWeight) style.fontWeight = value('FontWeight') === 'SemiBold' ? 600 : value('FontWeight');
+  if (props.FontFamily) style.fontFamily = String(value('FontFamily') ?? '');
+  if (props.FontWeight) style.fontWeight = value('FontWeight') === 'SemiBold' ? 600 : String(value('FontWeight') ?? '');
   if (props.FontSize !== '') style.fontSize = cssLength(value('FontSize'));
   if (props.FocusVisualMargin !== '') style.outlineOffset = cssLength(value('FocusVisualMargin'));
   if (props.CornerRadius !== '') style['--ButtonCornerRadius'] = xamlThickness(value('CornerRadius'));
   if (isCollapsed.value) style.display = 'none';
 
-  return [attrs.style, style];
+  return [attrs.style as StyleValue, style];
 });
 
 const onClick = (_event: MouseEvent | KeyboardEvent) => {
@@ -421,21 +424,22 @@ const onClick = (_event: MouseEvent | KeyboardEvent) => {
   const currentCommand = command.value;
   const parameter = commandParameter.value;
   if (currentCommand?.CanExecute?.(parameter) ?? true) currentCommand?.Execute(parameter);
-  if (typeof KeyboardEvent !== 'undefined' && _event instanceof KeyboardEvent || !propertyNodes.value.flyout.length) void Flyout.value?.ShowAt?.(buttonRef.value);
+  if (typeof KeyboardEvent !== 'undefined' && _event instanceof KeyboardEvent || !propertyNodes.value.flyout.length) void (Flyout.value as { ShowAt?: (anchor: HTMLElement | null) => unknown } | null)?.ShowAt?.(buttonRef.value);
 };
-const onNativeClick = event => {
+const onNativeClick = (event: MouseEvent) => {
   if (suppressClick) { suppressClick = false; return; }
   if (resolveXamlValue(props.ClickMode, instance) !== 'Hover') onClick(event);
 };
-const raiseKey = (name, event) => {
+const keyNames: Record<string, string> = { ' ': 'Space', ArrowDown: 'Down', ArrowUp: 'Up', ArrowLeft: 'Left', ArrowRight: 'Right' };
+const raiseKey = (name: 'KeyDown' | 'KeyUp', event: KeyboardEvent) => {
   const sender = publicApi;
-  const args = { OriginalSource: sender, OriginalEvent: event, Key: ({ ' ': 'Space', ArrowDown: 'Down', ArrowUp: 'Up', ArrowLeft: 'Left', ArrowRight: 'Right' })[event.key] ?? event.key, Handled: false };
+  const args = { OriginalSource: sender, OriginalEvent: event, Key: keyNames[event.key] ?? event.key, Handled: false };
   emit(name, sender, args);
   resolveXamlHandler(attrs[name], instance)?.(sender, args);
   if (args.Handled) event.preventDefault();
   return args.Handled;
 };
-const onKeyDown = event => {
+const onKeyDown = (event: KeyboardEvent) => {
   iconInput.KeyDown(event);
   if (raiseKey('KeyDown', event)) return;
   if (isDisabled.value || resolveXamlValue(props.ClickMode, instance) === 'Hover') return;
@@ -446,7 +450,7 @@ const onKeyDown = event => {
   IsPressed.value = true;
   if (resolveXamlValue(props.ClickMode, instance) === 'Press') onClick(event);
 };
-const onKeyUp = event => {
+const onKeyUp = (event: KeyboardEvent) => {
   iconInput.KeyUp(event);
   if (raiseKey('KeyUp', event)) { clearPressed(); return; }
   if (isDisabled.value || resolveXamlValue(props.ClickMode, instance) === 'Hover') return;
@@ -456,7 +460,7 @@ const onKeyUp = event => {
   clearPressed();
   if (invoke && resolveXamlValue(props.ClickMode, instance) === 'Release') onClick(event);
 };
-const onLostFocus = event => {
+const onLostFocus = (event: FocusEvent) => {
   clearPressed(); suppressClick = false; iconInput.LostFocus(event);
   const sender = publicApi;
   const args = { OriginalSource: sender, OriginalEvent: event, Handled: false };
@@ -485,7 +489,7 @@ const onAccelerator = (event: KeyboardEvent) => {
 const onWindowBlur = () => { clearPressed(); suppressClick = false; iconInput.Refresh(); };
 onMounted(() => { document.addEventListener('keydown', onAccelerator); window.addEventListener('blur', onWindowBlur); });
 onBeforeUnmount(() => { document.removeEventListener('keydown', onAccelerator); window.removeEventListener('blur', onWindowBlur); });
-const onGotFocus = (event) => {
+const onGotFocus = (event: FocusEvent) => {
   const sender = publicApi;
   const args = { OriginalSource: sender, OriginalEvent: event, Handled: false };
   emit('GotFocus', sender, args);

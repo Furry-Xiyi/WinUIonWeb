@@ -172,7 +172,7 @@ const rootStyle = computed(() => {
   }
   if (value(props.Visibility) === 'Collapsed') style.display = 'none'
   if (value(props.Visibility) === 'Hidden') style.visibility = 'hidden'
-  return style
+  return style as import('vue').CSSProperties
 })
 
 const viewport = () => rootRef.value?.querySelector<HTMLElement>('.win-scroll-viewer-viewport, .win-scroll-presenter') ?? null

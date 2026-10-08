@@ -236,7 +236,7 @@ const rootStyle = computed(() => {
   for (const name of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) if (value(props[name]) !== '') style[name[0].toLowerCase() + name.slice(1)] = cssLength(value(props[name]))
   if (value(props.Visibility) === 'Collapsed') style.display = 'none'
   if (value(props.Visibility) === 'Hidden') style.visibility = 'hidden'
-  return [attrs.style, style]
+  return [attrs.style, style as import('vue').CSSProperties]
 })
 const raise = (name: 'TimeChanged' | 'SelectedTimeChanged', args: unknown) => { emit(name, publicApi, args); resolveXamlHandler(attrs[name], instance)?.(publicApi, args) }
 const setTime = (input: unknown, notify = true, kind?: 'number' | 'string') => {

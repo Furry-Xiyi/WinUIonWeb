@@ -1,5 +1,7 @@
 export default {
   'catalog.group.windowing': 'Windowing',
+  'catalog.item.createmultiplewindows.title': 'Multiple windows',
+  'catalog.item.createmultiplewindows.subtitle': 'An example showing the creation of single-threaded top level Xaml windows.',
   'catalog.item.titlebar.title': 'TitleBar',
   'catalog.item.titlebar.subtitle': 'An example showing how to use the default TitleBar control.',
   "catalog.home.title": "WinUI on Web Gallery",

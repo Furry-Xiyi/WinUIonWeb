@@ -9,6 +9,18 @@ export interface TitleBarInsets {
   /** The browser overlay's actual vertical band, when available. */
   TitleBarArea?: TitleBarRegion
 }
+export type TitleBarHeightOption = 'Standard' | 'Tall' | 'Collapsed'
+export interface TitleBarWindowConfiguration {
+  ExtendsContentIntoTitleBar?: boolean
+  PreferredHeightOption?: TitleBarHeightOption
+}
+export interface NativeTitleBarMetrics {
+  /** Includes the actual WebView zoom as well as the native monitor DPI. */
+  PhysicalPixelsPerCssPixel: number
+  LeftInset: number
+  RightInset: number
+  TitleBarArea?: TitleBarRegion
+}
 export interface TitleBarDragRegions {
   Caption: TitleBarRegion
   Passthrough: readonly TitleBarRegion[]
@@ -22,6 +34,8 @@ export interface TitleBarWindowHost {
   /** Native AppWindow insets must be converted to this document's CSS pixels. */
   GetTitleBarInsets?(): TitleBarInsets | null
   SubscribeTitleBarInsets?(listener: () => void): () => void
+  SetExtendsContentIntoTitleBar?(value: boolean): void | Promise<void>
+  SetPreferredHeightOption?(value: TitleBarHeightOption): void | Promise<void>
   /** Optional ownership guard for hosts that contain nested demonstration bars. */
   IsTitleBarOwner?(element: HTMLElement): boolean
   /** Actual non-client regions only. Ordinary browser windows have no implementation. */
@@ -45,6 +59,28 @@ export function registerTitleBarWindowHost(content: HTMLElement, host: TitleBarW
   windowHosts.set(content, host)
   return () => { if (windowHosts.get(content) === host) windowHosts.delete(content) }
 }
+/** AppWindow reports physical pixels; XAML and browser layout use logical pixels. */
+export function nativeTitleBarMetricsToCssPixels(metrics: NativeTitleBarMetrics): TitleBarInsets | null {
+  const scale = metrics.PhysicalPixelsPerCssPixel
+  if (!Number.isFinite(scale) || scale <= 0 || !Number.isFinite(metrics.LeftInset) || !Number.isFinite(metrics.RightInset)
+    || metrics.LeftInset < 0 || metrics.RightInset < 0) return null
+  const area = metrics.TitleBarArea
+  if (area && (![area.X, area.Y, area.Width, area.Height].every(Number.isFinite) || area.Width < 0 || area.Height < 0)) return null
+  return {
+    LeftInset: metrics.LeftInset / scale, RightInset: metrics.RightInset / scale,
+    ...(area ? { TitleBarArea: { X: area.X / scale, Y: area.Y / scale, Width: area.Width / scale, Height: area.Height / scale } } : {}),
+  }
+}
+
+/** Apply actual window policy before mounting the custom XAML TitleBar. */
+export async function configureTitleBarWindowHost(host: TitleBarWindowHost | null | undefined, configuration: TitleBarWindowConfiguration, signal?: AbortSignal): Promise<void> {
+  signal?.throwIfAborted()
+  if (configuration.ExtendsContentIntoTitleBar !== undefined) await host?.SetExtendsContentIntoTitleBar?.(configuration.ExtendsContentIntoTitleBar)
+  signal?.throwIfAborted()
+  if (configuration.PreferredHeightOption !== undefined) await host?.SetPreferredHeightOption?.(configuration.PreferredHeightOption)
+  signal?.throwIfAborted()
+}
+
 type WindowControlsOverlay = EventTarget & { visible: boolean; getTitlebarAreaRect(): DOMRect }
 
 /** Convert physical window occlusion to the control's own arrange rectangle. */

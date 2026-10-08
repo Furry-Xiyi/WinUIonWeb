@@ -13,7 +13,7 @@ const pageBackground = (owner: Window, content?: HTMLElement): { color?: string;
   const context = canvas.getContext('2d')
   if (!context) return { transitioning: false }
   const layers: HTMLElement[] = []
-  let element = (content?.firstElementChild as HTMLElement | null) ?? content ?? owner.document.documentElement
+  let element: HTMLElement | null = (content?.firstElementChild as HTMLElement | null) ?? content ?? owner.document.documentElement
   while (element) { layers.push(element); element = element.parentElement }
   // Read the page's rendered layers, including an exact native fallback on
   // the content host. This never changes or imitates the material surface.

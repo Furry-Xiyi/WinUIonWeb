@@ -19,14 +19,14 @@ import { resolveXamlValue, updateXamlBinding } from './xamlRuntime'
 
 defineOptions({ name: 'PivotItem', inheritAttrs: false })
 const props = defineProps({
-  Header: { type: null as unknown as PropType<unknown>, default: null }, Content: { type: null as unknown as PropType<unknown>, default: null }, ContentTemplate: { type: null as unknown as PropType<unknown>, default: null },
-  Background: { type: null as unknown as PropType<unknown>, default: '{ThemeResource PivotItemBackground}' }, Foreground: { type: null as unknown as PropType<unknown>, default: '' },
-  Margin: { type: null as unknown as PropType<unknown>, default: '{ThemeResource PivotItemMargin}' }, Padding: { type: null as unknown as PropType<unknown>, default: 0 },
-  HorizontalContentAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' }, VerticalContentAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' },
-  IsEnabled: { type: null as unknown as PropType<unknown>, default: true }, IsTabStop: { type: null as unknown as PropType<unknown>, default: false }, Visibility: { type: null as unknown as PropType<unknown>, default: 'Visible' },
-  Width: { type: null as unknown as PropType<unknown>, default: '' }, Height: { type: null as unknown as PropType<unknown>, default: '' }, MinWidth: { type: null as unknown as PropType<unknown>, default: '' }, MinHeight: { type: null as unknown as PropType<unknown>, default: '' },
-  MaxWidth: { type: null as unknown as PropType<unknown>, default: '' }, MaxHeight: { type: null as unknown as PropType<unknown>, default: '' }, HorizontalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' }, VerticalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' },
-  Opacity: { type: null as unknown as PropType<unknown>, default: 1 }, IsHitTestVisible: { type: null as unknown as PropType<unknown>, default: true }, AccessKey: { type: null as unknown as PropType<unknown>, default: '' }
+  Header: { type: null as unknown as PropType<unknown>, default: null as unknown }, Content: { type: null as unknown as PropType<unknown>, default: null as unknown }, ContentTemplate: { type: null as unknown as PropType<unknown>, default: null as unknown },
+  Background: { type: null as unknown as PropType<unknown>, default: '{ThemeResource PivotItemBackground}' as unknown }, Foreground: { type: null as unknown as PropType<unknown>, default: '' as unknown },
+  Margin: { type: null as unknown as PropType<unknown>, default: '{ThemeResource PivotItemMargin}' as unknown }, Padding: { type: null as unknown as PropType<unknown>, default: 0 as unknown },
+  HorizontalContentAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' as unknown }, VerticalContentAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' as unknown },
+  IsEnabled: { type: null as unknown as PropType<unknown>, default: true as unknown }, IsTabStop: { type: null as unknown as PropType<unknown>, default: false as unknown }, Visibility: { type: null as unknown as PropType<unknown>, default: 'Visible' as unknown },
+  Width: { type: null as unknown as PropType<unknown>, default: '' as unknown }, Height: { type: null as unknown as PropType<unknown>, default: '' as unknown }, MinWidth: { type: null as unknown as PropType<unknown>, default: '' as unknown }, MinHeight: { type: null as unknown as PropType<unknown>, default: '' as unknown },
+  MaxWidth: { type: null as unknown as PropType<unknown>, default: '' as unknown }, MaxHeight: { type: null as unknown as PropType<unknown>, default: '' as unknown }, HorizontalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' as unknown }, VerticalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' as unknown },
+  Opacity: { type: null as unknown as PropType<unknown>, default: 1 as unknown }, IsHitTestVisible: { type: null as unknown as PropType<unknown>, default: true as unknown }, AccessKey: { type: null as unknown as PropType<unknown>, default: '' as unknown }
 })
 const instance = getCurrentInstance()
 const attrs = useAttrs()

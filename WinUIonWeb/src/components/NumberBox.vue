@@ -100,7 +100,7 @@ const props = withDefaults(defineProps<{
   Maximum: Number.POSITIVE_INFINITY,
   SmallChange: 1,
   LargeChange: 10,
-  Header: '',
+  Header: () => '',
   HeaderTemplate: undefined,
   Description: '',
   PlaceholderText: '',
@@ -140,7 +140,7 @@ const anchorTheme = ref<'light' | 'dark' | ''>('');
 const attrs = useAttrs();
 const instance = getCurrentInstance();
 const slots = useSlots();
-const resources = inject(xamlResourceDictionaryKey, {});
+const resources = inject<Record<string, unknown>>(xamlResourceDictionaryKey, {});
 const desiredInputWidth = ref(64);
 const headerTemplateNodes = computed(() => {
   const visit = (nodes: VNode[]): VNode[] => nodes.flatMap(node => {

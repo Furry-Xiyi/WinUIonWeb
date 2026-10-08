@@ -52,7 +52,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 export const ScrollViewerTemplate = defineComponent({
   name: 'ScrollViewer.Template',
   __scrollViewerTemplate: true,
@@ -590,9 +589,31 @@ function handleViewerPointerLeave() {
 
 // Zoom handling (wheel/pinch)
 function handleWheel(event: WheelEvent) {
+  if (event.defaultPrevented) return
   lastIndicatorType = 'mouse'
   if (!effectiveIsEnabled.value) {
     event.preventDefault()
+    return
+  }
+
+  const horizontalOnly = effectiveHorizontalScrollMode.value !== 'Disabled'
+    && effectiveHorizontalScrollBarVisibility.value !== 'Disabled'
+    && (effectiveVerticalScrollMode.value === 'Disabled' || effectiveVerticalScrollBarVisibility.value === 'Disabled')
+  if (horizontalOnly && !event.ctrlKey && !event.metaKey) {
+    const { deltaX, deltaY } = normalizeWheelDelta(event, true)
+    const delta = deltaX || deltaY
+    if (!delta) return
+    // ScrollContentPresenter routes mouse wheel input to its enabled axis.
+    // Keep the pending wheel target so consecutive ticks retain their distance.
+    if (wheelScrollAnimationFrame.value === undefined) cancelPendingAnimatedScrollForDirectInput()
+    if (requestScrollByOffset(delta, 0)) {
+      beginDirectManipulation()
+      event.preventDefault()
+      event.stopPropagation()
+    } else if (!effectiveIsHorizontalScrollChainingEnabled.value) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
     return
   }
   cancelPendingAnimatedScrollForDirectInput()
@@ -630,7 +651,7 @@ function handleWheel(event: WheelEvent) {
   }
 }
 
-function normalizeWheelDelta(event: WheelEvent) {
+function normalizeWheelDelta(event: WheelEvent, horizontalFallback = false) {
   let deltaX = event.deltaX
   let deltaY = event.deltaY
 
@@ -639,7 +660,7 @@ function normalizeWheelDelta(event: WheelEvent) {
     deltaY *= 16
   } else if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE && scrollViewerRef.value) {
     deltaX *= scrollViewerRef.value.clientWidth
-    deltaY *= scrollViewerRef.value.clientHeight
+    deltaY *= horizontalFallback ? scrollViewerRef.value.clientWidth : scrollViewerRef.value.clientHeight
   }
 
   return { deltaX, deltaY }
@@ -695,6 +716,8 @@ function startSmoothWheelScroll() {
   if (!scrollViewerRef.value) return
   isWheelScrolling.value = true
   if (wheelScrollAnimationFrame.value !== undefined) return
+  wheelScrollExpectedLeft.value = scrollViewerRef.value.scrollLeft
+  wheelScrollExpectedTop.value = scrollViewerRef.value.scrollTop
   wheelScrollAnimationFrame.value = requestAnimationFrame(runSmoothWheelScroll)
 }
 
@@ -707,8 +730,9 @@ function runSmoothWheelScroll() {
 
   const deltaLeft = wheelScrollTargetLeft.value - container.scrollLeft
   const deltaTop = wheelScrollTargetTop.value - container.scrollTop
-  const doneLeft = Math.abs(deltaLeft) < 0.5
-  const doneTop = Math.abs(deltaTop) < 0.5
+  // Browsers can round offsets to whole pixels; finish before easing stalls.
+  const doneLeft = Math.abs(deltaLeft) <= 1
+  const doneTop = Math.abs(deltaTop) <= 1
 
   if (doneLeft && doneTop) {
     container.scrollLeft = wheelScrollTargetLeft.value

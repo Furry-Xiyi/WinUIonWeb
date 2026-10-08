@@ -54,12 +54,22 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, ref, useSlots } from 'vue'
-import ExpanderBase from './ExpanderBase.vue'
+import { computed, defineComponent, Fragment, getCurrentInstance, h, ref, useSlots, type VNode } from 'vue'
+import ExpanderBaseControl from './ExpanderBase.vue'
 import { getExpanderProperty, type ExpanderPropertyName } from './ExpanderProperties'
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue } from './xamlRuntime'
 
 defineOptions({ inheritAttrs: false })
+// The JavaScript SFC exposes these named slots without a TypeScript declaration.
+const ExpanderBase = ExpanderBaseControl as unknown as {
+  new(): Omit<InstanceType<typeof ExpanderBaseControl>, '$slots'> & { $slots: {
+    Header?: () => VNode[]
+    Description?: () => VNode[]
+    HeaderIcon?: () => VNode[]
+    HeaderControls?: () => VNode[]
+    default?: () => VNode[]
+  } }
+}
 defineEmits(['update:IsExpanded', 'Expanding', 'Collapsed'])
 const instance = getCurrentInstance()
 const expanderBase = ref<{ IsExpanded: boolean } | null>(null)

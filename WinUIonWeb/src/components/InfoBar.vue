@@ -44,7 +44,7 @@ export default { ActionButton: InfoBarActionButton, Content: InfoBarContent, Con
 </script>
 
 <script setup lang="ts">
-import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch, type VNode } from 'vue'
+import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch, type CSSProperties, type VNode } from 'vue'
 import Border from './Border.vue'
 import ButtonControl from './Button.vue'
 import ColumnDefinition from './ColumnDefinition.vue'
@@ -193,7 +193,9 @@ const effectiveIcon = computed(() => {
 })
 const iconKind = computed(() => (propertyNodes.value.IconSource[0]?.type as { __iconSourceKind?: string })?.__iconSourceKind)
 const IconOutlet = defineComponent({ name: 'InfoBarIconPresenter', setup() { return () => {
-  const source = effectiveIcon.value as Record<string, unknown> | VNode | null
+  const source = effectiveIcon.value as (Record<string, unknown> & {
+    FontFamily?: string; FontSize?: string | number
+  }) | VNode | null
   if (!source) return null
   if (isVNode(source)) return source
   if (source.Glyph !== undefined || iconKind.value === 'FontIcon') return h(FontIcon, { ...source, FontFamily: source.FontFamily || 'var(--SymbolThemeFontFamily)', FontSize: source.FontSize ?? 20 })
@@ -318,8 +320,8 @@ const severityClass = computed(() => `win-infobar-${String(Severity.value).toLow
 const themeClass = computed(() => ['Light', 'Dark'].includes(String(RequestedTheme.value)) ? `theme-${String(RequestedTheme.value).toLowerCase()}` : '')
 const rootAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([key]) => !['class', 'style', 'CloseButtonClick', 'Closing', 'Closed', 'Opened', 'AutomationProperties.Name'].includes(key))))
 const rootStyle = computed(() => {
-  const style: Record<string, unknown> = { justifySelf: alignment(resolve(props.HorizontalAlignment), 'horizontal'), alignSelf: alignment(resolve(props.VerticalAlignment), 'vertical'), margin: xamlThickness(resolve(props.Margin)) }
-  for (const name of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) if (resolve(props[name]) !== '') style[name[0].toLowerCase() + name.slice(1)] = cssLength(resolve(props[name]))
+  const style: CSSProperties = { justifySelf: alignment(resolve(props.HorizontalAlignment), 'horizontal'), alignSelf: alignment(resolve(props.VerticalAlignment), 'vertical'), margin: xamlThickness(resolve(props.Margin)) }
+  for (const name of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) if (resolve(props[name]) !== '') style[(name[0].toLowerCase() + name.slice(1)) as 'width' | 'height' | 'minWidth' | 'minHeight' | 'maxWidth' | 'maxHeight'] = cssLength(resolve(props[name]))
   if (!IsOpen.value || resolve(props.Visibility) === 'Collapsed') style.display = 'none'
   if (resolve(props.Visibility) === 'Hidden') style.visibility = 'hidden'
   return [attrs.style, style]

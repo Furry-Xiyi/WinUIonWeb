@@ -14,7 +14,7 @@
       :class="[themeClass, `tail-${tailSide}`, `hero-${effectiveHeroPlacement.toLowerCase()}`, { 'teaching-tip-container': isVisible, 'is-light-dismiss': IsLightDismissEnabled }]"
       :style="containerStyle"
       role="dialog"
-      :aria-label="automationName || Title || undefined"
+      :aria-label="automationName || String(Title || '') || undefined"
       :aria-modal="IsLightDismissEnabled || undefined"
       :aria-hidden="!isVisible || undefined"
       :inert="!isVisible"
@@ -208,7 +208,7 @@ const Subtitle = dependencyProperty('Subtitle')
 const TeachingTipTitleValue = Title
 const TeachingTipSubtitleValue = Subtitle
 const AlternateCloseButtonLabel = computed(() => t('control.teachingtip.close'))
-const automationName = computed(() => resolve(attrs['AutomationProperties.Name']))
+const automationName = computed(() => String(resolve(attrs['AutomationProperties.Name']) ?? ''))
 const themeClass = computed(() => `win-theme-scope theme-${theme.value}`)
 const propertyNodes = computed(() => {
   const result: Record<TeachingTipPropertyName, VNode[]> = { heroContent: [], content: [], iconSource: [], actionButtonContent: [], closeButtonContent: [] }
@@ -264,18 +264,19 @@ const TipCornerRadius = computed(() => propertyValue('CornerRadius'))
 const hasVisibleTail = computed(() => propertyValue('TailVisibility') !== 'Collapsed' && (Boolean(targetElement()) || propertyValue('TailVisibility') === 'Visible'))
 const tailSide = computed(() => hasVisibleTail.value ? teachingTipTailSide(actualPlacement.value) : 'none')
 const tailViewBox = computed(() => tailSide.value === 'left' || tailSide.value === 'right' ? '0 0 10 20' : '0 0 20 10')
-const tailPoints = computed(() => ({ top: '0,10 10,0 20,10', bottom: '0,0 10,10 20,0', left: '10,0 0,10 10,20', right: '0,0 10,10 0,20' }[tailSide.value] || ''))
-const containerStyle = computed(() => ({
+const tailPoints = computed(() => ({ top: '0,10 10,0 20,10', bottom: '0,0 10,10 20,0', left: '10,0 0,10 10,20', right: '0,0 10,10 0,20', none: '' }[tailSide.value]))
+type TipPaint = import('vue').CSSProperties[`--${string}`]
+const containerStyle = computed<import('vue').CSSProperties>(() => ({
   display: isVisible.value ? undefined : 'none',
-  left: `${position.value.left}px`, top: `${position.value.top}px`, visibility: positioned.value ? 'visible' : 'hidden',
+  left: `${position.value.left}px`, top: `${position.value.top}px`, visibility: positioned.value ? 'visible' as const : 'hidden' as const,
   '--teaching-tip-width': `${sizeLimit.value.width}px`, '--teaching-tip-height': `${sizeLimit.value.height}px`,
   '--teaching-tip-tail-x': `${position.value.tailX}px`, '--teaching-tip-tail-y': `${position.value.tailY}px`,
-  '--teaching-tip-background': IsLightDismissEnabled.value ? 'var(--TeachingTipTransientBackground, var(--AcrylicInAppFillColorDefaultBrush))' : propertyValue('Background'),
-  '--teaching-tip-foreground': propertyValue('Foreground'), '--teaching-tip-border': propertyValue('BorderBrush'),
-  '--teaching-tip-radius': typeof propertyValue('CornerRadius') === 'number' ? `${propertyValue('CornerRadius')}px` : propertyValue('CornerRadius'),
+  '--teaching-tip-background': IsLightDismissEnabled.value ? 'var(--TeachingTipTransientBackground, var(--AcrylicInAppFillColorDefaultBrush))' : propertyValue('Background') as TipPaint,
+  '--teaching-tip-foreground': propertyValue('Foreground') as TipPaint, '--teaching-tip-border': propertyValue('BorderBrush') as TipPaint,
+  '--teaching-tip-radius': typeof propertyValue('CornerRadius') === 'number' ? `${propertyValue('CornerRadius')}px` : propertyValue('CornerRadius') as TipPaint,
   '--teaching-tip-border-width': `${Number(propertyValue('BorderThickness')) || 0}px`
 }))
-const lightDismissStyle = computed(() => ({
+const lightDismissStyle = computed<import('vue').CSSProperties>(() => ({
   left: `${rootBounds.value.left}px`, top: `${rootBounds.value.top}px`,
   width: `${rootBounds.value.width}px`, height: `${rootBounds.value.height}px`,
   visibility: positioned.value ? 'visible' : 'hidden'

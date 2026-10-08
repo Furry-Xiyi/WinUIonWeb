@@ -101,7 +101,8 @@
 <script setup>
 import { computed, inject, provide, shallowReactive } from 'vue'
 import Button from '../../components/Button.vue'
-import ComboBox, { XamlString } from '../../components/ComboBox.vue'
+import ComboBox from '../../components/ComboBox.vue'
+import { XamlString } from '../../components/inlineControlProperties'
 import ContentDialog from '../../components/ContentDialog.vue'
 import ControlExample from '../../components/ControlExample.vue'
 import FontIcon from '../../components/FontIcon.vue'

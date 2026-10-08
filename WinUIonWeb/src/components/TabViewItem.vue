@@ -4,7 +4,7 @@ export default { ...tabViewItemProperties }
 </script>
 
 <script setup lang="ts">
-import { cloneVNode, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch, type PropType } from 'vue'
+import { cloneVNode, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch, type PropType, type VNode } from 'vue'
 import IconSourceElement from './IconSourceElement.vue'
 import { TabViewTemplateToolTip } from './tabViewToolTip'
 import { getToolTipServiceProperty, ToolTipServiceToolTip } from './ToolTipServiceProperties'
@@ -21,18 +21,18 @@ import './tabViewStyles.css'
 
 defineOptions({ name: 'TabViewItem', inheritAttrs: false })
 const props = defineProps({
-  Header: { type: null as unknown as PropType<unknown>, default: null }, HeaderTemplate: { type: null as unknown as PropType<unknown>, default: null },
-  IconSource: { type: null as unknown as PropType<unknown>, default: null }, Content: { type: null as unknown as PropType<unknown>, default: null }, ContentTemplate: { type: null as unknown as PropType<unknown>, default: null },
-  IsClosable: { type: null as unknown as PropType<unknown>, default: true }, IsEnabled: { type: null as unknown as PropType<unknown>, default: true }, IsSelected: { type: null as unknown as PropType<unknown>, default: false },
-  IsTabStop: { type: null as unknown as PropType<unknown>, default: true }, Visibility: { type: null as unknown as PropType<unknown>, default: 'Visible' },
-  Background: { type: null as unknown as PropType<unknown>, default: '' }, Foreground: { type: null as unknown as PropType<unknown>, default: '' }, BorderBrush: { type: null as unknown as PropType<unknown>, default: '' },
-  BorderThickness: { type: null as unknown as PropType<unknown>, default: 1 }, CornerRadius: { type: null as unknown as PropType<unknown>, default: '{ThemeResource OverlayCornerRadius}' },
-  Width: { type: null as unknown as PropType<unknown>, default: '' }, Height: { type: null as unknown as PropType<unknown>, default: '' }, MinWidth: { type: null as unknown as PropType<unknown>, default: '' }, MaxWidth: { type: null as unknown as PropType<unknown>, default: '' },
-  MinHeight: { type: null as unknown as PropType<unknown>, default: 32 }, MaxHeight: { type: null as unknown as PropType<unknown>, default: '' }, Margin: { type: null as unknown as PropType<unknown>, default: 0 },
-  Padding: { type: null as unknown as PropType<unknown>, default: '' }, HorizontalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' }, VerticalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' },
-  HorizontalContentAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' }, VerticalContentAlignment: { type: null as unknown as PropType<unknown>, default: 'Center' },
-  FontSize: { type: null as unknown as PropType<unknown>, default: 12 }, FontWeight: { type: null as unknown as PropType<unknown>, default: 'Normal' }, Opacity: { type: null as unknown as PropType<unknown>, default: 1 },
-  ContextFlyout: { type: null as unknown as PropType<unknown>, default: null }, AccessKey: { type: null as unknown as PropType<unknown>, default: '' }, DataContext: { type: null as unknown as PropType<unknown>, default: null }
+  Header: { type: null as unknown as PropType<unknown>, default: null as unknown }, HeaderTemplate: { type: null as unknown as PropType<unknown>, default: null as unknown },
+  IconSource: { type: null as unknown as PropType<unknown>, default: null as unknown }, Content: { type: null as unknown as PropType<unknown>, default: null as unknown }, ContentTemplate: { type: null as unknown as PropType<unknown>, default: null as unknown },
+  IsClosable: { type: null as unknown as PropType<unknown>, default: true as unknown }, IsEnabled: { type: null as unknown as PropType<unknown>, default: true as unknown }, IsSelected: { type: null as unknown as PropType<unknown>, default: false as unknown },
+  IsTabStop: { type: null as unknown as PropType<unknown>, default: true as unknown }, Visibility: { type: null as unknown as PropType<unknown>, default: 'Visible' as unknown },
+  Background: { type: null as unknown as PropType<unknown>, default: '' as unknown }, Foreground: { type: null as unknown as PropType<unknown>, default: '' as unknown }, BorderBrush: { type: null as unknown as PropType<unknown>, default: '' as unknown },
+  BorderThickness: { type: null as unknown as PropType<unknown>, default: 1 as unknown }, CornerRadius: { type: null as unknown as PropType<unknown>, default: '{ThemeResource OverlayCornerRadius}' as unknown },
+  Width: { type: null as unknown as PropType<unknown>, default: '' as unknown }, Height: { type: null as unknown as PropType<unknown>, default: '' as unknown }, MinWidth: { type: null as unknown as PropType<unknown>, default: '' as unknown }, MaxWidth: { type: null as unknown as PropType<unknown>, default: '' as unknown },
+  MinHeight: { type: null as unknown as PropType<unknown>, default: 32 as unknown }, MaxHeight: { type: null as unknown as PropType<unknown>, default: '' as unknown }, Margin: { type: null as unknown as PropType<unknown>, default: 0 as unknown },
+  Padding: { type: null as unknown as PropType<unknown>, default: '' as unknown }, HorizontalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' as unknown }, VerticalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' as unknown },
+  HorizontalContentAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' as unknown }, VerticalContentAlignment: { type: null as unknown as PropType<unknown>, default: 'Center' as unknown },
+  FontSize: { type: null as unknown as PropType<unknown>, default: 12 as unknown }, FontWeight: { type: null as unknown as PropType<unknown>, default: 'Normal' as unknown }, Opacity: { type: null as unknown as PropType<unknown>, default: 1 as unknown },
+  ContextFlyout: { type: null as unknown as PropType<unknown>, default: null as unknown }, AccessKey: { type: null as unknown as PropType<unknown>, default: '' as unknown }, DataContext: { type: null as unknown as PropType<unknown>, default: null as unknown }
 })
 const emit = defineEmits(['CloseRequested', 'update:IsSelected'])
 const instance = getCurrentInstance()
@@ -80,7 +80,7 @@ const ToolTipDeclarationOutlet = defineComponent({ setup: () => () => {
 } })
 const HeaderOutlet = defineComponent({ setup: () => () => renderTabViewPresenter(property('Header'), 'Header' in overrides ? [] : children('Header'), property('HeaderTemplate'), children('HeaderTemplate'), instance) })
 const iconSize = computed(() => Number(value('{ThemeResource TabViewItemHeaderIconSize}')) || 16)
-const IconOutlet = defineComponent({ setup: () => () => h(Viewbox, { MaxWidth: iconSize.value, MaxHeight: iconSize.value, class: 'win-tab-view-icon-viewbox' }, () => h(IconSourceElement, { ref: (source: unknown) => { realizedIconSource.value = source as typeof realizedIconSource.value }, IconSource: property('IconSource') }, () => normalizeXamlNodes(children('IconSource'), instance))) })
+const IconOutlet = defineComponent({ setup: () => () => h(Viewbox, { MaxWidth: iconSize.value, MaxHeight: iconSize.value, class: 'win-tab-view-icon-viewbox' }, () => h(IconSourceElement, { ref: (source: unknown) => { realizedIconSource.value = source as typeof realizedIconSource.value }, IconSource: property('IconSource') as string | Record<string, unknown> | undefined }, () => normalizeXamlNodes(children('IconSource'), instance))) })
 const ContextFlyoutOutlet = defineComponent({ setup: () => () => { const declaration = children('ContextFlyout')[0] ?? (isVNode(property('ContextFlyout')) ? property('ContextFlyout') as VNode : null); return declaration ? h(Fragment, normalizeXamlNodes([cloneVNode(declaration, { ref: (flyout: unknown) => { contextFlyout.value = flyout as typeof contextFlyout.value } })], instance)) : null } })
 const rootAttrs = computed(() => {
   const result = tabViewRootAttributes(attrs, instance)
@@ -90,9 +90,9 @@ const rootAttrs = computed(() => {
   }
   return result
 })
-const rootStyle = computed(() => ({ ...frameworkLayoutStyle({ ...Object.fromEntries(Object.keys(props).map(name => [name, property(name as keyof typeof props)])), Padding: '', Background: '', BorderBrush: '', BorderThickness: '', CornerRadius: '' }, instance),
+const rootStyle = computed<import('vue').CSSProperties>(() => ({ ...frameworkLayoutStyle({ ...Object.fromEntries(Object.keys(props).map(name => [name, property(name as keyof typeof props)])), Padding: '', Background: '', BorderBrush: '', BorderThickness: '', CornerRadius: '' }, instance),
   width: property('Width') !== '' ? `${Number(property('Width'))}px` : owner?.Width(key()) ? `${owner.Width(key())}px` : undefined,
-  color: property('Foreground') ? resolveBrushStyle(property('Foreground'), instance).background : undefined,
+  color: property('Foreground') ? resolveBrushStyle(property('Foreground'), instance).background as import('vue').CSSProperties['color'] : undefined,
   opacity: owner?.Dragging(key()) ? .8 : String(property('Opacity')),
   '--tab-custom-foreground': property('Foreground') ? resolveBrushStyle(property('Foreground'), instance).background : undefined,
   '--tab-custom-background': property('Background') ? resolveBrushStyle(property('Background'), instance).background : undefined,

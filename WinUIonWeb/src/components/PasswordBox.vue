@@ -28,7 +28,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
 const passwordProperty = (name: string) => defineComponent({ name: `PasswordBox.${name}`, __passwordProperty: name, setup: () => () => null });
 export const PasswordBoxHeader = passwordProperty('Header');
 export const PasswordBoxHeaderTemplate = passwordProperty('HeaderTemplate');
@@ -80,7 +79,7 @@ const HeaderOutlet = defineComponent({ setup: () => () => h(Fragment, headerNode
 const HeaderTemplateOutlet = defineComponent({ setup: () => () => h(Fragment, headerTemplateNodes.value) });
 const DescriptionOutlet = defineComponent({ setup: () => () => h(Fragment, descriptionNodes.value) });
 const emit = defineEmits(['update:Password', 'PasswordChanging', 'PasswordChanged', 'GotFocus', 'LostFocus', 'Paste', 'KeyDown', 'ContextMenuOpening']);
-const dispatch = (name: string, args: unknown = { Handled: false }) => {
+const dispatch = (name: 'PasswordChanging' | 'PasswordChanged' | 'GotFocus' | 'LostFocus' | 'Paste' | 'KeyDown' | 'ContextMenuOpening', args: unknown = { Handled: false }) => {
   const sender = instance?.exposeProxy ?? instance?.exposed ?? instance?.proxy;
   const listener = instance?.vnode.props?.[`on${name}`];
   if (listener) {
@@ -229,7 +228,7 @@ onBeforeUnmount(() => { menuRequest++; contextMenu.value?.Hide?.(); window.remov
 defineExpose({
   get Password() { return password.value; }, set Password(value: string) { applyPassword(String(value ?? '')); },
   get PasswordRevealMode() { return mode.value; }, set PasswordRevealMode(value: string) { overrides.PasswordRevealMode = value; stopPeek(); },
-  get IsEnabled() { return props.IsEnabled; }, set IsEnabled(value: boolean) { overrides.IsEnabled = value; },
+  get IsEnabled() { return props.IsEnabled as boolean; }, set IsEnabled(value: boolean) { overrides.IsEnabled = value; },
   Focus: () => field.value?.focus({ preventScroll: !!props.PreventKeyboardDisplayOnProgrammaticFocus }), SelectAll: () => field.value?.select(),
   PasteFromClipboard: () => { contextSelection.value = { start: field.value?.selectionStart ?? 0, end: field.value?.selectionEnd ?? 0 }; return pasteFromClipboard(); },
   get ContextFlyout() { return props.ContextFlyout !== undefined ? props.ContextFlyout : customContext.value ?? contextMenu.value; },

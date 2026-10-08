@@ -168,7 +168,7 @@ export const createSelectorBarItem = (initialNode: VNode, owner: ComponentIntern
       } else {
         const previous = propertyValues[name] as Record<PropertyKey, unknown> | undefined
         const previousNode = previous?.[elementNodeKey] as VNode | undefined
-        if (previousNode && previousNode.type === elementNode.type && previousNode.key === elementNode.key) {
+        if (previous && previousNode && previousNode.type === elementNode.type && previousNode.key === elementNode.key) {
           (previous.UpdateElementNode as (next: VNode) => void)(elementNode)
         } else propertyValues[name] = createSelectorBarElement(elementNode, owner)
       }

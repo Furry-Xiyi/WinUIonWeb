@@ -32,14 +32,14 @@ import { xamlThemeKey } from './brushCore'
 
 defineOptions({ name: 'ToolTip', inheritAttrs: false })
 const props = defineProps({
-  Content: { type: [String, Number, Object], default: '' },
+  Content: { type: [String, Number, Object], default: '' as unknown },
   ContentTemplate: { type: [String, Object, Function], default: null },
   ContentTransitions: { type: [String, Object, Array], default: null },
   IsOpen: { type: [Boolean, String], default: false },
   IsEnabled: { type: [Boolean, String], default: true },
   Placement: { type: String, default: 'Top' },
-  PlacementTarget: { type: [Object, String], default: null },
-  PlacementRect: { type: [Object, String], default: null },
+  PlacementTarget: { type: [Object, String] as import('vue').PropType<object | string | null>, default: null },
+  PlacementRect: { type: [Object, String] as import('vue').PropType<object | string | null>, default: null },
   HorizontalOffset: { type: [String, Number], default: undefined },
   VerticalOffset: { type: [String, Number], default: undefined },
   Background: { type: [String, Object], default: '{ThemeResource ToolTipBackgroundBrush}' },

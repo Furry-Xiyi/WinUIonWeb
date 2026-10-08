@@ -1,5 +1,7 @@
 export default {
   'catalog.group.windowing': '窗口',
+  'catalog.item.createmultiplewindows.title': '多个窗口',
+  'catalog.item.createmultiplewindows.subtitle': '创建单线程顶层 XAML 窗口的示例。',
   'catalog.item.titlebar.title': '标题栏',
   'catalog.item.titlebar.subtitle': '展示如何使用默认标题栏控件的示例。',
   "catalog.home.title": "WinUI on Web 图库",

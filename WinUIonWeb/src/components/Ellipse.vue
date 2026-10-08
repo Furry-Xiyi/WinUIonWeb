@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, onBeforeUnmount, onMounted, provide, reactive, ref, useAttrs, watch } from 'vue'
+import { computed, getCurrentInstance, onBeforeUnmount, onMounted, provide, reactive, ref, useAttrs, watch, type CSSProperties } from 'vue'
 import Image from './Image.vue'
 import { alignment, cssLength, xamlThickness } from './layout'
 import { resolveXamlResourceObject, resolveXamlValue, xamlScopeKey } from './xamlRuntime'
@@ -113,7 +113,7 @@ const ellipseStyle = computed(() => {
   const strokeColor = stroke.value && typeof stroke.value === 'object' && 'Color' in stroke.value
     ? resolveXamlValue(stroke.value.Color, instance)
     : stroke.value
-  const style: Record<string, string | undefined> = {
+  const style: CSSProperties = {
     width: cssLength(resolveXamlValue(props.Width, instance)) || undefined,
     height: cssLength(resolveXamlValue(props.Height, instance)) || undefined,
     minWidth: cssLength(resolveXamlValue(props.MinWidth, instance)) || undefined,

@@ -18,7 +18,7 @@ export const useBrushProperty = (property: string, value: () => unknown, nodes: 
   let disposers: (() => void)[] = []
   const dispose = () => {
     disposers.forEach(stop => stop()); disposers = []
-    if (publishedName && names?.[publishedName] === brush) delete names[publishedName]
+    if (publishedName && names && names[publishedName] === brush) delete names[publishedName]
     publishedName = undefined
   }
   onBeforeUnmount(dispose)
@@ -43,7 +43,7 @@ export const useBrushProperty = (property: string, value: () => unknown, nodes: 
       brush = type.__createXamlResource?.(name => resolveXamlValue(source.value?.props?.[name], instance), { Dispose: stop => disposers.push(stop), Node: () => source.value!, instance })
     } else if (!xamlResourceNodesEqual(source.value, node)) source.value = node
     const name = node.props?.['x:Name'] ?? node.props?.['data-xaml-ref']
-    if (publishedName && publishedName !== name && names?.[publishedName] === brush) { delete names[publishedName]; publishedName = undefined }
+    if (publishedName && publishedName !== name && names && names[publishedName] === brush) { delete names[publishedName]; publishedName = undefined }
     if (typeof name === 'string' && names && names[name] !== brush) {
       names[name] = brush
       publishedName = name

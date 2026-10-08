@@ -11,8 +11,8 @@ const instance = getCurrentInstance();
 const attrs = useAttrs();
 const element = ref<HTMLElement | null>(null);
 const resolve = (name: keyof typeof props) => resolveXamlValue(props[name],instance);
-const forwardedAttrs = computed(() => ({ ...Object.fromEntries(Object.entries(attrs).filter(([name]) => name !== 'style' && name !== 'AutomationProperties.Name')), 'aria-label':resolveXamlValue(attrs['AutomationProperties.Name'],instance) }));
-const style = computed(() => ({ margin:xamlThickness(resolve('Margin')), padding:xamlThickness(resolve('Padding')), width:cssLength(resolve('Width')), height:cssLength(resolve('Height')), minWidth:cssLength(resolve('MinWidth')), minHeight:cssLength(resolve('MinHeight')), maxWidth:cssLength(resolve('MaxWidth')), maxHeight:cssLength(resolve('MaxHeight')), justifySelf:alignment(resolve('HorizontalAlignment'),'horizontal'), alignSelf:alignment(resolve('VerticalAlignment'),'vertical'), opacity:resolve('Opacity'), ...(resolve('Visibility') === 'Collapsed' ? { display:'none' } : {}) }));
+const forwardedAttrs = computed(() => ({ ...Object.fromEntries(Object.entries(attrs).filter(([name]) => name !== 'style' && name !== 'AutomationProperties.Name')), 'aria-label': resolveXamlValue(attrs['AutomationProperties.Name'],instance) as string | undefined }));
+const style = computed<import('vue').CSSProperties>(() => ({ margin:xamlThickness(resolve('Margin')), padding:xamlThickness(resolve('Padding')), width:cssLength(resolve('Width')), height:cssLength(resolve('Height')), minWidth:cssLength(resolve('MinWidth')), minHeight:cssLength(resolve('MinHeight')), maxWidth:cssLength(resolve('MaxWidth')), maxHeight:cssLength(resolve('MaxHeight')), justifySelf:alignment(resolve('HorizontalAlignment'),'horizontal'), alignSelf:alignment(resolve('VerticalAlignment'),'vertical'), opacity:resolve('Opacity') as import('vue').CSSProperties['opacity'], ...(resolve('Visibility') === 'Collapsed' ? { display:'none' } : {}) }));
 defineExpose({ Element: element, get OverflowContentTarget() { return resolveXamlValue(props.OverflowContentTarget,instance); } });
 </script>
 <style>

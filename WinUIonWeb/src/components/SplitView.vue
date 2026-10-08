@@ -28,7 +28,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Fragment, h } from 'vue'
 const splitViewProperty = (name: 'pane' | 'content') => defineComponent({
   name: `SplitView.${name[0].toUpperCase()}${name.slice(1)}`,
   __splitViewProperty: name,

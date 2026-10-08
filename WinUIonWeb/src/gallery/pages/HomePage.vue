@@ -6,50 +6,60 @@
         <RowDefinition Height="Auto" />
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
-      <Grid ref="headerRef" class="home-page-header">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid class="home-header-image-mask" Grid.RowSpan="3" Height="400">
-          <Grid class="home-header-image-grid" Height="500" Margin="0,-100,0,0">
-            <Image class="home-header-image" Source="{x:Bind HeaderImage}" Stretch="UniformToFill"
-                   Width="{x:Bind HeaderImageWidth, Mode=OneWay}" Height="500"
-                   Opacity="{x:Bind HeaderImageOpacity, Mode=OneWay}" />
+      <UserControl class="home-page-header">
+        <Grid class="home-header-root" Margin="0">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <Grid ref="headerRef" class="home-header-layout">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid class="home-header-image-mask" Grid.RowSpan="3" Height="400">
+              <Grid class="home-header-image-grid" Height="500" Margin="0,-100,0,0">
+                <Image class="home-header-image" Source="{x:Bind HeaderImage}" Stretch="UniformToFill"
+                       Width="{x:Bind HeaderImageWidth, Mode=OneWay}" Height="500"
+                       Opacity="{x:Bind HeaderImageOpacity, Mode=OneWay}" />
+              </Grid>
+            </Grid>
+            <TextBlock AutomationProperties.AutomationId="__ClickableAreaTextBlock" />
+            <StackPanel class="home-header-copy" Margin="36,48,0,0" VerticalAlignment="Center">
+              <TextBlock Text="{x:Bind VersionText}" FontSize="18" Foreground="{x:Bind HeaderForeground, Mode=OneWay}" />
+              <TextBlock class="home-header-title" Text="{x:Bind TitleText}" FontSize="40" FontWeight="SemiBold"
+                         Foreground="{x:Bind HeaderForeground, Mode=OneWay}"
+                         TextWrapping="Wrap" AutomationProperties.HeadingLevel="Level1" />
+            </StackPanel>
+            <HorizontalScrollContainer Grid.Row="2" Margin="0,56,0,0">
+              <HorizontalScrollContainer.Source>
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <HomeHeaderTile Title="{x:Bind HeaderTiles[0].Title}" Description="{x:Bind HeaderTiles[0].Description}" Link="{x:Bind HeaderTiles[0].Link}">
+                    <HomeHeaderTile.Source><Image Width="36" Height="36" Source="{x:Bind HeaderTiles[0].ImagePath}" /></HomeHeaderTile.Source>
+                  </HomeHeaderTile>
+                  <HomeHeaderTile Title="{x:Bind HeaderTiles[1].Title}" Description="{x:Bind HeaderTiles[1].Description}" Link="{x:Bind HeaderTiles[1].Link}">
+                    <HomeHeaderTile.Source><Image Width="36" Height="36" Source="{x:Bind HeaderTiles[1].ImagePath}" /></HomeHeaderTile.Source>
+                  </HomeHeaderTile>
+                  <HomeHeaderTile Title="{x:Bind HeaderTiles[2].Title}" Description="{x:Bind HeaderTiles[2].Description}" Link="{x:Bind HeaderTiles[2].Link}">
+                    <HomeHeaderTile.Source><Viewbox><PathIcon Data="{x:Bind GitHubIconPath}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" /></Viewbox></HomeHeaderTile.Source>
+                  </HomeHeaderTile>
+                  <HomeHeaderTile Title="{x:Bind HeaderTiles[3].Title}" Description="{x:Bind HeaderTiles[3].Description}" Link="{x:Bind HeaderTiles[3].Link}">
+                    <HomeHeaderTile.Source><Image Width="36" Height="36" Source="{x:Bind HeaderTiles[3].ImagePath}" /></HomeHeaderTile.Source>
+                  </HomeHeaderTile>
+                  <HomeHeaderTile Title="{x:Bind HeaderTiles[4].Title}" Description="{x:Bind HeaderTiles[4].Description}" Link="{x:Bind HeaderTiles[4].Link}">
+                    <HomeHeaderTile.Source><FontIcon Margin="0,8,0,0" FontSize="24" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Glyph="&#xE943;" /></HomeHeaderTile.Source>
+                  </HomeHeaderTile>
+                  <HomeHeaderTile Title="{x:Bind HeaderTiles[5].Title}" Description="{x:Bind HeaderTiles[5].Description}" Link="{x:Bind HeaderTiles[5].Link}">
+                    <HomeHeaderTile.Source><Image Width="36" Height="36" Source="{x:Bind HeaderTiles[5].ImagePath, Mode=OneWay}" /></HomeHeaderTile.Source>
+                  </HomeHeaderTile>
+                </StackPanel>
+              </HorizontalScrollContainer.Source>
+            </HorizontalScrollContainer>
           </Grid>
         </Grid>
-        <StackPanel class="home-header-copy" Margin="36,48,0,0" VerticalAlignment="Center">
-          <TextBlock Text="{x:Bind VersionText}" FontSize="18" Foreground="{x:Bind HeaderForeground, Mode=OneWay}" />
-          <TextBlock class="home-header-title" Text="{x:Bind TitleText}" FontSize="40" FontWeight="SemiBold"
-                     Foreground="{x:Bind HeaderForeground, Mode=OneWay}"
-                     TextWrapping="Wrap" AutomationProperties.HeadingLevel="Level1" />
-        </StackPanel>
-        <HorizontalScrollContainer Grid.Row="2" Margin="0,56,0,0">
-          <HorizontalScrollContainer.Source>
-            <StackPanel Orientation="Horizontal" Spacing="12">
-              <HomeHeaderTile Title="{x:Bind HeaderTiles[0].Title}" Description="{x:Bind HeaderTiles[0].Description}" Link="{x:Bind HeaderTiles[0].Link}">
-                <HomeHeaderTile.Source><Image Width="36" Height="36" Source="{x:Bind HeaderTiles[0].ImagePath}" /></HomeHeaderTile.Source>
-              </HomeHeaderTile>
-              <HomeHeaderTile Title="{x:Bind HeaderTiles[1].Title}" Description="{x:Bind HeaderTiles[1].Description}" Link="{x:Bind HeaderTiles[1].Link}">
-                <HomeHeaderTile.Source><Image Width="36" Height="36" Source="{x:Bind HeaderTiles[1].ImagePath}" /></HomeHeaderTile.Source>
-              </HomeHeaderTile>
-              <HomeHeaderTile Title="{x:Bind HeaderTiles[2].Title}" Description="{x:Bind HeaderTiles[2].Description}" Link="{x:Bind HeaderTiles[2].Link}">
-                <HomeHeaderTile.Source><Viewbox><PathIcon Data="{x:Bind GitHubIconPath}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" /></Viewbox></HomeHeaderTile.Source>
-              </HomeHeaderTile>
-              <HomeHeaderTile Title="{x:Bind HeaderTiles[3].Title}" Description="{x:Bind HeaderTiles[3].Description}" Link="{x:Bind HeaderTiles[3].Link}">
-                <HomeHeaderTile.Source><Image Width="36" Height="36" Source="{x:Bind HeaderTiles[3].ImagePath}" /></HomeHeaderTile.Source>
-              </HomeHeaderTile>
-              <HomeHeaderTile Title="{x:Bind HeaderTiles[4].Title}" Description="{x:Bind HeaderTiles[4].Description}" Link="{x:Bind HeaderTiles[4].Link}">
-                <HomeHeaderTile.Source><FontIcon Margin="0,8,0,0" FontSize="24" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Glyph="&#xE943;" /></HomeHeaderTile.Source>
-              </HomeHeaderTile>
-              <HomeHeaderTile Title="{x:Bind HeaderTiles[5].Title}" Description="{x:Bind HeaderTiles[5].Description}" Link="{x:Bind HeaderTiles[5].Link}">
-                <HomeHeaderTile.Source><Image Width="36" Height="36" Source="{x:Bind HeaderTiles[5].ImagePath, Mode=OneWay}" /></HomeHeaderTile.Source>
-              </HomeHeaderTile>
-            </StackPanel>
-          </HorizontalScrollContainer.Source>
-        </HorizontalScrollContainer>
-      </Grid>
+      </UserControl>
       <SelectorBar class="home-filter-bar" Grid.Row="1" Margin="36,24,0,16" HorizontalAlignment="Center"
                    Style="{StaticResource TokenViewSelectorBarStyle}" SelectionChanged="OnFilterChanged">
         <SelectorBarItem Icon="Clock" IsSelected="True" Tag="Recent" Text="{x:Bind RecentText}"
@@ -66,6 +76,7 @@
             <HorizontalScrollContainer Margin="-36,0,-36,12" Visibility="{x:Bind RecentVisibility, Mode=OneWay}">
               <HorizontalScrollContainer.Source>
                 <GalleryItemsGrid ItemsSource="{x:Bind RecentlyVisitedSamplesList, Mode=OneWay}" SingleRow="True"
+                                  Padding="0,0,0,10"
                                   AccessibleName="{x:Bind RecentlyVisitedText}" ItemClick="OnItemGridViewItemClick" />
               </HorizontalScrollContainer.Source>
             </HorizontalScrollContainer>
@@ -103,6 +114,7 @@ import ScrollViewer from '../../components/ScrollViewer.vue';
 import HorizontalScrollContainer from '../../components/HorizontalScrollContainer.vue';
 import SwitchPresenter from '../../components/SwitchPresenter.vue';
 import Case from '../../components/Case.vue';
+import UserControl from '../../components/UserControl';
 import HomeHeaderTile from '../components/HomeHeaderTile.vue';
 import GalleryItemsGrid from '../components/GalleryItemsGrid.vue';
 import { useI18n } from '../../components/i18n';
@@ -183,7 +195,7 @@ provide(xamlScopeKey, { HeaderImage, HeaderImageWidth, HeaderImageOpacity, Heade
 <style scoped>
 .gallery-home-scroll { width: 100%; height: 100%; min-width: 0; min-height: 0; }
 .gallery-home-page { width: 100%; min-width: 0; overflow-x: clip; }
-.home-page-header { min-width: 0; overflow: hidden; }
+.home-page-header, .home-header-root, .home-header-layout { min-width: 0; overflow: hidden; }
 .home-header-image-mask { mask-image: linear-gradient(#000 75%, transparent 85%); overflow: hidden; pointer-events: none; }
 .home-header-image-grid { background: linear-gradient(#ced8e4, #d5dbe3); }
 .home-header-image { max-width: 100%; }

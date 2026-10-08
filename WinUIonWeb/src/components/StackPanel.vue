@@ -5,7 +5,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import { brushProperty } from './brushProperties'
 
 const StackPanelResources = defineComponent({

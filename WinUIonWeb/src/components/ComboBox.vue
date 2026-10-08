@@ -181,26 +181,14 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue';
 import { CollectionItemTemplate, CollectionItems, CollectionResources, CollectionItemContainerStyle } from './CollectionProperties';
 import { ComboBoxHeader, ComboBoxHeaderTemplate, ComboBoxDescription } from './ComboBoxProperties';
-
-export const ComboBoxItem = defineComponent({
-  name: 'ComboBoxItem',
-  __xamlComboBoxItem: true,
-  setup() { return () => null; }
-});
+export { ComboBoxItem, XamlString } from './inlineControlProperties';
 
 // XAML's x:String is a structural inline item marker. Registering it as a
 // component lets Vue resolve the official `<x:String>` element without
 // creating a wrapper node; ComboBox.inlineItems reads its text/UID directly
 // from the vnode when materializing the ItemsSource.
-export const XamlString = defineComponent({
-  name: 'x:String',
-  __xamlString: true,
-  setup() { return () => null; }
-});
-
 export default {
   ItemTemplate: CollectionItemTemplate,
   Items: CollectionItems,

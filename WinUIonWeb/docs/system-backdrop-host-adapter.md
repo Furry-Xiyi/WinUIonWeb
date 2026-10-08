@@ -97,6 +97,18 @@ window, and must never open a replacement. Failed or cancelled attachment
 disposes that connection while leaving the existing window available; a
 successful handle owns normal `Close()` behavior.
 
+Same-origin browser handles with the same persisted ID share the current
+window's content root, requested theme and material. After document replacement
+the opener rejoins the new document's context, so its original handle updates
+the recovered content even if the child has cleared `window.opener`. Requests
+made during loading remain available when the new runtime attaches its root;
+outdated queued revisions cannot overwrite newer requests. Each connection
+releases its own subscriptions. The last connection restores the shared
+original content styles still owned by the context and deletes the context;
+disposing one connection leaves another live connection's rendering intact.
+See [multiple window integration](./multiple-window-host-adapter.md) for
+application tracking and reload ownership.
+
 Gallery windows share `src/utils/pwaWindowChrome.ts` with the main application
 and TabView windows. `observePwaWindowChrome(window, contentElement)` follows
 the actual document theme and rendered background layers, including an exact
@@ -240,6 +252,16 @@ materials, and should never apply a second material without releasing the
 previous controller. An unsupported request publishes its real unavailable
 state. Browser surfaces remain transparent; native surfaces use the host's
 actual fallback rendering.
+
+The browser's shared context is not applied to native adapter targets. If
+`AttachWindow` returns a new connection while another connection still owns
+the same native association, the native adapter coordinates content-root,
+theme/material and state synchronization across those connections. Its
+subscription lifetime and material cleanup must preserve controllers that
+still have another owner. An association token alone does not provide this
+synchronization. Native host calls are covered by deterministic adapter
+fixtures; reload synchronization with a real native host requires that host's
+own integration validation.
 
 The Gallery application's existing window uses `connectGalleryWindowBackdrop`
 from `src/utils/galleryWindowBackdrop.ts`. It requests native `Mica/Base` only

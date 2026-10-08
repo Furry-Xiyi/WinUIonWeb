@@ -38,7 +38,7 @@ const MenuBar = defineComponent({
     let nextItemKey = 0;
     const enabledOverride = ref<boolean | undefined>();
     const visibilityOverride = ref<string | undefined>();
-    const enabled = computed(() => enabledOverride.value ?? ![false, 'False', 'false'].includes(resolveXamlValue(props.IsEnabled, instance)));
+    const enabled = computed(() => enabledOverride.value ?? !([false, 'False', 'false'] as unknown[]).includes(resolveXamlValue(props.IsEnabled, instance)));
     const visibility = computed(() => visibilityOverride.value ?? String(resolveXamlValue(props.Visibility, instance)));
     const visible = computed(() => visibility.value !== 'Collapsed');
     let disposed = false;
@@ -158,7 +158,7 @@ const MenuBar = defineComponent({
       const items = source.filter((node: unknown): node is VNode => isVNode(node) && !!(node.type as any)?.__menuBarItem);
       // Preserve each item object when Vue patches collection insertions or removals.
       declarationNodes = items.map((node, index) => keyItem(node, index, props.Items !== undefined));
-      return (itemOverride.value ?? declarationNodes).map((node, index) => materializeXamlVNode(keyItem(node, index, true), undefined, instance));
+      return (itemOverride.value ?? declarationNodes).map((node, index) => materializeXamlVNode(keyItem(node, index, true), undefined, instance)) as VNode[];
     };
     const requireItem = (item: unknown): VNode => {
       if (!isVNode(item) || !(item.type as any)?.__menuBarItem) throw new TypeError('MenuBar.Items accepts MenuBarItem elements.');
@@ -192,7 +192,7 @@ const MenuBar = defineComponent({
     });
     expose({
       get Items() { return publicItems; },
-      set Items(next: unknown[]) { replaceItems(next.map(requireItem)); },
+      set Items(next: unknown) { replaceItems((next as unknown[]).map(requireItem)); },
       Focus: () => { const item = enabledItems()[0]; if (item) focus(item); return !!item; },
       get Element() { return element.value; },
       get IsEnabled() { return enabled.value; },
@@ -223,7 +223,7 @@ const MenuBar = defineComponent({
       ...Object.fromEntries(Object.entries(attrs).filter(([name]) => /^(Grid|Canvas|RelativePanel)\./.test(name)).map(([name, value]) => [name, resolveXamlValue(value, instance)])),
       ref: element,
       class: ['win-menu-bar win-menu-bar-layout-root', ['light', 'dark'].includes(requestedTheme.value) && ['win-theme-scope', `theme-${theme.value}`], attrs.class],
-      style: [frameworkLayoutStyle({ ...attrs, ...props, Visibility: visibility.value }, instance), attrs.style],
+      style: [frameworkLayoutStyle({ ...attrs, ...props, Visibility: visibility.value }, instance), attrs.style as import('vue').StyleValue],
       id: attrs['x:Name'] ?? attrs.id,
       dir: resolveXamlValue(attrs.FlowDirection, instance) === 'RightToLeft' ? 'rtl' : undefined,
       role: 'menubar',

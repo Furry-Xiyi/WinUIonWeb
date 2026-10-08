@@ -28,7 +28,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 const viewProperty = (name: string) => defineComponent({
   name: `SemanticZoom.${name}`, __semanticZoomProperty: name, setup() { return () => null }
 })

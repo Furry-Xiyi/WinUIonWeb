@@ -7,6 +7,7 @@ export interface UICommandMetadata extends UICommand {
   AccessKey?: string
   IconSource?: string | CommandIconSource
   KeyboardAccelerators?: KeyboardAccelerator[]
+  MatchesKeyboardEvent?: (event: KeyboardEvent) => boolean
   addEventListener?: (name: 'CanExecuteChanged' | 'PropertyChanged', handler: (...args: any[]) => void) => void
   removeEventListener?: (name: 'CanExecuteChanged' | 'PropertyChanged', handler: (...args: any[]) => void) => void
 }

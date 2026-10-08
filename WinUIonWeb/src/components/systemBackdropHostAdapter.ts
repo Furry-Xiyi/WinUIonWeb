@@ -34,6 +34,8 @@ export interface SystemBackdropCapabilities {
   SupportedMaterials: readonly SystemBackdropType[]
   SupportedMicaKinds?: readonly ('Base' | 'BaseAlt')[]
   SupportedDesktopAcrylicKinds?: readonly ('Base' | 'Thin')[]
+  /** True only when this host supports real content extension into its caption. */
+  ExtendsContentIntoTitleBar?: boolean
 }
 
 export interface SystemBackdropHostEvent {
@@ -53,6 +55,8 @@ export interface SystemBackdropHostTarget {
   Kind: SystemBackdropTargetKind
   Subscribe?(listener: (event: SystemBackdropHostEvent) => void): () => void
   SetContentElement?(element: HTMLElement): void
+  /** Activate the actual native window; browsers use their real focus API. */
+  Activate?(): Awaitable<void>
   Dispose?(): Awaitable<void>
   Close(): Awaitable<void>
 }
@@ -61,6 +65,8 @@ export interface SystemBackdropWindowOptions {
   title: string
   width?: number
   height?: number
+  /** Native Window.ExtendsContentIntoTitleBar request, never simulated browser chrome. */
+  extendsContentIntoTitleBar?: boolean
   theme?: SystemBackdropTheme
   backdrop?: unknown
   adapter?: SystemBackdropHostAdapter
@@ -101,6 +107,7 @@ export interface SystemBackdropWindowHandle {
   SetTheme(theme: SystemBackdropTheme): Promise<SystemBackdropState>
   SetContentElement(element: HTMLElement): Promise<SystemBackdropState>
   Subscribe(listener: (state: SystemBackdropState) => void): () => void
+  Activate(): Promise<void>
   /** Release the material connection without closing an existing window. */
   Dispose(): Promise<void>
   Close(): Promise<void>
@@ -122,7 +129,51 @@ export function setSystemBackdropHostAdapter(adapter: SystemBackdropHostAdapter 
 export function getSystemBackdropHostAdapter(): SystemBackdropHostAdapter | undefined { return installedAdapter }
 
 let nextWindowId = 0
-const browserCapabilities: SystemBackdropCapabilities = { NativeSystemBackdrop: false, SupportedMaterials: [] }
+const browserWindowTargets = new WeakSet<SystemBackdropHostTarget>()
+interface BackdropStyleOwnership {
+  Content: HTMLElement
+  Background: string
+  Color: string
+  State?: string
+  OwnedBackground?: string
+  OwnedColor?: string
+  OwnedState?: string
+}
+interface BrowserWindowContext {
+  Document: Document
+  Content?: HTMLElement
+  Theme: SystemBackdropTheme
+  Backdrop: SystemBackdropConfig | null
+  Listeners: Map<object, () => void>
+  Styles?: BackdropStyleOwnership
+  Revision: number
+  Release(): void
+}
+type BrowserContextWindow = Window & { __winuiBackdropWindowContextsV1?: Map<string | number, BrowserWindowContext> }
+const backdropEquals = (left: SystemBackdropConfig | null, right: SystemBackdropConfig | null) =>
+  left === right || left !== null && right !== null && ['Type', 'Kind', 'FallbackColor', 'TintColor', 'TintOpacity', 'LuminosityOpacity'].every(key => left[key as keyof SystemBackdropConfig] === right[key as keyof SystemBackdropConfig])
+const browserCapabilities: SystemBackdropCapabilities = { NativeSystemBackdrop: false, SupportedMaterials: [], ExtendsContentIntoTitleBar: false }
+const captureBackdropStyles = (Content: HTMLElement): BackdropStyleOwnership => ({ Content, Background: Content.style.background, Color: Content.style.color, State: Content.dataset.systemBackdropState })
+const restoreBackdropStyles = (styles: BackdropStyleOwnership) => {
+  const content = styles.Content
+  if (styles.OwnedBackground !== undefined && content.style.background === styles.OwnedBackground) content.style.background = styles.Background
+  if (styles.OwnedColor !== undefined && content.style.color === styles.OwnedColor) content.style.color = styles.Color
+  if (styles.OwnedState !== undefined && content.dataset.systemBackdropState === styles.OwnedState) {
+    if (styles.State === undefined) delete content.dataset.systemBackdropState
+    else content.dataset.systemBackdropState = styles.State
+  }
+}
+const setBrowserContextContent = (context: BrowserWindowContext, element: HTMLElement) => {
+  if (context.Content === element) return false
+  if (context.Styles) restoreBackdropStyles(context.Styles)
+  context.Content = element
+  context.Styles = captureBackdropStyles(element)
+  context.Revision++
+  return true
+}
+const notifyBrowserContext = (context: BrowserWindowContext, source: object) => {
+  for (const [key, listener] of [...context.Listeners]) if (key !== source) listener()
+}
 
 function browserTarget(content: HTMLElement, kind: SystemBackdropTargetKind, browserWindow: Window, id?: string | number): SystemBackdropHostTarget {
   const callbacks = new Set<(event: SystemBackdropHostEvent) => void>()
@@ -141,7 +192,12 @@ function browserTarget(content: HTMLElement, kind: SystemBackdropTargetKind, bro
   // navigation is not Window.Closed, so use the real Window.closed flag.
   const interval = kind === 'Window' ? window.setInterval(() => {
     if (browserWindow.closed) closed()
-    else { try { if (browserWindow.document !== currentDocument) attach() } catch { /* A native host may navigate outside the app origin. */ } }
+    else {
+      try {
+        if (browserWindow.document !== currentDocument) { attach(); publish({ Type: 'ConfigurationChanged' }) }
+        else if (target.Content.ownerDocument !== currentDocument) publish({ Type: 'ConfigurationChanged' })
+      } catch { /* A native host may navigate outside the app origin. */ }
+    }
   }, 500) : undefined
   const detach = () => {
     browserWindow.removeEventListener('focus', focus)
@@ -149,13 +205,28 @@ function browserTarget(content: HTMLElement, kind: SystemBackdropTargetKind, bro
     if (interval !== undefined) window.clearInterval(interval)
     callbacks.clear()
   }
-  return {
+  const target: SystemBackdropHostTarget = {
     Id: id ?? `browser-backdrop-${++nextWindowId}`, Content: content, Window: browserWindow, Kind: kind,
     Subscribe(listener) { callbacks.add(listener); return () => { callbacks.delete(listener); if (!callbacks.size) detach() } },
     SetContentElement(element) { this.Content = element; attach() },
-    Close() { detach(); if (kind === 'Window' && !browserWindow.closed) browserWindow.close() },
+    Activate() { if (kind === 'Window' && !browserWindow.closed) browserWindow.focus() },
+    Close() {
+      detach()
+      if (kind !== 'Window') return
+      if (!browserWindow.closed) browserWindow.close()
+      if (browserWindow.closed) {
+        const context = (browserWindow as BrowserContextWindow).__winuiBackdropWindowContextsV1?.get(this.Id)
+        if (context) {
+          for (const listener of [...context.Listeners.values()]) listener()
+          context.Listeners.clear()
+          context.Release()
+        }
+      }
+    },
     Dispose() { detach() },
   }
+  if (kind === 'Window') browserWindowTargets.add(target)
+  return target
 }
 
 /** Real browser window: unavailable native materials are reported without imitation. */
@@ -210,6 +281,7 @@ const nativeFallbackColor = (color: string): string => {
 
 async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBackdropHostAdapter, options: Pick<SystemBackdropWindowOptions, 'theme' | 'backdrop' | 'mountContent' | 'signal'>, closeOnFailure = true): Promise<SystemBackdropWindowHandle> {
   const owner = target.Window ?? target.Content.ownerDocument.defaultView
+  const reportError = (error: unknown) => ((owner as (Window & { console: Console }) | null)?.console ?? console).error(error)
   const readMedia = () => owner ? ['(prefers-color-scheme: dark)', '(forced-colors: active)', '(prefers-reduced-transparency: reduce)'].map(query => owner.matchMedia(query)) : []
   let media = readMedia()
   const listeners = new Set<(state: SystemBackdropState) => void>()
@@ -221,22 +293,91 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
   let closePromise: Promise<void> | undefined
   let cleanup: (() => Awaitable<void>) | undefined
   let unsubscribeBackdrop: (() => void) | undefined
+  let observedBackdrop: SystemBackdrop | undefined
   let queue = Promise.resolve<SystemBackdropState>({ Status: 'Fallback', RequestedBackdrop: requested, AppliedBackdrop: null, RequestedTheme: theme, Theme: 'Light', IsInputActive: inputActive })
   let state: SystemBackdropState = { Status: 'Fallback', RequestedBackdrop: requested, AppliedBackdrop: null, RequestedTheme: theme, Theme: 'Light', IsInputActive: inputActive }
-  let originalBackground = target.Content.style.background
-  let originalColor = target.Content.style.color
-  let originalState = target.Content.dataset.systemBackdropState
-  let ownedBackground: string | undefined
-  let ownedColor: string | undefined
-  let ownedState: string | undefined
-  const announce = () => { for (const listener of [...listeners]) { try { listener(snapshot(state)) } catch (error) { owner?.console.error(error) } } }
+  let contentStyles = captureBackdropStyles(target.Content)
+  const contextSource = {}
+  let windowContext: BrowserWindowContext | undefined
+  let joinedWindowContext = false
+  const announce = () => { for (const listener of [...listeners]) { try { listener(snapshot(state)) } catch (error) { reportError(error) } } }
   const actualTheme = (): 'Light' | 'Dark' => theme === 'Light' || theme === 'Dark' ? theme : media[0]?.matches ? 'Dark' : 'Light'
   const configuration = (): SystemBackdropConfiguration => ({ Theme: actualTheme(), IsInputActive: inputActive, IsHighContrast: media[1]?.matches ?? false, IsTransparencyEnabled: !(media[2]?.matches ?? false), IsEnergySaverEnabled: false })
-  const apply = (): Promise<SystemBackdropState> => {
+  const rebindContent = (element: HTMLElement) => {
+    if (element === target.Content) return false
+    if (!browserWindowTargets.has(target)) restoreBackdropStyles(contentStyles)
+    contentStyles = captureBackdropStyles(element)
+    target.Content = element
+    target.SetContentElement?.(element)
+    media.forEach(query => query.removeEventListener('change', updatePolicy))
+    media = readMedia()
+    media.forEach(query => query.addEventListener('change', updatePolicy))
+    return true
+  }
+  const readWindowIntent = () => {
+    if (!windowContext || closed) return false
+    const rootChanged = windowContext.Content ? rebindContent(windowContext.Content) : false
+    const intentChanged = theme !== windowContext.Theme || !backdropEquals(requested, windowContext.Backdrop)
+    theme = windowContext.Theme
+    if (!backdropEquals(requested, windowContext.Backdrop)) {
+      if (observedBackdrop && backdropEquals(observedBackdrop.ToConfig(), windowContext.Backdrop)) requested = cloneSystemBackdropConfig(windowContext.Backdrop)
+      else observeBackdrop(windowContext.Backdrop)
+    }
+    return rootChanged || intentChanged
+  }
+  const contextChanged = () => {
+    if (owner?.closed) { void close(false).catch(reportError); return }
+    if (readWindowIntent()) void apply(false)
+  }
+  const joinWindowContext = () => {
+    if (!browserWindowTargets.has(target) || !owner || closed) return
+    const hostWindow = owner as BrowserContextWindow
+    const contexts = hostWindow.__winuiBackdropWindowContextsV1 ??= new Map()
+    let context = contexts.get(target.Id)
+    if (!context || context.Document !== owner.document) {
+      const contextId = target.Id
+      context = { Document: owner.document, Theme: theme, Backdrop: cloneSystemBackdropConfig(requested), Listeners: new Map(), Revision: 0,
+        Release() {
+          if (this.Listeners.size) return
+          if (this.Styles) restoreBackdropStyles(this.Styles)
+          if (contexts.get(contextId) === this) contexts.delete(contextId)
+          this.Content = undefined
+          this.Styles = undefined
+        },
+      }
+      contexts.set(target.Id, context)
+    }
+    if (context !== windowContext) {
+      if (windowContext && windowContext.Document !== owner.document) windowContext.Listeners.clear()
+      windowContext?.Listeners.delete(contextSource)
+      windowContext?.Release()
+      windowContext = context
+    }
+    context.Listeners.set(contextSource, contextChanged)
+    // During navigation the new runtime supplies the first live content root.
+    // Requests made by the opener before that root exists remain in this context.
+    if ((!context.Content || !joinedWindowContext && !closeOnFailure) && target.Content.ownerDocument === owner.document) {
+      setBrowserContextContent(context, target.Content)
+      notifyBrowserContext(context, contextSource)
+    }
+    joinedWindowContext = true
+    return readWindowIntent()
+  }
+  const publishWindowIntent = () => {
+    if (!windowContext) return
+    let changed = windowContext.Theme !== theme || !backdropEquals(windowContext.Backdrop, requested)
+    if (target.Content.ownerDocument === windowContext.Document) changed = setBrowserContextContent(windowContext, target.Content) || changed
+    windowContext.Theme = theme
+    windowContext.Backdrop = cloneSystemBackdropConfig(requested)
+    if (changed) { windowContext.Revision++; notifyBrowserContext(windowContext, contextSource) }
+  }
+  const apply = (joinContext = true): Promise<SystemBackdropState> => {
+    if (joinContext) joinWindowContext()
+    const context = windowContext, contextRevision = context?.Revision
     const backdrop = cloneSystemBackdropConfig(requested), requestedTheme = theme
     let config = configuration()
     queue = queue.catch(() => snapshot(state)).then(async () => {
-      if (closed) return snapshot(state)
+      if (closed || context && (context !== windowContext || context.Revision !== contextRevision)) return snapshot(state)
       let reason: SystemBackdropFallbackReason | undefined
       let error: unknown
       let applied: SystemBackdropConfig | null = null
@@ -275,16 +416,20 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
         reason = 'HostError'; error = failure
         try { await adapter.ApplyBackdrop(target, null, config) } catch { /* Preserve the original host failure. */ }
       }
-      if (closed) return snapshot(state)
+      if (closed || context && (context !== windowContext || context.Revision !== contextRevision)) return snapshot(state)
       // Desktop materials belong to the native compositor. Browsers report
       // unavailability and keep this surface transparent; a native host owns
       // its fallback or supplies the controller's exact fallback color.
       const fallback = Boolean(backdrop && !applied)
-      target.Content.style.background = nativeControllerConnected && fallback && config.FallbackColor ? nativeFallbackColor(config.FallbackColor) : 'transparent'
-      target.Content.style.color = nativeBackdropAvailable && config.IsHighContrast ? 'CanvasText' : ''
-      ownedBackground = target.Content.style.background
-      ownedColor = target.Content.style.color
-      if (target.Kind === 'Window') {
+      const hasCurrentContent = !context || context.Content === target.Content
+      const styles = context?.Styles ?? contentStyles
+      if (hasCurrentContent) {
+        target.Content.style.background = nativeControllerConnected && fallback && config.FallbackColor ? nativeFallbackColor(config.FallbackColor) : 'transparent'
+        target.Content.style.color = nativeBackdropAvailable && config.IsHighContrast ? 'CanvasText' : ''
+        styles.OwnedBackground = target.Content.style.background
+        styles.OwnedColor = target.Content.style.color
+      }
+      if (hasCurrentContent && target.Kind === 'Window') {
         target.Content.classList.toggle('theme-dark', config.Theme === 'Dark')
         target.Content.classList.toggle('theme-light', config.Theme === 'Light')
         target.Content.dataset.theme = config.Theme.toLowerCase()
@@ -294,8 +439,10 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
         documentRoot.dataset.theme = config.Theme.toLowerCase()
       }
       const highContrastBackdrop = nativeBackdropAvailable && config.IsHighContrast
-      target.Content.dataset.systemBackdropState = highContrastBackdrop ? 'HighContrast' : fallback ? 'Fallback' : 'Active'
-      ownedState = target.Content.dataset.systemBackdropState
+      if (hasCurrentContent) {
+        target.Content.dataset.systemBackdropState = highContrastBackdrop ? 'HighContrast' : fallback ? 'Fallback' : 'Active'
+        styles.OwnedState = target.Content.dataset.systemBackdropState
+      }
       state = {
         Status: highContrastBackdrop ? 'HighContrast' : fallback ? 'Fallback' : 'Active',
         RequestedBackdrop: backdrop, AppliedBackdrop: applied, RequestedTheme: requestedTheme,
@@ -307,6 +454,7 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
     })
     return queue
   }
+  const refreshWindowContext = () => { if (joinWindowContext()) void apply(false) }
   const updatePolicy = () => { void apply() }
   media.forEach(query => query.addEventListener('change', updatePolicy))
   let detachTarget: (() => void) | undefined = undefined
@@ -327,20 +475,16 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
     media.forEach(query => query.removeEventListener('change', updatePolicy))
     options.signal?.removeEventListener('abort', abort)
     unsubscribeBackdrop?.()
+    windowContext?.Listeners.delete(contextSource)
+    windowContext?.Release()
+    windowContext = undefined
     detachTarget?.()
     void (async () => {
       await queue.catch(() => undefined)
       try {
         await adapter.ApplyBackdrop(target, null, configuration())
       } finally {
-        if (target.Kind === 'Surface' || !closeTarget) {
-          if (ownedBackground !== undefined && target.Content.style.background === ownedBackground) target.Content.style.background = originalBackground
-          if (ownedColor !== undefined && target.Content.style.color === ownedColor) target.Content.style.color = originalColor
-          if (ownedState !== undefined && target.Content.dataset.systemBackdropState === ownedState) {
-            if (originalState === undefined) delete target.Content.dataset.systemBackdropState
-            else target.Content.dataset.systemBackdropState = originalState
-          }
-        }
+        if (!browserWindowTargets.has(target) && (target.Kind === 'Surface' || !closeTarget)) restoreBackdropStyles(contentStyles)
         try { await cleanup?.() }
         finally {
           try { await target.Dispose?.() }
@@ -351,50 +495,55 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
     return closePromise
   }
   const handle: SystemBackdropWindowHandle = {
-    Id: target.Id, NativeAssociationToken: target.NativeAssociationToken, TitleBarHost: target.TitleBarHost, get Content() { return target.Content }, Window: target.Window ?? null,
-    get State() { return snapshot(state) },
-    SetSystemBackdrop(backdrop) { if (closed) return Promise.resolve(snapshot(state)); observeBackdrop(backdrop); return apply() },
-    SetTheme(value) { if (closed) return Promise.resolve(snapshot(state)); theme = normalizeTheme(value); return apply() },
+    Id: target.Id, NativeAssociationToken: target.NativeAssociationToken, TitleBarHost: target.TitleBarHost, get Content() { refreshWindowContext(); return target.Content }, Window: target.Window ?? null,
+    get State() { refreshWindowContext(); return snapshot(state) },
+    SetSystemBackdrop(backdrop) { if (closed) return Promise.resolve(snapshot(state)); joinWindowContext(); observeBackdrop(backdrop); publishWindowIntent(); return apply(false) },
+    SetTheme(value) { if (closed) return Promise.resolve(snapshot(state)); joinWindowContext(); theme = normalizeTheme(value); publishWindowIntent(); return apply(false) },
     SetContentElement(element) {
       if (closed) return Promise.resolve(snapshot(state))
       if (element.ownerDocument.defaultView !== owner) return Promise.reject(new TypeError('Window.Content must belong to the host window.'))
-      if (element !== target.Content) {
-        originalBackground = element.style.background
-        originalColor = element.style.color
-        originalState = element.dataset.systemBackdropState
-        ownedBackground = undefined
-        ownedColor = undefined
-        ownedState = undefined
-      }
-      target.Content = element
-      target.SetContentElement?.(element)
+      joinWindowContext()
+      rebindContent(element)
       // Loading the destination framework runtime replaces its Document.
       // MatchMedia objects from the initial about:blank document must not own
       // policy subscriptions for the new content document.
       media.forEach(query => query.removeEventListener('change', updatePolicy))
       media = readMedia()
       media.forEach(query => query.addEventListener('change', updatePolicy))
-      return apply()
+      if (!windowContext) joinWindowContext()
+      publishWindowIntent()
+      return apply(false)
     },
     Subscribe(listener) { if (!closed) listeners.add(listener); listener(snapshot(state)); return () => listeners.delete(listener) },
+    async Activate() {
+      if (closed || target.Kind !== 'Window') return
+      if (target.Activate) await target.Activate()
+      else if (target.Window && owner && !owner.closed && typeof owner.focus === 'function') owner.focus()
+      else throw new SystemBackdropWindowError('HostUnavailable', 'The host cannot activate this native window.')
+    },
     Dispose: () => close(false),
     Close: () => close(true),
   }
   const observeBackdrop = (backdrop: unknown) => {
     unsubscribeBackdrop?.()
     requested = toSystemBackdropConfig(backdrop)
-    unsubscribeBackdrop = backdrop instanceof SystemBackdrop ? backdrop.Subscribe(() => {
-      requested = backdrop.ToConfig()
-      updatePolicy()
-    }) : undefined
+    const watchedBackdrop = backdrop instanceof SystemBackdrop ? backdrop : undefined
+    observedBackdrop = watchedBackdrop
+    unsubscribeBackdrop = watchedBackdrop?.Subscribe(() => {
+      joinWindowContext()
+      if (observedBackdrop !== watchedBackdrop) return
+      requested = watchedBackdrop.ToConfig()
+      publishWindowIntent()
+      void apply(false)
+    })
   }
-  const abort = () => { void close(closeOnFailure).catch(error => owner?.console.error(error)) }
+  const abort = () => { void close(closeOnFailure).catch(reportError) }
   try {
     if (options.signal?.aborted) throw new SystemBackdropWindowError('HostUnavailable', 'The backdrop host connection was cancelled.')
     observeBackdrop(options.backdrop)
     options.signal?.addEventListener('abort', abort, { once: true })
     detachTarget = target.Subscribe?.(event => {
-      if (event.Type === 'Closed') { void close(false).catch(error => owner?.console.error(error)); return }
+      if (event.Type === 'Closed') { void close(false).catch(reportError); return }
       if (event.Type === 'Activated') inputActive = event.IsInputActive ?? true
       updatePolicy()
     })

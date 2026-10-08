@@ -17,7 +17,7 @@ export default { Child: BorderChild, Resources: BorderResources, Background: bru
 </script>
 
 <script setup lang="ts">
-import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, Text, unref, useAttrs, useSlots, watch, type VNode } from 'vue'
+import { cloneVNode, Comment, computed, Fragment, getCurrentInstance, h, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, Text, unref, useAttrs, useSlots, watch, type VNode } from 'vue'
 import { frameworkLayoutStyle } from './frameworkLayout'
 import { normalizeXamlNodes, resolveXamlValue, updateXamlBinding } from './xamlRuntime'
 import { xamlThemeKey } from './brushCore'
@@ -95,7 +95,8 @@ const brushResources = useXamlBrushResources(instance)
 const backgroundBrush = useBrushProperty('Background', () => props.Background, () => slots.default?.() ?? [], instance)
 const shadowStyle = computed(() => {
   const vector = Translation.value
-  const coordinates = typeof vector === 'string' ? vector.split(',').map(Number) : [vector?.X ?? 0, vector?.Y ?? 0, vector?.Z ?? 0]
+  const object = vector && typeof vector === 'object' ? vector as { X?: unknown; Y?: unknown; Z?: unknown } : undefined
+  const coordinates = typeof vector === 'string' ? vector.split(',').map(Number) : [object?.X ?? 0, object?.Y ?? 0, object?.Z ?? 0]
   return {
     transform: Number(coordinates[0]) || Number(coordinates[1]) ? `translate(${Number(coordinates[0]) || 0}px, ${Number(coordinates[1]) || 0}px)` : undefined
   }
@@ -115,7 +116,7 @@ onMounted(measureCornerRadius)
 watch([() => resolveXamlValue(props.CornerRadius, instance), () => unref(theme)], () => { void nextTick(measureCornerRadius) })
 const shadowVisualStyle = computed(() => {
   const vector = Translation.value
-  const z = typeof vector === 'string' ? vector.split(',')[2] : vector?.Z ?? 0
+  const z = typeof vector === 'string' ? vector.split(',')[2] : vector && typeof vector === 'object' && 'Z' in vector ? vector.Z : 0
   const radius = shadowCornerRadius(resolveXamlValue(props.CornerRadius, instance)) || inheritedCornerRadius.value
   return themeShadowVisualStyle(getThemeShadowRecipe(z, unref(theme)), radius)
 })

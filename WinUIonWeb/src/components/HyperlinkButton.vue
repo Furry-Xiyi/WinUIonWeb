@@ -38,7 +38,7 @@ export default { Content: HyperlinkButtonContent, ContentTemplate: buttonContent
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, provide, proxyRefs, ref, Text, useAttrs, useSlots, watch } from 'vue'
+import { computed, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, provide, proxyRefs, ref, Text, useAttrs, useSlots, watch, type VNode } from 'vue'
 import ContentPresenter from './ContentPresenter.vue'
 import { alignment, boolValue, cssLength, xamlThickness } from './layout'
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime'
@@ -50,7 +50,7 @@ const props = defineProps({
   Content: { type: null, default: '' }, NavigateUri: { type: String, default: '' }, TargetName: { type: String, default: '' },
   ContentTemplate: { type: null, default: undefined }, ContentTransitions: { type: null, default: undefined },
   RequestedTheme: { type: String, default: 'Default' },
-  Command: { type: [Object, String], default: undefined }, CommandParameter: { default: undefined },
+  Command: { type: [Object, String], default: undefined }, CommandParameter: { type: null, default: undefined },
   ClickMode: { type: String, default: 'Release' },
   IsEnabled: { type: [Boolean, String], default: true }, IsTabStop: { type: [Boolean, String], default: true }, Visibility: { type: String, default: 'Visible' },
   Background: { type: String, default: '' }, BackgroundSizing: { type: String, default: 'OuterBorderEdge' }, Foreground: { type: String, default: '' }, BorderBrush: { type: String, default: '' }, BorderThickness: { type: [String, Number], default: 1 },
@@ -120,10 +120,10 @@ const ContentOutlet = defineComponent({ name: 'HyperlinkButtonContent', setup() 
   const templated = renderTemplate(Content.value)
   if (templated) return templated
   if (slots.default) {
-    const collect = nodes => nodes.flatMap(node => {
-      if (node.type === Fragment && Array.isArray(node.children)) return collect(node.children)
+    const collect = (nodes: VNode[]): VNode[] => nodes.flatMap(node => {
+      if (node.type === Fragment && Array.isArray(node.children)) return collect(node.children as VNode[])
       if (getButtonContentProperty(node)) return []
-      if (node.type?.__hyperlinkButtonProperty === 'content') return node.children?.default?.() ?? []
+      if ((node.type as { __hyperlinkButtonProperty?: string })?.__hyperlinkButtonProperty === 'content') return (node.children as { default?: () => VNode[] } | null)?.default?.() ?? []
       return [node]
     })
     const nodes = normalizeXamlNodes(collect(slots.default()), instance)

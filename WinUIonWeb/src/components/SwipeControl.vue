@@ -137,7 +137,7 @@ const readProperty = (name: keyof typeof props): unknown => {
 const isTrue = (value: unknown) => value === true || String(value).toLowerCase() === 'true'
 const enabled = computed(() => isTrue(readProperty('IsEnabled')))
 const tabStop = computed(() => isTrue(readProperty('IsTabStop')))
-const automationName = computed(() => readProperty('AutomationProperties.Name'))
+const automationName = computed(() => readProperty('AutomationProperties.Name') as string | undefined)
 const nodes = computed(() => swipeNodes(slots.default?.() ?? []))
 const contentNodes = computed(() => {
   const property = nodes.value.find(node => swipeProperty(node) === 'Content')
@@ -402,7 +402,7 @@ const iconGlyph = (item: SwipeItem) => {
 }
 const iconStyle = (item: SwipeItem) => {
   const source = icon(item)
-  return typeof source === 'object' ? { fontFamily: source?.FontFamily } : {}
+  return typeof source === 'object' ? { fontFamily: source?.FontFamily as CSSProperties['fontFamily'] } : {}
 }
 const bitmapStyle = (item: SwipeItem) => ({ '--swipe-item-bitmap-source': `url(\"${iconUri(item)}\")` } as CSSProperties)
 const remainOpen = () => mode.value === 'Execute' && currentItems.value[0]?.BehaviorOnInvoked === 'RemainOpen' && open.value

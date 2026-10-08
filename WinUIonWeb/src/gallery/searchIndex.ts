@@ -44,7 +44,7 @@ const TAGS = [
   'richtextblock', 'textbox', 'textblock', 'settings', 'xamlresources',
   'xamlstyles', 'geometry', 'iconography', 'typography', 'acrylic',
   'animatedicon', 'compactsizing', 'iconelement', 'line',
-  'radialgradientbrush', 'systembackdrops', 'systembackdropelement', 'themeshadow', 'colors', 'titlebar'
+  'radialgradientbrush', 'systembackdrops', 'systembackdropelement', 'themeshadow', 'colors', 'createmultiplewindows', 'titlebar'
 ];
 
 const resolveLabel = (resources: Record<string, string>, tag: string) => (
@@ -53,6 +53,9 @@ const resolveLabel = (resources: Record<string, string>, tag: string) => (
 
 const enLabels: Record<string, string> = enUS;
 const zhLabels: Record<string, string> = zhCN;
+const searchTags: Record<string, readonly string[]> = {
+  createmultiplewindows: ['multiple windows', 'new window', 'multi window']
+};
 
 export const searchIndex: SearchItem[] = TAGS.map((tag) => ({
   tag,
@@ -79,7 +82,8 @@ export const searchAll = (query: string, locale: Locale): SearchItem[] => {
     .filter((item) => (
       item.en.toLowerCase().includes(normalizedQuery) ||
       item.zh.toLowerCase().includes(normalizedQuery) ||
-      item.tag.toLowerCase().includes(normalizedQuery)
+      item.tag.toLowerCase().includes(normalizedQuery) ||
+      searchTags[item.tag]?.some(tag => tag.includes(normalizedQuery))
     ))
     .sort(compare);
 };

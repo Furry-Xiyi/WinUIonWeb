@@ -36,7 +36,7 @@ export default { Header: property('Header'), HeaderTemplate: property('HeaderTem
 
 <script setup lang="ts">
 
-import { computed, getCurrentInstance, inject, isVNode, nextTick, onBeforeUnmount, provide, ref, unref, useAttrs, useSlots, watch, type VNode } from 'vue'
+import { computed, getCurrentInstance, inject, isVNode, nextTick, onBeforeUnmount, provide, ref, unref, useAttrs, useSlots, watch, type CSSProperties, type VNode } from 'vue'
 import Button from './Button.vue'
 import ColumnDefinition from './ColumnDefinition.vue'
 import ContentPresenter from './ContentPresenter.vue'
@@ -147,15 +147,15 @@ const HeaderContent = defineComponent({ setup() { return () => {
 const rootClasses = computed(() => ({ 'has-no-date': !localDate.value, 'is-disabled': !enabled.value, 'win-theme-scope': ['dark', 'light'].includes(theme.value), 'theme-dark': theme.value === 'dark', 'theme-light': theme.value === 'light' }))
 const rootAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([key]) => !['class', 'style', 'DateChanged', 'SelectedDateChanged'].includes(key))))
 const rootStyle = computed(() => {
-  const style: Record<string, unknown> = {
-    '--picker-background': value(props.Background), '--picker-foreground': value(props.Foreground), '--picker-border': value(props.BorderBrush),
+  const style: CSSProperties = {
+    '--picker-background': value(props.Background) as CSSProperties['--picker-background'], '--picker-foreground': value(props.Foreground) as CSSProperties['--picker-foreground'], '--picker-border': value(props.BorderBrush) as CSSProperties['--picker-border'],
     '--picker-border-thickness': xamlThickness(value(props.BorderThickness)), '--picker-radius': cssLength(value(props.CornerRadius)),
     margin: xamlThickness(value(props.Margin)), padding: xamlThickness(value(props.Padding)),
     alignSelf: alignment(value(props.VerticalAlignment), 'vertical'), justifySelf: alignment(value(props.HorizontalAlignment), 'horizontal'),
-    fontSize: cssLength(value(props.FontSize)), fontFamily: value(props.FontFamily) || undefined, fontWeight: value(props.FontWeight) === 'Normal' ? 400 : value(props.FontWeight)
+    fontSize: cssLength(value(props.FontSize)), fontFamily: value(props.FontFamily) as CSSProperties['fontFamily'] || undefined, fontWeight: value(props.FontWeight) === 'Normal' ? 400 : value(props.FontWeight) as CSSProperties['fontWeight']
   }
   for (const name of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight'] as const) {
-    if (value(props[name]) !== '') style[name[0].toLowerCase() + name.slice(1)] = cssLength(value(props[name]))
+    if (value(props[name]) !== '') style[(name[0].toLowerCase() + name.slice(1)) as 'width' | 'height' | 'minWidth' | 'minHeight' | 'maxWidth' | 'maxHeight'] = cssLength(value(props[name]))
   }
   if (value(props.Visibility) === 'Collapsed') style.display = 'none'
   if (value(props.Visibility) === 'Hidden') style.visibility = 'hidden'

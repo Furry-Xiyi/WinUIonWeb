@@ -2,6 +2,11 @@ import { computed, defineComponent, getCurrentInstance, h, ref, watch, type VNod
 import { resolveXamlValue, updateXamlBinding } from './xamlRuntime'
 
 export type ControlExamplePropertyName = 'example' | 'output' | 'options' | 'substitutions'
+export interface ControlExampleSubstitutionValue {
+  Key?: unknown
+  Value?: unknown
+  IsEnabled?: unknown
+}
 
 const property = (name: ControlExamplePropertyName) => defineComponent({
   name: `ControlExample.${name[0].toUpperCase()}${name.slice(1)}`,

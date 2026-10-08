@@ -1,21 +1,23 @@
-import type { ComponentInternalInstance } from 'vue'
+import type { ComponentInternalInstance, CSSProperties } from 'vue'
 import { alignment, cssLength, xamlThickness } from './layout'
 import { resolveXamlValue } from './xamlRuntime'
 import { resolveBrushStyle } from './AcrylicBrush'
 
-export const frameworkLayoutStyle = (props: Record<string, unknown>, instance: ComponentInternalInstance | null) => {
+export const frameworkLayoutStyle = (props: Record<string, unknown>, instance: ComponentInternalInstance | null): CSSProperties => {
   const resolve = (value: unknown) => resolveXamlValue(value, instance)
-  const style: Record<string, string> = {}
-  for (const property of ['Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight']) {
+  const style: CSSProperties = {}
+  const lengths = { Width: 'width', Height: 'height', MinWidth: 'minWidth', MinHeight: 'minHeight', MaxWidth: 'maxWidth', MaxHeight: 'maxHeight' } as const
+  for (const property of Object.keys(lengths) as (keyof typeof lengths)[]) {
     const value = resolve(props[property])
     if (value === undefined || value === null || value === '' || value === 'Auto' || Number.isNaN(value)) continue
-    style[property.charAt(0).toLowerCase() + property.slice(1)] = cssLength(value)
+    style[lengths[property]] = cssLength(value)
     if (property === 'Width') style.flex = '0 0 auto'
   }
-  for (const property of ['Margin', 'Padding', 'BorderThickness']) {
+  const thicknesses = { Margin: 'margin', Padding: 'padding', BorderThickness: 'borderWidth' } as const
+  for (const property of Object.keys(thicknesses) as (keyof typeof thicknesses)[]) {
     const value = resolve(props[property])
     if (value !== undefined && value !== null && value !== '') {
-      style[property === 'BorderThickness' ? 'borderWidth' : property.toLowerCase()] = xamlThickness(value)
+      style[thicknesses[property]] = xamlThickness(value)
     }
   }
   for (const [property, cssProperty] of [['Background', 'background'], ['BorderBrush', 'borderColor']] as const) {

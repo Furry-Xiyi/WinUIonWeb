@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, isVNode, ref, useSlots } from 'vue'
+import { computed, defineComponent, Fragment, getCurrentInstance, h, isVNode, ref, useSlots, type ComponentPublicInstance, type PropType } from 'vue'
 import Border from './Border.vue'
 import { alignment, applyContentPresenterChildren, useLayoutObserver } from './layout'
 import { getVNodeChildren } from './CollectionProperties'
@@ -20,9 +20,9 @@ defineOptions({ inheritAttrs: false })
 
 // Border supplies the shared XAML sizing, padding, brush and corner properties.
 const props = defineProps({
-  Content: { type: null, default: '' },
-  ContentTemplate: { type: null, default: undefined },
-  ContentTransitions: { type: null, default: undefined },
+  Content: { type: null as unknown as PropType<unknown>, default: '' as unknown },
+  ContentTemplate: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+  ContentTransitions: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
   Foreground: { type: [String, Object], default: '' },
   HorizontalContentAlignment: { type: String, default: 'Stretch' },
   VerticalContentAlignment: { type: String, default: 'Stretch' }
@@ -31,7 +31,13 @@ const props = defineProps({
 const instance = getCurrentInstance()
 const slots = useSlots()
 const root = ref<HTMLElement | null>(null)
-const registerRoot = (value: { Element?: HTMLElement; $el?: HTMLElement } | null) => { root.value = value?.Element ?? value?.$el ?? null }
+const registerRoot = (value: Element | ComponentPublicInstance | null) => {
+  if (value instanceof HTMLElement) root.value = value
+  else {
+    const component = value as { Element?: HTMLElement; $el?: HTMLElement } | null
+    root.value = component?.Element ?? component?.$el ?? null
+  }
+}
 useLayoutObserver(root, () => {
   if (root.value) applyContentPresenterChildren(root.value, resolveXamlValue(props.HorizontalContentAlignment, instance), resolveXamlValue(props.VerticalContentAlignment, instance))
 })
@@ -42,8 +48,9 @@ const foreground = computed(() => {
   if (!value) return undefined
   if (typeof value === 'object' && 'Color' in value) {
     const color = cssColor(value.Color)
-    return value.Opacity === undefined || value.Opacity === 1 ? color
-      : `color-mix(in srgb, ${color} ${clampOpacity(value.Opacity) * 100}%, transparent)`
+    const opacity = 'Opacity' in value ? value.Opacity : undefined
+    return opacity === undefined || opacity === 1 ? color
+      : `color-mix(in srgb, ${color} ${clampOpacity(opacity) * 100}%, transparent)`
   }
   return cssColor(value)
 })

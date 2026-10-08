@@ -1,14 +1,15 @@
 <script lang="ts">
-import { defineComponent, Fragment, getCurrentInstance, h, inject, onBeforeUnmount, provide, shallowReactive, shallowRef, type ShallowRef, type VNode } from 'vue'
+import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, onBeforeUnmount, provide, shallowReactive, shallowRef, unref, type ShallowRef, type VNode } from 'vue'
 import type { XamlResourceFactoryContext } from './UICommandProperties'
 import { normalizeXamlNodes, resolveXamlValue, xamlNameScopeKey } from './xamlRuntime'
 import { primitiveResourceScope, primitiveResourceStyles, xamlPrimitiveResourceKey } from './xamlPrimitives'
 import { collectXamlResources, useXamlBrushResources, xamlResourceKey, xamlResourceNodesEqual } from './xamlBrushResources'
+import { xamlThemeKey } from './brushCore'
+import { frameworkLayoutStyle } from './frameworkLayout'
 
 /**
- * A small XAML Page host.  Its only job is to make page-level resources
- * available to descendants while keeping `<Page.Resources>` out of the
- * visual tree, just as WinUI's Page does.
+ * Page publishes resources and RequestedTheme to its content. Explicit
+ * framework-element attributes create the content host that arranges children.
  */
 export const xamlResourceDictionaryKey = Symbol('WinUIonWeb.xamlResourceDictionary')
 
@@ -31,6 +32,7 @@ const vnodeChildren = (node: VNode): VNode[] => {
 
 const isResourceProperty = (node: VNode) =>
   Boolean((node.type as { __xamlResourceProperty?: string } | undefined)?.__xamlResourceProperty)
+const pageHostAttributes = new Set(['class', 'style', 'RequestedTheme', 'Width', 'Height', 'MinWidth', 'MinHeight', 'MaxWidth', 'MaxHeight', 'Margin', 'Padding', 'HorizontalAlignment', 'VerticalAlignment', 'Background', 'BorderBrush', 'BorderThickness', 'CornerRadius', 'Visibility', 'IsHitTestVisible', 'Opacity'])
 
 export default defineComponent({
   name: 'Page',
@@ -38,6 +40,14 @@ export default defineComponent({
   Resources: PageResources,
   setup(_, { slots, attrs }) {
     const instance = getCurrentInstance()
+    const inheritedTheme = inject(xamlThemeKey, null) ?? inject('winuiTheme', null)
+    const requestedTheme = computed(() => resolveXamlValue(attrs.RequestedTheme, instance))
+    const actualTheme = computed(() => {
+      const value = requestedTheme.value
+      if (value === 'Light' || value === 'Dark') return value
+      return unref(inheritedTheme)
+    })
+    provide(xamlThemeKey, actualTheme)
     // Resource declarations are rebuilt from the slot tree during render. A
     // reactive dictionary would schedule Page again while that render is
     // still mutating it, which is the source of the recursive-update loop in
@@ -154,9 +164,15 @@ export default defineComponent({
         ...normalizeXamlNodes(children.filter((node) => !(node && typeof node === 'object' && isResourceProperty(node as VNode))) as VNode[], instance)
       ]
       const resourceStyles = primitiveResourceStyles(localPrimitives.value)
-      return Object.keys(resourceStyles).length ? h('div', {
-        ...attrs, class: ['win-page', attrs.class],
-        style: [{ minWidth: '0', minHeight: '0', maxWidth: '100%', ...resourceStyles }, attrs.style]
+      const hostAttrs = Object.fromEntries(Object.entries(attrs).filter(([name]) => name !== 'RequestedTheme'))
+      // A themed or sized Page is a real content host, so its child alignment
+      // is measured against the Page rather than the surrounding document.
+      const hasPageAttributes = Object.keys(attrs).some(name => pageHostAttributes.has(name))
+      const needsHost = hasPageAttributes || Object.keys(resourceStyles).length > 0
+      return needsHost ? h('div', {
+        ...hostAttrs,
+        class: ['win-page', attrs.class, requestedTheme.value === 'Light' ? 'win-theme-scope theme-light' : requestedTheme.value === 'Dark' ? 'win-theme-scope theme-dark' : undefined],
+        style: [{ ...(hasPageAttributes ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)' } : {}), minWidth: '0', minHeight: '0', maxWidth: '100%', ...resourceStyles, ...frameworkLayoutStyle(attrs, instance) }, attrs.style]
       }, content) : h(Fragment, content)
     }
   }

@@ -10,7 +10,7 @@ import { connectWindowTitleBarFrame } from '../../../utils/titleBarWindowFrame'
 
 export type SampleBackdropType = 'None' | 'Mica' | 'MicaAlt' | 'Acrylic' | 'AcrylicThin'
 export interface SystemBackdropSampleSession {
-  Kind?: 'SystemBackdrops' | 'TitleBarDragRegions' | 'TitleBarEndToEnd'
+  Kind?: 'SystemBackdrops' | 'TitleBarDragRegions' | 'TitleBarEndToEnd' | 'CreateMultipleWindows'
   handle: SystemBackdropWindowHandle
   allowedBackdrops: SampleBackdropType[]
   locale: Locale
@@ -40,7 +40,7 @@ interface StoredSampleSession {
 }
 const storageKey = (id: string) => `WinUI.WindowSample.${id}`
 const backdropTypes: readonly SampleBackdropType[] = ['None', 'Mica', 'MicaAlt', 'Acrylic', 'AcrylicThin']
-const sampleKinds = ['SystemBackdrops', 'TitleBarDragRegions', 'TitleBarEndToEnd'] as const
+const sampleKinds = ['SystemBackdrops', 'TitleBarDragRegions', 'TitleBarEndToEnd', 'CreateMultipleWindows'] as const
 const readStoredSession = (owner: Window, id: string): StoredSampleSession | undefined => {
   try {
     const value = JSON.parse(owner.sessionStorage.getItem(storageKey(id)) ?? 'null') as StoredSampleSession | null

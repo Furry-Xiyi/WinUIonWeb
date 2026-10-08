@@ -766,8 +766,8 @@ export const normalizeXamlVNode = (node: VNode, instance: ComponentInternalInsta
             if (typeof previousMounted === 'function') previousMounted(vnode)
             register(vnode)
           }
-          props.onVnodeUpdated = (vnode: VNode) => {
-            if (typeof previousUpdated === 'function') previousUpdated(vnode)
+          props.onVnodeUpdated = (vnode: VNode, previousVNode: VNode) => {
+            if (typeof previousUpdated === 'function') previousUpdated(vnode, previousVNode)
             register(vnode)
           }
           props.onVnodeBeforeUnmount = (vnode: VNode) => {

@@ -13,7 +13,7 @@
       ref="popupRef"
       :class="[isOpen ? 'win-popup-root' : 'win-popup-child-storage', themeClass]"
       :style="popupStyle"
-      :inert="!isOpen ? '' : undefined"
+      :inert="!isOpen ? true : undefined"
       :aria-hidden="!isOpen ? 'true' : undefined"
       :dir="flowDirection === 'RightToLeft' ? 'rtl' : undefined"
       tabindex="-1">
@@ -24,7 +24,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import { brushProperty } from './brushProperties'
 
 const PopupChild = defineComponent({
@@ -131,14 +130,14 @@ const themeClass = computed(() => {
   const theme = requested === 'light' || requested === 'dark' ? requested : inherited
   return theme === 'light' || theme === 'dark' ? `win-theme-scope theme-${theme}` : ''
 })
-const popupStyle = computed(() => ({
+const popupStyle = computed<import('vue').CSSProperties>(() => ({
   left: `${position.value.left}px`, top: `${position.value.top}px`,
   maxWidth: `${position.value.width}px`, maxHeight: `${position.value.height}px`,
   visibility: position.value.ready ? 'visible' : 'hidden',
   transform: translationCoordinates.value[0] || translationCoordinates.value[1]
     ? `translate(${translationCoordinates.value[0]}px, ${translationCoordinates.value[1]}px)` : undefined
 }))
-const overlayStyle = computed(() => ({
+const overlayStyle = computed<import('vue').CSSProperties>(() => ({
   left: `${position.value.rootLeft}px`, top: `${position.value.rootTop}px`,
   width: `${position.value.width}px`, height: `${position.value.height}px`,
   visibility: position.value.ready ? 'visible' : 'hidden'

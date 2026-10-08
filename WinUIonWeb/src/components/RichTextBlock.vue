@@ -38,22 +38,22 @@ const attrs = useAttrs();
 const element = ref<HTMLElement | null>(null), source = ref<HTMLElement | null>(null), flow = ref<HTMLElement | null>(null);
 const resolve = (name: keyof typeof props) => resolveXamlValue(props[name],instance);
 const selectionEnabled = computed(() => resolve('IsTextSelectionEnabled') === true);
-const forwardedAttrs = computed(() => ({ ...Object.fromEntries(Object.entries(attrs).filter(([name]) => name !== 'style' && name !== 'AutomationProperties.Name')), 'aria-label': resolveXamlValue(attrs['AutomationProperties.Name'], instance) }));
+const forwardedAttrs = computed(() => ({ ...Object.fromEntries(Object.entries(attrs).filter(([name]) => name !== 'style' && name !== 'AutomationProperties.Name')), 'aria-label': String(resolveXamlValue(attrs['AutomationProperties.Name'], instance) ?? '') }));
 const hasOverflow = computed(() => Boolean(resolve('OverflowContentTarget')));
 const ContentOutlet = defineComponent({ setup: () => () => h(Fragment,normalizeXamlNodes(textContentNodes(slots.default?.() ?? [], 'Blocks'),instance)) });
-const style = computed(() => ({
+const style = computed<import('vue').CSSProperties>(() => ({
   fontFamily: resolve('FontFamily') === 'XamlAutoFontFamily' ? 'var(--ContentControlThemeFontFamily)' : resolve('FontFamily') as string,
   fontSize: cssLength(resolve('FontSize')),
   fontStyle: String(resolve('FontStyle')).toLowerCase(), fontWeight: textFontWeight(resolve('FontWeight')),
   fontStretch: String(resolve('FontStretch')).replace(/([a-z])([A-Z])/g,'$1-$2').toLowerCase(),
-  color: textBrush(resolve('Foreground')), textAlign: String(resolve('HorizontalTextAlignment') || resolve('TextAlignment')).toLowerCase(),
+  color: textBrush(resolve('Foreground')), textAlign: String(resolve('HorizontalTextAlignment') || resolve('TextAlignment')).toLowerCase() as import('vue').CSSProperties['textAlign'],
   lineHeight: Number(resolve('LineHeight')) > 0 ? cssLength(resolve('LineHeight')) : resolve('TextLineBounds') === 'Tight' ? '1' : Number(resolve('FontSize')) === 14 ? '20px' : 'normal',
   letterSpacing: `${Number(resolve('CharacterSpacing')) / 1000}em`, textIndent: cssLength(resolve('TextIndent')),
   direction: resolve('FlowDirection') === 'RightToLeft' ? 'rtl' : 'ltr', unicodeBidi: resolve('TextReadingOrder') === 'DetectFromContent' ? 'plaintext' : 'normal',
-  textDecorationLine: String(resolve('TextDecorations')).replace('Strikethrough','line-through').toLowerCase(),
+  textDecorationLine: String(resolve('TextDecorations')).replace('Strikethrough','line-through').toLowerCase() as import('vue').CSSProperties['textDecorationLine'],
   whiteSpace: resolve('TextWrapping') === 'NoWrap' ? 'nowrap' : 'normal', overflowWrap: resolve('TextWrapping') === 'Wrap' ? 'anywhere' : 'normal',
   width: cssLength(resolve('Width')), height: cssLength(resolve('Height')), margin: xamlThickness(resolve('Margin')), padding: xamlThickness(resolve('Padding')),
-  minWidth: cssLength(resolve('MinWidth')), minHeight: cssLength(resolve('MinHeight')), maxWidth: cssLength(resolve('MaxWidth')), maxHeight: cssLength(resolve('MaxHeight')), opacity: resolve('Opacity'),
+  minWidth: cssLength(resolve('MinWidth')), minHeight: cssLength(resolve('MinHeight')), maxWidth: cssLength(resolve('MaxWidth')), maxHeight: cssLength(resolve('MaxHeight')), opacity: resolve('Opacity') as import('vue').CSSProperties['opacity'],
   justifySelf: alignment(resolve('HorizontalAlignment'),'horizontal'), alignSelf: alignment(resolve('VerticalAlignment'),'vertical'),
   userSelect: selectionEnabled.value ? 'text' : 'none', WebkitUserSelect: selectionEnabled.value ? 'text' : 'none', '--rich-text-selection': textBrush(resolve('SelectionHighlightColor')),
   ...(resolve('IsTextScaleFactorEnabled') === false ? { textSizeAdjust: 'none', WebkitTextSizeAdjust: 'none' } : {}),

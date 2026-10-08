@@ -2,8 +2,10 @@ import catalogResources from './CatalogResources';
 import systemBackdropElementResources from './SystemBackdropElementResources';
 import systemBackdropResources from './SystemBackdropResources';
 import titleBarResources from './TitleBarResources';
+import multipleWindowsResources from './MultipleWindowsResources';
 
 export default {
+  ...multipleWindowsResources,
   ...titleBarResources,
   ...systemBackdropElementResources,
   ...systemBackdropResources,

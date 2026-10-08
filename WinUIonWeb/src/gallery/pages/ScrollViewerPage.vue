@@ -72,7 +72,8 @@
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
-import ComboBox, { ComboBoxItem } from '../../components/ComboBox.vue'
+import ComboBox from '../../components/ComboBox.vue'
+import { ComboBoxItem } from '../../components/inlineControlProperties'
 import ControlExample from '../../components/ControlExample.vue'
 import Grid from '../../components/Grid.vue'
 import ColumnDefinition from '../../components/ColumnDefinition.vue'

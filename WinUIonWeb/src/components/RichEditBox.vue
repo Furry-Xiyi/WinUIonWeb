@@ -708,7 +708,7 @@ const updateSelectionFlyout = () => {
   }
   const rect = selection.getRangeAt(0).getBoundingClientRect();
   if (hasCustomSelectionFlyout.value && editorRef.value) {
-    const controller = customSelectionController.value || props.SelectionFlyout as typeof customSelectionController.value;
+    const controller = customSelectionController.value || (props.SelectionFlyout as unknown as typeof customSelectionController.value);
     const targetRect = editorRef.value.getBoundingClientRect();
     void controller?.ShowAt?.(editorRef.value, { ShowMode: 'Transient', Position: { X: rect.left - targetRect.left, Y: rect.top - targetRect.top } });
     return;

@@ -22,7 +22,10 @@ const imageProps = computed(() => ({
   ...Object.fromEntries(Object.keys(iconElementProps).filter(name => !['Foreground', 'FlowDirection', 'RequestedTheme'].includes(name)).map(name => [name, icon.read(name)])),
   Source: sourceOverride.value === undefined ? props.Source : sourceOverride.value
 }))
-const bindElement = () => { icon.Element.value = imageRef.value?.$el ?? instance?.subTree.el ?? null }
+const bindElement = () => {
+  const element = imageRef.value?.$el ?? instance?.subTree.el
+  icon.Element.value = (element ?? null) as HTMLElement | null
+}
 onMounted(bindElement)
 onUpdated(bindElement)
 Object.defineProperty(icon.api, 'Source', {

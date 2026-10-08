@@ -19,7 +19,7 @@
     :aria-disabled="isEnabled ? undefined : 'true'"
     :aria-hidden="isHidden ? 'true' : undefined"
     :aria-current="isCurrent ? 'page' : undefined"
-    :inert="isHidden ? '' : undefined"
+    :inert="isHidden ? true : undefined"
     @focusin="onGotFocus"
     @keydown="onKeyDown"
     @pointerenter="onPointerEnter"
@@ -91,7 +91,7 @@ export default { ContentTemplate }
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, provide, ref, useAttrs, useSlots, watch, type VNode } from 'vue'
+import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, provide, ref, useAttrs, useSlots, watch, type CSSProperties, type VNode } from 'vue'
 import NativeButton from './Button.vue'
 import ContentPresenter from './ContentPresenter.vue'
 import TextBlock from './TextBlock.vue'
@@ -105,7 +105,7 @@ import { useI18n } from './i18n/index'
 
 defineOptions({ name: 'BreadcrumbBarItem', inheritAttrs: false })
 const props = defineProps({
-  Content: { default: undefined }, ContentTemplate: { default: undefined },
+  Content: { type: null, default: undefined }, ContentTemplate: { type: null, default: undefined },
   IsEnabled: { type: [Boolean, String], default: true }, FlowDirection: { type: String, default: '' },
   Background: { type: [String, Object], default: '' }, BorderBrush: { type: [String, Object], default: '' },
   BorderThickness: { type: [String, Number], default: 0 }, Foreground: { type: [String, Object], default: '' },
@@ -143,12 +143,12 @@ const Button = defineComponent({
     })),
       IsEnabled: isEnabled.value,
       Padding: '1,3',
-      BorderThickness: property('BorderThickness') || 0,
-      BorderBrush: property('BorderBrush') || 'transparent',
-      FontFamily: property('FontFamily') || 'var(--ContentControlThemeFontFamily, Segoe UI Variable, Segoe UI, sans-serif)',
-      FontSize: property('FontSize') || 'var(--BreadcrumbBarItemThemeFontSize, var(--ControlContentThemeFontSize, 14px))',
+      BorderThickness: String(property('BorderThickness') || 0),
+      BorderBrush: String(property('BorderBrush') || 'transparent'),
+      FontFamily: String(property('FontFamily') || 'var(--ContentControlThemeFontFamily, Segoe UI Variable, Segoe UI, sans-serif)'),
+      FontSize: String(property('FontSize') || 'var(--BreadcrumbBarItemThemeFontSize, var(--ControlContentThemeFontSize, 14px))'),
       FontWeight: String(property('FontWeight') || 'Normal'),
-      CornerRadius: property('CornerRadius') || 'var(--ControlCornerRadius, 4px)',
+      CornerRadius: String(property('CornerRadius') || 'var(--ControlCornerRadius, 4px)'),
       Click: activate
     }, buttonSlots)
   }
@@ -178,10 +178,10 @@ const isDropDown = computed(() => context?.type === 'EllipsisDropDown')
 const isHidden = computed(() => Boolean(context?.hidden))
 const flowDirection = computed(() => String(FlowDirection.value) === 'RightToLeft' || context?.direction === 'rtl' ? 'rtl' : 'ltr')
 const tabIndex = computed(() => !isEnabled.value || isHidden.value || property('IsTabStop') === false ? -1 : context?.tabIndex ?? 0)
-const automationName = computed(() => isEllipsis.value ? t('text.more') : resolve(attrs['AutomationProperties.Name']))
+const automationName = computed(() => isEllipsis.value ? t('text.more') : String(resolve(attrs['AutomationProperties.Name']) ?? ''))
 const rootAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([name]) => !['class', 'style', 'Click', 'GotFocus', 'KeyDown', 'AutomationProperties.Name'].includes(name))))
 const layoutStyle = computed(() => {
-  const style: Record<string, unknown> = { ...frameworkLayoutStyle(props, instance) }
+  const style: CSSProperties & Record<string, string | number | undefined> = { ...frameworkLayoutStyle(props, instance) }
   // The flyout's StackPanel runs vertically, so its cross axis is horizontal.
   // VerticalAlignment still centers inline items in the horizontal repeater.
   if (isDropDown.value) style.alignSelf = style.justifySelf || 'stretch'
@@ -189,10 +189,10 @@ const layoutStyle = computed(() => {
   delete style.borderWidth
   delete style.borderColor
   const background = property('Background')
-  if (background) style['--breadcrumb-background'] = background
+  if (background) style['--breadcrumb-background'] = String(background)
   for (const [name, key] of [['Foreground', '--breadcrumb-item-foreground'], ['FontFamily', 'fontFamily'], ['FontSize', 'fontSize'], ['FontWeight', 'fontWeight']] as const) {
     const value = property(name)
-    if (value !== '' && value !== undefined) style[key] = name === 'FontSize' && !Number.isNaN(Number(value)) ? `${value}px` : value === 'Normal' ? 'normal' : value
+    if (value !== '' && value !== undefined) style[key] = name === 'FontSize' && !Number.isNaN(Number(value)) ? `${value}px` : value === 'Normal' ? 'normal' : value == null ? undefined : String(value)
   }
   return style
 })

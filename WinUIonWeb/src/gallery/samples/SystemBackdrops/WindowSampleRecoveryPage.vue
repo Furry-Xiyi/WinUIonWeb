@@ -26,7 +26,7 @@ import type { WindowSampleRecoveryFailure } from './mountSystemBackdropsWindow'
 const props = defineProps<{ context: WindowSampleRecoveryFailure }>()
 const { t } = useI18n()
 const Labels = computed(() => ({
-  title: t(props.context.Kind === 'TitleBarDragRegions' ? 'sample.titlebar.drag-window-title' : props.context.Kind === 'TitleBarEndToEnd' ? 'sample.titlebar.end-window-title' : 'sample.systembackdrops.window-title'),
+  title: t(props.context.Kind === 'TitleBarDragRegions' ? 'sample.titlebar.drag-window-title' : props.context.Kind === 'TitleBarEndToEnd' ? 'sample.titlebar.end-window-title' : props.context.Kind === 'CreateMultipleWindows' ? 'sample.multiplewindows.child-window-title' : 'sample.systembackdrops.window-title'),
   failure: t('sample.systembackdrops.window-recovery-failed'), retry: t('sample.systembackdrops.retry-connection'),
 }))
 const Retry_Click = () => window.location.reload()

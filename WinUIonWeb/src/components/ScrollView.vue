@@ -115,7 +115,7 @@ let measureFrame = 0
 let correlation = 0
 let operation: { Id: number; Kind: 'Scroll' | 'Zoom' } | null = null
 const publicSender = new Proxy({} as Record<string, unknown>, { get: (_target, key) => unref(exposed[key as string]), set: (_target, key, next) => { const current = exposed[key as string] as { value?: unknown }; if (current && typeof current === 'object' && 'value' in current) current.value = next; else exposed[key as string] = next; return true } })
-const event = (name: string, args: Record<string, unknown> = {}) => {
+const event = (name: 'ExtentChanged' | 'StateChanged' | 'ViewChanged' | 'ScrollAnimationStarting' | 'ZoomAnimationStarting' | 'ScrollCompleted' | 'ZoomCompleted' | 'ScrollStarting' | 'ZoomStarting' | 'AnchorRequested' | 'BringingIntoView' | 'Loaded', args: Record<string, unknown> = {}) => {
   emit(name, publicSender, args)
   if (!attrs[`on${name}`]) resolveXamlHandler(attrs[name], instance)?.(publicSender, args)
 }

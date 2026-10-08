@@ -25,18 +25,18 @@ import './tabViewStyles.css'
 
 defineOptions({ name: 'TabView', inheritAttrs: false })
 const props = defineProps({
-  TabWidthMode: { type: null as unknown as PropType<unknown>, default: 'Equal' }, CloseButtonOverlayMode: { type: null as unknown as PropType<unknown>, default: 'Auto' },
-  TabStripHeader: { type: null as unknown as PropType<unknown>, default: null }, TabStripHeaderTemplate: { type: null as unknown as PropType<unknown>, default: null },
-  TabStripFooter: { type: null as unknown as PropType<unknown>, default: null }, TabStripFooterTemplate: { type: null as unknown as PropType<unknown>, default: null },
-  IsAddTabButtonVisible: { type: null as unknown as PropType<unknown>, default: true }, AddTabButtonCommand: { type: null as unknown as PropType<unknown>, default: null }, AddTabButtonCommandParameter: { type: null as unknown as PropType<unknown>, default: null },
-  TabItemsSource: { type: null as unknown as PropType<unknown>, default: null }, TabItemTemplate: { type: null as unknown as PropType<unknown>, default: null }, TabItemTemplateSelector: { type: null as unknown as PropType<unknown>, default: null },
-  CanDragTabs: { type: null as unknown as PropType<unknown>, default: false }, CanReorderTabs: { type: null as unknown as PropType<unknown>, default: true }, AllowDropTabs: { type: null as unknown as PropType<unknown>, default: true }, CanTearOutTabs: { type: null as unknown as PropType<unknown>, default: false },
-  SelectedIndex: { type: null as unknown as PropType<unknown>, default: 0 }, SelectedItem: { type: null as unknown as PropType<unknown>, default: undefined },
-  IsEnabled: { type: null as unknown as PropType<unknown>, default: true }, IsTabStop: { type: null as unknown as PropType<unknown>, default: false }, Visibility: { type: null as unknown as PropType<unknown>, default: 'Visible' },
-  Background: { type: null as unknown as PropType<unknown>, default: '{ThemeResource TabViewBackground}' }, Foreground: { type: null as unknown as PropType<unknown>, default: '' }, BorderBrush: { type: null as unknown as PropType<unknown>, default: '' }, BorderThickness: { type: null as unknown as PropType<unknown>, default: 0 }, CornerRadius: { type: null as unknown as PropType<unknown>, default: 0 },
-  Margin: { type: null as unknown as PropType<unknown>, default: 0 }, Padding: { type: null as unknown as PropType<unknown>, default: '{ThemeResource TabViewHeaderPadding}' },
-  Width: { type: null as unknown as PropType<unknown>, default: '' }, Height: { type: null as unknown as PropType<unknown>, default: '' }, MinWidth: { type: null as unknown as PropType<unknown>, default: '' }, MinHeight: { type: null as unknown as PropType<unknown>, default: '' }, MaxWidth: { type: null as unknown as PropType<unknown>, default: '' }, MaxHeight: { type: null as unknown as PropType<unknown>, default: '' },
-  HorizontalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' }, VerticalAlignment: { type: null as unknown as PropType<unknown>, default: 'Top' }, RequestedTheme: { type: null as unknown as PropType<unknown>, default: 'Default' }, FlowDirection: { type: null as unknown as PropType<unknown>, default: '' }, Opacity: { type: null as unknown as PropType<unknown>, default: 1 }, IsHitTestVisible: { type: null as unknown as PropType<unknown>, default: true }
+  TabWidthMode: { type: null as unknown as PropType<unknown>, default: 'Equal' as unknown }, CloseButtonOverlayMode: { type: null as unknown as PropType<unknown>, default: 'Auto' as unknown },
+  TabStripHeader: { type: null as unknown as PropType<unknown>, default: null as unknown }, TabStripHeaderTemplate: { type: null as unknown as PropType<unknown>, default: null as unknown },
+  TabStripFooter: { type: null as unknown as PropType<unknown>, default: null as unknown }, TabStripFooterTemplate: { type: null as unknown as PropType<unknown>, default: null as unknown },
+  IsAddTabButtonVisible: { type: null as unknown as PropType<unknown>, default: true as unknown }, AddTabButtonCommand: { type: null as unknown as PropType<unknown>, default: null as unknown }, AddTabButtonCommandParameter: { type: null as unknown as PropType<unknown>, default: null as unknown },
+  TabItemsSource: { type: null as unknown as PropType<unknown>, default: null as unknown }, TabItemTemplate: { type: null as unknown as PropType<unknown>, default: null as unknown }, TabItemTemplateSelector: { type: null as unknown as PropType<unknown>, default: null as unknown },
+  CanDragTabs: { type: null as unknown as PropType<unknown>, default: false as unknown }, CanReorderTabs: { type: null as unknown as PropType<unknown>, default: true as unknown }, AllowDropTabs: { type: null as unknown as PropType<unknown>, default: true as unknown }, CanTearOutTabs: { type: null as unknown as PropType<unknown>, default: false as unknown },
+  SelectedIndex: { type: null as unknown as PropType<unknown>, default: 0 as unknown }, SelectedItem: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+  IsEnabled: { type: null as unknown as PropType<unknown>, default: true as unknown }, IsTabStop: { type: null as unknown as PropType<unknown>, default: false as unknown }, Visibility: { type: null as unknown as PropType<unknown>, default: 'Visible' as unknown },
+  Background: { type: null as unknown as PropType<unknown>, default: '{ThemeResource TabViewBackground}' as unknown }, Foreground: { type: null as unknown as PropType<unknown>, default: '' as unknown }, BorderBrush: { type: null as unknown as PropType<unknown>, default: '' as unknown }, BorderThickness: { type: null as unknown as PropType<unknown>, default: 0 as unknown }, CornerRadius: { type: null as unknown as PropType<unknown>, default: 0 as unknown },
+  Margin: { type: null as unknown as PropType<unknown>, default: 0 as unknown }, Padding: { type: null as unknown as PropType<unknown>, default: '{ThemeResource TabViewHeaderPadding}' as unknown },
+  Width: { type: null as unknown as PropType<unknown>, default: '' as unknown }, Height: { type: null as unknown as PropType<unknown>, default: '' as unknown }, MinWidth: { type: null as unknown as PropType<unknown>, default: '' as unknown }, MinHeight: { type: null as unknown as PropType<unknown>, default: '' as unknown }, MaxWidth: { type: null as unknown as PropType<unknown>, default: '' as unknown }, MaxHeight: { type: null as unknown as PropType<unknown>, default: '' as unknown },
+  HorizontalAlignment: { type: null as unknown as PropType<unknown>, default: 'Stretch' as unknown }, VerticalAlignment: { type: null as unknown as PropType<unknown>, default: 'Top' as unknown }, RequestedTheme: { type: null as unknown as PropType<unknown>, default: 'Default' as unknown }, FlowDirection: { type: null as unknown as PropType<unknown>, default: '' as unknown }, Opacity: { type: null as unknown as PropType<unknown>, default: 1 as unknown }, IsHitTestVisible: { type: null as unknown as PropType<unknown>, default: true as unknown }
 })
 const emit = defineEmits(['Loaded', 'SelectionChanged', 'TabCloseRequested', 'TabDroppedOutside', 'AddTabButtonClick', 'TabItemsChanged', 'TabDragStarting', 'TabDragCompleted', 'TabStripDragOver', 'TabStripDrop', 'TabTearOutWindowRequested', 'TabTearOutRequested', 'ExternalTornOutTabsDropping', 'ExternalTornOutTabsDropped', 'update:SelectedIndex', 'update:SelectedItem'])
 const instance = getCurrentInstance()
@@ -110,11 +110,11 @@ provide(xamlResourceDictionaryKey, resources)
 const names = inject<Record<string, unknown>>(xamlNameScopeKey, {})
 const brushResources = useXamlBrushResources(instance, names)
 const resourceNames = shallowRef<string[]>([])
-const inheritedTheme = inject(xamlThemeKey, null)
+const inheritedTheme = inject<unknown>(xamlThemeKey, null)
 provide(xamlThemeKey, computed(() => requestedTheme.value ?? (inheritedTheme && typeof inheritedTheme === 'object' && 'value' in inheritedTheme ? inheritedTheme.value : inheritedTheme)))
 const resourceBrushStyles = computed(() => Object.fromEntries(resourceNames.value.map(name => { const brush = resolveAcrylicResource(name, instance); return [`--${name}`, resolveBrushStyle(brush, instance).background] }).filter(([, paint]) => paint !== undefined)))
 const metric = (name: string, fallback: number) => { const number = Number(primitives.value[name] ?? value(`{ThemeResource ${name}}`)); return Number.isFinite(number) ? number : fallback }
-type RecordEntry = { Key: unknown; Item: unknown; Index: number; Node: VNode | null }
+type RecordEntry = { Key: string; Item: unknown; Index: number; Node: VNode | null }
 const keys = new WeakMap<object, string>()
 const primitiveKeys = new Map<unknown, string>()
 let identity = 0
@@ -176,7 +176,7 @@ const replaceItems = (next: unknown[]) => {
   const source = property('TabItemsSource')
   if (Array.isArray(source)) source.splice(0, source.length, ...next)
   else if (source && typeof source === 'object' && 'ReplaceAll' in source && typeof source.ReplaceAll === 'function') source.ReplaceAll(next)
-  else if (source && typeof source === 'object' && 'Clear' in source && 'Append' in source && typeof source.Clear === 'function' && typeof source.Append === 'function') { source.Clear(); next.forEach(item => source.Append(item)) }
+  else if (source && typeof source === 'object' && 'Clear' in source && 'Append' in source && typeof source.Clear === 'function' && typeof source.Append === 'function') { source.Clear(); const append = source.Append; next.forEach(item => append.call(source, item)) }
   else if (source) throw new TypeError('TabItemsSource must expose a mutable collection to move tabs.')
   else localItems.value = next
 }
@@ -574,7 +574,7 @@ const ContentPanel = defineComponent({ props: { Entry: { type: Object as PropTyp
   // x:Name declarations. Repeated sample pages must not replace one another's
   // SourceElement/TextBox names in the outer Gallery page namescope.
   provide(xamlNameScopeKey, shallowReactive<Record<string, unknown>>({}))
-  return () => { const entry = panelProps.Entry; const current = containerOf(entry); const saved = realizedContent.get(entry.Key); return h('div', { class: 'win-tab-view-content-panel', hidden: entry.Key !== selectedKey.value, inert: entry.Key !== selectedKey.value ? '' : undefined, 'aria-hidden': entry.Key !== selectedKey.value }, renderTabViewPresenter(current ? current.Content : saved?.Content, [], current ? current.ContentTemplate : saved?.Template, [], instance)) }
+  return () => { const entry = panelProps.Entry; const current = containerOf(entry); const saved = realizedContent.get(entry.Key); return h('div', { class: 'win-tab-view-content-panel', hidden: entry.Key !== selectedKey.value, inert: entry.Key !== selectedKey.value ? true : undefined, 'aria-hidden': entry.Key !== selectedKey.value }, [renderTabViewPresenter(current ? current.Content : saved?.Content, [], current ? current.ContentTemplate : saved?.Template, [], instance)]) }
 } })
 const ContentOutlet = defineComponent({ setup: () => () => { const selected = selectedRecord.value; const container = containerOf(selected); if (selected && container) { const existing = realizedContent.get(selected.Key); if (!existing) realizedContent.set(selected.Key, { Content: container.Content, Template: container.ContentTemplate }) }; return h(Fragment, entries.value.filter(entry => realizedContent.has(entry.Key)).map(entry => h(ContentPanel, { key: entry.Key, Entry: entry }))) } })
 const ResourcesOutlet = defineComponent({ setup: () => () => { const local: Record<string, VNode> = {}; collectXamlResources(children('Resources'), local); for (const key of Object.keys(resources)) if (!Object.hasOwn(local, key)) delete resources[key]; Object.assign(resources, local); brushResources.sync(local); const nextNames = [...new Set(Object.entries(local).filter(([, node]) => (node.type as { __xamlBrush?: boolean }).__xamlBrush).map(([key]) => key.replace(/^(Light|Dark|Default|HighContrast):/, '')))]; if (nextNames.join('|') !== resourceNames.value.join('|')) resourceNames.value = nextNames; return h(Fragment, normalizeXamlNodes(children('KeyboardAccelerators'), instance)) } })

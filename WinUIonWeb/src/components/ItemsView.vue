@@ -377,6 +377,7 @@ const templateMetricsFor = (item) => {
 const repeaterWidth = ref(0);
 const repeaterDesiredHeight = ref(0);
 let repeaterObserver;
+let repeaterMeasureFrame;
 const measureImageRatios = () => {
   const urls = new Set();
   for (const item of items.value) {
@@ -771,11 +772,20 @@ onMounted(() => {
     repeaterDesiredHeight.value = element.offsetHeight + (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
   };
   update();
-  repeaterObserver = new ResizeObserver(update);
+  repeaterObserver = new ResizeObserver(() => {
+    if (repeaterMeasureFrame !== undefined) return;
+    // Publishing the new height can resize the containing ScrollView.
+    // Arrange it in the next frame, outside ResizeObserver delivery.
+    repeaterMeasureFrame = requestAnimationFrame(() => {
+      repeaterMeasureFrame = undefined;
+      update();
+    });
+  });
   repeaterObserver.observe(element);
 });
 onBeforeUnmount(() => {
   repeaterObserver?.disconnect();
+  if (repeaterMeasureFrame !== undefined) cancelAnimationFrame(repeaterMeasureFrame);
   window.removeEventListener('keydown', captureModifiers);
   window.removeEventListener('keyup', captureModifiers);
   window.removeEventListener('blur', clearModifiers);

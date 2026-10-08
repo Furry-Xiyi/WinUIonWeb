@@ -128,7 +128,7 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, reactive, ref, unref, useAttrs, useSlots, type Component, type CSSProperties, type VNode } from 'vue'
+import { computed, getCurrentInstance, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, reactive, ref, unref, useAttrs, useSlots, type Component, type CSSProperties, type VNode } from 'vue'
 import Button from './Button.vue'
 import Grid from './Grid.vue'
 import RowDefinition from './RowDefinition.vue'
@@ -157,9 +157,9 @@ const props = defineProps({
   PrimaryButtonCommand: { type: [Object, Function, String], default: undefined },
   SecondaryButtonCommand: { type: [Object, Function, String], default: undefined },
   CloseButtonCommand: { type: [Object, Function, String], default: undefined },
-  PrimaryButtonCommandParameter: { default: undefined },
-  SecondaryButtonCommandParameter: { default: undefined },
-  CloseButtonCommandParameter: { default: undefined },
+  PrimaryButtonCommandParameter: { type: null, default: undefined },
+  SecondaryButtonCommandParameter: { type: null, default: undefined },
+  CloseButtonCommandParameter: { type: null, default: undefined },
   DefaultButton: { type: String, default: 'None' },
   IsEnabled: { type: [Boolean, String], default: true },
   IsPrimaryButtonEnabled: { type: [Boolean, String], default: true },
@@ -222,7 +222,7 @@ const SecondaryColumnWidth = computed(() => allButtonsVisible.value ? '*' : 0)
 const PrimaryButtonColumn = computed(() => !SecondaryButtonText.value && !CloseButtonText.value ? 4 : 0)
 const SecondaryButtonColumn = computed(() => allButtonsVisible.value ? 2 : !CloseButtonText.value ? 4 : 0)
 const buttonVisibilityClass = computed(() => allButtonsVisible.value ? 'all-visible' : 'partial-visible')
-const automationName = computed(() => resolveXamlValue(attrs['AutomationProperties.Name'], instance))
+const automationName = computed(() => String(resolveXamlValue(attrs['AutomationProperties.Name'], instance) ?? ''))
 const themeClass = computed(() => {
   themeRevision.value
   const requested = String(resolve('RequestedTheme') ?? 'Default').toLowerCase()

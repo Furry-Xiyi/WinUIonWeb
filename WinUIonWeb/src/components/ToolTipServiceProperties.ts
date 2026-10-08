@@ -13,7 +13,7 @@ export const ToolTipServiceToolTip = defineComponent({
       while (parent) {
         const root = parent.subTree
         const element = parent.vnode.el instanceof HTMLElement ? parent.vnode.el
-          : Array.isArray(root?.children) ? root.children.find(child => child && typeof child === 'object' && 'el' in child && child.el instanceof HTMLElement)?.el
+          : Array.isArray(root?.children) ? (root.children.find(child => child && typeof child === 'object' && 'el' in child && child.el instanceof HTMLElement) as VNode | undefined)?.el
             : undefined
         if (element instanceof HTMLElement) { owner.value = element; return }
         parent = parent.parent

@@ -38,7 +38,8 @@
 </template>
 
 <script setup lang="ts">
-import ComboBox, { ComboBoxItem } from '../../../components/ComboBox.vue'
+import ComboBox from '../../../components/ComboBox.vue'
+import { ComboBoxItem } from '../../../components/inlineControlProperties'
 import Grid from '../../../components/Grid.vue'
 import RowDefinition from '../../../components/RowDefinition.vue'
 import StackPanel from '../../../components/StackPanel.vue'

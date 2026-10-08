@@ -1,4 +1,4 @@
-import { normalizeStyle, type CSSProperties, type Directive } from 'vue'
+import { normalizeStyle, type Directive, type StyleValue } from 'vue'
 
 interface BrushVisual {
   root: HTMLDivElement
@@ -39,7 +39,7 @@ const remove = (host: HTMLElement) => {
   }
   visuals.delete(host)
 }
-const update = (host: HTMLElement, input: CSSProperties | CSSProperties[] | undefined, hostBackdrop = false, noBackdrop = false) => {
+const update = (host: HTMLElement, input: StyleValue, hostBackdrop = false, noBackdrop = false) => {
   const style = normalizeStyle(input) as Record<string, string> | undefined
   if (!style?.['--acrylic-tint']) { remove(host); return }
   let visual = visuals.get(host)
@@ -105,7 +105,7 @@ const update = (host: HTMLElement, input: CSSProperties | CSSProperties[] | unde
 
 // Composition effects occupy their own paint layer. Brush opacity and
 // cross-fades never change the host's content, layout, or hit-testing region.
-export const vAcrylicBrush: Directive<HTMLElement, CSSProperties | CSSProperties[]> = {
+export const vAcrylicBrush: Directive<HTMLElement, StyleValue> = {
   mounted: (host, binding) => update(host, binding.value, !!binding.modifiers['host-backdrop'], !!binding.modifiers['no-backdrop']),
   updated: (host, binding) => update(host, binding.value, !!binding.modifiers['host-backdrop'], !!binding.modifiers['no-backdrop']),
   beforeUnmount: remove
@@ -126,7 +126,7 @@ const removeBackdrop = (host: HTMLElement) => {
   host.style.setProperty('-webkit-backdrop-filter', sampler.webkitBackdropFilter)
   samplers.delete(host)
 }
-const updateBackdrop = (host: HTMLElement, input: CSSProperties | CSSProperties[] | undefined) => {
+const updateBackdrop = (host: HTMLElement, input: StyleValue) => {
   const styles = (Array.isArray(input) ? input : [input]).map(style => normalizeStyle(style) as Record<string, string> | undefined)
   const brushes = styles.filter(style => style?.['--acrylic-tint'])
   if (!brushes.length) { removeBackdrop(host); return }
@@ -150,7 +150,7 @@ const updateBackdrop = (host: HTMLElement, input: CSSProperties | CSSProperties[
 // Opacity and clip-path make a popup animation host a CSS backdrop root. Its
 // material children cannot sample the page through that boundary. Sample on
 // the host, then compose the official brush layers with no-backdrop children.
-export const vAcrylicBackdrop: Directive<HTMLElement, CSSProperties | CSSProperties[]> = {
+export const vAcrylicBackdrop: Directive<HTMLElement, StyleValue> = {
   mounted: (host, binding) => updateBackdrop(host, binding.value),
   updated: (host, binding) => updateBackdrop(host, binding.value),
   beforeUnmount: removeBackdrop

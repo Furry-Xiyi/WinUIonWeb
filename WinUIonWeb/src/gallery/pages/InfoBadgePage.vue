@@ -90,7 +90,8 @@
 <script setup lang="ts">
 import { computed, inject, provide, ref } from 'vue'
 import Button from '../../components/Button.vue'
-import ComboBox, { ComboBoxItem } from '../../components/ComboBox.vue'
+import ComboBox from '../../components/ComboBox.vue'
+import { ComboBoxItem } from '../../components/inlineControlProperties'
 import ControlExample from '../../components/ControlExample.vue'
 import { ControlExampleSubstitution } from '../../components/ControlExampleProperties'
 import Frame from '../../components/Frame.vue'

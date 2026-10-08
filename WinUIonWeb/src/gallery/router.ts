@@ -18,6 +18,7 @@ const pageLoaders = {
   styles: () => import('./pages/SectionPage.vue'),
   text: () => import('./pages/SectionPage.vue'),
   windowing: () => import('./pages/SectionPage.vue'),
+  createmultiplewindows: () => import('./pages/CreateMultipleWindowsPage.vue'),
   titlebar: () => import('./pages/TitleBarPage.vue'),
   button: () => import('./pages/ButtonPage.vue'),
   calendardatepicker: () => import('./pages/CalendarDatePickerPage.vue'),

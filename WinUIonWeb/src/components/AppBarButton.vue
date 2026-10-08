@@ -38,7 +38,7 @@ export default { Flyout: AppBarButtonFlyout, Icon: AppBarButtonIcon, Content: Ap
 </script>
 
 <script setup lang="ts">
-import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, provide, ref, shallowReactive, Text, unref, useAttrs, useSlots, watch, type CSSProperties, type VNode } from 'vue'
+import { cloneVNode, Comment, computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, onBeforeUnmount, onMounted, provide, ref, shallowReactive, Text, unref, useAttrs, useSlots, watch, type CSSProperties, type PropType, type VNode } from 'vue'
 import SymbolIcon from './SymbolIcon.vue'
 import FontIcon from './FontIcon.vue'
 import BitmapIcon from './BitmapIcon.vue'
@@ -54,14 +54,14 @@ import { useUICommand } from './uiCommandRuntime'
 defineOptions({ name: 'AppBarButton', inheritAttrs: false })
 type FlyoutController = { ShowAt?: (target: HTMLElement, options?: Record<string, unknown>) => unknown; Hide?: () => void; readonly IsOpen?: boolean }
 const props = defineProps({
-  Label: { type: String, default: undefined }, Icon: { default: undefined }, Content: { default: undefined },
-  Command: { default: undefined }, CommandParameter: { default: undefined }, Flyout: { default: undefined },
+  Label: { type: String, default: undefined }, Icon: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, Content: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+  Command: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, CommandParameter: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, Flyout: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
   IsCompact: { type: [Boolean, String], default: undefined }, LabelPosition: { type: String, default: 'Default' },
   DynamicOverflowOrder: { type: [Number, String], default: 0 }, IsEnabled: { type: [Boolean, String], default: true },
   IsTabStop: { type: [Boolean, String], default: true }, Visibility: { type: String, default: 'Visible' },
   AllowFocusOnInteraction: { type: [Boolean, String], default: undefined }, AllowFocusWhenDisabled: { type: [Boolean, String], default: false },
-  KeyboardAccelerators: { default: undefined }, KeyboardAcceleratorTextOverride: { type: String, default: '' }, KeyboardAcceleratorPlacementMode: { type: String, default: 'Hidden' },
-  Background: { default: undefined }, Foreground: { default: undefined }, BorderBrush: { default: undefined },
+  KeyboardAccelerators: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, KeyboardAcceleratorTextOverride: { type: String, default: '' }, KeyboardAcceleratorPlacementMode: { type: String, default: 'Hidden' },
+  Background: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, Foreground: { type: null as unknown as PropType<unknown>, default: undefined as unknown }, BorderBrush: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
   BorderThickness: { type: [Number, String], default: undefined }, CornerRadius: { type: [Number, String], default: undefined },
   Padding: { type: [Number, String], default: undefined }, Margin: { type: [Number, String], default: undefined },
   Width: { type: [Number, String], default: undefined }, Height: { type: [Number, String], default: undefined },
@@ -70,8 +70,8 @@ const props = defineProps({
   FontFamily: { type: String, default: undefined }, FontWeight: { type: [Number, String], default: undefined }, FontSize: { type: [Number, String], default: undefined },
   HorizontalAlignment: { type: String, default: 'Left' }, VerticalAlignment: { type: String, default: 'Top' },
   HorizontalContentAlignment: { type: String, default: 'Center' }, VerticalContentAlignment: { type: String, default: 'Center' },
-  FlowDirection: { type: String, default: 'LeftToRight' }, Style: { default: undefined },
-  'AutomationProperties.Name': { type: String, default: '' }, 'ToolTipService.ToolTip': { default: undefined }
+  FlowDirection: { type: String, default: 'LeftToRight' }, Style: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+  'AutomationProperties.Name': { type: String, default: '' }, 'ToolTipService.ToolTip': { type: null as unknown as PropType<unknown>, default: undefined as unknown }
 })
 const emit = defineEmits(['Click', 'PointerEntered', 'PointerExited', 'PointerPressed', 'PointerReleased', 'PointerMoved', 'PointerCanceled', 'PointerCaptureLost', 'KeyDown', 'KeyUp', 'GotFocus', 'LostFocus', 'update:Label', 'update:Icon', 'update:Content', 'update:Command', 'update:CommandParameter', 'update:Flyout', 'update:IsCompact', 'update:LabelPosition', 'update:DynamicOverflowOrder', 'update:IsEnabled', 'update:IsTabStop', 'update:Visibility', 'update:AllowFocusOnInteraction', 'update:AllowFocusWhenDisabled', 'update:KeyboardAccelerators', 'update:KeyboardAcceleratorTextOverride', 'update:KeyboardAcceleratorPlacementMode', 'update:Background', 'update:Foreground', 'update:BorderBrush', 'update:BorderThickness', 'update:CornerRadius', 'update:Padding', 'update:Margin', 'update:Width', 'update:Height', 'update:MinWidth', 'update:MinHeight', 'update:MaxWidth', 'update:MaxHeight', 'update:FontFamily', 'update:FontWeight', 'update:FontSize', 'update:HorizontalAlignment', 'update:VerticalAlignment', 'update:HorizontalContentAlignment', 'update:VerticalContentAlignment', 'update:FlowDirection', 'update:Style', 'update:AutomationProperties.Name', 'update:ToolTipService.ToolTip'])
 const attrs = useAttrs()
@@ -170,11 +170,11 @@ const ContentOutlet = defineComponent({ name: 'AppBarButtonContentPresenter', se
   const source = icon.value
   if (typeof source === 'string' || typeof source === 'number') return h(SymbolIcon, { Symbol: source, FontSize: 20 })
   if (source && typeof source === 'object') {
-    const definition = source as Record<string, unknown>
-    if ('Symbol' in definition) return h(SymbolIcon, { ...definition, FontSize: definition.FontSize ?? 20 })
-    if ('Glyph' in definition) return h(FontIcon, { ...definition, FontSize: definition.FontSize ?? 20 })
-    if ('UriSource' in definition) return h(BitmapIcon, definition)
-    if ('Data' in definition) return h(PathIcon, definition)
+    const definition = source as Record<string, unknown> & { FontSize?: string | number }
+    if ('Symbol' in definition) return h(SymbolIcon, { ...definition, FontSize: definition.FontSize ?? 20 } as unknown as InstanceType<typeof SymbolIcon>['$props'])
+    if ('Glyph' in definition) return h(FontIcon, { ...definition, FontSize: definition.FontSize ?? 20 } as unknown as InstanceType<typeof FontIcon>['$props'])
+    if ('UriSource' in definition) return h(BitmapIcon, definition as unknown as InstanceType<typeof BitmapIcon>['$props'])
+    if ('Data' in definition) return h(PathIcon, definition as unknown as InstanceType<typeof PathIcon>['$props'])
   }
   return null
 } } })
@@ -204,7 +204,7 @@ const buttonClasses = computed(() => ({
 }))
 const buttonStyle = computed<CSSProperties>(() => {
   const layout = frameworkLayoutStyle(Object.fromEntries(Object.keys(props).map(name => [name, value(name as keyof typeof props)])), instance)
-  for (const property of ['background', 'borderColor', 'borderWidth', 'padding']) delete layout[property]
+  for (const property of ['background', 'borderColor', 'borderWidth', 'padding'] as const) delete layout[property]
   return {
   ...layout, margin: xamlThickness(value('Margin')) || undefined,
   width: cssLength(value('Width')) || undefined, height: cssLength(value('Height')) || undefined,
@@ -233,7 +233,8 @@ const publicProperties = {
 const eventSender = new Proxy(publicProperties, { get: (target, key) => unref(Reflect.get(target, key)), set: (target, key, next) => { const property = Reflect.get(target, key); if (property && typeof property === 'object' && 'value' in property) property.value = next; return true } })
 const sender = () => toggleContext?.sender() ?? eventSender
 const routedArgs = (event: Event) => ({ OriginalSource: sender(), Handled: false, OriginalEvent: event })
-const raise = (name: string, args: Record<string, any>) => {
+type InputEventName = 'Click' | 'PointerEntered' | 'PointerExited' | 'PointerPressed' | 'PointerReleased' | 'PointerMoved' | 'PointerCanceled' | 'PointerCaptureLost' | 'KeyDown' | 'KeyUp' | 'GotFocus' | 'LostFocus'
+const raise = (name: InputEventName, args: Record<string, any>) => {
   const listener = instance?.vnode.props?.[`on${name}`];
   if (listener) {
     for (const handler of Array.isArray(listener) ? listener : [listener]) {
@@ -242,7 +243,7 @@ const raise = (name: string, args: Record<string, any>) => {
   } else emit(name, sender(), args);
   if (attrs[name] !== undefined && !listener) resolveXamlHandler(attrs[name], instance)?.(sender(), args);
 }
-const dispatchInput = (name: string, event: Event) => {
+const dispatchInput = (name: InputEventName, event: Event) => {
   const args: Record<string, any> = routedArgs(event)
   if (event instanceof PointerEvent) {
     args.Pointer = { PointerId: event.pointerId, PointerDeviceType: event.pointerType === 'touch' ? 'Touch' : event.pointerType === 'pen' ? 'Pen' : 'Mouse', IsInContact: event.buttons !== 0 }

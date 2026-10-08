@@ -5,7 +5,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 export const RelativePanelResources = defineComponent({ name: 'RelativePanel.Resources', __relativePanelResources: true, setup: () => () => null })
 export default { Resources: RelativePanelResources }
 </script>

@@ -23,7 +23,7 @@ import { useI18n } from '../../../components/i18n/index'
 import { resolveXamlValue } from '../../../components/xamlRuntime'
 import { tabViewWindowSampleInfoKey, type TabViewWindowSampleInfo } from './tabViewWindowStatus'
 
-const props = defineProps<{ DataContext?: { Title: string; IsOn: boolean } }>()
+const props = defineProps<{ DataContext?: { Title: string; IsOn: boolean } | string }>()
 const instance = getCurrentInstance()
 const fallback = reactive({ Title: '', IsOn: false })
 const state = computed(() => resolveXamlValue(props.DataContext, instance) as typeof fallback ?? fallback)

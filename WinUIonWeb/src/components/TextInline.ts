@@ -1,4 +1,4 @@
-import { Comment, defineComponent, Fragment, getCurrentInstance, h, onBeforeUnmount, ref, type ComponentInternalInstance, type CSSProperties, type VNode } from 'vue'
+import { Comment, defineComponent, Fragment, getCurrentInstance, h, onBeforeUnmount, ref, type ComponentInternalInstance, type ComponentObjectPropsOptions, type CSSProperties, type VNode } from 'vue'
 import { cssLength, xamlThickness } from './layout'
 import { cssColor, isSolidColorBrush } from './brushCore'
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue } from './xamlRuntime'
@@ -67,19 +67,20 @@ const inlineStyle = (props: Record<string, unknown>, instance: ComponentInternal
     ...(value('IsTextScaleFactorEnabled') === false ? { textSizeAdjust: 'none', WebkitTextSizeAdjust: 'none' } : {})
   }
 }
-const inline = (name: string, tag: string, extra: Record<string, unknown> = {}) => defineComponent({
+const inline = (name: string, tag: string, extra: ComponentObjectPropsOptions = {}) => defineComponent({
   name, inheritAttrs: false,
   Inlines:name === 'Paragraph' ? ParagraphInlines : SpanInlines,
-  props: { ...formattingProps, ...extra } as any,
+  props: { ...formattingProps, ...extra },
   setup(props, { slots, attrs }) {
     const instance = getCurrentInstance()
+    const properties: Record<string, unknown> = props
     return () => h(tag, {
-      lang: resolveXamlValue(props.Language, instance) as string,
+      lang: resolveXamlValue(properties.Language, instance) as string,
       style: [inlineStyle(props, instance), name === 'Paragraph' ? {
-        margin: xamlThickness(resolveXamlValue(props.Margin, instance) ?? 0),
-        textIndent: cssLength(resolveXamlValue(props.TextIndent, instance)),
-        textAlign: String(resolveXamlValue(props.TextAlignment, instance) ?? '').toLowerCase(),
-        lineHeight: Number(resolveXamlValue(props.LineHeight, instance)) > 0 ? cssLength(resolveXamlValue(props.LineHeight, instance)) : undefined
+        margin: xamlThickness(resolveXamlValue(properties.Margin, instance) ?? 0),
+        textIndent: cssLength(resolveXamlValue(properties.TextIndent, instance)),
+        textAlign: String(resolveXamlValue(properties.TextAlignment, instance) ?? '').toLowerCase(),
+        lineHeight: Number(resolveXamlValue(properties.LineHeight, instance)) > 0 ? cssLength(resolveXamlValue(properties.LineHeight, instance)) : undefined
       } : undefined, attrs.style]
     }, normalizeXamlNodes(textContentNodes(slots.default?.() ?? [], 'Inlines'), instance))
   }

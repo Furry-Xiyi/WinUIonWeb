@@ -8,7 +8,7 @@ export declare const pruneStoredFavorites: (validIds: ReadonlySet<string>) => st
 export declare const createPageState: (pageKey: string) => {
   favorites: Ref<string[]>;
   isFavoriteState: Ref<boolean>;
-  pageTheme: Ref<'light' | 'dark' | string>;
+  pageTheme: Ref<'light' | 'dark'>;
   toggleTheme: () => void;
   toggleFavorite: () => void;
 };

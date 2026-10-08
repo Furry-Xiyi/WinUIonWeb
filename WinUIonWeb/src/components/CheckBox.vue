@@ -88,7 +88,7 @@ watch(resolvedIsChecked, isChecked => {
 
 const isChecked = computed(() => currentValue.value === true);
 const isIndeterminate = computed(() => isThreeState.value && currentValue.value === null);
-const ariaChecked = computed(() => isIndeterminate.value ? 'mixed' : String(isChecked.value));
+const ariaChecked = computed(() => isIndeterminate.value ? 'mixed' as const : isChecked.value);
 
 const stateClasses = computed(() => ({
   'is-checked': isChecked.value,
@@ -106,13 +106,13 @@ provide(xamlScopeKey, {
   CheckGlyphMargin: computed(() => isIndeterminate.value ? '0' : '0,1,0,-1')
 });
 
-const cssLength = (value) => {
+const cssLength = (value: string | number | null | undefined) => {
   if (value === '' || value === undefined || value === null) return '';
   if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value.trim()))) return `${Number(value.trim())}px`;
   return typeof value === 'number' ? `${value}px` : value;
 };
 
-const xamlThickness = (value) => {
+const xamlThickness = (value: string | number) => {
   if (!value) return '';
   const parts = String(value).split(',').map((part) => cssLength(Number.isNaN(Number(part.trim())) ? part.trim() : Number(part.trim())));
   if (parts.length === 1) return parts[0];
@@ -123,7 +123,7 @@ const xamlThickness = (value) => {
 
 const checkboxStyle = computed(() => props.Margin ? { margin: xamlThickness(props.Margin) } : {});
 
-const emitState = (value, originalEvent?: MouseEvent | KeyboardEvent) => {
+const emitState = (value: boolean | null, originalEvent?: MouseEvent | KeyboardEvent) => {
   if (value === currentValue.value) return;
   // XAML OneWay bindings still allow the control to change its target value.
   // Keep a local value until the source sends a newer value back down.

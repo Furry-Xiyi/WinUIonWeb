@@ -86,7 +86,7 @@ import SymbolIcon from '../../components/SymbolIcon.vue';
 import RichTextBlockOverflow from '../../components/RichTextBlockOverflow.vue';
 import SampleCodePresenter from '../../components/SampleCodePresenter.vue';
 import { Run, Span, Bold, Italic, Underline, LineBreak, Hyperlink, Paragraph } from '../../components/TextInline';
-import { ComboBoxItem, XamlString } from '../../components/ComboBox.vue';
+import { ComboBoxItem, XamlString } from '../../components/inlineControlProperties';
 import { ControlExampleSubstitution } from '../../components/ControlExampleProperties';
 import { XamlStyle as Style, XamlSetter as Setter } from '../../components/CollectionProperties';
 import { ResourceDictionary } from '../../components/xamlPrimitives';

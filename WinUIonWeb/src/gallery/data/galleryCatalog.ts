@@ -215,7 +215,10 @@ const groupDefinitions: GroupDefinition[] = [
   {
     UniqueId: 'windowing',
     Icon: '\uE7C4',
-    Items: [{ UniqueId: 'titlebar', Image: 'TitleBar.png', Icon: '\uE7C4', IsNew: false, IsUpdated: true }]
+    Items: [
+      { UniqueId: 'createmultiplewindows', Image: 'CreateMultipleWindows.png', Icon: '\uE8A7', IsNew: false, IsUpdated: false },
+      { UniqueId: 'titlebar', Image: 'TitleBar.png', Icon: '\uE7C4', IsNew: false, IsUpdated: true }
+    ]
   }
 ];
 

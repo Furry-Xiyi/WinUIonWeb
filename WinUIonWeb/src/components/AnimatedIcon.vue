@@ -43,20 +43,20 @@ export default { Source, FallbackIconSource, SetState, GetState }
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, Fragment, getCurrentInstance, h, isVNode, onBeforeUnmount, onMounted, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch, type VNode } from 'vue'
+import { computed, Fragment, getCurrentInstance, h, isVNode, onBeforeUnmount, onMounted, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch, type Component, type CSSProperties, type PropType, type VNode } from 'vue'
 import BitmapIcon from './BitmapIcon.vue'
 import FontIcon from './FontIcon.vue'
 import PathIcon from './PathIcon.vue'
 import SymbolIcon from './SymbolIcon.vue'
 import { frameworkLayoutStyle } from './frameworkLayout'
 import { getAnimatedIconVisualSource } from './animatedIconVisuals'
-import { findAnimatedIconStateAncestor, GetState, SetState, subscribeAnimatedIconState } from './animatedIconRuntime'
+import { findAnimatedIconStateAncestor, subscribeAnimatedIconState } from './animatedIconRuntime'
 import { resolveXamlValue, updateXamlBinding } from './xamlRuntime'
 
 defineOptions({ name: 'AnimatedIcon', inheritAttrs: false })
 const props = defineProps({
-  Source: { default: undefined },
-  FallbackIconSource: { default: undefined },
+  Source: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
+  FallbackIconSource: { type: null as unknown as PropType<unknown>, default: undefined as unknown },
   Foreground: { type: String, default: '' },
   MirroredWhenRightToLeft: { type: [Boolean, String], default: false },
   FlowDirection: { type: String, default: '' },
@@ -164,7 +164,8 @@ const FallbackOutlet = defineComponent({
     return () => {
       const source = fallbackSource.value
       if (!source) return null
-      const type = ({ SymbolIcon, FontIcon, PathIcon, BitmapIcon } as Record<string, typeof SymbolIcon>)[source.kind]
+      const types = { SymbolIcon, FontIcon, PathIcon, BitmapIcon } as Record<string, Component>
+      const type = types[source.kind]
       if (!type) return null
       const values = Object.fromEntries(Object.entries(source.props).map(([key, value]) => [key, resolve(value)]))
       return h(type, values)
@@ -281,7 +282,7 @@ const numericLength = (value: unknown) => {
   const text = String(value ?? '').trim()
   return /^\d+(?:\.\d+)?(?:px)?$/.test(text) ? Number.parseFloat(text) : null
 }
-const iconStyle = computed(() => {
+const iconStyle = computed<CSSProperties>(() => {
   const source = visualSource.value
   const width = resolve(props.Width)
   const height = resolve(props.Height)
@@ -297,7 +298,7 @@ const iconStyle = computed(() => {
     } : {}),
     ...frameworkLayoutStyle(props, instance),
     pointerEvents: resolve(props.IsHitTestVisible) === false || resolve(props.IsHitTestVisible) === 'False' ? 'none' : undefined,
-    color: propertyValue('Foreground') || undefined,
+    color: propertyValue('Foreground') ? String(propertyValue('Foreground')) : undefined,
     direction: propertyValue('FlowDirection') === 'RightToLeft' ? 'rtl' : propertyValue('FlowDirection') === 'LeftToRight' ? 'ltr' : undefined
   }
 })

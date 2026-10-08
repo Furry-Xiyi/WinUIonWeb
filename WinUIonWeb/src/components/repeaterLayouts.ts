@@ -449,8 +449,8 @@ export const measureBoxFor = (
     default: {
       const horizontal = String(props.Orientation ?? 'Vertical').toLowerCase() === 'horizontal'
       return horizontal
-        ? { width: Number.NaN, height: finite(available.height) }
-        : { width: finite(available.width), height: Number.NaN }
+        ? { width: Number.NaN, height: finite(available.height) ?? Number.NaN }
+        : { width: finite(available.width) ?? Number.NaN, height: Number.NaN }
     }
   }
 }

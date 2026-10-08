@@ -47,8 +47,8 @@
           :aria-level="entry.depth + 1"
           :aria-posinset="entry.positionInSet"
           :aria-setsize="entry.setSize"
-          :aria-expanded="entry.hasChildren ? String(entry.isExpanded) : undefined"
-          :aria-selected="selectionMode === 'None' ? undefined : String(entry.isSelected)"
+          :aria-expanded="entry.hasChildren ? entry.isExpanded : undefined"
+          :aria-selected="selectionMode === 'None' ? undefined : entry.isSelected"
           :aria-checked="selectionMode === 'Multiple' ? checkboxAriaValue(entry) : undefined"
           role="treeitem"
           @focus="onRowFocus(entry)"
@@ -122,7 +122,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Fragment, h } from 'vue'
 import {
   CollectionItemContainerStyle,
   CollectionItemContainerStyleSelector,
@@ -290,7 +289,7 @@ type TreeNode = {
   Depth: number
   IsContentMode: boolean
   /** Stable identity used as the render key: the source item object. */
-  Key: unknown
+  Key: PropertyKey
   /** The DataTemplate's binding context for this item. */
   Context: unknown
   /** TreeViewItem values supplied by a container-rooted DataTemplate. */
@@ -352,8 +351,8 @@ const props = withDefaults(defineProps<{
   AllowDrop: true,
   SelectedItem: undefined,
   SelectedItems: undefined,
-  ItemTemplate: '',
-  ItemTemplateSelector: '',
+  ItemTemplate: () => '',
+  ItemTemplateSelector: () => '',
   ItemContainerStyle: undefined,
   ItemContainerStyleSelector: undefined,
   ItemContainerTransitions: undefined,
@@ -452,7 +451,7 @@ const rootStyle = computed<CSSProperties>(() => ({
   maxHeight: cssLength(props.MaxHeight) || undefined,
   margin: xamlThickness(props.Margin) || undefined,
   ...backgroundStyle.value,
-  borderColor: resolveXamlValue(props.BorderBrush, instance) || undefined,
+  borderColor: resolveXamlValue(props.BorderBrush, instance) as CSSProperties['borderColor'] || undefined,
   borderWidth: xamlThickness(props.BorderThickness) || undefined,
   borderStyle: xamlThickness(props.BorderThickness) ? 'solid' : undefined,
   borderRadius: cssLength(props.CornerRadius) || undefined,
@@ -589,8 +588,10 @@ const templateNodesFor = (item: unknown): VNode[] => {
   return itemTemplateNodes.value
 }
 
-const isTreeViewItemNode = (node: unknown) =>
-  Boolean((node as VNode | undefined)?.type && (node.type as { __treeViewItem?: boolean }).__treeViewItem)
+const isTreeViewItemNode = (node: unknown) => {
+  const declaration = node as VNode | undefined
+  return Boolean(declaration?.type && (declaration.type as { __treeViewItem?: boolean }).__treeViewItem)
+}
 
 /** The <TreeViewItem> root a DataTemplate may declare, bound to `item`. */
 const treeViewItemRoot = (item: unknown) => {
@@ -893,7 +894,7 @@ const createNodeVector = (
       value: (start: number, deleteCount?: number, ...values: unknown[]) => {
         const normalized = values.map(normalize)
         const removed = deleteCount === undefined
-          ? nativeSplice.call(list, start) as TreeNode[]
+          ? (nativeSplice as (this: TreeNode[], start: number) => TreeNode[]).call(list, start)
           : nativeSplice.call(list, start, deleteCount, ...normalized) as TreeNode[]
         for (const node of removed) detach(node)
         changed()
@@ -997,7 +998,7 @@ const buildNode = (
     SelectionState: 'UnSelected',
     Depth: depth,
     IsContentMode: isContentMode,
-    Key: item,
+    Key: item as PropertyKey,
     Template: null,
     Context: itemContext(item),
     ContainerProps: {}
@@ -2938,7 +2939,7 @@ const onRowPointerUp = (event?: PointerEvent) => {
   pointerDragActive.value = false
 }
 
-const onRowPointerCancel = () => {
+const onRowPointerCancel = (_event?: PointerEvent) => {
   clearTouchDragTimer()
   if (!pointerDrag.value && !pointerDragActive.value) return
   try {
@@ -2951,7 +2952,7 @@ const onRowPointerCancel = () => {
   }
 }
 
-const onRowPointerLeave = (event: PointerEvent) => {
+const onRowPointerLeave = (event: PointerEvent, _entry?: TreeRow) => {
   if (event.pointerType === 'mouse' && !pointerDragActive.value) pointerDrag.value = null
 }
 
@@ -3314,7 +3315,7 @@ const onNativeDragStart = (event: DragEvent, entry: TreeRow) => {
   window.setTimeout(() => preview.remove(), 0)
 }
 
-const onNativeDragEnd = () => {
+const onNativeDragEnd = (_event?: DragEvent) => {
   const session = nativeDragSession
   suppressClickUntil = Date.now() + 250
   try {
