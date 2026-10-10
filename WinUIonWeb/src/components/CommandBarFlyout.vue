@@ -343,14 +343,14 @@ const onPointerDown = (event: PointerEvent) => {
   if (!isOpen.value) return;
   if (flyoutContainsNode(inputRegion, event.target as Node | null)) { lastInsidePointer = performance.now(); return; }
   if (target.value?.contains(event.target as Node)) return;
-  Hide();
+  Hide(false);
 };
 const onGlobalKeyDown = (event: KeyboardEvent) => {
   if (!isOpen.value || event.key !== 'Escape' || event.defaultPrevented || hasOpenDescendantFlyout(inputRegion) || flyoutContainsNode(inputRegion, event.target as Node | null)) return;
   event.preventDefault(); Hide();
 };
 const onViewport = () => { if (!isOpen.value || viewportFrame !== null) return; viewportFrame = requestAnimationFrame(() => { viewportFrame = null; void updatePosition(); }); };
-const onWindowBlur = () => Hide();
+const onWindowBlur = () => Hide(false);
 const onOtherOpening = (event: Event) => {
   const owner = (event as CustomEvent).detail;
   if (owner !== api && !isDescendantFlyoutOpening(owner, inputRegion) && !flyoutContainsNode(inputRegion, document.activeElement) && performance.now() - lastInsidePointer > 1000) Hide();

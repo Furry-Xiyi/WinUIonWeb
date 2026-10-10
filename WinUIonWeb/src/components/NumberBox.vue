@@ -9,11 +9,14 @@
         Description="{x:Bind NumberBoxTemplate.Description, Mode=OneWay}"
         PlaceholderText="{x:Bind NumberBoxTemplate.PlaceholderText, Mode=OneWay}"
         IsEnabled="{x:Bind NumberBoxTemplate.IsEnabled, Mode=OneWay}"
+        MinHeight="{x:Bind NumberBoxTemplate.MinHeight, Mode=OneWay}"
         InputScope="{x:Bind NumberBoxTemplate.InputScope, Mode=OneWay}"
         TextAlignment="{x:Bind NumberBoxTemplate.TextAlignment, Mode=OneWay}"
         SelectionHighlightColor="{x:Bind NumberBoxTemplate.SelectionHighlightColor, Mode=OneWay}"
         PreventKeyboardDisplayOnProgrammaticFocus="{x:Bind NumberBoxTemplate.PreventKeyboardDisplayOnProgrammaticFocus, Mode=OneWay}"
         TextChanged="OnNumberBoxTextChanged"
+        TextCompositionStarted="OnNumberBoxTextCompositionStarted"
+        TextCompositionEnded="OnNumberBoxTextCompositionEnded"
         GotFocus="OnNumberBoxGotFocus"
         LostFocus="OnNumberBoxLostFocus" />
     </div>
@@ -134,6 +137,7 @@ const emit = defineEmits<{
 
 const rootRef = ref<HTMLElement | null>(null);
 const isFocused = ref(false);
+const isComposing = ref(false);
 const compactPopupStyle = ref<CSSProperties>({});
 const inheritedTheme = inject<ComputedRef<'light' | 'dark'> | null>('winuiTheme', null);
 const anchorTheme = ref<'light' | 'dark' | ''>('');
@@ -450,7 +454,7 @@ const onFocus = () => {
 
 const onLostFocus = () => {
   isFocused.value = false;
-  commitText();
+  if (!isComposing.value) commitText();
 };
 
 const commitText = () => {
@@ -466,6 +470,7 @@ const commitText = () => {
 };
 
 const changeBy = (delta: number) => {
+  if (isComposing.value) return;
   const committed = commitText();
   if (Number.isNaN(committed) || !resolvedIsEnabled.value) return;
   let value = committed + delta;
@@ -481,7 +486,7 @@ const changeBy = (delta: number) => {
 };
 
 const onKeydown = (event: KeyboardEvent) => {
-  if (!resolvedIsEnabled.value || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
+  if (!resolvedIsEnabled.value || isComposing.value || event.isComposing || event.keyCode === 229 || event.ctrlKey || event.metaKey || event.altKey) return;
   if (event.key === 'ArrowUp') {
     event.preventDefault();
     changeBy(resolvedSmallChange.value);
@@ -501,12 +506,12 @@ const onKeydown = (event: KeyboardEvent) => {
 };
 
 const onKeyup = (event: KeyboardEvent) => {
-  if (!resolvedIsEnabled.value || event.isComposing) return;
+  if (!resolvedIsEnabled.value || isComposing.value || event.isComposing || event.keyCode === 229) return;
   if (event.key === 'Enter') { event.preventDefault(); commitText(); }
   else if (event.key === 'Escape') { event.preventDefault(); text.value = formatValue(resolvedValue.value); }
 };
 const onWheel = (event: WheelEvent) => {
-  if (!isFocused.value || !resolvedIsEnabled.value || !event.deltaY) return;
+  if (!isFocused.value || isComposing.value || !resolvedIsEnabled.value || !event.deltaY) return;
   event.preventDefault();
   changeBy(event.deltaY < 0 ? resolvedSmallChange.value : -resolvedSmallChange.value);
 };
@@ -545,21 +550,25 @@ const NumberBoxTemplate = {
   get HeaderTemplate() { return localHeaderTemplate.value ?? resolvedHeaderTemplate.value; },
   get Description() { return resolvedDescription.value; }, get PlaceholderText() { return resolvedPlaceholderText.value; },
   get IsEnabled() { return resolvedIsEnabled.value; }, get InputScope() { return resolvedInputScope.value || 'Decimal'; },
+  get MinHeight() { return resolvedMinHeight.value; },
   get TextAlignment() { return resolvedTextAlignment.value; }, get SelectionHighlightColor() { return resolvedSelectionHighlightColor.value; },
   get PreventKeyboardDisplayOnProgrammaticFocus() { return resolvedPreventKeyboardDisplayOnProgrammaticFocus.value; },
   get CanIncrease() { return canIncrease.value; }, get CanDecrease() { return canDecrease.value; },
   get IncreaseLabel() { return t('TextControls.NumberBox.Increase'); }, get DecreaseLabel() { return t('TextControls.NumberBox.Decrease'); }
 };
-provide(xamlScopeKey, { NumberBoxTemplate, OnNumberBoxTextChanged: onTextInput, OnNumberBoxGotFocus: onFocus, OnNumberBoxLostFocus: onLostFocus, OnNumberBoxSpinUp: () => changeBy(resolvedSmallChange.value), OnNumberBoxSpinDown: () => changeBy(-resolvedSmallChange.value) });
+provide(xamlScopeKey, { NumberBoxTemplate, OnNumberBoxTextChanged: onTextInput, OnNumberBoxGotFocus: onFocus, OnNumberBoxLostFocus: onLostFocus,
+  OnNumberBoxTextCompositionStarted: () => { isComposing.value = true; },
+  OnNumberBoxTextCompositionEnded: () => { isComposing.value = false; },
+  OnNumberBoxSpinUp: () => changeBy(resolvedSmallChange.value), OnNumberBoxSpinDown: () => changeBy(-resolvedSmallChange.value) });
 provide(textInputTemplateKey, {
   KeyDown: onKeydown,
-  ActionsWidth: () => resolvedSpinButtonPlacementMode.value === 'Inline' ? 72 : resolvedSpinButtonPlacementMode.value === 'Compact' ? 40 : 0,
+  ActionsWidth: () => resolvedSpinButtonPlacementMode.value === 'Inline' ? 76 : resolvedSpinButtonPlacementMode.value === 'Compact' ? 40 : 0,
   ReserveDeleteButtonWidth: 40,
   DesiredWidthChanged: width => { desiredInputWidth.value = width; },
   Actions: () => resolvedSpinButtonPlacementMode.value === 'Inline'
     ? h('div', { class: 'win-number-spin inline', onPointerdown: (event: PointerEvent) => event.preventDefault() }, [
-        h(RepeatButton, { class: 'win-number-spin-button', Content: '\uE70E', Padding: '0', IsEnabled: canIncrease.value, IsTabStop: 'False', 'AutomationProperties.Name': NumberBoxTemplate.IncreaseLabel, Click: () => changeBy(resolvedSmallChange.value) }),
-        h(RepeatButton, { class: 'win-number-spin-button', Content: '\uE70D', Padding: '0', IsEnabled: canDecrease.value, IsTabStop: 'False', 'AutomationProperties.Name': NumberBoxTemplate.DecreaseLabel, Click: () => changeBy(-resolvedSmallChange.value) })
+        h(RepeatButton, { class: 'win-number-spin-button', Content: '\uE70E', Padding: '0', VerticalAlignment: 'Stretch', IsEnabled: canIncrease.value, IsTabStop: 'False', 'AutomationProperties.Name': NumberBoxTemplate.IncreaseLabel, Click: () => changeBy(resolvedSmallChange.value) }),
+        h(RepeatButton, { class: 'win-number-spin-button', Content: '\uE70D', Padding: '0', VerticalAlignment: 'Stretch', IsEnabled: canDecrease.value, IsTabStop: 'False', 'AutomationProperties.Name': NumberBoxTemplate.DecreaseLabel, Click: () => changeBy(-resolvedSmallChange.value) })
       ])
     : resolvedSpinButtonPlacementMode.value === 'Compact' ? h('span', { class: 'win-number-compact-indicator', 'aria-hidden': true }, '\uEC8F') : null
 });
@@ -596,10 +605,10 @@ provide(textInputTemplateKey, {
   display: flex;
   align-self: stretch;
   color: var(--text-secondary);
-  height: 30px;
-  width: 72px;
-  min-width: 72px;
-  flex: 0 0 72px;
+  margin: var(--textbox-helper-margin-top, -1px) var(--textbox-helper-margin-right, -1px) var(--textbox-helper-margin-bottom, -1px) 0;
+  width: 76px;
+  min-width: 76px;
+  flex: 0 0 76px;
   overflow: visible;
 }
 
@@ -610,13 +619,13 @@ provide(textInputTemplateKey, {
 .win-number-box :deep(.win-number-spin-button) {
   position: relative;
   z-index: 1;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-self: stretch;
   min-width: 0;
   min-height: 0;
   padding: 0;
   margin: 4px;
-  height: 22px;
+  height: auto;
   font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif);
   font-size: 12px;
   border-width: 0 1px 1px 1px;
@@ -633,20 +642,19 @@ provide(textInputTemplateKey, {
   min-width: 32px;
   flex: 0 0 32px;
   margin-left: 0;
-  margin-right: 0;
+  margin-right: 4px;
 }
 
-.win-number-spin-button:first-child span {
-  inset: 4px;
+.win-number-box :deep(.win-number-spin-button .win-button-content-presenter),
+.win-number-compact-popup :deep(.win-number-popup-button .win-button-content-presenter) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 }
 
-.win-number-spin-button:last-child span {
-  inset: 4px 4px 4px 0;
-}
-
-.win-number-spin-button span,
-.win-number-compact-indicator span,
-.win-number-popup-button span {
+.win-number-box :deep(.win-number-spin-button .win-button-default-text) {
   font-family: var(--SymbolThemeFontFamily, 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif);
   font-size: 12px;
 }
@@ -701,10 +709,10 @@ provide(textInputTemplateKey, {
 }
 
 .win-number-compact-popup :deep(.win-number-popup-button) {
+  position: relative;
   width: 36px;
   height: 36px;
-  display: grid;
-  place-items: center;
+  display: flex;
   border: 0;
   border-radius: 4px;
   background: transparent;
@@ -737,6 +745,6 @@ provide(textInputTemplateKey, {
 }
 
 .win-number-textbox :deep(.win-textbox-delete-button-layout) {
-  inset: 4px;
+  inset: 4px 4px 4px 0;
 }
 </style>

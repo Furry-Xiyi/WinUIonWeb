@@ -285,6 +285,12 @@ const redoStack = ref<string[]>([]);
 let lastCommittedHtml = '';
 let composing = false;
 let formatting = false;
+let compositionCommitPending = false;
+let compositionCommitTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingDocumentMutation: (() => void) | null = null;
+let preservingCommandSelection = false;
+let selectionReleasePending = false;
+const selectionFormatState = shallowReactive<Record<string, boolean | string>>({});
 
 const disabledFormatting = computed(() => props.DisabledFormattingAccelerators.toLowerCase());
 const isFormattingDisabled = (command: 'bold' | 'italic' | 'underline') => {
@@ -436,7 +442,7 @@ function escapeText(value: string) {
 const plainText = () => editorRef.value?.innerText.replace(/\n$/, '') ?? '';
 
 const syncDom = () => {
-  if (!editorRef.value || isFocused.value) return;
+  if (!editorRef.value || isFocused.value || composing || compositionCommitPending) return;
   editorRef.value.innerHTML = internalHtml.value;
 };
 
@@ -450,12 +456,17 @@ const normalizeText = (value: string) => {
 
 const saveSelection = () => {
   const selection = window.getSelection();
-  if (selection && selection.rangeCount > 0 && editorRef.value?.contains(selection.anchorNode)) {
+  if (!composing && !compositionCommitPending && selection && selection.rangeCount > 0 && editorRef.value?.contains(selection.anchorNode) && editorRef.value.contains(selection.focusNode)) {
     savedSelection.value = selection.getRangeAt(0).cloneRange();
+    for (const command of ['bold', 'italic', 'underline', 'strikeThrough', 'insertOrderedList', 'insertUnorderedList']) {
+      selectionFormatState[command] = document.queryCommandState(command);
+    }
+    for (const command of ['foreColor', 'backColor']) selectionFormatState[command] = document.queryCommandValue(command);
   }
 };
 
 const restoreSelection = () => {
+  if (composing || compositionCommitPending) return;
   const range = savedSelection.value;
   const selection = window.getSelection();
   if (!range || !selection || !editorRef.value?.contains(range.startContainer) || !editorRef.value?.contains(range.endContainer)) return;
@@ -471,12 +482,12 @@ const getSelectionText = () => {
 
 const getSelectionRange = () => {
   const selection = window.getSelection();
-  if (selection?.rangeCount && editorRef.value?.contains(selection.anchorNode)) return selection.getRangeAt(0);
+  if (selection?.rangeCount && editorRef.value?.contains(selection.anchorNode) && editorRef.value.contains(selection.focusNode)) return selection.getRangeAt(0);
   return savedSelection.value;
 };
 
 const formatEffect = (command: string, value?: string, effect?: string) => {
-  if (props.IsReadOnly || !props.IsEnabled) return;
+  if (props.IsReadOnly || !props.IsEnabled || composing || compositionCommitPending) return;
   focus();
   restoreSelection();
   const before = selectionOffsets();
@@ -497,9 +508,9 @@ const selectionCharacterFormat = {
   set Underline(value: string) { formatEffect('underline', undefined, value); },
   get Strikethrough() { return queryCommandState('strikeThrough') ? 'On' : 'Off'; },
   set Strikethrough(value: string) { formatEffect('strikeThrough', undefined, value); },
-  get ForegroundColor() { return document.queryCommandValue('foreColor'); },
+  get ForegroundColor() { return queryCommandValue('foreColor'); },
   set ForegroundColor(value: string) { applyForegroundColor(String(value), false); },
-  get BackgroundColor() { return document.queryCommandValue('backColor'); },
+  get BackgroundColor() { return queryCommandValue('backColor'); },
   set BackgroundColor(value: string) { if (value) formatEffect('backColor', value); }
 };
 
@@ -515,6 +526,7 @@ const serializeMathML = () => {
 
 const setMathML = (value: string) => {
   if (mathMode.value !== 'MathOnly') throw new TypeError('MathOnly mode is required');
+  if (deferDocumentMutation(() => setMathML(value))) return;
   try {
     const imported = parseMathML(value);
     if (editorRef.value) editorRef.value.replaceChildren(imported);
@@ -559,6 +571,7 @@ const setMathMode = (mode: 'NoMath' | 'MathOnly' | 'Normal') => {
 };
 
 const undo = () => {
+  if (deferDocumentMutation(undo)) return;
   const editor = editorRef.value;
   const previous = undoStack.value.pop();
   if (!editor || previous === undefined) return;
@@ -568,6 +581,7 @@ const undo = () => {
 };
 
 const redo = () => {
+  if (deferDocumentMutation(redo)) return;
   const editor = editorRef.value;
   const next = redoStack.value.pop();
   if (!editor || next === undefined) return;
@@ -579,10 +593,14 @@ const redo = () => {
 const loadRtfDocument = async (source: string | ArrayBuffer) => {
   const rendered = await loadRtf(source);
   if (!editorRef.value) return;
-  formatting = true;
-  editorRef.value.replaceChildren(...rendered.map(node => node.cloneNode(true)));
-  formatting = false;
-  onInput();
+  const applyDocument = () => {
+    if (!editorRef.value) return;
+    formatting = true;
+    editorRef.value.replaceChildren(...rendered.map(node => node.cloneNode(true)));
+    formatting = false;
+    onInput();
+  };
+  if (!deferDocumentMutation(applyDocument)) applyDocument();
 };
 
 const getText = (options?: string) => {
@@ -624,21 +642,22 @@ const highlightText = (text: string) => {
 };
 
 function isCommandActive(command: string) {
-  try {
-    restoreSelection();
-    return document.queryCommandState(command);
-  } catch {
-    return false;
-  }
+  return queryCommandState(command);
 }
 
-const onInput = () => {
+const onInput = (event?: InputEvent) => {
   const editor = editorRef.value;
-  if (!editor || formatting) return;
+  // The IME owns its live DOM range until the final composition input. Publishing
+  // candidates or normalizing them would invalidate that range and its caret.
+  if (!editor || formatting || composing || compositionCommitPending || event?.isComposing) return;
   let text = normalizeText(plainText());
   if (text !== plainText()) {
+    const before = selectionOffsets();
     editor.innerText = text;
+    const range = domRange(Math.min(before.StartPosition, text.length), Math.min(before.EndPosition, text.length));
+    if (range) { const selection = window.getSelection(); selection?.removeAllRanges(); selection?.addRange(range); }
   }
+  saveSelection();
   internalHtml.value = editor.innerHTML;
   const changed = lastCommittedHtml !== internalHtml.value;
   if (!changed) return;
@@ -672,6 +691,7 @@ const emitSelection = () => {
 };
 
 const onSelectionGesture = async () => {
+  if (composing || compositionCommitPending) return;
   if (!emitSelection()) return;
   await nextTick();
   updateSelectionFlyout();
@@ -719,6 +739,9 @@ const updateSelectionFlyout = () => {
 };
 
 const onKeydown = (event: KeyboardEvent) => {
+  // Enter, Escape, arrows and formatting shortcuts belong to the candidate
+  // window while an IME transaction is active, including legacy keyCode 229.
+  if (composing || compositionCommitPending || event.isComposing || event.keyCode === 229) return;
   if (event.key === 'Escape') { commandBarOpen.value = false; return; }
   if (mathMode.value === 'MathOnly' && !composing && (event.key === ' ' || event.key === 'Enter')) {
     if (convertLinearMath()) event.preventDefault();
@@ -800,7 +823,7 @@ const onContextMenu = (event: MouseEvent) => {
 };
 
 const runTextCommand = async (command: string) => {
-  if (!props.IsEnabled) return;
+  if (!props.IsEnabled || composing || compositionCommitPending) return;
   focus();
   restoreSelection();
   if (command === 'copy') document.execCommand('copy');
@@ -858,17 +881,23 @@ const hasSelection = () => {
 };
 
 const queryCommandState = (command: string) => {
-  focus();
-  restoreSelection();
   try {
-    return document.queryCommandState(command);
+    const selection = window.getSelection();
+    return !composing && !compositionCommitPending && selection?.rangeCount && editorRef.value?.contains(selection.anchorNode) && editorRef.value.contains(selection.focusNode)
+      ? document.queryCommandState(command) : Boolean(selectionFormatState[command]);
   } catch {
     return false;
   }
 };
 
+const queryCommandValue = (command: string) => {
+  const selection = window.getSelection();
+  return !composing && !compositionCommitPending && selection?.rangeCount && editorRef.value?.contains(selection.anchorNode) && editorRef.value.contains(selection.focusNode)
+    ? document.queryCommandValue(command) : String(selectionFormatState[command] ?? '');
+};
+
 const execCommand = (command: string, value?: string) => {
-  if (!props.IsEnabled || props.IsReadOnly) return;
+  if (!props.IsEnabled || props.IsReadOnly || composing || compositionCommitPending) return;
   focus();
   restoreSelection();
   document.execCommand(command, false, value);
@@ -880,7 +909,7 @@ const execCommand = (command: string, value?: string) => {
 // no selection WinUI's sample colors the whole document, which is also the
 // useful default for the color-picker example.
 const applyForegroundColor = (color: string, selectAllIfEmpty = true) => {
-  if (!editorRef.value || props.IsReadOnly || !props.IsEnabled) return;
+  if (!editorRef.value || props.IsReadOnly || !props.IsEnabled || composing || compositionCommitPending) return;
   focus();
   restoreSelection();
   const selection = window.getSelection();
@@ -940,12 +969,14 @@ const setListStyleType = (styleType: string) => {
 };
 
 const setText = (value: string) => {
+  if (deferDocumentMutation(() => setText(value))) return;
   internalHtml.value = escapeText(value);
   if (editorRef.value) editorRef.value.innerText = value;
   onInput();
 };
 
 const setHtml = (value: string) => {
+  if (deferDocumentMutation(() => setHtml(value))) return;
   internalHtml.value = value;
   if (editorRef.value) editorRef.value.innerHTML = value;
   onInput();
@@ -970,6 +1001,7 @@ const domRange = (start: number, end: number) => {
 const textRange = (start: number, end: number) => {
   let position = Math.max(0, start), limit = Math.max(start, end), searchPosition = position;
   const format = (command: string, value: string) => {
+    if (composing || compositionCommitPending) return;
     const range = domRange(position, limit);
     if (!range) return;
     const previous = selectionOffsets();
@@ -1037,9 +1069,81 @@ const Document = {
   Redo: redo
 };
 
-const onCompositionStart = () => { composing = true; dispatch('TextCompositionStarted'); };
+function deferDocumentMutation(mutate: () => void) {
+  if (!composing && !compositionCommitPending) return false;
+  pendingDocumentMutation = mutate;
+  return true;
+}
+
+const finishComposition = () => {
+  compositionCommitTimer = null;
+  compositionCommitPending = false;
+  onInput();
+  const mutate = pendingDocumentMutation;
+  pendingDocumentMutation = null;
+  mutate?.();
+  if (selectionReleasePending) { selectionReleasePending = false; releaseSelection(); }
+};
+const onCompositionStart = () => {
+  if (compositionCommitTimer !== null) { clearTimeout(compositionCommitTimer); finishComposition(); }
+  saveSelection();
+  composing = true;
+  commandBarOpen.value = false;
+  customSelectionController.value?.Hide?.();
+  dispatch('TextCompositionStarted');
+};
 const onCompositionUpdate = () => dispatch('TextCompositionChanged');
-const onCompositionEnd = () => { composing = false; dispatch('TextCompositionEnded'); onInput(); };
+const onCompositionEnd = () => {
+  composing = false;
+  compositionCommitPending = true;
+  dispatch('TextCompositionEnded');
+  // Browsers may deliver the committed input after compositionend. Coalesce
+  // both into one document notification and one undo transaction.
+  compositionCommitTimer = setTimeout(finishComposition, 0);
+};
+
+const isSelectionCommandTarget = (target: EventTarget | null) => {
+  if (!(target instanceof Element)) return false;
+  if (commandBarOpen.value && target.closest('.win-commandbar-flyout')) return true;
+  const toolbar = rootSurface?.closest('.win-relative-panel, [role="toolbar"]');
+  const button = target.closest('button, [role="button"]');
+  if (toolbar?.contains(target) && button && !button.closest('.win-textbox')) return true;
+  return preservingCommandSelection && Boolean(target.closest('.flyout-presenter, .win-commandbar-flyout'));
+};
+
+const releaseSelection = () => {
+  const selection = window.getSelection();
+  const range = getSelectionRange();
+  const selected = Boolean(range && !range.collapsed);
+  if (range && editorRef.value?.contains(range.startContainer) && editorRef.value.contains(range.endContainer)) {
+    savedSelection.value = range.cloneRange();
+    savedSelection.value.collapse(false);
+  }
+  if (selection?.rangeCount && editorRef.value?.contains(selection.anchorNode) && editorRef.value.contains(selection.focusNode)) selection.removeAllRanges();
+  commandBarOpen.value = false;
+  customSelectionController.value?.Hide?.();
+  for (const command of Object.keys(selectionFormatState)) selectionFormatState[command] = typeof selectionFormatState[command] === 'boolean' ? false : '';
+  if (selected) dispatch('SelectionChanged');
+};
+
+const onDocumentPointerDown = (event: PointerEvent) => {
+  if (isInsideEditor(event.target) || rootSurface?.contains(event.target as Node)) { preservingCommandSelection = false; selectionReleasePending = false; return; }
+  if (isSelectionCommandTarget(event.target)) { preservingCommandSelection = true; selectionReleasePending = false; return; }
+  preservingCommandSelection = false;
+  if (composing || compositionCommitPending) selectionReleasePending = true;
+  else releaseSelection();
+};
+const onDocumentFocusIn = (event: FocusEvent) => {
+  if (isInsideEditor(event.target) || isSelectionCommandTarget(event.target)) return;
+  preservingCommandSelection = false;
+  if (composing || compositionCommitPending) selectionReleasePending = true;
+  else releaseSelection();
+};
+const onWindowBlur = () => {
+  preservingCommandSelection = false;
+  if (composing || compositionCommitPending) selectionReleasePending = true;
+  else releaseSelection();
+};
 
 let rootSurface: HTMLElement | null = null;
 onMounted(() => {
@@ -1052,6 +1156,9 @@ onMounted(() => {
   rootSurface = editorRef.value?.closest('.win-rich-edit-box') as HTMLElement | null;
   rootSurface?.addEventListener('pointerdown', onRootPointerDown, true);
   rootSurface?.addEventListener('contextmenu', onRootContextMenu, true);
+  document.addEventListener('pointerdown', onDocumentPointerDown, true);
+  document.addEventListener('focusin', onDocumentFocusIn, true);
+  window.addEventListener('blur', onWindowBlur);
   dispatch('Loaded');
 });
 
@@ -1062,6 +1169,11 @@ onBeforeUnmount(() => {
   editorRef.value?.removeEventListener('compositionend', onCompositionEnd);
   rootSurface?.removeEventListener('pointerdown', onRootPointerDown, true);
   rootSurface?.removeEventListener('contextmenu', onRootContextMenu, true);
+  document.removeEventListener('pointerdown', onDocumentPointerDown, true);
+  document.removeEventListener('focusin', onDocumentFocusIn, true);
+  window.removeEventListener('blur', onWindowBlur);
+  if (compositionCommitTimer !== null) clearTimeout(compositionCommitTimer);
+  pendingDocumentMutation = null;
   flyoutOpeningHandlers.Selection.clear(); flyoutOpeningHandlers.Context.clear();
   commandBarFlyout.value?.Hide();
 });

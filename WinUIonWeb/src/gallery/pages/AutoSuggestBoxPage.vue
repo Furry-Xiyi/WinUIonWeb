@@ -135,6 +135,11 @@ provide(xamlScopeKey, {
 .page-description { margin: 0 0 16px; color: var(--text-secondary); }
 .page-header-actions { position: absolute; top: 0; right: 0; }
 .gallery-page-content { min-width: 0; }
+.gallery-page-content :deep(.example-display) {
+  /* The flyout is overlaid inside this stable example surface, so the source
+     expander never moves or sits underneath the suggestion list. */
+  min-height: 360px;
+}
 .basic-suggestion-example { flex-wrap: wrap; min-width: 0; }
 .basic-suggestion-example :deep(.win-text-block) { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 </style>

@@ -60,6 +60,7 @@
             @focus="onFocus"
             @blur="onBlur"
             @keydown="onKeydown"
+            @keyup="onKeyup"
             @paste="onPaste"
             @contextmenu="onContextMenu"
             @select="onSelect"
@@ -93,6 +94,7 @@
             @focus="onFocus"
             @blur="onBlur"
             @keydown="onKeydown"
+            @keyup="onKeyup"
             @paste="onPaste"
             @contextmenu="onContextMenu"
             @select="onSelect"
@@ -351,6 +353,9 @@ const fieldRef = ref<HTMLInputElement | HTMLTextAreaElement | null>(null);
 let editorResizeObserver: ResizeObserver | undefined;
 let caretFrame: number | undefined;
 const isFocused = ref(false);
+const isComposing = ref(false);
+let compositionKeyUpPending = false;
+let pendingCompositionText: string | undefined;
 const isHovered = ref(false);
 const localText = ref(resolvedText.value);
 const undoStack = ref<string[]>([]);
@@ -434,6 +439,10 @@ const rootStyle = computed<CSSProperties & Record<string, string | number | unde
   style['--textbox-natural-width'] = `${naturalFieldWidth.value}px`;
   style['--textbox-radius'] = cssSize(props.CornerRadius);
   style['--textbox-border-thickness'] = xamlThickness(props.BorderThickness);
+  const border = String(props.BorderThickness).split(',').map(value => Number.parseFloat(value) || 0);
+  style['--textbox-helper-margin-top'] = `${-(border[1] ?? border[0] ?? 1)}px`;
+  style['--textbox-helper-margin-bottom'] = `${-(border[3] ?? border[1] ?? border[0] ?? 1)}px`;
+  style['--textbox-helper-margin-right'] = `${-(border[2] ?? border[0] ?? 1)}px`;
   if (props.BorderBrush) { style['--textbox-border-top'] = props.BorderBrush; style['--textbox-border-bottom'] = props.BorderBrush; }
   if (props.PlaceholderForeground) style['--textbox-placeholder-foreground'] = props.PlaceholderForeground;
   if (props.SelectionHighlightColor) {
@@ -588,6 +597,7 @@ const scheduleCaretIntoView = () => {
 };
 
 watch(resolvedText, value => {
+  if (isComposing.value) { pendingCompositionText = value; return; }
   if (localText.value !== value) {
     emitTextValue(value, 'ProgrammaticChange');
   }
@@ -611,6 +621,7 @@ const normalizeInput = (value: string) => {
 };
 
 const onInput = (event: Event) => {
+  if (isComposing.value || (event as InputEvent).isComposing) return;
   const element = event.target as HTMLInputElement | HTMLTextAreaElement;
   const nextValue = normalizeInput(element.value);
   const beforeChangingArgs = { NewText: nextValue, Cancel: false };
@@ -643,6 +654,7 @@ const onBlur = () => {
   // flyout is teleported to body. Keep the TextBox focused until that flyout
   // closes and restores DOM focus to the editing field.
   if (contextMenuOpen.value || isRestoringContextMenuFocus.value) return;
+  if (!isFocused.value) return;
   isFocused.value = false;
   requestCandidateWindowAlignment('Default');
   dispatch('LostFocus');
@@ -694,6 +706,9 @@ const requestCandidateWindowAlignment = (
 };
 
 const onCompositionStart = () => {
+  isComposing.value = true;
+  pendingCompositionText = undefined;
+  dismissTextMenus();
   requestCandidateWindowAlignment();
   dispatch('TextCompositionStarted');
 };
@@ -704,6 +719,13 @@ const onCompositionChanged = () => {
 };
 
 const onCompositionEnd = () => {
+  isComposing.value = false;
+  const pending = pendingCompositionText;
+  pendingCompositionText = undefined;
+  if (fieldRef.value) onInput({ target: fieldRef.value } as unknown as Event);
+  if (pending !== undefined && pending !== currentText.value) {
+    emitTextValue(pending, 'ProgrammaticChange');
+  }
   dispatch('TextCompositionEnded');
 };
 
@@ -723,10 +745,17 @@ const onPointerLeave = () => {
 };
 
 const onKeydown = (event: KeyboardEvent) => {
-  inputTemplate?.KeyDown?.(event);
+  const compositionKey = isComposing.value || event.isComposing || event.keyCode === 229;
+  if (!compositionKey) inputTemplate?.KeyDown?.(event);
   const args = { Key: event.key, OriginalSource: fieldRef.value, Handled: event.defaultPrevented };
   dispatch('KeyDown', args);
   if (args.Handled) { event.preventDefault(); return; }
+  if (compositionKey) {
+    compositionKeyUpPending = true;
+    event.stopPropagation();
+    return;
+  }
+  compositionKeyUpPending = false;
   if ((event.ctrlKey || event.metaKey) && !props.IsReadOnly) {
     if (event.key.toLowerCase() === 'z') { event.preventDefault(); event.shiftKey ? redo() : undo(); }
     if (event.key.toLowerCase() === 'y') { event.preventDefault(); redo(); }
@@ -735,6 +764,13 @@ const onKeydown = (event: KeyboardEvent) => {
     event.preventDefault();
   }
   scheduleCaretIntoView();
+};
+
+const onKeyup = (event: KeyboardEvent) => {
+  if (isComposing.value || event.isComposing || event.keyCode === 229 || compositionKeyUpPending) {
+    compositionKeyUpPending = false;
+    event.stopPropagation();
+  }
 };
 
 const readSelection = () => {
@@ -754,7 +790,7 @@ const readSelection = () => {
 const lastSelection = ref({ start: 0, length: 0, text: '' });
 let restoringSelection = false;
 const onSelect = () => {
-  if (restoringSelection) return;
+  if (restoringSelection || isComposing.value) return;
   const selection = readSelection();
   if (selection.start === lastSelection.value.start && selection.length === lastSelection.value.length) return;
   const changingArgs = { SelectionStart: selection.start, SelectionLength: selection.length, Cancel: false };
@@ -818,7 +854,7 @@ const onContextMenu = async (event: MouseEvent) => {
   contextMenuOpen.value = false;
   contextSelection.value = readSelection();
   clipboardText.value = await readClipboardText();
-  if (request !== contextRequest || !fieldRef.value?.isConnected || isDisabled.value) return;
+  if (request !== contextRequest || !fieldRef.value?.isConnected || isDisabled.value || document.activeElement !== fieldRef.value) return;
 
   if (!contextMenuItems.value.length) return;
 
@@ -842,15 +878,57 @@ const onContextMenu = async (event: MouseEvent) => {
 };
 
 const onSelectionPointerUp = async (event: PointerEvent) => {
-  if (event.button !== 0 || isDisabled.value || props.SelectionFlyout === null) return;
+  if (event.button !== 0 || !['touch', 'pen'].includes(event.pointerType) || isComposing.value || isDisabled.value || props.SelectionFlyout === null) return;
   contextSelection.value = readSelection();
   if (!contextSelection.value.length || !fieldRef.value) return;
   flyoutKind.value = 'Selection';
   const custom = customSelectionFlyout.value ?? props.SelectionFlyout;
   if (custom?.ShowAt) { void custom.ShowAt(fieldRef.value, { ShowMode: 'Transient' }); return; }
+  const request = ++contextRequest;
+  const selected = { ...contextSelection.value };
   clipboardText.value = await readClipboardText();
   await nextTick();
+  const current = readSelection();
+  if (request !== contextRequest || !fieldRef.value?.isConnected || document.activeElement !== fieldRef.value
+    || current.start !== selected.start || current.length !== selected.length) return;
+  contextMenuOpen.value = true;
   void contextMenuRef.value?.ShowAt?.(fieldRef.value, { ShowMode: 'Transient', Placement: 'TopEdgeAlignedLeft' });
+};
+
+const dismissTextMenus = () => {
+  contextRequest++;
+  contextMenuOpen.value = false;
+  isRestoringContextMenuFocus.value = false;
+  contextMenuRef.value?.Hide?.(false);
+  customContextFlyout.value?.Hide?.(false);
+  customSelectionFlyout.value?.Hide?.(false);
+};
+const isMenuTarget = (target: EventTarget | null) => target instanceof Element
+  && !!target.closest('.win-commandbar-flyout,.win-menu-flyout,.win-flyout');
+const isOwnedPopupTarget = (target: EventTarget | null) => {
+  if (!(target instanceof Element) || !rootRef.value) return false;
+  const numberPopup = target.closest('.win-number-compact-popup');
+  if (numberPopup && rootRef.value.closest('.win-number-box')?.contains(document.activeElement)) return true;
+  const suggestions = target.closest('.win-asb-popup');
+  return !!suggestions && !!rootRef.value.closest('.win-auto-suggest-box')?.contains(document.activeElement);
+};
+const onDocumentPointerDown = (event: PointerEvent) => {
+  const target = event.target as Node | null;
+  if (!rootRef.value || !target) return;
+  if (rootRef.value.contains(target)) {
+    if (event.button === 0 && target === fieldRef.value) dismissTextMenus();
+    return;
+  }
+  if (isMenuTarget(event.target) || isOwnedPopupTarget(event.target)) return;
+  dismissTextMenus();
+  fieldRef.value?.blur();
+  if (isFocused.value) onBlur();
+};
+const onDocumentFocusIn = (event: FocusEvent) => {
+  if (!rootRef.value?.contains(event.target as Node) && !isMenuTarget(event.target) && !isOwnedPopupTarget(event.target)) {
+    dismissTextMenus();
+    if (isFocused.value) onBlur();
+  }
 };
 
 const clearText = () => {
@@ -1024,6 +1102,8 @@ const cutContextSelectionToClipboard = () => {
 };
 
 onMounted(() => {
+  document.addEventListener('pointerdown', onDocumentPointerDown, true);
+  document.addEventListener('focusin', onDocumentFocusIn, true);
   applyLegacyCandidateWindowAlignment();
   void nextTick(() => {
     resizeTextarea();
@@ -1038,6 +1118,8 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', onDocumentPointerDown, true);
+  document.removeEventListener('focusin', onDocumentFocusIn, true);
   contextRequest++;
   editorResizeObserver?.disconnect();
   if (caretFrame !== undefined) cancelAnimationFrame(caretFrame);
@@ -1257,7 +1339,7 @@ defineExpose({
   min-width: 30px;
   height: auto;
   min-height: 0;
-  margin: 0;
+  margin: var(--textbox-helper-margin-top, -1px) 0 var(--textbox-helper-margin-bottom, -1px);
   padding: 0;
   overflow: hidden;
   color: var(--textbox-button-foreground);
@@ -1275,11 +1357,9 @@ defineExpose({
   -webkit-appearance: none;
   align-self: stretch;
   position: relative;
-  width: 40px;
-  min-width: 40px;
   height: auto;
   min-height: 0;
-  margin: 0;
+  margin: var(--textbox-helper-margin-top, -1px) 0 var(--textbox-helper-margin-bottom, -1px);
   padding: 0;
   overflow: hidden;
   color: var(--textbox-button-foreground);
@@ -1287,22 +1367,8 @@ defineExpose({
   border: 0;
   border-radius: 0;
   cursor: pointer;
-  flex: 0 0 40px;
   font: inherit;
   line-height: 1;
-}
-
-:deep(.win-textbox-action-button.win-textbox-action-query) {
-  width: 40px;
-  min-width: 40px;
-  flex-basis: 40px;
-  margin-left: 0;
-}
-
-:deep(.win-textbox-action-button.win-textbox-action-number) {
-  width: 40px;
-  min-width: 40px;
-  flex-basis: 40px;
 }
 
 :deep(.win-textbox-action-button:hover) {
@@ -1382,6 +1448,11 @@ defineExpose({
 .win-textbox-field::selection {
   background-color: var(--textbox-selection-background, Highlight);
   color: HighlightText;
+}
+
+.win-textbox:not(.is-focused) :deep(.win-textbox-field::selection) {
+  background-color: transparent;
+  color: inherit;
 }
 
 .win-textbox-description {

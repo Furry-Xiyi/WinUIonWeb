@@ -382,6 +382,7 @@ provide(xamlScopeKey, {
 
 .example-display > :deep(*) {
   min-width: 0;
+  max-width: 100%;
 }
 
 .example-options :deep(*) {

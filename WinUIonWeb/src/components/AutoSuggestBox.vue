@@ -311,6 +311,7 @@ provide(xamlScopeKey, {
 });
 provide(textInputTemplateKey, {
   KeyDown: event => onKeydown(event),
+  ActionsWidth: () => hasQueryIcon.value ? 38 : 4,
   Actions: () => hasQueryIcon.value ? h('button', {
     ref: AnimatedQueryInput.Attach, class: 'win-textbox-action-button win-textbox-action-query win-asb-query-button',
     type: 'button', disabled: !isEnabled.value, 'aria-label': t('text.submit-query'),
@@ -443,7 +444,7 @@ const submitQuery = (chosenSuggestion: Suggestion | null = null, queryText = cur
 };
 
 const onKeydown = (event: KeyboardEvent) => {
-  if (event.isComposing || isComposing.value || !isEnabled.value) return;
+  if (event.isComposing || event.keyCode === 229 || isComposing.value || !isEnabled.value) return;
   if (!isOpen.value || !suggestionItems.value.length) {
     if (event.key === 'Enter') { event.preventDefault(); submitQuery(); }
     return;
@@ -492,20 +493,29 @@ const updatePopupPosition = () => {
   const visualViewport = window.visualViewport;
   const viewportTop = visualViewport?.offsetTop ?? 0;
   const viewportBottom = viewportTop + (visualViewport?.height ?? window.innerHeight);
+  // A Gallery example is a drawing boundary: its suggestion list must not
+  // cover the adjacent output, options, or source-code regions.
+  const exampleBounds = rootRef.value?.closest('.example-display')?.getBoundingClientRect();
+  const popupTop = Math.max(viewportTop, (exampleBounds?.top ?? viewportTop) + (exampleBounds ? 1 : 0));
+  const popupBottom = Math.min(viewportBottom, (exampleBounds?.bottom ?? viewportBottom) - (exampleBounds ? 1 : 0));
+  const popupLeft = exampleBounds ? Math.max(rect.left, exampleBounds.left + 1) : rect.left;
+  const popupWidth = exampleBounds
+    ? Math.max(0, Math.min(rect.width, exampleBounds.right - 1 - popupLeft))
+    : rect.width;
   const maxHeight = Number(resolveXamlValue(props.MaxSuggestionListHeight, instance)) || 300;
   const alignCandidateWindowToBottom = isComposing.value && props.DesiredCandidateWindowAlignment === 'BottomEdge';
   const candidateWindowGap = alignCandidateWindowToBottom ? 40 : 0;
-  const spaceBelow = viewportBottom - rect.bottom - candidateWindowGap - 8;
-  const spaceAbove = rect.top - viewportTop - candidateWindowGap - 8;
+  const spaceBelow = Math.max(0, popupBottom - rect.bottom - candidateWindowGap);
+  const spaceAbove = Math.max(0, rect.top - popupTop - candidateWindowGap);
   openDirection.value = alignCandidateWindowToBottom
     ? 'down'
     : (spaceBelow >= Math.min(maxHeight, 160) || spaceBelow >= spaceAbove ? 'down' : 'up');
 
   if (openDirection.value === 'up') {
     popupStyle.value = {
-      left: `${rect.left}px`,
+      left: `${popupLeft}px`,
       bottom: `${window.innerHeight - rect.top + candidateWindowGap}px`,
-      width: `${rect.width}px`,
+      width: `${popupWidth}px`,
       maxHeight: `${boolValue(resolveXamlValue(props.AutoMaximizeSuggestionArea, instance)) ? Math.max(0, spaceAbove) : Math.min(maxHeight, Math.max(0, spaceAbove))}px`,
       '--asb-input-bottom-radius': '4px',
       '--asb-popup-radius': '8px 8px 0 0'
@@ -514,9 +524,9 @@ const updatePopupPosition = () => {
   }
 
   popupStyle.value = {
-    left: `${rect.left}px`,
+    left: `${popupLeft}px`,
     top: `${rect.bottom + candidateWindowGap}px`,
-    width: `${rect.width}px`,
+    width: `${popupWidth}px`,
     maxHeight: `${boolValue(resolveXamlValue(props.AutoMaximizeSuggestionArea, instance)) ? Math.max(0, spaceBelow) : Math.min(maxHeight, Math.max(0, spaceBelow))}px`,
     '--asb-input-bottom-radius': localOpen.value ? '0' : '4px',
     '--asb-popup-radius': '0 0 8px 8px'
@@ -634,10 +644,10 @@ defineExpose(api);
   appearance: none;
   width: 32px;
   min-width: 32px;
-  height: auto;
+  height: 28px;
   min-height: 0;
   flex: 0 0 32px;
-  align-self: stretch;
+  align-self: center;
   margin: 0 0 0 2px;
   padding: 0;
   border: 0;
@@ -653,13 +663,17 @@ defineExpose(api);
 .win-auto-suggest-box :deep(.win-asb-query-button:disabled) { color: var(--text-disabled); }
 
 .win-asb-textbox :deep(.win-textbox-delete-button) {
-  width: 40px;
-  min-width: 40px;
-  flex-basis: 40px;
+  width: 32px;
+  min-width: 32px;
+  flex-basis: 32px;
 }
 
 .win-asb-textbox :deep(.win-textbox-delete-button-layout) {
-  inset: 4px;
+  inset: 4px 0;
+}
+
+.win-asb-textbox :deep(.win-textbox-content) {
+  padding-right: calc(4px + var(--textbox-helper-margin-right, -1px));
 }
 
 .win-auto-suggest-box.is-suggestion-open-down :deep(.win-textbox-border),
