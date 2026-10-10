@@ -119,6 +119,17 @@ const componentName = (type: unknown) => {
   return value.name || value.__name || value.__file?.split(/[\\/]/).pop()?.replace(/\.vue$/, '') || ''
 }
 
+// Vue's SFC compiler retains __name in both modes, while Vite removes __file
+// from production bundles. Match the Gallery page/sample naming convention and
+// its four other binding owners without adding control implementation state.
+const galleryScopeNames = new Set([
+  'GalleryItemsGrid', 'HomeHeaderTile', 'PageHeader', 'TabContentSampleControl'
+])
+const isGalleryScope = (type: ComponentInternalInstance['type']): boolean => {
+  const name = (type as { __name?: string }).__name ?? ''
+  return (name !== 'Page' && /Page\d*$/.test(name)) || galleryScopeNames.has(name)
+}
+
 const unwrap = (value: unknown): unknown => {
   if (isRef(value)) return value.value
   return value
@@ -173,9 +184,7 @@ const scopeFor = (instance: ComponentInternalInstance | null): Scope => {
   // ControlExample.propertyNodes and recursively evaluate the same VNodes.
   let cursor = instance?.parent ?? null
   while (cursor) {
-    const sourceFile = String((cursor.type as { __file?: string } | undefined)?.__file ?? '').replace(/\\/g, '/')
-    const isPageScope = /\/gallery\/(?:pages|components|samples\/TabView)\//.test(sourceFile)
-    if (isPageScope) {
+    if (isGalleryScope(cursor.type)) {
       merge(cursor.setupState)
     }
     cursor = cursor.parent
