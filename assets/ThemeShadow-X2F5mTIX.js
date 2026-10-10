@@ -1,0 +1,1 @@
+import{In as e,Mn as t,_i as n,wi as r}from"./ScrollViewer-CHNE18MA.js";var i=t(Object.assign(n({name:`ThemeShadow`,inheritAttrs:!1,setup(t,{expose:n}){let i=e();return n(i),r(i.Dispose),()=>null}}),{__xamlDependencyObject:!0,__createXamlResource(t,n){let r=e();return n.Dispose(r.Dispose),r}}),[[`__file`,`ThemeShadow.vue`]]);export{i as t};
