@@ -1,0 +1,14 @@
+import{Bi as e,Cn as t,bi as n,ci as r,gi as i,ki as a,o,p as s,t as c,ui as l}from"./ScrollViewer-B43ymvAj.js";import{t as u}from"./StackPanel-Dy6dKYi5.js";import{t as d}from"./ControlExample-Ddvmn5_c.js";import{n as f,t as p}from"./Pivot-BhgcZwjR.js";import{t as m}from"./pageState-BQHW0me4.js";var h={__name:`PivotPage`,setup(h){let{t:g}=s(),_=n(`currentPage`),{pageTheme:v}=m(r(()=>_?.value||`pivot`).value);r(()=>g(`text.pivot-description`)),r(()=>g(`sample.pivot.basic`));let y=r(()=>g(`sample.pivot.email`)),b=r(()=>g(`sample.pivot.all`)),x=r(()=>g(`sample.pivot.all-content`)),S=r(()=>g(`sample.pivot.unread`)),C=r(()=>g(`sample.pivot.unread-content`)),w=r(()=>g(`sample.pivot.flagged`)),T=r(()=>g(`sample.pivot.flagged-content`)),E=r(()=>g(`sample.pivot.urgent`)),D=r(()=>g(`sample.pivot.urgent-content`)),O=e=>String(e).replaceAll(`&`,`&amp;`).replaceAll(`"`,`&quot;`).replaceAll(`<`,`&lt;`).replaceAll(`>`,`&gt;`);return r(()=>`<Pivot Title="${O(y.value)}">
+    <PivotItem Header="${O(b.value)}">
+        <TextBlock Text="${O(x.value)}" />
+    </PivotItem>
+    <PivotItem Header="${O(S.value)}">
+        <TextBlock Text="${O(C.value)}" />
+    </PivotItem>
+    <PivotItem Header="${O(w.value)}">
+        <TextBlock Text="${O(T.value)}" />
+    </PivotItem>
+    <PivotItem Header="${O(E.value)}">
+        <TextBlock Text="${O(D.value)}" />
+    </PivotItem>
+</Pivot>`),(n,r)=>(a(),l(t,null,{default:e(()=>[i(c,{class:`gallery-page-scroll`,VerticalScrollBarVisibility:`Auto`,VerticalScrollMode:`Auto`},{default:e(()=>[i(u,{class:`gallery-item-page`},{default:e(()=>[i(o,{MaxWidth:`1064`,HorizontalAlignment:`Left`,Margin:`0,4,24,0`,Style:`{ThemeResource BodyTextBlockStyle}`,Text:`{x:Bind pageDescription, Mode=OneWay}`,TextWrapping:`WrapWholeWords`}),i(u,{class:`gallery-page-content`,MaxWidth:`1028`,HorizontalAlignment:`Left`},{default:e(()=>[i(d,{Margin:`0,0,24,0`,HeaderText:`{x:Bind basicHeader, Mode=OneWay}`,Theme:`{x:Bind pageTheme, Mode=OneWay}`,Xaml:`{x:Bind basicXaml, Mode=OneWay}`},{default:e(()=>[i(d.Example,null,{default:e(()=>[i(p,{Title:`{x:Bind emailTitle, Mode=OneWay}`,MinHeight:`400`},{default:e(()=>[i(f,{Header:`{x:Bind allHeader, Mode=OneWay}`},{default:e(()=>[i(o,{Text:`{x:Bind allContent, Mode=OneWay}`})]),_:1}),i(f,{Header:`{x:Bind unreadHeader, Mode=OneWay}`},{default:e(()=>[i(o,{Text:`{x:Bind unreadContent, Mode=OneWay}`})]),_:1}),i(f,{Header:`{x:Bind flaggedHeader, Mode=OneWay}`},{default:e(()=>[i(o,{Text:`{x:Bind flaggedContent, Mode=OneWay}`})]),_:1}),i(f,{Header:`{x:Bind urgentHeader, Mode=OneWay}`},{default:e(()=>[i(o,{Text:`{x:Bind urgentContent, Mode=OneWay}`})]),_:1})]),_:1})]),_:1})]),_:1})]),_:1})]),_:1})]),_:1})]),_:1}))}};export{h as default};

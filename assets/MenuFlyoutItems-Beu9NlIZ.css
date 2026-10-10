@@ -1,0 +1,1 @@
+.win-menu-flyout-separator{box-sizing:border-box;flex:none;align-items:center;min-width:0;display:grid}.win-menu-flyout-separator-line{height:var(--MenuFlyoutSeparatorHeight,1px);background:var(--MenuFlyoutSeparatorBackground,var(--DividerStrokeColorDefaultBrush,var(--stroke-divider)))}

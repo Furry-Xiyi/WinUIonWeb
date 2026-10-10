@@ -1,0 +1,1 @@
+import{_i as e}from"./ScrollViewer-B43ymvAj.js";var t=e({name:`ComboBoxItem`,__xamlComboBoxItem:!0,setup(){return()=>null}}),n=e({name:`x:String`,__xamlString:!0,setup(){return()=>null}}),r=e({name:`Slider.Header`,__sliderHeaderProperty:!0,setup(){return()=>null}});export{r as n,n as r,t};
