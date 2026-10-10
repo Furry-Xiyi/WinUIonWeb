@@ -42,6 +42,7 @@ import Button from './Button.vue'
 import ScrollViewer from './ScrollViewer.vue'
 import { useI18n } from './i18n/index'
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime'
+import type { Location, ViewChangedArgs, Request, SemanticView } from './semanticZoomTypes'
 
 defineOptions({ inheritAttrs: false })
 const props = defineProps({
@@ -58,18 +59,6 @@ const props = defineProps({
   'ScrollViewer.IsHorizontalRailEnabled': { type: [Boolean, String], default: false }, 'ScrollViewer.IsVerticalRailEnabled': { type: [Boolean, String], default: false },
   'ScrollViewer.ZoomMode': { type: String, default: 'Disabled' }
 })
-interface Location { Item: unknown; Bounds: { X: number; Y: number; Width: number; Height: number }; ZoomPoint?: { X: number; Y: number } }
-interface ViewChangedArgs { IsSourceZoomedInView: boolean; SourceItem: Location; DestinationItem: Location }
-interface Request { Item?: unknown; OriginalSource?: HTMLElement; ZoomPoint?: { X: number; Y: number }; Gesture?: boolean }
-interface SemanticView {
-  IsActiveView?: boolean; IsZoomedInView?: boolean; SemanticZoomOwner?: unknown;
-  InitializeViewChange?: () => void;
-  StartViewChangeFrom?: (source: Location, destination: Location) => void;
-  StartViewChangeTo?: (source: Location, destination: Location) => void;
-  MakeVisible?: (location: Location) => void;
-  CompleteViewChangeFrom?: (source: Location, destination: Location) => void;
-  CompleteViewChangeTo?: (source: Location, destination: Location) => void; CompleteViewChange?: () => void;
-}
 const emit = defineEmits<{ 'update:IsZoomedInViewActive': [boolean]; ViewChangeStarted: [unknown, ViewChangedArgs]; ViewChangeCompleted: [unknown, ViewChangedArgs] }>()
 const instance = getCurrentInstance(), attrs = useAttrs(), slots = useSlots()
 const forwardedAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([key]) => !['ViewChangeStarted', 'ViewChangeCompleted'].includes(key))))

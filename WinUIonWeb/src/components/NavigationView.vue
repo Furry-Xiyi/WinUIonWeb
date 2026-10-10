@@ -2895,7 +2895,7 @@ watch(() => props.selectedValue, (val) => {
 <style>
   @font-face {
     font-family: 'WinUIOnWebNavigationIcons';
-    src: local('Segoe Fluent Icons'), local('Segoe MDL2 Assets'), url('../assets/Fonts/SEGOEICONS.TTF') format('truetype');
+    src: local('Segoe Fluent Icons');
     font-display: block;
   }
 

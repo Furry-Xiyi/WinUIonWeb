@@ -20,7 +20,7 @@ import { boolValue } from './layout'
 import { arrangeParallaxChild, computeParallaxTranslation, measureParallaxAxis, parallaxChildLayoutKey, resolveParallaxOffsets, type ParallaxSize } from './parallaxRuntime'
 import { normalizeXamlNodes, resolveXamlValue, updateXamlBinding, xamlNameScopeKey } from './xamlRuntime'
 
-interface Props {
+export interface Props {
   Child?: unknown; Source?: object | string | null; HorizontalShift?: number | string; VerticalShift?: number | string
   HorizontalSourceStartOffset?: number | string; HorizontalSourceEndOffset?: number | string; VerticalSourceStartOffset?: number | string; VerticalSourceEndOffset?: number | string
   HorizontalSourceOffsetKind?: string | number; VerticalSourceOffsetKind?: string | number; IsHorizontalShiftClamped?: boolean | string; IsVerticalShiftClamped?: boolean | string

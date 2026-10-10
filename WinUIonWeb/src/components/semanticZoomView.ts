@@ -1,6 +1,6 @@
 import { computed, ref, shallowRef, toRaw, type Ref } from 'vue'
-interface Location { Item: unknown; Bounds: { X: number; Y: number; Width: number; Height: number }; ZoomPoint?: { X: number; Y: number } }
-interface Owner { ToggleActiveView: (request?: { Item?: unknown; OriginalSource?: HTMLElement }) => void; HasFocus?: () => boolean }
+export interface Location { Item: unknown; Bounds: { X: number; Y: number; Width: number; Height: number }; ZoomPoint?: { X: number; Y: number } }
+export interface Owner { ToggleActiveView: (request?: { Item?: unknown; OriginalSource?: HTMLElement }) => void; HasFocus?: () => boolean }
 const same = (a: unknown, b: unknown) => toRaw(a) === toRaw(b)
 const groupOf = (item: unknown) => (item as { Group?: unknown } | null)?.Group ?? item
 const itemsOf = (group: unknown): unknown[] => (group as { Items?: unknown[]; GroupItems?: unknown[] } | null)?.Items ?? (group as { GroupItems?: unknown[] } | null)?.GroupItems ?? []

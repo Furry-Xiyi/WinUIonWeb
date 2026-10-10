@@ -1,5 +1,4 @@
 import { defineComponent, Fragment, h, type VNode } from 'vue'
-import { getControlExampleProperty, type ControlExamplePropertyName } from './ControlExampleProperties'
 
 export type CollectionPropertyName = 'items' | 'resources' | 'itemTemplate' | 'itemTemplateSelector' | 'itemsPanel' | 'groupHeaderTemplate' | 'groupStyle' | 'groupStyleHeaderTemplate' | 'layout' | 'itemContainerStyle' | 'itemContainerStyleSelector' | 'itemContainerTransitions'
 
@@ -119,9 +118,6 @@ export const getCollectionProperty = (node: VNode): CollectionPropertyName | und
   }
   return undefined
 }
-
-export const getXamlProperty = (node: VNode): CollectionPropertyName | ControlExamplePropertyName | undefined =>
-  getCollectionProperty(node) ?? getControlExampleProperty(node)
 
 export const getLayoutDescriptor = (nodes: VNode[]) => {
   const node = nodes.find(Boolean)

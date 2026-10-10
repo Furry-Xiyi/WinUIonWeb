@@ -441,6 +441,6 @@ onBeforeUnmount(() => {
 .calendar-picker-dismiss-layer { position: fixed; inset: 0; z-index: 10000; background: transparent; }
 .calendar-picker-dismiss-layer.overlay-on { background: var(--CalendarDatePickerLightDismissOverlayBackground, rgba(0,0,0,.2)); }
 .calendar-picker-flyout { position: fixed; z-index: 10001; padding: 0; border: 0; border-radius: var(--OverlayCornerRadius, 8px); max-width: calc(100vw - 8px); overflow: visible; }
-.calendar-picker-flyout :deep(.win-calendar-view) { overflow: hidden; border-radius: inherit; }
+.calendar-picker-flyout .win-calendar-view { overflow: hidden; border-radius: inherit; }
 .calendar-picker-flyout.is-closing { pointer-events: none; }
 </style>

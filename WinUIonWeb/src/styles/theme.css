@@ -287,7 +287,7 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
 /* PersonPicture.xaml and PersonPicture_themeresources.xaml. */
 @font-face {
   font-family: 'Segoe Fluent Icons';
-  src: local('Segoe Fluent Icons'), url('../assets/Fonts/SEGOEICONS.TTF') format('truetype');
+  src: local('Segoe Fluent Icons');
   font-display: block;
 }
 :root, html.theme-light, html.theme-dark,
@@ -1176,24 +1176,6 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
     --host-flyout-bg: var(--flyout-bg);
     --host-nav-pane-bg: color-mix(in srgb, var(--app-bg) 56%, transparent);
   }
-}
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  user-select: none;
-}
-
-html, body, #app {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  color: var(--text-primary);
-  background-color: var(--app-bg);
-  transition: --app-bg var(--normal-duration) var(--fast-out-slow-in), --layer-default var(--normal-duration) var(--fast-out-slow-in), --flyout-bg var(--normal-duration) var(--fast-out-slow-in), --card-bg var(--normal-duration) var(--fast-out-slow-in), --card-stroke var(--normal-duration) var(--fast-out-slow-in), --card-bg-secondary var(--normal-duration) var(--fast-out-slow-in), --stroke-surface-flyout var(--normal-duration) var(--fast-out-slow-in), --stroke-divider var(--normal-duration) var(--fast-out-slow-in), --ctrl-border-rest var(--normal-duration) var(--fast-out-slow-in), --ctrl-border var(--normal-duration) var(--fast-out-slow-in), --ctrl-border-accent var(--normal-duration) var(--fast-out-slow-in), --accent-border var(--normal-duration) var(--fast-out-slow-in), --accent-border-accent var(--normal-duration) var(--fast-out-slow-in), --text-primary var(--normal-duration) var(--fast-out-slow-in), --text-secondary var(--normal-duration) var(--fast-out-slow-in), --text-tertiary var(--normal-duration) var(--fast-out-slow-in), --text-disabled var(--normal-duration) var(--fast-out-slow-in), --subtle-secondary var(--normal-duration) var(--fast-out-slow-in), --subtle-tertiary var(--normal-duration) var(--fast-out-slow-in), --subtle-pressed var(--normal-duration) var(--fast-out-slow-in), --ctrl-fill-default var(--normal-duration) var(--fast-out-slow-in), --ctrl-fill-secondary var(--normal-duration) var(--fast-out-slow-in), --ctrl-fill-tertiary var(--normal-duration) var(--fast-out-slow-in), --ctrl-fill-disabled var(--normal-duration) var(--fast-out-slow-in), --ctrl-strong-fill var(--normal-duration) var(--fast-out-slow-in), --ctrl-strong-fill-disabled var(--normal-duration) var(--fast-out-slow-in), --ctrl-strong-stroke var(--normal-duration) var(--fast-out-slow-in), --ctrl-strong-stroke-disabled var(--normal-duration) var(--fast-out-slow-in), --ctrl-solid-fill var(--normal-duration) var(--fast-out-slow-in), --ctrl-elevation-top var(--normal-duration) var(--fast-out-slow-in), --ctrl-elevation-bottom var(--normal-duration) var(--fast-out-slow-in), --accent-base var(--normal-duration) var(--fast-out-slow-in), --accent-hover var(--normal-duration) var(--fast-out-slow-in), --accent-pressed var(--normal-duration) var(--fast-out-slow-in), --accent-fill-disabled var(--normal-duration) var(--fast-out-slow-in), --accent-text var(--normal-duration) var(--fast-out-slow-in), --accent-text-secondary var(--normal-duration) var(--fast-out-slow-in), --toggle-border var(--normal-duration) var(--fast-out-slow-in), --toggle-thumb var(--normal-duration) var(--fast-out-slow-in), --toggle-thumb-hover var(--normal-duration) var(--fast-out-slow-in), --toggle-on-thumb var(--normal-duration) var(--fast-out-slow-in), --radio-border var(--normal-duration) var(--fast-out-slow-in);
 }
 
 .gallery-item-page,

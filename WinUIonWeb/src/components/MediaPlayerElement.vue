@@ -1395,7 +1395,7 @@ defineExpose({ MediaPlayer: videoRef });
 
 @font-face {
   font-family: 'WinUIOnWebIcons';
-  src: url('../assets/Fonts/SEGOEICONS.TTF') format('truetype');
+  src: local('Segoe Fluent Icons');
   font-display: block;
 }
 

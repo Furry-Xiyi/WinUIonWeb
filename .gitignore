@@ -397,4 +397,7 @@ FodyWeavers.xsd
 /WinUIonWeb/vite-*.err.log
 /WinUIonWeb/.vite/
 /WinUIonWeb/dist/
+/WinUIonWeb/dist-lib/
 /WinUIonWeb/obj/
+/WinUIonWeb/.package-smoke/
+/WinUIonWeb/src/assets/Fonts/SEGOEICONS.TTF

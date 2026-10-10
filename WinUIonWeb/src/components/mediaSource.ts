@@ -1,3 +1,5 @@
+import MediaDecodeWorker from './mediaDecode.worker.ts?worker&inline';
+
 const cacheName = 'WinUIonWeb.media.vc1-h264-aac.v1';
 const maximumInputSize = 32 * 1024 * 1024;
 const convertedSources = new Map<string, Promise<Blob>>();
@@ -27,7 +29,7 @@ const downloadSource = async (source: string): Promise<ArrayBuffer> => {
 
 const decode = (bytes: ArrayBuffer): Promise<Blob> => new Promise((resolve, reject) => {
   if (workerIdleTimer) clearTimeout(workerIdleTimer);
-  const worker = decodeWorker ||= new Worker(new URL('./mediaDecode.worker.ts', import.meta.url), { type: 'module' });
+  const worker = decodeWorker ||= new MediaDecodeWorker();
   const id = ++requestId;
   const finish = (error?: Error, result?: Blob) => {
     clearTimeout(timeout);
