@@ -271,6 +271,9 @@ export default {
   "sample.listbox.selected-color": "Selected color: {color}",
   "app.shortTitle": "WinUI on Web Gallery",
   "app.title": "WinUI on Web Gallery",
+  "app.unofficial-notice.title": "Unofficial project notice",
+  "app.unofficial-notice.message": "WinUI on Web is an independent, unofficial web project. It is not an official Microsoft, Windows App SDK, or WinUI product, and Microsoft does not endorse or support it. See Settings > About for source links, licenses, and the full legal notice.",
+  "app.unofficial-notice.acknowledge": "I understand",
   "app.version": "1.0.0-Insider",
   "app.author": "惜忆想睡觉",
   "search.placeholder": "Search controls and samples...",
@@ -1866,6 +1869,20 @@ export default {
      ,"text.all-rights-reserved": "All rights reserved."
      ,"text.qq-group": "QQ Group"
      ,"text.discord-group": "Discord Group"
+     ,"settings.legal.heading": "WinUI sources, licenses and legal notices"
+     ,"settings.legal.nonofficial": "WinUI on Web is an independently developed, unofficial web implementation. It is not created, maintained, sponsored, endorsed by, or affiliated with Microsoft, and is not the official WinUI 3 Gallery, WinUI, or Windows App SDK."
+     ,"settings.legal.attribution": "The control designs, behavior, sample structure and some linked media refer to Microsoft's public WinUI 3 Gallery and Windows UI Library (microsoft-ui-xaml) projects. Microsoft Corporation and their contributors retain the rights to their original code, documentation, samples and assets."
+     ,"settings.legal.licenses": "WinUI 3 Gallery and microsoft-ui-xaml are distributed under their respective MIT licenses. Their copyright notices, permission conditions, warranty disclaimers and applicable third-party notices continue to govern upstream material. This project's own source is published under GPL-3.0; it does not replace upstream or third-party terms. Read the linked full license and NOTICE files before copying, modifying or redistributing material."
+     ,"settings.legal.trademarks": "Microsoft, Windows, WinUI, Windows App SDK and related names and logos are trademarks or protected marks of their respective owners. Mentioning them identifies the referenced technologies and does not imply Microsoft endorsement."
+     ,"settings.legal.warranty": "This web implementation may differ from the official products and is provided as-is, without warranty from Microsoft or this project. Consult the official sources below for authoritative product information and legal terms; the community links below are not Microsoft support channels."
+     ,"settings.legal.official-gallery": "Official WinUI 3 Gallery"
+     ,"settings.legal.winui-docs": "Official WinUI 3 documentation"
+     ,"settings.legal.gallery-source": "WinUI 3 Gallery source repository"
+     ,"settings.legal.winui-source": "Windows UI Library source repository"
+     ,"settings.legal.gallery-license": "WinUI 3 Gallery MIT license"
+     ,"settings.legal.winui-license": "Windows UI Library MIT license"
+     ,"settings.legal.winui-notices": "Windows UI Library third-party notices"
+     ,"settings.legal.project-license": "WinUI on Web GPL-3.0 license"
      ,"sample.infobadge.description": "Badging is a non-intrusive and intuitive way to display notifications or bring focus to an area within an app - whether that be for notifications, indicating new content, or showing an alert. An InfoBadge is a small piece of UI that can be added into an app and customized to display a number, icon, or a simple dot."
      ,"sample.infobadge.embedded-navigationview": "InfoBadge embedded in NavigationView"
      ,"sample.infobadge.opacity": "InfoBadge Opacity"

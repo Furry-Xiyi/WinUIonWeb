@@ -271,6 +271,9 @@ export default {
   "sample.listbox.selected-color": "所选颜色：{color}",
   "app.shortTitle": "WinUI on Web 图库",
   "app.title": "WinUI on Web 图库",
+  "app.unofficial-notice.title": "非官方项目提示",
+  "app.unofficial-notice.message": "WinUI on Web 是独立开发的非官方网页项目，并非 Microsoft、Windows App SDK 或 WinUI 官方产品，也未获得 Microsoft 的官方认可或支持。来源链接、许可证及完整法律声明见“设置 > 关于”。",
+  "app.unofficial-notice.acknowledge": "我知道了",
   "app.version": "1.0.0-Insider",
   "app.author": "惜忆想睡觉",
   "search.placeholder": "搜索控件和示例...",
@@ -1866,6 +1869,20 @@ export default {
      ,"text.all-rights-reserved": "保留所有权利。"
      ,"text.qq-group": "QQ 群组"
      ,"text.discord-group": "Discord 群组"
+     ,"settings.legal.heading": "WinUI 来源、许可与法律声明"
+     ,"settings.legal.nonofficial": "WinUI on Web 是独立开发的非官方网页实现，并非由 Microsoft 创建、维护、赞助或认可，与 Microsoft 没有关联；它也不是官方 WinUI 3 Gallery、WinUI 或 Windows App SDK。"
+     ,"settings.legal.attribution": "控件设计、行为、示例结构和部分链接媒体参考了 Microsoft 公开的 WinUI 3 Gallery 与 Windows UI Library（microsoft-ui-xaml）项目。Microsoft Corporation 及相关贡献者保留其原始代码、文档、示例和素材的权利。"
+     ,"settings.legal.licenses": "WinUI 3 Gallery 和 microsoft-ui-xaml 分别按各自的 MIT 许可证发布。上游材料仍受其版权声明、许可条件、免责声明及适用的第三方声明约束。本项目自身源码按 GPL-3.0 发布，该许可不替代上游或第三方条款。复制、修改或再分发相关材料前，请阅读下方链接中的完整许可证和 NOTICE 文件。"
+     ,"settings.legal.trademarks": "Microsoft、Windows、WinUI、Windows App SDK 及相关名称和徽标是各权利人的商标或受保护标识。提及这些名称仅用于说明所参考的技术，不代表获得 Microsoft 认可。"
+     ,"settings.legal.warranty": "本网页实现可能与官方产品存在差异，并按现状提供；Microsoft 和本项目均不提供任何保证。产品信息和法律条款请以以下官方来源为准；下方社区链接并非 Microsoft 支持渠道。"
+     ,"settings.legal.official-gallery": "官方 WinUI 3 Gallery"
+     ,"settings.legal.winui-docs": "官方 WinUI 3 文档"
+     ,"settings.legal.gallery-source": "WinUI 3 Gallery 源码仓库"
+     ,"settings.legal.winui-source": "Windows UI Library 源码仓库"
+     ,"settings.legal.gallery-license": "WinUI 3 Gallery MIT 许可证"
+     ,"settings.legal.winui-license": "Windows UI Library MIT 许可证"
+     ,"settings.legal.winui-notices": "Windows UI Library 第三方声明"
+     ,"settings.legal.project-license": "WinUI on Web GPL-3.0 许可证"
      ,"sample.infobadge.description": "徽章是一种不打扰用户且直观的方式，用于显示通知或将注意力引导到应用中的某个区域，例如通知、新内容提示或警报。InfoBadge 是一小块可添加到应用中的界面元素，可自定义显示数字、图标或简单圆点。"
      ,"sample.infobadge.embedded-navigationview": "嵌入 NavigationView 的 InfoBadge"
      ,"sample.infobadge.opacity": "InfoBadge 不透明度"

@@ -227,14 +227,15 @@ const normalizeItem = (item, fallbackKey = 'item') => {
       ? 'Separator'
       : declaredType;
   const children = item?.MenuItemsSource ?? item?.MenuItems;
-  const iconNode = item?.__IconNodes?.[0];
+  const iconNodes = item?.__IconNodes ?? (isVNode(item?.Icon) ? [item.Icon] : undefined);
+  const iconNode = iconNodes?.[0];
   const iconProps = iconNode?.props;
   return {
     value: getSourceIdentity(item, `__${String(type).toLowerCase()}-${fallbackKey}`),
     tag: getItemTag(item),
     label: item?.Content ?? (typeof item === 'string' || typeof item === 'number' ? String(item) : ''),
-    icon: resolveSymbolGlyph(item?.Icon ?? iconProps?.Symbol) || item?.Icon?.Glyph || iconProps?.Glyph || item?.Icon || '',
-    iconNodes: item?.__IconNodes,
+    icon: isVNode(item?.Icon) ? '' : resolveSymbolGlyph(item?.Icon ?? iconProps?.Symbol) || item?.Icon?.Glyph || iconProps?.Glyph || item?.Icon || '',
+    iconNodes,
     contentNodes: item?.__ContentNodes,
     infoBadge: item?.InfoBadge ?? null,
     automationName: item?.['AutomationProperties.Name'] ?? item?.AutomationProperties?.Name ?? '',

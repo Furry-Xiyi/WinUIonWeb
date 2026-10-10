@@ -93,6 +93,14 @@
     </div>
   </div>
 
+  <ContentDialog
+    x:Name="UnofficialNoticeDialog"
+    ref="unofficialNoticeDialog"
+    Title="{x:Bind unofficialNoticeTitle}"
+    Content="{x:Bind unofficialNoticeMessage}"
+    CloseButtonText="{x:Bind unofficialNoticeAcknowledgement}"
+    DefaultButton="Close" />
+
   <Teleport to="#app">
     <div
       v-if="compactSearchOpen"
@@ -114,7 +122,7 @@
 </template>
 
 <script setup>
-import { nextTick, ref, shallowRef, watch, provide, inject, computed, onMounted, onBeforeUnmount, onErrorCaptured } from 'vue';
+import { h, markRaw, nextTick, ref, shallowRef, watch, provide, inject, computed, onMounted, onBeforeUnmount, onErrorCaptured } from 'vue';
 import TitleBar from '../components/TitleBar.vue';
 import NavigationView from '../components/NavigationView.vue';
 import { beginNavigationCommit, navigationInputFrozen } from '../components/frameNavigationRuntime';
@@ -124,7 +132,9 @@ import ToolTipService from '../components/ToolTipService.vue';
 import AutoSuggestBox from '../components/AutoSuggestBox.vue';
 import PageHeader from './components/PageHeader.vue';
 import Button from '../components/Button.vue';
+import ContentDialog from '../components/ContentDialog.vue';
 import FontIcon from '../components/FontIcon.vue';
+import ImageIcon from '../components/ImageIcon.vue';
 import Grid from '../components/Grid.vue';
 import ColumnDefinition from '../components/ColumnDefinition.vue';
 import { getGalleryGroups, getGalleryItems } from './data/galleryCatalog';
@@ -149,6 +159,9 @@ import {
 
 const { t, locale } = useI18n();
 const appTitle = t('app.title');
+const unofficialNoticeTitle = t('app.unofficial-notice.title');
+const unofficialNoticeMessage = t('app.unofficial-notice.message');
+const unofficialNoticeAcknowledgement = t('app.unofficial-notice.acknowledge');
 const searchPlaceholder = t('search.placeholder');
 const searchSubmitLabel = t('text.submit-query');
 const galleryGroups = getGalleryGroups(t);
@@ -156,6 +169,9 @@ const sectionTags = new Set(galleryGroups.map(group => group.UniqueId));
 const controlTags = new Set(getGalleryItems(t).map(item => item.UniqueId));
 
 const titleBarRef = ref(null);
+const unofficialNoticeDialog = ref(null);
+let unofficialNoticeRequested = false;
+let isGalleryMounted = false;
 const searchBoxRef = ref(null);
 const compactSearchOpen = ref(false);
 const compactSearchRef = ref(null);
@@ -460,7 +476,7 @@ const navMenuItems = computed(() => [
     Content: group.Title,
     MenuItems: group.Items.map(item => ({
       Tag: item.UniqueId,
-      Icon: item.Icon,
+      Icon: markRaw(h(ImageIcon, { Source: item.ImagePath, Width: 16, Height: 16 })),
       Content: item.Title
     }))
   }))
@@ -850,6 +866,7 @@ const onWindowResize = () => {
 provide(xamlScopeKey, {
   selectedNavigationItem, navPosition, navMenuItems, isPaneOpen, canGoBack,
   appTitle, appIcon, isPaneToggleVisible, searchQuery, searchResults, searchPlaceholder, searchSubmitLabel,
+  unofficialNoticeTitle, unofficialNoticeMessage, unofficialNoticeAcknowledgement,
   onNavigationItemInvoked, onBackRequested, onTopBarToggle, onCompactSearchButtonClick, onSearchQuerySubmitted,
   currentPageItem, pageName, copyCurrentPageLink, toggleCurrentPageTheme
 });
@@ -897,6 +914,12 @@ function postUwpSetting(key, value) {
 }
 
 onMounted(() => {
+  isGalleryMounted = true;
+  void nextTick().then(() => {
+    if (!isGalleryMounted || unofficialNoticeRequested || !unofficialNoticeDialog.value) return;
+    unofficialNoticeRequested = true;
+    return unofficialNoticeDialog.value.ShowAsync();
+  }).catch(error => console.error(error));
   // WebView2 exposes window.chrome.webview in every host. Only the explicit
   // marker identifies the UWP host that owns the custom title bar.
   isHostedInUwpWebView.value = Boolean(window.__WINUI_ON_WEB_UWP_APP__);
@@ -910,6 +933,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  isGalleryMounted = false;
   for (const state of routePageAnimations.values()) state.finish(true);
   if (navigationReleaseFrame) cancelAnimationFrame(navigationReleaseFrame);
   removeNavigationBeforeEach();

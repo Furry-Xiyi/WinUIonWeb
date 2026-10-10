@@ -1,6 +1,6 @@
 <template>
   <Teleport :to="teleportTarget">
-    <div :id="tooltipId" ref="tooltipRef"
+    <div :id="tooltipId" ref="tooltipRef" popover="manual"
       v-acrylic-brush="backgroundStyle"
       v-theme-shadow="{ Translation: 16, Enabled: present }"
       :class="[present ? 'tooltip win-tooltip LayoutRoot' : 'tooltip-content-cache', themeClass]"
@@ -263,6 +263,20 @@ async function updatePosition() {
 }
 let animation: Animation | null = null, transitionSequence = 0, openTimer: number | undefined
 let resizeObserver: ResizeObserver | null = null, unregister: (() => void) | undefined
+// A native ToolTip uses a parentless Popup. The manual popover places its web
+// visual above ordinary stacking contexts without adding light-dismiss.
+function enterTopLayer(element: HTMLElement, raise = false) {
+  if (typeof element.showPopover !== 'function') { element.removeAttribute('popover'); return }
+  if (element.matches(':popover-open')) {
+    if (!raise) return
+    element.hidePopover()
+  }
+  element.setAttribute('popover', 'manual')
+  try { element.showPopover() } catch { element.removeAttribute('popover') }
+}
+function leaveTopLayer(element: HTMLElement | null) {
+  if (element && typeof element.hidePopover === 'function' && element.matches(':popover-open')) element.hidePopover()
+}
 function setOpen(open: boolean) { localIsOpen.value = open; updateXamlBinding(props.IsOpen, open, instance); emit('update:IsOpen', open) }
 function show(immediate = true) {
   window.clearTimeout(openTimer)
@@ -284,7 +298,10 @@ async function changeVisibility(open: boolean) {
   const sequence = ++transitionSequence, opacity = present.value && tooltipRef.value ? getComputedStyle(tooltipRef.value).opacity : '0'
   animation?.cancel(); animation = null
   if (open) {
-    present.value = true; positioned.value = false; syncTheme(); await updatePosition()
+    present.value = true; positioned.value = false; syncTheme(); await nextTick()
+    if (sequence !== transitionSequence || !isVisible.value) return
+    if (tooltipRef.value) enterTopLayer(tooltipRef.value, true)
+    await updatePosition()
     if (sequence !== transitionSequence || !isVisible.value) return
   }
   const element = tooltipRef.value
@@ -294,7 +311,7 @@ async function changeVisibility(open: boolean) {
   try { await animation.finished } catch { return }
   if (sequence !== transitionSequence) return
   element.style.opacity = open ? '1' : '0'; animation.cancel(); animation = null
-  if (!open) { present.value = false; positioned.value = false }
+  if (!open) { leaveTopLayer(element); present.value = false; positioned.value = false }
   raise(open ? 'Opened' : 'Closed')
 }
 watch(boundIsOpen, () => { localIsOpen.value = undefined })
@@ -314,7 +331,10 @@ watch(() => ownerContext?.owner.value, owner => {
   if (owner) syncTheme()
 }, { immediate: true, flush: 'post' })
 function onViewportChanged() { if (present.value) { syncTheme(); void updatePosition() } }
-function onFullscreenChanged() { teleportTarget.value = document.fullscreenElement as HTMLElement || 'body'; onViewportChanged() }
+function onFullscreenChanged() {
+  teleportTarget.value = document.fullscreenElement as HTMLElement || 'body'
+  void nextTick(() => { if (present.value && tooltipRef.value) enterTopLayer(tooltipRef.value, true); onViewportChanged() })
+}
 function observeLayout() {
   resizeObserver?.disconnect()
   const target = targetElement()
@@ -334,7 +354,7 @@ onMounted(() => {
   if (isVisible.value) void updatePosition()
 })
 onBeforeUnmount(() => {
-  transitionSequence += 1; window.clearTimeout(openTimer); animation?.cancel(); unregister?.(); resizeObserver?.disconnect()
+  transitionSequence += 1; window.clearTimeout(openTimer); animation?.cancel(); leaveTopLayer(tooltipRef.value); unregister?.(); resizeObserver?.disconnect()
   window.removeEventListener('resize', onViewportChanged); window.removeEventListener('scroll', onViewportChanged, true)
   window.visualViewport?.removeEventListener('resize', onViewportChanged); window.visualViewport?.removeEventListener('scroll', onViewportChanged)
   document.removeEventListener('fullscreenchange', onFullscreenChanged)
@@ -343,11 +363,12 @@ defineExpose({ Controller: controller, IsOpen: computed({ get: () => isVisible.v
 </script>
 <style>
 .tooltip.win-tooltip {
-  position: fixed; display: flex; width: max-content; min-width: 0; box-sizing: border-box;
+  /* WinUI sets IsHitTestVisible to false so the popup never blocks its owner. */
+  position: fixed; inset: auto; margin: 0; display: flex; width: max-content; min-width: 0; box-sizing: border-box;
   overflow: visible; overflow-wrap: anywhere; color: var(--ToolTipForegroundBrush, var(--text-primary));
   border: 1px solid var(--ToolTipBorderBrush); border-radius: var(--ControlCornerRadius, 4px);
   font-family: var(--ContentControlThemeFontFamily, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif);
-  font-size: 12px; line-height: 16px; opacity: 0; pointer-events: auto; isolation: isolate;
+  font-size: 12px; line-height: 16px; opacity: 0; pointer-events: none; isolation: isolate;
 }
 .tooltip.win-tooltip .win-text-block { min-width: 0; max-width: 100%; color: inherit; font-size: inherit; line-height: inherit; overflow-wrap: inherit; }
 .tooltip.win-tooltip > :not(.win-theme-shadow-visual) { max-width: 100%; max-height: 100%; }
