@@ -1,0 +1,25 @@
+import{Fi as e,Ti as t,Wi as n,Wt as r,a as i,ai as a,di as o,et as s,hi as c,ii as l,o as u,or as d,ri as f,t as p,wi as m,xt as h}from"./ScrollViewer-PoO_ma9Z.js";import{n as g,t as _}from"./CommandBar-rGbntM0g.js";import{t as v}from"./Button-DjU0urmJ.js";import{t as y}from"./StackPanel-CT7pl8zy.js";import{t as b}from"./ToggleButton-DwmhXZge.js";import{t as x}from"./ControlExample-C1ahTZEr.js";import{t as S}from"./pageState-BN3kXI7L.js";var C=`--- header
+AppBarButtons separated by AppBarSeparators.
+--- xaml
+<CommandBar>
+    <CommandBar.PrimaryCommands>
+        <AppBarButton Icon="AttachCamera" Label="Attach Camera"/>
+        <AppBarSeparator />
+        <AppBarButton Icon="Like" Label="Like"/>
+        <AppBarButton Icon="Dislike" Label="Dislike"/>
+        <AppBarSeparator />
+        <AppBarButton Icon="Orientation" Label="Orientation"/>
+    </CommandBar.PrimaryCommands>
+</CommandBar>`,w={__name:`AppBarSeparatorPage`,setup(e,{expose:r}){r();let{t:a}=s(),o=c(`currentPage`),{isFavoriteState:l,pageTheme:m,toggleTheme:w,toggleFavorite:T}=S(o?.value||`appbarseparator`),E=n({});t(d,E);let D={t:a,currentPage:o,isFavoriteState:l,pageTheme:m,toggleTheme:w,toggleFavorite:T,Names:E,Labels:f(()=>({PageTitle:a(`text.appbarseparator`),Description:a(`text.appbarseparator-description`),ToggleTheme:a(`gallery.page-header.toggle-theme`),Header:a(`sample.appbarseparator.separated`),AttachCamera:a(`sample.appbarseparator.attach-camera`),Like:a(`sample.appbarseparator.like`),Dislike:a(`sample.appbarseparator.dislike`),Orientation:a(`sample.appbarseparator.orientation`)})),FavoriteLabel:f(()=>a(l.value?`gallery.remove-favorite`:`gallery.add-favorite`)),FavoriteGlyph:f(()=>l.value?``:``),SeparatorXaml:`--- header
+AppBarButtons separated by AppBarSeparators.
+--- xaml
+<CommandBar>
+    <CommandBar.PrimaryCommands>
+        <AppBarButton Icon="AttachCamera" Label="Attach Camera"/>
+        <AppBarSeparator />
+        <AppBarButton Icon="Like" Label="Like"/>
+        <AppBarButton Icon="Dislike" Label="Dislike"/>
+        <AppBarSeparator />
+        <AppBarButton Icon="Orientation" Label="Orientation"/>
+    </CommandBar.PrimaryCommands>
+</CommandBar>`.split(`--- xaml`)[1]?.split(/\r?\n--- /)[0].trim()??``,computed:f,inject:c,provide:t,shallowReactive:n,AppBarButton:h,AppBarSeparator:g,Button:v,CommandBar:_,ControlExample:x,FontIcon:i,ScrollViewer:p,StackPanel:y,TextBlock:u,ToggleButton:b,get useI18n(){return s},get xamlNameScopeKey(){return d},get createPageState(){return S},get separatorDefinition(){return C}};return Object.defineProperty(D,"__isScriptSetup",{enumerable:!1,value:!0}),D}},T={class:`gallery-item-page`},E={class:`page-heading`},D={class:`page-header-actions`};function O(t,n,r,i,s,c){return m(),a(i.ScrollViewer,{class:`gallery-page-scroll`,VerticalScrollBarVisibility:`Auto`,VerticalScrollMode:`Auto`},{default:e(()=>[l(`div`,T,[l(`div`,E,[o(i.TextBlock,{class:`page-header`,Text:`{x:Bind Labels.PageTitle, Mode=OneWay}`,FontSize:`28`,FontWeight:`SemiBold`,LineHeight:`32`,Margin:`0,0,72,8`,TextWrapping:`Wrap`}),o(i.TextBlock,{class:`page-description`,Text:`{x:Bind Labels.Description, Mode=OneWay}`,TextWrapping:`WrapWholeWords`}),l(`div`,D,[o(i.Button,{class:`header-action`,Click:`toggleTheme`,"ToolTipService.ToolTip":`{x:Bind Labels.ToggleTheme, Mode=OneWay}`,"AutomationProperties.Name":`{x:Bind Labels.ToggleTheme, Mode=OneWay}`},{default:e(()=>[o(i.FontIcon,{Glyph:``,FontSize:`16`})]),_:1}),o(i.ToggleButton,{class:`header-action`,IsChecked:`{x:Bind isFavoriteState, Mode=OneWay}`,Click:`toggleFavorite`,"ToolTipService.ToolTip":`{x:Bind FavoriteLabel, Mode=OneWay}`,"AutomationProperties.Name":`{x:Bind FavoriteLabel, Mode=OneWay}`},{default:e(()=>[o(i.FontIcon,{Glyph:`{x:Bind FavoriteGlyph, Mode=OneWay}`,FontSize:`16`})]),_:1})])]),o(i.StackPanel,{class:`gallery-page-content`},{default:e(()=>[o(i.ControlExample,{class:`appbar-separator-example`,SampleDefinition:`AppBarSeparator\\AppbarbuttonsSeparatedAppbarseparators.txt`,HeaderText:`{x:Bind Labels.Header, Mode=OneWay}`,Theme:`{x:Bind pageTheme, Mode=OneWay}`,Xaml:`{x:Bind SeparatorXaml}`},{default:e(()=>[o(i.ControlExample.Example,null,{default:e(()=>[o(i.ScrollViewer,{HorizontalScrollBarVisibility:`Hidden`,HorizontalScrollMode:`Auto`,VerticalScrollBarVisibility:`Hidden`,VerticalScrollMode:`Disabled`},{default:e(()=>[o(i.CommandBar,{"x:Name":`Control1`},{default:e(()=>[o(i.CommandBar.PrimaryCommands,null,{default:e(()=>[o(i.AppBarButton,{Icon:`AttachCamera`,Label:`{x:Bind Labels.AttachCamera, Mode=OneWay}`}),o(i.AppBarSeparator),o(i.AppBarButton,{Icon:`Like`,Label:`{x:Bind Labels.Like, Mode=OneWay}`}),o(i.AppBarButton,{Icon:`Dislike`,Label:`{x:Bind Labels.Dislike, Mode=OneWay}`}),o(i.AppBarSeparator),o(i.AppBarButton,{Icon:`Orientation`,Label:`{x:Bind Labels.Orientation, Mode=OneWay}`})]),_:1})]),_:1})]),_:1})]),_:1}),o(i.ControlExample.Output),o(i.ControlExample.Options)]),_:1})]),_:1})])]),_:1})}var k=r(w,[[`render`,O],[`__scopeId`,`data-v-b46cb18f`],[`__file`,`AppBarSeparatorPage.vue`]]);export{k as default};
