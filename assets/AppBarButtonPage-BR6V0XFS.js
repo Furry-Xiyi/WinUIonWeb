@@ -1,0 +1,45 @@
+import{$i as e,Ai as t,At as n,Bi as r,Ji as i,Mn as a,P as o,U as s,W as c,Yi as l,a as u,bi as d,ci as f,dr as p,gi as m,ki as h,li as g,o as _,p as v,t as y,ui as b}from"./ScrollViewer-DXAtwYnH.js";import{t as x}from"./Button-1Ztf3pH0.js";import{t as S}from"./Flyout-Bb2H7-cQ.js";import{t as C}from"./TextBox-Ty-JbKyj.js";import{t as w}from"./StackPanel-DGz4UnE4.js";import{t as T}from"./MenuFlyoutItems-CR9hagyh.js";import{t as E}from"./ToggleButton-D0RGNdIP.js";import{t as D}from"./ControlExample-BX-yRpiQ.js";import{t as O}from"./pageState-cPponcIo.js";var k=`--- header
+An AppBarButton with a symbol icon.
+--- xaml
+<AppBarButton Icon="Like" Label="SymbolIcon" Click="AppBarButton_Click"/>`,A=`--- header
+An AppBarButton with a bitmap icon.
+--- xaml
+<AppBarButton Label="BitmapIcon" Click="AppBarButton_Click">
+    <AppBarButton.Icon>
+        <BitmapIcon UriSource="ms-appx:///Assets/SampleMedia/Slices2.png"/>
+    </AppBarButton.Icon>
+</AppBarButton>`,j=`--- header
+An AppBarButton with a font icon.
+--- xaml
+<AppBarButton Label="FontIcon" Click="AppBarButton_Click">
+    <AppBarButton.Icon>
+        <FontIcon FontFamily="Candara" Glyph="&#x03A3;"/>
+    </AppBarButton.Icon>
+</AppBarButton>`,M=`--- header
+An AppBarButton with a path icon.
+--- xaml
+<AppBarButton Label="PathIcon" Click="AppBarButton_Click">
+    <AppBarButton.Content>
+        <Viewbox Stretch="Uniform">
+            <PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24"/>
+        </Viewbox>
+    </AppBarButton.Content>
+</AppBarButton>`,N=`--- header
+An AppBarButton with a KeyboardAccelerator
+--- xaml
+<AppBarButton Icon="Save" Label="Save" Click="AppBarButton_Click">
+    <AppBarButton.KeyboardAccelerators>
+        <KeyboardAccelerator Modifiers="Control" Key="S"/>
+    </AppBarButton.KeyboardAccelerators>
+</AppBarButton>
+`,P=`--- header
+An AppBarButton that opens a Flyout containing an input control.
+--- xaml
+<AppBarButton AllowFocusOnInteraction="True" Icon="Edit" Label="Edit">
+    <AppBarButton.Flyout>
+        <Flyout>
+            <TextBox MinWidth="240" PlaceholderText="Input text here"/>
+        </Flyout>
+    </AppBarButton.Flyout>
+</AppBarButton>
+`,F={class:`gallery-item-page`},I={class:`page-heading`},L={class:`page-header-actions`},R=a({__name:`AppBarButtonPage`,setup(a){let{t:R}=v(),{isFavoriteState:z,pageTheme:B,toggleTheme:V,toggleFavorite:H}=O(d(`currentPage`)?.value||`appbarbutton`);t(p,l({})),f(()=>({PageTitle:R(`text.appbarbutton`),Description:R(`text.appbarbutton-description`),ToggleTheme:R(`gallery.page-header.toggle-theme`),SymbolHeader:R(`sample.appbarbutton.symbol`),BitmapHeader:R(`sample.appbarbutton.bitmap`),FontHeader:R(`sample.appbarbutton.font`),PathHeader:R(`sample.appbarbutton.path`),KeyboardHeader:R(`sample.appbarbutton.keyboard`),FlyoutHeader:R(`sample.appbarbutton.flyout`),SymbolLabel:R(`sample.appbarbutton.symbol-label`),BitmapLabel:R(`sample.appbarbutton.bitmap-label`),FontLabel:R(`sample.appbarbutton.font-label`),PathLabel:R(`sample.appbarbutton.path-label`),Save:R(`text.save`),Edit:R(`text.edit`),InputPlaceholder:R(`sample.appbarbutton.input-placeholder`)})),f(()=>R(z.value?`gallery.remove-favorite`:`gallery.add-favorite`)),f(()=>z.value?``:``);let U=i([``,``,``,``,``]),W=e=>U.value[e]?R(`sample.you-clicked`,{name:U.value[e]}):``;f(()=>W(0)),f(()=>W(1)),f(()=>W(2)),f(()=>W(3)),f(()=>W(4));let G=e=>e.split(`--- xaml`)[1]?.split(/\r?\n--- /)[0].trim()??``;return G(k),G(A),G(j),G(M),G(N),G(P),(t,i)=>(h(),b(y,{class:`gallery-page-scroll`,VerticalScrollBarVisibility:`Auto`,VerticalScrollMode:`Auto`},{default:r(()=>[g(`div`,F,[g(`div`,I,[m(_,{class:`page-header`,Text:`{x:Bind Labels.PageTitle, Mode=OneWay}`,FontSize:`28`,FontWeight:`SemiBold`,LineHeight:`32`,Margin:`0,0,72,8`,TextWrapping:`Wrap`}),m(_,{class:`page-description`,Text:`{x:Bind Labels.Description, Mode=OneWay}`,TextWrapping:`WrapWholeWords`}),g(`div`,L,[m(x,{class:`header-action`,Click:`toggleTheme`,"ToolTipService.ToolTip":`{x:Bind Labels.ToggleTheme, Mode=OneWay}`,"AutomationProperties.Name":`{x:Bind Labels.ToggleTheme, Mode=OneWay}`},{default:r(()=>[m(u,{Glyph:``,FontSize:`16`})]),_:1}),m(E,{class:`header-action`,IsChecked:`{x:Bind isFavoriteState, Mode=OneWay}`,Click:`toggleFavorite`,"ToolTipService.ToolTip":`{x:Bind FavoriteLabel, Mode=OneWay}`,"AutomationProperties.Name":`{x:Bind FavoriteLabel, Mode=OneWay}`},{default:r(()=>[m(u,{Glyph:`{x:Bind FavoriteGlyph, Mode=OneWay}`,FontSize:`16`})]),_:1})])]),m(w,{class:`gallery-page-content`},{default:r(()=>[m(D,{"x:Name":`Example1`,class:`appbar-example`,SampleDefinition:`AppBarButton\\AppbarbuttonSymbolIcon.txt`,HeaderText:`{x:Bind Labels.SymbolHeader, Mode=OneWay}`,Theme:`{x:Bind pageTheme, Mode=OneWay}`,Xaml:`{x:Bind SymbolXaml}`},{default:r(()=>[m(D.Example,null,{default:r(()=>[m(w,{Orientation:`Horizontal`},{default:r(()=>[m(o,{"x:Name":`Button1`,Click:`AppBarButton_Click`,Icon:`Like`,Label:`{x:Bind Labels.SymbolLabel, Mode=OneWay}`})]),_:1})]),_:1}),m(D.Output,null,{default:r(()=>[m(_,{"x:Name":`Control1Output`,Text:`{x:Bind Output1, Mode=OneWay}`,TextWrapping:`Wrap`,"AutomationProperties.LiveSetting":`Polite`})]),_:1}),m(D.Options)]),_:1}),m(D,{"x:Name":`Example2`,class:`appbar-example`,SampleDefinition:`AppBarButton\\AppbarbuttonBitmapIcon.txt`,HeaderText:`{x:Bind Labels.BitmapHeader, Mode=OneWay}`,Theme:`{x:Bind pageTheme, Mode=OneWay}`,Xaml:`{x:Bind BitmapXaml}`},{default:r(()=>[m(D.Example,null,{default:r(()=>[m(w,{Orientation:`Horizontal`},{default:r(()=>[m(o,{"x:Name":`Button2`,Click:`AppBarButton_Click`,Label:`{x:Bind Labels.BitmapLabel, Mode=OneWay}`},{default:r(()=>[m(o.Icon,null,{default:r(()=>[m(c,{UriSource:`https://raw.githubusercontent.com/microsoft/WinUI-Gallery/main/WinUIGallery/Assets/SampleMedia/Slices2.png`})]),_:1})]),_:1})]),_:1})]),_:1}),m(D.Output,null,{default:r(()=>[m(_,{"x:Name":`Control2Output`,Text:`{x:Bind Output2, Mode=OneWay}`,TextWrapping:`Wrap`,"AutomationProperties.LiveSetting":`Polite`})]),_:1}),m(D.Options)]),_:1}),m(D,{"x:Name":`Example3`,class:`appbar-example`,SampleDefinition:`AppBarButton\\AppbarbuttonFontIcon.txt`,HeaderText:`{x:Bind Labels.FontHeader, Mode=OneWay}`,Theme:`{x:Bind pageTheme, Mode=OneWay}`,Xaml:`{x:Bind FontXaml}`},{default:r(()=>[m(D.Example,null,{default:r(()=>[m(w,{Orientation:`Horizontal`},{default:r(()=>[m(o,{"x:Name":`Button3`,Click:`AppBarButton_Click`,Label:`{x:Bind Labels.FontLabel, Mode=OneWay}`},{default:r(()=>[m(o.Icon,null,{default:r(()=>[m(u,{FontFamily:`Candara`,Glyph:`Σ`})]),_:1})]),_:1})]),_:1})]),_:1}),m(D.Output,null,{default:r(()=>[m(_,{"x:Name":`Control3Output`,Text:`{x:Bind Output3, Mode=OneWay}`,TextWrapping:`Wrap`,"AutomationProperties.LiveSetting":`Polite`})]),_:1}),m(D.Options)]),_:1}),m(D,{"x:Name":`Example4`,class:`appbar-example`,SampleDefinition:`AppBarButton\\AppbarbuttonPathIcon.txt`,HeaderText:`{x:Bind Labels.PathHeader, Mode=OneWay}`,Theme:`{x:Bind pageTheme, Mode=OneWay}`,Xaml:`{x:Bind PathXaml}`},{default:r(()=>[m(D.Example,null,{default:r(()=>[m(w,{Orientation:`Horizontal`},{default:r(()=>[m(o,{"x:Name":`Button4`,Click:`AppBarButton_Click`,Label:`{x:Bind Labels.PathLabel, Mode=OneWay}`},{default:r(()=>[m(o.Content,null,{default:r(()=>[m(n,{Stretch:`Uniform`},{default:r(()=>[m(s,{Data:`F1 M 20,20L 24,10L 24,24L 5,24`})]),_:1})]),_:1})]),_:1})]),_:1})]),_:1}),m(D.Output,null,{default:r(()=>[m(_,{"x:Name":`Control4Output`,Text:`{x:Bind Output4, Mode=OneWay}`,TextWrapping:`Wrap`,"AutomationProperties.LiveSetting":`Polite`})]),_:1}),m(D.Options)]),_:1}),m(D,{"x:Name":`Example5`,class:`appbar-example`,SampleDefinition:`AppBarButton\\AppbarbuttonKeyboardaccelerator.txt`,HeaderText:`{x:Bind Labels.KeyboardHeader, Mode=OneWay}`,Theme:`{x:Bind pageTheme, Mode=OneWay}`,Xaml:`{x:Bind KeyboardXaml}`},{default:r(()=>[m(D.Example,null,{default:r(()=>[m(w,{Orientation:`Horizontal`},{default:r(()=>[m(o,{"x:Name":`Button5`,Click:`AppBarButton_Click`,Icon:`Save`,Label:`{x:Bind Labels.Save, Mode=OneWay}`},{default:r(()=>[m(o.KeyboardAccelerators,null,{default:r(()=>[m(e(T),{Key:`S`,Modifiers:`Control`})]),_:1})]),_:1})]),_:1})]),_:1}),m(D.Output,null,{default:r(()=>[m(_,{"x:Name":`Control5Output`,Text:`{x:Bind Output5, Mode=OneWay}`,TextWrapping:`Wrap`,"AutomationProperties.LiveSetting":`Polite`})]),_:1}),m(D.Options)]),_:1}),m(D,{"x:Name":`Example6`,class:`appbar-example`,SampleDefinition:`AppBarButton\\AppbarbuttonOpensFlyoutContaining.txt`,HeaderText:`{x:Bind Labels.FlyoutHeader, Mode=OneWay}`,Theme:`{x:Bind pageTheme, Mode=OneWay}`,Xaml:`{x:Bind FlyoutXaml}`},{default:r(()=>[m(D.Example,null,{default:r(()=>[m(w,{Orientation:`Horizontal`},{default:r(()=>[m(o,{AllowFocusOnInteraction:`True`,Icon:`Edit`,Label:`{x:Bind Labels.Edit, Mode=OneWay}`},{default:r(()=>[m(o.Flyout,null,{default:r(()=>[m(S,null,{default:r(()=>[m(C,{MinWidth:`240`,PlaceholderText:`{x:Bind Labels.InputPlaceholder, Mode=OneWay}`})]),_:1})]),_:1})]),_:1})]),_:1})]),_:1}),m(D.Output),m(D.Options)]),_:1})]),_:1})])]),_:1}))}},[[`__scopeId`,`data-v-e5e8b9f1`]]);export{R as default};

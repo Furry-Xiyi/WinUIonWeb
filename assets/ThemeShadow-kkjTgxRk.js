@@ -1,0 +1,1 @@
+import{In as e,_i as t,wi as n}from"./ScrollViewer-DXAtwYnH.js";var r=Object.assign(t({name:`ThemeShadow`,inheritAttrs:!1,setup(t,{expose:r}){let i=e();return r(i),n(i.Dispose),()=>null}}),{__xamlDependencyObject:!0,__createXamlResource(t,n){let r=e();return n.Dispose(r.Dispose),r}});export{r as t};
