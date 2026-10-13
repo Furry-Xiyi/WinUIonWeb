@@ -382,7 +382,6 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
       let error: unknown
       let applied: SystemBackdropConfig | null = null
       let nativeBackdropAvailable = false
-      let nativeControllerConnected = false
       try {
         const nativePolicy = await adapter.GetConfiguration?.(target)
         if (nativePolicy) config = { ...config, ...Object.fromEntries(Object.entries(nativePolicy).filter(([, value]) => value !== undefined)), ...(requestedTheme === 'Default' ? {} : { Theme: requestedTheme }) }
@@ -405,7 +404,6 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
         // material on blur would discard the controller's own fallback.
         const hostBackdrop = capabilities.NativeSystemBackdrop && supported ? backdrop : null
         if (await adapter.ApplyBackdrop(target, hostBackdrop, config)) {
-          nativeControllerConnected = Boolean(hostBackdrop)
           applied = reason ? null : backdrop
         }
         else {
@@ -417,14 +415,15 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
         try { await adapter.ApplyBackdrop(target, null, config) } catch { /* Preserve the original host failure. */ }
       }
       if (closed || context && (context !== windowContext || context.Revision !== contextRevision)) return snapshot(state)
-      // Desktop materials belong to the native compositor. Browsers report
-      // unavailability and keep this surface transparent; a native host owns
-      // its fallback or supplies the controller's exact fallback color.
+      // Keep an unsupported PWA/browser backdrop on the same theme fallback
+      // as Mica instead of exposing the document's unrelated page background.
       const fallback = Boolean(backdrop && !applied)
       const hasCurrentContent = !context || context.Content === target.Content
       const styles = context?.Styles ?? contentStyles
       if (hasCurrentContent) {
-        target.Content.style.background = nativeControllerConnected && fallback && config.FallbackColor ? nativeFallbackColor(config.FallbackColor) : 'transparent'
+        target.Content.style.background = fallback
+          ? config.IsHighContrast ? 'Canvas' : config.FallbackColor ? nativeFallbackColor(config.FallbackColor) : 'transparent'
+          : 'transparent'
         target.Content.style.color = nativeBackdropAvailable && config.IsHighContrast ? 'CanvasText' : ''
         styles.OwnedBackground = target.Content.style.background
         styles.OwnedColor = target.Content.style.color
@@ -433,10 +432,6 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
         target.Content.classList.toggle('theme-dark', config.Theme === 'Dark')
         target.Content.classList.toggle('theme-light', config.Theme === 'Light')
         target.Content.dataset.theme = config.Theme.toLowerCase()
-        const documentRoot = target.Content.ownerDocument.documentElement
-        documentRoot.classList.toggle('theme-dark', config.Theme === 'Dark')
-        documentRoot.classList.toggle('theme-light', config.Theme === 'Light')
-        documentRoot.dataset.theme = config.Theme.toLowerCase()
       }
       const highContrastBackdrop = nativeBackdropAvailable && config.IsHighContrast
       if (hasCurrentContent) {

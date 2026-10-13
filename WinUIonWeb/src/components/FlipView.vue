@@ -18,8 +18,8 @@
     :aria-orientation="orientationClass"
     :aria-activedescendant="activeDescendantId"
     :aria-label="automationName"
-    @mouseenter="onMouseEnter"
-    @mouseleave="onMouseLeave"
+    @pointerenter="onMouseEnter($event)"
+    @pointerleave="onMouseLeave"
     @focusin="onFocusIn"
     @focusout="onFocusOut"
     @keydown="onKeyDown"
@@ -55,16 +55,16 @@
       type="button"
       class="flip-btn prev"
       :style="previousButtonBackgroundStyle"
-      v-acrylic-brush="previousButtonBackgroundStyle"
+      v-acrylic-brush.host-backdrop="previousButtonBackgroundStyle"
       :class="{ visible: previousButtonVisible }"
       :disabled="!isEnabled || selectedIndex <= 0"
       :aria-hidden="!previousButtonVisible"
       :aria-label="previousLabel"
       tabindex="-1"
-      @pointerenter="previousButtonState = 'PointerOver'; onButtonEnter()"
-      @pointerdown="previousButtonState = 'Pressed'"
-      @pointerup="previousButtonState = 'PointerOver'"
-      @pointercancel="previousButtonState = ''"
+      @pointerenter="onNavigationButtonEnter($event, 'previous')"
+      @pointerdown="onNavigationButtonPressed('previous')"
+      @pointerup="onNavigationButtonReleased($event, 'previous')"
+      @pointercancel="onNavigationButtonCanceled('previous')"
       @pointerleave="previousButtonState = ''; onButtonLeave()"
       @click="prev">
       <FontIcon v-if="orientationClass === 'horizontal'" class="flip-arrow" Glyph="&#xEDD9;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="{ThemeResource FlipViewButtonFontSize}" Foreground="{ThemeResource FlipViewNextPreviousArrowForeground}" HorizontalAlignment="Center" VerticalAlignment="Center" MirroredWhenRightToLeft="True" UseLayoutRounding="False" aria-hidden="true" />
@@ -74,16 +74,16 @@
       type="button"
       class="flip-btn next"
       :style="nextButtonBackgroundStyle"
-      v-acrylic-brush="nextButtonBackgroundStyle"
+      v-acrylic-brush.host-backdrop="nextButtonBackgroundStyle"
       :class="{ visible: nextButtonVisible }"
       :disabled="!isEnabled || selectedIndex >= items.length - 1"
       :aria-hidden="!nextButtonVisible"
       :aria-label="nextLabel"
       tabindex="-1"
-      @pointerenter="nextButtonState = 'PointerOver'; onButtonEnter()"
-      @pointerdown="nextButtonState = 'Pressed'"
-      @pointerup="nextButtonState = 'PointerOver'"
-      @pointercancel="nextButtonState = ''"
+      @pointerenter="onNavigationButtonEnter($event, 'next')"
+      @pointerdown="onNavigationButtonPressed('next')"
+      @pointerup="onNavigationButtonReleased($event, 'next')"
+      @pointercancel="onNavigationButtonCanceled('next')"
       @pointerleave="nextButtonState = ''; onButtonLeave()"
       @click="next">
       <FontIcon v-if="orientationClass === 'horizontal'" class="flip-arrow" Glyph="&#xEDDA;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="{ThemeResource FlipViewButtonFontSize}" Foreground="{ThemeResource FlipViewNextPreviousArrowForeground}" HorizontalAlignment="Center" VerticalAlignment="Center" MirroredWhenRightToLeft="True" UseLayoutRounding="False" aria-hidden="true" />
@@ -127,6 +127,7 @@ import { getCollectionProperty, getVNodeChildren } from './CollectionProperties'
 import { materializeXamlVNode, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlItemContextKey } from './xamlRuntime'
 import { useAcrylicBrushStyle } from './AcrylicBrush'
 import { vAcrylicBrush } from './acrylicBrushVisual'
+import { isHoverPointer } from './pointerInput'
 
 const props = defineProps({
   ItemsSource: { type: [String, Array, Object], default: null },
@@ -594,8 +595,8 @@ function hideNavigationButtons() {
   clearButtonsFadeTimer()
   if (!keepButtonsVisible.value) showButtons.value = false
 }
-function onMouseEnter() {
-  if (isEnabled.value) showNavigationButtons()
+function onMouseEnter(event: PointerEvent) {
+  if (isEnabled.value && isHoverPointer(event)) showNavigationButtons()
 }
 function onMouseLeave() {
   if (!keepButtonsVisible.value) showNavigationButtons()
@@ -603,6 +604,28 @@ function onMouseLeave() {
 function onButtonEnter() {
   keepButtonsVisible.value = true
   showNavigationButtons()
+}
+function onNavigationButtonEnter(event: PointerEvent, direction: 'previous' | 'next') {
+  const state = isHoverPointer(event) ? 'PointerOver' : ''
+  if (direction === 'previous') previousButtonState.value = state
+  else nextButtonState.value = state
+  if (state) onButtonEnter()
+}
+function onNavigationButtonPressed(direction: 'previous' | 'next') {
+  if (direction === 'previous') previousButtonState.value = 'Pressed'
+  else nextButtonState.value = 'Pressed'
+  onButtonEnter()
+}
+function onNavigationButtonReleased(event: PointerEvent, direction: 'previous' | 'next') {
+  const state = isHoverPointer(event) ? 'PointerOver' : ''
+  if (direction === 'previous') previousButtonState.value = state
+  else nextButtonState.value = state
+  if (!state) onButtonLeave()
+}
+function onNavigationButtonCanceled(direction: 'previous' | 'next') {
+  if (direction === 'previous') previousButtonState.value = ''
+  else nextButtonState.value = ''
+  onButtonLeave()
 }
 function onButtonLeave() {
   keepButtonsVisible.value = false

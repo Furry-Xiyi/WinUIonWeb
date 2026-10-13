@@ -100,10 +100,14 @@ provide(xamlScopeKey, { ...inject(xamlScopeKey, {}), Content, ContentTemplate, C
   --ButtonForegroundDisabled: var(--ToggleButtonForegroundCheckedDisabled);
   --ButtonBorderBrush: var(--ToggleButtonBorderBrushChecked);
   --ButtonBorderBrushPointerOver: var(--ToggleButtonBorderBrushCheckedPointerOver);
-  --ButtonBorderBrushTop: var(--ButtonBorderBrush);
-  --ButtonBorderBrushBottom: var(--AccentButtonBorderBrushDefaultBottom, var(--accent-border-accent));
   --ButtonBorderBrushPressed: var(--ToggleButtonBorderBrushCheckedPressed);
   --ButtonBorderBrushDisabled: var(--ToggleButtonBorderBrushCheckedDisabled);
+  --ButtonBorderBrushSide: var(--ControlStrokeColorOnAccentDefaultBrush, var(--ButtonControlStrokeColorDefaultBrush, currentColor));
+  --ButtonBorderBrushSidePointerOver: var(--ButtonBorderBrushSide);
+  --ButtonBorderBrushSidePressed: var(--ToggleButtonBorderBrushCheckedPressed);
+  --ButtonBorderBrushSideDisabled: var(--ToggleButtonBorderBrushCheckedDisabled);
+  --ButtonBorderBrushTop: var(--AccentButtonBorderBrushDefault, var(--ControlStrokeColorOnAccentDefaultBrush, currentColor));
+  --ButtonBorderBrushBottom: var(--AccentButtonBorderBrushDefaultBottom, var(--ControlStrokeColorOnAccentSecondaryBrush, var(--ControlStrokeColorOnAccentDefaultBrush, currentColor)));
 }
 .win-toggle-button.is-checked .win-button-content-presenter { background-clip: border-box !important; }
 .win-toggle-button.is-indeterminate {
@@ -119,5 +123,9 @@ provide(xamlScopeKey, { ...inject(xamlScopeKey, {}), Content, ContentTemplate, C
   --ButtonBorderBrushPointerOver: var(--ToggleButtonBorderBrushIndeterminatePointerOver);
   --ButtonBorderBrushPressed: var(--ToggleButtonBorderBrushIndeterminatePressed);
   --ButtonBorderBrushDisabled: var(--ToggleButtonBorderBrushIndeterminateDisabled);
+  --ButtonBorderBrushSide: var(--ButtonControlStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, currentColor));
+  --ButtonBorderBrushSidePointerOver: var(--ButtonBorderBrushSide);
+  --ButtonBorderBrushSidePressed: var(--ToggleButtonBorderBrushIndeterminatePressed);
+  --ButtonBorderBrushSideDisabled: var(--ToggleButtonBorderBrushIndeterminateDisabled);
 }
 </style>

@@ -49,6 +49,7 @@ export const useAnimatedIconInput = (_selectedStates = false, stateMapper: (stat
     const element = target(event)
     if (!element || event.button > 0) return
     const state = stateFor(element)
+    if (event.pointerType === 'touch') state.hovered = false
     state.pressed = true
     state.pointerId = event.pointerId
     update(element)

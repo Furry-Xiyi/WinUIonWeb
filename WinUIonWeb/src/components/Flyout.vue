@@ -288,9 +288,9 @@ const recordMousePosition = (event: PointerEvent) => {
   }
 };
 provide(flyoutInputContextKey, {
-  allowsHover: (event) => event.pointerType !== 'mouse'
+  allowsHover: (event) => event.pointerType !== 'touch' && (event.pointerType !== 'mouse'
     || realMouseMoves.has(event)
-    || (!isOpening && !suppressStationaryHover)
+    || (!isOpening && !suppressStationaryHover))
 });
 
 const api: FlyoutApi = {

@@ -31,76 +31,78 @@
 
     <Grid class="win-page-header-command-row" Grid.Row="1">
       <StackPanel class="win-page-header-left-actions" Orientation="Horizontal" Spacing="4">
-        <DropDownButton
-          Visibility="{x:Bind DocumentationVisibility, Mode=OneWay}"
-          class="win-page-header-drop-down"
-          AutomationProperties.Name="{x:Bind DocumentationLabel, Mode=OneWay}"
-          ToolTipService.ToolTip="{x:Bind DocumentationLabel, Mode=OneWay}">
-          <DropDownButton.Content>
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <FontIcon FontSize="16" Glyph="&#xE8A5;" />
-              <TextBlock Text="{x:Bind DocumentationLabel, Mode=OneWay}" />
-            </StackPanel>
-          </DropDownButton.Content>
-          <DropDownButton.Flyout>
-            <Flyout Placement="Bottom">
-              <ItemsControl x:Name="DocsList" Margin="-12" IsTabStop="False" ItemsSource="{x:Bind DocumentationLinks, Mode=OneWay}">
-                <ItemsControl.ItemsPanel>
-                  <ItemsPanelTemplate><StackPanel Orientation="Vertical" /></ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate x:DataType="models:ControlInfoDocLink">
-                    <HyperlinkButton HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind Uri}" ToolTipService.ToolTip="{x:Bind Uri}">
-                      <TextBlock Text="{x:Bind Title}" />
-                    </HyperlinkButton>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-            </Flyout>
-          </DropDownButton.Flyout>
-        </DropDownButton>
+        <ThemeWrapper>
+          <DropDownButton
+            Visibility="{x:Bind DocumentationVisibility, Mode=OneWay}"
+            class="win-page-header-drop-down"
+            AutomationProperties.Name="{x:Bind DocumentationLabel, Mode=OneWay}"
+            ToolTipService.ToolTip="{x:Bind DocumentationLabel, Mode=OneWay}">
+            <DropDownButton.Content>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <FontIcon FontSize="16" Glyph="&#xE8A5;" />
+                <TextBlock Text="{x:Bind DocumentationLabel, Mode=OneWay}" />
+              </StackPanel>
+            </DropDownButton.Content>
+            <DropDownButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ItemsControl x:Name="DocsList" Margin="-12" IsTabStop="False" ItemsSource="{x:Bind DocumentationLinks, Mode=OneWay}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><StackPanel Orientation="Vertical" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:ControlInfoDocLink">
+                      <HyperlinkButton HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind Uri}" ToolTipService.ToolTip="{x:Bind Uri}">
+                        <TextBlock Text="{x:Bind Title}" />
+                      </HyperlinkButton>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </Flyout>
+            </DropDownButton.Flyout>
+          </DropDownButton>
 
-        <DropDownButton
-          class="win-page-header-drop-down"
-          AutomationProperties.Name="{x:Bind SourceCodeLabel, Mode=OneWay}"
-          ToolTipService.ToolTip="{x:Bind SourceCodeToolTip, Mode=OneWay}">
-          <DropDownButton.Content>
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <Viewbox Height="18"><PathIcon Data="{StaticResource GitHubIconPath}" /></Viewbox>
-              <TextBlock Text="{x:Bind SourceLabel, Mode=OneWay}" />
-            </StackPanel>
-          </DropDownButton.Content>
-          <DropDownButton.Flyout>
-            <Flyout Placement="Bottom">
-              <StackPanel x:Name="SourcePanel" Margin="0,-8,0,-12">
-                <StackPanel x:Name="ControlSourcePanel" Margin="0,0,0,4" Visibility="{x:Bind ControlSourceVisibility, Mode=OneWay}">
-                  <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind ControlSourceLabel, Mode=OneWay}" />
-                    <Button Padding="6,5,6,6" AutomationProperties.HelpText="{x:Bind GetControlSourceInfoText(), Mode=OneWay}" AutomationProperties.Name="{x:Bind InfoLabel, Mode=OneWay}" Style="{ThemeResource SubtleButtonStyle}" ToolTipService.ToolTip="{x:Bind GetControlSourceInfoText(), Mode=OneWay}">
+          <DropDownButton
+            class="win-page-header-drop-down"
+            AutomationProperties.Name="{x:Bind SourceCodeLabel, Mode=OneWay}"
+            ToolTipService.ToolTip="{x:Bind SourceCodeToolTip, Mode=OneWay}">
+            <DropDownButton.Content>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Viewbox Height="18"><PathIcon Data="{StaticResource GitHubIconPath}" /></Viewbox>
+                <TextBlock Text="{x:Bind SourceLabel, Mode=OneWay}" />
+              </StackPanel>
+            </DropDownButton.Content>
+            <DropDownButton.Flyout>
+              <Flyout Placement="Bottom">
+                <StackPanel x:Name="SourcePanel" Margin="0,-8,0,-12">
+                  <StackPanel x:Name="ControlSourcePanel" Margin="0,0,0,4" Visibility="{x:Bind ControlSourceVisibility, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind ControlSourceLabel, Mode=OneWay}" />
+                      <Button Padding="6,5,6,6" AutomationProperties.HelpText="{x:Bind GetControlSourceInfoText(), Mode=OneWay}" AutomationProperties.Name="{x:Bind InfoLabel, Mode=OneWay}" Style="{ThemeResource SubtleButtonStyle}" ToolTipService.ToolTip="{x:Bind GetControlSourceInfoText(), Mode=OneWay}">
+                        <FontIcon VerticalAlignment="Center" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Glyph="&#xE946;" />
+                      </Button>
+                    </StackPanel>
+                    <HyperlinkButton x:Name="ControlSourceLink" Margin="-12,4,-12,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind effectiveControlSourceUri, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind effectiveControlSourceUri, Mode=OneWay}">
+                      <TextBlock Text="{x:Bind itemTitle, Mode=OneWay}" />
+                    </HyperlinkButton>
+                  </StackPanel>
+                  <MenuFlyoutSeparator x:Name="ControlSourceSeparator" Margin="-12" Visibility="{x:Bind ControlSourceVisibility, Mode=OneWay}" />
+                  <StackPanel Margin="0,8,0,0" Orientation="Horizontal" Spacing="8">
+                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind SampleSourceLabel, Mode=OneWay}" />
+                    <Button Padding="6,5,6,6" AutomationProperties.HelpText="{x:Bind GetSamplePageSourceInfoText(), Mode=OneWay}" AutomationProperties.Name="{x:Bind InfoLabel, Mode=OneWay}" Style="{ThemeResource SubtleButtonStyle}" ToolTipService.ToolTip="{x:Bind GetSamplePageSourceInfoText(), Mode=OneWay}">
                       <FontIcon VerticalAlignment="Center" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Glyph="&#xE946;" />
                     </Button>
                   </StackPanel>
-                  <HyperlinkButton x:Name="ControlSourceLink" Margin="-12,4,-12,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind effectiveControlSourceUri, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind effectiveControlSourceUri, Mode=OneWay}">
-                    <TextBlock Text="{x:Bind itemTitle, Mode=OneWay}" />
+                  <HyperlinkButton x:Name="PageMarkupGitHubLink" Margin="-12,4,-12,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind effectivePageMarkupUri, Mode=OneWay}" IsEnabled="{x:Bind HasPageMarkupSource, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind effectivePageMarkupUri, Mode=OneWay}">
+                    <TextBlock Text="{x:Bind XamlLabel, Mode=OneWay}" />
+                  </HyperlinkButton>
+                  <HyperlinkButton x:Name="PageCodeGitHubLink" Margin="-12,4,-12,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind effectivePageCodeUri, Mode=OneWay}" IsEnabled="{x:Bind HasPageCodeSource, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind effectivePageCodeUri, Mode=OneWay}">
+                    <TextBlock Text="{x:Bind CSharpLabel, Mode=OneWay}" />
                   </HyperlinkButton>
                 </StackPanel>
-                <MenuFlyoutSeparator x:Name="ControlSourceSeparator" Margin="-12" Visibility="{x:Bind ControlSourceVisibility, Mode=OneWay}" />
-                <StackPanel Margin="0,8,0,0" Orientation="Horizontal" Spacing="8">
-                  <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind SampleSourceLabel, Mode=OneWay}" />
-                  <Button Padding="6,5,6,6" AutomationProperties.HelpText="{x:Bind GetSamplePageSourceInfoText(), Mode=OneWay}" AutomationProperties.Name="{x:Bind InfoLabel, Mode=OneWay}" Style="{ThemeResource SubtleButtonStyle}" ToolTipService.ToolTip="{x:Bind GetSamplePageSourceInfoText(), Mode=OneWay}">
-                    <FontIcon VerticalAlignment="Center" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Glyph="&#xE946;" />
-                  </Button>
-                </StackPanel>
-                <HyperlinkButton x:Name="PageMarkupGitHubLink" Margin="-12,4,-12,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind effectivePageMarkupUri, Mode=OneWay}" IsEnabled="{x:Bind HasPageMarkupSource, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind effectivePageMarkupUri, Mode=OneWay}">
-                  <TextBlock Text="{x:Bind XamlLabel, Mode=OneWay}" />
-                </HyperlinkButton>
-                <HyperlinkButton x:Name="PageCodeGitHubLink" Margin="-12,4,-12,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" NavigateUri="{x:Bind effectivePageCodeUri, Mode=OneWay}" IsEnabled="{x:Bind HasPageCodeSource, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind effectivePageCodeUri, Mode=OneWay}">
-                  <TextBlock Text="{x:Bind CSharpLabel, Mode=OneWay}" />
-                </HyperlinkButton>
-              </StackPanel>
-            </Flyout>
-          </DropDownButton.Flyout>
-        </DropDownButton>
+              </Flyout>
+            </DropDownButton.Flyout>
+          </DropDownButton>
+        </ThemeWrapper>
       </StackPanel>
 
       <StackPanel class="win-page-header-right-actions" Orientation="Horizontal" Spacing="0" HorizontalAlignment="Right">
@@ -178,6 +180,7 @@ import { MenuFlyoutSeparator } from '../../components/MenuFlyoutItems';
 import Grid from '../../components/Grid.vue';
 import Flyout from '../../components/Flyout.vue';
 import StackPanel from '../../components/StackPanel.vue';
+import ThemeWrapper from '../../components/ThemeWrapper.vue';
 import TextBlock from '../../components/TextBlock.vue';
 import ToggleButton from '../../components/ToggleButton.vue';
 import PathIcon from '../../components/PathIcon.vue';

@@ -1,0 +1,185 @@
+{
+   "PdfProFile": {
+      "message": "Перевод PDF Pro на базе ИИ"
+   },
+   "babelDOC": {
+      "message": "BabelDOC сохраняет макет PDF-файла при переводе"
+   },
+   "brandDescription": {
+      "message": "Двуязычный перевод веб-страниц, PDF и электронных книг EPUB, бесплатно."
+   },
+   "brandDescriptionForSafari": {
+      "message": "Двуязычный перевод веб-страниц, PDF и электронных книг EPUB, бесплатно."
+   },
+   "brandName": {
+      "message": "Иммерсивный перевод: двуязычный перевод веб-страниц и PDF-документов"
+   },
+   "closeSidePanel": {
+      "message": "Закрыть боковую панель"
+   },
+   "legacyShortcut_openAiWritingModal": {
+      "message": "[Устарело] Открыть модальное окно «Напишет ИИ»"
+   },
+   "legacyShortcut_toggleMouseHoverTranslateDirectly": {
+      "message": "[Устарело] На странице временно включите или отключите прямой перевод при наведении мыши"
+   },
+   "legacyShortcut_toggleOnlyTransation": {
+      "message": "[Устарело] Переключиться в режим только для перевода"
+   },
+   "legacyShortcut_toggleSidePanel": {
+      "message": "[Устарело] Открыть / Закрыть боковую панель"
+   },
+   "legacyShortcut_toggleTranslatePage": {
+      "message": "[Устарело] Перевести веб-страницу / Показать оригинал"
+   },
+   "legacyShortcut_toggleTranslateTheMainPage": {
+      "message": "[Устарело] Перевести основную область страницы / Показать оригинальный текст"
+   },
+   "legacyShortcut_toggleTranslateTheWholePage": {
+      "message": "[Устарело] Перевести всю страницу / Показать исходный текст"
+   },
+   "legacyShortcut_toggleTranslateToThePageEndImmediately": {
+      "message": "[Устарело] Показать перевод внизу страницы / Показать оригинальный текст"
+   },
+   "legacyShortcut_toggleTranslationMask": {
+      "message": "[Устарело] Показать/скрыть эффект размытия при переводе"
+   },
+   "legacyShortcut_toggleVideoSubtitlePreTranslation": {
+      "message": "[Устарело] Переключите двуязычные субтитры для использования функции иммерсивного перевода."
+   },
+   "legacyShortcut_translateInputBox": {
+      "message": "[Устарело] Перевести текущее содержимое ввода"
+   },
+   "legacyShortcut_translateWithBing": {
+      "message": "[Устарело] Временно используйте Microsoft для перевода текущей страницы"
+   },
+   "legacyShortcut_translateWithClaude": {
+      "message": "[Устарело] Временно используйте Claude для перевода текущей страницы"
+   },
+   "legacyShortcut_translateWithCustom1": {
+      "message": "[Устарело] Временное использование пользовательских сервисов перевода для перевода текущей страницы (1)"
+   },
+   "legacyShortcut_translateWithCustom2": {
+      "message": "[Устарело] Временное использование пользовательских сервисов перевода для перевода текущей страницы (2)"
+   },
+   "legacyShortcut_translateWithCustom3": {
+      "message": "[Устарело] Временное использование пользовательских сервисов перевода для перевода текущей страницы (3)"
+   },
+   "legacyShortcut_translateWithDeepL": {
+      "message": "[Устарело] Временно используйте DeepL для перевода текущей страницы"
+   },
+   "legacyShortcut_translateWithGemini": {
+      "message": "[Устарело] Временно используйте Gemini для перевода текущей страницы"
+   },
+   "legacyShortcut_translateWithGoogle": {
+      "message": "[Устарело] Временное использование Google Translate для текущей страницы"
+   },
+   "legacyShortcut_translateWithOpenAI": {
+      "message": "[Устарело] Временно используйте OpenAI для перевода текущей страницы"
+   },
+   "legacyShortcut_translateWithTransmart": {
+      "message": "[Устарело] Временно используйте Tencent для перевода текущей страницы"
+   },
+   "openAboutPage": {
+      "message": "О приложении / Обратная связь"
+   },
+   "openAiWritingModal": {
+      "message": "Открыть модальное окно «Напишет ИИ»"
+   },
+   "openEbookBuilder": {
+      "message": "Создание двуязычных электронных книг в формате EPUB"
+   },
+   "openEbookViewer": {
+      "message": "Читать электронные книги"
+   },
+   "openOptionsPage": {
+      "message": "Открыть настройки"
+   },
+   "openSidePanel": {
+      "message": "Открыть боковую панель"
+   },
+   "shortBrandName": {
+      "message": "Иммерсивный перевод"
+   },
+   "textTranslate": {
+      "message": "Текстовый перевод"
+   },
+   "toggleMouseHoverTranslateDirectly": {
+      "message": "На странице временно включите или отключите прямой перевод при наведении мыши"
+   },
+   "toggleOnlyTransation": {
+      "message": "Переключиться в режим только для перевода"
+   },
+   "toggleSidePanel": {
+      "message": "Открыть / Закрыть боковую панель"
+   },
+   "toggleTranslatePage": {
+      "message": "Перевести на {targetLanguage}"
+   },
+   "toggleTranslatePageOfficialPage": {
+      "message": "Перевести веб-страницу / Показать оригинал"
+   },
+   "toggleTranslateTheMainPage": {
+      "message": "Перевести основную область страницы / Показать оригинальный текст"
+   },
+   "toggleTranslateTheWholePage": {
+      "message": "Перевести всю страницу / Показать исходный текст"
+   },
+   "toggleTranslateToThePageEndImmediately": {
+      "message": "Показать перевод внизу страницы / Показать оригинальный текст"
+   },
+   "toggleTranslationMask": {
+      "message": "Показать/скрыть эффект размытия при переводе"
+   },
+   "toggleVideoSubtitlePreTranslation": {
+      "message": "Переключите двуязычные субтитры для использования функции иммерсивного перевода."
+   },
+   "translateInputBox": {
+      "message": "Перевести текущее содержимое ввода"
+   },
+   "translateLocalHtmlFile": {
+      "message": "Перевод HTML/Текстовых файлов"
+   },
+   "translateLocalPdfFile": {
+      "message": "Перевод PDF-файлов"
+   },
+   "translateLocalSubtitleFile": {
+      "message": "Перевод файлов субтитров"
+   },
+   "translateMangaMenuId": {
+      "message": "Перевести изображение/восстановить изображение"
+   },
+   "translateText": {
+      "message": "Перевести \"{text}\""
+   },
+   "translateWithBing": {
+      "message": "Временно используйте Microsoft для перевода текущей страницы"
+   },
+   "translateWithClaude": {
+      "message": "Временно используйте Claude для перевода текущей страницы"
+   },
+   "translateWithCustom1": {
+      "message": "Временное использование пользовательских сервисов перевода для перевода текущей страницы (1)"
+   },
+   "translateWithCustom2": {
+      "message": "Временное использование пользовательских сервисов перевода для перевода текущей страницы (2)"
+   },
+   "translateWithCustom3": {
+      "message": "Временное использование пользовательских сервисов перевода для перевода текущей страницы (3)"
+   },
+   "translateWithDeepL": {
+      "message": "Временно используйте DeepL для перевода текущей страницы"
+   },
+   "translateWithGemini": {
+      "message": "Временно используйте Gemini для перевода текущей страницы"
+   },
+   "translateWithGoogle": {
+      "message": "Временное использование Google Translate для текущей страницы"
+   },
+   "translateWithOpenAI": {
+      "message": "Временно используйте OpenAI для перевода текущей страницы"
+   },
+   "translateWithTransmart": {
+      "message": "Временно используйте Tencent для перевода текущей страницы"
+   }
+}

@@ -271,6 +271,7 @@ const onWindowBlur = () => { isKeyboardFocused.value = false; cancelPointer(); }
 const onPointerCaptureLost = event => { if (event.pointerId === pointerId) { isPointerOver.value = false; isThumbPointerOver.value = false; finishPointer(); } };
 const beginPointer = (event, thumb) => {
   if (!isEnabled.value || event.button !== 0 || pointerId !== null) return;
+  if (event.pointerType === 'touch') { isPointerOver.value = false; isThumbPointerOver.value = false; }
   event.preventDefault(); event.stopPropagation(); isKeyboardFocused.value = false;
   trackRef.value.focus({ preventScroll: true });
   isKeyboardFocused.value = false; isPressed.value = true; isThumbPressed.value = thumb; isDragging.value = true;

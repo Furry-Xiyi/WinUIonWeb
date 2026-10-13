@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "edge",
+      "request": "launch",
+      "name": "WinUIonWeb (Vite)",
+      "url": "http://localhost:63179/WinUIonWeb/",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "version": "3.0.0.0",
+  "rules": [
+    {
+      "name": "ChatGPT",
+      "host_patterns": ["chatgpt.com", "chat.openai.com"],
+      "extraction_paths": [
+        ["messages", "*", "content", "parts", "*"]
+      ],
+      "_example_payload": {
+        "action": "next",
+        "messages": [
+          {
+            "id": "28b995a9-c01f-4c56-815f-7f147ecfb469",
+            "author": { "role": "user" },
+            "content": {
+              "content_type": "text",
+              "parts": ["USER INPUT HERE"]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Google Gemini",
+      "host_patterns": ["gemini.google.com"],
+      "is_url_encoded": true,
+      "url_param_name": "f.req",
+      "nested_json_path": ["1"],
+      "extraction_paths": [
+        ["0", "0"]
+      ],
+      "_note": "Gemini has double JSON encoding: f.req decoded -> [null, \"[[\\\"USER INPUT\\\",...]]\"] -> parse [1] as JSON -> [0][0] has user input",
+      "_example_payload_raw": "f.req=%5Bnull%2C%22%5B%5B%5C%22USER INPUT HERE%5C%22%2C0%2Cnull%5D%5D%22%5D",
+      "_example_payload_decoded_outer": [null, "[[\"USER INPUT HERE\",0,null]]"],
+      "_example_payload_decoded_inner": [["USER INPUT HERE", 0, null]]
+    },
+    {
+      "name": "Claude",
+      "host_patterns": ["claude.ai"],
+      "extraction_paths": [
+        ["prompt"],
+        ["messages", "*", "content"]
+      ],
+      "_example_payload": {
+        "prompt": "USER INPUT HERE",
+        "parent_message_uuid": "019c3482-758c-71e2-ac54-c928cdb072b8",
+        "timezone": "America/Los_Angeles",
+        "model": "claude-sonnet-4-5-20250929",
+        "tools": [],
+        "attachments": [],
+        "rendering_mode": "messages"
+      }
+    },
+    {
+      "name": "Consumer Copilot",
+      "host_patterns": ["copilot.microsoft.com", "m365.cloud.microsoft"],
+      "array_path": ["content"],
+      "array_type_field": "type",
+      "array_type_value": "text",
+      "array_text_field": "text",
+      "skip_event_types": ["setOptions", "messagePreview"],
+      "_example_payload": {
+        "event": "send",
+        "conversationId": "YtGckuWVEf88dyvXpTWW1",
+        "content": [{"type": "text", "text": "USER INPUT HERE"}],
+        "mode": "smart",
+        "context": {}
+      },
+      "_note": "setOptions events contain config data, not user input"
+    },
+    {
+      "name": "Perplexity",
+      "host_patterns": ["perplexity.ai"],
+      "extraction_paths": [
+        ["query_str"],
+        ["params", "dsl_query"]
+      ],
+      "_example_payload": {
+        "params": {
+          "attachments": [],
+          "language": "en-US",
+          "timezone": "America/Los_Angeles",
+          "search_focus": "internet",
+          "dsl_query": "USER INPUT HERE"
+        },
+        "query_str": "USER INPUT HERE"
+      }
+    },
+    {
+      "name": "Meta AI",
+      "host_patterns": ["graph.meta.ai", "ai.facebook.com"],
+      "is_multipart_form": true,
+      "form_field_name": "variables",
+      "extraction_paths": [
+        ["message", "sensitive_string_value"]
+      ],
+      "_note": "Meta AI sends multipart form-data with JSON in the 'variables' field",
+      "_example_variables_json": {
+        "message": {
+          "sensitive_string_value": "USER INPUT HERE"
+        },
+        "externalConversationId": "046135cb-566c-49c1-80a5-f1d3fd9442cc",
+        "isNewConversation": true
+      }
+    },
+    {
+      "name": "Grok",
+      "host_patterns": ["grok.com"],
+      "extraction_paths": [
+        ["message"]
+      ],
+      "_example_payload": {
+        "temporary": false,
+        "modelName": "grok-3",
+        "message": "USER INPUT HERE",
+        "fileAttachments": [],
+        "imageAttachments": [],
+        "disableSearch": false
+      }
+    },
+    {
+      "name": "DeepSeek",
+      "host_patterns": ["chat.deepseek.com"],
+      "extraction_paths": [
+        ["prompt"]
+      ],
+      "_example_payload": {
+        "chat_session_id": "384a28da-7350-444f-a92e-d48aa10ca9a8",
+        "parent_message_id": null,
+        "prompt": "USER INPUT HERE",
+        "ref_file_ids": [],
+        "thinking_enabled": false,
+        "search_enabled": false
+      }
+    }
+  ]
+}

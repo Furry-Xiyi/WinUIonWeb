@@ -26,9 +26,15 @@
   --ControlFillColorDisabledBrush: rgba(249, 249, 249, 0.301961);
   --SubtleFillColorDisabledBrush: rgba(255, 255, 255, 0);
   --TextFillColorTertiaryBrush: rgba(0, 0, 0, 0.447059);
-  --ButtonControlStrokeColorDefaultBrush: rgba(0, 0, 0, 0.058824);
   --ButtonControlElevationBorderBrush: linear-gradient(0deg, rgba(0, 0, 0, 0.160784) 0.99px, rgba(0, 0, 0, 0.058824) 3px);
+  --ButtonControlElevationBorderBrushSide: rgba(0, 0, 0, 0.058824);
+  --ButtonControlElevationBorderBrushTop: rgba(0, 0, 0, 0.058824);
+  --ButtonControlElevationBorderBrushBottom: rgba(0, 0, 0, 0.160784);
   --ButtonAccentControlElevationBorderBrush: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0.99px, rgba(255, 255, 255, 0.078431) 3px);
+  --ButtonAccentControlElevationBorderBrushSide: rgba(255, 255, 255, 0.078431);
+  --ButtonAccentControlElevationBorderBrushTop: rgba(255, 255, 255, 0.078431);
+  --ButtonAccentControlElevationBorderBrushBottom: rgba(0, 0, 0, 0.4);
+  --ButtonControlStrokeColorDefaultBrush: rgba(0, 0, 0, 0.058824);
   --AccentButtonBackground: var(--AccentFillColorDefaultBrush);
   --AccentButtonBackgroundPointerOver: var(--AccentFillColorSecondaryBrush);
   --AccentButtonBackgroundPressed: var(--AccentFillColorTertiaryBrush);
@@ -207,9 +213,17 @@ html.theme-dark, .theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scop
   --ControlFillColorDisabledBrush: rgba(255, 255, 255, 0.043137);
   --SubtleFillColorDisabledBrush: rgba(255, 255, 255, 0);
   --TextFillColorTertiaryBrush: rgba(255, 255, 255, 0.529412);
-  --ButtonControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.070588);
-  --ButtonControlElevationBorderBrush: linear-gradient(180deg, rgba(255, 255, 255, 0.094118) 0.99px, rgba(255, 255, 255, 0.070588) 3px);
-  --ButtonAccentControlElevationBorderBrush: linear-gradient(0deg, rgba(0, 0, 0, 0.137255) 0.99px, rgba(255, 255, 255, 0.078431) 3px);
+  --ControlElevationBorderBrush: linear-gradient(180deg, rgba(255, 255, 255, 0.094118) 0.99px, rgba(255, 255, 255, 0.070588) 3px);
+  --ButtonControlElevationBorderBrushSide: rgba(255, 255, 255, 0.070588);
+  --ButtonControlElevationBorderBrushTop: rgba(255, 255, 255, 0.094118);
+  --ButtonControlElevationBorderBrushBottom: rgba(255, 255, 255, 0.070588);
+  --AccentControlElevationBorderBrush: linear-gradient(0deg, rgba(0, 0, 0, 0.137255) 0.99px, rgba(255, 255, 255, 0.078431) 3px);
+  --ButtonAccentControlElevationBorderBrushSide: rgba(255, 255, 255, 0.078431);
+  --ButtonAccentControlElevationBorderBrushTop: rgba(255, 255, 255, 0.078431);
+  --ButtonAccentControlElevationBorderBrushBottom: rgba(0, 0, 0, 0.137255);
+  --ButtonControlStrokeColorDefaultBrush: var(--ControlStrokeColorDefaultBrush);
+  --ButtonControlElevationBorderBrush: var(--ControlElevationBorderBrush);
+  --ButtonAccentControlElevationBorderBrush: var(--AccentControlElevationBorderBrush);
   --AccentButtonBackground: var(--AccentFillColorDefaultBrush);
   --AccentButtonBackgroundPointerOver: var(--AccentFillColorSecondaryBrush);
   --AccentButtonBackgroundPressed: var(--AccentFillColorTertiaryBrush);
@@ -374,6 +388,19 @@ html.theme-dark, .theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scop
   --ToggleButtonPressedForegroundThemeBrush: rgba(0, 0, 0, 1);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light):not(.theme-dark) {
+    --ControlElevationBorderBrush: linear-gradient(180deg, rgba(255, 255, 255, 0.094118) 0.99px, rgba(255, 255, 255, 0.070588) 3px);
+    --AccentControlElevationBorderBrush: linear-gradient(0deg, rgba(0, 0, 0, 0.137255) 0.99px, rgba(255, 255, 255, 0.078431) 3px);
+    --ButtonControlElevationBorderBrushSide: rgba(255, 255, 255, 0.070588);
+    --ButtonControlElevationBorderBrushTop: rgba(255, 255, 255, 0.094118);
+    --ButtonControlElevationBorderBrushBottom: rgba(255, 255, 255, 0.070588);
+    --ButtonAccentControlElevationBorderBrushSide: rgba(255, 255, 255, 0.078431);
+    --ButtonAccentControlElevationBorderBrushTop: rgba(255, 255, 255, 0.078431);
+    --ButtonAccentControlElevationBorderBrushBottom: rgba(0, 0, 0, 0.137255);
+  }
+}
+
 .theme-highcontrast, .theme-high-contrast {
   --ControlFillColorTransparentBrush: transparent;
   --SubtleFillColorTransparentBrush: transparent;
@@ -388,9 +415,21 @@ html.theme-dark, .theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scop
   --ControlFillColorDisabledBrush: var(--SystemColorButtonFaceColor, ButtonFace);
   --SubtleFillColorDisabledBrush: var(--SystemColorButtonFaceColor, ButtonFace);
   --TextFillColorTertiaryBrush: var(--SystemColorWindowTextColor, CanvasText);
-  --ButtonControlStrokeColorDefaultBrush: var(--SystemColorButtonTextColor, ButtonText);
-  --ButtonControlElevationBorderBrush: var(--SystemColorWindowTextColor, CanvasText);
-  --ButtonAccentControlElevationBorderBrush: var(--SystemColorWindowTextColor, CanvasText);
+  --ControlStrokeColorDefaultBrush: var(--SystemColorButtonTextColor, ButtonText);
+  --ControlStrokeColorSecondaryBrush: var(--SystemColorButtonTextColor, ButtonText);
+  --ControlStrokeColorOnAccentDefaultBrush: var(--SystemColorButtonTextColor, ButtonText);
+  --ControlStrokeColorOnAccentSecondaryBrush: var(--SystemColorButtonTextColor, ButtonText);
+  --ControlElevationBorderBrush: var(--SystemColorWindowTextColor, CanvasText);
+  --ButtonControlElevationBorderBrushSide: var(--SystemColorWindowTextColor, CanvasText);
+  --ButtonControlElevationBorderBrushTop: var(--SystemColorWindowTextColor, CanvasText);
+  --ButtonControlElevationBorderBrushBottom: var(--SystemColorWindowTextColor, CanvasText);
+  --AccentControlElevationBorderBrush: var(--SystemColorWindowTextColor, CanvasText);
+  --ButtonAccentControlElevationBorderBrushSide: var(--SystemColorWindowTextColor, CanvasText);
+  --ButtonAccentControlElevationBorderBrushTop: var(--SystemColorWindowTextColor, CanvasText);
+  --ButtonAccentControlElevationBorderBrushBottom: var(--SystemColorWindowTextColor, CanvasText);
+  --ButtonControlStrokeColorDefaultBrush: var(--ControlStrokeColorDefaultBrush);
+  --ButtonControlElevationBorderBrush: var(--ControlElevationBorderBrush);
+  --ButtonAccentControlElevationBorderBrush: var(--AccentControlElevationBorderBrush);
   --AccentButtonBackground: var(--SystemControlHighlightAccentBrush, Highlight);
   --AccentButtonBackgroundPointerOver: var(--SystemControlForegroundAccentBrush, Highlight);
   --AccentButtonBackgroundPressed: var(--SystemControlBackgroundBaseMediumLowBrush, ButtonFace);
@@ -570,9 +609,21 @@ html.theme-dark, .theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scop
     --ControlFillColorDisabledBrush: var(--SystemColorButtonFaceColor, ButtonFace);
     --SubtleFillColorDisabledBrush: var(--SystemColorButtonFaceColor, ButtonFace);
     --TextFillColorTertiaryBrush: var(--SystemColorWindowTextColor, CanvasText);
-    --ButtonControlStrokeColorDefaultBrush: var(--SystemColorButtonTextColor, ButtonText);
-    --ButtonControlElevationBorderBrush: var(--SystemColorWindowTextColor, CanvasText);
-    --ButtonAccentControlElevationBorderBrush: var(--SystemColorWindowTextColor, CanvasText);
+    --ControlStrokeColorDefaultBrush: var(--SystemColorButtonTextColor, ButtonText);
+    --ControlStrokeColorSecondaryBrush: var(--SystemColorButtonTextColor, ButtonText);
+    --ControlStrokeColorOnAccentDefaultBrush: var(--SystemColorButtonTextColor, ButtonText);
+    --ControlStrokeColorOnAccentSecondaryBrush: var(--SystemColorButtonTextColor, ButtonText);
+    --ControlElevationBorderBrush: var(--SystemColorWindowTextColor, CanvasText);
+    --ButtonControlElevationBorderBrushSide: var(--SystemColorWindowTextColor, CanvasText);
+    --ButtonControlElevationBorderBrushTop: var(--SystemColorWindowTextColor, CanvasText);
+    --ButtonControlElevationBorderBrushBottom: var(--SystemColorWindowTextColor, CanvasText);
+    --AccentControlElevationBorderBrush: var(--SystemColorWindowTextColor, CanvasText);
+    --ButtonAccentControlElevationBorderBrushSide: var(--SystemColorWindowTextColor, CanvasText);
+    --ButtonAccentControlElevationBorderBrushTop: var(--SystemColorWindowTextColor, CanvasText);
+    --ButtonAccentControlElevationBorderBrushBottom: var(--SystemColorWindowTextColor, CanvasText);
+    --ButtonControlStrokeColorDefaultBrush: var(--ControlStrokeColorDefaultBrush);
+    --ButtonControlElevationBorderBrush: var(--ControlElevationBorderBrush);
+    --ButtonAccentControlElevationBorderBrush: var(--AccentControlElevationBorderBrush);
     --AccentButtonBackground: var(--SystemControlHighlightAccentBrush, Highlight);
     --AccentButtonBackgroundPointerOver: var(--SystemControlForegroundAccentBrush, Highlight);
     --AccentButtonBackgroundPressed: var(--SystemControlBackgroundBaseMediumLowBrush, ButtonFace);

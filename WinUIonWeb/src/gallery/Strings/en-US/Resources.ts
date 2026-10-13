@@ -473,6 +473,7 @@ export default {
   "text.a-toolbar-for-commands": "A toolbar for commands.",
   "text.account": "Account",
   "text.acrylic": "Acrylic",
+  "text.acrylic-thin": "Acrylic (Thin)",
   "text.adam": "Adam",
   "text.add": "Add",
   "text.allows-users-to-view-and-set-ratings": "Allows users to view and set ratings.",

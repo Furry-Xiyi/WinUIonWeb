@@ -59,6 +59,7 @@
 import { computed, getCurrentInstance, provide, ref, useAttrs, watch } from 'vue';
 import TextBlock from './TextBlock.vue';
 import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
+import { isHoverPointer } from './pointerInput';
 
 const noValueSetSentinel = -1;
 
@@ -275,7 +276,7 @@ const changeRatingBy = (change, originatedFromMouse = false) => {
 
 const onPointerEnter = (event) => {
   if (!isEnabled.value || resolvedIsReadOnly.value) return;
-  isPointerOver.value = true;
+  isPointerOver.value = isHoverPointer(event);
   updatePointerRating(event);
 };
 
@@ -303,6 +304,7 @@ const onPointerCaptureLost = () => {
 
 const onPointerDown = (event) => {
   if (!isEnabled.value || resolvedIsReadOnly.value) return;
+  if (!isHoverPointer(event)) isPointerOver.value = false;
   isPointerDown.value = true;
   itemsRef.value?.setPointerCapture?.(event.pointerId);
 };
@@ -315,7 +317,7 @@ const onPointerUp = (event) => {
   if (itemsRef.value?.hasPointerCapture?.(event.pointerId)) {
     itemsRef.value.releasePointerCapture(event.pointerId);
   }
-  isPointerOver.value = itemsRef.value?.matches(':hover') ?? false;
+  isPointerOver.value = isHoverPointer(event) && (itemsRef.value?.matches(':hover') ?? false);
   if (isPointerOver.value) updatePointerRating(event);
 };
 

@@ -21,7 +21,7 @@
                       @focus="focusedKey = item.key"
                       @keydown="onHeaderKeyDown($event)" @pointerdown="onHeaderPressed($event, item.key)"
                       @pointerup="clearPressedHeader" @pointercancel="clearPressedHeader" @lostpointercapture="clearPressedHeader"
-                      @pointerenter="hoveredKey = item.key" @pointerleave="hoveredKey = null">
+                      @pointerenter="hoveredKey = isHoverPointer($event) ? item.key : null" @pointerleave="hoveredKey = null">
                       <div class="win-pivot-header-grid-content">
                         <div class="win-pivot-header-content-presenter"><HeaderOutlet :item="item" /></div>
                         <div class="win-pivot-selected-pipe" aria-hidden="true"></div>
@@ -65,6 +65,7 @@ import { frameworkLayoutStyle } from './frameworkLayout'
 import { attachedValue, xamlThickness } from './layout'
 import { getPivotProperty, pivotChildren, PivotItemContentTemplate, pivotItemContextKey, pivotItemIdentityKey, pivotNodes, pivotPropertyChildren, pivotRootAttributes, pivotText, pivotTypeName, renderPivotPresenter } from './PivotProperties'
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding } from './xamlRuntime'
+import { isHoverPointer } from './pointerInput'
 
 defineOptions({ name: 'Pivot', inheritAttrs: false })
 const props = defineProps({
@@ -402,7 +403,7 @@ const onRootClick = (event: MouseEvent) => {
   if (target.hasAttribute('data-pivot-index')) void selectIndex(Number(target.dataset.pivotIndex), true, true)
   else moveSelection(target.classList.contains('win-pivot-previous-button') ? -1 : 1, true)
 }
-const onHeaderPointerEnter = (event: PointerEvent) => { if (event.pointerType !== 'touch') headerPointerOver.value = true }
+const onHeaderPointerEnter = (event: PointerEvent) => { headerPointerOver.value = isHoverPointer(event) }
 const onHeaderPointerLeave = (event: PointerEvent) => { if (event.relatedTarget instanceof Node && rootRef.value?.querySelector('.win-pivot-layout-element')?.contains(event.relatedTarget) && (event.relatedTarget as Element).closest?.('.win-pivot-nav-button,.win-pivot-header-clipper')) return; headerPointerOver.value = false; hoveredKey.value = null }
 const onHeaderPressed = (event: PointerEvent, key: unknown) => { if (event.button === 0 && enabled.value) pressedKey.value = key }
 const clearPressedHeader = () => { pressedKey.value = null }

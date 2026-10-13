@@ -1,3 +1,6 @@
+/* Native WinUI controls draw their own bounded selection visuals. */
+html { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+
 /* Common_themeresources.xaml system focus aliases resolve in each theme. */
 :root, html.theme-light, html.theme-dark,
 .example-theme-wrapper.theme-light, .example-theme-wrapper.theme-dark,
@@ -859,10 +862,12 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
   --stroke-surface-flyout: rgba(0, 0, 0, 0.06);
   --stroke-divider: rgba(0, 0, 0, 0.06);
   --ctrl-border-rest: rgba(0, 0, 0, 0.06);
-  --ctrl-border: rgba(0, 0, 0, 0.06);
-  --ctrl-border-accent: rgba(0, 0, 0, 0.16);
-  --accent-border: rgba(255, 255, 255, 0.08);
+  --ctrl-border: rgba(0, 0, 0, 0.058824);
+  --ctrl-border-accent: rgba(0, 0, 0, 0.160784);
+  --accent-border: rgba(255, 255, 255, 0.078431);
   --accent-border-accent: rgba(0, 0, 0, 0.40);
+  --ControlStrokeColorOnAccentDefaultBrush: var(--accent-border);
+  --ControlStrokeColorOnAccentSecondaryBrush: var(--accent-border-accent);
   --ButtonBorderBrushDefaultTop: var(--ctrl-border);
   --ButtonBorderBrushDefaultBottom: var(--ctrl-border-accent);
   --AccentButtonBorderBrushDefault: var(--accent-border);
@@ -889,7 +894,6 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
   --ctrl-solid-fill: #FFFFFF;
   --ctrl-elevation-top: rgba(255, 255, 255, 0.08);
   --ctrl-elevation-bottom: rgba(0, 0, 0, 0.16);
-  --ControlElevationBorderBrush: linear-gradient(180deg, var(--ctrl-border) 0px, var(--ctrl-border-accent) 2px, var(--ctrl-border-accent) 100%);
   --accent-base: #0067C0;
   --accent-hover: rgba(0, 103, 192, 0.90);
   --accent-pressed: rgba(0, 103, 192, 0.80);
@@ -918,7 +922,7 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
   --SystemChromeWhiteColor: #FFFFFF;
   --SystemBaseLowColor: rgba(0, 0, 0, 0.20);
   --SystemBaseHighColor: #000000;
-  --SystemAccentColor: var(--accent-base);
+  --SystemAccentColor: var(--winui-system-accent-color-light, var(--winui-system-accent-color, var(--accent-base)));
   --SystemControlBackgroundBaseLowBrush: var(--SystemBaseLowColor);
   --SystemControlBackgroundChromeMediumBrush: var(--SystemChromeMediumColor);
   --SystemControlBackgroundAccentBrush: var(--SystemAccentColor);
@@ -981,11 +985,10 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
   --CardBackgroundFillColorSecondaryBrush: rgba(246, 246, 246, 0.50);
   --DividerStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
   --NavigationViewItemSeparatorForeground: var(--DividerStrokeColorDefaultBrush);
-  --ControlStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
-  --ControlStrokeColorSecondaryBrush: rgba(0, 0, 0, 0.16);
+  --ControlStrokeColorDefaultBrush: var(--ctrl-border);
+  --ControlStrokeColorSecondaryBrush: var(--ctrl-border-accent);
   --TextControlElevationBorderBrush: linear-gradient(180deg, var(--ControlStrokeColorSecondaryBrush) 0px, var(--ControlStrokeColorDefaultBrush) 2px, var(--ControlStrokeColorDefaultBrush) 100%);
   --TextControlBorderBrush: var(--ControlStrokeColorSecondaryBrush);
-  --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border) 0px, var(--accent-border-accent) 2px, var(--accent-border-accent) 100%);
   --AccentControlElevationBorderBottomBrush: rgba(0, 0, 0, 0.40);
   --toggle-border: rgba(0, 0, 0, 0.45);
   --toggle-thumb: rgba(0, 0, 0, 0.61);
@@ -1038,10 +1041,12 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
     --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
     --stroke-divider: rgba(255, 255, 255, 0.08);
     --ctrl-border-rest: rgba(0, 0, 0, 0.07);
-    --ctrl-border: rgba(255, 255, 255, 0.0706);
-    --ctrl-border-accent: rgba(255, 255, 255, 0.0941);
-    --accent-border: rgba(0, 0, 0, 0.1373);
-    --accent-border-accent: rgba(255, 255, 255, 0.0784);
+    --ctrl-border: rgba(255, 255, 255, 0.070588);
+    --ctrl-border-accent: rgba(255, 255, 255, 0.094118);
+    --accent-border: rgba(0, 0, 0, 0.137255);
+    --accent-border-accent: rgba(255, 255, 255, 0.078431);
+    --ControlStrokeColorOnAccentDefaultBrush: var(--accent-border-accent);
+    --ControlStrokeColorOnAccentSecondaryBrush: var(--accent-border);
     --ButtonBorderBrushDefaultTop: var(--ctrl-border-accent);
     --ButtonBorderBrushDefaultBottom: var(--ctrl-border);
     --AccentButtonBorderBrushDefault: var(--accent-border-accent);
@@ -1068,7 +1073,6 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
     --ctrl-solid-fill: #454545;
     --ctrl-elevation-top: rgba(255, 255, 255, 0.0941);
     --ctrl-elevation-bottom: rgba(255, 255, 255, 0.0706);
-    --ControlElevationBorderBrush: linear-gradient(180deg, var(--ctrl-border-accent) 0px, var(--ctrl-border-accent) 1px, var(--ctrl-border) 3px, var(--ctrl-border) 100%);
     --accent-base: #4CC2FF;
     --accent-hover: rgba(96, 205, 255, 0.90);
     --accent-pressed: rgba(96, 205, 255, 0.80);
@@ -1093,7 +1097,7 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
     --SystemChromeWhiteColor: #FFFFFF;
     --SystemBaseLowColor: rgba(255, 255, 255, 0.20);
     --SystemBaseHighColor: #FFFFFF;
-    --SystemAccentColor: var(--accent-base);
+    --SystemAccentColor: var(--winui-system-accent-color, var(--accent-base));
     --SystemControlBackgroundBaseLowBrush: var(--SystemBaseLowColor);
     --SystemControlBackgroundChromeMediumBrush: var(--SystemChromeMediumColor);
     --SystemControlBackgroundAccentBrush: var(--SystemAccentColor);
@@ -1153,11 +1157,10 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
     --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
     --DividerStrokeColorDefaultBrush: rgba(255, 255, 255, 0.08);
     --NavigationViewItemSeparatorForeground: var(--DividerStrokeColorDefaultBrush);
-    --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.0706);
-  --ControlStrokeColorSecondaryBrush: rgba(255, 255, 255, 0.0941);
-  --TextControlElevationBorderBrush: linear-gradient(180deg, var(--ControlStrokeColorSecondaryBrush) 0px, var(--ControlStrokeColorDefaultBrush) 2px, var(--ControlStrokeColorDefaultBrush) 100%);
-  --TextControlBorderBrush: var(--ControlStrokeColorSecondaryBrush);
-    --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border-accent) 0px, var(--accent-border) 2px, var(--accent-border) 100%);
+    --ControlStrokeColorDefaultBrush: var(--ctrl-border);
+    --ControlStrokeColorSecondaryBrush: var(--ctrl-border-accent);
+    --TextControlElevationBorderBrush: linear-gradient(180deg, var(--ControlStrokeColorSecondaryBrush) 0px, var(--ControlStrokeColorDefaultBrush) 2px, var(--ControlStrokeColorDefaultBrush) 100%);
+    --TextControlBorderBrush: var(--ControlStrokeColorSecondaryBrush);
     --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.0784);
     --toggle-border: rgba(255, 255, 255, 0.54);
     --toggle-thumb: rgba(255, 255, 255, 0.79);
@@ -1279,10 +1282,12 @@ html.theme-light,
   --stroke-surface-flyout: rgba(0, 0, 0, 0.06);
   --stroke-divider: rgba(0, 0, 0, 0.06);
   --ctrl-border-rest: rgba(0, 0, 0, 0.06);
-  --ctrl-border: rgba(0, 0, 0, 0.06);
-  --ctrl-border-accent: rgba(0, 0, 0, 0.16);
-  --accent-border: rgba(255, 255, 255, 0.08);
+  --ctrl-border: rgba(0, 0, 0, 0.058824);
+  --ctrl-border-accent: rgba(0, 0, 0, 0.160784);
+  --accent-border: rgba(255, 255, 255, 0.078431);
   --accent-border-accent: rgba(0, 0, 0, 0.40);
+  --ControlStrokeColorOnAccentDefaultBrush: var(--accent-border);
+  --ControlStrokeColorOnAccentSecondaryBrush: var(--accent-border-accent);
   --ButtonBorderBrushDefaultTop: var(--ctrl-border);
   --ButtonBorderBrushDefaultBottom: var(--ctrl-border-accent);
   --AccentButtonBorderBrushDefault: var(--accent-border);
@@ -1309,7 +1314,6 @@ html.theme-light,
   --ctrl-solid-fill: #FFFFFF;
   --ctrl-elevation-top: rgba(255, 255, 255, 0.08);
   --ctrl-elevation-bottom: rgba(0, 0, 0, 0.16);
-  --ControlElevationBorderBrush: linear-gradient(180deg, var(--ctrl-border) 0px, var(--ctrl-border-accent) 2px, var(--ctrl-border-accent) 100%);
   --accent-base: #0067C0;
   --accent-hover: rgba(0, 103, 192, 0.90);
   --accent-pressed: rgba(0, 103, 192, 0.80);
@@ -1384,11 +1388,10 @@ html.theme-light,
   --CardBackgroundFillColorSecondaryBrush: rgba(246, 246, 246, 0.50);
   --DividerStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
   --NavigationViewItemSeparatorForeground: var(--DividerStrokeColorDefaultBrush);
-  --ControlStrokeColorDefaultBrush: rgba(0, 0, 0, 0.06);
-  --ControlStrokeColorSecondaryBrush: rgba(0, 0, 0, 0.16);
+  --ControlStrokeColorDefaultBrush: var(--ctrl-border);
+  --ControlStrokeColorSecondaryBrush: var(--ctrl-border-accent);
   --TextControlElevationBorderBrush: linear-gradient(180deg, var(--ControlStrokeColorSecondaryBrush) 0px, var(--ControlStrokeColorDefaultBrush) 2px, var(--ControlStrokeColorDefaultBrush) 100%);
   --TextControlBorderBrush: var(--ControlStrokeColorSecondaryBrush);
-  --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border) 0px, var(--accent-border-accent) 2px, var(--accent-border-accent) 100%);
   --AccentControlElevationBorderBottomBrush: rgba(0, 0, 0, 0.40);
   --toggle-border: rgba(0, 0, 0, 0.45);
   --toggle-thumb: rgba(0, 0, 0, 0.61);
@@ -1445,10 +1448,12 @@ html.theme-dark,
   --stroke-surface-flyout: rgba(0, 0, 0, 0.20);
   --stroke-divider: rgba(255, 255, 255, 0.08);
   --ctrl-border-rest: rgba(0, 0, 0, 0.07);
-  --ctrl-border: rgba(255, 255, 255, 0.0706);
-  --ctrl-border-accent: rgba(255, 255, 255, 0.0941);
-  --accent-border: rgba(0, 0, 0, 0.1373);
-  --accent-border-accent: rgba(255, 255, 255, 0.0784);
+  --ctrl-border: rgba(255, 255, 255, 0.070588);
+  --ctrl-border-accent: rgba(255, 255, 255, 0.094118);
+  --accent-border: rgba(0, 0, 0, 0.137255);
+  --accent-border-accent: rgba(255, 255, 255, 0.078431);
+  --ControlStrokeColorOnAccentDefaultBrush: var(--accent-border-accent);
+  --ControlStrokeColorOnAccentSecondaryBrush: var(--accent-border);
   --ButtonBorderBrushDefaultTop: var(--ctrl-border-accent);
   --ButtonBorderBrushDefaultBottom: var(--ctrl-border);
   --AccentButtonBorderBrushDefault: var(--accent-border-accent);
@@ -1475,7 +1480,6 @@ html.theme-dark,
   --ctrl-solid-fill: #454545;
   --ctrl-elevation-top: rgba(255, 255, 255, 0.0941);
   --ctrl-elevation-bottom: rgba(255, 255, 255, 0.0706);
-  --ControlElevationBorderBrush: linear-gradient(180deg, var(--ctrl-border-accent) 0px, var(--ctrl-border-accent) 1px, var(--ctrl-border) 3px, var(--ctrl-border) 100%);
   --accent-base: #4CC2FF;
   --accent-hover: rgba(96, 205, 255, 0.90);
   --accent-pressed: rgba(96, 205, 255, 0.80);
@@ -1501,7 +1505,7 @@ html.theme-dark,
   --SystemChromeWhiteColor: #FFFFFF;
   --SystemBaseLowColor: rgba(255, 255, 255, 0.20);
   --SystemBaseHighColor: #FFFFFF;
-  --SystemAccentColor: var(--accent-base);
+  --SystemAccentColor: var(--winui-system-accent-color-dark, var(--winui-system-accent-color, var(--accent-base)));
   --SystemControlBackgroundBaseLowBrush: var(--SystemBaseLowColor);
   --SystemControlBackgroundChromeMediumBrush: var(--SystemChromeMediumColor);
   --SystemControlBackgroundAccentBrush: var(--SystemAccentColor);
@@ -1553,11 +1557,10 @@ html.theme-dark,
   --CardBackgroundFillColorSecondaryBrush: rgba(255, 255, 255, 0.0326);
   --DividerStrokeColorDefaultBrush: rgba(255, 255, 255, 0.08);
   --NavigationViewItemSeparatorForeground: var(--DividerStrokeColorDefaultBrush);
-  --ControlStrokeColorDefaultBrush: rgba(255, 255, 255, 0.0706);
-  --ControlStrokeColorSecondaryBrush: rgba(255, 255, 255, 0.0941);
+  --ControlStrokeColorDefaultBrush: var(--ctrl-border);
+  --ControlStrokeColorSecondaryBrush: var(--ctrl-border-accent);
   --TextControlElevationBorderBrush: linear-gradient(180deg, var(--ControlStrokeColorSecondaryBrush) 0px, var(--ControlStrokeColorDefaultBrush) 2px, var(--ControlStrokeColorDefaultBrush) 100%);
   --TextControlBorderBrush: var(--ControlStrokeColorSecondaryBrush);
-  --AccentControlElevationBorderBrush: linear-gradient(180deg, var(--accent-border-accent) 0px, var(--accent-border) 2px, var(--accent-border) 100%);
   --AccentControlElevationBorderBottomBrush: rgba(255, 255, 255, 0.0784);
   --toggle-border: rgba(255, 255, 255, 0.54);
   --toggle-thumb: rgba(255, 255, 255, 0.79);
@@ -1941,4 +1944,130 @@ html.theme-light, .example-theme-wrapper.theme-light, .win-theme-scope.theme-lig
 html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark {
   --LayerFillColorDefault: #3a3a3a4c;
   --SolidBackgroundFillColorTertiaryBrush: #282828;
+}
+
+/*
+ * Prefer the operating-system AccentColor system color when the browser host
+ * exposes it. Native WebView hosts can override these values through
+ * connectSystemAccentColorHost.
+ */
+:root {
+  --winui-system-accent-color: #0067C0;
+  --winui-system-accent-color-dark: #4CC2FF;
+}
+@supports (color: AccentColor) {
+  :root {
+    --winui-system-accent-color: AccentColor;
+  }
+}
+@supports (color: AccentColorText) {
+  :root { --winui-system-accent-text-light: AccentColorText; }
+}
+@supports (color: color-mix(in srgb, AccentColor, white)) {
+  :root { --winui-system-accent-color-dark: color-mix(in srgb, AccentColor 70%, white); }
+}
+
+:root, html.theme-light,
+.example-theme-wrapper.theme-light, .win-theme-scope.theme-light {
+  --accent-base: var(--winui-system-accent-color-light, var(--winui-system-accent-color, #0067C0));
+  --accent-hover: var(--winui-system-accent-hover-light, rgba(0, 103, 192, 0.90));
+  --accent-pressed: var(--winui-system-accent-pressed-light, rgba(0, 103, 192, 0.80));
+  --accent-aa-text: var(--winui-system-accent-text-light, #FFFFFF);
+  --accent-text: var(--winui-system-accent-text-light, #FFFFFF);
+  --SystemAccentColor: var(--winui-system-accent-color-light, var(--winui-system-accent-color, var(--accent-base)));
+  --SystemColorHighlightColor: var(--accent-base);
+  --SystemColorHighlightTextColor: var(--accent-aa-text);
+  --SystemControlBackgroundAccentBrush: var(--SystemAccentColor);
+  --SystemFillColorAttentionBrush: var(--accent-base);
+  --AccentFillColorDefaultBrush: var(--accent-base);
+  --AccentFillColorSecondaryBrush: var(--accent-hover);
+  --AccentFillColorTertiaryBrush: var(--accent-pressed);
+  --TextOnAccentFillColorPrimaryBrush: var(--winui-system-accent-text-light, #FFFFFF);
+  --TextOnAccentFillColorSecondaryBrush: var(--winui-system-accent-text-secondary-light, rgba(255, 255, 255, 0.70));
+  --TextOnAccentFillColorDisabledBrush: var(--winui-system-accent-text-light, #FFFFFF);
+}
+
+html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark {
+  --accent-base: var(--winui-system-accent-color-dark, var(--winui-system-accent-color, #4CC2FF));
+  --accent-hover: var(--winui-system-accent-hover-dark, rgba(96, 205, 255, 0.90));
+  --accent-pressed: var(--winui-system-accent-pressed-dark, rgba(96, 205, 255, 0.80));
+  --accent-aa-text: var(--winui-system-accent-text-dark, #000000);
+  --accent-text: var(--winui-system-accent-text-dark, #000000);
+  --SystemAccentColor: var(--winui-system-accent-color-dark, var(--winui-system-accent-color, var(--accent-base)));
+  --SystemColorHighlightColor: var(--accent-base);
+  --SystemColorHighlightTextColor: var(--accent-aa-text);
+  --SystemControlBackgroundAccentBrush: var(--SystemAccentColor);
+  --SystemFillColorAttentionBrush: var(--accent-base);
+  --AccentFillColorDefaultBrush: var(--accent-base);
+  --AccentFillColorSecondaryBrush: var(--accent-hover);
+  --AccentFillColorTertiaryBrush: var(--accent-pressed);
+  --TextOnAccentFillColorPrimaryBrush: var(--winui-system-accent-text-dark, #000000);
+  --TextOnAccentFillColorSecondaryBrush: var(--winui-system-accent-text-secondary-dark, rgba(0, 0, 0, 0.50));
+  --TextOnAccentFillColorDisabledBrush: var(--winui-system-accent-text-dark, #000000);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light):not(.theme-dark) {
+    --accent-base: var(--winui-system-accent-color-dark, var(--winui-system-accent-color, #4CC2FF));
+    --accent-hover: var(--winui-system-accent-hover-dark, rgba(96, 205, 255, 0.90));
+    --accent-pressed: var(--winui-system-accent-pressed-dark, rgba(96, 205, 255, 0.80));
+    --accent-aa-text: var(--winui-system-accent-text-dark, #000000);
+    --accent-text: var(--winui-system-accent-text-dark, #000000);
+    --SystemAccentColor: var(--winui-system-accent-color-dark, var(--winui-system-accent-color, var(--accent-base)));
+    --SystemColorHighlightColor: var(--accent-base);
+    --SystemColorHighlightTextColor: var(--accent-aa-text);
+    --SystemControlBackgroundAccentBrush: var(--SystemAccentColor);
+    --SystemFillColorAttentionBrush: var(--accent-base);
+    --AccentFillColorDefaultBrush: var(--accent-base);
+    --AccentFillColorSecondaryBrush: var(--accent-hover);
+    --AccentFillColorTertiaryBrush: var(--accent-pressed);
+    --TextOnAccentFillColorPrimaryBrush: var(--winui-system-accent-text-dark, #000000);
+    --TextOnAccentFillColorSecondaryBrush: var(--winui-system-accent-text-secondary-dark, rgba(0, 0, 0, 0.50));
+    --TextOnAccentFillColorDisabledBrush: var(--winui-system-accent-text-dark, #000000);
+  }
+}
+
+@supports (color: color-mix(in srgb, black, white)) {
+  :root, html.theme-light,
+  .example-theme-wrapper.theme-light, .win-theme-scope.theme-light {
+    --accent-hover: var(--winui-system-accent-hover-light, color-mix(in srgb, var(--accent-base) 90%, transparent));
+    --accent-pressed: var(--winui-system-accent-pressed-light, color-mix(in srgb, var(--accent-base) 80%, transparent));
+    --accent-aa-fill: color-mix(in srgb, var(--accent-base) 80%, black);
+    --SystemAccentColorLight1: var(--winui-system-accent-light-1, color-mix(in srgb, var(--SystemAccentColor) 80%, white));
+    --SystemAccentColorLight2: var(--winui-system-accent-light-2, color-mix(in srgb, var(--SystemAccentColor) 60%, white));
+    --SystemAccentColorLight3: var(--winui-system-accent-light-3, color-mix(in srgb, var(--SystemAccentColor) 40%, white));
+    --SystemAccentColorDark1: var(--winui-system-accent-dark-1, color-mix(in srgb, var(--SystemAccentColor) 86%, black));
+    --SystemAccentColorDark2: var(--winui-system-accent-dark-2, color-mix(in srgb, var(--SystemAccentColor) 68%, black));
+    --SystemAccentColorDark3: var(--winui-system-accent-dark-3, color-mix(in srgb, var(--SystemAccentColor) 50%, black));
+    --AccentFillColorSecondaryBrush: var(--accent-hover);
+    --AccentFillColorTertiaryBrush: var(--accent-pressed);
+  }
+  html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark {
+    --accent-hover: var(--winui-system-accent-hover-dark, color-mix(in srgb, var(--accent-base) 90%, white));
+    --accent-pressed: var(--winui-system-accent-pressed-dark, color-mix(in srgb, var(--accent-base) 80%, white));
+    --accent-aa-fill: var(--SystemAccentColorLight2, color-mix(in srgb, var(--accent-base) 74%, white));
+    --SystemAccentColorLight1: var(--winui-system-accent-light-1, color-mix(in srgb, var(--SystemAccentColor) 82%, white));
+    --SystemAccentColorLight2: var(--winui-system-accent-light-2, color-mix(in srgb, var(--SystemAccentColor) 64%, white));
+    --SystemAccentColorLight3: var(--winui-system-accent-light-3, color-mix(in srgb, var(--SystemAccentColor) 46%, white));
+    --SystemAccentColorDark1: var(--winui-system-accent-dark-1, color-mix(in srgb, var(--SystemAccentColor) 86%, black));
+    --SystemAccentColorDark2: var(--winui-system-accent-dark-2, color-mix(in srgb, var(--SystemAccentColor) 68%, black));
+    --SystemAccentColorDark3: var(--winui-system-accent-dark-3, color-mix(in srgb, var(--SystemAccentColor) 50%, black));
+    --AccentFillColorSecondaryBrush: var(--accent-hover);
+    --AccentFillColorTertiaryBrush: var(--accent-pressed);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not(.theme-light):not(.theme-dark) {
+      --accent-hover: var(--winui-system-accent-hover-dark, color-mix(in srgb, var(--accent-base) 90%, white));
+      --accent-pressed: var(--winui-system-accent-pressed-dark, color-mix(in srgb, var(--accent-base) 80%, white));
+      --accent-aa-fill: var(--SystemAccentColorLight2, color-mix(in srgb, var(--accent-base) 74%, white));
+      --SystemAccentColorLight1: var(--winui-system-accent-light-1, color-mix(in srgb, var(--SystemAccentColor) 82%, white));
+      --SystemAccentColorLight2: var(--winui-system-accent-light-2, color-mix(in srgb, var(--SystemAccentColor) 64%, white));
+      --SystemAccentColorLight3: var(--winui-system-accent-light-3, color-mix(in srgb, var(--SystemAccentColor) 46%, white));
+      --SystemAccentColorDark1: var(--winui-system-accent-dark-1, color-mix(in srgb, var(--SystemAccentColor) 86%, black));
+      --SystemAccentColorDark2: var(--winui-system-accent-dark-2, color-mix(in srgb, var(--SystemAccentColor) 68%, black));
+      --SystemAccentColorDark3: var(--winui-system-accent-dark-3, color-mix(in srgb, var(--SystemAccentColor) 50%, black));
+      --AccentFillColorSecondaryBrush: var(--accent-hover);
+      --AccentFillColorTertiaryBrush: var(--accent-pressed);
+    }
+  }
 }

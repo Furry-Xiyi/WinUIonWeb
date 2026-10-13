@@ -1,0 +1,18 @@
+2026/10/19-10:29:23.295 4004 Reusing MANIFEST C:\Users\32706\Develop\Windows\Furry-Xiyi\WinUIonWeb\.verification\edge-cdp-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/10/19-10:29:23.331 4004 Recovering log #10
+2026/10/19-10:29:23.387 4004 Reusing old log C:\Users\32706\Develop\Windows\Furry-Xiyi\WinUIonWeb\.verification\edge-cdp-profile\Default\Local Storage\leveldb/000010.log 
+2026/10/19-10:32:54.516 1558 Level-0 table #14: started
+2026/10/19-10:32:54.557 1558 Level-0 table #14: 20574 bytes OK
+2026/10/19-10:32:54.564 1558 Delete type=0 #10
+2026/10/19-10:37:54.456 1558 Level-0 table #16: started
+2026/10/19-10:37:54.476 1558 Level-0 table #16: 25629 bytes OK
+2026/10/19-10:37:54.487 1558 Delete type=0 #13
+2026/10/19-10:37:54.492 1558 Compacting 4@0 + 1@1 files
+2026/10/19-10:37:54.528 1558 Generated table #17@0: 2507 keys, 106347 bytes
+2026/10/19-10:37:54.528 1558 Compacted 4@0 + 1@1 files => 106347 bytes
+2026/10/19-10:37:54.553 1558 compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/10/19-10:37:54.557 1558 Delete type=2 #7
+2026/10/19-10:37:54.558 1558 Delete type=2 #9
+2026/10/19-10:37:54.559 1558 Delete type=2 #11
+2026/10/19-10:37:54.560 1558 Delete type=2 #14
+2026/10/19-10:37:54.560 1558 Delete type=2 #16

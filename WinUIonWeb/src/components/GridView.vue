@@ -154,6 +154,7 @@ import { resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey }
 import { createSemanticZoomView } from './semanticZoomView';
 import { useAcrylicBrushStyle } from './AcrylicBrush';
 import { vAcrylicBrush } from './acrylicBrushVisual';
+import { attachSecondaryTouchScrollDuringDrag } from './pointerDragTouchScroll';
 
 const props = defineProps({
   ItemsSource: { type: [String, Array, Object], default: null },
@@ -2099,6 +2100,7 @@ const onWindowDragEnd = (event) => {
   else if (isExternalDragOver.value) clearExternalDropVisual();
 };
 
+let detachSecondaryTouchScroll;
 onMounted(() => {
   const root = containerRef.value;
   root?.addEventListener(pointerDragOverEvent, onPointerGridDragOver);
@@ -2113,8 +2115,14 @@ onMounted(() => {
     window.addEventListener('blur', cancelDrag);
     window.addEventListener('dragend', onWindowDragEnd);
   }
+  detachSecondaryTouchScroll = attachSecondaryTouchScrollDuringDrag(
+    () => pointerDragActive.value,
+    () => pointerDrag.value?.pointerId
+  );
 });
 onBeforeUnmount(() => {
+  detachSecondaryTouchScroll?.();
+  detachSecondaryTouchScroll = undefined;
   const root = containerRef.value;
   root?.removeEventListener(pointerDragOverEvent, onPointerGridDragOver);
   root?.removeEventListener(pointerDragLeaveEvent, onPointerGridDragLeave);
@@ -2280,7 +2288,7 @@ defineExpose({ ScrollIntoGroup, ...semanticView });
   }
 
   .win-grid-item.clickEnabled { cursor: pointer; }
-  .win-grid-item.can-drag { cursor: grab; -webkit-user-drag: none; }
+  .win-grid-item.can-drag { cursor: grab; touch-action: none; -webkit-user-drag: none; }
   .win-grid-item.can-drag:active { cursor: grabbing; }
 
   .grid-item-presenter {

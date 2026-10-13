@@ -2,7 +2,7 @@
   <div ref="rootRef" v-bind="rootAttrs" class="win-selector-bar-item" :class="[preparePropertyElements(), stateClasses]"
     :style="[attrs.style, rootStyle]" role="option" :tabindex="tabIndex"
     :aria-selected="isSelected" :aria-disabled="!isEnabled || undefined"
-    @pointerenter="pointerOver = true" @pointerleave="onPointerLeave"
+    @pointerenter="onPointerEnter" @pointerleave="onPointerLeave"
     @pointerdown="onPointerDown" @pointerup="onPointerUp" @pointercancel="cancelPointer"
     @lostpointercapture="cancelPointer" @click="onClick" @keydown="onKeyDown" @focus="onFocus">
     <div class="win-selector-bar-item-container-root" data-template-part="PART_ContainerRoot" :style="chromeStyle">
@@ -33,6 +33,7 @@ import { alignment, xamlThickness } from './layout'
 import { itemContainerControllerKey, itemsViewItemContextKey, itemsViewElementKey } from './ItemsViewState'
 import { selectorBarItemDefaults, selectorBarItemKey, selectorBarPointerFocusKey, selectorBarElementFactory } from './selectorBarRuntime'
 import { selectorBarStyleSetter } from './selectorBarResources'
+import { isHoverPointer } from './pointerInput'
 import { normalizeXamlNodes, resolveXamlValue, updateXamlBinding, xamlItemContextKey, xamlScopeKey } from './xamlRuntime'
 
 defineOptions({ name: 'SelectorBarItem', inheritAttrs: false })
@@ -101,7 +102,7 @@ const chromeStyle = computed(() => {
     const state = isEnabled.value && pressed.value ? 'Pressed' : isEnabled.value && pointerOver.value ? 'PointerOver' : ''
     const suffix = `${state}${isSelected.value ? 'Selected' : ''}`
     return {
-      borderRadius: rootStyle.value.borderRadius,
+      borderRadius: 'inherit',
       borderStyle: 'solid', borderWidth: xamlThickness(read('BorderThickness')),
       borderColor: suffix ? resolveXamlValue(`{ThemeResource TokenItemBorderBrush${suffix}}`, instance) : read('BorderBrush'),
       background: suffix ? resolveXamlValue(`{ThemeResource TokenItemBackground${suffix}}`, instance) : read('Background'),
@@ -110,7 +111,7 @@ const chromeStyle = computed(() => {
     }
   }
   return {
-    borderRadius: rootStyle.value.borderRadius,
+    borderRadius: 'inherit',
     background: !isEnabled.value ? 'var(--SelectorBarItemBackgroundDisabled)'
       : isSelected.value && !pointerOver.value && !pressed.value ? 'var(--SelectorBarItemBackgroundSelected)'
       : !isSelected.value && pressed.value ? 'var(--SelectorBarItemBackgroundPressed)'
@@ -202,10 +203,12 @@ const cancelPointer = event => {
   pointerOrigin = null
   if (captured != null && rootRef.value?.hasPointerCapture?.(captured)) rootRef.value.releasePointerCapture(captured)
 }
+const onPointerEnter = event => { pointerOver.value = isHoverPointer(event) }
 const onPointerDown = event => {
   if (!isEnabled.value || read('IsHitTestVisible') === false || (event.pointerType === 'mouse' && event.button !== 0)) return
   if (pointerId != null && pointerId !== event.pointerId) return
   pointerId = event.pointerId; pointerType = event.pointerType; pressed.value = true
+  if (!isHoverPointer(event)) pointerOver.value = false
   pointerOrigin = { x: event.clientX, y: event.clientY }
   // WinUI updates selection on PointerReleased. Prevent the browser's default
   // mouse focus here; focus is restored after the committed interaction.
@@ -307,13 +310,13 @@ defineExpose(publicApi)
 <style scoped>
 .win-selector-bar-item {
   position: relative; display: grid; box-sizing: border-box; min-width: 0; min-height: 0;
-  flex: 0 0 auto; margin: 0; padding: 0 !important; border: 0; outline: none;
+  flex: 0 0 auto; margin: 0; padding: 0 !important; border: 0; outline: none; overflow: hidden;
   color: var(--SelectorBarItemForeground, var(--TextFillColorPrimaryBrush, var(--text-primary)));
   user-select: none; -webkit-tap-highlight-color: transparent; cursor: default;
 }
 .win-selector-bar-item-container-root {
   position: relative; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto;
-  box-sizing: border-box; min-width: 0; min-height: 0; overflow: hidden; background: transparent;
+  box-sizing: border-box; min-width: 0; min-height: 0; overflow: hidden; border-radius: inherit; background: transparent;
 }
 .win-selector-bar-item-content {
   grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: var(--SelectorBarItemSpacing, 8px);

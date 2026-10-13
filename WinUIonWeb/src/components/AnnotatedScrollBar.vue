@@ -4,15 +4,16 @@
     :class="stateClasses"
     :style="containerStyle"
     ref="containerRef"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
+    @pointerenter="handlePointerEnter"
+    @pointerleave="handleMouseLeave"
+    @pointerdown="handlePointerDown"
   >
     <!-- 滚动轨道 -->
     <div
       class="scrollbar-rail"
       ref="railRef"
       @click="handleRailClick"
-      @mousemove="handleRailMove"
+      @pointermove="handleRailMove"
     >
       <!-- 标签层 -->
       <div class="scrollbar-labels" ref="labelsRef">
@@ -42,7 +43,7 @@
         v-if="showDetailLabel && detailLabelContent"
         class="detail-label"
         :style="[detailLabelStyle, detailBackgroundStyle]"
-        v-acrylic-brush="detailBackgroundStyle"
+        v-acrylic-brush.host-backdrop="detailBackgroundStyle"
         v-theme-shadow="{ Translation: 16 }"
       >
         <span class="detail-label-content">{{ detailLabelContent }}</span>
@@ -56,6 +57,7 @@ import { ref, computed, getCurrentInstance, watch, onMounted, onBeforeUnmount } 
 import { useAcrylicBrushStyle } from './AcrylicBrush';
 import { vAcrylicBrush } from './acrylicBrushVisual';
 import { vThemeShadow } from './themeShadowVisual';
+import { isHoverPointer } from './pointerInput';
 const detailBackgroundStyle = useAcrylicBrushStyle('{ThemeResource ToolTipBackgroundBrush}', getCurrentInstance());
 
 const props = defineProps({
@@ -234,10 +236,15 @@ const detailLabelStyle = computed(() => {
 });
 
 // 鼠标进入/离开
-const handleMouseEnter = () => {
+const handlePointerEnter = (event) => {
+  if (!isHoverPointer(event)) return;
   if (!props.disabled) {
     isPointerOver.value = true;
   }
+};
+
+const handlePointerDown = (event) => {
+  if (!isHoverPointer(event)) isPointerOver.value = false;
 };
 
 const handleMouseLeave = () => {
@@ -247,6 +254,7 @@ const handleMouseLeave = () => {
 
 // 轨道移动 - 触发DetailLabelRequested事件
 const handleRailMove = (e) => {
+  if (!isHoverPointer(e)) { showDetailLabel.value = false; return; }
   if (props.disabled || !railRef.value) return;
 
   const rect = railRef.value.getBoundingClientRect();

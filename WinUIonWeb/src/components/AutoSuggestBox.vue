@@ -35,7 +35,7 @@
         class="win-asb-popup win-theme-scope"
         :class="[openDirection === 'up' ? 'opens-up' : 'opens-down', popupThemeClass]"
         :style="[popupStyle, suggestionsBackgroundStyle]"
-        v-acrylic-brush="suggestionsBackgroundStyle"
+        v-acrylic-brush.host-backdrop="suggestionsBackgroundStyle"
         v-theme-shadow="{ Translation: 32 }"
         :id="popupId"
         @pointerdown.prevent

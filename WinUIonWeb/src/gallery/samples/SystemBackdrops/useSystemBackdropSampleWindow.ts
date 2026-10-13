@@ -1,4 +1,5 @@
 import { computed, onBeforeUnmount, onMounted, provide, ref, shallowReactive } from 'vue'
+import appIconUrl from '../../../assets/AppIcon.ico'
 import { useI18n } from '../../../components/i18n/index'
 import { xamlNameScopeKey, xamlScopeKey } from '../../../components/xamlRuntime'
 import type { SystemBackdropConfig } from '../../../components/systemBackdrop'
@@ -76,7 +77,7 @@ export const useSystemBackdropSampleWindow = (props: { handle: SystemBackdropWin
   onMounted(() => { unsubscribe = props.handle.Subscribe(onStateChanged) })
   onBeforeUnmount(() => { ++backdropOperation; ++themeOperation; unsubscribe?.() })
   provide(xamlNameScopeKey, shallowReactive({}))
-  provide(xamlScopeKey, { Labels, statusText, windowBackground, backdropItems, selectedBackdropIndex, selectedThemeIndex, BackdropComboBox_SelectionChanged, ThemeComboBox_SelectionChanged })
+  provide(xamlScopeKey, { Labels, AppIconUri: appIconUrl, statusText, windowBackground, backdropItems, selectedBackdropIndex, selectedThemeIndex, BackdropComboBox_SelectionChanged, ThemeComboBox_SelectionChanged })
   
   return { Labels, statusText, windowBackground, backdropItems, selectedBackdropIndex, selectedThemeIndex, BackdropComboBox_SelectionChanged, ThemeComboBox_SelectionChanged }
 }

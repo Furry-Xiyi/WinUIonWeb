@@ -2,10 +2,14 @@
 TitleBar configuration
 --- xaml
 <TitleBar
+    PreferredHeightOption="Tall"
     Title="$(Title)"
     Subtitle="$(Subtitle)"
     IsBackButtonVisible="$(BackButtonVisibility)"
-    IsPaneToggleButtonVisible="$(PaneToggleVisibility)">
+    IsPaneToggleButtonVisible="$(PaneToggleVisibility)"
+    IsCaptionButtonsVisible="$(CaptionButtonsVisibility)"
+    CaptionButtonsFramework="$(CaptionButtonsFramework)"
+    CaptionButtonRequested="TitleBar_CaptionButtonRequested">
     <TitleBar.Resources>
         <!-- TitleBar.Content uses Center alignment by default. Override to
              Stretch so the AutoSuggestBox grows with the title bar. -->

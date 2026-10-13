@@ -1,4 +1,5 @@
 import { onBeforeUnmount, onMounted, ref, watch, type ComputedRef, type Ref } from 'vue'
+import { isHoverPointer } from './pointerInput'
 
 type GlyphInput = Record<string, (...args: any[]) => void>
 export const useDropDownButtonInput = (element: Ref<HTMLButtonElement | null>, enabled: ComputedRef<boolean>, clickMode: ComputedRef<string>, invoke: (event: Event) => void,
@@ -22,13 +23,14 @@ export const useDropDownButtonInput = (element: Ref<HTMLButtonElement | null>, e
     }
   })
   const onPointerEntered = (event: PointerEvent) => {
-    IsPointerOver.value = true
+    IsPointerOver.value = isHoverPointer(event)
     if (activePointer === event.pointerId && event.buttons > 0) IsPressed.value = true
     glyph.PointerEntered(event); pointer('PointerEntered', event)
-    if (enabled.value && clickMode.value === 'Hover') invoke(event)
+    if (IsPointerOver.value && enabled.value && clickMode.value === 'Hover') invoke(event)
   }
   const onPointerExited = (event: PointerEvent) => { IsPointerOver.value = false; if (!activeKey) IsPressed.value = false; glyph.PointerExited(event); pointer('PointerExited', event) }
   const onPointerPressed = (event: PointerEvent) => {
+    if (!isHoverPointer(event)) IsPointerOver.value = false
     if (enabled.value && event.button === 0 && clickMode.value !== 'Hover' && activePointer === null) {
       suppressClick = false; activePointer = event.pointerId; IsPressed.value = true
       try { element.value?.setPointerCapture(event.pointerId) } catch { }
@@ -36,10 +38,10 @@ export const useDropDownButtonInput = (element: Ref<HTMLButtonElement | null>, e
     }
     glyph.PointerPressed(event); pointer('PointerPressed', event)
   }
-  const onPointerMoved = (event: PointerEvent) => { if (activePointer === event.pointerId) { IsPressed.value = inside(event); IsPointerOver.value = IsPressed.value } pointer('PointerMoved', event) }
-  const onPointerReleased = (event: PointerEvent) => { if (activePointer === event.pointerId && !inside(event)) suppressClick = true; clearPressed(); glyph.PointerReleased(event); pointer('PointerReleased', event) }
-  const onPointerCanceled = (event: PointerEvent) => { suppressClick = true; clearPressed(); glyph.PointerExited(event); pointer('PointerCanceled', event) }
-  const onPointerCaptureLost = (event: PointerEvent) => { if (activePointer !== null) suppressClick = true; clearPressed(); glyph.PointerExited(event); pointer('PointerCaptureLost', event) }
+  const onPointerMoved = (event: PointerEvent) => { if (activePointer === event.pointerId) { IsPressed.value = inside(event); IsPointerOver.value = isHoverPointer(event) && IsPressed.value } pointer('PointerMoved', event) }
+  const onPointerReleased = (event: PointerEvent) => { if (activePointer === event.pointerId && !inside(event)) suppressClick = true; clearPressed(); if (!isHoverPointer(event)) IsPointerOver.value = false; glyph.PointerReleased(event); pointer('PointerReleased', event) }
+  const onPointerCanceled = (event: PointerEvent) => { suppressClick = true; clearPressed(); if (!isHoverPointer(event)) IsPointerOver.value = false; glyph.PointerExited(event); pointer('PointerCanceled', event) }
+  const onPointerCaptureLost = (event: PointerEvent) => { if (activePointer !== null) suppressClick = true; clearPressed(); if (!isHoverPointer(event)) IsPointerOver.value = false; glyph.PointerExited(event); pointer('PointerCaptureLost', event) }
   const key = (name: string, event: KeyboardEvent) => raise(name, event, { Key: ({ ' ': 'Space', ArrowUp: 'Up', ArrowDown: 'Down', ArrowLeft: 'Left', ArrowRight: 'Right' })[event.key] ?? event.key })
   const onKeyDown = (event: KeyboardEvent) => {
     glyph.KeyDown(event)

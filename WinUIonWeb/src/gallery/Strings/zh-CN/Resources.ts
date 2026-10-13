@@ -473,6 +473,7 @@ export default {
   "text.a-toolbar-for-commands": "用于命令的工具栏。",
   "text.account": "帐户",
   "text.acrylic": "Acrylic",
+  "text.acrylic-thin": "薄亚克力",
   "text.adam": "亚当",
   "text.add": "添加",
   "text.allows-users-to-view-and-set-ratings": "允许用户查看和设置评级。",

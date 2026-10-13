@@ -11,9 +11,11 @@ End to end TitleBar sample
 
     <TitleBar
         x:Name="titleBar"
+        PreferredHeightOption="Tall"
         BackRequested="TitleBar_BackRequested"
         IsBackButtonVisible="{x:Bind navFrame.CanGoBack, Mode=OneWay}"
         IsPaneToggleButtonVisible="True"
+        IsPaneOpen="{x:Bind navView.IsPaneOpen, Mode=OneWay}"
         PaneToggleRequested="TitleBar_PaneToggleRequested" />
 
     <NavigationView

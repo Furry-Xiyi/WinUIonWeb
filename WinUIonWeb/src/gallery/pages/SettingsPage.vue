@@ -39,6 +39,7 @@
                 <RadioButtons SelectedIndex="{x:Bind MaterialIndex, Mode=OneWay}" SelectionChanged="onMaterialSelectionChanged">
                   <RadioButton Content="{x:Bind MicaLabel}" />
                   <RadioButton Content="{x:Bind AcrylicLabel}" />
+                  <RadioButton Content="{x:Bind AcrylicThinLabel}" />
                 </RadioButtons>
               </Expander>
             </Grid>
@@ -120,7 +121,7 @@ import Expander from '../../components/Expander.vue';
 import RadioButton from '../../components/RadioButton.vue';
 import RadioButtons from '../../components/RadioButtons.vue';
 import SettingsCard from '../../components/SettingsCard.vue';
-import ComboBox from '../../components/ComboBox.vue';
+import { ComboBox } from '../../index';
 import TextBlock from '../../components/TextBlock.vue';
 import Button from '../../components/Button.vue';
 import HyperlinkButton from '../../components/HyperlinkButton.vue';
@@ -131,6 +132,7 @@ import Grid from '../../components/Grid.vue';
 import appManifest from '../../manifest.json';
 import appIcon from '../../assets/AppIcon.ico';
 import { useI18n } from '../../components/i18n/index';
+import { galleryWindowBackdropKey } from '../../utils/galleryWindowBackdrop';
 import {
   DefaultNavigationTransitionInfo,
   createCommonNavigationTransitionInfo,
@@ -150,6 +152,7 @@ const QQGroupLabel = computed(() => t('text.qq-group'));
 const DiscordGroupLabel = computed(() => t('text.discord-group'));
 const themeSetting = inject('themeSetting');
 const materialSetting = inject('materialSetting');
+const galleryWindowBackdrop = inject(galleryWindowBackdropKey, null);
 const navigationTransitionInfo = inject('navigationTransitionInfo');
 const navPosition = inject('navPosition');
 const isHostedInUwpWebView = inject('isHostedInUwpWebView');
@@ -163,14 +166,15 @@ const MaterialLabel = computed(() => t('text.material'));
 const MaterialDescription = computed(() => t('text.choose-the-app-background-material'));
 const MicaLabel = computed(() => t('text.mica'));
 const AcrylicLabel = computed(() => t('text.acrylic'));
-const MaterialVisibility = computed(() => isHostedInUwpWebView.value ? 'Visible' : 'Collapsed');
+const AcrylicThinLabel = computed(() => t('text.acrylic-thin'));
+const MaterialVisibility = computed(() => isHostedInUwpWebView.value || galleryWindowBackdrop?.value ? 'Visible' : 'Collapsed');
 const PageTransitionLabel = computed(() => t('text.page-transition'));
 const PageTransitionDescription = computed(() => t('text.animation-style-when-switching-pages'));
 const NavigationPanePositionLabel = computed(() => t('text.navigation-pane-position'));
 const NavigationPanePositionDescription = computed(() => t('text.select-the-navigation-bar-position'));
 const AboutLabel = computed(() => t('text.about'));
 const themeOptions = ['system', 'light', 'dark'];
-const materialOptions = ['mica', 'acrylic'];
+const materialOptions = ['mica', 'acrylic', 'acrylic-thin'];
 const NavigationTransitionInfoOptions = [
   {
     Key: 'DefaultNavigationTransitionInfo',

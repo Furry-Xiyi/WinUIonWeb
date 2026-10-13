@@ -11,10 +11,10 @@
         </StackPanel>
         <StackPanel class="gallery-page-content" Margin="0,12,0,0">
           <RichTextBlock><Paragraph><Run Text="{x:Bind Labels.customizationIntro, Mode=OneWay}" /><Hyperlink Click="Hyperlink_Click"><Run Text="{x:Bind Labels.appWindowTitleBar, Mode=OneWay}" /></Hyperlink><Run Text="{x:Bind Labels.sampleSuffix, Mode=OneWay}" /></Paragraph></RichTextBlock>
-          <ControlExample HorizontalContentAlignment="Stretch" HeaderText="{x:Bind Labels.configurationHeader, Mode=OneWay}" SampleDefinition="TitleBar\TitlebarConfiguration.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind configurationXaml, Mode=OneWay}">
+          <ControlExample class="titlebar-configuration-example" HorizontalContentAlignment="Stretch" HeaderText="{x:Bind Labels.configurationHeader, Mode=OneWay}" SampleDefinition="TitleBar\TitlebarConfiguration.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind configurationXaml, Mode=OneWay}">
             <ControlExample.Example>
-              <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{StaticResource OverlayCornerRadius}">
-                <TitleBar x:Name="TitleBarControl" Title="{Binding ElementName=TitleBox, Path=Text, Mode=OneWay}" Subtitle="{Binding ElementName=SubtitleBox, Path=Text, Mode=OneWay}" IsBackButtonVisible="{Binding ElementName=BackButtonToggle, Path=IsOn, Mode=OneWay}" IsPaneToggleButtonVisible="{Binding ElementName=PaneToggle, Path=IsOn, Mode=OneWay}" LayoutUpdated="TitleBar_LayoutUpdated">
+              <Grid class="titlebar-sample-card" Width="100%" MinWidth="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{StaticResource OverlayCornerRadius}">
+                <TitleBar x:Name="TitleBarControl" Width="100%" MinWidth="0" HorizontalAlignment="Stretch" PreferredHeightOption="Tall" Title="{Binding ElementName=TitleBox, Path=Text, Mode=OneWay}" Subtitle="{Binding ElementName=SubtitleBox, Path=Text, Mode=OneWay}" IsBackButtonVisible="{Binding ElementName=BackButtonToggle, Path=IsOn, Mode=OneWay}" IsPaneToggleButtonVisible="{Binding ElementName=PaneToggle, Path=IsOn, Mode=OneWay}" IsCaptionButtonsVisible="{Binding ElementName=CaptionButtonsToggle, Path=IsOn, Mode=OneWay}" CaptionButtonsFramework="{Binding ElementName=CaptionFramework, Path=SelectedValue, Mode=OneWay}" CaptionButtonRequested="TitleBar_CaptionButtonRequested" LayoutUpdated="TitleBar_LayoutUpdated">
                   <TitleBar.Resources><HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment></TitleBar.Resources>
                   <TitleBar.IconSource><ImageIconSource ImageSource="https://cdn.jsdelivr.net/gh/microsoft/WinUI-Gallery@main/WinUIGallery/Assets/Tiles/GalleryIcon.ico" /></TitleBar.IconSource>
                   <TitleBar.RightHeader><PersonPicture Width="30" Height="30" Initials="JD" /></TitleBar.RightHeader>
@@ -22,13 +22,19 @@
                 </TitleBar>
               </Grid>
             </ControlExample.Example>
-            <ControlExample.Output />
+            <ControlExample.Output><TextBlock Text="{x:Bind captionButtonOutput, Mode=OneWay}" TextWrapping="WrapWholeWords" /></ControlExample.Output>
             <ControlExample.Options>
               <StackPanel Width="240" Orientation="Vertical" Spacing="12">
                 <TextBox x:Name="TitleBox" Header="{x:Bind Labels.titleOption, Mode=OneWay}" Text="{x:Bind Labels.defaultTitle, Mode=OneWay}" />
                 <TextBox x:Name="SubtitleBox" Header="{x:Bind Labels.subtitleOption, Mode=OneWay}" Text="{x:Bind Labels.defaultSubtitle, Mode=OneWay}" />
                 <ToggleSwitch x:Name="BackButtonToggle" Header="{x:Bind Labels.backButtonOption, Mode=OneWay}" IsOn="False" />
                 <ToggleSwitch x:Name="PaneToggle" Header="{x:Bind Labels.paneToggleOption, Mode=OneWay}" IsOn="False" />
+                <ToggleSwitch x:Name="CaptionButtonsToggle" Header="{x:Bind Labels.captionButtonsOption, Mode=OneWay}" IsOn="False" />
+                <ComboBox x:Name="CaptionFramework" Header="{x:Bind Labels.captionFrameworkOption, Mode=OneWay}" SelectedIndex="0" SelectedValuePath="Tag" IsEnabled="{Binding ElementName=CaptionButtonsToggle, Path=IsOn, Mode=OneWay}">
+                  <ComboBoxItem Content="{x:Bind Labels.captionFrameworkManual, Mode=OneWay}" Tag="" />
+                  <ComboBoxItem Content="{x:Bind Labels.captionFrameworkTauri, Mode=OneWay}" Tag="Tauri" />
+                  <ComboBoxItem Content="{x:Bind Labels.captionFrameworkElectron, Mode=OneWay}" Tag="Electron" />
+                </ComboBox>
               </StackPanel>
             </ControlExample.Options>
             <ControlExample.Substitutions>
@@ -36,6 +42,8 @@
               <ControlExampleSubstitution Key="Subtitle" Value="{x:Bind SubtitleBox.Text, Mode=OneWay}" />
               <ControlExampleSubstitution Key="BackButtonVisibility" Value="{x:Bind BackButtonToggle.IsOn, Mode=OneWay}" />
               <ControlExampleSubstitution Key="PaneToggleVisibility" Value="{x:Bind PaneToggle.IsOn, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="CaptionButtonsVisibility" Value="{x:Bind CaptionButtonsToggle.IsOn, Mode=OneWay}" />
+              <ControlExampleSubstitution Key="CaptionButtonsFramework" Value="{x:Bind CaptionFramework.SelectedValue, Mode=OneWay}" />
             </ControlExample.Substitutions>
           </ControlExample>
           <ControlExample HorizontalContentAlignment="Stretch" HeaderText="{x:Bind Labels.dragHeader, Mode=OneWay}" SampleDefinition="TitleBar\TitlebarDragRegions.txt" Theme="{x:Bind pageTheme, Mode=OneWay}" Xaml="{x:Bind dragXaml, Mode=OneWay}" CSharp="{x:Bind dragCSharp, Mode=OneWay}">
@@ -58,6 +66,7 @@
 import { computed, defineComponent, inject, onBeforeUnmount, provide, ref, shallowReactive } from 'vue'
 import AutoSuggestBox from '../../components/AutoSuggestBox.vue'
 import Button from '../../components/Button.vue'
+import ComboBox from '../../components/ComboBox.vue'
 import ControlExample from '../../components/ControlExample.vue'
 import FontIcon from '../../components/FontIcon.vue'
 import Grid from '../../components/Grid.vue'
@@ -71,6 +80,7 @@ import TextBox from '../../components/TextBox.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import ToggleButton from '../../components/ToggleButton.vue'
 import ToggleSwitch from '../../components/ToggleSwitch.vue'
+import { ComboBoxItem } from '../../components/inlineControlProperties'
 import { ImageIconSource } from '../../components/IconSource'
 import { Hyperlink, Paragraph, Run } from '../../components/TextInline'
 import { ControlExampleSubstitution } from '../../components/ControlExampleProperties'
@@ -88,12 +98,13 @@ const i18n = useI18n()
 const { t } = i18n
 const currentPage = inject<{ value: string }>('currentPage')
 const { isFavoriteState, pageTheme, toggleTheme, toggleFavorite } = createPageState(currentPage?.value || 'titlebar')
-const Labels = computed(() => ({ title: t('text.titlebar'), toggleTheme: t('gallery.page-header.toggle-theme'), favorite: t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'), customizationIntro: t('sample.titlebar.customization-intro'), appWindowTitleBar: t('sample.titlebar.app-window-title-bar'), sampleSuffix: t('sample.titlebar.sample-suffix'), configurationHeader: t('sample.titlebar.configuration-header'), dragHeader: t('sample.titlebar.drag-header'), endToEndHeader: t('sample.titlebar.end-to-end-header'), search: t('sample.titlebar.search'), titleOption: t('sample.titlebar.title-option'), subtitleOption: t('sample.titlebar.subtitle-option'), defaultTitle: t('sample.titlebar.default-title'), defaultSubtitle: t('sample.titlebar.default-subtitle'), backButtonOption: t('sample.titlebar.back-button-option'), paneToggleOption: t('sample.titlebar.pane-toggle-option'), dragDescription: t('sample.titlebar.drag-description'), endToEndDescription: t('sample.titlebar.end-to-end-description'), showWindow: t('sample.systembackdrops.show-window') }))
+const Labels = computed(() => ({ title: t('text.titlebar'), toggleTheme: t('gallery.page-header.toggle-theme'), favorite: t(isFavoriteState.value ? 'gallery.remove-favorite' : 'gallery.add-favorite'), customizationIntro: t('sample.titlebar.customization-intro'), appWindowTitleBar: t('sample.titlebar.app-window-title-bar'), sampleSuffix: t('sample.titlebar.sample-suffix'), configurationHeader: t('sample.titlebar.configuration-header'), dragHeader: t('sample.titlebar.drag-header'), endToEndHeader: t('sample.titlebar.end-to-end-header'), search: t('sample.titlebar.search'), titleOption: t('sample.titlebar.title-option'), subtitleOption: t('sample.titlebar.subtitle-option'), defaultTitle: t('sample.titlebar.default-title'), defaultSubtitle: t('sample.titlebar.default-subtitle'), backButtonOption: t('sample.titlebar.back-button-option'), paneToggleOption: t('sample.titlebar.pane-toggle-option'), captionButtonsOption: t('sample.titlebar.caption-buttons-option'), captionFrameworkOption: t('sample.titlebar.caption-framework-option'), captionFrameworkManual: t('sample.titlebar.caption-framework-manual'), captionFrameworkTauri: t('sample.titlebar.caption-framework-tauri'), captionFrameworkElectron: t('sample.titlebar.caption-framework-electron'), dragDescription: t('sample.titlebar.drag-description'), endToEndDescription: t('sample.titlebar.end-to-end-description'), showWindow: t('sample.systembackdrops.show-window') }))
 const favoriteGlyph = computed(() => isFavoriteState.value ? '\uE735' : '\uE734')
 const names = shallowReactive<Record<string, any>>({})
 const section = (definition: string, name: string) => definition.match(new RegExp('(?:^|\\r?\\n)--- ' + name + '\\r?\\n([\\s\\S]*?)(?=\\r?\\n--- |$)'))?.[1]?.trim() ?? ''
 const configurationXaml = section(configurationDefinition, 'xaml'), dragXaml = section(dragDefinition, 'xaml'), dragCSharp = section(dragDefinition, 'c#'), endToEndXaml = section(endToEndDefinition, 'xaml'), endToEndCSharp = section(endToEndDefinition, 'c#')
 const dragOutput = ref(''), endToEndOutput = ref('')
+const captionButtonOutput = ref(t('sample.titlebar.caption-buttons-manual'))
 const subscriptions = new Set<() => void>()
 onBeforeUnmount(() => { subscriptions.forEach(stop => stop()); subscriptions.clear() })
 const openSample = async (kind: 'TitleBarDragRegions' | 'TitleBarEndToEnd') => {
@@ -106,10 +117,11 @@ const openSample = async (kind: 'TitleBarDragRegions' | 'TitleBarEndToEnd') => {
 }
 const CreateTitleBarDragRegionsWindowClick = () => openSample('TitleBarDragRegions')
 const CreateTitleBarWindowClick = () => openSample('TitleBarEndToEnd')
+const TitleBar_CaptionButtonRequested = (button: string) => { captionButtonOutput.value = t('sample.titlebar.caption-buttons-requested', { button }) }
 const TitleBar_LayoutUpdated = () => { syncPwaWindowChrome(window, pageTheme.value, document.getElementById('app') ?? undefined) }
 const Hyperlink_Click = () => { window.open('https://github.com/microsoft/WinUI-Gallery/tree/main/WinUIGallery/Samples/AppWindowTitleBar', '_blank', 'noopener') }
 provide(xamlNameScopeKey, names)
-provide(xamlScopeKey, { Labels, favoriteGlyph, isFavoriteState, pageTheme, toggleTheme, toggleFavorite, configurationXaml, dragXaml, dragCSharp, endToEndXaml, endToEndCSharp, dragOutput, endToEndOutput, CreateTitleBarDragRegionsWindowClick, CreateTitleBarWindowClick, TitleBar_LayoutUpdated, Hyperlink_Click })
+provide(xamlScopeKey, { Labels, favoriteGlyph, isFavoriteState, pageTheme, toggleTheme, toggleFavorite, configurationXaml, dragXaml, dragCSharp, endToEndXaml, endToEndCSharp, dragOutput, endToEndOutput, captionButtonOutput, CreateTitleBarDragRegionsWindowClick, CreateTitleBarWindowClick, TitleBar_LayoutUpdated, TitleBar_CaptionButtonRequested, Hyperlink_Click })
 </script>
 
 <style scoped>
@@ -118,4 +130,16 @@ provide(xamlScopeKey, { Labels, favoriteGlyph, isFavoriteState, pageTheme, toggl
 :deep(.page-header-actions) { position: absolute; right: 0; top: 0; }
 :deep(.win-titlebar) { min-width: 0; max-width: 100%; }
 :deep(.win-textblock) { overflow-wrap: anywhere; }
+:deep(.titlebar-configuration-example .win-titlebar) { z-index: 0; }
+:deep(.titlebar-configuration-example .titlebar-sample-card) { overflow: hidden; border-radius: var(--OverlayCornerRadius, 8px); }
+:deep(.titlebar-configuration-example .example-container) { grid-template-columns: minmax(0, 1fr) 272px; grid-template-rows: minmax(0, 1fr) auto; }
+:deep(.titlebar-configuration-example .example-display) { grid-column: 1; grid-row: 1; }
+:deep(.titlebar-configuration-example .example-output) { grid-column: 1; grid-row: 2; width: auto; max-width: none; margin: 0 12px 12px; justify-self: stretch; }
+:deep(.titlebar-configuration-example .example-options) { grid-column: 2; grid-row: 1 / 3; width: auto; max-width: 272px; }
+@container control-example (max-width: 600px) {
+  :deep(.titlebar-configuration-example .example-container) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; }
+  :deep(.titlebar-configuration-example .example-display) { grid-column: 1; grid-row: 1; }
+  :deep(.titlebar-configuration-example .example-output) { grid-column: 1; grid-row: 2; margin: 12px; }
+  :deep(.titlebar-configuration-example .example-options) { grid-column: 1; grid-row: 3; width: auto; max-width: none; margin: 0; border-left: 0; border-top: 1px solid var(--DividerStrokeColorDefaultBrush, var(--stroke-divider)); }
+}
 </style>

@@ -1,6 +1,6 @@
 {
   "name": "winuionweb",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "WinUI-style Vue 3 components for the web",
   "license": "GPL-3.0-only",
   "repository": {
@@ -9,7 +9,13 @@
     "directory": "WinUIonWeb"
   },
   "homepage": "https://furry-xiyi.github.io/WinUIonWeb/",
-  "keywords": ["vue", "vue3", "winui", "components", "xaml"],
+  "keywords": [
+    "vue",
+    "vue3",
+    "winui",
+    "components",
+    "xaml"
+  ],
   "type": "module",
   "main": "./dist-lib/index.js",
   "module": "./dist-lib/index.js",
@@ -19,10 +25,24 @@
       "types": "./dist-lib/types/index.d.ts",
       "import": "./dist-lib/index.js"
     },
+    "./system-accent-color": {
+      "types": "./dist-lib/types/systemAccentColor.d.ts",
+      "import": "./dist-lib/system-accent-color.js"
+    },
     "./style.css": "./dist-lib/style.css"
   },
-  "files": ["dist-lib", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "docs/icon-font.md"],
-  "sideEffects": ["**/*.css"],
+  "files": [
+    "dist-lib",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "docs/icon-font.md",
+    "docs/title-bar-host-adapter.md",
+    "docs/system-accent-color-host-adapter.md"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "scripts": {
     "dev": "vite . --host=0.0.0.0",
     "build": "run-p type-check \"build-only {@}\" --",
@@ -56,6 +76,7 @@
     "jiti": "^2.6.1",
     "npm-run-all2": "^8.0.4",
     "oxlint": "~1.60.0",
+    "postcss-selector-parser": "^7.1.0",
     "typescript": "~6.0.0",
     "vite": "^8.0.8",
     "vite-plugin-vue-devtools": "^8.1.1",

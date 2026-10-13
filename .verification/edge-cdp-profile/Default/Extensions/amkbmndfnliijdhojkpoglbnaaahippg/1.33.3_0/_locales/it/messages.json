@@ -1,0 +1,185 @@
+{
+   "PdfProFile": {
+      "message": "Traduzione PDF Pro basata sull'IA"
+   },
+   "babelDOC": {
+      "message": "BabelDOC Traduzione PDF con conservazione del layout"
+   },
+   "brandDescription": {
+      "message": "Bilingual web page translation, also supports PDF translation, bilingual Epub eBook translation, free to use."
+   },
+   "brandDescriptionForSafari": {
+      "message": "[Traduzione Immersiva] Un plugin gratuito per la traduzione di pagine web bilingue (originale/tradotto), che supporta anche la traduzione di PDF e libri elettronici EPUB mantenendo la formattazione originale del documento, la traduzione di sottotitoli bilingui per video online come YouTube/Netflix, e supporta servizi di traduzione mainstream come Deepl/Google;"
+   },
+   "brandName": {
+      "message": "Immersion Translation: traduzione bilingue di pagine web e documenti PDF"
+   },
+   "closeSidePanel": {
+      "message": "Chiudi pannello laterale"
+   },
+   "legacyShortcut_openAiWritingModal": {
+      "message": "[Obsoleto] Apri finestra modale AI Write"
+   },
+   "legacyShortcut_toggleMouseHoverTranslateDirectly": {
+      "message": "[Obsoleto] Abilita o disabilita temporaneamente la traduzione diretta al passaggio del mouse sulla pagina"
+   },
+   "legacyShortcut_toggleOnlyTransation": {
+      "message": "[Obsoleto] Cambia modalità bilingue/solo traduzione"
+   },
+   "legacyShortcut_toggleSidePanel": {
+      "message": "[Obsoleto] Apri/Chiudi pannello laterale"
+   },
+   "legacyShortcut_toggleTranslatePage": {
+      "message": "[Obsoleto] Traduci pagina web / Mostra testo originale"
+   },
+   "legacyShortcut_toggleTranslateTheMainPage": {
+      "message": "[Obsoleto] Tradurre l'area principale della pagina/visualizzare il testo originale"
+   },
+   "legacyShortcut_toggleTranslateTheWholePage": {
+      "message": "[Obsoleto] Tradurre tutte le aree della pagina/visualizzare il testo originale"
+   },
+   "legacyShortcut_toggleTranslateToThePageEndImmediately": {
+      "message": "[Obsoleto] Traduzione immediata a fondo pagina/visualizzazione del testo originale"
+   },
+   "legacyShortcut_toggleTranslationMask": {
+      "message": "[Obsoleto] Mostra/nascondi l'effetto di sfocatura della traslazione"
+   },
+   "legacyShortcut_toggleVideoSubtitlePreTranslation": {
+      "message": "[Obsoleto] Passa ai sottotitoli bilingui utilizzando preferibilmente le impostazioni di traduzione immersive."
+   },
+   "legacyShortcut_translateInputBox": {
+      "message": "[Obsoleto] Traduci il contenuto attuale del campo di input."
+   },
+   "legacyShortcut_translateWithBing": {
+      "message": "[Obsoleto] Utilizzo temporaneo di Microsoft per tradurre la pagina corrente"
+   },
+   "legacyShortcut_translateWithClaude": {
+      "message": "[Obsoleto] Utilizza temporaneamente Claude per tradurre la pagina corrente"
+   },
+   "legacyShortcut_translateWithCustom1": {
+      "message": "[Obsoleto] Uso temporaneo di servizi di traduzione personalizzati per tradurre la pagina corrente(1)"
+   },
+   "legacyShortcut_translateWithCustom2": {
+      "message": "[Obsoleto] Uso temporaneo di servizi di traduzione personalizzati per tradurre la pagina corrente(2)"
+   },
+   "legacyShortcut_translateWithCustom3": {
+      "message": "[Obsoleto] Uso temporaneo di servizi di traduzione personalizzati per tradurre la pagina corrente(3)"
+   },
+   "legacyShortcut_translateWithDeepL": {
+      "message": "[Obsoleto] Utilizzo temporaneamente DeepL per tradurre la pagina corrente"
+   },
+   "legacyShortcut_translateWithGemini": {
+      "message": "[Obsoleto] Utilizza temporaneamente Gemini per tradurre la pagina corrente"
+   },
+   "legacyShortcut_translateWithGoogle": {
+      "message": "[Obsoleto] Utilizzo temporaneo di Google per tradurre la pagina corrente"
+   },
+   "legacyShortcut_translateWithOpenAI": {
+      "message": "[Obsoleto] Utilizzo temporaneo di OpenAI per tradurre la pagina corrente"
+   },
+   "legacyShortcut_translateWithTransmart": {
+      "message": "[Obsoleto] Utilizzo temporaneo di Tencent per tradurre la pagina corrente"
+   },
+   "openAboutPage": {
+      "message": "Informazioni/Risposte"
+   },
+   "openAiWritingModal": {
+      "message": "Apri finestra modale AI Write"
+   },
+   "openEbookBuilder": {
+      "message": "Creare eBook EPUB bilingue"
+   },
+   "openEbookViewer": {
+      "message": "Leggere gli eBook locali"
+   },
+   "openOptionsPage": {
+      "message": "Aprire la pagina delle impostazioni"
+   },
+   "openSidePanel": {
+      "message": "Apri pannello laterale"
+   },
+   "shortBrandName": {
+      "message": "Immersive Translate"
+   },
+   "textTranslate": {
+      "message": "Traduzione del testo"
+   },
+   "toggleMouseHoverTranslateDirectly": {
+      "message": "Abilita o disabilita temporaneamente la traduzione diretta al passaggio del mouse sulla pagina"
+   },
+   "toggleOnlyTransation": {
+      "message": "Cambia modalità bilingue/solo traduzione"
+   },
+   "toggleSidePanel": {
+      "message": "Apri/Chiudi pannello laterale"
+   },
+   "toggleTranslatePage": {
+      "message": "Traduci in {targetLanguage}"
+   },
+   "toggleTranslatePageOfficialPage": {
+      "message": "Traduci pagina web / Mostra testo originale"
+   },
+   "toggleTranslateTheMainPage": {
+      "message": "Tradurre l'area principale della pagina/visualizzare il testo originale"
+   },
+   "toggleTranslateTheWholePage": {
+      "message": "Tradurre tutte le aree della pagina/visualizzare il testo originale"
+   },
+   "toggleTranslateToThePageEndImmediately": {
+      "message": "Traduzione immediata a fondo pagina/visualizzazione del testo originale"
+   },
+   "toggleTranslationMask": {
+      "message": "Mostra/nascondi l'effetto di sfocatura della traslazione"
+   },
+   "toggleVideoSubtitlePreTranslation": {
+      "message": "Passa ai sottotitoli bilingui utilizzando preferibilmente le impostazioni di traduzione immersive."
+   },
+   "translateInputBox": {
+      "message": "Traduci il contenuto attuale del campo di input."
+   },
+   "translateLocalHtmlFile": {
+      "message": "Tradurre file HTML/testo"
+   },
+   "translateLocalPdfFile": {
+      "message": "Tradurre i file PDF locali"
+   },
+   "translateLocalSubtitleFile": {
+      "message": "Tradurre i file dei sottotitoli locali"
+   },
+   "translateMangaMenuId": {
+      "message": "Tradurre l'immagine/ripristinare l'immagine"
+   },
+   "translateText": {
+      "message": "Translate \"{text}\""
+   },
+   "translateWithBing": {
+      "message": "Utilizzo temporaneo di Microsoft per tradurre la pagina corrente"
+   },
+   "translateWithClaude": {
+      "message": "Utilizza temporaneamente Claude per tradurre la pagina corrente"
+   },
+   "translateWithCustom1": {
+      "message": "Uso temporaneo di servizi di traduzione personalizzati per tradurre la pagina corrente(1)"
+   },
+   "translateWithCustom2": {
+      "message": "Uso temporaneo di servizi di traduzione personalizzati per tradurre la pagina corrente(2)"
+   },
+   "translateWithCustom3": {
+      "message": "Uso temporaneo di servizi di traduzione personalizzati per tradurre la pagina corrente(3)"
+   },
+   "translateWithDeepL": {
+      "message": "Utilizzo temporaneamente DeepL per tradurre la pagina corrente"
+   },
+   "translateWithGemini": {
+      "message": "Utilizza temporaneamente Gemini per tradurre la pagina corrente"
+   },
+   "translateWithGoogle": {
+      "message": "Utilizzo temporaneo di Google per tradurre la pagina corrente"
+   },
+   "translateWithOpenAI": {
+      "message": "Utilizzo temporaneo di OpenAI per tradurre la pagina corrente"
+   },
+   "translateWithTransmart": {
+      "message": "Utilizzo temporaneo di Tencent per tradurre la pagina corrente"
+   }
+}

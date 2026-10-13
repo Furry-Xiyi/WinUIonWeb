@@ -173,12 +173,13 @@ if (systemBackdropSampleSession) {
   }
   window.addEventListener('pagehide', detachSampleWindow)
   void systemBackdropSampleSession.handle.SetContentElement(host).then(async () => {
+    const hasCustomTitleBar = true
     await configureTitleBarWindowHost(systemBackdropSampleSession.handle.TitleBarHost, {
-      ExtendsContentIntoTitleBar: true,
-      ...(systemBackdropSampleSession.Kind === 'TitleBarDragRegions' || systemBackdropSampleSession.Kind === 'TitleBarEndToEnd' ? { PreferredHeightOption: 'Tall' as const } : {}),
+      ExtendsContentIntoTitleBar: hasCustomTitleBar,
+      PreferredHeightOption: systemBackdropSampleSession.Kind === 'TitleBarDragRegions' || systemBackdropSampleSession.Kind === 'TitleBarEndToEnd' ? 'Tall' : 'Standard',
     }, sampleMountAbort.signal)
     if (sampleMountAbort.signal.aborted || systemBackdropSampleSession.handle.State.Status === 'Closed') return
-    releaseTitleBarFrame = connectWindowTitleBarFrame(host, systemBackdropSampleSession.handle.TitleBarHost)
+    releaseTitleBarFrame = connectWindowTitleBarFrame(host, systemBackdropSampleSession.handle.TitleBarHost, hasCustomTitleBar)
     app.mount(host)
     sampleMounted = true
     releasePwaChrome = observePwaWindowChrome(window, host)
@@ -226,7 +227,9 @@ if (systemBackdropSampleSession) {
   let galleryMounted = false
   const storedTheme = localStorage.getItem('winui-theme-setting')
   const theme = storedTheme === 'dark' ? 'Dark' : storedTheme === 'light' ? 'Light' : 'Default'
-  void connectGalleryWindowBackdrop(galleryHost, { theme, signal: connectionAbort.signal }).catch(error => {
+  const storedMaterial = localStorage.getItem('winui-material-setting')
+  const material = storedMaterial === 'acrylic-thin' ? 'AcrylicThin' : storedMaterial === 'acrylic' ? 'Acrylic' : 'Mica'
+  void connectGalleryWindowBackdrop(galleryHost, { theme, material, signal: connectionAbort.signal }).catch(error => {
     if (!connectionAbort.signal.aborted) console.error(error)
     return null
   }).then(async connection => {

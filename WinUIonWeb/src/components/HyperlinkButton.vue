@@ -178,7 +178,7 @@ function onPointerDown(event: PointerEvent) {
 }
 function onPointerEntered(event: PointerEvent) {
   if (activePointer === event.pointerId && event.buttons > 0) pressed.value = true
-  if (IsEnabled.value && ClickMode.value === 'Hover') root.value?.click()
+  if (event.pointerType !== 'touch' && IsEnabled.value && ClickMode.value === 'Hover') root.value?.click()
 }
 function onKeyDown(event: KeyboardEvent) {
   if (!IsEnabled.value || ClickMode.value === 'Hover') return

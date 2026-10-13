@@ -115,9 +115,11 @@ import {
   ExpanderHeaderIcon
 } from './ExpanderProperties'
 import { AcrylicBrush } from './AcrylicBrush'
+import { installPointerInput } from './pointerInput'
 import { ResourceDictionary, SolidColorBrush, StaticResource } from './xamlPrimitives'
 
 export function registerWinUIComponents(app: App): void {
+  installPointerInput()
   app.component('AcrylicBrush', AcrylicBrush)
   app.component('media:AcrylicBrush', AcrylicBrush)
   app.component('SolidColorBrush', SolidColorBrush)

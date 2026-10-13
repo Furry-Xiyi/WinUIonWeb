@@ -163,6 +163,7 @@ import CheckBox from './CheckBox.vue';
 import { getCollectionProperty, getVNodeChildren } from './CollectionProperties';
 import { materializeXamlVNode, normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlItemContextKey, xamlNameScopeKey, xamlScopeKey } from './xamlRuntime';
 import { xamlResourceDictionaryKey } from './Page.vue';
+import { attachSecondaryTouchScrollDuringDrag } from './pointerDragTouchScroll';
 
 const slots = useSlots();
 const attrs = useAttrs();
@@ -2040,6 +2041,7 @@ const onWindowPointerLeave = (event: PointerEvent) => {
   if (event.relatedTarget === null && pointerDragActive.value) cancelActiveInteractions();
 };
 
+let detachSecondaryTouchScroll: (() => void) | undefined;
 onMounted(() => {
   raiseContainerEvent('Loaded', { OriginalSource: listViewApi, Handled: false });
   const root = containerRef.value;
@@ -2055,6 +2057,10 @@ onMounted(() => {
   document.addEventListener('visibilitychange', onVisibilityChange);
   document.addEventListener('pointerout', onWindowPointerLeave);
   window.addEventListener('blur', cancelActiveInteractions);
+  detachSecondaryTouchScroll = attachSecondaryTouchScrollDuringDrag(
+    () => pointerDragActive.value,
+    () => pointerDrag.value?.pointerId
+  );
   globalPointerListenersAttached = true;
 });
 
@@ -2202,6 +2208,8 @@ const resetDrag = () => {
 };
 
 onBeforeUnmount(() => {
+  detachSecondaryTouchScroll?.();
+  detachSecondaryTouchScroll = undefined;
   cancelSelectionIndicatorPresses();
   for (const animation of selectionIndicatorAnimations) animation.cancel();
   selectionIndicatorAnimations.clear();
@@ -2368,6 +2376,7 @@ onBeforeUnmount(() => {
 
   .win-list-item.can-drag {
     cursor: grab;
+    touch-action: none;
   }
 
   .win-list-item.can-drag *,

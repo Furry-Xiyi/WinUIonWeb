@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="lib/fluent.css">
+  <style>
+    body { width: 300px; margin: 0; padding: 16px; }
+    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .header img { width: 24px; height: 24px; }
+    .title { font-size: 16px; font-weight: 600; }
+    
+    #loadingPanel { display: flex; justify-content: center; align-items: center; min-height: 120px; }
+    .winui-loading-gif {
+      width: 40px; height: 40px; background-color: var(--accent);
+      -webkit-mask-image: url('icons/loading.webp'); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center;
+      mask-image: url('icons/loading.webp'); mask-size: contain; mask-repeat: no-repeat; mask-position: center;
+    }
+
+    #settingsPanel { display: none; }
+    #promptPanel { display: none; flex-direction: column; align-items: center; text-align: center; justify-content: center; padding: 16px 0 8px 0; }
+    #promptPanel .icon { width: 48px; height: 48px; margin-bottom: 16px; }
+    #promptPanel .titleMsg { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+    #promptPanel .descMsg { font-size: 13px; opacity: 0.8; margin-bottom: 24px; line-height: 1.5; }
+    #promptPanel .actions { display: flex; gap: 12px; width: 100%; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="icons/icon48.png" alt="icon">
+    <div class="title" id="extName">Xiyi Download</div>
+  </div>
+
+  <div id="loadingPanel">
+    <div class="winui-loading-gif"></div>
+  </div>
+  
+  <div id="settingsPanel">
+    <div class="card">
+      <div class="row">
+        <div class="col"><span class="label" id="lblEnabled">Enable</span></div>
+        <label class="switch">
+          <input type="checkbox" id="chkEnabled">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <div class="col" style="flex:1;">
+          <span class="label" id="lblSize">Size</span>
+          <span class="desc" id="lblDesc">Desc</span>
+        </div>
+        <input type="number" id="minSize" min="0" step="0.1">
+      </div>
+    </div>
+  </div>
+
+  <div id="promptPanel">
+    <img src="icons/icon48.png" class="icon" alt="icon">
+    <div class="titleMsg" id="titleMsg">App Error</div>
+    <div class="descMsg" id="descMsg">Error Description</div>
+    <div class="actions">
+      <button class="btn-secondary" id="btnIgnore">Ignore</button>
+      <button class="btn-primary" id="btnAction">Action</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,7 +1,8 @@
 <template>
-  <Teleport :to="teleportTarget">
+  <span ref="hostRef" style="display:none" aria-hidden="true" />
+  <Teleport :to="teleportTarget" :disabled="!teleportTarget">
     <div :id="tooltipId" ref="tooltipRef" popover="manual"
-      v-acrylic-brush="backgroundStyle"
+      v-acrylic-brush.host-backdrop="backgroundStyle"
       v-theme-shadow="{ Translation: 16, Enabled: present }"
       :class="[present ? 'tooltip win-tooltip LayoutRoot' : 'tooltip-content-cache', themeClass]"
       :style="[tooltipStyle, { display: present ? 'flex' : 'none' }]" :data-placement="actualPlacement"
@@ -66,13 +67,16 @@ const ownerContext = inject(toolTipOwnerContextKey, null)
 const inheritedXamlScope = inject<Record<string, unknown>>(xamlScopeKey, {})
 const inheritedTheme = inject<string | Ref<string> | null>('winuiTheme', null)
 const pageResources = inject<Record<string, VNode> | null>(xamlResourceDictionaryKey, null)
+const hostRef = ref<HTMLElement | null>(null)
 const tooltipRef = ref<HTMLElement | null>(null)
 const tooltipId = `tooltip-${instance?.uid ?? Math.random().toString(36).slice(2)}`
 const present = ref(false), positioned = ref(false)
 const position = ref({ top: 0, left: 0 })
 const bounds = ref({ width: 320, height: 10000 })
 const actualPlacement = ref('Top')
-const teleportTarget = ref<HTMLElement | string>('body')
+const teleportTarget = ref<HTMLElement | null>(null)
+const ownerDocument = () => hostRef.value?.ownerDocument ?? ownerContext?.owner.value?.ownerDocument ?? document
+const ownerWindow = () => ownerDocument().defaultView ?? window
 const localIsOpen = ref<boolean>()
 const automaticInput = ref<ToolTipInputMode>('none')
 const pointer = ref<ToolTipPoint | null>(null), automaticTheme = ref('')
@@ -148,11 +152,12 @@ const tooltipStyle = computed<CSSProperties>(() => ({
 } as CSSProperties))
 function elementFrom(input: unknown): HTMLElement | null {
   const candidate = unref(input)
-  if (candidate instanceof HTMLElement) return candidate
+  if (candidate && typeof candidate === 'object' && (candidate as Node).nodeType === 1) return candidate as HTMLElement
   if (typeof candidate === 'string') {
-    const named = document.querySelector<HTMLElement>(`[data-xaml-ref="${CSS.escape(candidate)}"]`)
+    const doc = ownerDocument()
+    const named = doc.querySelector<HTMLElement>(`[data-xaml-ref="${ownerWindow().CSS.escape(candidate)}"]`)
     if (named) return named
-    try { return document.querySelector<HTMLElement>(candidate) } catch { return null }
+    try { return doc.querySelector<HTMLElement>(candidate) } catch { return null }
   }
   if (candidate && typeof candidate === 'object') {
     const record = candidate as { Element?: unknown; $el?: unknown; value?: unknown }
@@ -179,20 +184,21 @@ function placementRect(target: HTMLElement) {
   // Compose target and ancestor 2D transforms. Layout translations and
   // transform origins are recovered from the target's measured bounding box.
   // This is TransformBounds: transform all four local rectangle corners.
-  let matrix = new DOMMatrix()
+  const view = target.ownerDocument.defaultView ?? ownerWindow()
+  let matrix = new view.DOMMatrix()
   let current: HTMLElement | null = target
   let is2D = true
   while (current) {
-    const style = getComputedStyle(current)
-    const transform = style.transform === 'none' ? new DOMMatrix() : new DOMMatrix(style.transform)
+    const style = view.getComputedStyle(current)
+    const transform = style.transform === 'none' ? new view.DOMMatrix() : new view.DOMMatrix(style.transform)
     if (!transform.is2D) { is2D = false; break }
     const zoom = Number(style.zoom) || 1
-    matrix = new DOMMatrix([transform.a * zoom, transform.b * zoom, transform.c * zoom, transform.d * zoom, 0, 0]).multiply(matrix)
+    matrix = new view.DOMMatrix([transform.a * zoom, transform.b * zoom, transform.c * zoom, transform.d * zoom, 0, 0]).multiply(matrix)
     current = current.parentElement
   }
   const corners = (left: number, top: number, localWidth: number, localHeight: number) =>
     [[left, top], [left + localWidth, top], [left + localWidth, top + localHeight], [left, top + localHeight]]
-      .map(([localX, localY]) => matrix.transformPoint(new DOMPoint(localX, localY)))
+      .map(([localX, localY]) => matrix.transformPoint(new view.DOMPoint(localX, localY)))
   if (is2D && target.offsetWidth > 0 && target.offsetHeight > 0) {
     const ownerCorners = corners(0, 0, target.offsetWidth, target.offsetHeight)
     const offsetX = rect.left - Math.min(...ownerCorners.map(corner => corner.x))
@@ -205,11 +211,12 @@ function placementRect(target: HTMLElement) {
   return { left: rect.left + x * scaleX, top: rect.top + y * scaleY, right: rect.left + (x + width) * scaleX, bottom: rect.top + (y + height) * scaleY }
 }
 function viewportBounds() {
-  const viewport = window.visualViewport
+  const view = ownerWindow()
+  const viewport = view.visualViewport
   // Native windowed ToolTips use the available monitor; their unwindowed path
   // uses the XAML content window. A web popup uses the visible browser viewport,
   // independently of the owner, ScrollViewer and Gallery example bounds.
-  return { left: viewport?.offsetLeft ?? 0, top: viewport?.offsetTop ?? 0, right: (viewport?.offsetLeft ?? 0) + (viewport?.width ?? innerWidth), bottom: (viewport?.offsetTop ?? 0) + (viewport?.height ?? innerHeight) }
+  return { left: viewport?.offsetLeft ?? 0, top: viewport?.offsetTop ?? 0, right: (viewport?.offsetLeft ?? 0) + (viewport?.width ?? view.innerWidth), bottom: (viewport?.offsetTop ?? 0) + (viewport?.height ?? view.innerHeight) }
 }
 const clamp = (number: number, min: number, max: number) => Math.max(min, Math.min(Math.max(min, max), number))
 async function updatePosition() {
@@ -230,7 +237,7 @@ async function updatePosition() {
   const defaultOffset = mode === 'mouse' ? 20 : mode === 'touch' ? 44 : mode === 'keyboard' ? 12 : 0
   const horizontalOffset = props.HorizontalOffset === undefined ? defaultOffset : Number(value(props.HorizontalOffset)) || 0
   const verticalOffset = props.VerticalOffset === undefined ? defaultOffset : Number(value(props.VerticalOffset)) || 0
-  const rtl = getComputedStyle(target).direction === 'rtl'
+  const rtl = (target.ownerDocument.defaultView ?? ownerWindow()).getComputedStyle(target).direction === 'rtl'
   const centerX = (docking.left + docking.right - tipRect.width) / 2, centerY = (docking.top + docking.bottom - tipRect.height) / 2
   const candidates = {
     Top: { left: centerX, top: docking.top - verticalOffset - tipRect.height },
@@ -279,12 +286,12 @@ function leaveTopLayer(element: HTMLElement | null) {
 }
 function setOpen(open: boolean) { localIsOpen.value = open; updateXamlBinding(props.IsOpen, open, instance); emit('update:IsOpen', open) }
 function show(immediate = true) {
-  window.clearTimeout(openTimer)
+  ownerWindow().clearTimeout(openTimer)
   if (!isEnabled.value || (!ToolTipText.value && !contentNodes.value.length && !hasContentTemplate.value && !hasVisualContent.value)) return
   if (immediate) setOpen(true)
-  else openTimer = window.setTimeout(() => setOpen(true), 800)
+  else openTimer = ownerWindow().setTimeout(() => setOpen(true), 800)
 }
-function hide() { window.clearTimeout(openTimer); setOpen(false) }
+function hide() { ownerWindow().clearTimeout(openTimer); setOpen(false) }
 function raise(event: 'Opened' | 'Closed') {
   const sender = instance?.exposeProxy ?? instance?.proxy
   emit(event, sender, {}); resolveXamlHandler(attrs[event], instance)?.(sender, {})
@@ -295,7 +302,7 @@ function syncTheme() {
   if (ownerContext) ownerContext.theme.value = automaticTheme.value
 }
 async function changeVisibility(open: boolean) {
-  const sequence = ++transitionSequence, opacity = present.value && tooltipRef.value ? getComputedStyle(tooltipRef.value).opacity : '0'
+  const sequence = ++transitionSequence, opacity = present.value && tooltipRef.value ? ownerWindow().getComputedStyle(tooltipRef.value).opacity : '0'
   animation?.cancel(); animation = null
   if (open) {
     present.value = true; positioned.value = false; syncTheme(); await nextTick()
@@ -306,7 +313,7 @@ async function changeVisibility(open: boolean) {
   }
   const element = tooltipRef.value
   if (!element) return
-  const duration = matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 167
+  const duration = ownerWindow().matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 167
   animation = element.animate([{ opacity }, { opacity: open ? 1 : 0 }], { duration, easing: 'linear', fill: 'forwards' })
   try { await animation.finished } catch { return }
   if (sequence !== transitionSequence) return
@@ -332,7 +339,8 @@ watch(() => ownerContext?.owner.value, owner => {
 }, { immediate: true, flush: 'post' })
 function onViewportChanged() { if (present.value) { syncTheme(); void updatePosition() } }
 function onFullscreenChanged() {
-  teleportTarget.value = document.fullscreenElement as HTMLElement || 'body'
+  const doc = ownerDocument()
+  teleportTarget.value = doc.fullscreenElement as HTMLElement || doc.body
   void nextTick(() => { if (present.value && tooltipRef.value) enterTopLayer(tooltipRef.value, true); onViewportChanged() })
 }
 function observeLayout() {
@@ -343,21 +351,23 @@ function observeLayout() {
 }
 watch([tooltipRef, () => ownerContext?.owner.value, () => props.PlacementTarget], observeLayout, { flush: 'post' })
 onMounted(() => {
-  teleportTarget.value = document.fullscreenElement as HTMLElement || 'body'
-  window.addEventListener('resize', onViewportChanged); window.addEventListener('scroll', onViewportChanged, true)
-  window.visualViewport?.addEventListener('resize', onViewportChanged); window.visualViewport?.addEventListener('scroll', onViewportChanged)
-  document.addEventListener('fullscreenchange', onFullscreenChanged)
-  if (typeof ResizeObserver !== 'undefined') {
-    resizeObserver = new ResizeObserver(onViewportChanged)
+  const doc = ownerDocument(), view = ownerWindow()
+  teleportTarget.value = doc.fullscreenElement as HTMLElement || doc.body
+  view.addEventListener('resize', onViewportChanged); view.addEventListener('scroll', onViewportChanged, true)
+  view.visualViewport?.addEventListener('resize', onViewportChanged); view.visualViewport?.addEventListener('scroll', onViewportChanged)
+  doc.addEventListener('fullscreenchange', onFullscreenChanged)
+  if (view.ResizeObserver) {
+    resizeObserver = new view.ResizeObserver(onViewportChanged)
     observeLayout()
   }
   if (isVisible.value) void updatePosition()
 })
 onBeforeUnmount(() => {
-  transitionSequence += 1; window.clearTimeout(openTimer); animation?.cancel(); leaveTopLayer(tooltipRef.value); unregister?.(); resizeObserver?.disconnect()
-  window.removeEventListener('resize', onViewportChanged); window.removeEventListener('scroll', onViewportChanged, true)
-  window.visualViewport?.removeEventListener('resize', onViewportChanged); window.visualViewport?.removeEventListener('scroll', onViewportChanged)
-  document.removeEventListener('fullscreenchange', onFullscreenChanged)
+  const doc = ownerDocument(), view = ownerWindow()
+  transitionSequence += 1; view.clearTimeout(openTimer); animation?.cancel(); leaveTopLayer(tooltipRef.value); unregister?.(); resizeObserver?.disconnect()
+  view.removeEventListener('resize', onViewportChanged); view.removeEventListener('scroll', onViewportChanged, true)
+  view.visualViewport?.removeEventListener('resize', onViewportChanged); view.visualViewport?.removeEventListener('scroll', onViewportChanged)
+  doc.removeEventListener('fullscreenchange', onFullscreenChanged)
 })
 defineExpose({ Controller: controller, IsOpen: computed({ get: () => isVisible.value, set: setOpen }), TemplateSettings: { FromHorizontalOffset: 0, FromVerticalOffset: 0 }, show, hide, updatePosition })
 </script>

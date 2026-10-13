@@ -111,7 +111,12 @@ function onPointerPressed(_sender: unknown, args: { OriginalEvent: PointerEvent 
 function onPointerReleased() { if (ClickMode.value !== 'Hover') stop() }
 function onPointerCanceled() { stop() }
 function onPointerExited() { pointerInside = false; stopTimer() }
-function onPointerEntered() { pointerInside = true; if (activePointer !== null || ClickMode.value === 'Hover') schedule() }
+function onPointerEntered(_sender: unknown, args: { OriginalEvent?: PointerEvent }) {
+  const event = args.OriginalEvent
+  if (event?.pointerType === 'touch') { pointerInside = false; stopTimer(); return }
+  pointerInside = true
+  if (activePointer !== null || ClickMode.value === 'Hover') schedule()
+}
 function onPointerMoved(sender: { IsPressed: boolean }) {
   if (activePointer === null || ClickMode.value === 'Hover') return
   const inside = sender.IsPressed

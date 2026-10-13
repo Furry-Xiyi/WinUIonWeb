@@ -1,0 +1,188 @@
+{
+   "PdfProFile": {
+      "message": "Dịch PDF Pro bằng AI"
+   },
+   "babelDOC": {
+      "message": "BabelDOC giữ nguyên bố cục PDF"
+   },
+   "brandDescription": {
+      "message": "Tự do dịch trang web, biên dịch PDF & Epub, biên dịch video phụ đề bằng song ngữ"
+   },
+   "brandDescriptionForSafari": {
+      "message": "Tự do dịch trang web, biên dịch PDF & Epub, biên dịch video phụ đề bằng song ngữ"
+   },
+   "brandName": {
+      "message": "Immersive Translate: Dịch web, PDF và video bằng AI"
+   },
+   "closeSidePanel": {
+      "message": "Đóng thanh bên"
+   },
+   "donateContext": {
+      "message": "Khám phá các lợi ích khi tài trợ"
+   },
+   "legacyShortcut_openAiWritingModal": {
+      "message": "[Không còn dùng] Mở cửa sổ AI Write"
+   },
+   "legacyShortcut_toggleMouseHoverTranslateDirectly": {
+      "message": "[Không còn dùng] Tạm thời bật hoặc tắt dịch trực tiếp khi rê chuột trên trang"
+   },
+   "legacyShortcut_toggleOnlyTransation": {
+      "message": "[Không còn dùng] Chuyển giữa chế độ song ngữ và chỉ bản dịch"
+   },
+   "legacyShortcut_toggleSidePanel": {
+      "message": "[Không còn dùng] Mở/đóng bảng điều khiển bên"
+   },
+   "legacyShortcut_toggleTranslatePage": {
+      "message": "[Không còn dùng] Dịch trang web/Hiển thị văn bản gốc"
+   },
+   "legacyShortcut_toggleTranslateTheMainPage": {
+      "message": "[Không còn dùng] Dịch nội dung chính của trang/Hiển thị văn bản gốc"
+   },
+   "legacyShortcut_toggleTranslateTheWholePage": {
+      "message": "[Không còn dùng] Dịch toàn bộ trang/Hiển thị văn bản gốc"
+   },
+   "legacyShortcut_toggleTranslateToThePageEndImmediately": {
+      "message": "[Không còn dùng] Dịch ngay đến cuối trang/Hiển thị văn bản gốc"
+   },
+   "legacyShortcut_toggleTranslationMask": {
+      "message": "[Không còn dùng] Bật/tắt hiệu ứng làm mờ bản dịch (chế độ học tập) trên trang hiện tại"
+   },
+   "legacyShortcut_toggleVideoSubtitlePreTranslation": {
+      "message": "[Không còn dùng] Chuyển phụ đề video bằng tính năng Immersive Translate"
+   },
+   "legacyShortcut_translateInputBox": {
+      "message": "[Không còn dùng] Dịch nội dung trong ô nhập hiện tại"
+   },
+   "legacyShortcut_translateWithBing": {
+      "message": "[Không còn dùng] Tạm thời dịch trang hiện tại bằng Microsoft Translator"
+   },
+   "legacyShortcut_translateWithClaude": {
+      "message": "[Không còn dùng] Tạm thời dùng Claude để dịch trang hiện tại"
+   },
+   "legacyShortcut_translateWithCustom1": {
+      "message": "[Không còn dùng] Tạm thời dùng dịch vụ dịch tùy chỉnh để dịch trang hiện tại (1)"
+   },
+   "legacyShortcut_translateWithCustom2": {
+      "message": "[Không còn dùng] Tạm thời dùng dịch vụ dịch tùy chỉnh để dịch trang hiện tại (2)"
+   },
+   "legacyShortcut_translateWithCustom3": {
+      "message": "[Không còn dùng] Tạm thời dùng dịch vụ dịch tùy chỉnh để dịch trang hiện tại (3)"
+   },
+   "legacyShortcut_translateWithDeepL": {
+      "message": "[Không còn dùng] Tạm thời dịch trang hiện tại bằng DeepL"
+   },
+   "legacyShortcut_translateWithGemini": {
+      "message": "[Không còn dùng] Tạm thời dịch trang hiện tại bằng Gemini"
+   },
+   "legacyShortcut_translateWithGoogle": {
+      "message": "[Không còn dùng] Tạm thời dịch trang hiện tại bằng Google"
+   },
+   "legacyShortcut_translateWithOpenAI": {
+      "message": "[Không còn dùng] Tạm thời dịch trang hiện tại bằng OpenAI"
+   },
+   "legacyShortcut_translateWithTransmart": {
+      "message": "[Không còn dùng] Tạm thời dịch trang hiện tại bằng Tencent Translator"
+   },
+   "openAboutPage": {
+      "message": "Giới thiệu / Phản hồi / Tài trợ"
+   },
+   "openAiWritingModal": {
+      "message": "Mở cửa sổ AI Write"
+   },
+   "openEbookBuilder": {
+      "message": "Tạo song ngữ sách điện tử EPUB"
+   },
+   "openEbookViewer": {
+      "message": "Đọc sách điện tử cục bộ"
+   },
+   "openOptionsPage": {
+      "message": "Mở trang Cài đặt"
+   },
+   "openSidePanel": {
+      "message": "Mở thanh bên"
+   },
+   "shortBrandName": {
+      "message": "Tích hợp Dịch Ngôn ngữ"
+   },
+   "textTranslate": {
+      "message": "Dịch văn bản"
+   },
+   "toggleMouseHoverTranslateDirectly": {
+      "message": "Tạm bật hoặc tắt dịch trực tiếp khi di chuột trên trang"
+   },
+   "toggleOnlyTransation": {
+      "message": "Chuyển giữa song ngữ và chỉ bản dịch"
+   },
+   "toggleSidePanel": {
+      "message": "Mở/Đóng thanh bên"
+   },
+   "toggleTranslatePage": {
+      "message": "Biên dịch sang {targetLanguage}"
+   },
+   "toggleTranslatePageOfficialPage": {
+      "message": "Biên dịch trang web/Hiển thị văn bản gốc"
+   },
+   "toggleTranslateTheMainPage": {
+      "message": "Biên dịch trang chính/Hiển thị văn bản gốc"
+   },
+   "toggleTranslateTheWholePage": {
+      "message": "Biên dịch toàn bộ trang/Hiển thị văn bản gốc"
+   },
+   "toggleTranslateToThePageEndImmediately": {
+      "message": "Dịch ngay đến cuối trang/Hiển thị văn bản gốc"
+   },
+   "toggleTranslationMask": {
+      "message": "Bật/tắt làm mờ bản dịch trên trang hiện tại (chế độ học tập)"
+   },
+   "toggleVideoSubtitlePreTranslation": {
+      "message": "Bật/tắt ưu tiên Immersive Translate cho phụ đề song ngữ"
+   },
+   "translateInputBox": {
+      "message": "Dịch nội dung ô nhập hiện tại"
+   },
+   "translateLocalHtmlFile": {
+      "message": "Biên dịch tệp HTML/txt"
+   },
+   "translateLocalPdfFile": {
+      "message": "Biên dịch cục bộ tệp PDF"
+   },
+   "translateLocalSubtitleFile": {
+      "message": "Biên dịch Cục bộ Tệp Phụ đề"
+   },
+   "translateMangaMenuId": {
+      "message": "Dịch ảnh/Khôi phục ảnh gốc"
+   },
+   "translateText": {
+      "message": "Dịch \"{text}\""
+   },
+   "translateWithBing": {
+      "message": "Tạm dùng Microsoft Translator để dịch trang hiện tại"
+   },
+   "translateWithClaude": {
+      "message": "Tạm dùng Claude để dịch trang hiện tại."
+   },
+   "translateWithCustom1": {
+      "message": "Tạm dùng dịch vụ dịch tùy chỉnh để dịch trang hiện tại (1)"
+   },
+   "translateWithCustom2": {
+      "message": "Tạm dùng dịch vụ dịch tùy chỉnh để dịch trang hiện tại (2)"
+   },
+   "translateWithCustom3": {
+      "message": "Tạm dùng dịch vụ dịch tùy chỉnh để dịch trang hiện tại (3)"
+   },
+   "translateWithDeepL": {
+      "message": "Tạm dùng DeepL để dịch trang hiện tại"
+   },
+   "translateWithGemini": {
+      "message": "Tạm dùng Gemini để dịch trang hiện tại"
+   },
+   "translateWithGoogle": {
+      "message": "Tạm dùng Google để dịch trang hiện tại"
+   },
+   "translateWithOpenAI": {
+      "message": "Tạm dùng OpenAI để dịch trang hiện tại"
+   },
+   "translateWithTransmart": {
+      "message": "Tạm dùng Tencent Translator để dịch trang hiện tại"
+   }
+}

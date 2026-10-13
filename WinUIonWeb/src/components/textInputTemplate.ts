@@ -3,7 +3,7 @@ import type { InjectionKey, VNode } from 'vue'
 export type TextInputSurface = {
   Focused: () => void
   Blurred: () => void
-  PointerEntered: () => void
+  PointerEntered: (event: PointerEvent) => void
   PointerExited: () => void
 }
 

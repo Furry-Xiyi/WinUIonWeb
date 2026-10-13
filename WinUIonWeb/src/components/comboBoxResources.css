@@ -35,6 +35,20 @@ html.theme-dark, .theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scop
   --ComboBoxBorderBrushPointerOver: var(--ComboBoxControlElevationBorderBrush);
   --ComboBoxBorderBrushPressed: var(--ComboBoxControlStrokeColorDefaultBrush);
   --ComboBoxBorderBrushDisabled: var(--ComboBoxControlStrokeColorDefaultBrush);
+  /* ComboBox uses the same four-edge border model as Button.  The elevation
+     brush itself is a gradient, so keep its solid edge colors separately. */
+  --ComboBoxBorderSide: var(--ButtonControlElevationBorderBrushSide, var(--ComboBoxControlStrokeColorDefaultBrush));
+  --ComboBoxBorderTop: var(--ButtonControlElevationBorderBrushTop, var(--ComboBoxControlStrokeColorDefaultBrush));
+  --ComboBoxBorderBottom: var(--ButtonControlElevationBorderBrushBottom, var(--ComboBoxControlStrokeColorDefaultBrush));
+  --ComboBoxBorderSidePointerOver: var(--ComboBoxBorderSide);
+  --ComboBoxBorderTopPointerOver: var(--ComboBoxBorderTop);
+  --ComboBoxBorderBottomPointerOver: var(--ComboBoxBorderBottom);
+  --ComboBoxBorderSidePressed: var(--ButtonControlStrokeColorDefaultBrush, var(--ComboBoxControlStrokeColorDefaultBrush));
+  --ComboBoxBorderTopPressed: var(--ComboBoxBorderSidePressed);
+  --ComboBoxBorderBottomPressed: var(--ComboBoxBorderSidePressed);
+  --ComboBoxBorderSideDisabled: var(--ButtonControlStrokeColorDefaultBrush, var(--ComboBoxControlStrokeColorDefaultBrush));
+  --ComboBoxBorderTopDisabled: var(--ComboBoxBorderSideDisabled);
+  --ComboBoxBorderBottomDisabled: var(--ComboBoxBorderSideDisabled);
   --ComboBoxDropDownGlyphForeground: var(--TextFillColorSecondaryBrush, var(--text-secondary));
   --ComboBoxDropDownGlyphForegroundDisabled: var(--TextFillColorDisabledBrush, var(--text-disabled));
   --ComboBoxDropDownGlyphForegroundFocused: var(--TextFillColorSecondaryBrush, var(--text-secondary));
@@ -88,6 +102,18 @@ html.theme-dark, .theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scop
     --ComboBoxBorderBrushPointerOver: Highlight;
     --ComboBoxBorderBrushPressed: Highlight;
     --ComboBoxBorderBrushDisabled: GrayText;
+    --ComboBoxBorderSide: CanvasText;
+    --ComboBoxBorderTop: CanvasText;
+    --ComboBoxBorderBottom: CanvasText;
+    --ComboBoxBorderSidePointerOver: Highlight;
+    --ComboBoxBorderTopPointerOver: Highlight;
+    --ComboBoxBorderBottomPointerOver: Highlight;
+    --ComboBoxBorderSidePressed: Highlight;
+    --ComboBoxBorderTopPressed: Highlight;
+    --ComboBoxBorderBottomPressed: Highlight;
+    --ComboBoxBorderSideDisabled: GrayText;
+    --ComboBoxBorderTopDisabled: GrayText;
+    --ComboBoxBorderBottomDisabled: GrayText;
     --ComboBoxDropDownForeground: CanvasText;
     --ComboBoxDropDownBorderBrush: CanvasText;
     --ComboBoxDropDownGlyphForeground: CanvasText;

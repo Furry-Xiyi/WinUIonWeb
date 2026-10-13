@@ -1,7 +1,7 @@
 // Default resource values from WinUI-Reference/controls/dev/TitleBar.
 export const titleBarResources: Readonly<Record<string, unknown>> = Object.freeze({
   TitleBarCompactHeight: 32,
-  TitleBarExpandedHeight: 48,
+  TitleBarExpandedHeight: 46,
   TitleBarBackButtonWidth: 40,
   TitleBarPaneToggleButtonWidth: 40,
   TitleBarLeftPaddingWidth: 2,

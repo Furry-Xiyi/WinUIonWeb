@@ -1,7 +1,8 @@
 <template>
+  <ToolTipService />
   <Grid class="titlebar-sample-window">
     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-    <TitleBar x:Name="titleBar" Title="{x:Bind Labels.title, Mode=OneWay}" Subtitle="{x:Bind Labels.subtitle, Mode=OneWay}">
+    <TitleBar x:Name="titleBar" PreferredHeightOption="Tall" IsCaptionButtonsVisible="True" CaptionButtonsFramework="Tauri" Title="{x:Bind Labels.title, Mode=OneWay}" Subtitle="{x:Bind Labels.subtitle, Mode=OneWay}">
       <TitleBar.Resources><HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment></TitleBar.Resources>
       <TitleBar.IconSource><ImageIconSource ImageSource="https://cdn.jsdelivr.net/gh/microsoft/WinUI-Gallery@main/WinUIGallery/Assets/Tiles/GalleryIcon.ico" /></TitleBar.IconSource>
       <TitleBar.Content>
@@ -46,6 +47,7 @@ import ScrollViewer from '../../../components/ScrollViewer.vue'
 import StackPanel from '../../../components/StackPanel.vue'
 import TextBlock from '../../../components/TextBlock.vue'
 import TitleBar from '../../../components/TitleBar.vue'
+import ToolTipService from '../../../components/ToolTipService.vue'
 import { ImageIconSource } from '../../../components/IconSource'
 import { XamlString } from '../../../components/inlineControlProperties'
 import { useI18n } from '../../../components/i18n/index'

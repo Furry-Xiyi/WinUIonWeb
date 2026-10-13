@@ -1,0 +1,185 @@
+{
+   "PdfProFile": {
+      "message": "การแปล PDF Pro ด้วย AI"
+   },
+   "babelDOC": {
+      "message": "BabelDOC แปล PDF พร้อมคงรูปแบบ"
+   },
+   "brandDescription": {
+      "message": "【Immersive Translate】ส่วนขยายแปลเว็บสองภาษาฟรี รองรับ PDF แบบคงรูปแบบ คำบรรยายสองภาษาใน YouTube/Netflix และ EPUB พร้อมโมเดล AI เช่น ChatGPT, DeepL และ Gemini"
+   },
+   "brandDescriptionForSafari": {
+      "message": "เว็บไซต์แปลฟรี แปล PDF และหนังสืออีบุ๊ก Epub แปลคำบรรยายวิดีโอแบบสองภาษา"
+   },
+   "brandName": {
+      "message": "Immersive Translate: แปลเว็บสองภาษา AI, PDF, วิดีโอ และการ์ตูน"
+   },
+   "closeSidePanel": {
+      "message": "ปิดแผงด้านข้าง"
+   },
+   "legacyShortcut_openAiWritingModal": {
+      "message": "[เลิกใช้แล้ว] เปิดหน้าต่าง AI Write"
+   },
+   "legacyShortcut_toggleMouseHoverTranslateDirectly": {
+      "message": "[เลิกใช้แล้ว] เปิดหรือปิดการแปลโดยตรงเมื่อวางเมาส์บนหน้าเว็บชั่วคราว"
+   },
+   "legacyShortcut_toggleOnlyTransation": {
+      "message": "[เลิกใช้แล้ว] สลับเป็น/ออกจากโหมดแสดงเฉพาะคำแปล"
+   },
+   "legacyShortcut_toggleSidePanel": {
+      "message": "[เลิกใช้แล้ว] เปิด/ปิดแผงด้านข้าง"
+   },
+   "legacyShortcut_toggleTranslatePage": {
+      "message": "[เลิกใช้แล้ว] แปลหน้าเว็บ/แสดงต้นฉบับ"
+   },
+   "legacyShortcut_toggleTranslateTheMainPage": {
+      "message": "[เลิกใช้แล้ว] แปลเฉพาะส่วนหลักของหน้า/แสดงข้อความต้นฉบับ"
+   },
+   "legacyShortcut_toggleTranslateTheWholePage": {
+      "message": "[เลิกใช้แล้ว] แปลทั้งหน้า/แสดงข้อความต้นฉบับ"
+   },
+   "legacyShortcut_toggleTranslateToThePageEndImmediately": {
+      "message": "[เลิกใช้แล้ว] แปลไปจนถึงท้ายหน้า/แสดงข้อความต้นฉบับ"
+   },
+   "legacyShortcut_toggleTranslationMask": {
+      "message": "[เลิกใช้แล้ว] สลับเอฟเฟกต์เบลอบนข้อความแปล (โหมดเรียนรู้) สำหรับหน้าปัจจุบัน"
+   },
+   "legacyShortcut_toggleVideoSubtitlePreTranslation": {
+      "message": "[เลิกใช้แล้ว] สลับให้ใช้การตั้งค่า Immersive Translate ก่อนสำหรับคำบรรยายสองภาษา"
+   },
+   "legacyShortcut_translateInputBox": {
+      "message": "[เลิกใช้แล้ว] แปลเนื้อหาในช่องป้อนข้อมูลปัจจุบัน"
+   },
+   "legacyShortcut_translateWithBing": {
+      "message": "[เลิกใช้แล้ว] แปลหน้าปัจจุบันด้วย Microsoft Translator ชั่วคราว"
+   },
+   "legacyShortcut_translateWithClaude": {
+      "message": "[เลิกใช้แล้ว] ใช้ Claude แปลหน้าเว็บปัจจุบันชั่วคราว"
+   },
+   "legacyShortcut_translateWithCustom1": {
+      "message": "[เลิกใช้แล้ว] ใช้บริการแปลแบบกำหนดเองชั่วคราวเพื่อแปลหน้าเว็บปัจจุบัน(1)"
+   },
+   "legacyShortcut_translateWithCustom2": {
+      "message": "[เลิกใช้แล้ว] ใช้บริการแปลแบบกำหนดเองชั่วคราวเพื่อแปลหน้าเว็บปัจจุบัน(2)"
+   },
+   "legacyShortcut_translateWithCustom3": {
+      "message": "[เลิกใช้แล้ว] ใช้บริการแปลแบบกำหนดเองชั่วคราวเพื่อแปลหน้าเว็บปัจจุบัน(3)"
+   },
+   "legacyShortcut_translateWithDeepL": {
+      "message": "[เลิกใช้แล้ว] แปลหน้าปัจจุบันด้วย DeepL ชั่วคราว"
+   },
+   "legacyShortcut_translateWithGemini": {
+      "message": "[เลิกใช้แล้ว] แปลหน้าปัจจุบันด้วย Gemini ชั่วคราว"
+   },
+   "legacyShortcut_translateWithGoogle": {
+      "message": "[เลิกใช้แล้ว] แปลหน้าปัจจุบันด้วย Google ชั่วคราว"
+   },
+   "legacyShortcut_translateWithOpenAI": {
+      "message": "[เลิกใช้แล้ว] แปลหน้าปัจจุบันด้วย OpenAI ชั่วคราว"
+   },
+   "legacyShortcut_translateWithTransmart": {
+      "message": "[เลิกใช้แล้ว] แปลหน้าปัจจุบันด้วย Tencent Translator ชั่วคราว"
+   },
+   "openAboutPage": {
+      "message": "เกี่ยวกับ/ข้อเสนอแนะ/สนับสนุน"
+   },
+   "openAiWritingModal": {
+      "message": "เปิดหน้าต่าง AI Write"
+   },
+   "openEbookBuilder": {
+      "message": "สร้างอีบุ๊ก EPUB แบบสองภาษา"
+   },
+   "openEbookViewer": {
+      "message": "อ่านอีบุ๊กในเครื่อง"
+   },
+   "openOptionsPage": {
+      "message": "เปิดหน้าการตั้งค่า"
+   },
+   "openSidePanel": {
+      "message": "เปิดแผงด้านข้าง"
+   },
+   "shortBrandName": {
+      "message": "Immersive Translate"
+   },
+   "textTranslate": {
+      "message": "แปลข้อความ"
+   },
+   "toggleMouseHoverTranslateDirectly": {
+      "message": "เปิดหรือปิดการแปลโดยตรงเมื่อวางเมาส์บนหน้าเว็บชั่วคราว"
+   },
+   "toggleOnlyTransation": {
+      "message": "สลับเป็น/ออกจากโหมดแสดงเฉพาะคำแปล"
+   },
+   "toggleSidePanel": {
+      "message": "เปิด/ปิดแผงด้านข้าง"
+   },
+   "toggleTranslatePage": {
+      "message": "แปลเป็น {targetLanguage}"
+   },
+   "toggleTranslatePageOfficialPage": {
+      "message": "แปลหน้าเว็บ/แสดงต้นฉบับ"
+   },
+   "toggleTranslateTheMainPage": {
+      "message": "แปลเฉพาะส่วนหลักของหน้า/แสดงข้อความต้นฉบับ"
+   },
+   "toggleTranslateTheWholePage": {
+      "message": "แปลทั้งหน้า/แสดงข้อความต้นฉบับ"
+   },
+   "toggleTranslateToThePageEndImmediately": {
+      "message": "แปลไปจนถึงท้ายหน้า/แสดงข้อความต้นฉบับ"
+   },
+   "toggleTranslationMask": {
+      "message": "สลับเอฟเฟกต์เบลอบนข้อความแปล (โหมดเรียนรู้) สำหรับหน้าปัจจุบัน"
+   },
+   "toggleVideoSubtitlePreTranslation": {
+      "message": "สลับให้ใช้การตั้งค่า Immersive Translate ก่อนสำหรับคำบรรยายสองภาษา"
+   },
+   "translateInputBox": {
+      "message": "แปลเนื้อหาในช่องป้อนข้อมูลปัจจุบัน"
+   },
+   "translateLocalHtmlFile": {
+      "message": "แปลไฟล์ HTML/txt"
+   },
+   "translateLocalPdfFile": {
+      "message": "แปลไฟล์ PDF ในเครื่อง"
+   },
+   "translateLocalSubtitleFile": {
+      "message": "แปลไฟล์คำบรรยายในเครื่อง"
+   },
+   "translateMangaMenuId": {
+      "message": "แปลภาพ/คืนค่าภาพ"
+   },
+   "translateText": {
+      "message": "แปล \"{text}\""
+   },
+   "translateWithBing": {
+      "message": "แปลหน้าปัจจุบันด้วย Microsoft Translator ชั่วคราว"
+   },
+   "translateWithClaude": {
+      "message": "ใช้ Claude แปลหน้าเว็บปัจจุบันชั่วคราว"
+   },
+   "translateWithCustom1": {
+      "message": "ใช้บริการแปลแบบกำหนดเองชั่วคราวเพื่อแปลหน้าเว็บปัจจุบัน(1)"
+   },
+   "translateWithCustom2": {
+      "message": "ใช้บริการแปลแบบกำหนดเองชั่วคราวเพื่อแปลหน้าเว็บปัจจุบัน(2)"
+   },
+   "translateWithCustom3": {
+      "message": "ใช้บริการแปลแบบกำหนดเองชั่วคราวเพื่อแปลหน้าเว็บปัจจุบัน(3)"
+   },
+   "translateWithDeepL": {
+      "message": "แปลหน้าปัจจุบันด้วย DeepL ชั่วคราว"
+   },
+   "translateWithGemini": {
+      "message": "แปลหน้าปัจจุบันด้วย Gemini ชั่วคราว"
+   },
+   "translateWithGoogle": {
+      "message": "แปลหน้าปัจจุบันด้วย Google ชั่วคราว"
+   },
+   "translateWithOpenAI": {
+      "message": "แปลหน้าปัจจุบันด้วย OpenAI ชั่วคราว"
+   },
+   "translateWithTransmart": {
+      "message": "แปลหน้าปัจจุบันด้วย Tencent Translator ชั่วคราว"
+   }
+}

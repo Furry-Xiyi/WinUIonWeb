@@ -1,0 +1,123 @@
+:root {
+  color-scheme: light dark;
+  --surface: rgba(0, 0, 0, 0.04);
+  --border: rgba(0, 0, 0, 0.08);
+  --sec-bg: rgba(0, 0, 0, 0.05);
+  --sec-hover: rgba(0, 0, 0, 0.1);
+  --text-color: #000000;
+  
+  /* 默认 Win11 兜底主题色，将被 JS 覆盖 */
+  --accent-base: #005FB8; 
+  --accent: var(--accent-base);
+  --accent-text: #FFFFFF;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 255, 255, 0.1);
+    --sec-bg: rgba(255, 255, 255, 0.08);
+    --sec-hover: rgba(255, 255, 255, 0.12);
+    --text-color: #FFFFFF;
+    
+    /* 
+      【完美复刻 WinUI 3 深色发光主题色】
+      使用 hwb 色彩空间混合 35% 的白色。
+      它会 100% 锁定原始色相（绝不偏色），同时按比例降低黑度、提升白度，
+      这与 WinUI 3 计算 Light2 衍生色的算法逻辑一致，能呈现出极佳的通透发亮质感！
+    */
+    --accent: color-mix(in hwb, var(--accent-base) 65%, white);
+    --accent-text: #000000;
+  }
+}
+
+body {
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  color: var(--text-color);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(10px);
+}
+.row { display: flex; justify-content: space-between; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 4px; }
+.label { font-size: 14px; font-weight: 500; }
+.desc { font-size: 12px; opacity: 0.7; }
+
+/* ======== WinUI Toggle Switch ======== */
+.switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--border); transition: .2s; border-radius: 20px;
+  border: 1px solid var(--border); box-sizing: border-box;
+}
+
+.slider:before {
+  position: absolute; content: "";
+  height: 12px; width: 12px; left: 3px; bottom: 3px;
+  background-color: var(--text-color); 
+  transition: .2s cubic-bezier(0.4, 0, 0.2, 1); 
+  border-radius: 50%; 
+}
+.switch:hover input:not(:checked) + .slider:before {
+  height: 14px; width: 14px; left: 2px; bottom: 2px;
+}
+.switch:active input:not(:checked) + .slider:before {
+  width: 15px; height: 12px; left: 3px; bottom: 3px;
+  border-radius: 6px; 
+}
+
+input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
+input:checked + .slider:before {
+  transform: translateX(20px);
+  background-color: var(--accent-text);
+}
+.switch:hover input:checked + .slider:before {
+  height: 14px; width: 14px; left: 2px; bottom: 2px;
+  transform: translateX(20px);
+}
+.switch:active input:checked + .slider:before {
+  width: 15px; height: 12px; left: 3px; bottom: 3px;
+  transform: translateX(17px);
+  border-radius: 6px;
+}
+
+/* ======== WinUI Number Input ======== */
+input[type=number] {
+  width: 80px; padding: 6px 11px; 
+  border: 1px solid var(--border);
+  border-bottom: 1px solid rgba(0,0,0,0.4); 
+  border-radius: 6px;
+  background: var(--surface); color: inherit; outline: none; font-family: inherit; text-align: center;
+  transition: background-color 0.2s, border-bottom-color 0.2s;
+}
+@media (prefers-color-scheme: dark) {
+  input[type=number] { border-bottom: 1px solid rgba(255,255,255,0.4); }
+}
+input[type=number]:hover {
+  background: var(--sec-hover);
+}
+input[type=number]:focus { 
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 5px;
+  background: var(--surface);
+}
+
+/* ======== WinUI Buttons ======== */
+button {
+  flex: 1; border: 1px solid var(--border); border-radius: 4px;
+  padding: 8px 16px; font-size: 14px; font-family: inherit; cursor: pointer; transition: 0.2s; font-weight: 500;
+}
+.btn-primary { 
+  background: var(--accent); color: var(--accent-text); border: none; 
+}
+/* WinUI 中主题色按钮的 Hover 是微暗处理 */
+.btn-primary:hover { background: color-mix(in srgb, var(--accent) 85%, black); }
+.btn-secondary { background: var(--sec-bg); color: inherit; }
+.btn-secondary:hover { background: var(--sec-hover); }

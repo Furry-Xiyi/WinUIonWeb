@@ -241,6 +241,7 @@ import { getCollectionProperty, getVNodeChildren } from './CollectionProperties'
 import { xamlResourceDictionaryKey } from './Page.vue'
 import { useAcrylicBrushStyle } from './AcrylicBrush'
 import { vAcrylicBrush } from './acrylicBrushVisual'
+import { attachSecondaryTouchScrollDuringDrag } from './pointerDragTouchScroll'
 import {
   materializeXamlVNode,
   resolveXamlHandler,
@@ -3392,6 +3393,7 @@ const onVisibilityChange = () => {
 }
 
 let globalListenersAttached = false
+let detachSecondaryTouchScroll: (() => void) | undefined
 
 onMounted(() => {
   const root = containerRef.value
@@ -3404,10 +3406,16 @@ onMounted(() => {
   document.addEventListener('keydown', onGlobalKeyDown, true)
   document.addEventListener('visibilitychange', onVisibilityChange)
   window.addEventListener('blur', cancelActiveInteractions)
+  detachSecondaryTouchScroll = attachSecondaryTouchScrollDuringDrag(
+    () => pointerDragActive.value,
+    () => pointerDrag.value?.pointerId
+  )
   globalListenersAttached = true
 })
 
 onBeforeUnmount(() => {
+  detachSecondaryTouchScroll?.()
+  detachSecondaryTouchScroll = undefined
   clearExpandTimer()
   if (globalListenersAttached) {
     document.removeEventListener('pointermove', onGlobalPointerMove)
@@ -3597,12 +3605,15 @@ defineExpose(treeViewApi)
 
     .win-tree-item.can-drag {
       cursor: grab;
-      /* Preserve vertical ScrollViewer panning. A deliberate horizontal move
-         (or press-and-hold) starts the Pointer drag path. */
-      touch-action: pan-y;
+      /* Reserve touch gestures for the Pointer drag path. If the browser is
+         allowed to pan vertically, it cancels the pointer before a held row
+         can be dragged. */
+      touch-action: none;
     }
 
     .win-tree-view.pointer-dragging .win-tree-item {
+      /* Keep browser panning from cancelling the captured drag pointer.
+         A secondary touch scrolls through pointerDragTouchScroll instead. */
       touch-action: none;
     }
 

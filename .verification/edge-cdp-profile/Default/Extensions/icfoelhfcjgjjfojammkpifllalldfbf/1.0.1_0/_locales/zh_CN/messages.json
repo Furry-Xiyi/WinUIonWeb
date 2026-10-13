@@ -1,0 +1,44 @@
+{
+   "btnIgnore": {
+      "message": "忽略"
+   },
+   "extName": {
+      "message": "惜忆下载管理器扩展设置"
+   },
+   "extensionDescription": {
+      "message": "拦截浏览器下载并发送到惜忆下载管理器"
+   },
+   "extensionName": {
+      "message": "惜忆下载管理器扩展"
+   },
+   "lblDesc": {
+      "message": "设为 0 将拦截所有下载"
+   },
+   "lblEnabled": {
+      "message": "启用下载拦截"
+   },
+   "lblSize": {
+      "message": "最小拦截大小 (MB)"
+   },
+   "promptGotIt": {
+      "message": "我知道了"
+   },
+   "promptLaunch": {
+      "message": "启动应用程序"
+   },
+   "promptNotInstalledDesc": {
+      "message": "未能在系统中找到“惜忆下载管理器”，请前往微软商店下载安装后重试。"
+   },
+   "promptNotInstalledTitle": {
+      "message": "未安装主程序"
+   },
+   "promptNotRunningDesc": {
+      "message": "“惜忆下载管理器”已安装但未运行。为了正常接管下载，请启动应用。"
+   },
+   "promptNotRunningTitle": {
+      "message": "程序未启动"
+   },
+   "promptStore": {
+      "message": "去商店安装"
+   }
+}

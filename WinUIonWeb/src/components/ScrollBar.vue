@@ -1,7 +1,7 @@
 <template>
   <div ref="root" v-bind="forwardedAttrs" class="win-scrollbar scrollbar" :class="[vertical ? 'scrollbar-vertical' : 'scrollbar-horizontal', { expanded: expanded, dragging: dragging, 'no-auto-hide': noAutoHide, 'no-indicator': indicator === 'None', 'touch-indicator': indicator === 'TouchIndicator', disabled: !enabled }]" :style="layoutStyle" role="scrollbar" :aria-orientation="vertical ? 'vertical' : 'horizontal'" :aria-valuemin="minimum" :aria-valuemax="maximum" :aria-valuenow="value" :aria-disabled="!enabled" :data-indicator-state="indicator" :data-conscious-state="expanded ? 'Expanded' : 'Collapsed'" @pointerenter="enter" @pointermove="activity" @pointerleave="leave" @wheel="wheel">
     <div class="scrollbar-mouse-root">
-      <div class="scrollbar-track" :style="trackBackgroundStyle" v-acrylic-brush="trackBackgroundStyle" @pointerdown="startTrack" />
+      <div class="scrollbar-track" :style="trackBackgroundStyle" v-acrylic-brush.host-backdrop="trackBackgroundStyle" @pointerdown="startTrack" />
       <button ref="decrease" class="scrollbar-button decrease" :class="{ 'is-pressed': pressed === -1 }" type="button" tabindex="-1" aria-hidden="true" :disabled="!enabled" @pointerdown="startArrow(-1, $event)">
         <FontIcon Glyph="{x:Bind DecreaseGlyph, Mode=OneWay}" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="{ThemeResource ScrollBarButtonArrowIconFontSize}" HorizontalAlignment="Center" VerticalAlignment="Center" />
       </button>
@@ -85,6 +85,7 @@ const enter = (e: PointerEvent) => { if (e.pointerType === 'touch') return; over
 const leave = () => { over.value = false; owner.onHover?.(orientation.value, false) }
 const begin = (e: PointerEvent) => {
   if (!enabled.value || e.button !== 0) return false
+  if (e.pointerType === 'touch') leave()
   stop(); activity(e); interacting.value = true; capture = { id: e.pointerId, node: e.currentTarget as HTMLElement }
   try { capture.node.setPointerCapture(e.pointerId) } catch { /* Cancellation ends the interaction below. */ }
   document.addEventListener('pointermove', move); document.addEventListener('pointerup', stop); document.addEventListener('pointercancel', stop)

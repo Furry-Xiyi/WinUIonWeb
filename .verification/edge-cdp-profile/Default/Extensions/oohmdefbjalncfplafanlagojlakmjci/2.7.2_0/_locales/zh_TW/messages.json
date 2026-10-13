@@ -1,0 +1,1052 @@
+{
+   "ADTSerror": {
+      "message": "找不到ADTS頭 可能是AES-128-ECB加密資源,暫不支援解密.請使用第三方合併軟體..."
+   },
+   "DRMerror": {
+      "message": "媒體有DRM保護, 請使用第三方工具下載."
+   },
+   "M3U8DLparameterLong": {
+      "message": "m3u8dl參數太長,可能導致無法喚醒m3u8DL, 請手動複製到m3u8DL下載"
+   },
+   "MQTT": {
+      "message": "MQTT"
+   },
+   "Script": {
+      "message": "腳本"
+   },
+   "about": {
+      "message": "關於"
+   },
+   "addParameters": {
+      "message": "新增參數"
+   },
+   "addRegex": {
+      "message": "新增正規則"
+   },
+   "addSettingParameters": {
+      "message": "加入設定參數"
+   },
+   "addSuffix": {
+      "message": "新增後綴"
+   },
+   "addType": {
+      "message": "新增類型"
+   },
+   "addTypeError": {
+      "message": "抓取類型格式錯誤，請檢查"
+   },
+   "addUrl": {
+      "message": "添加網址"
+   },
+   "address": {
+      "message": "地址"
+   },
+   "alert": {
+      "message": "提示"
+   },
+   "alertimport": {
+      "message": "導入完成"
+   },
+   "alwaysDisableCatCatcher": {
+      "message": "永遠不啟用貓抓下載器"
+   },
+   "alwaysSearch": {
+      "message": "始終開啟深度搜索"
+   },
+   "aria2Tip": {
+      "message": "非常優秀的下載工具 使用方法檢視"
+   },
+   "asc": {
+      "message": "昇冪"
+   },
+   "audio": {
+      "message": "音訊"
+   },
+   "audioOnly": {
+      "message": "只要音訊"
+   },
+   "autoClosePageAfterDownload": {
+      "message": "下載完自動關閉頁面"
+   },
+   "autoCloserDownload": {
+      "message": "下載完自動關閉頁面"
+   },
+   "autoDownM3u8Tip": {
+      "message": "點擊 下載按鈕 使用m3u8解析器立即開始合併下載"
+   },
+   "autoDownload": {
+      "message": "自動下載"
+   },
+   "autoSend": {
+      "message": "自動發送"
+   },
+   "autoSetRefererCookieParams": {
+      "message": "自動設定Referer cookie參數"
+   },
+   "badgeNumber": {
+      "message": "圖示上顯示數字角標"
+   },
+   "bitrate": {
+      "message": "碼率"
+   },
+   "blobM3u8DLError": {
+      "message": "blob位址無法呼叫m3u8DL下載"
+   },
+   "blockResource": {
+      "message": "屏蔽資源"
+   },
+   "blockResourceTip": {
+      "message": "封鎖不想出現的資源"
+   },
+   "blockUrl": {
+      "message": "封鎖網址"
+   },
+   "blockUrlTips": {
+      "message": "支持萬用字元*和？"
+   },
+   "cacheCapture": {
+      "message": "快取捕捉"
+   },
+   "catCatch": {
+      "message": "貓抓"
+   },
+   "clear": {
+      "message": "清空"
+   },
+   "clearCapturedData": {
+      "message": "清空抓取的資料"
+   },
+   "clearOption": {
+      "message": "刷新、跳到新頁面 清空目前標籤抓取的資料"
+   },
+   "close": {
+      "message": "關閉"
+   },
+   "closeCapture": {
+      "message": "關閉捕捉"
+   },
+   "closeDownload": {
+      "message": "關閉下載"
+   },
+   "closeRecording": {
+      "message": "關閉錄製"
+   },
+   "closeSearch": {
+      "message": "關閉搜尋"
+   },
+   "closeSimulation": {
+      "message": "關閉模擬"
+   },
+   "collapseAll": {
+      "message": "關閉展開"
+   },
+   "collapseAllNodes": {
+      "message": "折疊所有節點"
+   },
+   "confirm": {
+      "message": "確認"
+   },
+   "confirmDownload": {
+      "message": "共 $num$ 個文件，是否確認下載?",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "confirmLoading": {
+      "message": "共 $num$ 個資源，是否取消載入?",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "confirmParameters": {
+      "message": "確認參數"
+   },
+   "confirmReset": {
+      "message": "確認重設嗎？"
+   },
+   "connectingToMQTT": {
+      "message": "正在連接 MQTT 伺服器..."
+   },
+   "contextMenus": {
+      "message": "右鍵菜單"
+   },
+   "convertToM3U8": {
+      "message": "轉為m3u8解析"
+   },
+   "copiedToClipboard": {
+      "message": "已複製到剪貼簿"
+   },
+   "copy": {
+      "message": "複製"
+   },
+   "copyCommand": {
+      "message": "複製指令"
+   },
+   "copyTip": {
+      "message": "為方便使用第三方應用，自訂複製按鈕寫入剪貼簿的內容。"
+   },
+   "currentPage": {
+      "message": "當前頁面"
+   },
+   "customCSS": {
+      "message": "自訂CSS"
+   },
+   "customFilenameOption": {
+      "message": "使用自訂檔案名稱儲存檔案(預設為網頁標題)"
+   },
+   "customKeyPlaceholder": {
+      "message": "自訂 金鑰 16進位 或 base64 或 金鑰位址"
+   },
+   "customSaveFileName": {
+      "message": "自訂儲存檔案名稱"
+   },
+   "customVLCProtocol": {
+      "message": "自訂VLC協定"
+   },
+   "dataFetchFailed": {
+      "message": "資料獲取失敗"
+   },
+   "dataPreprocessing": {
+      "message": "資料預處理"
+   },
+   "decryptionError": {
+      "message": "解密錯誤"
+   },
+   "deepSearch": {
+      "message": "深度搜尋"
+   },
+   "default": {
+      "message": "預設"
+   },
+   "defaultPopup": {
+      "message": "默認彈出模式"
+   },
+   "delete": {
+      "message": "刪除"
+   },
+   "deleteDuplicateFilenames": {
+      "message": "删除重複檔名"
+   },
+   "desc": {
+      "message": "降冪"
+   },
+   "description": {
+      "message": "網頁媒體嗅探工具"
+   },
+   "disable": {
+      "message": "禁用"
+   },
+   "disableAll": {
+      "message": "全部停用"
+   },
+   "doNotClear": {
+      "message": "不清空"
+   },
+   "documentation": {
+      "message": "文檔"
+   },
+   "dopopup": {
+      "message": "popup"
+   },
+   "dopreview": {
+      "message": "preview"
+   },
+   "download": {
+      "message": "下載"
+   },
+   "downloadComplete": {
+      "message": "下載完成"
+   },
+   "downloadDir": {
+      "message": "下載目錄"
+   },
+   "downloadExistingData": {
+      "message": "下載已有資料"
+   },
+   "downloadFailed": {
+      "message": "下載失敗"
+   },
+   "downloadProgress": {
+      "message": "下載進度"
+   },
+   "downloadRange": {
+      "message": "下載範圍"
+   },
+   "downloadSegmentList": {
+      "message": "下載切片清單"
+   },
+   "downloadThreads": {
+      "message": "下載執行緒"
+   },
+   "downloadWhileSaving": {
+      "message": "邊下邊存"
+   },
+   "downloadWithRequestHeader": {
+      "message": "攜帶請求頭參數下載"
+   },
+   "downloaded": {
+      "message": "已下載"
+   },
+   "downloadedVideoLength": {
+      "message": "已下載影片長度"
+   },
+   "downloader": {
+      "message": "下載器"
+   },
+   "downloaderTip": {
+      "message": "如果偵測到資源下載失敗, 自動啟用下載器再次嘗試下載."
+   },
+   "duration": {
+      "message": "長度"
+   },
+   "enable": {
+      "message": "啟用"
+   },
+   "enableAll": {
+      "message": "全部啟用"
+   },
+   "encryptedHLS": {
+      "message": "加密HLS"
+   },
+   "encryptedSAMPLE": {
+      "message": "使用SAMPLE-AES-CTR加密的資源, 目前無法處理."
+   },
+   "encryptionAlgorithm": {
+      "message": "加密演算法"
+   },
+   "end": {
+      "message": "結束"
+   },
+   "estimateSize": {
+      "message": "估算大小"
+   },
+   "excludeDuplicateResources": {
+      "message": "排除重複的資源 (資源過多會佔用大量CPU)"
+   },
+   "exit": {
+      "message": "退出"
+   },
+   "expandAll": {
+      "message": "展開全部"
+   },
+   "expandAllNodes": {
+      "message": "展開所有節點"
+   },
+   "expandPlayable": {
+      "message": "展開可播放"
+   },
+   "expandSelected": {
+      "message": "展開所選"
+   },
+   "exportSettings": {
+      "message": "匯出設定"
+   },
+   "extension": {
+      "message": "擴充"
+   },
+   "extensionName": {
+      "message": "副檔名"
+   },
+   "extractSlices": {
+      "message": "提取切片"
+   },
+   "ffmpegIsNotReady": {
+      "message": "在線ffmpeg服務未就緒, 請稍後再試"
+   },
+   "ffmpegTranscoding": {
+      "message": "ffmpeg 轉碼"
+   },
+   "fileLoading": {
+      "message": "檔案載入"
+   },
+   "fileRetrievalFailed": {
+      "message": "文件取得失敗"
+   },
+   "fileSize": {
+      "message": "文件大小"
+   },
+   "fileTooLarge": {
+      "message": "檔案大於$size$ 無法使用線上ffmpeg, 正在下載合併檔案, 檔案較大請耐心等待",
+      "placeholders": {
+         "size": {
+            "content": "$1"
+         }
+      }
+   },
+   "fileTooLargeStream": {
+      "message": "文件大於 $size$ 是否啟用邊下邊存?",
+      "placeholders": {
+         "size": {
+            "content": "$1"
+         }
+      }
+   },
+   "filter": {
+      "message": "篩選"
+   },
+   "filterSize": {
+      "message": "過濾大小"
+   },
+   "flag": {
+      "message": "識別字"
+   },
+   "flagTip": {
+      "message": "i: 忽略大小寫, g: 全域搜尋。也可為空。"
+   },
+   "formatConversionError": {
+      "message": "格式轉換錯誤, 請取消mp4轉換, 重新下載."
+   },
+   "fullscreen": {
+      "message": "全螢幕"
+   },
+   "functionEntry": {
+      "message": "功能入口"
+   },
+   "getParameters": {
+      "message": "get參數"
+   },
+   "getTime": {
+      "message": "獲取時間"
+   },
+   "goBack": {
+      "message": "返回上一頁"
+   },
+   "hasSent": {
+      "message": "已發送"
+   },
+   "hevcPreviewTip": {
+      "message": "HEVC/H.265編碼切片檔案 不支援預覽"
+   },
+   "hevcTip": {
+      "message": "HEVC/H.265編碼切片檔案 只支援線上ffmpeg轉碼"
+   },
+   "hideDownloadedSegments": {
+      "message": "隱藏下載成功的切片"
+   },
+   "iconOption": {
+      "message": "顯示網站圖示"
+   },
+   "iframeFFmpeg": {
+      "message": "內嵌ffmpeg服務"
+   },
+   "importConfiguration": {
+      "message": "導入配置"
+   },
+   "incorrectKey": {
+      "message": "金鑰不正確"
+   },
+   "invertSelection": {
+      "message": "反選"
+   },
+   "invoke": {
+      "message": "呼叫"
+   },
+   "invokeApp": {
+      "message": "呼叫應用"
+   },
+   "invokeM3u8DL": {
+      "message": "呼叫m3u8DL"
+   },
+   "invokeProtocolTemplate": {
+      "message": "呼叫協定範本"
+   },
+   "isBlockedSite": {
+      "message": "該網站要求禁止運行本程式"
+   },
+   "jsonFormatter": {
+      "message": "JSON格式化"
+   },
+   "key": {
+      "message": "金鑰"
+   },
+   "keyAddress": {
+      "message": "金鑰位址"
+   },
+   "keyDownloadFailed": {
+      "message": "金鑰下載失敗"
+   },
+   "liveHLS": {
+      "message": "直播HLS"
+   },
+   "loading": {
+      "message": "載入中..."
+   },
+   "loadingData": {
+      "message": "資料載入..."
+   },
+   "localM3u8": {
+      "message": "本地m3u8"
+   },
+   "loop": {
+      "message": "循環"
+   },
+   "m3u8DLTips": {
+      "message": "非常優秀的m3u8 mpd第三方下載工具 使用方法查看"
+   },
+   "m3u8Error": {
+      "message": "解析或播放m3u8檔案中有錯誤, 詳細錯誤訊息檢視控制台"
+   },
+   "m3u8Info": {
+      "message": "共 $num$ 個檔案, 總長度 $time$",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         },
+         "time": {
+            "content": "$2"
+         }
+      }
+   },
+   "m3u8Parser": {
+      "message": "M3U8解析器"
+   },
+   "m3u8Placeholder": {
+      "message": "請輸入m3u8連結 / m3u8內容 / 切片清單 / $${range}標籤"
+   },
+   "m3u8Playlist": {
+      "message": "m3u8播放清單"
+   },
+   "m3u8Url": {
+      "message": "m3u8位址"
+   },
+   "manualSend": {
+      "message": "手動發送"
+   },
+   "match": {
+      "message": "匹配"
+   },
+   "mediaControl": {
+      "message": "媒體控制"
+   },
+   "mergeDownloads": {
+      "message": "合併下載"
+   },
+   "merging": {
+      "message": "合併中"
+   },
+   "messageSentToMQTT": {
+      "message": "已發送訊息到 MQTT 伺服器"
+   },
+   "moreFeatures": {
+      "message": "更多功能"
+   },
+   "moreFrequent": {
+      "message": "更頻繁"
+   },
+   "mp4Format": {
+      "message": "mp4格式"
+   },
+   "mpdParser": {
+      "message": "MPD解析器"
+   },
+   "mqttBroker": {
+      "message": "MQTT代理位址"
+   },
+   "mqttBrokerHelp": {
+      "message": "MQTT代理的主機名稱或IP位址"
+   },
+   "mqttClientId": {
+      "message": "客戶端ID"
+   },
+   "mqttClientIdHelp": {
+      "message": "此連線的唯一客戶端識別碼"
+   },
+   "mqttCredentialsHelp": {
+      "message": "如不需要認證，請留空使用者名稱和密碼"
+   },
+   "mqttDataFormat": {
+      "message": "資料格式"
+   },
+   "mqttDataFormatDefault": {
+      "message": "留空則使用預設JSON格式"
+   },
+   "mqttDataFormatHelp": {
+      "message": "{\"url\": \"$${url}\", \"title\": \"$${title}\", \"type\": \"$${type}\", \"ext\": \"$${ext}\", \"timestamp\": \"$${timestamp}\"}"
+   },
+   "mqttDataFormatVars": {
+      "message": "可用變數"
+   },
+   "mqttPassword": {
+      "message": "密碼"
+   },
+   "mqttPath": {
+      "message": "路徑"
+   },
+   "mqttPathHelp": {
+      "message": "WebSocket路徑 (通常為/mqtt或/ws)"
+   },
+   "mqttProtocol": {
+      "message": "通訊協定"
+   },
+   "mqttProtocolWs": {
+      "message": "WS (非安全)"
+   },
+   "mqttProtocolWss": {
+      "message": "WSS (安全)"
+   },
+   "mqttQos": {
+      "message": "QoS級別"
+   },
+   "mqttQos0": {
+      "message": "0(最多一次)"
+   },
+   "mqttQos1": {
+      "message": "1(至少一次)"
+   },
+   "mqttQos2": {
+      "message": "2(確保一次)"
+   },
+   "mqttQosHelp": {
+      "message": "服務品質級別 (0=最多一次, 1=至少一次, 2=確保一次)"
+   },
+   "mqttTitleLength": {
+      "message": "標題最大長度"
+   },
+   "mqttTitleLengthHelp": {
+      "message": "MQTT訊息中標題的最大長度"
+   },
+   "mqttTopic": {
+      "message": "主題"
+   },
+   "mqttTopicHelp": {
+      "message": "發佈訊息的MQTT主題"
+   },
+   "mqttUsername": {
+      "message": "使用者名稱"
+   },
+   "multipleAudios": {
+      "message": "多個音訊"
+   },
+   "multipleAudiosTip": {
+      "message": "該m3u8檔中嵌套多個音訊"
+   },
+   "multipleSubtitles": {
+      "message": "多個字幕"
+   },
+   "multipleSubtitlesTip": {
+      "message": "該m3u8檔中嵌套多個字幕"
+   },
+   "multiplier": {
+      "message": "倍數:"
+   },
+   "mute": {
+      "message": "靜音"
+   },
+   "newDownloader": {
+      "message": "新下載器"
+   },
+   "nextLevel": {
+      "message": "下一級檔案"
+   },
+   "nextLevelTip": {
+      "message": "該m3u8檔中嵌套多個m3u8檔"
+   },
+   "noAudio": {
+      "message": "無音訊"
+   },
+   "noControllableMediaDetected": {
+      "message": "未偵測到可操控媒體"
+   },
+   "noData": {
+      "message": "還沒聞到味兒~"
+   },
+   "noKeyIsRequired": {
+      "message": "不需要金鑰"
+   },
+   "noMatch": {
+      "message": "不匹配"
+   },
+   "noMediaDetected": {
+      "message": "未偵測到有媒體的網頁"
+   },
+   "noVideo": {
+      "message": "無視訊"
+   },
+   "normalClear": {
+      "message": "正常清理"
+   },
+   "normalPlay": {
+      "message": "正常播放"
+   },
+   "onlineFFmpeg": {
+      "message": "在線ffmpeg服務"
+   },
+   "onlineMerge": {
+      "message": "線上合併"
+   },
+   "onlineServiceAddress": {
+      "message": "在線服務地址"
+   },
+   "openDir": {
+      "message": "開啟下載目錄"
+   },
+   "openDownloaderPageInBackground": {
+      "message": "後台開啟下載器頁面"
+   },
+   "openInBgDownload": {
+      "message": "後台開啟下載器頁面"
+   },
+   "operation": {
+      "message": "操作"
+   },
+   "option": {
+      "message": "選項"
+   },
+   "originalM3u8": {
+      "message": "原始m3u8"
+   },
+   "otherFeatures": {
+      "message": "其他功能"
+   },
+   "otherFiles": {
+      "message": "其他文件"
+   },
+   "otherPage": {
+      "message": "其他頁面"
+   },
+   "otherSettings": {
+      "message": "其他設定"
+   },
+   "parameter": {
+      "message": "參數"
+   },
+   "parameterSetting": {
+      "message": "參數設定"
+   },
+   "parser": {
+      "message": "解析"
+   },
+   "pause": {
+      "message": "暫停"
+   },
+   "pictureInPicture": {
+      "message": "畫中畫"
+   },
+   "play": {
+      "message": "播放"
+   },
+   "popup": {
+      "message": "彈出"
+   },
+   "possibleKey": {
+      "message": "尋找到疑似金鑰"
+   },
+   "preview": {
+      "message": "影片"
+   },
+   "previewCommand": {
+      "message": "預覽指令"
+   },
+   "previewMode": {
+      "message": "使用本機播放器呼叫協定開啟影片預覽"
+   },
+   "previewModePlaceholder": {
+      "message": "留空為不啟用 預設使用popup頁面預覽影片"
+   },
+   "realKeyNotFound": {
+      "message": "未找到真實密鑰"
+   },
+   "recordLive": {
+      "message": "錄音直播"
+   },
+   "recordWebRTC": {
+      "message": "錄製webRTC"
+   },
+   "recordingDuration": {
+      "message": "錄製時間"
+   },
+   "redownloadFailedItems": {
+      "message": "重下失敗項目"
+   },
+   "regex": {
+      "message": "正規"
+   },
+   "regexExpression": {
+      "message": "正規表示式"
+   },
+   "regexMatch": {
+      "message": "正規符合"
+   },
+   "regexSuffixTip": {
+      "message": "為取得到的URL指定一個後綴名, 可留空，會自動截取後綴名(很多檔案並不存在後綴名)"
+   },
+   "regexTest": {
+      "message": "正規測試"
+   },
+   "regexTip": {
+      "message": "正規表示式佔用資源較高, 非必要謹慎使用"
+   },
+   "regexTitle": {
+      "message": "正規表示式匹配 或 來自深度搜尋"
+   },
+   "regularFilterPlaceholder": {
+      "message": "正規篩選 匹配資源url 回車確認"
+   },
+   "removeFailedPreviewFiles": {
+      "message": "移除無法預覽的檔案"
+   },
+   "replaceKeywordList": {
+      "message": "替換關鍵字清單"
+   },
+   "replaceTags": {
+      "message": "替換標籤"
+   },
+   "requestBody": {
+      "message": "請求體"
+   },
+   "requestHeaders": {
+      "message": "請求頭"
+   },
+   "requestMethod": {
+      "message": "請求管道"
+   },
+   "resetAllSettings": {
+      "message": "重置所有設定"
+   },
+   "resetCopySettings": {
+      "message": "重設複製設定"
+   },
+   "resetOtherSettings": {
+      "message": "重設其他設定"
+   },
+   "resetSettings": {
+      "message": "重置設定"
+   },
+   "resolution": {
+      "message": "解析度"
+   },
+   "restartExtension": {
+      "message": "重啟擴充"
+   },
+   "restoreGetParameters": {
+      "message": "還原get參數"
+   },
+   "result": {
+      "message": "結果"
+   },
+   "retryCount": {
+      "message": "重試次數"
+   },
+   "retryDownload": {
+      "message": "重新下載"
+   },
+   "retryingDownload": {
+      "message": "正在重新下載"
+   },
+   "reverse": {
+      "message": "倒序排列"
+   },
+   "runningCannotChangeSettings": {
+      "message": "正在運作, 不能更改設定"
+   },
+   "sNumError": {
+      "message": "序號錯誤"
+   },
+   "sNumMax": {
+      "message": "序號最大不能超過 $num$",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "save": {
+      "message": "儲存"
+   },
+   "saveAs": {
+      "message": "另存為"
+   },
+   "saveAsOption": {
+      "message": "下載完選擇儲存目錄"
+   },
+   "saveFailed": {
+      "message": "儲存失敗"
+   },
+   "savePrompt": {
+      "message": "已儲存至硬碟, 請檢視瀏覽器已下載內容"
+   },
+   "saving": {
+      "message": "正在儲存"
+   },
+   "screenCapture": {
+      "message": "螢幕捕捉"
+   },
+   "screenshot": {
+      "message": "截圖"
+   },
+   "searchingForRealKey": {
+      "message": "尋找真實密鑰"
+   },
+   "secretKey": {
+      "message": "金鑰"
+   },
+   "segmentList": {
+      "message": "切片清單"
+   },
+   "selectAll": {
+      "message": "全選"
+   },
+   "selectAudio": {
+      "message": "選擇音訊"
+   },
+   "selectMedia": {
+      "message": "選擇媒體:"
+   },
+   "selectVideo": {
+      "message": "選擇影片"
+   },
+   "selectWebpage": {
+      "message": "選擇頁面:"
+   },
+   "send2MQTT": {
+      "message": "傳送到 MQTT"
+   },
+   "send2local": {
+      "message": "數據發送"
+   },
+   "send2localTips": {
+      "message": "在發送前合併數據？點擊【確定】合併，或點擊【取消】逐條發送。"
+   },
+   "sendFailed": {
+      "message": "發送失敗"
+   },
+   "sendFfmpeg": {
+      "message": "發送到線上ffmpeg"
+   },
+   "sendingMessageToMQTT": {
+      "message": "正在發送訊息到 MQTT 伺服器..."
+   },
+   "sendingToMQTT": {
+      "message": "正在傳送到 MQTT 伺服器..."
+   },
+   "setRequestHeaders": {
+      "message": "設定請求頭"
+   },
+   "setWhiteList": {
+      "message": "設定為白名單"
+   },
+   "settings": {
+      "message": "設定"
+   },
+   "sideurlprotocol": {
+      "message": "m3u8dl 自訂協定"
+   },
+   "simulateMobile": {
+      "message": "模擬手機"
+   },
+   "skipDecryption": {
+      "message": "跳過解密"
+   },
+   "sort": {
+      "message": "排序"
+   },
+   "speedPlayback": {
+      "message": "倍速播放"
+   },
+   "start": {
+      "message": "開始"
+   },
+   "startGTend": {
+      "message": "開始序號不能大於結束序號"
+   },
+   "stopDownload": {
+      "message": "停止下載"
+   },
+   "stopRecording": {
+      "message": "停止錄製"
+   },
+   "streamOnbeforeunload": {
+      "message": "正在推流, 關閉後停止下載..."
+   },
+   "streamSaverTip": {
+      "message": "邊下邊存功能 不支援ffmpeg線上轉換格式 不支援錯誤切片重下 不支援另存為"
+   },
+   "suffix": {
+      "message": "後綴"
+   },
+   "suffixTip": {
+      "message": "填入不含'.'的字尾, 不過濾大小填0"
+   },
+   "systemShare": {
+      "message": "系統分享"
+   },
+   "test": {
+      "message": "測試"
+   },
+   "title": {
+      "message": "標題"
+   },
+   "titleDownload": {
+      "message": "貓抓 下載器"
+   },
+   "titleJson": {
+      "message": "貓抓 json格式化"
+   },
+   "titleM3U8": {
+      "message": "貓抓 M3U8解析器"
+   },
+   "titleOption": {
+      "message": "貓抓 設定"
+   },
+   "titledash": {
+      "message": "貓抓 dash解析器"
+   },
+   "type": {
+      "message": "類型"
+   },
+   "typeTip": {
+      "message": "填入正確的content-type型別, 不過濾大小填0"
+   },
+   "unknownSize": {
+      "message": "未知大小"
+   },
+   "uploadKey": {
+      "message": "上傳金鑰"
+   },
+   "useSidePanel": {
+      "message": "使用側邊欄"
+   },
+   "userAgentTip": {
+      "message": "留空預設為目前瀏覽器 User Agent"
+   },
+   "verifying": {
+      "message": "驗證中"
+   },
+   "video": {
+      "message": "影片"
+   },
+   "videoRecording": {
+      "message": "錄影"
+   },
+   "viewSlices": {
+      "message": "查看所有切片和下載進度"
+   },
+   "volume": {
+      "message": "音 量"
+   },
+   "waitDownload": {
+      "message": "等待下載..."
+   },
+   "waitingForLiveData": {
+      "message": "等待直播資料"
+   },
+   "waitingForMedia": {
+      "message": "等待接收媒體檔案...請勿關閉本頁..."
+   },
+   "wildcards": {
+      "message": "萬用字元"
+   },
+   "winpopup": {
+      "message": "window popup"
+   },
+   "winpreview": {
+      "message": "window preview"
+   },
+   "withinChina": {
+      "message": "中國境內"
+   }
+}

@@ -10,6 +10,7 @@ import { TabViewTemplateToolTip } from './tabViewToolTip'
 import { getToolTipServiceProperty, ToolTipServiceToolTip } from './ToolTipServiceProperties'
 import ToolTip from './ToolTip.vue'
 import { pivotTemplate } from './PivotProperties'
+import { isHoverPointer } from './pointerInput'
 import Viewbox from './Viewbox.vue'
 import { useI18n } from './i18n/index'
 import { frameworkLayoutStyle } from './frameworkLayout'
@@ -152,9 +153,9 @@ Object.defineProperty(publicApi, 'ContentTemplate', { enumerable: true, configur
 const select = () => { if (enabled.value) owner?.Select(key()) }
 const pointerDown = (event: PointerEvent) => {
   if (!enabled.value || (event.target as HTMLElement)?.closest('.win-tab-view-close-button')) return
-  if (event.button === 0) { pressed.value = true; owner?.PointerDown(event, key()) }
+  if (event.button === 0) { pressed.value = true; if (!isHoverPointer(event)) hovered.value = false; owner?.PointerDown(event, key()) }
 }
-const pointerUp = (event: PointerEvent) => { pressed.value = false; if (event.button === 1 && closable.value && hovered.value) { event.preventDefault(); owner?.Close(key()) } }
+const pointerUp = (event: PointerEvent) => { pressed.value = false; if (!isHoverPointer(event)) hovered.value = false; if (event.button === 1 && closable.value && hovered.value) { event.preventDefault(); owner?.Close(key()) } }
 const keyDown = (event: KeyboardEvent) => { if (!enabled.value) return; if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select() }; owner?.KeyDown(event, key()) }
 const contextMenu = async (event: MouseEvent) => {
   const flyout = contextFlyout.value ?? property('ContextFlyout') as { ShowAt?: (target: unknown, options?: unknown) => unknown } | null
@@ -174,7 +175,7 @@ defineExpose(publicApi)
     :style="[attrs.style, rootStyle]" role="tab" :tabindex="enabled && property('IsTabStop') !== false ? owner?.TabIndex(key()) ?? 0 : -1"
     :aria-selected="selected" :aria-disabled="!enabled" :aria-controls="owner?.PanelId(key())" :accesskey="tabViewText(property('AccessKey')) || undefined"
     :draggable="enabled && owner?.CanDrag()" data-part="LayoutRoot" :data-visual-state="visualState" :data-drag-state="owner?.Dragging(key()) ? owner?.IsNativeDrag() ? 'Dragging' : 'Reordering' : 'NotDragging'"
-    @click="select" @keydown="keyDown" @focus="owner?.SetFocused(key())" @contextmenu="contextMenu" @pointerenter="hovered = true" @pointerleave="hovered = false; pressed = false"
+    @click="select" @keydown="keyDown" @focus="owner?.SetFocused(key())" @contextmenu="contextMenu" @pointerenter="hovered = isHoverPointer($event)" @pointerleave="hovered = false; pressed = false"
     @pointerdown="pointerDown" @pointerup="pointerUp" @pointercancel="pressed = false" @lostpointercapture="pressed = false"
     @auxclick.prevent @dragstart="owner?.DragStart($event, key())" @dragend="owner?.DragEnd($event)">
     <div class="win-tab-view-bottom-border-line" data-part="BottomBorderLine"></div>

@@ -23,7 +23,8 @@
     @focusout="AnimatedGlyphInput.LostFocus">
     <ContentPresenter v-if="resolvedHeader" x:Name="HeaderContentPresenter" class="win-combo-header" Content="{x:Bind resolvedHeader, Mode=OneWay}" ContentTemplate="{x:Bind resolvedHeaderTemplate, Mode=OneWay}" Margin="{ThemeResource ComboBoxTopHeaderMargin}" Foreground="{ThemeResource ComboBoxHeaderForeground}" VerticalAlignment="Top" />
 
-    <div v-if="resolvedIsEditable" ref="backgroundRef" class="win-combo-editable">
+    <div v-if="resolvedIsEditable" ref="backgroundRef" class="win-combo-editable" :class="{ 'is-editing': isEditing }">
+      <span v-if="isEditing" class="win-combo-background" aria-hidden="true" />
       <button
         v-if="!isEditing"
         class="win-combo-btn win-combo-edit-display"
@@ -121,11 +122,12 @@
           'edge-square-bottom': resolvedIsEditable && openedUp
         }]"
         :style="[flyoutStyle, dropDownBackgroundStyle]"
-        v-acrylic-brush="dropDownBackgroundStyle"
+        v-acrylic-brush.host-backdrop="dropDownBackgroundStyle"
         v-theme-shadow="{ Translation: 32, Enabled: defaultShadowEnabled }"
         role="listbox"
         @keydown="onFlyoutKeyDown"
-        @pointerdown.stop>
+        @pointerdown.stop="onFlyoutPointerDown"
+        @pointerleave="onFlyoutPointerLeave">
         <div
           class="win-combo-flyout-hit-root"
           @pointermove="onFlyoutPointerMove"
@@ -149,7 +151,7 @@
               :key="getItemKey(item, index)"
               :ref="(element) => setItemRef(element, index)"
               class="win-combo-item"
-              :class="{ selected: visualSelectedIndex === index, hovered: hoveredIndex === index, 'is-disabled': !IsItemEnabled(item) }"
+              :class="{ selected: visualSelectedIndex === index, hovered: isFlyoutAnimating && hoveredIndex === index, 'is-disabled': !IsItemEnabled(item) }"
               type="button"
               role="option"
               :aria-selected="currentSelectedIndex === index"
@@ -158,7 +160,9 @@
               :tabindex="currentSelectedIndex === index ? 0 : -1"
               @click="select(index)">
               <span class="win-combo-item-layout">
-                <span v-if="visualSelectedIndex === index" class="win-combo-item-pill"></span>
+                <svg v-if="visualSelectedIndex === index" class="win-combo-item-pill" width="3" height="16" viewBox="0 0 3 16" aria-hidden="true" focusable="false">
+                  <rect width="3" height="16" rx="1.5" fill="currentColor" />
+                </svg>
                 <ContentPresenter class="win-combo-item-content" Margin="{ThemeResource ComboBoxItemThemePadding}" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                   <ItemRenderer v-if="hasItemTemplate" :item="item" :index="index" />
                   <InlineItemRenderer v-else :item="item" />
@@ -175,6 +179,7 @@
         :style="flyoutStyle"
         @pointerdown.stop
         @pointermove="onFlyoutPointerMove"
+        @pointerleave="onFlyoutPointerLeave"
         @click="onFlyoutClick" />
     </Teleport>
   </div>
@@ -594,6 +599,12 @@ const rootStyle = computed(() => {
   style.justifySelf = alignment(resolveXamlValue(props.HorizontalAlignment, instance), 'horizontal');
   if (resolveXamlValue(props.HorizontalAlignment, instance) === 'Stretch' && resolvedWidth.value === '') style.width = '100%';
   for (const name of ['Background', 'Foreground', 'BorderBrush']) if (props[name]) style[`--ComboBox${name}`] = resolveXamlValue(props[name], instance);
+  const borderBrush = resolveXamlValue(props.BorderBrush, instance);
+  if (borderBrush !== undefined && borderBrush !== null && typeof borderBrush !== 'object' && !/gradient\(/i.test(String(borderBrush))) {
+    style['--ComboBoxBorderSide'] = String(borderBrush);
+    style['--ComboBoxBorderTop'] = String(borderBrush);
+    style['--ComboBoxBorderBottom'] = String(borderBrush);
+  }
   if (backgroundBrush.value.value && typeof backgroundBrush.value.value !== 'object') style['--ComboBoxBackground'] = backgroundBrush.value.value;
   if (props.PlaceholderForeground) style['--ComboBoxPlaceHolderForeground'] = resolveXamlValue(props.PlaceholderForeground, instance);
   style['--ComboBoxBorderThemeThickness'] = xamlThickness(resolveXamlValue(props.BorderThickness, instance));
@@ -779,7 +790,9 @@ const ObserveAnchorTheme = () => {
   if (!themeScope) return;
 
   themeObserver = new MutationObserver(() => {
-    anchorTheme.value = ResolveAnchorTheme();
+    const nextTheme = ResolveAnchorTheme();
+    if (nextTheme === anchorTheme.value) return;
+    anchorTheme.value = nextTheme;
     schedulePositionFlyout();
   });
   themeObserver.observe(themeScope, { attributes: true, attributeFilter: ['class', 'data-theme'] });
@@ -1033,7 +1046,7 @@ const positionFlyout = async () => {
 
   const maximumDropDownHeight = Math.min(resolvedMaxDropDownHeight.value, rootWindowSize.Height);
   const touchInput = inputDeviceTypeUsedToOpen.value === 'Touch';
-  const popupContentMargin = touchInput ? { Top: 0, Bottom: 0 } : ComboBoxDropdownContentMargin;
+  const popupContentMargin = ComboBoxDropdownContentMargin;
   const popupMinWidth = Math.max(touchInput ? 240 : 80, comboBoxRect.width);
   flyoutReady.value = false;
   flyoutStyle.value = {
@@ -1209,6 +1222,7 @@ const toggleEditableDropDown = () => {
 
 const select = (index) => {
   if (!resolvedIsEnabled.value || !IsItemEnabled(resolvedItemsSource.value[index])) return;
+  hoveredIndex.value = -1;
   SetSelectedIndex(index);
   isEditing.value = false;
   close();
@@ -1228,8 +1242,21 @@ const itemIndexAtPoint = (event) => {
 };
 
 const onFlyoutPointerMove = (event) => {
+  if (event.pointerType === 'touch') { hoveredIndex.value = -1; return; }
   const index = itemIndexAtPoint(event);
   hoveredIndex.value = index;
+};
+const onFlyoutPointerLeave = () => { hoveredIndex.value = -1; };
+const onFlyoutPointerDown = (event) => { if (event.pointerType === 'touch') hoveredIndex.value = -1; };
+const onDocumentPointerMove = (event) => {
+  if (!isOpen.value || event.pointerType === 'touch') {
+    if (event.pointerType === 'touch') hoveredIndex.value = -1;
+    return;
+  }
+  const target = event.target;
+  const inFlyout = flyoutRef.value?.contains(target)
+    || (target instanceof Element && target.closest('.win-combo-flyout-hit-overlay'));
+  hoveredIndex.value = inFlyout ? itemIndexAtPoint(event) : -1;
 };
 
 const onFlyoutClick = (event) => {
@@ -1609,6 +1636,7 @@ onMounted(() => {
   window.addEventListener('resize', schedulePositionFlyout);
   window.addEventListener('scroll', onWindowScroll, true);
   document.addEventListener('pointerdown', onDocumentPointerDown);
+  document.addEventListener('pointermove', onDocumentPointerMove, true);
   nextTick(() => {
     // Vue's case-insensitive emit diagnostic mistakes official Loaded for
     // an in-DOM listener. Dispatch the canonical handler without lowercasing.
@@ -1626,6 +1654,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', schedulePositionFlyout);
   window.removeEventListener('scroll', onWindowScroll, true);
   document.removeEventListener('pointerdown', onDocumentPointerDown);
+  document.removeEventListener('pointermove', onDocumentPointerMove, true);
   if (positionFrame) window.cancelAnimationFrame(positionFrame);
 });
 
@@ -1685,14 +1714,20 @@ defineExpose(controlSender);
   outline: none;
   transition: none;
   --ComboBoxBorderCurrent: var(--ComboBoxBorderBrush);
+  --ComboBoxBorderSideCurrent: var(--ComboBoxBorderSide);
+  --ComboBoxBorderTopCurrent: var(--ComboBoxBorderTop);
+  --ComboBoxBorderBottomCurrent: var(--ComboBoxBorderBottom);
   --ComboBoxBackgroundCurrent: var(--ComboBoxBackground);
   --ComboBoxPlaceholderCurrent: var(--ComboBoxPlaceHolderForeground);
 }
-.win-combo-background { position: absolute; inset: 0; border: var(--ComboBoxBorderThemeThickness, 1px) solid transparent; border-radius: inherit; background: var(--ComboBoxBackgroundCurrent); background-clip: padding-box; pointer-events: none; }
-.win-combo-btn::after { content: ''; position: absolute; inset: 0; padding: var(--ComboBoxBorderThemeThickness, 1px); border-radius: inherit; background: var(--ComboBoxBorderCurrent); pointer-events: none; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; }
+.win-combo-background { position: absolute; inset: 0; box-sizing: border-box; border: var(--ComboBoxBorderThemeThickness, 1px) solid transparent; border-radius: inherit; background: var(--ComboBoxBackgroundCurrent); background-clip: padding-box; pointer-events: none; }
+.win-combo-btn::after { content: ''; position: absolute; inset: 0; box-sizing: border-box; border-style: solid; border-width: var(--ComboBoxBorderThemeThickness, 1px); border-color: var(--ComboBoxBorderSideCurrent); border-top-color: var(--ComboBoxBorderTopCurrent); border-bottom-color: var(--ComboBoxBorderBottomCurrent); border-radius: inherit; pointer-events: none; }
 
 .win-combo-btn:hover {
   --ComboBoxBorderCurrent: var(--ComboBoxBorderBrushPointerOver);
+  --ComboBoxBorderSideCurrent: var(--ComboBoxBorderSidePointerOver);
+  --ComboBoxBorderTopCurrent: var(--ComboBoxBorderTopPointerOver);
+  --ComboBoxBorderBottomCurrent: var(--ComboBoxBorderBottomPointerOver);
   --ComboBoxPlaceholderCurrent: var(--ComboBoxPlaceHolderForegroundPointerOver);
   --ComboBoxBackgroundCurrent: var(--ComboBoxBackgroundPointerOver);
   color: var(--ComboBoxForegroundPointerOver, var(--text-primary));
@@ -1700,6 +1735,9 @@ defineExpose(controlSender);
 
 .win-combo-btn:active {
   --ComboBoxBorderCurrent: var(--ComboBoxBorderBrushPressed);
+  --ComboBoxBorderSideCurrent: var(--ComboBoxBorderSidePressed);
+  --ComboBoxBorderTopCurrent: var(--ComboBoxBorderTopPressed);
+  --ComboBoxBorderBottomCurrent: var(--ComboBoxBorderBottomPressed);
   --ComboBoxPlaceholderCurrent: var(--ComboBoxPlaceHolderForegroundPressed);
   --ComboBoxBackgroundCurrent: var(--ComboBoxBackgroundPressed);
   color: var(--ComboBoxForegroundPressed, var(--text-secondary));
@@ -1707,6 +1745,9 @@ defineExpose(controlSender);
 
 .win-combo-btn:disabled {
   --ComboBoxBorderCurrent: var(--ComboBoxBorderBrushDisabled);
+  --ComboBoxBorderSideCurrent: var(--ComboBoxBorderSideDisabled);
+  --ComboBoxBorderTopCurrent: var(--ComboBoxBorderTopDisabled);
+  --ComboBoxBorderBottomCurrent: var(--ComboBoxBorderBottomDisabled);
   --ComboBoxPlaceholderCurrent: var(--ComboBoxPlaceHolderForegroundDisabled);
   --ComboBoxBackgroundCurrent: var(--ComboBoxBackgroundDisabled);
   color: var(--ComboBoxForegroundDisabled, var(--text-disabled));
@@ -1728,12 +1769,17 @@ defineExpose(controlSender);
 .win-combo-btn:focus-visible::before {
   opacity: 1;
 }
+html.winui-touch-input .win-combo-btn:focus-visible::before {
+  /* ComboBox PointerFocused does not show the keyboard HighlightBackground. */
+  opacity: 0;
+}
 
 .win-combo-box.is-drop-down-open .win-combo-btn::before {
   opacity: 0;
 }
 .win-combo-focus-pill { position: absolute; top: 50%; left: 1px; width: 3px; height: 16px; border-radius: 1.5px; background: var(--ComboBoxItemPillFillBrush); transform: translateY(-50%); opacity: 0; pointer-events: none; }
 .win-combo-btn:focus-visible .win-combo-focus-pill { opacity: 1; }
+html.winui-touch-input .win-combo-btn:focus-visible .win-combo-focus-pill { opacity: 0; }
 .win-combo-box.is-drop-down-open .win-combo-focus-pill { opacity: 0; }
 
 .win-combo-btn:active .win-combo-content.is-placeholder {
@@ -1761,6 +1807,7 @@ defineExpose(controlSender);
 .win-combo-content > * { min-width: 0; max-width: 100%; }
 
 .win-combo-editable {
+  position: relative;
   grid-row: 2;
   grid-column: 1;
   width: 100%;
@@ -1772,6 +1819,51 @@ defineExpose(controlSender);
   align-items: stretch;
   box-sizing: border-box;
   overflow: hidden;
+  border-radius: var(--ComboBoxCornerRadius, 4px);
+  --ComboBoxBorderCurrent: var(--ComboBoxBorderBrush);
+  --ComboBoxBorderSideCurrent: var(--ComboBoxBorderSide);
+  --ComboBoxBorderTopCurrent: var(--ComboBoxBorderTop);
+  --ComboBoxBorderBottomCurrent: var(--ComboBoxBorderBottom);
+  --ComboBoxBackgroundCurrent: var(--ComboBoxBackground);
+}
+
+.win-combo-editable.is-editing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: var(--ComboBoxBorderThemeThickness, 1px);
+  border-color: var(--ComboBoxBorderSideCurrent);
+  border-top-color: var(--ComboBoxBorderTopCurrent);
+  border-bottom-color: var(--ComboBoxBorderBottomCurrent);
+  border-radius: var(--ComboBoxCornerRadius, 4px);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.win-combo-editable.is-editing:hover {
+  --ComboBoxBorderCurrent: var(--ComboBoxBorderBrushPointerOver);
+  --ComboBoxBorderSideCurrent: var(--ComboBoxBorderSidePointerOver);
+  --ComboBoxBorderTopCurrent: var(--ComboBoxBorderTopPointerOver);
+  --ComboBoxBorderBottomCurrent: var(--ComboBoxBorderBottomPointerOver);
+  --ComboBoxBackgroundCurrent: var(--ComboBoxBackgroundPointerOver);
+}
+
+.win-combo-editable.is-editing:active {
+  --ComboBoxBorderCurrent: var(--ComboBoxBorderBrushPressed);
+  --ComboBoxBorderSideCurrent: var(--ComboBoxBorderSidePressed);
+  --ComboBoxBorderTopCurrent: var(--ComboBoxBorderTopPressed);
+  --ComboBoxBorderBottomCurrent: var(--ComboBoxBorderBottomPressed);
+  --ComboBoxBackgroundCurrent: var(--ComboBoxBackgroundPressed);
+}
+
+.win-combo-editable.is-editing:focus-within {
+  --ComboBoxBorderCurrent: var(--ComboBoxBorderBrush);
+  --ComboBoxBorderSideCurrent: var(--ComboBoxBorderSide);
+  --ComboBoxBorderTopCurrent: var(--ComboBoxBorderTop);
+  --ComboBoxBorderBottomCurrent: var(--ComboBoxBorderBottom);
+  --ComboBoxBackgroundCurrent: var(--ComboBoxBackgroundFocused);
 }
 
 .win-combo-edit-display {
@@ -1786,12 +1878,17 @@ defineExpose(controlSender);
   min-width: 0;
   height: var(--ComboBoxMinHeight, 32px);
   min-height: var(--ComboBoxMinHeight, 32px);
+  z-index: 1;
 }
 .win-combo-textbox .win-textbox-header { display: none; }
 
 .win-combo-textbox .win-textbox-border {
   height: var(--ComboBoxMinHeight, 32px);
   min-height: var(--ComboBoxMinHeight, 32px);
+  background: transparent;
+  border-color: transparent;
+  border-bottom-color: transparent;
+  border-radius: var(--ComboBoxCornerRadius, 4px);
 }
 
 .win-combo-textbox .win-textbox-content {
@@ -1810,6 +1907,7 @@ defineExpose(controlSender);
   grid-row: 1;
   grid-column: 2;
   z-index: 1;
+  align-self: stretch;
   appearance: none;
   width: 30px;
   min-width: 30px;
@@ -1824,6 +1922,9 @@ defineExpose(controlSender);
   background: transparent;
   border: 0;
   border-radius: 4px;
+  box-sizing: border-box;
+  flex: 0 0 30px;
+  line-height: normal;
 }
 
 .win-combo-drop-down-button:hover {
@@ -1866,6 +1967,14 @@ defineExpose(controlSender);
 
 .win-combo-box.is-disabled .win-combo-content.is-placeholder {
   color: var(--ComboBoxPlaceHolderForegroundDisabled, var(--text-disabled));
+}
+.win-combo-box.is-disabled .win-combo-editable {
+  --ComboBoxBorderCurrent: var(--ComboBoxBorderBrushDisabled);
+  --ComboBoxBorderSideCurrent: var(--ComboBoxBorderSideDisabled);
+  --ComboBoxBorderTopCurrent: var(--ComboBoxBorderTopDisabled);
+  --ComboBoxBorderBottomCurrent: var(--ComboBoxBorderBottomDisabled);
+  --ComboBoxBackgroundCurrent: var(--ComboBoxBackgroundDisabled);
+  pointer-events: none;
 }
 
 .win-combo-overlay {
@@ -1934,8 +2043,7 @@ defineExpose(controlSender);
 }
 
 .win-combo-flyout.touch-input .win-combo-items-presenter {
-  padding-top: 0;
-  padding-bottom: 0;
+  padding: 4px 0;
 }
 
 .win-combo-item {
@@ -2009,6 +2117,10 @@ defineExpose(controlSender);
   color: var(--ComboBoxItemForegroundSelectedPointerOver);
   background: var(--ComboBoxItemBackgroundSelectedPointerOver);
 }
+.win-combo-item.selected.hovered .win-combo-item-layout {
+  color: var(--ComboBoxItemForegroundSelectedPointerOver);
+  background: var(--ComboBoxItemBackgroundSelectedPointerOver);
+}
 .win-combo-item.selected:active .win-combo-item-layout { color: var(--ComboBoxItemForegroundSelectedPressed); background: var(--ComboBoxItemBackgroundSelectedPressed); }
 .win-combo-item.is-disabled .win-combo-item-layout { color: var(--ComboBoxItemForegroundDisabled); background: var(--ComboBoxItemBackgroundDisabled); }
 .win-combo-item.is-disabled.selected .win-combo-item-layout { color: var(--ComboBoxItemForegroundSelectedDisabled); background: var(--ComboBoxItemBackgroundSelectedDisabled); }
@@ -2020,14 +2132,22 @@ defineExpose(controlSender);
 
 .win-combo-item-pill {
   position: absolute;
-  left: 1px;
+  inset-inline-start: 1px;
   top: 50%;
+  display: block;
+  box-sizing: border-box;
   width: 3px;
+  min-width: 3px;
+  max-width: 3px;
   height: 16px;
-  border-radius: 1.5px;
-  background: var(--ComboBoxItemPillFillBrush);
+  min-height: 16px;
+  max-height: 16px;
+  color: var(--ComboBoxItemPillFillBrush);
   transform: translateY(-50%);
+  transform-origin: center;
+  transform-box: border-box;
   transition: transform 167ms cubic-bezier(0, 0, 0, 1);
+  pointer-events: none;
 }
 
 .win-combo-item.selected:active .win-combo-item-pill {

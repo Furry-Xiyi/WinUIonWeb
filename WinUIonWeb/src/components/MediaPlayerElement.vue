@@ -1120,8 +1120,9 @@ const startControlPanelHideTimer = () => {
   }, 3000);
 };
 
-const onControlPanelEntered = () => {
-  controlPanelPointerOver.value = true;
+const onControlPanelEntered = (event: PointerEvent) => {
+  controlPanelPointerOver.value = event.pointerType !== 'touch';
+  if (!controlPanelPointerOver.value) return;
   if (hideControlsTimer) window.clearTimeout(hideControlsTimer);
 };
 
@@ -1146,7 +1147,7 @@ const onControlPanelCaptureLost = (event: PointerEvent) => {
   controlPanelPointerPressed.value = false;
   const point = event && Number.isFinite(event.clientX) && Number.isFinite(event.clientY) ? event : null;
   const hit = point ? document.elementFromPoint(point.clientX, point.clientY) : null;
-  controlPanelPointerOver.value = Boolean(hit && controlPanelElement()?.contains(hit));
+  controlPanelPointerOver.value = event.pointerType !== 'touch' && Boolean(hit && controlPanelElement()?.contains(hit));
   if (!controlPanelPointerOver.value) startControlPanelHideTimer();
 };
 
@@ -1514,16 +1515,6 @@ defineExpose({ MediaPlayer: videoRef });
   grid-template-rows: auto auto auto;
 }
 
-.win-media-transport-panel::before {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  content: '';
-  background: var(--MediaTransportControlsPanelBackground, var(--flyout-bg, var(--layer-default, transparent)));
-  border-radius: inherit;
-}
-
 .win-media-transport-controls.visible .win-media-transport-panel { transform: translateY(.5px); transition-duration: 300ms; }
 
 .win-media-error {
@@ -1767,7 +1758,6 @@ defineExpose({ MediaPlayer: videoRef });
 .flyout-presenter:has(.win-media-volume-panel) {
   min-width: 0;
   color: var(--text-primary);
-  background: var(--MediaTransportControlsFlyoutBackground, var(--AcrylicBackgroundFillColorDefaultBrush));
   border-radius: var(--overlay-corner-radius, 8px);
 }
 

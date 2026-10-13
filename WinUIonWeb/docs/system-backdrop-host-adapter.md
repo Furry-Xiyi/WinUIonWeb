@@ -264,19 +264,37 @@ fixtures; reload synchronization with a real native host requires that host's
 own integration validation.
 
 The Gallery application's existing window uses `connectGalleryWindowBackdrop`
-from `src/utils/galleryWindowBackdrop.ts`. It requests native `Mica/Base` only
-through an installed or explicitly supplied adapter, validates the actual
-desktop-compositor capability, and connects the existing content root through
-`AttachWindow`. Without an adapter it returns `null` and leaves the browser or
-PWA's official `SolidBackgroundFillColorBaseBrush` page fallback unchanged.
-The native host must support `Mica` with kind `Base`; unsupported capabilities
-are rejected before content or theme mutation.
+from `src/utils/galleryWindowBackdrop.ts`. It requests the saved application
+material through an installed or explicitly supplied adapter, validates the
+actual desktop-compositor capability, and connects the existing content root
+through `AttachWindow`. Without an adapter it returns `null` and leaves the
+browser or PWA's official `SolidBackgroundFillColorBaseBrush` page fallback
+unchanged. Supported material kinds are validated before content or theme
+mutation, including `DesktopAcrylic/Thin` when the host advertises it.
+
+For application-window Acrylic, the native host provides the desktop sample
+and blur. The Gallery then places the same `AcrylicBackgroundFillColorDefaultBrush`
+used by in-app `AcrylicBrush` over that native surface: its luminosity layer,
+tint layer and noise texture remain visible, while its CSS backdrop blur is
+disabled to avoid blurring the desktop twice. The layer follows theme and
+system accessibility policy, and is removed when Acrylic is no longer applied,
+the content root changes, or the connection is disposed. Mica does not receive
+this Acrylic overlay.
+
+`DesktopAcrylic/Thin` is a distinct native controller kind, not a CSS option or
+an alias for `DesktopAcrylicBackdrop` (which always means Base). A host that
+supports Thin must implement it with the Microsoft Composition
+`DesktopAcrylicController` configured for `Thin`, and advertise that kind in
+`SupportedDesktopAcrylicKinds`. Tauri's generic `Effect.Acrylic` flag does not
+select that controller kind by itself; a Tauri host must supply the matching
+native controller implementation before claiming Thin support.
 
 ```ts
 import { connectGalleryWindowBackdrop } from '../src/utils/galleryWindowBackdrop'
 
 const connection = await connectGalleryWindowBackdrop(contentElement, {
   theme: applicationRequestedTheme,
+  material: 'AcrylicThin',
 })
 await connection?.SetTheme('Default')
 // Release native material when the application runtime leaves this window.

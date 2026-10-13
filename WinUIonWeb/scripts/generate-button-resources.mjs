@@ -5,6 +5,7 @@ import { baseParse, NodeTypes } from '@vue/compiler-dom'
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const workspace = path.dirname(project)
+const referenceRoot = process.env.WINUI_REFERENCE_ROOT || path.join(workspace, 'WinUI-Reference')
 const adapt = node => ({
   localName: node.tag.split(':').pop(),
   children: node.children.filter(child => child.type === NodeTypes.ELEMENT).map(adapt),
@@ -38,7 +39,7 @@ function read(node, target, theme) {
 }
 for (const name of ['Button', 'HyperlinkButton', 'RepeatButton', 'ToggleButton', 'SplitButton']) {
   const directory = name === 'SplitButton' ? 'SplitButton' : 'CommonStyles'
-  const filename = path.join(workspace, 'WinUI-Reference', 'controls', 'dev', directory, `${name}_themeresources.xaml`)
+  const filename = path.join(referenceRoot, 'controls', 'dev', directory, `${name}_themeresources.xaml`)
   const parsed = baseParse(fs.readFileSync(filename, 'utf8'))
   const dictionaryRoot = adapt(parsed.children.find(node => node.type === NodeTypes.ELEMENT))
   for (const node of dictionaryRoot.children) {
@@ -57,7 +58,7 @@ const cssColor = color => {
   return `rgba(${red}, ${green}, ${blue}, ${Number((alpha / 255).toFixed(6))})`
 }
 function readBorderBrushes() {
-const commonFile = path.join(workspace, 'WinUI-Reference', 'controls', 'dev', 'CommonStyles', 'Common_themeresources_any.xaml')
+const commonFile = path.join(referenceRoot, 'controls', 'dev', 'CommonStyles', 'Common_themeresources_any.xaml')
 const commonParsed = baseParse(fs.readFileSync(commonFile, 'utf8'))
 const commonRoot = adapt(commonParsed.children.find(node => node.type === NodeTypes.ELEMENT))
 const borderBrushes = { Default: {}, Light: {}, HighContrast: {} }
@@ -76,12 +77,18 @@ for (const dictionary of commonRoot.children.find(node => node.localName === 'Re
       borderBrushes[theme][key] = color(brush.getAttribute('Color'));
     }
   }
-  const defaultStroke = dictionary.children.find(node => xKey(node) === 'ControlStrokeColorDefaultBrush')
-  borderBrushes[theme].ButtonControlStrokeColorDefaultBrush = color(defaultStroke?.getAttribute('Color') || '{ThemeResource SystemColorWindowTextColor}')
+  if (theme === 'HighContrast') {
+    for (const key of ['ControlStrokeColorDefaultBrush', 'ControlStrokeColorSecondaryBrush', 'ControlStrokeColorOnAccentDefaultBrush', 'ControlStrokeColorOnAccentSecondaryBrush']) {
+      const brush = dictionary.children.find(node => xKey(node) === key)
+      borderBrushes[theme][key] = color(brush.getAttribute('Color'))
+    }
+  }
   for (const key of ['ControlElevationBorderBrush', 'AccentControlElevationBorderBrush']) {
     const brush = dictionary.children.find(node => xKey(node) === key)
     if (brush.localName === 'SolidColorBrush') {
-      borderBrushes[theme][`Button${key}`] = color(brush.getAttribute('Color'))
+      const solidColor = color(brush.getAttribute('Color'))
+      borderBrushes[theme][theme === 'Light' ? `Button${key}` : key] = solidColor
+      for (const edge of ['Side', 'Top', 'Bottom']) borderBrushes[theme][`Button${key}${edge}`] = solidColor
       continue
     }
     const [startX, startY] = brush.getAttribute('StartPoint').split(',').map(Number)
@@ -89,8 +96,24 @@ for (const dictionary of commonRoot.children.find(node => node.localName === 'Re
     if (startX !== endX || brush.getAttribute('MappingMode') !== 'Absolute') throw new Error(`Unsupported official button border geometry: ${key}`)
     const reverse = brush.children.find(node => node.localName === 'LinearGradientBrush.RelativeTransform')?.children.some(node => node.localName === 'ScaleTransform' && Number(node.getAttribute('ScaleY')) === -1)
     const length = Math.abs(endY - startY)
-    const stops = brush.children.find(node => node.localName === 'LinearGradientBrush.GradientStops').children.map(node => `${color(node.getAttribute('Color'))} ${Number((Number(node.getAttribute('Offset')) * length).toFixed(6))}px`)
-    borderBrushes[theme][`Button${key}`] = `linear-gradient(${reverse ? 0 : 180}deg, ${stops.join(', ')})`
+    const gradientStops = brush.children.find(node => node.localName === 'LinearGradientBrush.GradientStops').children
+    const stopColors = gradientStops.map(node => color(node.getAttribute('Color')))
+    const stops = gradientStops.map((node, index) =>
+      `${stopColors[index]} ${Number((Number(node.getAttribute('Offset')) * length).toFixed(6))}px`)
+    // XAML gradient stops use StaticResource colors, so resolve them at generation time.
+    borderBrushes[theme][theme === 'Light' ? `Button${key}` : key] = `linear-gradient(${reverse ? 0 : 180}deg, ${stops.join(', ')})`
+    const edgeKey = `Button${key}`
+    borderBrushes[theme][`${edgeKey}Side`] = stopColors.at(-1)
+    borderBrushes[theme][`${edgeKey}Top`] = reverse ? stopColors.at(-1) : stopColors[0]
+    borderBrushes[theme][`${edgeKey}Bottom`] = reverse ? stopColors[0] : stopColors.at(-1)
+  }
+  if (theme === 'Light') {
+    const defaultStroke = dictionary.children.find(node => xKey(node) === 'ControlStrokeColorDefaultBrush')
+    borderBrushes[theme].ButtonControlStrokeColorDefaultBrush = color(defaultStroke.getAttribute('Color'))
+  } else {
+    borderBrushes[theme].ButtonControlStrokeColorDefaultBrush = 'var(--ControlStrokeColorDefaultBrush)'
+    borderBrushes[theme].ButtonControlElevationBorderBrush = 'var(--ControlElevationBorderBrush)'
+    borderBrushes[theme].ButtonAccentControlElevationBorderBrush = 'var(--AccentControlElevationBorderBrush)'
   }
 }
 return borderBrushes
@@ -132,6 +155,6 @@ const cssConstants = Object.entries(constants).filter(([key]) => kinds[key] !== 
 const block = theme => [...Object.entries(borderBrushes[theme]).map(([key, value]) => `  --${key}: ${value};`), ...Object.entries(aliases[theme]).map(([key, value]) => `  --${key}: ${cssAlias(value)};`), ...Object.entries(values[theme]).map(([key, value]) => `  --${key}: ${cssColor(value)};`)].join('\n')
 const lightScope = ':root, html.theme-light, .theme-light, .example-theme-wrapper.theme-light, .win-theme-scope.theme-light'
 const darkScope = 'html.theme-dark, .theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark'
-let css = `/* Generated from the official WinUI button theme resource dictionaries. */\n:root, .theme-light, .theme-dark, .theme-highcontrast, .theme-high-contrast {\n${cssConstants.join('\n')}\n}\n\n${lightScope} {\n${block('Light')}\n}\n\n${darkScope} {\n${block('Default')}\n}\n\n.theme-highcontrast, .theme-high-contrast {\n${block('HighContrast')}\n}\n\n@media (forced-colors: active) {\n  ${lightScope}, ${darkScope} {\n${block('HighContrast').split('\n').map(line => `  ${line}`).join('\n')}\n  }\n  .win-btn, .win-hyperlink-button, .win-split-button { forced-color-adjust: none; }\n}\n`
+let css = `/* Generated from the official WinUI button theme resource dictionaries. */\n:root, .theme-light, .theme-dark, .theme-highcontrast, .theme-high-contrast {\n${cssConstants.join('\n')}\n}\n\n${lightScope} {\n${block('Light')}\n}\n\n${darkScope} {\n${block('Default')}\n}\n\n@media (prefers-color-scheme: dark) {\n  :root:not(.theme-light):not(.theme-dark) {\n    --ControlElevationBorderBrush: ${borderBrushes.Default.ControlElevationBorderBrush};\n    --AccentControlElevationBorderBrush: ${borderBrushes.Default.AccentControlElevationBorderBrush};\n    --ButtonControlElevationBorderBrushSide: ${borderBrushes.Default.ButtonControlElevationBorderBrushSide};\n    --ButtonControlElevationBorderBrushTop: ${borderBrushes.Default.ButtonControlElevationBorderBrushTop};\n    --ButtonControlElevationBorderBrushBottom: ${borderBrushes.Default.ButtonControlElevationBorderBrushBottom};\n    --ButtonAccentControlElevationBorderBrushSide: ${borderBrushes.Default.ButtonAccentControlElevationBorderBrushSide};\n    --ButtonAccentControlElevationBorderBrushTop: ${borderBrushes.Default.ButtonAccentControlElevationBorderBrushTop};\n    --ButtonAccentControlElevationBorderBrushBottom: ${borderBrushes.Default.ButtonAccentControlElevationBorderBrushBottom};\n  }\n}\n\n.theme-highcontrast, .theme-high-contrast {\n${block('HighContrast')}\n}\n\n@media (forced-colors: active) {\n  ${lightScope}, ${darkScope} {\n${block('HighContrast').split('\n').map(line => `  ${line}`).join('\n')}\n  }\n  .win-btn, .win-hyperlink-button, .win-split-button { forced-color-adjust: none; }\n}\n`
 fs.writeFileSync(path.join(project, 'src', 'styles', 'buttonResources.css'), css)
 console.log(`Generated ${resourceKeys.size} button resources from the official XML dictionaries`)

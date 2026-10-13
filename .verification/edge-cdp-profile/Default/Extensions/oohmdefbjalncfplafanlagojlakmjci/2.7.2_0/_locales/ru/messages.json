@@ -1,0 +1,1052 @@
+{
+   "ADTSerror": {
+      "message": "Не удается найти заголовок ADTS. Возможно, ресурс зашифрован с помощью AES-128-ECB, расшифровка которого в настоящее время не поддерживается. Пожалуйста, используйте стороннее программное обеспечение для объединения."
+   },
+   "DRMerror": {
+      "message": "Медиафайл имеет защиту DRM, используйте сторонние инструменты для загрузки"
+   },
+   "M3U8DLparameterLong": {
+      "message": "Параметр M3U8DL слишком длинный."
+   },
+   "MQTT": {
+      "message": "MQTT"
+   },
+   "Script": {
+      "message": "Скрипт"
+   },
+   "about": {
+      "message": "О программе"
+   },
+   "addParameters": {
+      "message": "Добавить параметры"
+   },
+   "addRegex": {
+      "message": "Добавить регулярное выражение"
+   },
+   "addSettingParameters": {
+      "message": "Добавить параметры настройки"
+   },
+   "addSuffix": {
+      "message": "Добавить суффикс"
+   },
+   "addType": {
+      "message": "Добавить тип"
+   },
+   "addTypeError": {
+      "message": "Неверный формат типа захвата, пожалуйста, проверьте"
+   },
+   "addUrl": {
+      "message": "Добавить URL-адрес"
+   },
+   "address": {
+      "message": "Адрес"
+   },
+   "alert": {
+      "message": "Предупреждение"
+   },
+   "alertimport": {
+      "message": "Импорт завершен"
+   },
+   "alwaysDisableCatCatcher": {
+      "message": "Всегда отключать загрузчик Cat-Catch"
+   },
+   "alwaysSearch": {
+      "message": "Всегда включать глубокий поиск"
+   },
+   "aria2Tip": {
+      "message": "Отличный инструмент для скачивания, см. руководство пользователя"
+   },
+   "asc": {
+      "message": "По возрастанию"
+   },
+   "audio": {
+      "message": "Аудио"
+   },
+   "audioOnly": {
+      "message": "Только аудио"
+   },
+   "autoClosePageAfterDownload": {
+      "message": "Автоматически закрывать страницу после загрузки"
+   },
+   "autoCloserDownload": {
+      "message": "Автоматически закрывать страницу после загрузки"
+   },
+   "autoDownM3u8Tip": {
+      "message": "Нажмите кнопку загрузки, чтобы немедленно запустить объединение и загрузку через парсер m3u8"
+   },
+   "autoDownload": {
+      "message": "Автозагрузка"
+   },
+   "autoSend": {
+      "message": "Автоматическая передача данных"
+   },
+   "autoSetRefererCookieParams": {
+      "message": "Автоматически задавать параметры Referer и Cookie"
+   },
+   "badgeNumber": {
+      "message": "Показывать количество найденных медиафайлов на значке расширения"
+   },
+   "bitrate": {
+      "message": "Битрейт"
+   },
+   "blobM3u8DLError": {
+      "message": "Blob-URL не могут вызывать M3U8DL для загрузки"
+   },
+   "blockResource": {
+      "message": "Блокировать ресурс"
+   },
+   "blockResourceTip": {
+      "message": "Блокировать ресурсы, которые вы не хотите отображать"
+   },
+   "blockUrl": {
+      "message": "Блокировать URL-адрес"
+   },
+   "blockUrlTips": {
+      "message": "Поддерживает подстановочные знаки * и ?"
+   },
+   "cacheCapture": {
+      "message": "Захват"
+   },
+   "catCatch": {
+      "message": "cat-catch"
+   },
+   "clear": {
+      "message": "Очистить"
+   },
+   "clearCapturedData": {
+      "message": "Очистить захваченные данные"
+   },
+   "clearOption": {
+      "message": "Очищать данные, захваченные текущей вкладкой, при обновлении или переходе на новую страницу"
+   },
+   "close": {
+      "message": "Закрыть"
+   },
+   "closeCapture": {
+      "message": "Закрыть захват"
+   },
+   "closeDownload": {
+      "message": "Закрыть загрузку"
+   },
+   "closeRecording": {
+      "message": "Закрыть запись"
+   },
+   "closeSearch": {
+      "message": "Закрыть поиск"
+   },
+   "closeSimulation": {
+      "message": "Закрыть эмуляцию"
+   },
+   "collapseAll": {
+      "message": "Свернуть все"
+   },
+   "collapseAllNodes": {
+      "message": "Свернуть все узлы JSON"
+   },
+   "confirm": {
+      "message": "Подтвердить"
+   },
+   "confirmDownload": {
+      "message": "Всего файлов: $num$, подтвердить загрузку?",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "confirmLoading": {
+      "message": "Всего ресурсов: $num$, вы хотите отменить загрузку?",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "confirmParameters": {
+      "message": "Подтвердить параметры"
+   },
+   "confirmReset": {
+      "message": "Вы уверены, что хотите сбросить настройки?"
+   },
+   "connectingToMQTT": {
+      "message": "Подключение к MQTT-серверу..."
+   },
+   "contextMenus": {
+      "message": "Контекстное меню"
+   },
+   "convertToM3U8": {
+      "message": "Перейти к анализу M3U8"
+   },
+   "copiedToClipboard": {
+      "message": "Скопировано в буфер обмена"
+   },
+   "copy": {
+      "message": "Копировать"
+   },
+   "copyCommand": {
+      "message": "Копировать команду"
+   },
+   "copyTip": {
+      "message": "Для удобства использования в сторонних приложениях настройте содержимое, записываемое в буфер обмена кнопкой копирования"
+   },
+   "currentPage": {
+      "message": "Текущая страница"
+   },
+   "customCSS": {
+      "message": "Пользовательский CSS"
+   },
+   "customFilenameOption": {
+      "message": "Использовать собственное имя файла для сохранения (по умолчанию — заголовок веб-страницы)"
+   },
+   "customKeyPlaceholder": {
+      "message": "Настроить ключ в шестнадцатеричном формате, base64 или адрес ключа"
+   },
+   "customSaveFileName": {
+      "message": "Собственное имя файла сохранения"
+   },
+   "customVLCProtocol": {
+      "message": "Пользовательский протокол VLC"
+   },
+   "dataFetchFailed": {
+      "message": "Сбой получения данных"
+   },
+   "dataPreprocessing": {
+      "message": "Предобработка данных"
+   },
+   "decryptionError": {
+      "message": "Ошибка расшифровки"
+   },
+   "deepSearch": {
+      "message": "Поиск"
+   },
+   "default": {
+      "message": "По умолчанию"
+   },
+   "defaultPopup": {
+      "message": "Всплывающий режим по умолчанию"
+   },
+   "delete": {
+      "message": "Удалить"
+   },
+   "deleteDuplicateFilenames": {
+      "message": "Удалять дубликаты имен файлов"
+   },
+   "desc": {
+      "message": "По убыванию"
+   },
+   "description": {
+      "message": "Инструмент для перехвата веб-медиа"
+   },
+   "disable": {
+      "message": "Отключить"
+   },
+   "disableAll": {
+      "message": "Отключить все"
+   },
+   "doNotClear": {
+      "message": "Не очищать"
+   },
+   "documentation": {
+      "message": "Документация"
+   },
+   "dopopup": {
+      "message": "всплывающее окно"
+   },
+   "dopreview": {
+      "message": "предпросмотр"
+   },
+   "download": {
+      "message": "Скачать"
+   },
+   "downloadComplete": {
+      "message": "Загрузка завершена"
+   },
+   "downloadDir": {
+      "message": "Каталог загрузки"
+   },
+   "downloadExistingData": {
+      "message": "Скачать существующие данные"
+   },
+   "downloadFailed": {
+      "message": "Сбой загрузки"
+   },
+   "downloadProgress": {
+      "message": "Прогресс загрузки"
+   },
+   "downloadRange": {
+      "message": "Диапазон загрузки"
+   },
+   "downloadSegmentList": {
+      "message": "Список загрузки"
+   },
+   "downloadThreads": {
+      "message": "Потоки"
+   },
+   "downloadWhileSaving": {
+      "message": "Потоковая загрузка"
+   },
+   "downloadWithRequestHeader": {
+      "message": "Загрузка с параметрами заголовка запроса."
+   },
+   "downloaded": {
+      "message": "Скачано"
+   },
+   "downloadedVideoLength": {
+      "message": "Длина скачанного видео"
+   },
+   "downloader": {
+      "message": "Загрузчик"
+   },
+   "downloaderTip": {
+      "message": "Если загрузка ресурса не удалась, автоматически включить загрузчик для повторной попытки."
+   },
+   "duration": {
+      "message": "Длительность"
+   },
+   "enable": {
+      "message": "Включить"
+   },
+   "enableAll": {
+      "message": "Включить все"
+   },
+   "encryptedHLS": {
+      "message": "Зашифрованный HLS"
+   },
+   "encryptedSAMPLE": {
+      "message": "Ресурсы, зашифрованные с помощью SAMPLE-AES-CTR, в настоящее время не поддерживаются."
+   },
+   "encryptionAlgorithm": {
+      "message": "Метод"
+   },
+   "end": {
+      "message": "Конец"
+   },
+   "estimateSize": {
+      "message": "Оценочный размер"
+   },
+   "excludeDuplicateResources": {
+      "message": "Исключить дубликаты ресурсов (слишком много ресурсов потребляет много ресурсов процессора)"
+   },
+   "exit": {
+      "message": "Выйти"
+   },
+   "expandAll": {
+      "message": "Развернуть все"
+   },
+   "expandAllNodes": {
+      "message": "Развернуть все узлы JSON"
+   },
+   "expandPlayable": {
+      "message": "Развернуть воспроизводимые"
+   },
+   "expandSelected": {
+      "message": "Развернуть выбранные"
+   },
+   "exportSettings": {
+      "message": "Экспорт настроек"
+   },
+   "extension": {
+      "message": "Расширение"
+   },
+   "extensionName": {
+      "message": "Имя расширения"
+   },
+   "extractSlices": {
+      "message": "Извлечь сегменты"
+   },
+   "ffmpegIsNotReady": {
+      "message": "Сервис онлайн-FFmpeg не готов, повторите попытку позже"
+   },
+   "ffmpegTranscoding": {
+      "message": "Транскодирование FFmpeg"
+   },
+   "fileLoading": {
+      "message": "Загрузка файла"
+   },
+   "fileRetrievalFailed": {
+      "message": "Сбой получения файла"
+   },
+   "fileSize": {
+      "message": "Размер файла"
+   },
+   "fileTooLarge": {
+      "message": "Файл слишком большой, файл больше чем $size$",
+      "placeholders": {
+         "size": {
+            "content": "$1"
+         }
+      }
+   },
+   "fileTooLargeStream": {
+      "message": "Файл больше $size$, включить потоковую загрузку?",
+      "placeholders": {
+         "size": {
+            "content": "$1"
+         }
+      }
+   },
+   "filter": {
+      "message": "Фильтр"
+   },
+   "filterSize": {
+      "message": "Фильтр размера"
+   },
+   "flag": {
+      "message": "Флаг"
+   },
+   "flagTip": {
+      "message": "i: игнорировать регистр, g: глобальный поиск. Можно оставить пустым"
+   },
+   "formatConversionError": {
+      "message": "Ошибка преобразования формата"
+   },
+   "fullscreen": {
+      "message": "Во весь экран"
+   },
+   "functionEntry": {
+      "message": "Вход в функцию"
+   },
+   "getParameters": {
+      "message": "Параметры GET"
+   },
+   "getTime": {
+      "message": "Время получения"
+   },
+   "goBack": {
+      "message": "Назад"
+   },
+   "hasSent": {
+      "message": "Отправлено"
+   },
+   "hevcPreviewTip": {
+      "message": "Файлы фрагментов с кодированием HEVC/H.265 не поддерживаются для предварительного просмотра."
+   },
+   "hevcTip": {
+      "message": "Файлы фрагментов с кодированием HEVC/H.265 поддерживаются только для онлайн-транскодирования в FFmpeg"
+   },
+   "hideDownloadedSegments": {
+      "message": "Скрыть загруженные сегменты"
+   },
+   "iconOption": {
+      "message": "Отображать значок сайта"
+   },
+   "iframeFFmpeg": {
+      "message": "Использовать iframe для вызова FFmpeg"
+   },
+   "importConfiguration": {
+      "message": "Импорт конфигурации"
+   },
+   "incorrectKey": {
+      "message": "Неверный ключ"
+   },
+   "invertSelection": {
+      "message": "Инвертировать"
+   },
+   "invoke": {
+      "message": "Вызвать"
+   },
+   "invokeApp": {
+      "message": "Вызвать приложение"
+   },
+   "invokeM3u8DL": {
+      "message": "Вызвать M3U8DL"
+   },
+   "invokeProtocolTemplate": {
+      "message": "Шаблон вызова протокола"
+   },
+   "isBlockedSite": {
+      "message": "Работа расширения на данном сайте заблокирована"
+   },
+   "jsonFormatter": {
+      "message": "Форматирование JSON"
+   },
+   "key": {
+      "message": "Ключ"
+   },
+   "keyAddress": {
+      "message": "Адрес ключа"
+   },
+   "keyDownloadFailed": {
+      "message": "Сбой загрузки ключа"
+   },
+   "liveHLS": {
+      "message": "Прямая трансляция HLS"
+   },
+   "loading": {
+      "message": "Загрузка..."
+   },
+   "loadingData": {
+      "message": "Загрузка данных..."
+   },
+   "localM3u8": {
+      "message": "Локальный M3U8"
+   },
+   "loop": {
+      "message": "Повтор"
+   },
+   "m3u8DLTips": {
+      "message": "Отличный сторонний инструмент для скачивания m3u8 и mpd, см. руководство пользователя"
+   },
+   "m3u8Error": {
+      "message": "Произошли ошибки при синтаксическом анализе или воспроизведении файла M3U8, подробную информацию об ошибке смотрите в консоли"
+   },
+   "m3u8Info": {
+      "message": "Всего файлов: $num$, общая длительность: $time$.",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         },
+         "time": {
+            "content": "$2"
+         }
+      }
+   },
+   "m3u8Parser": {
+      "message": "Парсер M3U8"
+   },
+   "m3u8Placeholder": {
+      "message": "Пожалуйста, введите ссылку m3u8 / содержимое m3u8 / список сегментов / тег $${range}"
+   },
+   "m3u8Playlist": {
+      "message": "Плейлист M3U8"
+   },
+   "m3u8Url": {
+      "message": "URL-адрес m3u8"
+   },
+   "manualSend": {
+      "message": "Ручная передача данных"
+   },
+   "match": {
+      "message": "Соответствие"
+   },
+   "mediaControl": {
+      "message": "Управление медиа"
+   },
+   "mergeDownloads": {
+      "message": "Объединить загрузки"
+   },
+   "merging": {
+      "message": "Объединение"
+   },
+   "messageSentToMQTT": {
+      "message": "Сообщение отправлено на MQTT-сервер"
+   },
+   "moreFeatures": {
+      "message": "Еще"
+   },
+   "moreFrequent": {
+      "message": "Чаще"
+   },
+   "mp4Format": {
+      "message": "MP4"
+   },
+   "mpdParser": {
+      "message": "Парсер MPD"
+   },
+   "mqttBroker": {
+      "message": "Адрес брокера"
+   },
+   "mqttBrokerHelp": {
+      "message": "Имя хоста или IP-адрес MQTT-брокера"
+   },
+   "mqttClientId": {
+      "message": "ID клиента"
+   },
+   "mqttClientIdHelp": {
+      "message": "Уникальный идентификатор клиента для этого подключения"
+   },
+   "mqttCredentialsHelp": {
+      "message": "Оставьте имя пользователя/пароль пустыми, если они не требуются"
+   },
+   "mqttDataFormat": {
+      "message": "Формат данных"
+   },
+   "mqttDataFormatDefault": {
+      "message": "Оставьте пустым, чтобы использовать JSON-формат по умолчанию"
+   },
+   "mqttDataFormatHelp": {
+      "message": "{\"url\": \"$${url}\", \"title\": \"$${title}\", \"type\": \"$${type}\", \"ext\": \"$${ext}\", \"timestamp\": \"$${timestamp}\"}"
+   },
+   "mqttDataFormatVars": {
+      "message": "Доступные переменные"
+   },
+   "mqttPassword": {
+      "message": "Пароль"
+   },
+   "mqttPath": {
+      "message": "Путь"
+   },
+   "mqttPathHelp": {
+      "message": "Путь WebSocket (обычно /mqtt или /ws)"
+   },
+   "mqttProtocol": {
+      "message": "Протокол"
+   },
+   "mqttProtocolWs": {
+      "message": "WS (Небезопасный)"
+   },
+   "mqttProtocolWss": {
+      "message": "WSS (Безопасный)"
+   },
+   "mqttQos": {
+      "message": "Уровень QoS"
+   },
+   "mqttQos0": {
+      "message": "0 (Не более одного раза)"
+   },
+   "mqttQos1": {
+      "message": "1 (Как минимум один раз)"
+   },
+   "mqttQos2": {
+      "message": "2 (Точно один раз)"
+   },
+   "mqttQosHelp": {
+      "message": "Уровень качества обслуживания (0=Не более одного раза, 1=Как минимум один раз, 2=Точно один раз)"
+   },
+   "mqttTitleLength": {
+      "message": "Макс. длина заголовка"
+   },
+   "mqttTitleLengthHelp": {
+      "message": "Максимальная длина заголовка для отправки в сообщениях MQTT"
+   },
+   "mqttTopic": {
+      "message": "Тема"
+   },
+   "mqttTopicHelp": {
+      "message": "Тема MQTT для публикации сообщений"
+   },
+   "mqttUsername": {
+      "message": "Имя пользователя"
+   },
+   "multipleAudios": {
+      "message": "Несколько аудиодорожек"
+   },
+   "multipleAudiosTip": {
+      "message": "Этот файл M3U8 содержит несколько вложенных аудиодорожек"
+   },
+   "multipleSubtitles": {
+      "message": "Несколько дорожек субтитров"
+   },
+   "multipleSubtitlesTip": {
+      "message": "Этот файл M3U8 содержит несколько вложенных дорожек субтитров."
+   },
+   "multiplier": {
+      "message": "Множитель:"
+   },
+   "mute": {
+      "message": "Без звука"
+   },
+   "newDownloader": {
+      "message": "Новый загрузчик"
+   },
+   "nextLevel": {
+      "message": "Следующий уровень"
+   },
+   "nextLevelTip": {
+      "message": "Этот файл M3U8 содержит вложенные файлы M3U8."
+   },
+   "noAudio": {
+      "message": "Без аудио"
+   },
+   "noControllableMediaDetected": {
+      "message": "Управляемые медиафайлы не обнаружены"
+   },
+   "noData": {
+      "message": "Нет рыбки :( и нет медиафайлов"
+   },
+   "noKeyIsRequired": {
+      "message": "Ключ не требуется"
+   },
+   "noMatch": {
+      "message": "Нет соответствия"
+   },
+   "noMediaDetected": {
+      "message": "Медиафайлы на веб-странице не обнаружены"
+   },
+   "noVideo": {
+      "message": "Без видео"
+   },
+   "normalClear": {
+      "message": "Обычная очистка"
+   },
+   "normalPlay": {
+      "message": "Обычное воспроизведение"
+   },
+   "onlineFFmpeg": {
+      "message": "Онлайн-FFmpeg"
+   },
+   "onlineMerge": {
+      "message": "Объединить"
+   },
+   "onlineServiceAddress": {
+      "message": "Адрес онлайн-сервиса"
+   },
+   "openDir": {
+      "message": "Открыть каталог"
+   },
+   "openDownloaderPageInBackground": {
+      "message": "Открыть страницу загрузчика в фоновом режиме"
+   },
+   "openInBgDownload": {
+      "message": "Открыть страницу загрузчика в фоновом режиме"
+   },
+   "operation": {
+      "message": "Операция"
+   },
+   "option": {
+      "message": "Опция"
+   },
+   "originalM3u8": {
+      "message": "Оригинальный M3U8"
+   },
+   "otherFeatures": {
+      "message": "Другие функции"
+   },
+   "otherFiles": {
+      "message": "Другие файлы"
+   },
+   "otherPage": {
+      "message": "Другая страница"
+   },
+   "otherSettings": {
+      "message": "Другие настройки"
+   },
+   "parameter": {
+      "message": "Параметр"
+   },
+   "parameterSetting": {
+      "message": "Настройка параметров"
+   },
+   "parser": {
+      "message": "Парсер"
+   },
+   "pause": {
+      "message": "Пауза"
+   },
+   "pictureInPicture": {
+      "message": "Картинка в картинке"
+   },
+   "play": {
+      "message": "Воспроизвести"
+   },
+   "popup": {
+      "message": "Всплывающее окно"
+   },
+   "possibleKey": {
+      "message": "Найдены возможные ключи"
+   },
+   "preview": {
+      "message": "Предпросмотр"
+   },
+   "previewCommand": {
+      "message": "Предпросмотр команды"
+   },
+   "previewMode": {
+      "message": "Использовать протокол вызова локального плеера для предпросмотра видео"
+   },
+   "previewModePlaceholder": {
+      "message": "Оставьте пустым для отключения. По умолчанию для предварительного просмотра видео используется всплывающая страница"
+   },
+   "realKeyNotFound": {
+      "message": "Настоящий ключ не найден"
+   },
+   "recordLive": {
+      "message": "Запись"
+   },
+   "recordWebRTC": {
+      "message": "Запись WebRTC"
+   },
+   "recordingDuration": {
+      "message": "Длительность записи"
+   },
+   "redownloadFailedItems": {
+      "message": "Повторить загрузку неудачных элементов"
+   },
+   "regex": {
+      "message": "регулярное выражение"
+   },
+   "regexExpression": {
+      "message": "Регулярное выражение"
+   },
+   "regexMatch": {
+      "message": "Соответствие регулярному выражению"
+   },
+   "regexSuffixTip": {
+      "message": "Назначить суффикс для полученного URL. Можно оставить пустым, и суффикс будет автоматически усечен (многие файлы не имеют суффикса)"
+   },
+   "regexTest": {
+      "message": "Тест регулярного выражения"
+   },
+   "regexTip": {
+      "message": "Регулярные выражения потребляют много ресурсов, используйте их осторожно"
+   },
+   "regexTitle": {
+      "message": "Соответствие регулярному выражению или из глубокого поиска"
+   },
+   "regularFilterPlaceholder": {
+      "message": "Фильтр регулярных выражений, соответствие URL ресурса, нажмите Enter для подтверждения"
+   },
+   "removeFailedPreviewFiles": {
+      "message": "Удалить неудачные файлы предпросмотра"
+   },
+   "replaceKeywordList": {
+      "message": "Список заменяемых ключевых слов"
+   },
+   "replaceTags": {
+      "message": "Заменить теги"
+   },
+   "requestBody": {
+      "message": "Тело запроса"
+   },
+   "requestHeaders": {
+      "message": "Заголовки запроса"
+   },
+   "requestMethod": {
+      "message": "Метод запроса"
+   },
+   "resetAllSettings": {
+      "message": "Сбросить все настройки"
+   },
+   "resetCopySettings": {
+      "message": "Сбросить настройки копирования"
+   },
+   "resetOtherSettings": {
+      "message": "Сбросить другие настройки"
+   },
+   "resetSettings": {
+      "message": "Сбросить настройки"
+   },
+   "resolution": {
+      "message": "Разрешение"
+   },
+   "restartExtension": {
+      "message": "Перезапустить расширение"
+   },
+   "restoreGetParameters": {
+      "message": "Восстановить параметры GET"
+   },
+   "result": {
+      "message": "Результат"
+   },
+   "retryCount": {
+      "message": "Количество попыток"
+   },
+   "retryDownload": {
+      "message": "Повторить загрузку"
+   },
+   "retryingDownload": {
+      "message": "Повторная попытка загрузки"
+   },
+   "reverse": {
+      "message": "Обратный порядок"
+   },
+   "runningCannotChangeSettings": {
+      "message": "Выполняется, изменить настройки невозможно"
+   },
+   "sNumError": {
+      "message": "Ошибка серийного номера"
+   },
+   "sNumMax": {
+      "message": "Серийный номер не может превышать $num$",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "save": {
+      "message": "Сохранить"
+   },
+   "saveAs": {
+      "message": "Сохранить как"
+   },
+   "saveAsOption": {
+      "message": "Выбирать каталог для сохранения после загрузки"
+   },
+   "saveFailed": {
+      "message": "Сбой сохранения"
+   },
+   "savePrompt": {
+      "message": "Сохранено на диск, пожалуйста, проверьте загруженное содержимое в браузере."
+   },
+   "saving": {
+      "message": "Сохранение"
+   },
+   "screenCapture": {
+      "message": "Захват экрана"
+   },
+   "screenshot": {
+      "message": "Скриншот"
+   },
+   "searchingForRealKey": {
+      "message": "Поиск настоящего ключа"
+   },
+   "secretKey": {
+      "message": "Секретный ключ"
+   },
+   "segmentList": {
+      "message": "Сегмент"
+   },
+   "selectAll": {
+      "message": "Выбрать все"
+   },
+   "selectAudio": {
+      "message": "Выбрать аудио"
+   },
+   "selectMedia": {
+      "message": "Медиа:"
+   },
+   "selectVideo": {
+      "message": "Выбрать видео"
+   },
+   "selectWebpage": {
+      "message": "Веб-страница:"
+   },
+   "send2MQTT": {
+      "message": "Отправить в MQTT"
+   },
+   "send2local": {
+      "message": "Передача данных"
+   },
+   "send2localTips": {
+      "message": "Объединить данные перед отправкой? Нажмите 'ОК' для объединения или 'Отмена' для отправки по отдельности."
+   },
+   "sendFailed": {
+      "message": "Сбой отправки"
+   },
+   "sendFfmpeg": {
+      "message": "Отправить в онлайн-ffmpeg"
+   },
+   "sendingMessageToMQTT": {
+      "message": "Отправка сообщения на MQTT-сервер..."
+   },
+   "sendingToMQTT": {
+      "message": "Отправка на MQTT-сервер..."
+   },
+   "setRequestHeaders": {
+      "message": "Установить заголовки запроса."
+   },
+   "setWhiteList": {
+      "message": "Добавить в белый список"
+   },
+   "settings": {
+      "message": "Настройки"
+   },
+   "sideurlprotocol": {
+      "message": "Протокол URL m3u8dl"
+   },
+   "simulateMobile": {
+      "message": "Эмуляция мобильного"
+   },
+   "skipDecryption": {
+      "message": "Пропустить расшифровку"
+   },
+   "sort": {
+      "message": "Сортировка"
+   },
+   "speedPlayback": {
+      "message": "Скорость воспроизведения"
+   },
+   "start": {
+      "message": "Начало"
+   },
+   "startGTend": {
+      "message": "Начальный номер не может быть больше конечного номера"
+   },
+   "stopDownload": {
+      "message": "Остановить загрузку"
+   },
+   "stopRecording": {
+      "message": "Остановить запись"
+   },
+   "streamOnbeforeunload": {
+      "message": "Идет потоковая загрузка, скачивание прекратится после закрытия страницы"
+   },
+   "streamSaverTip": {
+      "message": "Функция «потоковой загрузки» не поддерживает онлайн-конвертацию форматов FFmpeg, повторную загрузку ошибочных сегментов и функцию «сохранить как»."
+   },
+   "suffix": {
+      "message": "Суффикс"
+   },
+   "suffixTip": {
+      "message": "Введите суффикс без '.'. Если фильтрация по размеру не нужна, введите 0."
+   },
+   "systemShare": {
+      "message": "Поделиться в системе"
+   },
+   "test": {
+      "message": "Тест"
+   },
+   "title": {
+      "message": "Заголовок"
+   },
+   "titleDownload": {
+      "message": "Загрузка cat-catch"
+   },
+   "titleJson": {
+      "message": "Форматирование JSON cat-catch"
+   },
+   "titleM3U8": {
+      "message": "Парсер m3u8 cat-catch"
+   },
+   "titleOption": {
+      "message": "Настройки cat-catch"
+   },
+   "titledash": {
+      "message": "Парсер Dash cat-catch"
+   },
+   "type": {
+      "message": "Тип"
+   },
+   "typeTip": {
+      "message": "Введите корректный content-type. Если фильтрация по размеру не нужна, введите 0."
+   },
+   "unknownSize": {
+      "message": "Неизвестный размер"
+   },
+   "uploadKey": {
+      "message": "Загрузить ключ"
+   },
+   "useSidePanel": {
+      "message": "Использовать боковую панель"
+   },
+   "userAgentTip": {
+      "message": "По умолчанию используется User Agent текущего браузера"
+   },
+   "verifying": {
+      "message": "Проверка"
+   },
+   "video": {
+      "message": "Видео"
+   },
+   "videoRecording": {
+      "message": "Запись видео"
+   },
+   "viewSlices": {
+      "message": "Просмотреть все сегменты и прогресс загрузки"
+   },
+   "volume": {
+      "message": "Громкость"
+   },
+   "waitDownload": {
+      "message": "Ожидание загрузки..."
+   },
+   "waitingForLiveData": {
+      "message": "Ожидание данных трансляции"
+   },
+   "waitingForMedia": {
+      "message": "Ожидание получения медиафайлов... Пожалуйста, не закрывайте эту страницу."
+   },
+   "wildcards": {
+      "message": "подстановочные знаки"
+   },
+   "winpopup": {
+      "message": "всплывающее окно в отдельном окне"
+   },
+   "winpreview": {
+      "message": "предпросмотр в окне"
+   },
+   "withinChina": {
+      "message": "Внутри Китая"
+   }
+}

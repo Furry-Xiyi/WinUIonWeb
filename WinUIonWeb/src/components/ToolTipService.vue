@@ -1,5 +1,5 @@
 <template>
-  <span class="tooltip-service-host" aria-hidden="true" style="display:none" />
+  <span ref="hostRef" class="tooltip-service-host" aria-hidden="true" style="display:none" />
   <ToolTip ref="fallbackRef" Content="{x:Bind ServiceContent}" />
 </template>
 <script lang="ts">
@@ -19,6 +19,11 @@ const SELECTOR = '[tooltipservice\\.tooltip]'
 const HOVER = 400, BETWEEN = 200, CLOSE = 167, DURATION = 5000
 const ServiceContent = ref('')
 provide(xamlScopeKey, { ServiceContent })
+const hostRef = ref<HTMLElement | null>(null)
+const ownerDocument = () => hostRef.value?.ownerDocument ?? document
+const ownerWindow = () => ownerDocument().defaultView ?? window
+const isNode = (value: EventTarget | null): value is Node => Boolean(value && typeof value === 'object' && 'nodeType' in value)
+const isHTMLElement = (value: Node): value is HTMLElement => value.nodeType === 1 && (value as Element).namespaceURI === 'http://www.w3.org/1999/xhtml'
 const fallbackRef = ref<{ Controller: ToolTipController } | null>(null)
 const owner = shallowRef<HTMLElement | null>(null)
 const mode = ref<ToolTipInputMode>('none'), point = ref<ToolTipPoint | null>(null), theme = ref('')
@@ -42,7 +47,7 @@ const canOpen = (element: HTMLElement) => {
   return Boolean(content) && !/\{(?:x:Bind|Binding)\s|\[object Object\]/.test(content!)
 }
 const findOwner = (target: EventTarget | null) => {
-  let current = target instanceof HTMLElement ? target : target instanceof Node ? target.parentElement : null
+  let current = !isNode(target) ? null : isHTMLElement(target) ? target : target.parentElement
   while (current) { if (current.hasAttribute(TOOLTIP)) return current; current = current.parentElement }
   return null
 }
@@ -58,9 +63,9 @@ function restoreTitle(element: HTMLElement) {
   if (original === null || original === undefined) element.removeAttribute('title'); else element.setAttribute('title', original)
   attached.delete(element); originalTitles.delete(element)
 }
-const clearOpen = () => { if (openTimer !== undefined) window.clearTimeout(openTimer); openTimer = undefined; pending = null; openSequence += 1 }
-const clearClose = () => { if (closeTimer !== undefined) window.clearTimeout(closeTimer); closeTimer = undefined }
-const clearTouch = () => { if (touchTimer !== undefined) window.clearTimeout(touchTimer); touchTimer = undefined }
+const clearOpen = () => { if (openTimer !== undefined) ownerWindow().clearTimeout(openTimer); openTimer = undefined; pending = null; openSequence += 1 }
+const clearClose = () => { if (closeTimer !== undefined) ownerWindow().clearTimeout(closeTimer); closeTimer = undefined }
+const clearTouch = () => { if (touchTimer !== undefined) ownerWindow().clearTimeout(touchTimer); touchTimer = undefined }
 function restoreDescription(element: HTMLElement) {
   if (!describedBy.has(element)) return
   const original = describedBy.get(element)
@@ -70,7 +75,7 @@ function restoreDescription(element: HTMLElement) {
 function closeActive() {
   clearOpen(); clearClose(); clearTouch()
   if (active) {
-    controller(active)?.Close(); restoreDescription(active); lastClosed = performance.now()
+    controller(active)?.Close(); restoreDescription(active); lastClosed = ownerWindow().performance.now()
   }
   active = null
 }
@@ -110,10 +115,10 @@ function queueOpen(element: HTMLElement, input: ToolTipInputMode, at?: ToolTipPo
   if (pending === element) { lastPoint = at; return }
   const changing = Boolean(active && active !== element)
   if (changing) closeActive(); else { clearOpen(); clearClose() }
-  const recentlyClosed = performance.now() - lastClosed <= BETWEEN
+  const recentlyClosed = ownerWindow().performance.now() - lastClosed <= BETWEEN
   const delay = input === 'touch' ? (recentlyClosed || changing ? 0 : HOVER) : input === 'keyboard' ? HOVER * 2 : (recentlyClosed || changing ? HOVER * 1.5 : HOVER * 2)
   pending = element; lastPoint = at
-  openTimer = window.setTimeout(() => { void openActive(element, input, lastPoint) }, delay)
+  openTimer = ownerWindow().setTimeout(() => { void openActive(element, input, lastPoint) }, delay)
 }
 function inSafeZone(at: ToolTipPoint) {
   const tip = active ? controller(active)?.Element() : null
@@ -123,16 +128,18 @@ function queueClose(element: HTMLElement, force = false) {
   if (pending !== element && active !== element) return
   if (pending === element) clearOpen()
   if (!force && lastPoint && inSafeZone(lastPoint)) return
-  if (closeTimer === undefined) closeTimer = window.setTimeout(() => { closeTimer = undefined; closeActive() }, CLOSE)
+  if (closeTimer === undefined) closeTimer = ownerWindow().setTimeout(() => { closeTimer = undefined; closeActive() }, CLOSE)
 }
 function scan(node: Node) {
-  if (!(node instanceof Element)) return
-  if (node instanceof HTMLElement && node.hasAttribute(TOOLTIP)) syncTitle(node)
-  node.querySelectorAll<HTMLElement>(SELECTOR).forEach(syncTitle)
+  if (node.nodeType !== 1) return
+  const element = node as Element
+  if (isHTMLElement(node) && element.hasAttribute(TOOLTIP)) syncTitle(node)
+  element.querySelectorAll<HTMLElement>(SELECTOR).forEach(syncTitle)
 }
 function release(node: Node) {
-  if (!(node instanceof Element)) return
-  const nodes = node instanceof HTMLElement && node.hasAttribute(TOOLTIP) ? [node, ...node.querySelectorAll<HTMLElement>(SELECTOR)] : [...node.querySelectorAll<HTMLElement>(SELECTOR)]
+  if (node.nodeType !== 1) return
+  const element = node as Element
+  const nodes = isHTMLElement(node) && element.hasAttribute(TOOLTIP) ? [node, ...element.querySelectorAll<HTMLElement>(SELECTOR)] : [...element.querySelectorAll<HTMLElement>(SELECTOR)]
   nodes.forEach(element => { if (active === element) closeActive(); if (pending === element) clearOpen(); if (suppressed === element) suppressed = null; restoreTitle(element) })
 }
 function onPointerOver(event: PointerEvent) {
@@ -149,7 +156,7 @@ function onPointerOut(event: PointerEvent) {
   const popup = (event.target as HTMLElement | null)?.closest?.('.win-tooltip')
   if (popup && active) {
     const related = event.relatedTarget
-    if (!(related instanceof Node && popup.contains(related))) {
+    if (!(isNode(related) && popup.contains(related))) {
       lastPoint = { x: event.clientX, y: event.clientY }
       queueClose(active, related === null)
     }
@@ -158,8 +165,11 @@ function onPointerOut(event: PointerEvent) {
   const element = findOwner(event.target)
   if (!element) return
   const related = event.relatedTarget
-  if (related instanceof Node && element.contains(related)) return
-  if (suppressed === element) suppressed = null
+  if (isNode(related) && element.contains(related)) return
+  // DOM updates under a stationary pointer can emit pointerout with a null
+  // relatedTarget even though the owner remains hovered. Keep a clicked or
+  // dismissed tip suppressed until the pointer really leaves that owner.
+  if (suppressed === element && !element.matches(':hover')) suppressed = null
   lastPoint = { x: event.clientX, y: event.clientY }
   queueClose(element, related === null)
 }
@@ -168,14 +178,21 @@ function onPointerDown(event: PointerEvent) {
   inputMode = event.pointerType === 'touch' ? 'touch' : 'mouse'
   if (event.pointerType === 'touch' && element) {
     queueOpen(element, 'touch', { x: event.clientX, y: event.clientY })
-    clearTouch(); touchTimer = window.setTimeout(closeActive, DURATION)
+    clearTouch(); touchTimer = ownerWindow().setTimeout(closeActive, DURATION)
   } else if (element) { suppressed = element; if (active === element || pending === element) closeActive() }
   else if (active) closeActive()
 }
 function onPointerCanceled() { closeActive() }
 function onPointerReleased(event: PointerEvent) { if (event.pointerType === 'touch' && pending) clearOpen() }
 function onFocusIn(event: FocusEvent) { const element = findOwner(event.target); if (element && inputMode === 'keyboard') queueOpen(element, 'keyboard') }
-function onFocusOut(event: FocusEvent) { const element = findOwner(event.target); if (element && !(event.relatedTarget instanceof Node && element.contains(event.relatedTarget))) { if (suppressed === element) suppressed = null; queueClose(element, true) } }
+function onFocusOut(event: FocusEvent) {
+  const element = findOwner(event.target)
+  if (!element || isNode(event.relatedTarget) && element.contains(event.relatedTarget)) return
+  // Clicking a navigation toggle can move focus without moving the mouse.
+  // Keep its tip dismissed until the pointer actually leaves the owner.
+  if (suppressed === element && !(inputMode === 'mouse' && element.matches(':hover'))) suppressed = null
+  queueClose(element, true)
+}
 function onKeyDown(event: KeyboardEvent) {
   inputMode = 'keyboard'
   if (event.key === 'Escape') { if (active) suppressed = active; closeActive(); return }
@@ -184,12 +201,13 @@ function onKeyDown(event: KeyboardEvent) {
   if (!['Alt', 'Backspace', 'Delete', 'ArrowDown', 'End', 'Home', 'Insert', 'ArrowLeft', 'PageDown', 'PageUp', 'ArrowRight', ' ', 'ArrowUp'].includes(event.key) && active) closeActive()
 }
 function onBlur() { closeActive(); suppressed = null }
-function onVisibilityChanged() { if (document.hidden) onBlur() }
+function onVisibilityChanged() { if (ownerDocument().hidden) onBlur() }
 const listeners = { pointerover: onPointerOver, pointermove: onPointerMove, pointerout: onPointerOut, pointerdown: onPointerDown, pointercancel: onPointerCanceled, lostpointercapture: onPointerCanceled, pointerup: onPointerReleased, keydown: onKeyDown, focusin: onFocusIn, focusout: onFocusOut } as const
 onMounted(() => {
-  document.querySelectorAll<HTMLElement>(SELECTOR).forEach(syncTitle)
-  observer = new MutationObserver(records => records.forEach(record => {
-    if (record.type === 'attributes' && record.target instanceof HTMLElement) {
+  const doc = ownerDocument(), view = ownerWindow()
+  doc.querySelectorAll<HTMLElement>(SELECTOR).forEach(syncTitle)
+  observer = new view.MutationObserver(records => records.forEach(record => {
+    if (record.type === 'attributes' && isHTMLElement(record.target)) {
       if (record.attributeName === TOOLTIP) syncTitle(record.target)
       if (active && (record.target === active || record.target.contains(active))) {
         if (!canOpen(active)) closeActive()
@@ -198,13 +216,14 @@ onMounted(() => {
     }
     record.addedNodes.forEach(scan); record.removedNodes.forEach(release)
   }))
-  observer.observe(document.body, { attributes: true, attributeFilter: [TOOLTIP, PLACEMENT, TARGET, 'class', 'disabled', 'aria-disabled'], childList: true, subtree: true })
-  for (const [event, handler] of Object.entries(listeners)) document.addEventListener(event, handler as EventListener, true)
-  window.addEventListener('blur', onBlur); document.addEventListener('visibilitychange', onVisibilityChanged)
+  observer.observe(doc.body, { attributes: true, attributeFilter: [TOOLTIP, PLACEMENT, TARGET, 'class', 'disabled', 'aria-disabled'], childList: true, subtree: true })
+  for (const [event, handler] of Object.entries(listeners)) doc.addEventListener(event, handler as EventListener, true)
+  view.addEventListener('blur', onBlur); doc.addEventListener('visibilitychange', onVisibilityChanged)
 })
 onBeforeUnmount(() => {
+  const doc = ownerDocument(), view = ownerWindow()
   observer?.disconnect(); closeActive(); attached.forEach(restoreTitle)
-  for (const [event, handler] of Object.entries(listeners)) document.removeEventListener(event, handler as EventListener, true)
-  window.removeEventListener('blur', onBlur); document.removeEventListener('visibilitychange', onVisibilityChanged)
+  for (const [event, handler] of Object.entries(listeners)) doc.removeEventListener(event, handler as EventListener, true)
+  view.removeEventListener('blur', onBlur); doc.removeEventListener('visibilitychange', onVisibilityChanged)
 })
 </script>

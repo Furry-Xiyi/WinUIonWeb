@@ -7,11 +7,16 @@
   <TitleBar
     ref="titleBarRef"
     class="gallery-titlebar"
-    :class="{ 'is-uwp-webview': isHostedInUwpWebView }"
+    :class="{ 'is-uwp-webview': isHostedInUwpWebView, 'has-inline-compact-search': titlebarCompact && !titlebarSearchUsesIcon }"
+    AutoRefreshDragRegions="True"
+    PreferredHeightOption="Tall"
+    IsCaptionButtonsVisible="True"
+    CaptionButtonsFramework="Tauri"
     Title="{x:Bind appTitle}"
     IsBackButtonVisible="{x:Bind canGoBack, Mode=OneWay}"
     IsBackButtonEnabled="{x:Bind canGoBack, Mode=OneWay}"
     IsPaneToggleButtonVisible="{x:Bind isPaneToggleVisible, Mode=OneWay}"
+    IsPaneOpen="{x:Bind isPaneOpen, Mode=OneWay}"
     BackRequested="onBackRequested"
     PaneToggleRequested="onTopBarToggle">
     <TitleBar.IconSource>
@@ -35,15 +40,24 @@
       QueryIcon="Find"
       OpenOnFocus="False"
       class="gallery-titlebar-search"
-      Width="350"
       QuerySubmitted="onSearchQuerySubmitted" />
     <Button
       Grid.Column="1"
       class="gallery-titlebar-search-button"
       AutomationProperties.Name="{x:Bind searchSubmitLabel}"
       ToolTipService.ToolTip="{x:Bind searchSubmitLabel}"
+      TitleBar.IsDragRegion="False"
+      Style="{StaticResource TitleBarBackButtonStyle}"
+      VerticalAlignment="Stretch"
+      HorizontalContentAlignment="Center"
+      VerticalContentAlignment="Center"
+      @pointerdown.stop
+      @click.stop
       Click="onCompactSearchButtonClick">
-      <FontIcon class="gallery-titlebar-search-button-icon" Glyph="&#xE721;" />
+      <AnimatedIcon class="gallery-titlebar-search-button-icon" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <AnimatedIcon.Source><animatedvisuals:AnimatedFindVisualSource /></AnimatedIcon.Source>
+        <AnimatedIcon.FallbackIconSource><FontIconSource Glyph="&#xE721;" FontSize="16" /></AnimatedIcon.FallbackIconSource>
+      </AnimatedIcon>
     </Button>
     </Grid>
     </TitleBar.Content>
@@ -176,8 +190,46 @@ const searchBoxRef = ref(null);
 const compactSearchOpen = ref(false);
 const compactSearchRef = ref(null);
 const compactSearchBoxRef = ref(null);
+const titlebarSearchFitsInCompactMode = ref(false);
 const titlebarCompact = computed(() => Boolean(titleBarRef.value?.isCompact));
-const titlebarNarrow = computed(() => Boolean(titleBarRef.value?.isNarrow));
+const titlebarSearchUsesIcon = computed(() => titlebarCompact.value && !titlebarSearchFitsInCompactMode.value);
+let titlebarContentResizeObserver = null;
+let titlebarContentMeasureTimer = 0;
+const measureTitlebarContentWidth = () => {
+  const titlebarElement = titleBarRef.value?.$el;
+  const content = typeof Element !== 'undefined' && titlebarElement instanceof Element
+    ? titlebarElement.querySelector('.win-titlebar-content')
+    : null;
+  const search = typeof Element !== 'undefined' && titlebarElement instanceof Element
+    ? titlebarElement.querySelector('.gallery-titlebar-search')
+    : null;
+  if (!(content instanceof HTMLElement) || !(search instanceof HTMLElement)) {
+    titlebarSearchFitsInCompactMode.value = false;
+    return;
+  }
+  const contentStyle = content.ownerDocument.defaultView?.getComputedStyle(content);
+  const searchStyle = search.ownerDocument.defaultView?.getComputedStyle(search);
+  const px = (value) => Number.parseFloat(value) || 0;
+  const availableWidth = content.clientWidth - px(contentStyle?.paddingLeft ?? '') - px(contentStyle?.paddingRight ?? '');
+  // Compare against the stable minimum, not the flex-shrunk used width. The
+  // latter changes when the input is hidden and can make the observer flip
+  // between the input and icon layouts during a live window resize.
+  const requiredWidth = Math.max(160, px(searchStyle?.minWidth ?? ''))
+    + px(searchStyle?.marginLeft ?? '') + px(searchStyle?.marginRight ?? '');
+  // Switch at the actual minimum width. A large hysteresis made the icon
+  // appear while the title bar still had enough room for the input.
+  const hysteresis = 2;
+  const threshold = titlebarSearchFitsInCompactMode.value ? requiredWidth - hysteresis : requiredWidth;
+  const fits = availableWidth >= threshold;
+  if (titlebarSearchFitsInCompactMode.value !== fits) titlebarSearchFitsInCompactMode.value = fits;
+};
+const scheduleTitlebarSearchMeasurement = () => {
+  if (titlebarContentMeasureTimer) window.clearTimeout(titlebarContentMeasureTimer);
+  titlebarContentMeasureTimer = window.setTimeout(() => {
+    titlebarContentMeasureTimer = 0;
+    measureTitlebarContentWidth();
+  }, 80);
+};
 const searchQuery = ref('');
 const searchResults = computed(() => {
   const query = searchQuery.value.trim();
@@ -225,7 +277,7 @@ const isPaneOpen = ref(true);
 const themeSetting = ref(readStoredSetting('winui-theme-setting', 'system', ['system', 'light', 'dark']));
 const galleryWindowBackdrop = inject(galleryWindowBackdropKey, shallowRef(null));
 const multipleWindowManager = inject(multipleWindowManagerKey, null);
-const materialSetting = ref(readStoredSetting('winui-material-setting', 'mica', ['mica', 'acrylic']));
+const materialSetting = ref(readStoredSetting('winui-material-setting', 'mica', ['mica', 'acrylic', 'acrylic-thin']));
 const navigationTransitionInfo = ref(readStoredNavigationTransitionInfo());
 const pageTransitionInfo = shallowRef(normalizeNavigationTransitionInfo(navigationTransitionInfo.value));
 const pageTransitionMode = ref('New');
@@ -831,7 +883,7 @@ const onSearchQuerySubmitted = (_sender, { QueryText, ChosenSuggestion }) => {
   void navigate((exact ?? items[0]).tag, navigationTransitionInfo.value);
 };
 const focusSearchBox = () => {
-  if (titlebarNarrow.value || titlebarCompact.value) {
+  if (titlebarSearchUsesIcon.value) {
     if (!compactSearchOpen.value) compactSearchOpen.value = true;
     void nextTick(() => {
       compactSearchRef.value?.querySelector('input')?.focus({ preventScroll: true });
@@ -847,20 +899,9 @@ const onWindowKeydown = (event) => {
   }
 };
 const onWindowResize = () => {
-  void nextTick(() => {
-    const titleBarElement = titleBarRef.value?.$el;
-    // During route transitions a component ref can briefly expose a comment
-    // node (or another Vue proxy) instead of the title-bar element. Restrict
-    // DOM access to an actual Element so a resize cannot abort rendering.
-    const searchElement = typeof Element !== 'undefined' && titleBarElement instanceof Element
-      ? titleBarElement.querySelector('.gallery-titlebar-search')
-      : null;
-    const searchVisible = searchElement instanceof Element
-      && getComputedStyle(searchElement).display !== 'none';
-    if ((!titlebarNarrow.value && !titlebarCompact.value) || searchVisible) {
-      compactSearchOpen.value = false;
-    }
-  });
+  // Windowed/fullscreen transitions can deliver many resize notifications.
+  // Measure only after the size settles; the input itself still flexes live.
+  scheduleTitlebarSearchMeasurement();
 };
 
 provide(xamlScopeKey, {
@@ -886,6 +927,11 @@ watch([galleryWindowBackdrop, themeSetting], ([connection, mode]) => {
   if (!connection) return;
   const theme = mode === 'dark' ? 'Dark' : mode === 'light' ? 'Light' : 'Default';
   void connection.SetTheme(theme).catch(error => console.error(error));
+}, { immediate: true });
+watch([galleryWindowBackdrop, materialSetting], ([connection, material]) => {
+  if (!connection) return;
+  const backdrop = material === 'acrylic-thin' ? 'AcrylicThin' : material === 'acrylic' ? 'Acrylic' : 'Mica';
+  void connection.SetMaterial(backdrop).catch(error => console.error(error));
 }, { immediate: true });
 persistSetting('winui-nav-position', navPosition);
 persistSetting('winui-theme-setting', themeSetting);
@@ -915,6 +961,13 @@ function postUwpSetting(key, value) {
 
 onMounted(() => {
   isGalleryMounted = true;
+  scheduleTitlebarSearchMeasurement();
+  const titlebarElement = titleBarRef.value?.$el;
+  const ResizeObserverConstructor = titlebarElement?.ownerDocument?.defaultView?.ResizeObserver;
+  if (titlebarElement instanceof HTMLElement && ResizeObserverConstructor) {
+    titlebarContentResizeObserver = new ResizeObserverConstructor(scheduleTitlebarSearchMeasurement);
+    titlebarContentResizeObserver.observe(titlebarElement);
+  }
   void nextTick().then(() => {
     if (!isGalleryMounted || unofficialNoticeRequested || !unofficialNoticeDialog.value) return;
     unofficialNoticeRequested = true;
@@ -947,6 +1000,10 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onWindowKeydown);
   window.removeEventListener('resize', onWindowResize);
   window.removeEventListener('blur', onWindowBlurForCompactSearch);
+  titlebarContentResizeObserver?.disconnect();
+  titlebarContentResizeObserver = null;
+  if (titlebarContentMeasureTimer) window.clearTimeout(titlebarContentMeasureTimer);
+  titlebarContentMeasureTimer = 0;
   document.removeEventListener('visibilitychange', onDocumentVisibilityChangeForCompactSearch);
   document.removeEventListener('focusout', onDocumentFocusOutForCompactSearch, true);
 });
@@ -954,6 +1011,7 @@ onBeforeUnmount(() => {
 watch(themeSetting, (value) => postUwpSetting('theme', value));
 watch(materialSetting, (value) => postUwpSetting('material', value));
 watch(navigationTransitionInfo, (value) => postUwpSetting('NavigationTransitionInfo', stringifyNavigationTransitionInfo(value)));
+watch(titlebarCompact, scheduleTitlebarSearchMeasurement);
 watch(compactSearchOpen, (open) => {
   if (open) {
     document.addEventListener('pointerdown', onDocumentPointerDownForCompactSearch, true);
@@ -967,11 +1025,9 @@ watch(compactSearchOpen, (open) => {
     document.removeEventListener('keydown', onDocumentKeydownForCompactSearch);
   }
 });
-watch(titlebarNarrow, (narrow) => {
-  if (!narrow) compactSearchOpen.value = false;
-});
-watch(titlebarCompact, (compact) => {
-  if (!compact) compactSearchOpen.value = false;
+watch(titlebarSearchUsesIcon, (usesIcon) => {
+  if (!usesIcon) compactSearchOpen.value = false;
+  void nextTick(() => titleBarRef.value?.RecomputeDragRegions?.());
 });
 </script>
 
@@ -998,13 +1054,13 @@ watch(titlebarCompact, (compact) => {
     z-index: 1000;
   }
 
-  .gallery-titlebar-content { width: 100%; min-width: 0; height: 100%; }
+  .gallery-titlebar-content { width: 100%; min-width: 0; height: 100%; grid-template-rows: minmax(0, 1fr); }
 
   .gallery-app-content {
     box-sizing: border-box;
     width: 100%;
     height: 100%;
-    --gallery-titlebar-bottom: calc(var(--WindowTitleBarY, env(titlebar-area-y, 0px)) + 48px);
+    --gallery-titlebar-bottom: calc(var(--WindowTitleBarY, env(titlebar-area-y, 0px)) + 46px);
     --gallery-caption-band-bottom: var(--WindowCaptionBandBottom, calc(env(titlebar-area-y, 0px) + env(titlebar-area-height, 0px)));
     padding-top: max(var(--gallery-titlebar-bottom), var(--gallery-caption-band-bottom));
     min-width: 0;
@@ -1026,8 +1082,10 @@ watch(titlebarCompact, (compact) => {
   }
 
   .gallery-titlebar .gallery-titlebar-search {
-    width: 350px;
+    width: clamp(160px, 35vw, 350px);
     max-width: 350px;
+    min-width: 160px;
+    box-sizing: border-box;
     flex: 0 1 350px;
   }
 
@@ -1049,16 +1107,23 @@ watch(titlebarCompact, (compact) => {
   /* 标题栏实际宽度过窄时优先保留标题，隐藏搜索框；
      由 TitleBar 根据自身宽度添加 is-narrow，不依赖视口媒体查询，
      这样 PWA overlay / WebView2 中标题栏区域比视口窄时也能生效。 */
-  .gallery-titlebar.is-narrow .gallery-titlebar-search,
   .gallery-titlebar.is-compact .gallery-titlebar-search {
     display: none !important;
+  }
+
+  /* TitleBar first collapses its title before removing Gallery's search field.
+     Keep the full input inline as long as the compact content lane can fit it. */
+  .gallery-titlebar.is-compact.has-inline-compact-search .gallery-titlebar-search {
+    display: flex !important;
   }
 
   /* 窄标题栏时标题后的搜索按钮：样式与返回/汉堡按钮保持一致 */
   .gallery-titlebar-search-button {
     display: none;
     box-sizing: border-box;
-    width: 40px;
+    width: var(--TitleBarBackButtonWidth, 40px);
+    height: calc(100% - 4px);
+    min-height: 0;
     margin: 2px;
     padding: 0;
     border: 0;
@@ -1067,26 +1132,22 @@ watch(titlebarCompact, (compact) => {
     align-self: stretch;
     align-items: center;
     justify-content: center;
-    color: var(--TitleBarForegroundBrush, var(--text-primary));
-    background: var(--TitleBarBackButtonBackground, transparent);
-    cursor: pointer;
+    color: var(--ButtonForegroundCurrent);
+    background: transparent;
+    cursor: default;
     font-family: var(--SymbolThemeFontFamily, 'WinUIOnWebIcons');
     font-size: 16px;
-    transition: background var(--fast-duration) var(--fast-out-slow-in), color var(--fast-duration) var(--fast-out-slow-in);
+    transition: none;
+    app-region: no-drag;
+    -webkit-app-region: no-drag;
   }
 
-  .gallery-titlebar.is-narrow .gallery-titlebar-search-button,
   .gallery-titlebar.is-compact .gallery-titlebar-search-button {
     display: flex;
   }
 
-  .gallery-titlebar-search-button:hover {
-    background: var(--TitleBarBackButtonBackgroundPointerOver, var(--subtle-secondary));
-  }
-
-  .gallery-titlebar-search-button:active {
-    background: var(--TitleBarBackButtonBackgroundPressed, var(--subtle-tertiary));
-    color: var(--text-secondary);
+  .gallery-titlebar.is-compact.has-inline-compact-search .gallery-titlebar-search-button {
+    display: none !important;
   }
 
   .gallery-titlebar-search-button-icon {
@@ -1100,7 +1161,6 @@ watch(titlebarCompact, (compact) => {
   }
 
   /* 窄标题栏时内容列左对齐，让搜索按钮紧跟标题 */
-  .gallery-titlebar.is-narrow .win-titlebar-content,
   .gallery-titlebar.is-compact .win-titlebar-content {
     justify-content: flex-start;
     padding: var(--TitleBarCompactContentMargin, 0 16px 0 0);
@@ -1109,7 +1169,7 @@ watch(titlebarCompact, (compact) => {
   /* 弹出的单个搜索框：位于标题栏下方，距视口左侧 16px */
   .gallery-compact-search-popup {
     position: fixed;
-    top: max(calc(var(--WindowTitleBarY, env(titlebar-area-y, 0px)) + 48px), var(--WindowCaptionBandBottom, calc(env(titlebar-area-y, 0px) + env(titlebar-area-height, 0px))));
+    top: max(calc(var(--WindowTitleBarY, env(titlebar-area-y, 0px)) + 46px), var(--WindowCaptionBandBottom, calc(env(titlebar-area-y, 0px) + env(titlebar-area-height, 0px))));
     left: 16px;
     width: min(350px, calc(100vw - 32px));
     z-index: 10000;
@@ -1178,16 +1238,16 @@ watch(titlebarCompact, (compact) => {
     --subtle-secondary: rgba(0, 0, 0, 0.04);
     --subtle-tertiary: rgba(0, 0, 0, 0.02);
     --subtle-pressed: rgba(0, 0, 0, 0.06);
-    --accent-base: #0067C0;
-    --accent-hover: rgba(0, 103, 192, 0.90);
-    --accent-pressed: rgba(0, 103, 192, 0.80);
-    --accent-aa-fill: #004E8C;
+    --accent-base: var(--winui-system-accent-color-light, var(--winui-system-accent-color, #0067C0));
+    --accent-hover: var(--winui-system-accent-hover-light, color-mix(in srgb, var(--accent-base) 90%, transparent));
+    --accent-pressed: var(--winui-system-accent-pressed-light, color-mix(in srgb, var(--accent-base) 80%, transparent));
+    --accent-aa-fill: var(--SystemAccentColorDark1, #004E8C);
     --accent-aa-text: #FFFFFF;
     --accent-fill-disabled: rgba(0, 0, 0, 0.22);
-    --accent-text: #FFFFFF;
+    --accent-text: var(--winui-system-accent-text-light, #FFFFFF);
     --accent-text-secondary: rgba(255, 255, 255, 0.70);
-    --TextOnAccentFillColorPrimaryBrush: #FFFFFF;
-    --TextOnAccentFillColorSecondaryBrush: rgba(255, 255, 255, 0.70);
+    --TextOnAccentFillColorPrimaryBrush: var(--winui-system-accent-text-light, #FFFFFF);
+    --TextOnAccentFillColorSecondaryBrush: var(--winui-system-accent-text-secondary-light, rgba(255, 255, 255, 0.70));
     --accent-border: rgba(255, 255, 255, 0.08);
     --accent-border-accent: rgba(0, 0, 0, 0.40);
     --button-stroke: rgba(0, 0, 0, 0.06);
@@ -1200,12 +1260,12 @@ watch(titlebarCompact, (compact) => {
     --toggle-on-thumb: #FFFFFF;
     --radio-border: rgba(0, 0, 0, 0.45);
     --system-accent-color-dark-1: var(--accent-base);
-    --AccentFillColorDefaultBrush: #0067C0;
+    --AccentFillColorDefaultBrush: var(--accent-base);
     --TextFillColorInverseBrush: #FFFFFF;
     --CardStrokeColorDefaultBrush: #0000000f;
     --NavigationViewContentGridBorderBrush: var(--CardStrokeColorDefaultBrush);
     --NavigationViewContentBackground: var(--LayerFillColorDefaultBrush);
-    --SystemFillColorAttentionBrush: #0067C0;
+    --SystemFillColorAttentionBrush: var(--accent-base);
     --SystemFillColorSuccessBrush: #0F7B0F;
     --SystemFillColorCautionBrush: #9D5D00;
     --SystemFillColorCriticalBrush: #C42B1C;
@@ -1270,16 +1330,16 @@ watch(titlebarCompact, (compact) => {
     --subtle-secondary: rgba(255, 255, 255, 0.06);
     --subtle-tertiary: rgba(255, 255, 255, 0.04);
     --subtle-pressed: rgba(255, 255, 255, 0.03);
-    --accent-base: #4CC2FF;
-    --accent-hover: rgba(96, 205, 255, 0.90);
-    --accent-pressed: rgba(96, 205, 255, 0.80);
-    --accent-aa-fill: #79D2FF;
+    --accent-base: var(--winui-system-accent-color-dark, color-mix(in srgb, var(--winui-system-accent-color, #0067C0) 70%, white));
+    --accent-hover: var(--winui-system-accent-hover-dark, color-mix(in srgb, var(--accent-base) 90%, transparent));
+    --accent-pressed: var(--winui-system-accent-pressed-dark, color-mix(in srgb, var(--accent-base) 80%, transparent));
+    --accent-aa-fill: var(--SystemAccentColorLight2, #79D2FF);
     --accent-aa-text: #000000;
     --accent-fill-disabled: rgba(255, 255, 255, 0.16);
-    --accent-text: #000000;
+    --accent-text: var(--winui-system-accent-text-dark, #000000);
     --accent-text-secondary: rgba(0, 0, 0, 0.50);
-    --TextOnAccentFillColorPrimaryBrush: #000000;
-    --TextOnAccentFillColorSecondaryBrush: rgba(0, 0, 0, 0.50);
+    --TextOnAccentFillColorPrimaryBrush: var(--winui-system-accent-text-dark, #000000);
+    --TextOnAccentFillColorSecondaryBrush: var(--winui-system-accent-text-secondary-dark, rgba(0, 0, 0, 0.50));
     --accent-border: rgba(0, 0, 0, 0.14);
     --accent-border-accent: rgba(255, 255, 255, 0.08);
     --button-stroke: rgba(255, 255, 255, 0.0075);
@@ -1292,12 +1352,12 @@ watch(titlebarCompact, (compact) => {
     --toggle-on-thumb: #000000;
     --radio-border: rgba(255, 255, 255, 0.54);
     --system-accent-color-light-2: var(--accent-base);
-    --AccentFillColorDefaultBrush: #4CC2FF;
+    --AccentFillColorDefaultBrush: var(--accent-base);
     --TextFillColorInverseBrush: rgba(0, 0, 0, 0.89);
     --CardStrokeColorDefaultBrush: #00000019;
     --NavigationViewContentGridBorderBrush: var(--CardStrokeColorDefaultBrush);
     --NavigationViewContentBackground: var(--LayerFillColorDefaultBrush);
-    --SystemFillColorAttentionBrush: #4CC2FF;
+    --SystemFillColorAttentionBrush: var(--accent-base);
     --SystemFillColorSuccessBrush: #6CCB5F;
     --SystemFillColorCautionBrush: #FCE100;
     --SystemFillColorCriticalBrush: #FF99A4;

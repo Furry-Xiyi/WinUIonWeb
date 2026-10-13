@@ -6,7 +6,7 @@
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
       <ContentPresenter v-if="hasHeader" class="picker-header" Grid.Row="0"><HeaderContent /></ContentPresenter>
-      <Button ref="buttonRef" class="picker-button" Grid.Row="1" Style="{StaticResource TimePickerFlyoutButtonStyle}" Padding="0" MinHeight="{ThemeResource TextControlThemeMinHeight}" MinWidth="0" BorderThickness="{x:Bind PickerBorderThickness}" CornerRadius="{x:Bind PickerCornerRadius}" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsEnabled="{x:Bind PickerEnabled}" AutomationProperties.Name="{x:Bind PickerAutomationName}" Click="OnFlyoutButtonClick">
+      <Button ref="buttonRef" class="picker-button" Grid.Row="1" Style="{StaticResource TimePickerFlyoutButtonStyle}" Padding="0" MinHeight="{ThemeResource TextControlThemeMinHeight}" MinWidth="0" BorderBrush="{x:Bind PickerBorderBrush}" BorderThickness="{x:Bind PickerBorderThickness}" CornerRadius="{x:Bind PickerCornerRadius}" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsEnabled="{x:Bind PickerEnabled}" AutomationProperties.Name="{x:Bind PickerAutomationName}" Click="OnFlyoutButtonClick">
         <Grid class="picker-button-grid" :style="columnStyle">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -229,7 +229,7 @@ const rootClasses = computed(() => ({ 'win-time-picker': true, 'has-no-time': lo
 const rootAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([key]) => !['class', 'style', 'TimeChanged', 'SelectedTimeChanged'].includes(key))))
 const rootStyle = computed(() => {
   const style: Record<string, unknown> = {
-    '--picker-background': value(props.Background), '--picker-foreground': value(props.Foreground), '--picker-border': value(props.BorderBrush),
+    '--picker-background': value(props.Background), '--picker-foreground': value(props.Foreground),
     '--picker-border-thickness': xamlThickness(value(props.BorderThickness)), '--picker-radius': cssLength(value(props.CornerRadius)), margin: xamlThickness(value(props.Margin)), padding: xamlThickness(value(props.Padding)),
     alignSelf: alignment(value(props.VerticalAlignment), 'vertical'), justifySelf: alignment(value(props.HorizontalAlignment), 'horizontal'), fontSize: cssLength(value(props.FontSize)), fontFamily: value(props.FontFamily) || undefined, fontWeight: value(props.FontWeight) === 'Normal' ? 400 : value(props.FontWeight)
   }
@@ -291,6 +291,7 @@ const publicApi = {
 }
 provide(xamlScopeKey, {
   PickerEnabled: enabled, PickerColumns: fields, PickerTheme: theme, PickerOverlayMode: computed(() => value(props.LightDismissOverlayMode)),
+  PickerBorderBrush: computed(() => value(props.BorderBrush)),
   PickerBorderThickness: computed(() => value(props.BorderThickness)), PickerCornerRadius: computed(() => value(props.CornerRadius)),
   PickerAutomationName: computed(() => [String(header.value || t('timePicker.name')), fields.value.map(field => textFor(field.key)).join(' ')].filter(Boolean).join(' ')),
   FirstText: computed(() => textFor(fields.value[0]?.key)), SecondText: computed(() => textFor(fields.value[1]?.key)), ThirdText: computed(() => textFor(fields.value[2]?.key)),
@@ -327,7 +328,6 @@ defineExpose(publicApi)
   --ButtonForegroundPointerOver: var(--TimePickerButtonForegroundPointerOver);
   --ButtonForegroundPressed: var(--TimePickerButtonForegroundPressed);
   --ButtonForegroundDisabled: var(--TimePickerButtonForegroundDisabled);
-  --ButtonBorderBrush: var(--picker-border);
   --ButtonBorderBrushPointerOver: var(--TimePickerButtonBorderBrushPointerOver);
   --ButtonBorderBrushPressed: var(--TimePickerButtonBorderBrushPressed);
   --ButtonBorderBrushDisabled: var(--TimePickerButtonBorderBrushDisabled);

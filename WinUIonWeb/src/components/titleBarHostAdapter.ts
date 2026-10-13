@@ -25,6 +25,36 @@ export interface TitleBarDragRegions {
   Caption: TitleBarRegion
   Passthrough: readonly TitleBarRegion[]
   Icon: TitleBarRegion | null
+  /** Actual Web-drawn button bounds; a Windows host may hit-test maximize for Snap Layouts. */
+  CaptionButtons?: Partial<Record<TitleBarCaptionButton, TitleBarRegion>>
+}
+export type TitleBarCaptionButton = 'minimize' | 'maximize' | 'close'
+export type TitleBarCaptionButtonsFramework = 'Tauri' | 'Electron'
+/**
+ * A native host may keep the maximize hit-test alive so Windows 11 can show
+ * Snap Layouts.  The host must route any native click through
+ * SubscribeCaptionButtonAction; it must not draw the caption button.
+ */
+export type TitleBarCaptionHitTestMode = 'Web' | 'NativeSnap'
+export interface TitleBarCaptionButtonState {
+  Button: TitleBarCaptionButton | null
+  State: 'normal' | 'pointerOver' | 'pressed'
+}
+/** A host supplies real window actions; the control owns only the visuals. */
+export interface TitleBarWindowControls {
+  Minimize(): void | Promise<void>
+  ToggleMaximize(): void | Promise<void>
+  Close(): void | Promise<void>
+  IsMaximized(): boolean | Promise<boolean>
+  SubscribeStateChanged?(listener: () => void): (() => void) | Promise<() => void>
+  /** Route a native click only when it was not also delivered to the Web control. */
+  SubscribeCaptionButtonAction?(listener: (button: TitleBarCaptionButton) => void): (() => void) | Promise<() => void>
+  /** Select Web hit testing or native Snap Layout hit testing for the buttons. */
+  SetCaptionButtonHitTestMode?(mode: TitleBarCaptionHitTestMode): void | Promise<void>
+  UsesNativeCaptionHitTest?: boolean
+  SubscribeCaptionButtonState?(listener: (state: TitleBarCaptionButtonState) => void): (() => void) | Promise<() => void>
+  GetTitleBarInsets?(): TitleBarInsets | null
+  SubscribeTitleBarInsets?(listener: () => void): (() => void) | Promise<() => void>
 }
 export interface TitleBarWindowHost {
   GetTitle(): string
@@ -41,6 +71,15 @@ export interface TitleBarWindowHost {
   /** Actual non-client regions only. Ordinary browser windows have no implementation. */
   SetDragRegions?(regions: TitleBarDragRegions): void
   ClearDragRegions?(): void
+  Minimize?(): void | Promise<void>
+  ToggleMaximize?(): void | Promise<void>
+  Close?(): void | Promise<void>
+  IsMaximized?(): boolean | Promise<boolean>
+  SubscribeStateChanged?(listener: () => void): (() => void) | Promise<() => void>
+  SubscribeCaptionButtonAction?(listener: (button: TitleBarCaptionButton) => void): (() => void) | Promise<() => void>
+  SetCaptionButtonHitTestMode?(mode: TitleBarCaptionHitTestMode): void | Promise<void>
+  UsesNativeCaptionHitTest?: boolean
+  SubscribeCaptionButtonState?(listener: (state: TitleBarCaptionButtonState) => void): (() => void) | Promise<() => void>
 }
 export interface TitleBarHostAdapter {
   /** Return a host only for the TitleBar that owns the actual application window. */
@@ -96,8 +135,11 @@ export function getTitleBarHostPadding(bounds: TitleBarRegion, viewportWidth: nu
   return { LeftInset: left, RightInset: right }
 }
 
-export function createBrowserTitleBarWindowHost(owner: Window): TitleBarWindowHost {
+export function createBrowserTitleBarWindowHost(owner: Window, controlsOverride?: TitleBarWindowControls): TitleBarWindowHost {
   const overlay = (owner.navigator as Navigator & { windowControlsOverlay?: WindowControlsOverlay } | undefined)?.windowControlsOverlay
+  // This explicit host bridge is intentionally separate from the browser's
+  // windowControlsOverlay, which reports geometry but has no window actions.
+  const controls = controlsOverride ?? (owner as Window & { winUIonWebWindowControls?: TitleBarWindowControls }).winUIonWebWindowControls
   return {
     GetTitle: () => owner.document.title,
     SetTitle: title => { owner.document.title = title },
@@ -108,6 +150,7 @@ export function createBrowserTitleBarWindowHost(owner: Window): TitleBarWindowHo
       return () => { owner.removeEventListener('focus', focus); owner.removeEventListener('blur', blur) }
     },
     GetTitleBarInsets() {
+      if (controls?.GetTitleBarInsets) return controls.GetTitleBarInsets()
       if (!overlay?.visible) return null
       const rect = overlay.getTitlebarAreaRect()
       if (![rect.x, rect.y, rect.width, rect.height].every(Number.isFinite) || rect.width <= 0 || rect.height <= 0) return null
@@ -117,11 +160,45 @@ export function createBrowserTitleBarWindowHost(owner: Window): TitleBarWindowHo
       }
     },
     SubscribeTitleBarInsets(listener) {
+      const stopControls = controls?.SubscribeTitleBarInsets?.(listener)
       overlay?.addEventListener('geometrychange', listener)
       owner.addEventListener('resize', listener)
-      return () => { overlay?.removeEventListener('geometrychange', listener); owner.removeEventListener('resize', listener) }
+      return () => {
+        if (stopControls) void Promise.resolve(stopControls).then(stop => stop())
+        overlay?.removeEventListener('geometrychange', listener)
+        owner.removeEventListener('resize', listener)
+      }
     },
+    ...(controls ? {
+      Minimize: () => controls.Minimize(),
+      ToggleMaximize: () => controls.ToggleMaximize(),
+      Close: () => controls.Close(),
+      IsMaximized: () => controls.IsMaximized(),
+      SubscribeStateChanged: (listener: () => void) => controls.SubscribeStateChanged?.(listener) ?? (() => {}),
+      ...(controls.SubscribeCaptionButtonAction ? { SubscribeCaptionButtonAction: (listener: (button: TitleBarCaptionButton) => void) => controls.SubscribeCaptionButtonAction!(listener) } : {}),
+      ...(controls.SetCaptionButtonHitTestMode ? { SetCaptionButtonHitTestMode: (mode: TitleBarCaptionHitTestMode) => controls.SetCaptionButtonHitTestMode!(mode) } : {}),
+      get UsesNativeCaptionHitTest() { return controls.UsesNativeCaptionHitTest === true },
+      ...(controls.SubscribeCaptionButtonState ? { SubscribeCaptionButtonState: (listener: (state: TitleBarCaptionButtonState) => void) => controls.SubscribeCaptionButtonState!(listener) } : {}),
+    } : {}),
   }
+}
+
+/** Resolve the explicitly selected framework bridge for TitleBar caption actions. */
+export function createFrameworkTitleBarWindowHost(
+  owner: Window,
+  framework: TitleBarCaptionButtonsFramework,
+  registeredHost?: TitleBarWindowHost | null,
+): TitleBarWindowHost | null {
+  const hasActions = (host?: TitleBarWindowHost | null): host is TitleBarWindowHost =>
+    Boolean(host?.Minimize && host.ToggleMaximize && host.Close && host.IsMaximized)
+  if (framework === 'Tauri') {
+    // Never let a nested Gallery preview inherit the opener's window actions.
+    return hasActions(registeredHost) ? registeredHost : null
+  }
+  const controls = (owner as Window & {
+    electronAPI?: { windowControls?: TitleBarWindowControls }
+  }).electronAPI?.windowControls
+  return controls ? createBrowserTitleBarWindowHost(owner, controls) : null
 }
 export function connectTitleBarWindowHost(element: HTMLElement, adapter?: TitleBarHostAdapter | null): TitleBarWindowHost | null {
   const selected = adapter ?? installedAdapter
@@ -133,7 +210,8 @@ export function connectTitleBarWindowHost(element: HTMLElement, adapter?: TitleB
     const host = windowHosts.get(current)
     if (host) return host.IsTitleBarOwner?.(element) === false ? null : host
   }
-  if (!element.matches('.gallery-titlebar') && !element.closest('.win-system-backdrop-window-content')) return null
+  const sampleWindow = element.closest('.win-system-backdrop-window-content')
+  if (!element.matches('.gallery-titlebar') && (!sampleWindow || sampleWindow.querySelector('.win-titlebar') !== element)) return null
   const owner = element.ownerDocument.defaultView
   return owner ? createBrowserTitleBarWindowHost(owner) : null
 }

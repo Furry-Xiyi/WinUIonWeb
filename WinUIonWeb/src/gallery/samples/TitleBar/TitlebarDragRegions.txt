@@ -9,7 +9,7 @@ TitleBar drag regions
        True   -> always draggable
        False  -> always clickable
        unset  -> framework decides (default) -->
-<TitleBar x:Name="titleBar" Title="Drag regions">
+<TitleBar x:Name="titleBar" PreferredHeightOption="Tall" Title="Drag regions">
     <TitleBar.Resources>
         <!-- TitleBar.Content uses Center alignment by default, so a child
              with HorizontalAlignment=Stretch will not actually grow.

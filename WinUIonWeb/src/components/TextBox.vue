@@ -159,6 +159,7 @@ import ScrollViewer from './ScrollViewer.vue';
 import { scrollViewerTemplateBindings } from './scrollViewerTemplateBindings';
 import { useAcrylicBrushStyle } from './AcrylicBrush';
 import { vAcrylicBrush } from './acrylicBrushVisual';
+import { isHoverPointer } from './pointerInput';
 import { useBrushProperty } from './brushProperties';
 import { getVNodeChildren } from './CollectionProperties';
 import ContentPresenter from './ContentPresenter.vue';
@@ -224,6 +225,7 @@ const rawProps = withDefaults(defineProps<{
   AcceptsReturn?: boolean | string;
   IsReadOnly?: boolean | string;
   IsEnabled?: boolean | string;
+  ShowDeleteButton?: boolean | string;
   MaxLength?: number | string;
   TextWrapping?: TextWrapping | XamlExpression;
   TextAlignment?: TextAlignment | XamlExpression;
@@ -265,6 +267,7 @@ const rawProps = withDefaults(defineProps<{
   AcceptsReturn: false,
   IsReadOnly: false,
   IsEnabled: true,
+  ShowDeleteButton: true,
   MaxLength: 0,
   TextWrapping: 'NoWrap',
   TextAlignment: 'Left',
@@ -298,7 +301,7 @@ const rawProps = withDefaults(defineProps<{
   MaxHeight: ''
 });
 const propertyOverrides = ref<Record<string, unknown>>({});
-type BooleanProperty = 'AcceptsReturn' | 'IsReadOnly' | 'IsEnabled' | 'IsSpellCheckEnabled' | 'IsTextPredictionEnabled' | 'IsColorFontEnabled' | 'PreventKeyboardDisplayOnProgrammaticFocus';
+type BooleanProperty = 'AcceptsReturn' | 'IsReadOnly' | 'IsEnabled' | 'ShowDeleteButton' | 'IsSpellCheckEnabled' | 'IsTextPredictionEnabled' | 'IsColorFontEnabled' | 'PreventKeyboardDisplayOnProgrammaticFocus';
 type ResolvedTextBoxProps = Omit<typeof rawProps, BooleanProperty | 'MaxLength' | 'CharacterSpacing' | 'TextWrapping' | 'TextAlignment' | 'CharacterCasing' | 'DesiredCandidateWindowAlignment'> & Record<BooleanProperty, boolean> & { MaxLength: number; CharacterSpacing: number; TextWrapping: TextWrapping; TextAlignment: TextAlignment; CharacterCasing: CharacterCasing; DesiredCandidateWindowAlignment: CandidateWindowAlignment };
 const props = new Proxy(rawProps, { get: (target, property) => typeof property === 'string' && property in propertyOverrides.value
   ? propertyOverrides.value[property] : resolveXamlValue(Reflect.get(target, property), instance) }) as ResolvedTextBoxProps;
@@ -394,7 +397,7 @@ const backgroundStyle = useAcrylicBrushStyle(() => isDisabled.value || isFocused
   ? undefined : backgroundBrush.value.value, instance);
 const hasText = computed(() => currentText.value.length > 0);
 const showDeleteButton = computed(() =>
-  !inputTemplate?.HideDeleteButton && hasText.value && !props.AcceptsReturn && !props.IsReadOnly && props.IsEnabled && isFocused.value
+  !inputTemplate?.HideDeleteButton && props.ShowDeleteButton && hasText.value && !props.AcceptsReturn && !props.IsReadOnly && props.IsEnabled && isFocused.value
     && surfaceWidth.value > (Number(props.FontSize) || 14) * 5
 );
 
@@ -736,8 +739,8 @@ watch(() => props.DesiredCandidateWindowAlignment, () => {
   });
 });
 
-const onPointerEnter = () => {
-  isHovered.value = true;
+const onPointerEnter = (event: PointerEvent) => {
+  isHovered.value = isHoverPointer(event);
 };
 
 const onPointerLeave = () => {

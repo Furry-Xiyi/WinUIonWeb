@@ -21,11 +21,16 @@ export function connectWindowTitleBarFrame(content: HTMLElement, nativeHost?: Ti
     ownsNativeCaption = false
   }
   const ownerBar = (): HTMLElement | null => {
-    const directBar = content.querySelector<HTMLElement>(':scope > .win-titlebar')
-    if (directBar) return directBar
-    const root = [...content.children].find(element => element !== captionRegion)
-    if (!(root instanceof owner.HTMLElement)) return null
-    return root.classList.contains('win-titlebar') ? root : root.querySelector<HTMLElement>(':scope > .win-titlebar')
+    // ToolTipService and other portal hosts can precede the visual root.
+    // Find the title bar among top-level roots instead of assuming the first
+    // child is the window content; otherwise a phantom caption band is added.
+    for (const root of content.children) {
+      if (root === captionRegion || !(root instanceof owner.HTMLElement)) continue
+      if (root.classList.contains('win-titlebar')) return root
+      const bar = root.querySelector<HTMLElement>(':scope > .win-titlebar')
+      if (bar) return bar
+    }
+    return null
   }
   const host: TitleBarWindowHost = {
     GetTitle: () => source.GetTitle(),
@@ -39,6 +44,15 @@ export function connectWindowTitleBarFrame(content: HTMLElement, nativeHost?: Ti
     ...(source.SetPreferredHeightOption ? { SetPreferredHeightOption: value => source.SetPreferredHeightOption!(value) } : {}),
     ...(source.SetDragRegions ? { SetDragRegions: regions => { removeCaptionRegion(false); source.SetDragRegions!(regions) } } : {}),
     ...(source.ClearDragRegions ? { ClearDragRegions: () => source.ClearDragRegions!() } : {}),
+    ...(source.Minimize ? { Minimize: () => source.Minimize!() } : {}),
+    ...(source.ToggleMaximize ? { ToggleMaximize: () => source.ToggleMaximize!() } : {}),
+    ...(source.Close ? { Close: () => source.Close!() } : {}),
+    ...(source.IsMaximized ? { IsMaximized: () => source.IsMaximized!() } : {}),
+    ...(source.SubscribeStateChanged ? { SubscribeStateChanged: listener => source.SubscribeStateChanged!(listener) } : {}),
+    ...(source.SubscribeCaptionButtonAction ? { SubscribeCaptionButtonAction: listener => source.SubscribeCaptionButtonAction!(listener) } : {}),
+    ...(source.SetCaptionButtonHitTestMode ? { SetCaptionButtonHitTestMode: mode => source.SetCaptionButtonHitTestMode!(mode) } : {}),
+    ...(source.UsesNativeCaptionHitTest ? { UsesNativeCaptionHitTest: true } : {}),
+    ...(source.SubscribeCaptionButtonState ? { SubscribeCaptionButtonState: listener => source.SubscribeCaptionButtonState!(listener) } : {}),
   }
   const unregister = registerTitleBarWindowHost(content, host)
   const originalPadding = content.style.paddingTop

@@ -21,6 +21,7 @@ import { primitiveResourceScope, primitiveResourceStyles, xamlPrimitiveResourceK
 import { pivotTemplate } from './PivotProperties'
 import { resolveAcrylicResource, resolveBrushStyle } from './AcrylicBrush'
 import { xamlThemeKey } from './brushCore'
+import { isHoverPointer } from './pointerInput'
 import './tabViewStyles.css'
 
 defineOptions({ name: 'TabView', inheritAttrs: false })
@@ -706,7 +707,7 @@ defineExpose(publicApi)
   <div ref="rootRef" v-bind="rootAttrs" class="win-tab-view" :class="[attrs.class, requestedTheme ? `theme-${requestedTheme}` : '', { 'is-disabled': !enabled, 'win-theme-scope': requestedTheme, 'is-dragging': activeTabViewDrag?.Source === endpoint }]"
     :style="[attrs.style, rootStyle]" :dir="direction" :data-theme="requestedTheme" :aria-disabled="!enabled" @keydown="keyDown">
     <ResourcesOutlet />
-    <div ref="stripRef" class="win-tab-view-tab-container-grid" data-part="TabContainerGrid" @pointerenter="stripHovered = true" @pointerleave="leaveStrip" @lostpointercapture="pendingPointer = null"
+    <div ref="stripRef" class="win-tab-view-tab-container-grid" data-part="TabContainerGrid" @pointerenter="stripHovered = isHoverPointer($event)" @pointerleave="leaveStrip" @lostpointercapture="pendingPointer = null"
       @dragenter="nativeDragOver" @dragover="nativeDragOver" @drop="nativeDrop" @dragleave="nativeDragLeave" @wheel="stripWheel">
       <div ref="headerRef" class="win-tab-view-left-content-presenter" data-part="LeftContentPresenter"><HeaderOutlet /></div>
       <div ref="listRef" class="win-tab-view-list-view" data-part="TabListView" :style="listStyle">

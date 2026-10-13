@@ -1,4 +1,5 @@
 import { normalizeStyle, type Directive, type StyleValue } from 'vue'
+import { acrylicNoise } from './acrylicNoise'
 
 interface BrushVisual {
   root: HTMLDivElement
@@ -32,13 +33,63 @@ const remove = (host: HTMLElement) => {
   host.removeEventListener('scroll', visual.syncViewport)
   visual.root.remove()
   if (host.style.position === 'relative' && !visual.position) host.style.position = ''
-  if (host.style.isolation === 'isolate') host.style.isolation = visual.isolation
+  if (host.style.isolation === 'isolate' || host.style.isolation === 'auto') host.style.isolation = visual.isolation
   if (visual.hostBackdrop) {
     host.style.backdropFilter = visual.backdropFilter
     host.style.setProperty('-webkit-backdrop-filter', visual.webkitBackdropFilter)
   }
   visuals.delete(host)
 }
+
+export interface AcrylicMaterialLayer {
+  update(input: StyleValue): void
+  dispose(): void
+}
+export interface AcrylicNoiseLayer {
+  update(): void
+  dispose(): void
+}
+
+/** Apply the in-app Acrylic layers over a native backdrop without another blur pass. */
+export const createAcrylicMaterialLayer = (host: HTMLElement, input: StyleValue): AcrylicMaterialLayer => {
+  update(host, input, false, true)
+  let disposed = false
+  return {
+    update(input) { if (!disposed) update(host, input, false, true) },
+    dispose() { if (!disposed) { disposed = true; remove(host) } }
+  }
+}
+
+export const mountAcrylicMaterialLayer = (host: HTMLElement, input: StyleValue): (() => void) => {
+  const material = createAcrylicMaterialLayer(host, input)
+  return () => material.dispose()
+}
+
+/** Add only the package-owned noise texture over a native Desktop Acrylic surface. */
+export const createAcrylicNoiseLayer = (host: HTMLElement, opacity = .03): AcrylicNoiseLayer => {
+  const noiseOpacity = Number.isFinite(opacity) ? Math.max(0, Math.min(1, opacity)) : .03
+  const style = {
+    '--acrylic-tint': 'transparent',
+    '--acrylic-luminosity': 'transparent',
+    '--acrylic-noise': `url("${acrylicNoise}")`,
+    '--acrylic-noise-opacity': String(noiseOpacity),
+    '--acrylic-fallback': 'transparent',
+    '--acrylic-fallback-opacity': '0',
+    '--acrylic-opaque': '1'
+  }
+  update(host, style, false, true)
+  let disposed = false
+  return {
+    update() { if (!disposed) update(host, style, false, true) },
+    dispose() { if (!disposed) { disposed = true; remove(host) } }
+  }
+}
+
+export const mountAcrylicNoiseLayer = (host: HTMLElement, opacity = .03): (() => void) => {
+  const noise = createAcrylicNoiseLayer(host, opacity)
+  return () => noise.dispose()
+}
+
 const update = (host: HTMLElement, input: StyleValue, hostBackdrop = false, noBackdrop = false) => {
   const style = normalizeStyle(input) as Record<string, string> | undefined
   if (!style?.['--acrylic-tint']) { remove(host); return }
@@ -64,8 +115,11 @@ const update = (host: HTMLElement, input: StyleValue, hostBackdrop = false, noBa
     host.addEventListener('scroll', syncViewport, { passive: true })
   }
   if (visual.root.parentElement !== host) host.appendChild(visual.root)
+  visual.acrylic.replaceChildren(visual.blur, visual.luminosity, visual.tint, visual.noise)
   if (getComputedStyle(host).position === 'static') host.style.position = 'relative'
-  host.style.isolation = 'isolate'
+  // A no-backdrop material is composed over a blurred ancestor. Isolating
+  // this host would hide that ancestor from the luminosity and color blends.
+  host.style.isolation = noBackdrop ? 'auto' : 'isolate'
   visual.syncViewport()
   const fallbackActive = style['--acrylic-fallback-opacity'] === '1'
   const opaque = style['--acrylic-opaque'] === '1'
@@ -84,7 +138,7 @@ const update = (host: HTMLElement, input: StyleValue, hostBackdrop = false, noBa
   visual.noise.style.backgroundImage = style['--acrylic-noise'] ?? 'none'
   visual.noise.style.backgroundRepeat = 'repeat'
   visual.noise.style.backgroundSize = '256px 256px'
-  visual.noise.style.opacity = '.02'
+  visual.noise.style.opacity = style['--acrylic-noise-opacity'] ?? '.02'
   visual.fallback.style.transition = first ? 'none'
     : `opacity ${fallbackDuration} cubic-bezier(.5, 0, 0, .9), background-color ${tintDuration} linear`
   visual.fallback.style.backgroundColor = style['--acrylic-fallback']!

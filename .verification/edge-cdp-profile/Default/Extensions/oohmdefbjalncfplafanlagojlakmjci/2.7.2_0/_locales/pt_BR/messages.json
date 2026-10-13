@@ -1,0 +1,1052 @@
+{
+   "ADTSerror": {
+      "message": "Não foi possível localizar o cabeçalho ADTS. Pode ser um recurso criptografado AES-128-ECB, que atualmente não é compatível com descriptografia. Use software de mesclagem de terceiros."
+   },
+   "DRMerror": {
+      "message": "A mídia possui proteção DRM, use ferramentas de terceiros para download"
+   },
+   "M3U8DLparameterLong": {
+      "message": "O parâmetro M3U8DL é muito longo."
+   },
+   "MQTT": {
+      "message": "MQTT"
+   },
+   "Script": {
+      "message": "Script"
+   },
+   "about": {
+      "message": "Sobre"
+   },
+   "addParameters": {
+      "message": "Adicionar Parâmetros"
+   },
+   "addRegex": {
+      "message": "Adicionar Regex"
+   },
+   "addSettingParameters": {
+      "message": "Adicionar Parâmetros de Configuração"
+   },
+   "addSuffix": {
+      "message": "Adicionar Sufixo"
+   },
+   "addType": {
+      "message": "Adicionar Tipo"
+   },
+   "addTypeError": {
+      "message": "O formato do tipo de captura está incorreto, verifique"
+   },
+   "addUrl": {
+      "message": "Adicionar URL"
+   },
+   "address": {
+      "message": "Endereço"
+   },
+   "alert": {
+      "message": "Alerta"
+   },
+   "alertimport": {
+      "message": "Importação concluída"
+   },
+   "alwaysDisableCatCatcher": {
+      "message": "Sempre desativar o Cat-Catch Downloader"
+   },
+   "alwaysSearch": {
+      "message": "Sempre habilitar pesquisa profunda"
+   },
+   "aria2Tip": {
+      "message": "Uma excelente ferramenta de download, veja como usar"
+   },
+   "asc": {
+      "message": "Ascendentemente"
+   },
+   "audio": {
+      "message": "Áudio"
+   },
+   "audioOnly": {
+      "message": "Somente Áudio"
+   },
+   "autoClosePageAfterDownload": {
+      "message": "Fechar Página Automaticamente Após Download"
+   },
+   "autoCloserDownload": {
+      "message": "Fechar Página Automaticamente Após Download"
+   },
+   "autoDownM3u8Tip": {
+      "message": "Clique no botão de download e use o analisador m3u8 para iniciar a mesclagem e o download imediatamente"
+   },
+   "autoDownload": {
+      "message": "Download Automático"
+   },
+   "autoSend": {
+      "message": "Transmissão manual de dados"
+   },
+   "autoSetRefererCookieParams": {
+      "message": "Definir Automaticamente Parâmetros de Referência e Cookies"
+   },
+   "badgeNumber": {
+      "message": "Mostrar prompt do emblema do ícone"
+   },
+   "bitrate": {
+      "message": "Taxa de bits"
+   },
+   "blobM3u8DLError": {
+      "message": "URLs de blob não podem invocar M3U8DL para download"
+   },
+   "blockResource": {
+      "message": "Bloquear Recurso"
+   },
+   "blockResourceTip": {
+      "message": "Bloqueia os recursos que você não deseja que apareçam"
+   },
+   "blockUrl": {
+      "message": "Bloquear URL"
+   },
+   "blockUrlTips": {
+      "message": "Suportar curingas * e ?"
+   },
+   "cacheCapture": {
+      "message": "Capturar"
+   },
+   "catCatch": {
+      "message": "cat-catch"
+   },
+   "clear": {
+      "message": "Limpar"
+   },
+   "clearCapturedData": {
+      "message": "Limpar Dados Capturados"
+   },
+   "clearOption": {
+      "message": "Atualize, navegue para uma nova página e limpe os dados capturados pela guia atual"
+   },
+   "close": {
+      "message": "Fechar"
+   },
+   "closeCapture": {
+      "message": "Fechar Captura"
+   },
+   "closeDownload": {
+      "message": "Fechar Download"
+   },
+   "closeRecording": {
+      "message": "Fechar Gravação"
+   },
+   "closeSearch": {
+      "message": "Fechar Busca"
+   },
+   "closeSimulation": {
+      "message": "Fechar Simulação"
+   },
+   "collapseAll": {
+      "message": "Agrupar Tudo"
+   },
+   "collapseAllNodes": {
+      "message": "Agrupar todos os nós JSON"
+   },
+   "confirm": {
+      "message": "Confirmar"
+   },
+   "confirmDownload": {
+      "message": "$num$ arquivos no total, confirmar download?",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "confirmLoading": {
+      "message": "Existem $num$ recursos no total, deseja cancelar o carregamento?",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "confirmParameters": {
+      "message": "Confirmar Parâmetros"
+   },
+   "confirmReset": {
+      "message": "Tem certeza de que deseja redefinir?"
+   },
+   "connectingToMQTT": {
+      "message": "Conectando ao servidor MQTT..."
+   },
+   "contextMenus": {
+      "message": "Menu do botão direito"
+   },
+   "convertToM3U8": {
+      "message": "Converter para Análise M3U8"
+   },
+   "copiedToClipboard": {
+      "message": "Copiar para Área de Transferência"
+   },
+   "copy": {
+      "message": "Copiar"
+   },
+   "copyCommand": {
+      "message": "Copiar Comando"
+   },
+   "copyTip": {
+      "message": "Para maior comodidade de usar aplicativos de terceiros, personalize o conteúdo gravado na área de transferência pelo botão copiar"
+   },
+   "currentPage": {
+      "message": "Página Atual"
+   },
+   "customCSS": {
+      "message": "CSS Personalizado"
+   },
+   "customFilenameOption": {
+      "message": "Usar um nome personalizado para salvar o arquivo (o padrão é o título da página da web)"
+   },
+   "customKeyPlaceholder": {
+      "message": "Personalizar a chave em hexadecimal ou base64, ou o endereço da chave"
+   },
+   "customSaveFileName": {
+      "message": "Personalizar Nome do Arquivo Salvo"
+   },
+   "customVLCProtocol": {
+      "message": "Protocolo VLC Personalizado"
+   },
+   "dataFetchFailed": {
+      "message": "Falha na busca de dados"
+   },
+   "dataPreprocessing": {
+      "message": "Pré-processamento de Dados"
+   },
+   "decryptionError": {
+      "message": "Erro de Descriptografia"
+   },
+   "deepSearch": {
+      "message": "Buscar"
+   },
+   "default": {
+      "message": "Padrão"
+   },
+   "defaultPopup": {
+      "message": "Modo Balão Padrão"
+   },
+   "delete": {
+      "message": "Excluir"
+   },
+   "deleteDuplicateFilenames": {
+      "message": "Excluir nomes de arquivos duplicados"
+   },
+   "desc": {
+      "message": "Descendentemente"
+   },
+   "description": {
+      "message": "Ferramenta de detecção de mídia da web"
+   },
+   "disable": {
+      "message": "Desabilitar"
+   },
+   "disableAll": {
+      "message": "Desabilitar Tudo"
+   },
+   "doNotClear": {
+      "message": "Não Limpar"
+   },
+   "documentation": {
+      "message": "Documentação"
+   },
+   "dopopup": {
+      "message": "balão"
+   },
+   "dopreview": {
+      "message": "prévia"
+   },
+   "download": {
+      "message": "Baixar"
+   },
+   "downloadComplete": {
+      "message": "Download Completo"
+   },
+   "downloadDir": {
+      "message": "Baixar Diretório"
+   },
+   "downloadExistingData": {
+      "message": "Baixar Dados Existentes"
+   },
+   "downloadFailed": {
+      "message": "Falha no Download"
+   },
+   "downloadProgress": {
+      "message": "Progresso do Download"
+   },
+   "downloadRange": {
+      "message": "Faixa de Download"
+   },
+   "downloadSegmentList": {
+      "message": "Lista de download"
+   },
+   "downloadThreads": {
+      "message": "Processos"
+   },
+   "downloadWhileSaving": {
+      "message": "Baixar Stream"
+   },
+   "downloadWithRequestHeader": {
+      "message": "Baixar com parâmetros de cabeçalho de solicitação."
+   },
+   "downloaded": {
+      "message": "Baixado"
+   },
+   "downloadedVideoLength": {
+      "message": "Duração do Vídeo Baixado"
+   },
+   "downloader": {
+      "message": "Downloader"
+   },
+   "downloaderTip": {
+      "message": "Se o download do recurso falhar, ative automaticamente o downloader para tentar novamente."
+   },
+   "duration": {
+      "message": "Duração"
+   },
+   "enable": {
+      "message": "Habilitar"
+   },
+   "enableAll": {
+      "message": "Habilitar Tudo"
+   },
+   "encryptedHLS": {
+      "message": "HLS Criptografado"
+   },
+   "encryptedSAMPLE": {
+      "message": "Os recursos criptografados com SAMPLE-AES-CTR não podem ser manipulados no momento."
+   },
+   "encryptionAlgorithm": {
+      "message": "Método"
+   },
+   "end": {
+      "message": "Terminar"
+   },
+   "estimateSize": {
+      "message": "Tamanho estimado"
+   },
+   "excludeDuplicateResources": {
+      "message": "Excluir recursos duplicados (consome muitos recursos da CPU)"
+   },
+   "exit": {
+      "message": "Sair"
+   },
+   "expandAll": {
+      "message": "Expandir Tudo"
+   },
+   "expandAllNodes": {
+      "message": "Expandir todos os nós JSON"
+   },
+   "expandPlayable": {
+      "message": "Expandir Reproduzível"
+   },
+   "expandSelected": {
+      "message": "Expandir Selecionado"
+   },
+   "exportSettings": {
+      "message": "Exportar Configurações"
+   },
+   "extension": {
+      "message": "Extensão"
+   },
+   "extensionName": {
+      "message": "Nome da Extensão"
+   },
+   "extractSlices": {
+      "message": "Extrair Pedaços"
+   },
+   "ffmpegIsNotReady": {
+      "message": "O serviço online FFmpeg não está pronto, tente novamente mais tarde"
+   },
+   "ffmpegTranscoding": {
+      "message": "Transcodificação FFmpeg"
+   },
+   "fileLoading": {
+      "message": "Carregamento de Arquivo"
+   },
+   "fileRetrievalFailed": {
+      "message": "Falha ao Salvar Arquivo"
+   },
+   "fileSize": {
+      "message": "Tamanho do Arquivo"
+   },
+   "fileTooLarge": {
+      "message": "Arquivo muito grande, arquivo maior que $size$",
+      "placeholders": {
+         "size": {
+            "content": "$1"
+         }
+      }
+   },
+   "fileTooLargeStream": {
+      "message": "Arquivo maior que $size$, habilitar download da stream?",
+      "placeholders": {
+         "size": {
+            "content": "$1"
+         }
+      }
+   },
+   "filter": {
+      "message": "Filtrar"
+   },
+   "filterSize": {
+      "message": "Filtrar Tamanho"
+   },
+   "flag": {
+      "message": "Sinalizador"
+   },
+   "flagTip": {
+      "message": "i: ignorar maiúsculas e minúsculas, g: pesquisa global. Também pode ser deixado em branco"
+   },
+   "formatConversionError": {
+      "message": "Erro de Conversão de Formato"
+   },
+   "fullscreen": {
+      "message": "Tela Cheia"
+   },
+   "functionEntry": {
+      "message": "Entrada de função"
+   },
+   "getParameters": {
+      "message": "Parâmetros GET"
+   },
+   "getTime": {
+      "message": "Tempo de Recuperação"
+   },
+   "goBack": {
+      "message": "Voltar"
+   },
+   "hasSent": {
+      "message": "Enviado"
+   },
+   "hevcPreviewTip": {
+      "message": "Arquivos de fragmentos codificados HEVC/H.265 não são suportados para visualização."
+   },
+   "hevcTip": {
+      "message": "Arquivos de fragmentos codificados HEVC/H.265 são suportados apenas para transcodificação ffmpeg online"
+   },
+   "hideDownloadedSegments": {
+      "message": "Ocultar segmentos baixados"
+   },
+   "iconOption": {
+      "message": "Exibir o ícone do site"
+   },
+   "iframeFFmpeg": {
+      "message": "Usar o iframe para chamar FFmpeg"
+   },
+   "importConfiguration": {
+      "message": "Importar Configurações"
+   },
+   "incorrectKey": {
+      "message": "Chave Incorreta"
+   },
+   "invertSelection": {
+      "message": "Alternar"
+   },
+   "invoke": {
+      "message": "Invocar"
+   },
+   "invokeApp": {
+      "message": "Invocar aplicativo"
+   },
+   "invokeM3u8DL": {
+      "message": "Invocar M3U8DL"
+   },
+   "invokeProtocolTemplate": {
+      "message": "Invocar Modelo do Protocolo"
+   },
+   "isBlockedSite": {
+      "message": "Este site exige bloquear a operação desta extensão"
+   },
+   "jsonFormatter": {
+      "message": "Formatador JSON"
+   },
+   "key": {
+      "message": "Chave"
+   },
+   "keyAddress": {
+      "message": "Endereço Chave"
+   },
+   "keyDownloadFailed": {
+      "message": "Falha no Download da Chave"
+   },
+   "liveHLS": {
+      "message": "HLS Ao Vivo"
+   },
+   "loading": {
+      "message": "Carregando..."
+   },
+   "loadingData": {
+      "message": "Carregando Dados..."
+   },
+   "localM3u8": {
+      "message": "M3U8 Local"
+   },
+   "loop": {
+      "message": "Repetir"
+   },
+   "m3u8DLTips": {
+      "message": "Uma excelente ferramenta de download de m3u8 e mpd de terceiros, veja como usar"
+   },
+   "m3u8Error": {
+      "message": "Há erros na análise ou reprodução do arquivo M3U8. Verifique o console para obter informações detalhadas sobre erros"
+   },
+   "m3u8Info": {
+      "message": "Um total de $num$ arquivo(s), com duração total de $time$.",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         },
+         "time": {
+            "content": "$2"
+         }
+      }
+   },
+   "m3u8Parser": {
+      "message": "Analisador M3U8"
+   },
+   "m3u8Placeholder": {
+      "message": "Insira o conteúdo do m3u8 ou a lista de fragmentos ts."
+   },
+   "m3u8Playlist": {
+      "message": "Lista de Reprodução M3U8"
+   },
+   "m3u8Url": {
+      "message": "URL do m3u8"
+   },
+   "manualSend": {
+      "message": "Transmissão automática de dados"
+   },
+   "match": {
+      "message": "Correspondente"
+   },
+   "mediaControl": {
+      "message": "Controle de Mídia"
+   },
+   "mergeDownloads": {
+      "message": "Mesclar Downloads"
+   },
+   "merging": {
+      "message": "Mesclando"
+   },
+   "messageSentToMQTT": {
+      "message": "Mensagem enviada para servidor MQTT"
+   },
+   "moreFeatures": {
+      "message": "Mais"
+   },
+   "moreFrequent": {
+      "message": "Mais Freqüente"
+   },
+   "mp4Format": {
+      "message": "MP4"
+   },
+   "mpdParser": {
+      "message": "Analisador MPD"
+   },
+   "mqttBroker": {
+      "message": "Endereço do Broker MQTT"
+   },
+   "mqttBrokerHelp": {
+      "message": "Endereço do host ou IP do broker MQTT"
+   },
+   "mqttClientId": {
+      "message": "ID do Cliente"
+   },
+   "mqttClientIdHelp": {
+      "message": "Identificador único do cliente para esta conexão"
+   },
+   "mqttCredentialsHelp": {
+      "message": "Deixe em branco se não for necessária autenticação"
+   },
+   "mqttDataFormat": {
+      "message": "Formato dos Dados"
+   },
+   "mqttDataFormatDefault": {
+      "message": "Deixe em branco para usar o formato JSON padrão"
+   },
+   "mqttDataFormatHelp": {
+      "message": "{\"url\": \"$${url}\", \"title\": \"$${title}\", \"type\": \"$${type}\", \"ext\": \"$${ext}\", \"timestamp\": \"$${timestamp}\"}"
+   },
+   "mqttDataFormatVars": {
+      "message": "Variáveis disponíveis"
+   },
+   "mqttPassword": {
+      "message": "Senha"
+   },
+   "mqttPath": {
+      "message": "Caminho"
+   },
+   "mqttPathHelp": {
+      "message": "Caminho do WebSocket (geralmente /mqtt ou /ws)"
+   },
+   "mqttProtocol": {
+      "message": "Protocolo"
+   },
+   "mqttProtocolWs": {
+      "message": "WS (Não Seguro)"
+   },
+   "mqttProtocolWss": {
+      "message": "WSS (Seguro)"
+   },
+   "mqttQos": {
+      "message": "Nível de QoS"
+   },
+   "mqttQos0": {
+      "message": "0(No Máximo Uma Vez)"
+   },
+   "mqttQos1": {
+      "message": "1(Pelo Menos Uma Vez)"
+   },
+   "mqttQos2": {
+      "message": "2(Exatamente Uma Vez)"
+   },
+   "mqttQosHelp": {
+      "message": "Nível de Qualidade de Serviço (0=No Máximo Uma Vez, 1=Pelo Menos Uma Vez, 2=Exatamente Uma Vez)"
+   },
+   "mqttTitleLength": {
+      "message": "Tamanho Máximo do Título"
+   },
+   "mqttTitleLengthHelp": {
+      "message": "Comprimento máximo do título nas mensagens MQTT"
+   },
+   "mqttTopic": {
+      "message": "Tópico"
+   },
+   "mqttTopicHelp": {
+      "message": "Tópico MQTT para publicar as mensagens"
+   },
+   "mqttUsername": {
+      "message": "Nome de Usuário"
+   },
+   "multipleAudios": {
+      "message": "Múltiplos Áudios"
+   },
+   "multipleAudiosTip": {
+      "message": "Este arquivo M3U8 alinha múltiplos áudios"
+   },
+   "multipleSubtitles": {
+      "message": "Múltiplas Legendas"
+   },
+   "multipleSubtitlesTip": {
+      "message": "Este arquivo M3U8 alinha múltiplas legendas."
+   },
+   "multiplier": {
+      "message": "Multiplicador:"
+   },
+   "mute": {
+      "message": "Mudo"
+   },
+   "newDownloader": {
+      "message": "Novo Downloader"
+   },
+   "nextLevel": {
+      "message": "Próximo Nível"
+   },
+   "nextLevelTip": {
+      "message": "Este arquivo M3U8 alinha vários arquivos M3U8."
+   },
+   "noAudio": {
+      "message": "Sem Áudio"
+   },
+   "noControllableMediaDetected": {
+      "message": "Nenhuma Mídia Controlável Detectada"
+   },
+   "noData": {
+      "message": "Sem Peixe"
+   },
+   "noKeyIsRequired": {
+      "message": "Nenhuma chave é necessária"
+   },
+   "noMatch": {
+      "message": "Sem Correspondente"
+   },
+   "noMediaDetected": {
+      "message": "Nenhuma Mídia Detectada na Página da Web"
+   },
+   "noVideo": {
+      "message": "Sem Vídeo"
+   },
+   "normalClear": {
+      "message": "Limpeza Normal"
+   },
+   "normalPlay": {
+      "message": "Reprodução Normal"
+   },
+   "onlineFFmpeg": {
+      "message": "FFmpeg Online"
+   },
+   "onlineMerge": {
+      "message": "Mesclar"
+   },
+   "onlineServiceAddress": {
+      "message": "Endereço do Serviço Online"
+   },
+   "openDir": {
+      "message": "Abrir Diretório"
+   },
+   "openDownloaderPageInBackground": {
+      "message": "Abrir a Página do Downloader em Segundo Plano"
+   },
+   "openInBgDownload": {
+      "message": "Abrir a Página do Downloader em Segundo Plano"
+   },
+   "operation": {
+      "message": "Operação"
+   },
+   "option": {
+      "message": "Opção"
+   },
+   "originalM3u8": {
+      "message": "M3U8 Original"
+   },
+   "otherFeatures": {
+      "message": "Outros Recursos"
+   },
+   "otherFiles": {
+      "message": "Outros Arquivos"
+   },
+   "otherPage": {
+      "message": "Outra Página"
+   },
+   "otherSettings": {
+      "message": "Outras Configurações"
+   },
+   "parameter": {
+      "message": "Parâmetros"
+   },
+   "parameterSetting": {
+      "message": "Configuração de Parâmetro"
+   },
+   "parser": {
+      "message": "Analisador"
+   },
+   "pause": {
+      "message": "Pausar"
+   },
+   "pictureInPicture": {
+      "message": "Imagem em Imagem"
+   },
+   "play": {
+      "message": "Reproduzir"
+   },
+   "popup": {
+      "message": "Balão"
+   },
+   "possibleKey": {
+      "message": "Chaves possíveis encontradas"
+   },
+   "preview": {
+      "message": "Prévia"
+   },
+   "previewCommand": {
+      "message": "Prévia do Comando"
+   },
+   "previewMode": {
+      "message": "Use o protocolo de chamada do player local para abrir visualizações de vídeo"
+   },
+   "previewModePlaceholder": {
+      "message": "Deixe em branco para desativá-lo. O padrão é usar a página popup para visualizar o vídeo"
+   },
+   "realKeyNotFound": {
+      "message": "Chave real não encontrada"
+   },
+   "recordLive": {
+      "message": "Gravar"
+   },
+   "recordWebRTC": {
+      "message": "Gravar WebRTC"
+   },
+   "recordingDuration": {
+      "message": "Duração da Gravação"
+   },
+   "redownloadFailedItems": {
+      "message": "Baixar novamente Itens com Falha"
+   },
+   "regex": {
+      "message": "regex"
+   },
+   "regexExpression": {
+      "message": "Expressão Regex"
+   },
+   "regexMatch": {
+      "message": "Correspondência Regex"
+   },
+   "regexSuffixTip": {
+      "message": "Atribuir um sufixo a URL obtida. Pode ser deixado em branco e o sufixo será automaticamente truncado (muitos arquivos não possuem sufixo)"
+   },
+   "regexTest": {
+      "message": "Testar Regex"
+   },
+   "regexTip": {
+      "message": "Expressões regulares consomem muitos recursos, use-as com cuidado se não for necessário"
+   },
+   "regexTitle": {
+      "message": "Correspondência de expressão regular ou de pesquisa profunda"
+   },
+   "regularFilterPlaceholder": {
+      "message": "Filtro de expressão regular, corresponde a um recurso URL, pressione Enter para confirmar"
+   },
+   "removeFailedPreviewFiles": {
+      "message": "Remover arquivos de prévias com falha"
+   },
+   "replaceKeywordList": {
+      "message": "Lista de Substitutos para Palavras-Chaves"
+   },
+   "replaceTags": {
+      "message": "Substituir Etiquetas"
+   },
+   "requestBody": {
+      "message": "Corpo do Pedido"
+   },
+   "requestHeaders": {
+      "message": "Solicitar Cabeçalhos"
+   },
+   "requestMethod": {
+      "message": "Método do Pedido"
+   },
+   "resetAllSettings": {
+      "message": "Restaurar Todas Configurações"
+   },
+   "resetCopySettings": {
+      "message": "Restaurar Configuração de Copiar"
+   },
+   "resetOtherSettings": {
+      "message": "Restaurar Outras Configuração"
+   },
+   "resetSettings": {
+      "message": "Restaurar Configurações"
+   },
+   "resolution": {
+      "message": "Resolução"
+   },
+   "restartExtension": {
+      "message": "Reiniciar Extensão"
+   },
+   "restoreGetParameters": {
+      "message": "Restaurar Parâmetros GET"
+   },
+   "result": {
+      "message": "Resultado"
+   },
+   "retryCount": {
+      "message": "Número de tentativas"
+   },
+   "retryDownload": {
+      "message": "Tentar Baixar Novamente"
+   },
+   "retryingDownload": {
+      "message": "Tentar Baixar Novamente"
+   },
+   "reverse": {
+      "message": "Ordem inversa"
+   },
+   "runningCannotChangeSettings": {
+      "message": "Em Execução, Não É Possível Alterar As Configurações"
+   },
+   "sNumError": {
+      "message": "Erro no número de série"
+   },
+   "sNumMax": {
+      "message": "O número de série não pode exceder $num$",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "save": {
+      "message": "Salvar"
+   },
+   "saveAs": {
+      "message": "Salvar Como"
+   },
+   "saveAsOption": {
+      "message": "Escolher o diretório de salvamento após o download"
+   },
+   "saveFailed": {
+      "message": "Falha ao salvar"
+   },
+   "savePrompt": {
+      "message": "Salvo no disco, verifique o conteúdo baixado no navegador."
+   },
+   "saving": {
+      "message": "Salvando"
+   },
+   "screenCapture": {
+      "message": "Capturar Tela"
+   },
+   "screenshot": {
+      "message": "Capturar Tela"
+   },
+   "searchingForRealKey": {
+      "message": "Procurando pela chave real"
+   },
+   "secretKey": {
+      "message": "Chave Secreta"
+   },
+   "segmentList": {
+      "message": "Segmento"
+   },
+   "selectAll": {
+      "message": "Selecionar Tudo"
+   },
+   "selectAudio": {
+      "message": "Selecionar Áudio"
+   },
+   "selectMedia": {
+      "message": "Mídia:"
+   },
+   "selectVideo": {
+      "message": "Selecionar Vídeo"
+   },
+   "selectWebpage": {
+      "message": "Página da Internet:"
+   },
+   "send2MQTT": {
+      "message": "Enviar para MQTT"
+   },
+   "send2local": {
+      "message": "Transmissão de dados"
+   },
+   "send2localTips": {
+      "message": "Mesclar dados antes de enviar? Clique em 'OK' para mesclar ou em 'Cancelar' para enviar individualmente."
+   },
+   "sendFailed": {
+      "message": "Envio Falhou"
+   },
+   "sendFfmpeg": {
+      "message": "Enviar para ffmpeg Online"
+   },
+   "sendingMessageToMQTT": {
+      "message": "Enviando mensagem para servidor MQTT..."
+   },
+   "sendingToMQTT": {
+      "message": "Enviando para servidor MQTT..."
+   },
+   "setRequestHeaders": {
+      "message": "Configurar solicitação cabeçalhos."
+   },
+   "setWhiteList": {
+      "message": "Definir para lista de permissões"
+   },
+   "settings": {
+      "message": "Configurações"
+   },
+   "sideurlprotocol": {
+      "message": "Protocolo URL m3u8dl"
+   },
+   "simulateMobile": {
+      "message": "Simular Celular"
+   },
+   "skipDecryption": {
+      "message": "Pular Descriptografia"
+   },
+   "sort": {
+      "message": "Ordenar"
+   },
+   "speedPlayback": {
+      "message": "Velocidade de Reprodução"
+   },
+   "start": {
+      "message": "Começar"
+   },
+   "startGTend": {
+      "message": "O número inicial não pode ser maior que o número final"
+   },
+   "stopDownload": {
+      "message": "Parar Download"
+   },
+   "stopRecording": {
+      "message": "Parar de Gravação"
+   },
+   "streamOnbeforeunload": {
+      "message": "A transmissão está em andamento, o download será interrompido após o fechamento"
+   },
+   "streamSaverTip": {
+      "message": "A função de 'baixar enquanto salva' não oferece suporte à conversão de formato online ffmpeg, não suporta download novamente de fatias erradas e não suporta 'salvar como'."
+   },
+   "suffix": {
+      "message": "Sufixo"
+   },
+   "suffixTip": {
+      "message": "Preencha com sufixo que não contém '.', se nenhuma filtragem de tamanho for necessária, preencha com 0."
+   },
+   "systemShare": {
+      "message": "Compartilhamento do Sistema"
+   },
+   "test": {
+      "message": "Testar"
+   },
+   "title": {
+      "message": "Título"
+   },
+   "titleDownload": {
+      "message": "Cat-catch Baixar"
+   },
+   "titleJson": {
+      "message": "Cat-catch Formatador Json"
+   },
+   "titleM3U8": {
+      "message": "Cat-catch Analisador M3u8"
+   },
+   "titleOption": {
+      "message": "Cat-catch Opção"
+   },
+   "titledash": {
+      "message": "Cat-catch Analisador Dash"
+   },
+   "type": {
+      "message": "Tipo"
+   },
+   "typeTip": {
+      "message": "Insira o tipo de conteúdo correto; se nenhuma filtragem de tamanho for necessária, preencha com 0."
+   },
+   "unknownSize": {
+      "message": "Tamanho Desconhecido"
+   },
+   "uploadKey": {
+      "message": "Chave de upload"
+   },
+   "useSidePanel": {
+      "message": "Usar painel lateral"
+   },
+   "userAgentTip": {
+      "message": "Padrão para o User Agent do navegador atual"
+   },
+   "verifying": {
+      "message": "Verificando"
+   },
+   "video": {
+      "message": "Vídeo"
+   },
+   "videoRecording": {
+      "message": "Gravar Vídeo"
+   },
+   "viewSlices": {
+      "message": "Exibir todas as fatias e progresso do download"
+   },
+   "volume": {
+      "message": "Volume"
+   },
+   "waitDownload": {
+      "message": "Aguardando download..."
+   },
+   "waitingForLiveData": {
+      "message": "Esperando por Dados do Ao Vivo"
+   },
+   "waitingForMedia": {
+      "message": "Aguardando receber arquivos de mídia... Por favor, não feche esta página."
+   },
+   "wildcards": {
+      "message": "curingas"
+   },
+   "winpopup": {
+      "message": "janela do balão"
+   },
+   "winpreview": {
+      "message": "janela da prévia"
+   },
+   "withinChina": {
+      "message": "Interior da China"
+   }
+}

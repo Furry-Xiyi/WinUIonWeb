@@ -1,12 +1,12 @@
 <template>
   <Grid class="system-backdrop-window" Background="{x:Bind windowBackground, Mode=OneWay}">
     <Grid.RowDefinitions>
-      <RowDefinition Height="32" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
-    <TitleBar x:Name="titleBar" Height="32" Margin="8,0,0,0" Title="{x:Bind Labels.windowTitle, Mode=OneWay}" IsBackButtonVisible="False" IsPaneToggleButtonVisible="False">
+    <TitleBar x:Name="titleBar" PreferredHeightOption="Standard" IsCaptionButtonsVisible="True" CaptionButtonsFramework="Tauri" Title="{x:Bind Labels.windowTitle, Mode=OneWay}" IsBackButtonVisible="False" IsPaneToggleButtonVisible="False">
       <TitleBar.IconSource>
-        <BitmapIconSource UriSource="https://cdn.jsdelivr.net/gh/microsoft/WinUI-Gallery@main/WinUIGallery/Assets/Tiles/GalleryIcon.ico" ShowAsMonochrome="False" />
+        <BitmapIconSource UriSource="{x:Bind AppIconUri, Mode=OneWay}" ShowAsMonochrome="False" />
       </TitleBar.IconSource>
     </TitleBar>
     <StackPanel

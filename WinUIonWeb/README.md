@@ -83,6 +83,8 @@ Gallery 中 `samples/**/*.txt` 展示的是原生 WinUI XAML 和部分 C#，不�
 
 控件样式使用主题 CSS 变量，可在容器上设置 `class="win-theme-scope theme-dark"` 或 `class="win-theme-scope theme-light"`。图标默认使用客户端本机安装的 `Segoe Fluent Icons`。若你有合法可分发的字体文件，可把它放在自己的应用 `public/fonts/` 目录，再调用 `loadWinUIIconFont(url)` 加载。具体路径、代码和授权限制见 [图标字体接入文档](docs/icon-font.md)。npm 包不包含从 Windows 提取的字体文件；法律信息见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
+主题样式在浏览器支持时会跟随 CSS `AccentColor` 系统色。深色主题会使用提亮后的强调色，按钮前景会按对比度选黑色或白色。WebView 宿主也可从 `winuionweb/system-accent-color` 导入 `connectSystemAccentColorHost`，发布 Windows `UISettings` 强调色并订阅颜色变化；该子路径不加载 Vue，可用于 React、Angular、Svelte 等框架。接入方式见[系统强调色主机适配器文档](docs/system-accent-color-host-adapter.md)。
+
 本包提供 ESM 入口。本仓库维护者发布新版本时，在 `WinUIonWeb/` 目录执行：
 
 ```sh

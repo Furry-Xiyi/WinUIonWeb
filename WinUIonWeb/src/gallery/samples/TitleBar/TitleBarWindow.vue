@@ -1,7 +1,8 @@
 <template>
+  <ToolTipService />
   <Grid class="titlebar-sample-window">
     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-    <TitleBar x:Name="titleBar" Title="{x:Bind Labels.title, Mode=OneWay}" Subtitle="{x:Bind Labels.subtitle, Mode=OneWay}" BackRequested="TitleBar_BackRequested" IsBackButtonVisible="{x:Bind navFrame.CanGoBack, Mode=OneWay}" IsPaneToggleButtonVisible="True" PaneToggleRequested="TitleBar_PaneToggleRequested">
+    <TitleBar x:Name="titleBar" PreferredHeightOption="Tall" IsCaptionButtonsVisible="True" CaptionButtonsFramework="Tauri" IsPaneOpen="{x:Bind navView.IsPaneOpen, Mode=OneWay}" Title="{x:Bind Labels.title, Mode=OneWay}" Subtitle="{x:Bind Labels.subtitle, Mode=OneWay}" BackRequested="TitleBar_BackRequested" IsBackButtonVisible="{x:Bind navFrame.CanGoBack, Mode=OneWay}" IsPaneToggleButtonVisible="True" PaneToggleRequested="TitleBar_PaneToggleRequested">
       <TitleBar.Resources><HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment></TitleBar.Resources>
       <TitleBar.IconSource><ImageIconSource ImageSource="https://cdn.jsdelivr.net/gh/microsoft/WinUI-Gallery@main/WinUIGallery/Assets/Tiles/GalleryIcon.ico" /></TitleBar.IconSource>
       <TitleBar.RightHeader><PersonPicture Width="30" Height="30" Initials="JD" /></TitleBar.RightHeader>
@@ -28,6 +29,7 @@ import NavigationView from '../../../components/NavigationView.vue'
 import PersonPicture from '../../../components/PersonPicture.vue'
 import RowDefinition from '../../../components/RowDefinition.vue'
 import TitleBar from '../../../components/TitleBar.vue'
+import ToolTipService from '../../../components/ToolTipService.vue'
 import { ImageIconSource } from '../../../components/IconSource'
 import { NavigationViewItem } from '../../../components/NavigationViewProperties'
 import { useI18n } from '../../../components/i18n/index'

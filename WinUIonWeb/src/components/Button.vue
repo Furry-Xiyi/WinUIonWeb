@@ -15,7 +15,6 @@
         'win-theme-scope': RequestedTheme === 'Light' || RequestedTheme === 'Dark',
         'theme-light': RequestedTheme === 'Light',
         'theme-dark': RequestedTheme === 'Dark',
-        'system-focus': boolValue(resolveXamlValue(props.UseSystemFocusVisuals, instance))
       },
       attrs.class
     ]"
@@ -49,6 +48,11 @@
       <ContentValueOutlet v-else />
     </ContentPresenter>
     <AttachedOutlet v-if="propertyNodes.attached.length" />
+    <FocusVisual
+      v-if="boolValue(resolveXamlValue(props.UseSystemFocusVisuals, instance))"
+      :Margin="resolveXamlValue(props.FocusVisualMargin, instance) === '' ? -3 : resolveXamlValue(props.FocusVisualMargin, instance)"
+      :CornerRadius="PresenterCornerRadius"
+      :TargetBorderThickness="PresenterBorderThickness" />
   </button>
   <FlyoutOutlet v-if="propertyNodes.flyout.length" />
 </template>
@@ -73,10 +77,12 @@ export default { Flyout: ButtonFlyout, Content: ButtonContent, ContentTemplate: 
 import { Comment, computed, Fragment, getCurrentInstance, inject, isVNode, onBeforeUnmount, onMounted, provide, proxyRefs, ref, shallowRef, Text, useAttrs, useSlots, watch, type CSSProperties, type PropType, type StyleValue, type VNode } from 'vue';
 import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime';
 import ContentPresenter from './ContentPresenter.vue';
+import FocusVisual from './FocusVisual.vue';
 import Grid from './Grid.vue';
 import { alignment, boolValue, cssLength, xamlThickness } from './layout';
 import { getToolTipServiceProperty } from './ToolTipServiceProperties';
 import { useAnimatedIconInput } from './animatedIconInput';
+import { isHoverPointer } from './pointerInput';
 import { useUICommand } from './uiCommandRuntime';
 import { isBrushProperty, useBrushProperty } from './brushProperties';
 import { getButtonContentProperty, useButtonContent } from './buttonContentRuntime';
@@ -157,10 +163,10 @@ const pointerEvent = (name: PointerEventName, event: PointerEvent, feedback: (ev
   if (args.Handled) { event.preventDefault(); event.stopPropagation(); }
 };
 const onPointerEntered = (event: PointerEvent) => {
-  IsPointerOver.value = true;
+  IsPointerOver.value = isHoverPointer(event);
   if (activePointer !== null && event.buttons > 0) IsPressed.value = true;
   pointerEvent('PointerEntered', event, iconInput.PointerEntered);
-  if (!isDisabled.value && resolveXamlValue(props.ClickMode, instance) === 'Hover') onClick(event);
+  if (isHoverPointer(event) && !isDisabled.value && resolveXamlValue(props.ClickMode, instance) === 'Hover') onClick(event);
 };
 const onPointerExited = (event: PointerEvent) => { IsPointerOver.value = false; IsPressed.value = false; pointerEvent('PointerExited', event, iconInput.PointerExited); };
 const clearPressed = () => {
@@ -171,6 +177,7 @@ const clearPressed = () => {
   }
 };
 const onPointerPressed = (event: PointerEvent) => {
+  if (!isHoverPointer(event)) IsPointerOver.value = false;
   if (!isDisabled.value && event.button === 0 && resolveXamlValue(props.ClickMode, instance) !== 'Hover') {
     suppressClick = false;
     activePointer = event.pointerId;
@@ -181,10 +188,10 @@ const onPointerPressed = (event: PointerEvent) => {
   pointerEvent('PointerPressed', event, iconInput.PointerPressed);
 };
 const pointerInside = (event: PointerEvent) => { const bounds = buttonRef.value?.getBoundingClientRect(); return bounds && event.clientX >= bounds.left && event.clientX <= bounds.right && event.clientY >= bounds.top && event.clientY <= bounds.bottom; };
-const onPointerMoved = (event: PointerEvent) => { if (event.pointerId === activePointer) { IsPressed.value = Boolean(pointerInside(event)); IsPointerOver.value = IsPressed.value; } pointerEvent('PointerMoved', event, () => {}); };
-const onPointerReleased = (event: PointerEvent) => { if (activePointer !== null && !pointerInside(event)) suppressClick = true; clearPressed(); pointerEvent('PointerReleased', event, iconInput.PointerReleased); };
-const onPointerCanceled = (event: PointerEvent) => { clearPressed(); suppressClick = true; pointerEvent('PointerCanceled', event, iconInput.PointerExited); };
-const onPointerCaptureLost = (event: PointerEvent) => { clearPressed(); pointerEvent('PointerCaptureLost', event, iconInput.PointerExited); };
+const onPointerMoved = (event: PointerEvent) => { if (event.pointerId === activePointer) { IsPressed.value = Boolean(pointerInside(event)); IsPointerOver.value = isHoverPointer(event) && IsPressed.value; } pointerEvent('PointerMoved', event, () => {}); };
+const onPointerReleased = (event: PointerEvent) => { if (activePointer !== null && !pointerInside(event)) suppressClick = true; clearPressed(); if (!isHoverPointer(event)) IsPointerOver.value = false; pointerEvent('PointerReleased', event, iconInput.PointerReleased); };
+const onPointerCanceled = (event: PointerEvent) => { clearPressed(); if (!isHoverPointer(event)) IsPointerOver.value = false; suppressClick = true; pointerEvent('PointerCanceled', event, iconInput.PointerExited); };
+const onPointerCaptureLost = (event: PointerEvent) => { clearPressed(); if (!isHoverPointer(event)) IsPointerOver.value = false; pointerEvent('PointerCaptureLost', event, iconInput.PointerExited); };
 const command = useUICommand(() => resolveXamlValue(props.Command, instance));
 const commandParameter = computed(() => resolveXamlValue(props.CommandParameter, instance));
 const onContextRequested = (event: MouseEvent) => {
@@ -192,6 +199,7 @@ const onContextRequested = (event: MouseEvent) => {
   const sender = publicApi;
   const args = {
     OriginalSource: sender,
+    OriginalEvent: event,
     Handled: false,
     PointerPosition: { X: event.clientX, Y: event.clientY },
     TryGetPosition: (relativeTo?: { Element?: HTMLElement } | HTMLElement) => {
@@ -380,9 +388,14 @@ const buttonStyle = computed(() => {
     style['--ButtonPresenterBorderThickness'] = xamlThickness(value('BorderThickness'));
   }
   if (props.BorderBrush) {
-    style['--ButtonBorderBrush'] = String(value('BorderBrush') ?? '');
-    style['--ButtonBorderBrushTop'] = String(value('BorderBrush') ?? '');
-    style['--ButtonBorderBrushBottom'] = String(value('BorderBrush') ?? '');
+    const borderBrush = String(value('BorderBrush') ?? '');
+    style['--ButtonBorderBrush'] = borderBrush;
+    // Keep elevation brushes as separate top, side and bottom colors.
+    if (!/(?:linear-gradient|(?:Accent)?ControlElevationBorderBrush|(?:DateTime|Date|Time)Picker(?:Flyout)?ButtonBorderBrush)/i.test(borderBrush)) {
+      style['--ButtonBorderBrushSide'] = borderBrush;
+      style['--ButtonBorderBrushTop'] = borderBrush;
+      style['--ButtonBorderBrushBottom'] = borderBrush;
+    }
   }
   const margin = resolveXamlValue(props.Margin, instance);
   if (margin !== undefined && margin !== null && margin !== '') style.margin = xamlThickness(margin);
@@ -403,7 +416,6 @@ const buttonStyle = computed(() => {
   if (props.FontFamily) style.fontFamily = String(value('FontFamily') ?? '');
   if (props.FontWeight) style.fontWeight = value('FontWeight') === 'SemiBold' ? 600 : String(value('FontWeight') ?? '');
   if (props.FontSize !== '') style.fontSize = cssLength(value('FontSize'));
-  if (props.FocusVisualMargin !== '') style.outlineOffset = cssLength(value('FocusVisualMargin'));
   if (props.CornerRadius !== '') style['--ButtonCornerRadius'] = xamlThickness(value('CornerRadius'));
   if (isCollapsed.value) style.display = 'none';
 
@@ -523,19 +535,23 @@ const onGotFocus = (event: FocusEvent) => {
     line-height: 19px;
     transition: background-color 83ms linear;
     outline: none;
-    outline-offset: -3px;
     user-select: none;
     --ButtonPadding: 5px 11px 6px;
     --ButtonBorderThemeThickness: 1px;
     --ButtonCornerRadius: 4px;
-    --ButtonBorderBrushTop: var(--ButtonBorderBrushDefaultTop, var(--ButtonBorderBrush));
-    --ButtonBorderBrushBottom: var(--ButtonBorderBrushDefaultBottom, var(--ctrl-border-accent));
+    --ButtonBorderBrushTop: var(--ButtonControlElevationBorderBrushTop, var(--ButtonBorderBrushDefaultTop, var(--ButtonControlStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, currentColor))));
+    --ButtonBorderBrushBottom: var(--ButtonControlElevationBorderBrushBottom, var(--ButtonBorderBrushDefaultBottom, var(--ButtonControlStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, currentColor))));
     --ButtonBorderBrushPointerOverTop: var(--ButtonBorderBrushTop);
     --ButtonBorderBrushPointerOverBottom: var(--ButtonBorderBrushBottom);
     --ButtonBorderBrushPressedTop: var(--ButtonBorderBrushPressed);
     --ButtonBorderBrushPressedBottom: var(--ButtonBorderBrushPressed);
     --ButtonBorderBrushDisabledTop: var(--ButtonBorderBrushDisabled);
     --ButtonBorderBrushDisabledBottom: var(--ButtonBorderBrushDisabled);
+    --ButtonBorderBrushSide: var(--ButtonControlElevationBorderBrushSide, var(--ButtonControlStrokeColorDefaultBrush, var(--ControlStrokeColorDefaultBrush, currentColor)));
+    --ButtonBorderBrushSidePointerOver: var(--ButtonBorderBrushSide);
+    --ButtonBorderBrushSidePressed: var(--ButtonBorderBrushPressed, var(--ButtonBorderBrushSide));
+    --ButtonBorderBrushSideDisabled: var(--ButtonBorderBrushDisabled, var(--ButtonBorderBrushSide));
+    --ButtonBorderBrushSideCurrent: var(--ButtonBorderBrushSide);
     --ButtonBackgroundCurrent: var(--ButtonBackground);
     --ButtonForegroundCurrent: var(--ButtonForeground);
     --ButtonBorderBrushCurrent: var(--ButtonBorderBrush);
@@ -547,6 +563,7 @@ const onGotFocus = (event: FocusEvent) => {
       --ButtonBackgroundCurrent: var(--ButtonBackgroundPointerOver);
       --ButtonForegroundCurrent: var(--ButtonForegroundPointerOver);
       --ButtonBorderBrushCurrent: var(--ButtonBorderBrushPointerOver);
+      --ButtonBorderBrushSideCurrent: var(--ButtonBorderBrushSidePointerOver);
       --ButtonBorderBrushTopCurrent: var(--ButtonBorderBrushPointerOverTop);
       --ButtonBorderBrushBottomCurrent: var(--ButtonBorderBrushPointerOverBottom);
     }
@@ -555,6 +572,7 @@ const onGotFocus = (event: FocusEvent) => {
       --ButtonBackgroundCurrent: var(--ButtonBackgroundPressed);
       --ButtonForegroundCurrent: var(--ButtonForegroundPressed);
       --ButtonBorderBrushCurrent: var(--ButtonBorderBrushPressed);
+      --ButtonBorderBrushSideCurrent: var(--ButtonBorderBrushSidePressed);
       --ButtonBorderBrushTopCurrent: var(--ButtonBorderBrushPressedTop);
       --ButtonBorderBrushBottomCurrent: var(--ButtonBorderBrushPressedBottom);
     }
@@ -563,6 +581,7 @@ const onGotFocus = (event: FocusEvent) => {
       --ButtonBackgroundCurrent: var(--ButtonBackgroundDisabled);
       --ButtonForegroundCurrent: var(--ButtonForegroundDisabled);
       --ButtonBorderBrushCurrent: var(--ButtonBorderBrushDisabled);
+      --ButtonBorderBrushSideCurrent: var(--ButtonBorderBrushSideDisabled);
       --ButtonBorderBrushTopCurrent: var(--ButtonBorderBrushDisabledTop);
       --ButtonBorderBrushBottomCurrent: var(--ButtonBorderBrushDisabledBottom);
       cursor: default;
@@ -579,19 +598,15 @@ const onGotFocus = (event: FocusEvent) => {
       --ButtonForegroundPressed: var(--AccentButtonForegroundPressed);
       --ButtonForegroundDisabled: var(--AccentButtonForegroundDisabled);
       --ButtonBorderBrush: var(--AccentButtonBorderBrush);
-      --ButtonBorderBrushTop: var(--AccentButtonBorderBrush);
-      --ButtonBorderBrushBottom: var(--AccentButtonBorderBrushBottom);
       --ButtonBorderBrushPointerOver: var(--AccentButtonBorderBrushPointerOver);
-      --ButtonBorderBrushPointerOverTop: var(--AccentButtonBorderBrushPointerOver);
-      --ButtonBorderBrushPointerOverBottom: var(--AccentButtonBorderBrushPointerOverBottom);
       --ButtonBorderBrushPressed: var(--AccentButtonBorderBrushPressed);
-      --ButtonBorderBrushPressedTop: var(--AccentButtonBorderBrushPressed);
-      --ButtonBorderBrushPressedBottom: var(--AccentButtonBorderBrushPressed);
       --ButtonBorderBrushDisabled: var(--AccentButtonBorderBrushDisabled);
-      --ButtonBorderBrushDisabledTop: var(--AccentButtonBorderBrushDisabled);
-      --ButtonBorderBrushDisabledBottom: var(--AccentButtonBorderBrushDisabled);
-      --AccentButtonBorderBrushBottom: var(--AccentButtonBorderBrushDefaultBottom, var(--accent-border-accent));
-      --AccentButtonBorderBrushPointerOverBottom: var(--AccentButtonBorderBrushBottom);
+      --ButtonBorderBrushSide: var(--ButtonAccentControlElevationBorderBrushSide, var(--ControlStrokeColorOnAccentDefaultBrush, var(--ButtonControlStrokeColorDefaultBrush, currentColor)));
+      --ButtonBorderBrushSidePointerOver: var(--ButtonAccentControlElevationBorderBrushSide, var(--ControlStrokeColorOnAccentDefaultBrush, var(--ButtonControlStrokeColorDefaultBrush, currentColor)));
+      --ButtonBorderBrushSidePressed: var(--AccentButtonBorderBrushPressed);
+      --ButtonBorderBrushSideDisabled: var(--AccentButtonBorderBrushDisabled);
+      --ButtonBorderBrushTop: var(--ButtonAccentControlElevationBorderBrushTop, var(--AccentButtonBorderBrushDefault, var(--ControlStrokeColorOnAccentDefaultBrush, currentColor)));
+      --ButtonBorderBrushBottom: var(--ButtonAccentControlElevationBorderBrushBottom, var(--AccentButtonBorderBrushDefaultBottom, var(--ControlStrokeColorOnAccentSecondaryBrush, var(--ControlStrokeColorOnAccentDefaultBrush, currentColor))));
     }
 
   .win-btn .win-text-block {
@@ -602,7 +617,25 @@ const onGotFocus = (event: FocusEvent) => {
     white-space: nowrap; text-overflow: ellipsis; line-height: inherit;
   }
 
-  .win-btn { border: 0; padding: 0; background: transparent; }
+  .win-btn {
+    border: 0;
+    padding: 0;
+    background: transparent;
+  }
+  .win-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: var(--ButtonPresenterBorderThickness, var(--ButtonBorderThemeThickness, 1px));
+    border-color: var(--ButtonBorderBrushSideCurrent);
+    border-top-color: var(--ButtonBorderBrushTopCurrent);
+    border-bottom-color: var(--ButtonBorderBrushBottomCurrent);
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+  }
   .win-button-content-presenter {
     position: relative;
     width: 100%; height: 100%; min-width: 0; min-height: 0; color: inherit;
@@ -611,15 +644,6 @@ const onGotFocus = (event: FocusEvent) => {
   }
   .win-btn.win-titlebar-template-button { transition: none; line-height: 16px; }
   .win-titlebar-button-root { width: 100%; height: 100%; min-width: 0; min-height: 0; align-items: center; justify-items: center; }
-  .win-btn.win-titlebar-template-button::after { display: none; }
-  .win-btn::after {
-    content: ""; position: absolute; inset: 0; padding: var(--ButtonPresenterBorderThickness, var(--ButtonBorderThemeThickness, 1px));
-    border-radius: inherit; background: var(--ButtonBorderBrushCurrent); pointer-events: none; z-index: 1;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor;
-  }
-  .win-btn.system-focus:focus-visible { outline: 2px solid var(--FocusStrokeColorOuterBrush, var(--text-primary)); box-shadow: inset 0 0 0 1px var(--FocusStrokeColorInnerBrush, var(--app-bg)); }
-
   .win-btn.content-horizontal-stretch > * {
     flex: 1 1 auto;
     min-width: 0;
@@ -650,13 +674,14 @@ const onGotFocus = (event: FocusEvent) => {
       --ButtonBorderBrush: var(--SubtleButtonBorderBrush);
       --ButtonBorderBrushTop: var(--SubtleButtonBorderBrush);
       --ButtonBorderBrushBottom: var(--SubtleButtonBorderBrush);
-      --ButtonBorderBrushPointerOver: var(--SubtleButtonBorderBrushPointerOver);
+      --ButtonBorderBrushSide: var(--SubtleButtonBorderBrush);
+      --ButtonBorderBrushSidePointerOver: var(--SubtleButtonBorderBrushPointerOver);
+      --ButtonBorderBrushSidePressed: var(--SubtleButtonBorderBrushPressed);
+      --ButtonBorderBrushSideDisabled: var(--SubtleButtonBorderBrushDisabled);
       --ButtonBorderBrushPointerOverTop: var(--SubtleButtonBorderBrushPointerOver);
       --ButtonBorderBrushPointerOverBottom: var(--SubtleButtonBorderBrushPointerOver);
-      --ButtonBorderBrushPressed: var(--SubtleButtonBorderBrushPressed);
       --ButtonBorderBrushPressedTop: var(--SubtleButtonBorderBrushPressed);
       --ButtonBorderBrushPressedBottom: var(--SubtleButtonBorderBrushPressed);
-      --ButtonBorderBrushDisabled: var(--SubtleButtonBorderBrushDisabled);
       --ButtonBorderBrushDisabledTop: var(--SubtleButtonBorderBrushDisabled);
       --ButtonBorderBrushDisabledBottom: var(--SubtleButtonBorderBrushDisabled);
     }

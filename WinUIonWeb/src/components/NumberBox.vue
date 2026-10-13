@@ -27,7 +27,7 @@
         class="win-number-compact-popup win-theme-scope"
         :class="compactPopupThemeClass"
         :style="[compactPopupStyle, compactPopupBackgroundStyle]"
-        v-acrylic-brush="compactPopupBackgroundStyle"
+        v-acrylic-brush.host-backdrop="compactPopupBackgroundStyle"
         v-theme-shadow="{ Translation: compactPopupShadowDepth }"
         @pointerdown.prevent>
         <RepeatButton class="win-number-popup-button" Content="&#xE70E;" Padding="0" IsEnabled="{x:Bind NumberBoxTemplate.CanIncrease, Mode=OneWay}" IsTabStop="False" AutomationProperties.Name="{x:Bind NumberBoxTemplate.IncreaseLabel, Mode=OneWay}" Click="OnNumberBoxSpinUp" />

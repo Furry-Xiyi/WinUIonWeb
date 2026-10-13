@@ -46,6 +46,89 @@ wrapper. Header/content properties accept declarative UI elements and an
 assigned DOM UI element; assigned elements are restored to their previous
 parent when the property is replaced or the bar is removed.
 
+## Caption buttons and Windows 11 Snap Layouts
+
+`TitleBar` draws its minimize, maximize/restore, and close buttons itself.
+They are opt-in: `IsCaptionButtonsVisible` defaults to `False`. Set it to
+`True` when the application wants these controls in this TitleBar. The buttons
+are still rendered if no desktop host is connected; in that case bind
+`MinimizeRequested`, `MaximizeRequested`, and `CloseRequested` (or the combined
+`CaptionButtonRequested`) to the window API used by the application.
+
+`CaptionButtonsFramework` is read only when `IsCaptionButtonsVisible` is `True`.
+The built-in values are `Tauri` and `Electron`. `Tauri` uses the host bridge
+registered for the current window (or `window.winUIonWebWindowControls`), while
+`Electron` reads `window.electronAPI.windowControls`. If the field is omitted,
+the application owns the event bindings. A host must supply actions only; it
+must not paint a second caption-button set.
+
+```xml
+<TitleBar
+    IsCaptionButtonsVisible="True"
+    CaptionButtonsFramework="Tauri"
+    PreferredHeightOption="Tall" />
+```
+
+The request event names are `MinimizeRequested`, `MaximizeRequested`, and
+`CloseRequested`. Each is raised only when there is no connected framework
+bridge. `CaptionButtonRequested` receives the requested action name as its
+first argument. The Gallery's TitleBar page has an interactive example of the
+visibility switch, optional framework field, and manual request event. For
+example, a custom host can bind these events to its own window API:
+
+```vue
+<TitleBar
+  IsCaptionButtonsVisible="True"
+  @MinimizeRequested="windowApi.minimize()"
+  @MaximizeRequested="windowApi.toggleMaximize()"
+  @CloseRequested="windowApi.close()" />
+```
+
+For Electron, expose a narrow window-control API from the preload script and
+select `CaptionButtonsFramework="Electron"`:
+
+```ts
+// preload.ts
+contextBridge.exposeInMainWorld('electronAPI', {
+  windowControls: {
+    Minimize: () => ipcRenderer.invoke('window:minimize'),
+    ToggleMaximize: () => ipcRenderer.invoke('window:toggle-maximize'),
+    Close: () => ipcRenderer.invoke('window:close'),
+    IsMaximized: () => ipcRenderer.invoke('window:is-maximized'),
+    SubscribeStateChanged: (listener: () => void) => {
+      const update = () => listener()
+      ipcRenderer.on('window:state-changed', update)
+      return () => ipcRenderer.removeListener('window:state-changed', update)
+    },
+  },
+})
+```
+
+The Electron main process should handle those IPC requests against the current
+`BrowserWindow`. Do not expose `ipcRenderer` itself to the page.
+
+The control owns `PreferredHeightOption`: `Standard` arranges a 32 CSS-pixel
+caption band and `Tall` arranges a 46 CSS-pixel band. It sends the selected
+value to `SetPreferredHeightOption` when the host implements that operation. An
+explicit `Height` of 32 or 46 selects the matching option; otherwise
+`PreferredHeightOption` is used.
+
+Windows 11 Snap Layouts require native hit testing for the Web-drawn maximize
+button. The control reports its actual `CaptionButtons` bounds through
+`SetDragRegions`, then calls `SetCaptionButtonHitTestMode('NativeSnap')` only
+when the host can also route native caption-button actions back through
+`SubscribeCaptionButtonAction`. A Windows host should hit-test the maximize
+rectangle as `HTMAXBUTTON` and preserve Windows' non-client hover processing so
+the Snap Layout flyout appears. It should route button activation to the
+control's window actions, while leaving all button glyphs, fills, tooltips, and
+focus/deactivation visuals to `TitleBar`. Return to `Web` mode when the control
+is removed.
+
+These callbacks are a host contract, not a Win32 implementation in the npm
+package. A host that does not implement them keeps ordinary Web hit testing;
+the package cannot claim Snap Layout support for that window until its native
+adapter supplies the hit-test and action callbacks.
+
 ## Native window ownership
 
 `titleBarHostAdapter.ts` has no framework dependency. Native hosts supply the
@@ -92,14 +175,12 @@ function. Removing the TitleBar releases that subscription and clears its
 native regions; removing the framework content root also calls
 `releaseWindowHost()`.
 
-The official TitleBar template uses 32 logical pixels without header/content
-and 48 logical pixels when header/content is present. Gallery's main window
-and its two complete TitleBar sample windows also request the actual native
-`AppWindow.TitleBar.PreferredHeightOption = Tall`. The control height and the
-native window configuration are separate. `configureTitleBarWindowHost` awaits
-content extension before requesting Tall, then the framework mounts its
-TitleBar. Its optional `AbortSignal` prevents late configuration after a
-cancelled mount. Browser hosts omit those native setters.
+`PreferredHeightOption` belongs to the `TitleBar` control. The host translates
+that choice into its native caption geometry; it does not infer Standard or
+Tall from which Gallery page happens to contain the control. A framework may
+call `configureTitleBarWindowHost` before mounting to extend the client area.
+Its optional `AbortSignal` prevents late configuration after a cancelled
+mount. Browser hosts omit native setters.
 
 `GetTitleBarInsets()` returns physical `LeftInset` and `RightInset` in viewport
 CSS pixels, with an optional `TitleBarArea: { X, Y, Width, Height }` describing
@@ -147,14 +228,10 @@ height and the caption band's bottom are measured
 separately. Geometry loss and cleanup restore original values while preserving
 external style changes.
 
-The Gallery keeps its official 48-pixel expanded title bar in PWA windows even
-when the browser caption buttons use a shorter band. Browser hosts do not
-expose a native Tall setter. The Gallery reserves the larger of its own bar and
-the real caption band, and keeps the bar inside the overlay's safe horizontal
-area. Standalone windows without an owning TitleBar reserve the full caption
-band above their content. Native Gallery hosts and the TitleBar demonstrations
-retain the official control heights; a larger native band reserves additional
-space without stretching their controls.
+For PWA windows, the browser reports its caption band through
+`windowControlsOverlay`; the host reserves that actual geometry and keeps the
+control inside the overlay's safe horizontal area. Standalone windows without
+an owning TitleBar reserve the full reported caption band above their content.
 
 When a standalone window has no owning TitleBar, the frame also supplies an
 empty caption drag region inside the actual content bounds, clipped to the

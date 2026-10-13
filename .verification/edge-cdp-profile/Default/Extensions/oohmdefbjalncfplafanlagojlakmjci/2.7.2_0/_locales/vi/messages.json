@@ -1,0 +1,1052 @@
+{
+   "ADTSerror": {
+      "message": "Không tìm thấy header ADTS. Có thể là tài nguyên mã hóa AES-128-ECB, hiện chưa hỗ trợ giải mã. Vui lòng dùng phần mềm ghép nối bên thứ ba."
+   },
+   "DRMerror": {
+      "message": "Media có bảo vệ DRM, vui lòng dùng công cụ bên thứ ba để tải"
+   },
+   "M3U8DLparameterLong": {
+      "message": "Tham số M3U8DL quá dài."
+   },
+   "MQTT": {
+      "message": "MQTT"
+   },
+   "Script": {
+      "message": "Kịch bản"
+   },
+   "about": {
+      "message": "Giới thiệu"
+   },
+   "addParameters": {
+      "message": "Thêm tham số"
+   },
+   "addRegex": {
+      "message": "Thêm Regex"
+   },
+   "addSettingParameters": {
+      "message": "Thêm tham số cài đặt"
+   },
+   "addSuffix": {
+      "message": "Thêm đuôi tệp"
+   },
+   "addType": {
+      "message": "Thêm loại"
+   },
+   "addTypeError": {
+      "message": "Định dạng loại bắt không chính xác, vui lòng kiểm tra lại"
+   },
+   "addUrl": {
+      "message": "Thêm URL"
+   },
+   "address": {
+      "message": "Địa chỉ"
+   },
+   "alert": {
+      "message": "Cảnh báo"
+   },
+   "alertimport": {
+      "message": "Nhập hoàn tất"
+   },
+   "alwaysDisableCatCatcher": {
+      "message": "Luôn tắt trình tải xuống Cat-Catch"
+   },
+   "alwaysSearch": {
+      "message": "Luôn bật tìm kiếm sâu"
+   },
+   "aria2Tip": {
+      "message": "Một công cụ tải xuống tuyệt vời, xem cách sử dụng"
+   },
+   "asc": {
+      "message": "Tăng dần"
+   },
+   "audio": {
+      "message": "Âm thanh"
+   },
+   "audioOnly": {
+      "message": "Chỉ âm thanh"
+   },
+   "autoClosePageAfterDownload": {
+      "message": "Tự động đóng trang sau khi tải xong"
+   },
+   "autoCloserDownload": {
+      "message": "Tự động đóng trang sau khi tải xong"
+   },
+   "autoDownM3u8Tip": {
+      "message": "Nhấp nút tải xuống và sử dụng trình phân tích m3u8 để bắt đầu ghép và tải ngay lập tức"
+   },
+   "autoDownload": {
+      "message": "Tự động tải xuống"
+   },
+   "autoSend": {
+      "message": "Tự động truyền dữ liệu"
+   },
+   "autoSetRefererCookieParams": {
+      "message": "Tự động thiết lập tham số Referer và Cookie"
+   },
+   "badgeNumber": {
+      "message": "Hiển thị số trên biểu tượng"
+   },
+   "bitrate": {
+      "message": "Tốc độ bit (Bitrate)"
+   },
+   "blobM3u8DLError": {
+      "message": "URL Blob không thể gọi M3U8DL để tải xuống"
+   },
+   "blockResource": {
+      "message": "Chặn tài nguyên"
+   },
+   "blockResourceTip": {
+      "message": "Chặn các tài nguyên bạn không muốn xuất hiện"
+   },
+   "blockUrl": {
+      "message": "Chặn URL"
+   },
+   "blockUrlTips": {
+      "message": "Hỗ trợ ký tự đại diện * và ?"
+   },
+   "cacheCapture": {
+      "message": "Bắt"
+   },
+   "catCatch": {
+      "message": "cat-catch"
+   },
+   "clear": {
+      "message": "Xóa"
+   },
+   "clearCapturedData": {
+      "message": "Xóa dữ liệu đã bắt"
+   },
+   "clearOption": {
+      "message": "Làm mới, điều hướng đến trang mới, và xóa dữ liệu đã bắt được bởi tab hiện tại"
+   },
+   "close": {
+      "message": "Đóng"
+   },
+   "closeCapture": {
+      "message": "Đóng bắt link"
+   },
+   "closeDownload": {
+      "message": "Đóng tải xuống"
+   },
+   "closeRecording": {
+      "message": "Đóng ghi hình"
+   },
+   "closeSearch": {
+      "message": "Đóng tìm kiếm"
+   },
+   "closeSimulation": {
+      "message": "Đóng giả lập"
+   },
+   "collapseAll": {
+      "message": "Thu gọn tất cả"
+   },
+   "collapseAllNodes": {
+      "message": "Thu gọn tất cả node JSON"
+   },
+   "confirm": {
+      "message": "Xác nhận"
+   },
+   "confirmDownload": {
+      "message": "Tổng cộng $num$ tệp, xác nhận tải xuống?",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "confirmLoading": {
+      "message": "Có tổng cộng $num$ tài nguyên, bạn có muốn hủy tải không?",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "confirmParameters": {
+      "message": "Xác nhận tham số"
+   },
+   "confirmReset": {
+      "message": "Bạn có chắc chắn muốn đặt lại không?"
+   },
+   "connectingToMQTT": {
+      "message": "Đang kết nối đến máy chủ MQTT..."
+   },
+   "contextMenus": {
+      "message": "Trình đơn chuột phải"
+   },
+   "convertToM3U8": {
+      "message": "Chuyển sang phân tích M3U8"
+   },
+   "copiedToClipboard": {
+      "message": "Đã sao chép vào bộ nhớ tạm"
+   },
+   "copy": {
+      "message": "Sao chép"
+   },
+   "copyCommand": {
+      "message": "Sao chép lệnh"
+   },
+   "copyTip": {
+      "message": "Để thuận tiện cho việc sử dụng ứng dụng bên thứ ba, tùy chỉnh nội dung được ghi vào bộ nhớ tạm bởi nút sao chép"
+   },
+   "currentPage": {
+      "message": "Trang hiện tại"
+   },
+   "customCSS": {
+      "message": "CSS tùy chỉnh"
+   },
+   "customFilenameOption": {
+      "message": "Sử dụng tên tệp tùy chỉnh để lưu (mặc định là tiêu đề trang web)"
+   },
+   "customKeyPlaceholder": {
+      "message": "Tùy chỉnh khóa dạng hex hoặc base64, hoặc địa chỉ chứa khóa"
+   },
+   "customSaveFileName": {
+      "message": "Tên tệp lưu tùy chỉnh"
+   },
+   "customVLCProtocol": {
+      "message": "Giao thức VLC tùy chỉnh"
+   },
+   "dataFetchFailed": {
+      "message": "Lấy dữ liệu thất bại"
+   },
+   "dataPreprocessing": {
+      "message": "Tiền xử lý dữ liệu"
+   },
+   "decryptionError": {
+      "message": "Lỗi giải mã"
+   },
+   "deepSearch": {
+      "message": "Tìm kiếm"
+   },
+   "default": {
+      "message": "Mặc định"
+   },
+   "defaultPopup": {
+      "message": "Chế độ Popup mặc định"
+   },
+   "delete": {
+      "message": "Xóa"
+   },
+   "deleteDuplicateFilenames": {
+      "message": "Xóa tên tệp trùng lặp"
+   },
+   "desc": {
+      "message": "Giảm dần"
+   },
+   "description": {
+      "message": "Công cụ bắt link media trên web"
+   },
+   "disable": {
+      "message": "Tắt"
+   },
+   "disableAll": {
+      "message": "Tắt tất cả"
+   },
+   "doNotClear": {
+      "message": "Không xóa"
+   },
+   "documentation": {
+      "message": "Tài liệu"
+   },
+   "dopopup": {
+      "message": "popup"
+   },
+   "dopreview": {
+      "message": "xem trước"
+   },
+   "download": {
+      "message": "Tải xuống"
+   },
+   "downloadComplete": {
+      "message": "Tải xuống hoàn tất"
+   },
+   "downloadDir": {
+      "message": "Thư mục tải xuống"
+   },
+   "downloadExistingData": {
+      "message": "Tải xuống dữ liệu hiện có"
+   },
+   "downloadFailed": {
+      "message": "Tải xuống thất bại"
+   },
+   "downloadProgress": {
+      "message": "Tiến độ tải xuống"
+   },
+   "downloadRange": {
+      "message": "Phạm vi tải"
+   },
+   "downloadSegmentList": {
+      "message": "Tải danh sách"
+   },
+   "downloadThreads": {
+      "message": "Luồng"
+   },
+   "downloadWhileSaving": {
+      "message": "Vừa tải vừa lưu"
+   },
+   "downloadWithRequestHeader": {
+      "message": "Tải xuống với tham số request header."
+   },
+   "downloaded": {
+      "message": "Đã tải"
+   },
+   "downloadedVideoLength": {
+      "message": "Độ dài video đã tải"
+   },
+   "downloader": {
+      "message": "Trình tải xuống"
+   },
+   "downloaderTip": {
+      "message": "Nếu tải tài nguyên thất bại, tự động bật trình tải xuống để thử lại."
+   },
+   "duration": {
+      "message": "Thời lượng"
+   },
+   "enable": {
+      "message": "Bật"
+   },
+   "enableAll": {
+      "message": "Bật tất cả"
+   },
+   "encryptedHLS": {
+      "message": "HLS được mã hóa"
+   },
+   "encryptedSAMPLE": {
+      "message": "Tài nguyên được mã hóa SAMPLE-AES-CTR hiện chưa thể xử lý."
+   },
+   "encryptionAlgorithm": {
+      "message": "Phương thức"
+   },
+   "end": {
+      "message": "Kết thúc"
+   },
+   "estimateSize": {
+      "message": "Kích thước ước tính"
+   },
+   "excludeDuplicateResources": {
+      "message": "Loại trừ tài nguyên trùng lặp (quá nhiều tài nguyên sẽ tiêu tốn nhiều CPU)"
+   },
+   "exit": {
+      "message": "Thoát"
+   },
+   "expandAll": {
+      "message": "Mở rộng tất cả"
+   },
+   "expandAllNodes": {
+      "message": "Mở rộng tất cả node JSON"
+   },
+   "expandPlayable": {
+      "message": "Mở rộng cái có thể phát"
+   },
+   "expandSelected": {
+      "message": "Mở rộng cái đã chọn"
+   },
+   "exportSettings": {
+      "message": "Xuất cài đặt"
+   },
+   "extension": {
+      "message": "Phần mở rộng"
+   },
+   "extensionName": {
+      "message": "Tên tiện ích"
+   },
+   "extractSlices": {
+      "message": "Trích xuất các lát (slices)"
+   },
+   "ffmpegIsNotReady": {
+      "message": "Dịch vụ FFmpeg trực tuyến chưa sẵn sàng, vui lòng thử lại sau"
+   },
+   "ffmpegTranscoding": {
+      "message": "Chuyển mã FFmpeg"
+   },
+   "fileLoading": {
+      "message": "Đang tải tệp"
+   },
+   "fileRetrievalFailed": {
+      "message": "Lấy tệp thất bại"
+   },
+   "fileSize": {
+      "message": "Kích thước tệp"
+   },
+   "fileTooLarge": {
+      "message": "Tệp quá lớn, tệp lớn hơn $size$",
+      "placeholders": {
+         "size": {
+            "content": "$1"
+         }
+      }
+   },
+   "fileTooLargeStream": {
+      "message": "Tệp lớn hơn $size$, bật chế độ vừa tải vừa lưu?",
+      "placeholders": {
+         "size": {
+            "content": "$1"
+         }
+      }
+   },
+   "filter": {
+      "message": "Lọc"
+   },
+   "filterSize": {
+      "message": "Lọc kích thước"
+   },
+   "flag": {
+      "message": "Cờ (Flag)"
+   },
+   "flagTip": {
+      "message": "i: không phân biệt hoa thường, g: tìm kiếm toàn cục. Có thể để trống"
+   },
+   "formatConversionError": {
+      "message": "Lỗi chuyển đổi định dạng"
+   },
+   "fullscreen": {
+      "message": "Toàn màn hình"
+   },
+   "functionEntry": {
+      "message": "Lối vào chức năng"
+   },
+   "getParameters": {
+      "message": "Tham số GET"
+   },
+   "getTime": {
+      "message": "Thời gian lấy"
+   },
+   "goBack": {
+      "message": "Quay lại"
+   },
+   "hasSent": {
+      "message": "Đã gửi"
+   },
+   "hevcPreviewTip": {
+      "message": "Tệp phân đoạn mã hóa HEVC/H.265 không hỗ trợ xem trước."
+   },
+   "hevcTip": {
+      "message": "Tệp phân đoạn mã hóa HEVC/H.265 chỉ được hỗ trợ chuyển mã ffmpeg trực tuyến"
+   },
+   "hideDownloadedSegments": {
+      "message": "Ẩn các phân đoạn đã tải xuống"
+   },
+   "iconOption": {
+      "message": "Hiển thị biểu tượng trang web"
+   },
+   "iframeFFmpeg": {
+      "message": "FFmpeg trực tuyến nhúng"
+   },
+   "importConfiguration": {
+      "message": "Nhập cấu hình"
+   },
+   "incorrectKey": {
+      "message": "Key không chính xác"
+   },
+   "invertSelection": {
+      "message": "Đảo ngược chọn"
+   },
+   "invoke": {
+      "message": "Gọi"
+   },
+   "invokeApp": {
+      "message": "Gọi ứng dụng"
+   },
+   "invokeM3u8DL": {
+      "message": "Gọi M3U8DL"
+   },
+   "invokeProtocolTemplate": {
+      "message": "Mẫu giao thức gọi"
+   },
+   "isBlockedSite": {
+      "message": "Trang web này yêu cầu chặn hoạt động của tiện ích mở rộng này"
+   },
+   "jsonFormatter": {
+      "message": "Định dạng JSON"
+   },
+   "key": {
+      "message": "Khóa"
+   },
+   "keyAddress": {
+      "message": "Địa chỉ Key"
+   },
+   "keyDownloadFailed": {
+      "message": "Tải Key thất bại"
+   },
+   "liveHLS": {
+      "message": "HLS trực tiếp"
+   },
+   "loading": {
+      "message": "Đang tải..."
+   },
+   "loadingData": {
+      "message": "Đang tải dữ liệu..."
+   },
+   "localM3u8": {
+      "message": "M3U8 cục bộ"
+   },
+   "loop": {
+      "message": "Lặp lại"
+   },
+   "m3u8DLTips": {
+      "message": "Công cụ tải m3u8 và mpd bên thứ ba tuyệt vời, xem cách sử dụng"
+   },
+   "m3u8Error": {
+      "message": "Có lỗi khi phân tích hoặc phát tệp M3U8, kiểm tra console để biết chi tiết lỗi"
+   },
+   "m3u8Info": {
+      "message": "Tổng cộng $num$ tệp, tổng thời lượng $time$.",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         },
+         "time": {
+            "content": "$2"
+         }
+      }
+   },
+   "m3u8Parser": {
+      "message": "Trình phân tích M3U8"
+   },
+   "m3u8Placeholder": {
+      "message": "Vui lòng nhập link m3u8 / nội dung m3u8 / danh sách phân đoạn / thẻ $${range}"
+   },
+   "m3u8Playlist": {
+      "message": "Danh sách phát M3U8"
+   },
+   "m3u8Url": {
+      "message": "URL M3U8"
+   },
+   "manualSend": {
+      "message": "Truyền dữ liệu thủ công"
+   },
+   "match": {
+      "message": "Khớp"
+   },
+   "mediaControl": {
+      "message": "Điều khiển Media"
+   },
+   "mergeDownloads": {
+      "message": "Ghép nối bản tải xuống"
+   },
+   "merging": {
+      "message": "Đang ghép nối"
+   },
+   "messageSentToMQTT": {
+      "message": "Tin nhắn đã gửi đến máy chủ MQTT"
+   },
+   "moreFeatures": {
+      "message": "Thêm"
+   },
+   "moreFrequent": {
+      "message": "Thường xuyên hơn"
+   },
+   "mp4Format": {
+      "message": "MP4"
+   },
+   "mpdParser": {
+      "message": "Trình phân tích MPD"
+   },
+   "mqttBroker": {
+      "message": "Địa chỉ Broker"
+   },
+   "mqttBrokerHelp": {
+      "message": "Tên máy chủ hoặc địa chỉ IP của MQTT broker"
+   },
+   "mqttClientId": {
+      "message": "ID khách hàng"
+   },
+   "mqttClientIdHelp": {
+      "message": "Mã định danh client duy nhất cho kết nối này"
+   },
+   "mqttCredentialsHelp": {
+      "message": "Để trống tên đăng nhập/mật khẩu nếu không yêu cầu"
+   },
+   "mqttDataFormat": {
+      "message": "Định dạng dữ liệu"
+   },
+   "mqttDataFormatDefault": {
+      "message": "Để trống để dùng định dạng JSON mặc định"
+   },
+   "mqttDataFormatHelp": {
+      "message": "{\"url\": \"$${url}\", \"title\": \"$${title}\", \"type\": \"$${type}\", \"ext\": \"$${ext}\", \"timestamp\": \"$${timestamp}\"}"
+   },
+   "mqttDataFormatVars": {
+      "message": "Các biến khả dụng"
+   },
+   "mqttPassword": {
+      "message": "Mật khẩu"
+   },
+   "mqttPath": {
+      "message": "Đường dẫn (Path)"
+   },
+   "mqttPathHelp": {
+      "message": "Đường dẫn WebSocket (thường là /mqtt hoặc /ws)"
+   },
+   "mqttProtocol": {
+      "message": "Giao thức"
+   },
+   "mqttProtocolWs": {
+      "message": "WS (Không an toàn)"
+   },
+   "mqttProtocolWss": {
+      "message": "WSS (An toàn)"
+   },
+   "mqttQos": {
+      "message": "Mức QoS"
+   },
+   "mqttQos0": {
+      "message": "0(Tối đa một lần)"
+   },
+   "mqttQos1": {
+      "message": "1(Ít nhất một lần)"
+   },
+   "mqttQos2": {
+      "message": "2(Chính xác một lần)"
+   },
+   "mqttQosHelp": {
+      "message": "Mức chất lượng dịch vụ (0=Tối đa một lần, 1=Ít nhất một lần, 2=Chính xác một lần)"
+   },
+   "mqttTitleLength": {
+      "message": "Độ dài tiêu đề tối đa"
+   },
+   "mqttTitleLengthHelp": {
+      "message": "Độ dài tối đa của tiêu đề gửi trong tin nhắn MQTT"
+   },
+   "mqttTopic": {
+      "message": "Chủ đề (Topic)"
+   },
+   "mqttTopicHelp": {
+      "message": "Chủ đề MQTT để xuất bản tin nhắn"
+   },
+   "mqttUsername": {
+      "message": "Tên đăng nhập"
+   },
+   "multipleAudios": {
+      "message": "Đa âm thanh"
+   },
+   "multipleAudiosTip": {
+      "message": "Tệp M3U8 này lồng nhiều luồng âm thanh"
+   },
+   "multipleSubtitles": {
+      "message": "Đa phụ đề"
+   },
+   "multipleSubtitlesTip": {
+      "message": "Tệp M3U8 này lồng nhiều phụ đề."
+   },
+   "multiplier": {
+      "message": "Hệ số nhân:"
+   },
+   "mute": {
+      "message": "Tắt tiếng"
+   },
+   "newDownloader": {
+      "message": "Trình tải mới"
+   },
+   "nextLevel": {
+      "message": "Cấp tiếp theo"
+   },
+   "nextLevelTip": {
+      "message": "Tệp M3U8 này lồng nhiều tệp M3U8 khác."
+   },
+   "noAudio": {
+      "message": "Không có âm thanh"
+   },
+   "noControllableMediaDetected": {
+      "message": "Không tìm thấy Media có thể điều khiển"
+   },
+   "noData": {
+      "message": "Không có cá"
+   },
+   "noKeyIsRequired": {
+      "message": "Không yêu cầu key"
+   },
+   "noMatch": {
+      "message": "Không khớp"
+   },
+   "noMediaDetected": {
+      "message": "Không tìm thấy Media nào trên trang web"
+   },
+   "noVideo": {
+      "message": "Không có hình ảnh"
+   },
+   "normalClear": {
+      "message": "Xóa bình thường"
+   },
+   "normalPlay": {
+      "message": "Phát bình thường"
+   },
+   "onlineFFmpeg": {
+      "message": "FFmpeg trực tuyến"
+   },
+   "onlineMerge": {
+      "message": "Ghép nối"
+   },
+   "onlineServiceAddress": {
+      "message": "Địa chỉ dịch vụ trực tuyến"
+   },
+   "openDir": {
+      "message": "Mở thư mục"
+   },
+   "openDownloaderPageInBackground": {
+      "message": "Mở trang tải xuống trong nền"
+   },
+   "openInBgDownload": {
+      "message": "Mở trang tải xuống trong nền"
+   },
+   "operation": {
+      "message": "Thao tác"
+   },
+   "option": {
+      "message": "Tùy chọn"
+   },
+   "originalM3u8": {
+      "message": "M3U8 gốc"
+   },
+   "otherFeatures": {
+      "message": "Tính năng khác"
+   },
+   "otherFiles": {
+      "message": "Các tệp khác"
+   },
+   "otherPage": {
+      "message": "Trang khác"
+   },
+   "otherSettings": {
+      "message": "Cài đặt khác"
+   },
+   "parameter": {
+      "message": "Tham số"
+   },
+   "parameterSetting": {
+      "message": "Cài đặt tham số"
+   },
+   "parser": {
+      "message": "Trình phân tích"
+   },
+   "pause": {
+      "message": "Tạm dừng"
+   },
+   "pictureInPicture": {
+      "message": "Hình trong hình (PiP)"
+   },
+   "play": {
+      "message": "Phát"
+   },
+   "popup": {
+      "message": "Cửa sổ bật lên"
+   },
+   "possibleKey": {
+      "message": "Tìm thấy khóa khả thi"
+   },
+   "preview": {
+      "message": "Xem trước"
+   },
+   "previewCommand": {
+      "message": "Xem trước lệnh"
+   },
+   "previewMode": {
+      "message": "Sử dụng giao thức gọi của trình phát cục bộ để mở xem trước video"
+   },
+   "previewModePlaceholder": {
+      "message": "Để trống để tắt. Mặc định sử dụng trang popup để xem trước video"
+   },
+   "realKeyNotFound": {
+      "message": "Không tìm thấy key thực"
+   },
+   "recordLive": {
+      "message": "Ghi hình"
+   },
+   "recordWebRTC": {
+      "message": "Ghi WebRTC"
+   },
+   "recordingDuration": {
+      "message": "Thời gian ghi"
+   },
+   "redownloadFailedItems": {
+      "message": "Tải lại các mục lỗi"
+   },
+   "regex": {
+      "message": "regex"
+   },
+   "regexExpression": {
+      "message": "Biểu thức Regex"
+   },
+   "regexMatch": {
+      "message": "Khớp Regex"
+   },
+   "regexSuffixTip": {
+      "message": "Gán đuôi tệp cho URL thu được. Có thể để trống, và đuôi tệp sẽ tự động được cắt bớt (nhiều tệp không có đuôi)"
+   },
+   "regexTest": {
+      "message": "Kiểm tra Regex"
+   },
+   "regexTip": {
+      "message": "Biểu thức chính quy tiêu tốn nhiều tài nguyên, hãy sử dụng cẩn thận nếu không cần thiết"
+   },
+   "regexTitle": {
+      "message": "Khớp biểu thức chính quy hoặc từ tìm kiếm sâu"
+   },
+   "regularFilterPlaceholder": {
+      "message": "Bộ lọc biểu thức chính quy, khớp URL tài nguyên, nhấn Enter để xác nhận"
+   },
+   "removeFailedPreviewFiles": {
+      "message": "Xóa các tệp không thể xem trước"
+   },
+   "replaceKeywordList": {
+      "message": "Danh sách từ khóa thay thế"
+   },
+   "replaceTags": {
+      "message": "Thay thế thẻ (Tags)"
+   },
+   "requestBody": {
+      "message": "Nội dung yêu cầu"
+   },
+   "requestHeaders": {
+      "message": "Header yêu cầu"
+   },
+   "requestMethod": {
+      "message": "Phương thức Request"
+   },
+   "resetAllSettings": {
+      "message": "Đặt lại tất cả cài đặt"
+   },
+   "resetCopySettings": {
+      "message": "Đặt lại cài đặt sao chép"
+   },
+   "resetOtherSettings": {
+      "message": "Đặt lại các cài đặt khác"
+   },
+   "resetSettings": {
+      "message": "Đặt lại cài đặt"
+   },
+   "resolution": {
+      "message": "Độ phân giải"
+   },
+   "restartExtension": {
+      "message": "Khởi động lại tiện ích"
+   },
+   "restoreGetParameters": {
+      "message": "Khôi phục tham số GET"
+   },
+   "result": {
+      "message": "Kết quả"
+   },
+   "retryCount": {
+      "message": "Số lần thử lại"
+   },
+   "retryDownload": {
+      "message": "Thử lại tải xuống"
+   },
+   "retryingDownload": {
+      "message": "Đang thử lại tải xuống"
+   },
+   "reverse": {
+      "message": "Thứ tự ngược"
+   },
+   "runningCannotChangeSettings": {
+      "message": "Đang chạy, không thể thay đổi cài đặt"
+   },
+   "sNumError": {
+      "message": "Lỗi số thứ tự"
+   },
+   "sNumMax": {
+      "message": "Số thứ tự không thể vượt quá $num$",
+      "placeholders": {
+         "num": {
+            "content": "$1"
+         }
+      }
+   },
+   "save": {
+      "message": "Lưu"
+   },
+   "saveAs": {
+      "message": "Lưu thành"
+   },
+   "saveAsOption": {
+      "message": "Chọn thư mục lưu sau khi tải xuống"
+   },
+   "saveFailed": {
+      "message": "Lưu thất bại"
+   },
+   "savePrompt": {
+      "message": "Đã lưu vào ổ đĩa, vui lòng kiểm tra nội dung tải xuống trong trình duyệt."
+   },
+   "saving": {
+      "message": "Đang lưu"
+   },
+   "screenCapture": {
+      "message": "Quay màn hình"
+   },
+   "screenshot": {
+      "message": "Chụp màn hình"
+   },
+   "searchingForRealKey": {
+      "message": "Đang tìm kiếm key thực"
+   },
+   "secretKey": {
+      "message": "Khóa bí mật (Secret Key)"
+   },
+   "segmentList": {
+      "message": "Phân đoạn"
+   },
+   "selectAll": {
+      "message": "Chọn tất cả"
+   },
+   "selectAudio": {
+      "message": "Chọn Audio"
+   },
+   "selectMedia": {
+      "message": "Phương tiện:"
+   },
+   "selectVideo": {
+      "message": "Chọn Video"
+   },
+   "selectWebpage": {
+      "message": "Trang web:"
+   },
+   "send2MQTT": {
+      "message": "Gửi đến MQTT"
+   },
+   "send2local": {
+      "message": "Truyền dữ liệu"
+   },
+   "send2localTips": {
+      "message": "Bạn có muốn gộp dữ liệu trước khi gửi không? Nhấn 'OK' để gộp, hoặc 'Hủy' để gửi từng mục."
+   },
+   "sendFailed": {
+      "message": "Gửi thất bại"
+   },
+   "sendFfmpeg": {
+      "message": "Gửi đến ffmpeg trực tuyến"
+   },
+   "sendingMessageToMQTT": {
+      "message": "Đang gửi tin nhắn đến máy chủ MQTT..."
+   },
+   "sendingToMQTT": {
+      "message": "Đang gửi đến máy chủ MQTT..."
+   },
+   "setRequestHeaders": {
+      "message": "Đặt header yêu cầu."
+   },
+   "setWhiteList": {
+      "message": "Đặt vào danh sách trắng"
+   },
+   "settings": {
+      "message": "Cài đặt"
+   },
+   "sideurlprotocol": {
+      "message": "Giao thức URL m3u8dl"
+   },
+   "simulateMobile": {
+      "message": "Giả lập Mobile"
+   },
+   "skipDecryption": {
+      "message": "Bỏ qua giải mã"
+   },
+   "sort": {
+      "message": "Sắp xếp"
+   },
+   "speedPlayback": {
+      "message": "Tốc độ phát"
+   },
+   "start": {
+      "message": "Bắt đầu"
+   },
+   "startGTend": {
+      "message": "Số bắt đầu không thể lớn hơn số kết thúc"
+   },
+   "stopDownload": {
+      "message": "Dừng tải xuống"
+   },
+   "stopRecording": {
+      "message": "Dừng ghi"
+   },
+   "streamOnbeforeunload": {
+      "message": "Đang stream, quá trình tải sẽ dừng sau khi đóng"
+   },
+   "streamSaverTip": {
+      "message": "Chức năng 'vừa tải vừa lưu' không hỗ trợ chuyển đổi định dạng ffmpeg trực tuyến, không hỗ trợ tải lại các lát bị lỗi, và không hỗ trợ 'lưu thành'."
+   },
+   "suffix": {
+      "message": "Đuôi tệp"
+   },
+   "suffixTip": {
+      "message": "Điền vào đuôi tệp không chứa dấu '.', nếu không cần lọc kích thước thì điền 0."
+   },
+   "systemShare": {
+      "message": "Chia sẻ hệ thống"
+   },
+   "test": {
+      "message": "Kiểm tra"
+   },
+   "title": {
+      "message": "Tiêu đề"
+   },
+   "titleDownload": {
+      "message": "Tải xuống cat-catch"
+   },
+   "titleJson": {
+      "message": "Trình định dạng json cat-catch"
+   },
+   "titleM3U8": {
+      "message": "Trình phân tích m3u8 cat-catch"
+   },
+   "titleOption": {
+      "message": "Tùy chọn cat-catch"
+   },
+   "titledash": {
+      "message": "Trình phân tích Dash cat-catch"
+   },
+   "type": {
+      "message": "Loại"
+   },
+   "typeTip": {
+      "message": "Nhập đúng content-type, nếu không cần lọc kích thước thì điền 0."
+   },
+   "unknownSize": {
+      "message": "Kích thước không xác định"
+   },
+   "uploadKey": {
+      "message": "Tải lên khóa"
+   },
+   "useSidePanel": {
+      "message": "Sử dụng bảng điều khiển bên (Side Panel)"
+   },
+   "userAgentTip": {
+      "message": "Mặc định sử dụng User Agent của trình duyệt hiện tại"
+   },
+   "verifying": {
+      "message": "Đang xác minh"
+   },
+   "video": {
+      "message": "Hình ảnh"
+   },
+   "videoRecording": {
+      "message": "Ghi hình video"
+   },
+   "viewSlices": {
+      "message": "Xem tất cả các lát và tiến độ tải xuống"
+   },
+   "volume": {
+      "message": "Âm lượng"
+   },
+   "waitDownload": {
+      "message": "Đang chờ tải xuống..."
+   },
+   "waitingForLiveData": {
+      "message": "Đang chờ dữ liệu trực tiếp (Live)"
+   },
+   "waitingForMedia": {
+      "message": "Đang chờ nhận tệp media... Vui lòng không đóng trang này."
+   },
+   "wildcards": {
+      "message": "ký tự đại diện"
+   },
+   "winpopup": {
+      "message": "cửa sổ popup"
+   },
+   "winpreview": {
+      "message": "cửa sổ xem trước"
+   },
+   "withinChina": {
+      "message": "Trong nội địa Trung Quốc"
+   }
+}

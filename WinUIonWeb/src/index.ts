@@ -1,5 +1,6 @@
 import type { App } from 'vue'
 import { registerWinUIComponents } from './components/register'
+import { installPointerInput } from './components/pointerInput'
 import { createI18n, i18nKey, type I18n } from './components/i18n'
 import './styles/theme.css'
 import './styles/buttonResources.css'
@@ -8,6 +9,9 @@ import './styles/pivot.css'
 import './styles/swipe.css'
 import './styles/animations.css'
 import './styles/icons.css'
+
+// Named component imports need the same input policy as the global plugin.
+installPointerInput()
 
 export interface WinUIOnWebOptions {
   locale?: string
@@ -31,6 +35,8 @@ export type { I18n, Locale, ResourceBundle, ResourceMap } from './components/i18
 export { xamlNameScopeKey, xamlScopeKey } from './components/xamlRuntime'
 export { loadWinUIIconFont } from './components/iconFont'
 export type { WinUIIconFontSource } from './components/iconFont'
+export { connectSystemAccentColorHost, createBrowserSystemAccentColorHostAdapter } from './systemAccentColor'
+export type { SystemAccentColorHostAdapter, SystemAccentColorHostTarget, SystemAccentColorPalette } from './systemAccentColor'
 
 // Named exports support local registration and TypeScript-aware imports.
 export { default as AnimatedIcon } from './components/AnimatedIcon.vue'
@@ -68,6 +74,7 @@ export { default as ExpanderBase } from './components/ExpanderBase.vue'
 export { default as FlipView } from './components/FlipView.vue'
 export { default as Flyout } from './components/Flyout.vue'
 export { default as FlyoutAnimation } from './components/FlyoutAnimation.vue'
+export { default as FocusVisual } from './components/FocusVisual.vue'
 export { default as FontIcon } from './components/FontIcon.vue'
 export { default as Frame } from './components/Frame.vue'
 export { default as Grid } from './components/Grid.vue'
@@ -145,6 +152,36 @@ export { default as TextBox } from './components/TextBox.vue'
 export { default as ThemeShadow } from './components/ThemeShadow.vue'
 export { default as TimePicker } from './components/TimePicker.vue'
 export { default as TitleBar } from './components/TitleBar.vue'
+export { AcrylicBrush, createAcrylicMaterialStyle, createAcrylicResource, resolveAcrylicResource, resolveBrushStyle, styleFromResolvedBrush, useAcrylicBrushStyle } from './components/AcrylicBrush'
+export type { AcrylicMaterialStyleOptions, AcrylicMaterialTheme } from './components/AcrylicBrush'
+export { createAcrylicMaterialLayer, createAcrylicNoiseLayer, mountAcrylicMaterialLayer, mountAcrylicNoiseLayer, vAcrylicBackdrop, vAcrylicBrush } from './components/acrylicBrushVisual'
+export type { AcrylicMaterialLayer, AcrylicNoiseLayer } from './components/acrylicBrushVisual'
+export { isAcrylicResource } from './components/acrylicResources'
+export {
+  configureTitleBarWindowHost,
+  connectTitleBarWindowHost,
+  createBrowserTitleBarWindowHost,
+  getTitleBarHostPadding,
+  nativeTitleBarMetricsToCssPixels,
+  registerTitleBarWindowHost,
+  setTitleBarHostAdapter,
+  titleBarHostAdapterKey,
+} from './components/titleBarHostAdapter'
+export type {
+  NativeTitleBarMetrics,
+  TitleBarCaptionButton,
+  TitleBarCaptionButtonState,
+  TitleBarCaptionButtonsFramework,
+  TitleBarCaptionHitTestMode,
+  TitleBarDragRegions,
+  TitleBarHeightOption,
+  TitleBarHostAdapter,
+  TitleBarInsets,
+  TitleBarRegion,
+  TitleBarWindowConfiguration,
+  TitleBarWindowControls,
+  TitleBarWindowHost,
+} from './components/titleBarHostAdapter'
 export { default as ToggleButton } from './components/ToggleButton.vue'
 export { default as ToggleSplitButton } from './components/ToggleSplitButton.vue'
 export { default as ToggleSwitch } from './components/ToggleSwitch.vue'

@@ -486,7 +486,7 @@ onMounted(() => {
   viewportHeight.value = rootEl.value.clientHeight || VIEWPORT_HEIGHT;
   bind(rootEl.value, 'pointerenter', (event) => { columnPointerOver.value = isEnabled.value && event.pointerType !== 'touch'; });
   bind(rootEl.value, 'pointerleave', () => { columnPointerOver.value = false; });
-  bind(rootEl.value, 'pointerdown', (event) => { if (event.pointerType === 'touch') columnPointerOver.value = false; });
+  bind(rootEl.value, 'pointerdown', (event) => { if (event.pointerType === 'touch') { columnPointerOver.value = false; hoveredSlot.value = -1; } });
   bind(rootEl.value, 'pointercancel', () => { columnPointerOver.value = false; });
   bind(scrollEl.value, 'scroll', onScroll, { passive: true });
   bind(scrollEl.value, 'wheel', onWheel, { passive: false });

@@ -8,7 +8,7 @@
     :aria-selected="selectionEnabled ? isSelected : undefined"
     :aria-disabled="!isEnabled || undefined"
     role="option"
-    @pointerenter="isPointerOver = true"
+    @pointerenter="onPointerEnter"
     @pointerleave="isPointerOver = false"
     @pointerdown="onPointerDown"
     @pointerup="onPointerUp"
@@ -44,6 +44,7 @@ import { itemContainerControllerKey, itemsViewItemContextKey } from './ItemsView
 import { resolveXamlValue, xamlItemContextKey } from './xamlRuntime';
 import { useAcrylicBrushStyle } from './AcrylicBrush';
 import { vAcrylicBrush } from './acrylicBrushVisual';
+import { isHoverPointer } from './pointerInput';
 
 const props = defineProps({
   IsSelected: { type: [Boolean, String], default: false },
@@ -112,7 +113,7 @@ const xamlThickness = (value) => {
 // The active layout owns the realized element's box. LinedFlowLayout assigns an
 // explicit width and height per item; the other layouts let the element keep the
 // size its own Width/Height/Margin declare.
-const resolvedCornerRadius = computed(() => cssLength(resolveXamlValue(props.CornerRadius, instance)));
+const resolvedCornerRadius = computed(() => cssLength(resolveXamlValue(props.CornerRadius, instance)) || 'var(--ControlCornerRadius, 4px)');
 const rootStyle = computed(() => {
   const geometry = itemContext?.geometry?.();
   return {
@@ -123,6 +124,7 @@ const rootStyle = computed(() => {
     maxWidth: cssLength(resolveXamlValue(props.MaxWidth, instance)),
     maxHeight: cssLength(resolveXamlValue(props.MaxHeight, instance)),
     margin: xamlThickness(resolveXamlValue(props.Margin, instance)),
+    borderRadius: resolvedCornerRadius.value,
     flex: geometry?.flex
   };
 });
@@ -131,6 +133,7 @@ const rootChromeStyle = computed(() => ({
   borderRadius: resolvedCornerRadius.value,
   ...backgroundStyle.value
 }));
+const onPointerEnter = (event) => { isPointerOver.value = isHoverPointer(event); };
 
 const canRaiseItemInvoked = () => Boolean(controller?.canUserInvoke?.() || controller?.canUserSelect?.());
 
@@ -147,13 +150,15 @@ const onPointerDown = (event) => {
   if (!isEnabled.value) return;
   if (event.pointerType === 'mouse' && event.button !== 0) return;
   isPressed.value = true;
+  if (!isHoverPointer(event)) isPointerOver.value = false;
 };
 const onPointerUp = (event) => {
   if (!isPressed.value) return;
   isPressed.value = false;
+  if (!isHoverPointer(event)) isPointerOver.value = false;
   raiseItemInvoked('PointerReleased', event);
 };
-const onPointerCancel = () => { isPressed.value = false; };
+const onPointerCancel = () => { isPressed.value = false; isPointerOver.value = false; };
 
 const onClick = (event) => { raiseItemInvoked('Tap', event); };
 const onDoubleClick = (event) => { raiseItemInvoked('DoubleTap', event); };

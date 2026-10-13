@@ -407,10 +407,17 @@ function updateRootBounds() {
 function isolateBackground() {
   if (placement.value === 'InPlace') return
   const children = rootElement ? rootElement.children : document.body.children
+  const isolate = (element: HTMLElement) => {
+    if (element === layoutRoot.value || element.contains(layoutRoot.value)) return
+    // Portaled caption buttons are window chrome rather than dialog content.
+    // Leave only that small body-level host outside the inert subtree; the
+    // title bar and all other application content remain isolated.
+    if (element.matches('.win-titlebar-caption-host.is-portal')) return
+    if (!backgroundInert.has(element)) backgroundInert.set(element, element.inert)
+    element.inert = true
+  }
   for (const child of Array.from(children)) {
-    if (!(child instanceof HTMLElement) || child === layoutRoot.value || child.contains(layoutRoot.value)) continue
-    if (!backgroundInert.has(child)) backgroundInert.set(child, child.inert)
-    child.inert = true
+    if (child instanceof HTMLElement) isolate(child)
   }
 }
 

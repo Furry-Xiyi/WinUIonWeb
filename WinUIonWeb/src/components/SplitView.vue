@@ -10,7 +10,7 @@
     @keydown="onKeyDown">
     <!-- Official PaneRoot -> Border(Pane) + lazy HCPaneBorder. -->
     <div ref="paneRoot" class="split-view-pane-root" data-template-part="PaneRoot"
-      :style="paneStyle" v-acrylic-brush="paneBackgroundStyle" :aria-hidden="paneVisible ? undefined : true"
+      :style="paneStyle" v-acrylic-brush.host-backdrop="paneBackgroundStyle" :aria-hidden="paneVisible ? undefined : true"
       :inert="paneVisible ? undefined : true" tabindex="-1">
       <Border class="split-view-pane-presenter"><PaneOutlet /></Border>
       <div v-if="highContrast && paneVisible" class="split-view-hc-pane-border"

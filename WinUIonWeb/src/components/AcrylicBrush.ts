@@ -97,9 +97,7 @@ export const resolveAcrylicResource = (name: string, instance: ComponentInternal
   }
   return value ?? acrylicResource(name, themeFor(instance), palette, forcedColors.value || uiSettings.IsHighContrast)
 }
-export const resolveBrushStyle = (input: unknown, instance: ComponentInternalInstance | null = null): CSSProperties => {
-  const resourceName = typeof input === 'string' ? input.trim().match(/^\{(?:ThemeResource|StaticResource)\s+([^}]+)\}$|^var\(--([\w]+)\)$/)?.slice(1).find(Boolean) : undefined
-  const brush = resourceName && isAcrylicResource(resourceName) ? resolveAcrylicResource(resourceName, instance) : resolveXamlValue(input, instance)
+export const styleFromResolvedBrush = (brush: unknown): CSSProperties => {
   if (isSolidColorBrush(brush)) return { background: brush.Opacity === 1 ? cssColor(brush.Color)
     : `color-mix(in srgb, ${cssColor(brush.Color)} ${clampOpacity(brush.Opacity) * 100}%, transparent)` }
   if (brush && typeof brush === 'object' && '__radialGradient' in brush) return { background: 'transparent' }
@@ -123,11 +121,44 @@ export const resolveBrushStyle = (input: unknown, instance: ComponentInternalIns
     '--acrylic-fallback-duration': `${reducedMotion.value ? 1 : 167}ms`
   } as CSSProperties
 }
-export const useAcrylicBrushStyle = (value: unknown | (() => unknown), instance: ComponentInternalInstance | null = getCurrentInstance()) => {
+
+export const resolveBrushStyle = (input: unknown, instance: ComponentInternalInstance | null = null): CSSProperties => {
+  const resourceName = typeof input === 'string' ? input.trim().match(/^\{(?:ThemeResource|StaticResource)\s+([^}]+)\}$|^var\(--([\w]+)\)$/)?.slice(1).find(Boolean) : undefined
+  const brush = resourceName && isAcrylicResource(resourceName) ? resolveAcrylicResource(resourceName, instance) : resolveXamlValue(input, instance)
+  return styleFromResolvedBrush(brush)
+}
+
+export type AcrylicMaterialTheme = 'Default' | 'Light' | 'Dark'
+export interface AcrylicMaterialStyleOptions {
+  theme?: AcrylicMaterialTheme
+  /** Match the native Mica fallback used by the containing window. */
+  fallbackColor?: string
+}
+
+/** Create the control package's standard window Acrylic style for a native backdrop host. */
+export const createAcrylicMaterialStyle = (options: AcrylicMaterialStyleOptions = {}): CSSProperties => {
+  const theme = options.theme === 'Dark' ? 'dark' : options.theme === 'Light' ? 'light' : themeFor(null)
+  const highContrast = forcedColors.value || uiSettings.IsHighContrast
+  const brush = acrylicResource('AcrylicBackgroundFillColorDefaultBrush', theme, undefined, highContrast)
+  const material = isAcrylicBrush(brush) ? createAcrylicBrush({
+    TintColor: brush.TintColor,
+    TintOpacity: brush.TintOpacity,
+    TintLuminosityOpacity: brush.TintLuminosityOpacity,
+    TintTransitionDuration: brush.TintTransitionDuration,
+    AlwaysUseFallback: brush.AlwaysUseFallback,
+    FallbackColor: options.fallbackColor === undefined ? brush.FallbackColor : colorString(options.fallbackColor),
+    Opacity: brush.Opacity
+  }) : brush
+  return styleFromResolvedBrush(material)
+}
+
+export const useAcrylicBrushStyle = (value: unknown | (() => unknown), instance: ComponentInternalInstance | null = getCurrentInstance(), resolver: typeof resolveBrushStyle = resolveBrushStyle) => {
   // All material hosts share one policy observer and release it with their visual tree.
   onMounted(connectHost)
   onBeforeUnmount(disconnectHost)
   const inherited = inject(xamlThemeKey, null) ?? inject('winuiTheme', null)
   if (inherited && instance && !instance.provides[xamlThemeKey]) instance.provides[xamlThemeKey] = inherited
-  return computed(() => resolveBrushStyle(typeof value === 'function' ? value() : value, instance))
+  return computed(() => resolver(typeof value === 'function' ? value() : value, instance))
 }
+
+export { isAcrylicResource }

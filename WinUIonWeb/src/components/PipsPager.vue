@@ -35,6 +35,7 @@ import { DataTemplate, StackLayout, getVNodeChildren } from './CollectionPropert
 import { xamlResourceDictionaryKey } from './Page.vue'
 import { useI18n } from './i18n/index'
 import { normalizeXamlVNode, resolveXamlHandler, resolveXamlValue, updateXamlBinding, xamlScopeKey } from './xamlRuntime'
+import { isHoverPointer } from './pointerInput'
 
 // A template owns the current values of its TemplateBindings. Materialize
 // those values before passing them to the shared Button implementation.
@@ -243,13 +244,13 @@ const OnPipClicked = (button: { Element?: HTMLElement }, args: { OriginalEvent?:
   const element = button.Element ?? args.OriginalEvent?.currentTarget as HTMLElement | undefined
   SetSelectedPageIndex(element?.dataset.pageIndex, true)
 }
-const OnPointerEntered = () => { isPointerOver.value = true }
+const OnPointerEntered = (event: PointerEvent) => { isPointerOver.value = isHoverPointer(event) }
 const OnPointerExited = (event: PointerEvent) => {
   const rect = rootRef.value?.getBoundingClientRect()
   if (!rect || event.clientX <= rect.left + 1 || event.clientX >= rect.right - 1 || event.clientY <= rect.top + 1 || event.clientY >= rect.bottom - 1) isPointerOver.value = false
 }
 const OnPointerCanceled = () => { isPointerOver.value = false; pointerFocus = false }
-const OnPointerPressed = () => { pointerFocus = true; isFocused.value = false }
+const OnPointerPressed = (event: PointerEvent) => { if (!isHoverPointer(event)) isPointerOver.value = false; pointerFocus = true; isFocused.value = false }
 const OnGotFocus = () => { isFocused.value = !pointerFocus; pointerFocus = false }
 const OnLostFocus = (event: FocusEvent) => { if (!rootRef.value?.contains(event.relatedTarget as Node)) isFocused.value = false }
 const OnKeyDown = (event: KeyboardEvent) => {

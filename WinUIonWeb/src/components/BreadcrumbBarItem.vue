@@ -264,6 +264,7 @@ const clearPointer = (event?: PointerEvent | Event) => {
   // returning to Normal restores brushes without adding a scale animation.
 }
 const onPointerEnter = (event: PointerEvent) => {
+  if (event.pointerType === 'touch') { isPointerOver.value = false; return }
   if (isDropDown.value && flyoutInput && !flyoutInput.allowsHover(event)) return
   if (!isDropDown.value || !isEnabled.value || !acceptsPointer(event)) return
   const bounds = rootRef.value?.getBoundingClientRect()
@@ -271,6 +272,7 @@ const onPointerEnter = (event: PointerEvent) => {
   isPointerOver.value = true
 }
 const onPointerDown = (event: PointerEvent) => {
+  if (event.pointerType === 'touch') clearPointer()
   if (!isDropDown.value || !isEnabled.value || (event.pointerType === 'mouse' && event.button !== 0) || !acceptsPointer(event)) return
   isPressed.value = true
   rootRef.value?.focus({ preventScroll: true })

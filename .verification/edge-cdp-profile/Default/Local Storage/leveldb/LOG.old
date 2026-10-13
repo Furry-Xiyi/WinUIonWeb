@@ -1,0 +1,15 @@
+2026/10/19-03:25:51.247 ccc Reusing MANIFEST C:\Users\32706\Develop\Windows\Furry-Xiyi\WinUIonWeb\.verification\edge-cdp-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/10/19-03:25:51.660 ccc Recovering log #3
+2026/10/19-03:25:51.670 ccc Reusing old log C:\Users\32706\Develop\Windows\Furry-Xiyi\WinUIonWeb\.verification\edge-cdp-profile\Default\Local Storage\leveldb/000003.log 
+2026/10/19-03:30:51.852 3c90 Level-0 table #5: started
+2026/10/19-03:30:51.946 3c90 Level-0 table #5: 20365 bytes OK
+2026/10/19-03:30:51.957 3c90 Delete type=0 #3
+2026/10/19-03:34:51.808 3c90 Level-0 table #7: started
+2026/10/19-03:34:51.845 3c90 Level-0 table #7: 20818 bytes OK
+2026/10/19-03:34:51.862 3c90 Delete type=0 #4
+2026/10/19-03:38:51.783 3c90 Level-0 table #9: started
+2026/10/19-03:38:51.801 3c90 Level-0 table #9: 20606 bytes OK
+2026/10/19-03:38:51.812 3c90 Delete type=0 #6
+2026/10/19-03:42:51.781 3c90 Level-0 table #11: started
+2026/10/19-03:42:51.814 3c90 Level-0 table #11: 20917 bytes OK
+2026/10/19-03:42:51.823 3c90 Delete type=0 #8

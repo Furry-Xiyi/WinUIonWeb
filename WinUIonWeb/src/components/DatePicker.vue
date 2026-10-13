@@ -6,7 +6,7 @@
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
       <ContentPresenter v-if="hasHeader" class="picker-header" Grid.Row="0"><HeaderContent /></ContentPresenter>
-      <Button ref="buttonRef" class="picker-button" Grid.Row="1" Style="{StaticResource DatePickerFlyoutButtonStyle}" Padding="0" MinHeight="{ThemeResource TextControlThemeMinHeight}" MinWidth="0" BorderThickness="{x:Bind PickerBorderThickness}" CornerRadius="{x:Bind PickerCornerRadius}" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsEnabled="{x:Bind PickerEnabled}" AutomationProperties.Name="{x:Bind PickerAutomationName}" Click="OnFlyoutButtonClick">
+      <Button ref="buttonRef" class="picker-button" Grid.Row="1" Style="{StaticResource DatePickerFlyoutButtonStyle}" Padding="0" MinHeight="{ThemeResource TextControlThemeMinHeight}" MinWidth="0" BorderBrush="{x:Bind PickerBorderBrush}" BorderThickness="{x:Bind PickerBorderThickness}" CornerRadius="{x:Bind PickerCornerRadius}" HorizontalAlignment="Stretch" VerticalAlignment="Top" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsEnabled="{x:Bind PickerEnabled}" AutomationProperties.Name="{x:Bind PickerAutomationName}" Click="OnFlyoutButtonClick">
         <Grid class="picker-button-content" :style="columnStyle">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="78*" />
@@ -148,7 +148,7 @@ const rootClasses = computed(() => ({ 'has-no-date': !localDate.value, 'is-disab
 const rootAttrs = computed(() => Object.fromEntries(Object.entries(attrs).filter(([key]) => !['class', 'style', 'DateChanged', 'SelectedDateChanged'].includes(key))))
 const rootStyle = computed(() => {
   const style: CSSProperties = {
-    '--picker-background': value(props.Background) as CSSProperties['--picker-background'], '--picker-foreground': value(props.Foreground) as CSSProperties['--picker-foreground'], '--picker-border': value(props.BorderBrush) as CSSProperties['--picker-border'],
+    '--picker-background': value(props.Background) as CSSProperties['--picker-background'], '--picker-foreground': value(props.Foreground) as CSSProperties['--picker-foreground'],
     '--picker-border-thickness': xamlThickness(value(props.BorderThickness)), '--picker-radius': cssLength(value(props.CornerRadius)),
     margin: xamlThickness(value(props.Margin)), padding: xamlThickness(value(props.Padding)),
     alignSelf: alignment(value(props.VerticalAlignment), 'vertical'), justifySelf: alignment(value(props.HorizontalAlignment), 'horizontal'),
@@ -220,6 +220,7 @@ const OnFlyoutClosed = (_sender: unknown, args: { Accepted: boolean }) => {
 }
 provide(xamlScopeKey, {
   PickerEnabled: enabled, PickerColumns: columns, PickerTheme: theme, PickerOverlayMode: computed(() => value(props.LightDismissOverlayMode)),
+  PickerBorderBrush: computed(() => value(props.BorderBrush)),
   PickerBorderThickness: computed(() => value(props.BorderThickness)), PickerCornerRadius: computed(() => value(props.CornerRadius)),
   PickerAutomationName: computed(() => String(header.value || t('datePicker.name')) + ' ' + fields.value.map(textFor).join(' ')),
   FirstText: computed(() => textFor(fields.value[0])), SecondText: computed(() => textFor(fields.value[1])), ThirdText: computed(() => textFor(fields.value[2])),
@@ -251,7 +252,6 @@ defineExpose(publicApi)
   --ButtonForegroundPointerOver: var(--DatePickerButtonForegroundPointerOver);
   --ButtonForegroundPressed: var(--DatePickerButtonForegroundPressed);
   --ButtonForegroundDisabled: var(--DatePickerButtonForegroundDisabled);
-  --ButtonBorderBrush: var(--picker-border);
   --ButtonBorderBrushPointerOver: var(--DatePickerButtonBorderBrushPointerOver);
   --ButtonBorderBrushPressed: var(--DatePickerButtonBorderBrushPressed);
   --ButtonBorderBrushDisabled: var(--DatePickerButtonBorderBrushDisabled);

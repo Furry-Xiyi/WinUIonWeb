@@ -1,0 +1,23 @@
+{
+   "createnew": {
+      "message": "BÚA TIL NÝTT"
+   },
+   "explanationofflinedisabled": {
+      "message": "Þú ert án nettengingar. Til að nota Google-skjöl án nettengingar skaltu opna stillingarnar á heimasíðu Google skjala og virkja samstillingu án nettengingar næst þegar þú tengist netinu."
+   },
+   "explanationofflineenabled": {
+      "message": "Engin nettenging. Þú getur samt sem áður breytt tiltækum skrám eða búið til nýjar."
+   },
+   "extdesc": {
+      "message": "Breyttu, búðu til og skoðaðu skjölin þín, töflureikna og kynningar — allt án nettengingar."
+   },
+   "extname": {
+      "message": "Google-skjöl án nettengingar"
+   },
+   "learnmore": {
+      "message": "Frekari upplýsingar"
+   },
+   "popuphelptext": {
+      "message": "Skrifaðu, breyttu og starfaðu með öðrum hvort sem nettenging er til staðar eða ekki."
+   }
+}

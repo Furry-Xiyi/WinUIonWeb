@@ -639,12 +639,13 @@ const paneStyle = computed(() => ({
   // clamp the pane to that width so its item badges stay inside the display.
   '--win-nav-open-pane-length': `${Math.max(props.compactPaneLength, Math.min(props.openPaneLength, containerWidth.value || props.openPaneLength))}px`,
   '--win-nav-compact-pane-length': `${props.compactPaneLength}px`,
-  // NavigationViewMinimalHeaderMargin is -24,44,0,0 in the native theme and
-  // follows the command-row padding in ContentLeftPadding. The page header
-  // is a direct child here, so apply the resulting effective inset instead
-  // of the raw negative XAML margin.
+  // The native minimal-header style has a -24px offset because its content
+  // surface already includes the pane's command-row inset. This implementation
+  // overlays ContentGrid across the closed 48px navigation rail, so give the
+  // header its own inset; otherwise it is painted underneath the rail.
   '--win-nav-header-margin-left': `${isLeftMinimalMode.value
-    ? (isPaneToggleButtonVisible.value ? 40 : 0) + (showBackButtonInLeftNav.value ? 40 : 0) - 24
+    ? Math.max(56, Number(props.compactPaneLength) + 8,
+      (isPaneToggleButtonVisible.value ? 40 : 0) + (showBackButtonInLeftNav.value ? 40 : 0) - 24)
     : 56}px`,
   '--win-nav-pane-duration': `${paneTransitionDurationMs(isCompact.value)}ms`,
   '--win-nav-pane-open-duration': `${paneTransitionSpec.value.openDurationMs}ms`,
@@ -1748,10 +1749,9 @@ const toggleLeftGroup = (item) => {
         }
         return;
       }
-      if (!animatePaneIndicatorTransition({
-        target,
-        targetIsChild: true
-      })) {
+      // The child begins fully clipped by its just-expanded parent. Let the
+      // indicator animation run behind that clip so it is revealed with the row.
+      if (!animatePaneIndicatorTransition({ target, targetIsChild: true, allowClippedTarget: true })) {
         skipTransition = true;
         calcIndicator();
         requestAnimationFrame(() => { skipTransition = false; });
@@ -2144,7 +2144,7 @@ const synchronizePaneLayoutTransition = ({ restoreScrollOffset = false } = {}) =
   paneLayoutSyncFrame = requestAnimationFrame(synchronize);
 };
 
-const calcIndicator = ({ animateSelectionChange = false, sourceSnapshot = null } = {}) => {
+const calcIndicator = ({ animateSelectionChange = false, sourceSnapshot = null, allowClippedTarget = false } = {}) => {
   if (pendingSelectionRequest || navigationViewUnmounted) return;
   if (pendingPaneIndicatorSource && !sourceSnapshot) return;
   if (!navRef.value || !lastSelectedEl || !navRef.value.contains(lastSelectedEl)) return;
@@ -2166,7 +2166,11 @@ const calcIndicator = ({ animateSelectionChange = false, sourceSnapshot = null }
   const axis = top ? 'x' : 'y';
   const size = top ? 'width' : 'height';
   const targetClip = getIndicatorClip(lastSelectedEl, track, metrics);
-  if (targetClip.top >= targetClip.bottom || targetClip.left >= targetClip.right) {
+  const targetIsClipped = targetClip.top >= targetClip.bottom || targetClip.left >= targetClip.right;
+  // A newly expanded child can start outside its parent's current clip. Keep
+  // the incoming animation alive; syncAnimatingIndicatorLayout expands the
+  // track clip as the group reveals the child.
+  if (targetIsClipped && (!allowClippedTarget || !animateSelectionChange || !sourceRect)) {
     nextIndicatorAnimation(indicatorEl);
     activeIndicatorTarget = null;
     indicatorHiddenByScroll = true;
@@ -2807,11 +2811,11 @@ watch(isSettingsVisible, (visible) => {
   }
 });
 
-const animatePaneIndicatorTransition = ({ target, targetIsChild, sourceSnapshot = null }) => {
+const animatePaneIndicatorTransition = ({ target, targetIsChild, sourceSnapshot = null, allowClippedTarget = false }) => {
   if (!target || !indicatorTrack.value) return false;
   lastSelectedEl = target;
   lastIsChild = targetIsChild;
-  calcIndicator({ animateSelectionChange: true, sourceSnapshot });
+  calcIndicator({ animateSelectionChange: true, sourceSnapshot, allowClippedTarget });
   return true;
 };
 

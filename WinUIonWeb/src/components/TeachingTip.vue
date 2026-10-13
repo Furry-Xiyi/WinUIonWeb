@@ -112,8 +112,11 @@
               Click="OnCloseButtonClick" />
           </Grid>
         </Grid>
+        <!-- TeachingTip.xaml binds TailPolygon.Fill and ContentRootGrid.Background
+             to the same brush. Clip the complete material, including its blur. -->
+        <div v-if="hasVisibleTail" class="teaching-tip-tail-material" Grid.RowSpan="5" Grid.ColumnSpan="5"
+          :style="tailMaterialStyle" v-acrylic-brush.host-backdrop="tailMaterialStyle" aria-hidden="true" />
         <svg v-if="hasVisibleTail" class="teaching-tip-tail-polygon" Grid.RowSpan="5" Grid.ColumnSpan="5" :viewBox="tailViewBox" aria-hidden="true">
-          <polygon :points="tailPoints" />
           <polyline :points="tailPoints" />
         </svg>
         </Grid>
@@ -151,6 +154,8 @@ import { normalizeXamlNodes, resolveXamlHandler, resolveXamlValue, updateXamlBin
 import { popupBoundsFor, resolvePopupElement, fitPopupPosition } from './popupRuntime'
 import { teachingTipPlacement, teachingTipTailSide, teachingTipThickness, type TeachingTipPlacement } from './teachingTipPlacement'
 import { createThemeShadow } from './themeShadowRuntime'
+import { useAcrylicBrushStyle } from './AcrylicBrush'
+import { vAcrylicBrush } from './acrylicBrushVisual'
 
 defineOptions({ name: 'TeachingTip', inheritAttrs: false })
 const props = defineProps({
@@ -258,6 +263,7 @@ const CloseColumn = computed(() => hasActionButton.value ? 1 : 0)
 const ActionStyle = computed(() => propertyValue('ActionButtonStyle'))
 const CloseStyle = computed(() => propertyValue('CloseButtonStyle'))
 const TipBackground = computed(() => IsLightDismissEnabled.value ? '{ThemeResource TeachingTipTransientBackground}' : propertyValue('Background'))
+const tailMaterialStyle = useAcrylicBrushStyle(() => TipBackground.value, instance)
 const TipBorderBrush = computed(() => propertyValue('BorderBrush'))
 const TipBorderThickness = computed(() => propertyValue('BorderThickness'))
 const TipCornerRadius = computed(() => propertyValue('CornerRadius'))
@@ -271,7 +277,6 @@ const containerStyle = computed<import('vue').CSSProperties>(() => ({
   left: `${position.value.left}px`, top: `${position.value.top}px`, visibility: positioned.value ? 'visible' as const : 'hidden' as const,
   '--teaching-tip-width': `${sizeLimit.value.width}px`, '--teaching-tip-height': `${sizeLimit.value.height}px`,
   '--teaching-tip-tail-x': `${position.value.tailX}px`, '--teaching-tip-tail-y': `${position.value.tailY}px`,
-  '--teaching-tip-background': IsLightDismissEnabled.value ? 'var(--TeachingTipTransientBackground, var(--AcrylicInAppFillColorDefaultBrush))' : propertyValue('Background') as TipPaint,
   '--teaching-tip-foreground': propertyValue('Foreground') as TipPaint, '--teaching-tip-border': propertyValue('BorderBrush') as TipPaint,
   '--teaching-tip-radius': typeof propertyValue('CornerRadius') === 'number' ? `${propertyValue('CornerRadius')}px` : propertyValue('CornerRadius') as TipPaint,
   '--teaching-tip-border-width': `${Number(propertyValue('BorderThickness')) || 0}px`
@@ -524,7 +529,6 @@ onBeforeUnmount(() => {
   min-width: 0;
   max-height: calc(var(--teaching-tip-height) - 16px);
   grid-template-rows: auto minmax(0, 1fr) auto !important;
-  background: var(--teaching-tip-background, var(--TeachingTipBackgroundBrush));
   border: var(--teaching-tip-border-width, 1px) solid var(--teaching-tip-border, var(--TeachingTipBorderBrush));
   border-radius: var(--teaching-tip-radius, var(--OverlayCornerRadius, 8px));
   overflow: visible;
@@ -554,11 +558,16 @@ onBeforeUnmount(() => {
 .teaching-tip-alternate-close-button.win-btn:active::after { background: var(--TeachingTipAlternateCloseButtonBackgroundPressed, var(--SubtleFillColorTertiaryBrush)); border-color: var(--TeachingTipAlternateCloseButtonBorderBrushPressed, transparent); }
 .teaching-tip-alternate-close-button.win-btn:active { color: var(--TeachingTipAlternateCloseButtonForegroundPressed, var(--TextFillColorSecondaryBrush)); }
 .teaching-tip-alternate-close-button.win-btn > * { position: relative; z-index: 1; }
-.teaching-tip-tail-polygon { position: absolute; z-index: 1; overflow: visible; pointer-events: none; fill: var(--teaching-tip-background); stroke: var(--teaching-tip-border); stroke-width: 1; }
-.teaching-tip-tail-polygon polygon { stroke: none; }
+.teaching-tip-tail-material, .teaching-tip-tail-polygon { position: absolute; z-index: 1; pointer-events: none; }
+.teaching-tip-tail-material { overflow: hidden; }
+.teaching-tip-tail-polygon { overflow: visible; stroke: var(--teaching-tip-border); stroke-width: 1; }
 .teaching-tip-tail-polygon polyline { fill: none; }
-.tail-top .teaching-tip-tail-polygon { top: -1px; left: var(--teaching-tip-tail-x); width: 20px; height: 10px; transform: translateX(-50%); }
-.tail-bottom .teaching-tip-tail-polygon { bottom: -1px; left: var(--teaching-tip-tail-x); width: 20px; height: 10px; transform: translateX(-50%); }
-.tail-left .teaching-tip-tail-polygon { left: -1px; top: var(--teaching-tip-tail-y); width: 10px; height: 20px; transform: translateY(-50%); }
-.tail-right .teaching-tip-tail-polygon { right: -1px; top: var(--teaching-tip-tail-y); width: 10px; height: 20px; transform: translateY(-50%); }
+.tail-top .teaching-tip-tail-material, .tail-top .teaching-tip-tail-polygon { top: -1px; left: var(--teaching-tip-tail-x); width: 20px; height: 10px; transform: translateX(-50%); }
+.tail-bottom .teaching-tip-tail-material, .tail-bottom .teaching-tip-tail-polygon { bottom: -1px; left: var(--teaching-tip-tail-x); width: 20px; height: 10px; transform: translateX(-50%); }
+.tail-left .teaching-tip-tail-material, .tail-left .teaching-tip-tail-polygon { left: -1px; top: var(--teaching-tip-tail-y); width: 10px; height: 20px; transform: translateY(-50%); }
+.tail-right .teaching-tip-tail-material, .tail-right .teaching-tip-tail-polygon { right: -1px; top: var(--teaching-tip-tail-y); width: 10px; height: 20px; transform: translateY(-50%); }
+.tail-top .teaching-tip-tail-material { clip-path: polygon(0 100%, 50% 0, 100% 100%); }
+.tail-bottom .teaching-tip-tail-material { clip-path: polygon(0 0, 50% 100%, 100% 0); }
+.tail-left .teaching-tip-tail-material { clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+.tail-right .teaching-tip-tail-material { clip-path: polygon(0 0, 100% 50%, 0 100%); }
 </style>

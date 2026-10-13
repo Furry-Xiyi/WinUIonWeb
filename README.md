@@ -25,6 +25,8 @@ https://github.com/user-attachments/assets/55c94b52-5e76-4ddd-a217-339fe7f568ef
 
 ## 更多控件正在开发中，敬请期待！
 * 体验：https://furry-xiyi.github.io/WinUIonWeb/
+* 安装指令：npm install winuionweb
+* 说明网址：https://www.npmjs.com/package/winuionweb 
 
 ### 声明
 

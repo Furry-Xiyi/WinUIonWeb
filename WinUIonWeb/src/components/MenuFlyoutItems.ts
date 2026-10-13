@@ -189,6 +189,7 @@ const createItem = (kind: string) => Object.assign(defineComponent({
       if (!hasSubmenu || !submenuRegion) context.CloseSiblings(controller)
     }
     const pointerDown = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') hovered.value = false
       if (!enabled.value || event.button !== 0) return
       if (isSplit) splitRegion.value = (event.target as Element)?.closest('.win-menu-flyout-split-secondary') ? 'secondary' : 'primary'
       canceledClick = false; pressed.value = true; pointerId = event.pointerId; pointerOrigin = { x: event.clientX, y: event.clientY }
