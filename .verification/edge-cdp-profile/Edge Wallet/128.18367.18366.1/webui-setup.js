@@ -1,1 +1,0 @@
-console.warn("No logic should be implemented in webui-setup.js");

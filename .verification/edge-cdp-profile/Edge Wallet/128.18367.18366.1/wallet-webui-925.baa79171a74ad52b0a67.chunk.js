@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunk_xpay_wallet_hub=self.webpackChunk_xpay_wallet_hub||[]).push([[925],{45925:(e,l,t)=>{t.d(l,{S:()=>u});const u=(e,l)=>new Intl.NumberFormat(e,{style:"currency",...l})}}]);

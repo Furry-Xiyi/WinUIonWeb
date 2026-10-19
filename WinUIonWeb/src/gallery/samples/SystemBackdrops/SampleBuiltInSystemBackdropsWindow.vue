@@ -1,5 +1,5 @@
 <template>
-  <Grid class="system-backdrop-window" Background="{x:Bind windowBackground, Mode=OneWay}">
+  <Grid class="system-backdrop-window" :Background="windowBackground">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />

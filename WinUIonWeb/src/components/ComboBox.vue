@@ -206,7 +206,7 @@ export default {
 </script>
 
 <script setup>
-import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowReactive, shallowRef, useAttrs, useSlots, watch } from 'vue';
+import { computed, defineComponent, Fragment, getCurrentInstance, h, inject, isVNode, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowReactive, shallowRef, unref, useAttrs, useSlots, watch } from 'vue';
 import { useI18n } from './i18n/index';
 import ScrollViewer from './ScrollViewer.vue';
 import { getCollectionProperty, getVNodeChildren } from './CollectionProperties';
@@ -224,7 +224,7 @@ import './comboBoxResources.css';
 import { useFlyoutAnimation } from './useFlyoutAnimation';
 import AnimatedIcon from './AnimatedIcon.vue';
 import { useAnimatedIconInput } from './animatedIconInput';
-import { colorString, createSolidColorBrush } from './brushCore';
+import { colorString, createSolidColorBrush, xamlThemeKey } from './brushCore';
 import { useAcrylicBrushStyle } from './AcrylicBrush';
 import { vAcrylicBrush } from './acrylicBrushVisual';
 import { vThemeShadow } from './themeShadowVisual';
@@ -523,7 +523,7 @@ const currentSelectedIndex = ref(-1);
 const currentSelectedItem = shallowRef(undefined);
 const currentText = ref(resolvedText.value === undefined ? '' : String(resolvedText.value));
 const anchorTheme = ref('');
-const inheritedTheme = inject('winuiTheme', null);
+const inheritedTheme = inject(xamlThemeKey, null) ?? inject('winuiTheme', null);
 const listBoxId = `win-combo-box-${Math.random().toString(36).slice(2)}`;
 
 const flyoutAnimation = useFlyoutAnimation(flyoutRef, {
@@ -623,7 +623,7 @@ const selectionBoxStyle = computed(() => ({
 
 const themeClass = computed(() => {
   const requested = String(resolveXamlValue(props.RequestedTheme, instance)).toLowerCase();
-  const theme = requested !== 'default' ? requested : inheritedTheme?.value || anchorTheme.value;
+  const theme = requested !== 'default' ? requested : unref(inheritedTheme) || anchorTheme.value;
   return theme === 'light' || theme === 'dark' ? `theme-${theme}` : '';
 });
 

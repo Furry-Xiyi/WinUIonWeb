@@ -5,6 +5,8 @@ export const systemBackdropHostAdapterKey = Symbol.for('WinUI.SystemBackdropHost
 export type SystemBackdropTheme = 'Default' | 'Light' | 'Dark'
 export type SystemBackdropFallbackReason = 'NativeBackdropUnavailable' | 'MaterialUnsupported' | 'Inactive' | 'HighContrast' | 'TransparencyDisabled' | 'EnergySaver' | 'HostError'
 export type SystemBackdropTargetKind = 'Window' | 'Surface'
+/** Keep unsupported desktop materials visually aligned with the Mica fallback. */
+export const systemBackdropFallbackColor = (theme: 'Light' | 'Dark'): string => theme === 'Dark' ? '#202020' : '#F3F3F3'
 type Awaitable<T> = T | Promise<T>
 
 export interface SystemBackdropState {
@@ -302,7 +304,10 @@ async function connectTarget(target: SystemBackdropHostTarget, adapter: SystemBa
   let joinedWindowContext = false
   const announce = () => { for (const listener of [...listeners]) { try { listener(snapshot(state)) } catch (error) { reportError(error) } } }
   const actualTheme = (): 'Light' | 'Dark' => theme === 'Light' || theme === 'Dark' ? theme : media[0]?.matches ? 'Dark' : 'Light'
-  const configuration = (): SystemBackdropConfiguration => ({ Theme: actualTheme(), IsInputActive: inputActive, IsHighContrast: media[1]?.matches ?? false, IsTransparencyEnabled: !(media[2]?.matches ?? false), IsEnergySaverEnabled: false })
+  const configuration = (): SystemBackdropConfiguration => {
+    const Theme = actualTheme()
+    return { Theme, IsInputActive: inputActive, IsHighContrast: media[1]?.matches ?? false, IsTransparencyEnabled: !(media[2]?.matches ?? false), IsEnergySaverEnabled: false, FallbackColor: systemBackdropFallbackColor(Theme) }
+  }
   const rebindContent = (element: HTMLElement) => {
     if (element === target.Content) return false
     if (!browserWindowTargets.has(target)) restoreBackdropStyles(contentStyles)

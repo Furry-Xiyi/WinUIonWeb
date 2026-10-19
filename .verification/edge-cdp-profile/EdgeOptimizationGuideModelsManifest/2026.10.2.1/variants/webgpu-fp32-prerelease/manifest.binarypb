@@ -1,72 +1,0 @@
-
-d
-b
-edge_base_modelO
-@f6bba62c6ea9e97b73c400532e0e95ff33713db5095f60883ddf61fe0ebe1a5d2026.10.2.1±
-=
-edge_base_model_gpu&
-
-edge_base_model
-model.onnx(€@"P
-prompt_api_gpu>
-edge_base_model_gpu'
-manifestconfigs/prompt_api.binarypb"Z
-proofreader_api_gpuC
-edge_base_model_gpu,
-manifest configs/proofreader_api.binarypb"X
-summarizer_api_gpuB
-edge_base_model_gpu+
-manifestconfigs/summarizer_api.binarypb"h
-writing_assistance_api_gpuJ
-edge_base_model_gpu3
-manifest'configs/writing_assistance_api.binarypb’
-gpu_high_tier€
-
-
-prompt_api
-prompt_api_gpu
-(
-proofreader_api
-proofreader_api_gpu
-&
-summarizer_api
-summarizer_api_gpu
-6
-writing_assistance_api
-writing_assistance_api_gpua
-
-prompt_apiS
-Ctype.googleapis.com/optimization_guide.proto.PromptApiFeatureConfig
-
-prompt_apij
-summarizer_apiX
-Dtype.googleapis.com/optimization_guide.proto.SummarizerFeatureConfig
-summarizer_api„
-writing_assistance_apij
-Ntype.googleapis.com/optimization_guide.proto.WritingAssistanceApiFeatureConfig
-writing_assistance_api‘
-gpu_low_tier€
-
-
-prompt_api
-prompt_api_gpu
-(
-proofreader_api
-proofreader_api_gpu
-&
-summarizer_api
-summarizer_api_gpu
-6
-writing_assistance_api
-writing_assistance_api_gpua
-
-prompt_apiS
-Ctype.googleapis.com/optimization_guide.proto.PromptApiFeatureConfig
-
-prompt_apij
-summarizer_apiX
-Dtype.googleapis.com/optimization_guide.proto.SummarizerFeatureConfig
-summarizer_api„
-writing_assistance_apij
-Ntype.googleapis.com/optimization_guide.proto.WritingAssistanceApiFeatureConfig
-writing_assistance_api
