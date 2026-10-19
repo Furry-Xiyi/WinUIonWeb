@@ -1,15 +1,15 @@
 <template>
   <Button ref="buttonControl" v-bind="hostAttrs" class="win-dropdown-button" :class="[attrs.class]" :style="attrs.style"
     :IsEnabled="IsEnabled" :IsTabStop="IsTabStop" :ClickMode="ClickMode" :RequestedTheme="RequestedTheme"
-    :Visibility="resolve(props.Visibility)" :Background="resolvedBackground" :Foreground="resolve(props.Foreground)"
-    :BorderBrush="resolve(props.BorderBrush)" :BorderThickness="BorderThickness" :CornerRadius="CornerRadius"
-    :Padding="Padding" :BackgroundSizing="BackgroundSizing" :Margin="resolve(props.Margin)"
-    :Width="resolve(props.Width)" :Height="resolve(props.Height)" :MinWidth="resolve(props.MinWidth)"
-    :MinHeight="resolve(props.MinHeight)" :MaxWidth="resolve(props.MaxWidth)" :MaxHeight="resolve(props.MaxHeight)"
-    :HorizontalAlignment="resolve(props.HorizontalAlignment)" :VerticalAlignment="resolve(props.VerticalAlignment)"
+    :Visibility="resolveString(props.Visibility)" :Background="resolvedBackground" :Foreground="resolveString(props.Foreground)"
+    :BorderBrush="resolveString(props.BorderBrush)" :BorderThickness="BorderThickness" :CornerRadius="CornerRadius"
+    :Padding="resolveString(props.Padding)" :BackgroundSizing="BackgroundSizing" :Margin="resolveString(props.Margin)"
+    :Width="resolveLength(props.Width)" :Height="resolveLength(props.Height)" :MinWidth="resolveLength(props.MinWidth)"
+    :MinHeight="resolveLength(props.MinHeight)" :MaxWidth="resolveLength(props.MaxWidth)" :MaxHeight="resolveLength(props.MaxHeight)"
+    :HorizontalAlignment="resolveString(props.HorizontalAlignment)" :VerticalAlignment="resolveString(props.VerticalAlignment)"
     :HorizontalContentAlignment="HorizontalContentAlignment" :VerticalContentAlignment="VerticalContentAlignment"
-    :FontFamily="resolve(props.FontFamily)" :FontSize="resolve(props.FontSize)" :FontWeight="resolve(props.FontWeight)"
-    :UseSystemFocusVisuals="UseSystemFocusVisuals" :FocusVisualMargin="resolve(props.FocusVisualMargin)"
+    :FontFamily="resolveString(props.FontFamily)" :FontSize="resolveLength(props.FontSize)" :FontWeight="resolveString(props.FontWeight)"
+    :UseSystemFocusVisuals="UseSystemFocusVisuals" :FocusVisualMargin="resolveLength(props.FocusVisualMargin)"
     :aria-haspopup="Flyout ? 'menu' : undefined" :aria-expanded="Flyout ? isFlyoutOpen : undefined"
     :Command="Command" :CommandParameter="CommandParameter" :Flyout="FlyoutForButton"
     @Click="onButtonClick" @GotFocus="forwardButtonEvent('GotFocus')" @LostFocus="forwardButtonEvent('LostFocus')"
@@ -82,22 +82,24 @@ const instance = getCurrentInstance(), attrs = useAttrs(), slots = useSlots()
 const buttonControl = ref<any>(null)
 const element = computed<HTMLButtonElement | null>(() => buttonControl.value?.Element ?? null)
 const resolve = (value: unknown) => resolveXamlValue(value, instance)
+const resolveString = (value: unknown): string | undefined => resolve(value) as string | undefined
+const resolveLength = (value: unknown): string | number | undefined => resolve(value) as string | number | undefined
 const inheritedResources = inject<Record<string, VNode>>(xamlResourceDictionaryKey, {})
 const { ContentTemplate, ContentTransitions, renderTemplate } = useButtonContent(props, () => slots.default?.() ?? [], instance)
 const backgroundBrush = useBrushProperty('Background', () => props.Background, () => slots.default?.() ?? [], instance)
-const resolvedBackground = computed(() => backgroundBrush.value.value)
+const resolvedBackground = computed(() => backgroundBrush.value.value as string | Record<string, any> | undefined)
 const Command = useUICommand(() => resolve(props.Command))
 const CommandParameter = computed(() => resolve(props.CommandParameter))
 const localContent = shallowRef<unknown>(undefined)
 const sourceContent = computed(() => props.Content === undefined ? Command.value?.Label ?? '' : resolve(props.Content))
 const Content = computed({ get: () => localContent.value === undefined ? sourceContent.value : localContent.value, set: value => { localContent.value = value; updateXamlBinding(props.Content, value, instance) } })
 watch(sourceContent, () => { localContent.value = undefined })
-const property = (name: 'IsEnabled' | 'RequestedTheme') => {
+const property = <T>(name: 'IsEnabled' | 'RequestedTheme') => {
   const source = computed(() => resolve(props[name])), local = shallowRef<unknown>(undefined)
   watch(source, () => { local.value = undefined })
-  return computed({ get: () => local.value === undefined ? source.value : local.value, set: value => { local.value = value; updateXamlBinding(props[name], value, instance) } })
+  return computed<T>({ get: () => (local.value === undefined ? source.value : local.value) as T, set: value => { local.value = value; updateXamlBinding(props[name], value, instance) } })
 }
-const EnabledProperty = property('IsEnabled'), RequestedTheme = property('RequestedTheme')
+const EnabledProperty = property<boolean | string>('IsEnabled'), RequestedTheme = property<string>('RequestedTheme')
 const IsEnabled = computed({ get: () => boolValue(EnabledProperty.value) && (Command.value?.CanExecute?.(CommandParameter.value) ?? true), set: value => { EnabledProperty.value = boolValue(value) } })
 const IsTabStop = computed(() => boolValue(resolve(props.IsTabStop))), UseSystemFocusVisuals = computed(() => boolValue(resolve(props.UseSystemFocusVisuals)))
 const ClickMode = computed(() => String(resolve(props.ClickMode)))
@@ -165,8 +167,8 @@ const IsPointerOver = computed(() => Boolean(buttonControl.value?.IsPointerOver)
 const exposedContent = computed({ get: () => localContent.value === undefined ? propertyNodes.value.content[0] ?? Content.value : Content.value, set: value => { Content.value = value } })
 const api = proxyRefs({ Element: element, Name: computed(() => attrs['data-xaml-ref'] ?? attrs['x:Name'] ?? attrs.Name ?? ''), Content: exposedContent, ContentTemplate, ContentTransitions, IsEnabled, RequestedTheme, Command, CommandParameter, Flyout, IsPressed, IsPointerOver, Focus: () => { if (!IsEnabled.value) return false; element.value?.focus(); return Boolean(element.value) } })
 defineExpose(api)
-const Padding = computed(() => resolve(props.Padding)), BorderThickness = computed(() => resolve(props.BorderThickness)), CornerRadius = computed(() => resolve(props.CornerRadius)), BackgroundSizing = computed(() => resolve(props.BackgroundSizing))
-const HorizontalContentAlignment = computed(() => resolve(props.HorizontalContentAlignment)), VerticalContentAlignment = computed(() => resolve(props.VerticalContentAlignment))
+const Padding = computed(() => resolveString(props.Padding)), BorderThickness = computed(() => resolveLength(props.BorderThickness)), CornerRadius = computed(() => resolveLength(props.CornerRadius)), BackgroundSizing = computed(() => resolveString(props.BackgroundSizing))
+const HorizontalContentAlignment = computed(() => resolveString(props.HorizontalContentAlignment)), VerticalContentAlignment = computed(() => resolveString(props.VerticalContentAlignment))
 const AnimatedChevronDownSmallVisualSource = animatedIconVisualSourceComponents.AnimatedChevronDownSmallVisualSource
 const hostAttrs = computed(() => {
   const rest = { ...attrs }

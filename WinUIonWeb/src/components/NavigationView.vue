@@ -701,6 +701,8 @@ let lastResizeShellWidth = 0;
 let expandedPaneVerticalOffset = 0;
 let paneLayoutSyncFrame = null;
 let isRestoringPaneScroll = false;
+let indicatorScrollElement = null;
+let indicatorScrollFrame = null;
 
 const canGoBack = computed(() => officialProps.IsBackEnabled && officialProps.IsEnabled);
 
@@ -2069,11 +2071,18 @@ const onScroll = () => {
   if (scrollElement && !isCompact.value) {
     expandedPaneVerticalOffset = scrollElement.scrollTop;
   }
-  if (lastSelectedEl && navRef.value && navRef.value.contains(lastSelectedEl)) {
+  if (!lastSelectedEl || !navRef.value?.contains(lastSelectedEl) || indicatorScrollFrame) return;
+  // ScrollViewer's ViewChanged callback is not guaranteed to run for every
+  // native scroll frame. Measure after the browser applies the scroll offset
+  // so the resting indicator stays aligned during wheel, touch, and scrollbar
+  // scrolling, even when no selection animation is active.
+  indicatorScrollFrame = requestAnimationFrame(() => {
+    indicatorScrollFrame = null;
+    if (isRestoringPaneScroll || !lastSelectedEl || !navRef.value?.contains(lastSelectedEl)) return;
     skipTransition = true;
     calcIndicator();
     requestAnimationFrame(() => { skipTransition = false; });
-  }
+  });
 };
 
 const queueLayoutRefresh = () => {
@@ -2091,6 +2100,16 @@ const queueLayoutRefresh = () => {
 };
 
 const getScrollAreaElement = () => scrollArea.value?.scrollViewerRef?.value ?? scrollArea.value?.scrollViewerRef ?? scrollArea.value ?? null;
+
+const bindIndicatorScrollListener = () => {
+  const nextElement = getScrollAreaElement();
+  if (nextElement === indicatorScrollElement) return;
+  indicatorScrollElement?.removeEventListener('scroll', onScroll);
+  indicatorScrollElement = nextElement;
+  indicatorScrollElement?.addEventListener('scroll', onScroll, { passive: true });
+};
+
+watch(scrollArea, () => nextTick(bindIndicatorScrollListener), { flush: 'post' });
 
 const synchronizePaneLayoutTransition = ({ restoreScrollOffset = false } = {}) => {
   if (paneLayoutSyncFrame) cancelAnimationFrame(paneLayoutSyncFrame);
@@ -2686,6 +2705,7 @@ watch(groupExpanded, () => { groupChevronInput.Refresh(); }, { deep: true, flush
 
 onMounted(() => {
   attachCommandIconHosts();
+  bindIndicatorScrollListener();
   containerWidth.value = shellRef.value?.clientWidth || shellRef.value?.offsetWidth || window.innerWidth;
   lastResizeShellWidth = containerWidth.value;
   syncDisplayMode();
@@ -2717,6 +2737,9 @@ onBeforeUnmount(() => {
   if (paneTransitionTimer) clearTimeout(paneTransitionTimer);
   paneClipAnimation?.cancel();
   if (trackingRaf) cancelAnimationFrame(trackingRaf);
+  if (indicatorScrollFrame) cancelAnimationFrame(indicatorScrollFrame);
+  indicatorScrollElement?.removeEventListener('scroll', onScroll);
+  indicatorScrollElement = null;
   if (resizeTimer) cancelAnimationFrame(resizeTimer);
   nextIndicatorAnimation(indicatorTrack.value?.querySelector('.win-nav-indicator'));
   for (const item of xamlItemSources.values()) {

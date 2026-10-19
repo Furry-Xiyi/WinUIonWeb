@@ -50,7 +50,7 @@
     <AttachedOutlet v-if="propertyNodes.attached.length" />
     <FocusVisual
       v-if="boolValue(resolveXamlValue(props.UseSystemFocusVisuals, instance))"
-      :Margin="resolveXamlValue(props.FocusVisualMargin, instance) === '' ? -3 : resolveXamlValue(props.FocusVisualMargin, instance)"
+      :Margin="resolveLength(props.FocusVisualMargin) === '' ? -3 : resolveLength(props.FocusVisualMargin)"
       :CornerRadius="PresenterCornerRadius"
       :TargetBorderThickness="PresenterBorderThickness" />
   </button>
@@ -343,9 +343,10 @@ const PresenterBackground = computed(() => backgroundBrush.value.value && typeof
   && !isDisabled.value && !IsPressed.value && !IsPointerOver.value ? backgroundBrush.value.value : 'var(--ButtonBackgroundCurrent)');
 const PresenterBackgroundSizing = computed(() => resolveXamlValue(props.BackgroundSizing, instance) || (resolvedStyle.value.includes('AccentButtonStyle') ? 'OuterBorderEdge' : 'InnerBorderEdge'));
 const PresenterBorderBrush = computed(() => 'var(--ButtonBorderBrushCurrent)');
-const PresenterBorderThickness = computed(() => resolveXamlValue(props.BorderThickness, instance) === '' ? 1 : resolveXamlValue(props.BorderThickness, instance));
+const resolveLength = (value: unknown): string | number | undefined => resolveXamlValue(value, instance) as string | number | undefined;
+const PresenterBorderThickness = computed(() => resolveLength(props.BorderThickness) === '' ? 1 : resolveLength(props.BorderThickness));
 const PresenterPadding = computed(() => resolveXamlValue(props.Padding, instance) || '11,5,11,6');
-const PresenterCornerRadius = computed(() => resolveXamlValue(props.CornerRadius, instance) === '' ? 4 : resolveXamlValue(props.CornerRadius, instance));
+const PresenterCornerRadius = computed(() => resolveLength(props.CornerRadius) === '' ? 4 : resolveLength(props.CornerRadius));
 const inheritedScope = inject(xamlScopeKey, {});
 provide(xamlScopeKey, { ...inheritedScope, ContentTemplate, ContentTransitions, PresenterHorizontalAlignment, PresenterVerticalAlignment, PresenterBackground, PresenterBackgroundSizing, PresenterBorderBrush, PresenterBorderThickness, PresenterPadding, PresenterCornerRadius });
 

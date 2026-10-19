@@ -74,6 +74,17 @@ offers theme-specific accent fills, `LightThemeTextColor` and
 color in CSS where `color-mix()` is supported. Missing text colors use a
 contrast-based fallback.
 
+Windows hosts should read all seven accent values from
+`UISettings.GetColorValue(UIColorType)`: `Accent` and `AccentDark1` through
+`AccentDark3`, plus `AccentLight1` through `AccentLight3`. WinUI's common
+theme resources use `AccentDark1` as the light-theme default fill and
+`AccentLight2` as the dark-theme default fill. Their pointer-over and pressed
+brushes keep that same default shade and apply opacity `0.9` and `0.8`.
+Compositing those translucent brushes makes the light-theme states lighter on
+light surfaces and the dark-theme states darker on dark surfaces. Do not map
+these states to unrelated `Light1/3` or `Dark2/3` palette entries. If the host
+only provides a base color, the stylesheet keeps its existing blue fallbacks.
+
 The adapter publishes CSS variables on the selected root element. WinUIonWeb's
 `--accent-base`, `--AccentFillColorDefaultBrush`, `--SystemAccentColor`, and
 their hover, pressed, text, and theme-shade aliases resolve from those values
@@ -81,6 +92,6 @@ in both `.theme-light` and `.theme-dark` scopes. A host can use its native
 `UISettings.ColorValuesChanged` event to keep the subscription current.
 
 When the host reports one accent without a separate dark-theme color, the
-adapter lightens that color for dark surfaces. It selects black or white button
-text by contrast against each resolved accent color. An explicitly supplied
-theme-specific color or foreground takes precedence.
+stylesheet keeps its existing blue dark-theme fallback. The adapter selects
+black or white button text by contrast against each resolved accent color. An
+explicitly supplied theme-specific color or foreground takes precedence.

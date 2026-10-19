@@ -179,26 +179,29 @@ export function connectSystemAccentColorHost(
     const lightAccent = requestedLight && isCssColor(requestedLight, target) ? requestedLight : accent
     const darkAccent = requestedDark && isCssColor(requestedDark, target)
       ? requestedDark
-      : mixColor(accent, [255, 255, 255], 0.3, target) ?? accent
-
+      : undefined
     target.style.setProperty('--winui-system-accent-color', accent)
     target.style.setProperty('--winui-system-accent-color-light', lightAccent)
-    target.style.setProperty('--winui-system-accent-color-dark', darkAccent)
+    if (darkAccent) target.style.setProperty('--winui-system-accent-color-dark', darkAccent)
 
     const toRgbString = (value: string) => {
       const rgb = resolveRgb(value, target)
       return rgb ? `rgb(${rgb.join(', ')})` : value
     }
     const lightText = palette.LightThemeTextColor?.trim() || contrastingText(toRgbString(lightAccent))
-    const darkText = palette.DarkThemeTextColor?.trim() || contrastingText(toRgbString(darkAccent))
+    const darkText = palette.DarkThemeTextColor?.trim() || (darkAccent ? contrastingText(toRgbString(darkAccent)) : undefined)
     if (lightText && isCssColor(lightText, target)) target.style.setProperty('--winui-system-accent-text-light', lightText)
     if (darkText && isCssColor(darkText, target)) target.style.setProperty('--winui-system-accent-text-dark', darkText)
 
     const derivedColors: ReadonlyArray<readonly [string, string | undefined]> = [
+      // WinUI's AccentFillColorSecondary/TertiaryBrush keep the theme's
+      // default accent shade and apply 0.9/0.8 opacity. Compositing that
+      // color over a light surface makes the states lighter; over a dark
+      // surface it makes them darker. They are not separate palette shades.
       ['--winui-system-accent-hover-light', alphaColor(lightAccent, 0.9, target)],
       ['--winui-system-accent-pressed-light', alphaColor(lightAccent, 0.8, target)],
-      ['--winui-system-accent-hover-dark', mixColor(darkAccent, [255, 255, 255], 0.1, target)],
-      ['--winui-system-accent-pressed-dark', mixColor(darkAccent, [255, 255, 255], 0.2, target)],
+      ['--winui-system-accent-hover-dark', darkAccent ? alphaColor(darkAccent, 0.9, target) : undefined],
+      ['--winui-system-accent-pressed-dark', darkAccent ? alphaColor(darkAccent, 0.8, target) : undefined],
       ['--winui-system-accent-text-secondary-light', alphaColor(lightText ?? '#FFFFFF', 0.7, target)],
       ['--winui-system-accent-text-secondary-dark', alphaColor(darkText ?? '#000000', 0.7, target)],
       ['--winui-system-accent-light-1', palette.AccentColorLight1?.trim() || mixColor(accent, [255, 255, 255], 0.2, target)],

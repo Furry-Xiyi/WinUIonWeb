@@ -1963,15 +1963,11 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
 @supports (color: AccentColorText) {
   :root { --winui-system-accent-text-light: AccentColorText; }
 }
-@supports (color: color-mix(in srgb, AccentColor, white)) {
-  :root { --winui-system-accent-color-dark: color-mix(in srgb, AccentColor 70%, white); }
-}
-
 :root, html.theme-light,
 .example-theme-wrapper.theme-light, .win-theme-scope.theme-light {
   --accent-base: var(--winui-system-accent-color-light, var(--winui-system-accent-color, #0067C0));
-  --accent-hover: var(--winui-system-accent-hover-light, rgba(0, 103, 192, 0.90));
-  --accent-pressed: var(--winui-system-accent-pressed-light, rgba(0, 103, 192, 0.80));
+    --accent-hover: var(--winui-system-accent-hover-light, rgba(0, 103, 192, 0.90));
+    --accent-pressed: var(--winui-system-accent-pressed-light, rgba(0, 103, 192, 0.80));
   --accent-aa-text: var(--winui-system-accent-text-light, #FFFFFF);
   --accent-text: var(--winui-system-accent-text-light, #FFFFFF);
   --SystemAccentColor: var(--winui-system-accent-color-light, var(--winui-system-accent-color, var(--accent-base)));
@@ -1989,8 +1985,8 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
 
 html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark {
   --accent-base: var(--winui-system-accent-color-dark, var(--winui-system-accent-color, #4CC2FF));
-  --accent-hover: var(--winui-system-accent-hover-dark, rgba(96, 205, 255, 0.90));
-  --accent-pressed: var(--winui-system-accent-pressed-dark, rgba(96, 205, 255, 0.80));
+    --accent-hover: var(--winui-system-accent-hover-dark, rgba(96, 205, 255, 0.90));
+    --accent-pressed: var(--winui-system-accent-pressed-dark, rgba(96, 205, 255, 0.80));
   --accent-aa-text: var(--winui-system-accent-text-dark, #000000);
   --accent-text: var(--winui-system-accent-text-dark, #000000);
   --SystemAccentColor: var(--winui-system-accent-color-dark, var(--winui-system-accent-color, var(--accent-base)));
@@ -2030,9 +2026,9 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
 @supports (color: color-mix(in srgb, black, white)) {
   :root, html.theme-light,
   .example-theme-wrapper.theme-light, .win-theme-scope.theme-light {
-    --accent-hover: var(--winui-system-accent-hover-light, color-mix(in srgb, var(--accent-base) 90%, transparent));
-    --accent-pressed: var(--winui-system-accent-pressed-light, color-mix(in srgb, var(--accent-base) 80%, transparent));
-    --accent-aa-fill: color-mix(in srgb, var(--accent-base) 80%, black);
+  --accent-hover: var(--winui-system-accent-hover-light, rgba(0, 103, 192, 0.90));
+  --accent-pressed: var(--winui-system-accent-pressed-light, rgba(0, 103, 192, 0.80));
+    --accent-aa-fill: #004E8C;
     --SystemAccentColorLight1: var(--winui-system-accent-light-1, color-mix(in srgb, var(--SystemAccentColor) 80%, white));
     --SystemAccentColorLight2: var(--winui-system-accent-light-2, color-mix(in srgb, var(--SystemAccentColor) 60%, white));
     --SystemAccentColorLight3: var(--winui-system-accent-light-3, color-mix(in srgb, var(--SystemAccentColor) 40%, white));
@@ -2043,9 +2039,9 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
     --AccentFillColorTertiaryBrush: var(--accent-pressed);
   }
   html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark {
-    --accent-hover: var(--winui-system-accent-hover-dark, color-mix(in srgb, var(--accent-base) 90%, white));
-    --accent-pressed: var(--winui-system-accent-pressed-dark, color-mix(in srgb, var(--accent-base) 80%, white));
-    --accent-aa-fill: var(--SystemAccentColorLight2, color-mix(in srgb, var(--accent-base) 74%, white));
+  --accent-hover: var(--winui-system-accent-hover-dark, rgba(96, 205, 255, 0.90));
+  --accent-pressed: var(--winui-system-accent-pressed-dark, rgba(96, 205, 255, 0.80));
+    --accent-aa-fill: var(--SystemAccentColorLight2, #79D2FF);
     --SystemAccentColorLight1: var(--winui-system-accent-light-1, color-mix(in srgb, var(--SystemAccentColor) 82%, white));
     --SystemAccentColorLight2: var(--winui-system-accent-light-2, color-mix(in srgb, var(--SystemAccentColor) 64%, white));
     --SystemAccentColorLight3: var(--winui-system-accent-light-3, color-mix(in srgb, var(--SystemAccentColor) 46%, white));
@@ -2057,9 +2053,9 @@ html.theme-dark, .example-theme-wrapper.theme-dark, .win-theme-scope.theme-dark 
   }
   @media (prefers-color-scheme: dark) {
     :root:not(.theme-light):not(.theme-dark) {
-      --accent-hover: var(--winui-system-accent-hover-dark, color-mix(in srgb, var(--accent-base) 90%, white));
-      --accent-pressed: var(--winui-system-accent-pressed-dark, color-mix(in srgb, var(--accent-base) 80%, white));
-      --accent-aa-fill: var(--SystemAccentColorLight2, color-mix(in srgb, var(--accent-base) 74%, white));
+      --accent-hover: var(--winui-system-accent-hover-dark, rgba(96, 205, 255, 0.90));
+      --accent-pressed: var(--winui-system-accent-pressed-dark, rgba(96, 205, 255, 0.80));
+      --accent-aa-fill: var(--SystemAccentColorLight2, #79D2FF);
       --SystemAccentColorLight1: var(--winui-system-accent-light-1, color-mix(in srgb, var(--SystemAccentColor) 82%, white));
       --SystemAccentColorLight2: var(--winui-system-accent-light-2, color-mix(in srgb, var(--SystemAccentColor) 64%, white));
       --SystemAccentColorLight3: var(--winui-system-accent-light-3, color-mix(in srgb, var(--SystemAccentColor) 46%, white));

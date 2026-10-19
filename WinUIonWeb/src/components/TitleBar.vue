@@ -112,14 +112,14 @@
          in the card so its rounded clipping remains effective. -->
     <Teleport to="body" :disabled="!captionButtonsPortaled">
       <div v-if="captionControlsVisible" class="win-titlebar-caption-host" :class="{ 'is-portal': captionButtonsPortaled, 'is-deactivated': isDeactivated }" :style="captionButtonHostStyle">
-        <div ref="minimizeCaptionButton" class="win-titlebar-caption-button win-titlebar-caption-button-minimize" data-titlebar-caption-button="minimize" role="button" tabindex="0" :aria-label="captionLabels.minimize" :aria-disabled="captionActionInFlight !== null" :data-state="captionButtonState('minimize')" @click.stop="activateCaptionButton('minimize')" @keydown.enter.prevent="activateCaptionButton('minimize')" @keydown.space.prevent @keyup.space.prevent="activateCaptionButton('minimize')" @pointerenter="setCaptionButtonPointer('minimize', 'pointerOver', $event)" @pointerleave="setCaptionButtonPointer('minimize', 'normal', $event)" @pointerdown="setCaptionButtonPointer('minimize', 'pressed', $event)" @pointerup="setCaptionButtonPointer('minimize', 'pointerOver', $event)" @pointercancel="setCaptionButtonPointer('minimize', 'normal', $event)">
+        <div ref="minimizeCaptionButton" class="win-titlebar-caption-button win-titlebar-caption-button-minimize" data-titlebar-caption-button="minimize" role="button" tabindex="-1" :aria-label="captionLabels.minimize" :aria-disabled="captionActionInFlight !== null" :data-state="captionButtonState('minimize')" @click.stop="activateCaptionButton('minimize')" @keydown.enter.prevent="activateCaptionButton('minimize')" @keydown.space.prevent @keyup.space.prevent="activateCaptionButton('minimize')" @pointerenter="setCaptionButtonPointer('minimize', 'pointerOver', $event)" @pointerleave="setCaptionButtonPointer('minimize', 'normal', $event)" @pointerdown="setCaptionButtonPointer('minimize', 'pressed', $event)" @pointerup="setCaptionButtonPointer('minimize', 'pointerOver', $event)" @pointercancel="setCaptionButtonPointer('minimize', 'normal', $event)">
           <FontIcon class="win-titlebar-caption-glyph" Glyph="&#xE921;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="10" IsTextScaleFactorEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center" aria-hidden="true" />
         </div>
-        <div ref="maximizeCaptionButton" class="win-titlebar-caption-button win-titlebar-caption-button-maximize" data-titlebar-caption-button="maximize" role="button" tabindex="0" :aria-label="captionLabels.maximize" :aria-pressed="windowIsMaximized" :aria-disabled="captionActionInFlight !== null" :data-state="captionButtonState('maximize')" @click.stop="activateCaptionButton('maximize')" @keydown.enter.prevent="activateCaptionButton('maximize')" @keydown.space.prevent @keyup.space.prevent="activateCaptionButton('maximize')" @pointerenter="setCaptionButtonPointer('maximize', 'pointerOver', $event)" @pointerleave="setCaptionButtonPointer('maximize', 'normal', $event)" @pointerdown="setCaptionButtonPointer('maximize', 'pressed', $event)" @pointerup="setCaptionButtonPointer('maximize', 'pointerOver', $event)" @pointercancel="setCaptionButtonPointer('maximize', 'normal', $event)">
+        <div ref="maximizeCaptionButton" class="win-titlebar-caption-button win-titlebar-caption-button-maximize" data-titlebar-caption-button="maximize" role="button" tabindex="-1" :aria-label="captionLabels.maximize" :aria-pressed="windowIsMaximized" :aria-disabled="captionActionInFlight !== null" :data-state="captionButtonState('maximize')" @click.stop="activateCaptionButton('maximize')" @keydown.enter.prevent="activateCaptionButton('maximize')" @keydown.space.prevent @keyup.space.prevent="activateCaptionButton('maximize')" @pointerenter="setCaptionButtonPointer('maximize', 'pointerOver', $event)" @pointerleave="setCaptionButtonPointer('maximize', 'normal', $event)" @pointerdown="setCaptionButtonPointer('maximize', 'pressed', $event)" @pointerup="setCaptionButtonPointer('maximize', 'pointerOver', $event)" @pointercancel="setCaptionButtonPointer('maximize', 'normal', $event)">
           <FontIcon v-if="!windowIsMaximized" class="win-titlebar-caption-glyph" Glyph="&#xE922;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="10" IsTextScaleFactorEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center" aria-hidden="true" />
           <FontIcon v-else class="win-titlebar-caption-glyph" Glyph="&#xE923;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="10" IsTextScaleFactorEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center" aria-hidden="true" />
         </div>
-        <div ref="closeCaptionButton" class="win-titlebar-caption-button win-titlebar-caption-button-close" data-titlebar-caption-button="close" role="button" tabindex="0" :aria-label="captionLabels.close" :aria-disabled="captionActionInFlight !== null" :data-state="captionButtonState('close')" @click.stop="activateCaptionButton('close')" @keydown.enter.prevent="activateCaptionButton('close')" @keydown.space.prevent @keyup.space.prevent="activateCaptionButton('close')" @pointerenter="setCaptionButtonPointer('close', 'pointerOver', $event)" @pointerleave="setCaptionButtonPointer('close', 'normal', $event)" @pointerdown="setCaptionButtonPointer('close', 'pressed', $event)" @pointerup="setCaptionButtonPointer('close', 'pointerOver', $event)" @pointercancel="setCaptionButtonPointer('close', 'normal', $event)">
+        <div ref="closeCaptionButton" class="win-titlebar-caption-button win-titlebar-caption-button-close" data-titlebar-caption-button="close" role="button" tabindex="-1" :aria-label="captionLabels.close" :aria-disabled="captionActionInFlight !== null" :data-state="captionButtonState('close')" @click.stop="activateCaptionButton('close')" @keydown.enter.prevent="activateCaptionButton('close')" @keydown.space.prevent @keyup.space.prevent="activateCaptionButton('close')" @pointerenter="setCaptionButtonPointer('close', 'pointerOver', $event)" @pointerleave="setCaptionButtonPointer('close', 'normal', $event)" @pointerdown="setCaptionButtonPointer('close', 'pressed', $event)" @pointerup="setCaptionButtonPointer('close', 'pointerOver', $event)" @pointercancel="setCaptionButtonPointer('close', 'normal', $event)">
           <FontIcon class="win-titlebar-caption-glyph" Glyph="&#xE8BB;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="10" IsTextScaleFactorEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center" aria-hidden="true" />
         </div>
       </div>
@@ -353,7 +353,7 @@ const updateCaptionButtonHost = () => {
   for (const name of [
     '--TitleBarCaptionButtonForeground', '--TitleBarCaptionButtonPressedForeground', '--TitleBarCaptionButtonInactiveForeground',
     '--SubtleFillColorSecondaryBrush', '--SubtleFillColorTertiaryBrush', '--subtle-secondary', '--subtle-tertiary'
-  ]) {
+  ] as const) {
     const value = computedStyle.getPropertyValue(name).trim();
     if (value) hostStyle[name] = value;
   }
@@ -461,6 +461,9 @@ const verticalAlignment = (value: string) => ({
 const rootStyle = computed(() => {
   const style: CSSProperties & Record<`--${string}`, string | number | undefined> = {};
   for (const name of Object.keys(brushAliases.value)) style[`--${name}`] = resource(name) as string | number | undefined;
+  style['--TitleBarCaptionButtonForeground'] = String(resource('TitleBarBackButtonForeground'));
+  style['--TitleBarCaptionButtonPressedForeground'] = String(resource('TitleBarBackButtonForegroundPressed'));
+  style['--TitleBarCaptionButtonInactiveForeground'] = String(resource('TitleBarDeactivatedForegroundBrush'));
   for (const name of ['TitleBarLeftPaddingWidth', 'TitleBarRightPaddingWidth', 'TitleBarMinDragRegionWidth', 'TitleBarBackButtonWidth', 'TitleBarPaneToggleButtonWidth']) {
     if (localResources.value[name] !== undefined) style[`--${name}`] = cssLength(localResources.value[name]);
   }
@@ -965,6 +968,9 @@ defineExpose(publicApi);
     --TitleBarHeaderNegativeInsetPaddingWidth: 2px;
     --TitleBarMinDragRegionWidth: 48px;
     --TitleBarDeactivatedOpacity: 0.5;
+    --TitleBarCaptionButtonForeground: var(--TextFillColorPrimaryBrush, var(--text-primary, #191919));
+    --TitleBarCaptionButtonPressedForeground: var(--TextFillColorSecondaryBrush, var(--text-secondary, #606060));
+    --TitleBarCaptionButtonInactiveForeground: var(--TextFillColorTertiaryBrush, var(--text-tertiary, #9b9b9b));
     --TitleBarCompactContentMargin: 0 16px 0 0;
     --TitleBarIconMaxWidth: 16px;
     --TitleBarIconMaxHeight: 16px;
@@ -1179,33 +1185,19 @@ defineExpose(publicApi);
     color: var(--TitleBarCaptionButtonInactiveForeground, #9b9b9b);
   }
 
+  .win-titlebar-caption-host.is-deactivated .win-titlebar-caption-button[data-state="pointerOver"],
+  .win-titlebar.is-deactivated .win-titlebar-caption-button[data-state="pointerOver"] {
+    color: var(--TitleBarCaptionButtonForeground, #191919);
+  }
+
+  .win-titlebar-caption-host.is-deactivated .win-titlebar-caption-button-close[data-state="pointerOver"],
+  .win-titlebar.is-deactivated .win-titlebar-caption-button-close[data-state="pointerOver"] {
+    color: #fff;
+  }
+
   .win-titlebar-caption-button:focus-visible {
     outline: 1px solid currentColor;
     outline-offset: -3px;
-  }
-
-  :global(html.theme-dark .win-titlebar),
-  :global(.theme-dark .win-titlebar),
-  :global(.win-titlebar.theme-dark) {
-    --TitleBarCaptionButtonForeground: #fff;
-    --TitleBarCaptionButtonPressedForeground: #cfcfcf;
-    --TitleBarCaptionButtonInactiveForeground: #717171;
-  }
-
-  :global(html.theme-light .win-titlebar),
-  :global(.theme-light .win-titlebar),
-  :global(.win-titlebar.theme-light) {
-    --TitleBarCaptionButtonForeground: #191919;
-    --TitleBarCaptionButtonPressedForeground: #606060;
-    --TitleBarCaptionButtonInactiveForeground: #9b9b9b;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :global(html:not(.theme-light):not(.theme-dark) .win-titlebar) {
-      --TitleBarCaptionButtonForeground: #fff;
-      --TitleBarCaptionButtonPressedForeground: #cfcfcf;
-      --TitleBarCaptionButtonInactiveForeground: #717171;
-    }
   }
 
   @media (forced-colors: active) {
@@ -1218,6 +1210,10 @@ defineExpose(publicApi);
     .win-titlebar-caption-button[data-state="pressed"] { color: HighlightText; background: Highlight; }
     .win-titlebar-caption-button-close[data-state="pointerOver"],
     .win-titlebar-caption-button-close[data-state="pressed"] { color: HighlightText; background: Highlight; }
+    .win-titlebar-caption-host.is-deactivated .win-titlebar-caption-button[data-state="pointerOver"],
+    .win-titlebar.is-deactivated .win-titlebar-caption-button[data-state="pointerOver"] { color: HighlightText; }
+    .win-titlebar-caption-host.is-deactivated .win-titlebar-caption-button-close[data-state="pointerOver"],
+    .win-titlebar.is-deactivated .win-titlebar-caption-button-close[data-state="pointerOver"] { color: HighlightText; }
   }
 
   .win-titlebar :deep(.win-titlebar-back-button),

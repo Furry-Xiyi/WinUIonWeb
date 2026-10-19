@@ -23,7 +23,10 @@ const sourceDefaults: Record<IconSourceKind, Record<string, unknown>> = {
   ImageIcon: { ImageSource: null }
 }
 
-export const iconSourceContextKey: InjectionKey<(source: IconSourceModel | null) => void> = Symbol('WinUI.IconSource')
+// Package and application copies of WinUIonWeb can coexist inside the same
+// Vue app. A registry created by one copy must be visible to the other copy's
+// IconSourceElement (for example Gallery TitleBar + app ImageIconSource).
+export const iconSourceContextKey: InjectionKey<(source: IconSourceModel | null) => void> = Symbol.for('WinUI.IconSource')
 
 const propertyElement = (owner: string, property: string) => defineComponent({
   name: `${owner}.${property}`,

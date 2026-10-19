@@ -3,6 +3,9 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
+  // The workspace keeps generated JavaScript beside maintained TypeScript.
+  // Match the app config so library bundles never pick stale .js siblings.
+  resolve: { extensions: ['.mjs', '.mts', '.ts', '.tsx', '.vue', '.js', '.jsx', '.json'] },
   plugins: [vue({
     // XAML-style bindings inside controls read the component setup state.
     features: { prodDevtools: true }
