@@ -3,7 +3,7 @@ import appIconUrl from '../../../assets/AppIcon.ico'
 import { useI18n } from '../../../components/i18n/index'
 import { xamlNameScopeKey, xamlScopeKey } from '../../../components/xamlRuntime'
 import type { SystemBackdropConfig } from '../../../components/systemBackdrop'
-import type { SystemBackdropWindowHandle, SystemBackdropState } from '../../../components/systemBackdropHostAdapter'
+import { systemBackdropFallbackColor, type SystemBackdropWindowHandle, type SystemBackdropState } from '../../../components/systemBackdropHostAdapter'
 import type { SampleBackdropType } from './mountSystemBackdropsWindow'
 
 export const useSystemBackdropSampleWindow = (props: { handle: SystemBackdropWindowHandle; allowedBackdrops: SampleBackdropType[] }) => {
@@ -39,7 +39,12 @@ export const useSystemBackdropSampleWindow = (props: { handle: SystemBackdropWin
         : state.value.AppliedBackdrop ? t('sample.systembackdrops.backdrop.mica') : t('sample.systembackdrops.backdrop.none')
     return t('sample.systembackdrops.applied', { backdrop: applied })
   })
-  const windowBackground = computed(() => !state.value.RequestedBackdrop && selectedThemeIndex.value !== 0 ? state.value.Theme === 'Dark' ? 'Black' : 'White' : 'Transparent')
+  const windowBackground = computed(() => {
+    if (state.value.Status === 'HighContrast') return 'Canvas'
+    if (!state.value.RequestedBackdrop) return state.value.Theme === 'Dark' ? 'Black' : 'White'
+    if (state.value.Status !== 'Active' || !state.value.AppliedBackdrop) return systemBackdropFallbackColor(state.value.Theme)
+    return 'Transparent'
+  })
   const configurationFor = (value: string): SystemBackdropConfig | null => {
     if (value === 'Mica') return { Type: 'Mica', Kind: 'Base' }
     if (value === 'MicaAlt') return { Type: 'Mica', Kind: 'BaseAlt' }
