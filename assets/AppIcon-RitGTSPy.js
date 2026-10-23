@@ -1,0 +1,1 @@
+var e=`/WinUIonWeb/assets/AppIcon-CnwOrJy-.ico`;export{e as t};
